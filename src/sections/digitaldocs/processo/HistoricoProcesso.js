@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 // @mui
 import {
   Box,
@@ -19,8 +19,7 @@ import { BASEURL } from '../../../utils/axios';
 import { ptDate, ptTime } from '../../../utils/formatTime';
 import { newLineText } from '../../../utils/normalizeText';
 // redux
-import { getAll } from '../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
@@ -28,23 +27,15 @@ import SvgIconStyle from '../../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
-HistoricoProcesso.propTypes = { fluxoId: PropTypes.number, historico: PropTypes.array };
+HistoricoProcesso.propTypes = { historico: PropTypes.array };
 
-export default function HistoricoProcesso({ fluxoId, historico }) {
-  const dispatch = useDispatch();
+export default function HistoricoProcesso({ historico }) {
   const [openHistorico, setOpenHistorico] = useState(false);
-  const { historicoFluxo } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
+  const { colaboradores } = useSelector((state) => state.colaborador);
 
   const handleHistorico = () => {
     setOpenHistorico(!openHistorico);
   };
-
-  useEffect(() => {
-    if (mail && fluxoId && currentColaborador?.perfil_id && historicoFluxo.length === 0) {
-      dispatch(getAll('historico fluxo', { mail, fluxoId, perfilId: currentColaborador?.perfil_id }));
-    }
-  }, [dispatch, mail, historicoFluxo, fluxoId, currentColaborador?.perfil_id]);
 
   return (
     <>
@@ -71,12 +62,6 @@ export default function HistoricoProcesso({ fluxoId, historico }) {
               {historico.map((row, index) => {
                 const key = row.data_transicao;
                 const _criador = colaboradores?.find((_row) => _row?.perfil?.id === row?.perfil_id);
-                const estadoInicial = historicoFluxo?.find(
-                  (_row) => Number(_row?.id) === Number(row?.estado_inicial_id)
-                )?.nome;
-                const estadoFinal = historicoFluxo?.find(
-                  (_row) => Number(_row?.id) === Number(row?.estado_final_id)
-                )?.nome;
                 return (
                   <TimelineItem key={key} sx={{ '&:before': { display: 'none' }, mb: 0.5 }}>
                     <TimelineSeparator>
@@ -115,9 +100,9 @@ export default function HistoricoProcesso({ fluxoId, historico }) {
                           </Label>
                         </Stack>
                         <Stack direction="row" justifyContent="left" alignItems="center" spacing={0.5}>
-                          <Typography variant="caption">{row?.is_resgate ? estadoFinal : estadoInicial}</Typography>
+                          <Typography variant="caption">{row?.is_resgate ? row?.nomef : row?.nome}</Typography>
                           <SvgIconStyle src="/assets/icons/arrow-right.svg" sx={{ width: 20 }} />
-                          <Typography variant="caption">{row?.is_resgate ? estadoInicial : estadoFinal}</Typography>
+                          <Typography variant="caption">{row?.is_resgate ? row?.nome : row?.nomef}</Typography>
                         </Stack>
                         <Stack direction="row" justifyContent="left" alignItems="center" spacing={1.5} sx={{ pt: 2 }}>
                           <Avatar

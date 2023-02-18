@@ -70,7 +70,7 @@ export default function Anexos({ anexos }) {
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} sx={{ mb: -3 }}>
+      <Grid item xs={12} sx={{ mb: -2 }}>
         <Typography variant="subtitle1" gutterBottom>
           Anexos
         </Typography>

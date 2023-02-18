@@ -343,13 +343,20 @@ export function SearchToolbarTrabalhados({
 }) {
   const { meusAmbientes } = useSelector((state) => state.digitaldocs);
   const { currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
-  const colaboradoresList = applySort(
-    colaboradores?.filter((row) => row.uo_id === currentColaborador?.uo_id),
-    getComparator('desc', 'is_efetivo')
+  const colaboradoresList = [];
+  colaboradores
+    ?.filter((row) => row.uo_id === currentColaborador?.uo_id)
+    ?.forEach((row) => {
+      colaboradoresList.push({ id: row?.perfil?.id, label: row?.perfil?.displayName });
+    });
+  const ambientesList = applySort(
+    meusAmbientes?.filter((row) => row.nome !== 'Todos'),
+    getComparator('asc', 'nome')
   ).map((row) => ({
     id: row?.id,
-    label: row?.perfil?.displayName,
+    label: row?.nome,
   }));
+
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -359,9 +366,9 @@ export function SearchToolbarTrabalhados({
           onChange={(event, newValue) => {
             onFilterAmbiente(newValue);
           }}
-          options={meusAmbientes}
+          options={ambientesList}
           sx={{ width: { md: 200, xl: 300 } }}
-          getOptionLabel={(option) => option.nome}
+          getOptionLabel={(option) => option.label}
           renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
         />
         <Autocomplete
@@ -370,7 +377,7 @@ export function SearchToolbarTrabalhados({
           onChange={(event, newValue) => {
             onFilterColaborador(newValue);
           }}
-          options={colaboradoresList}
+          options={applySort(colaboradoresList, getComparator('asc', 'label'))}
           sx={{ width: { md: 200, xl: 300 } }}
           getOptionLabel={(option) => option.label}
           renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
@@ -378,6 +385,7 @@ export function SearchToolbarTrabalhados({
       </Stack>
       <TextField
         fullWidth
+        placeholder="Procurar..."
         value={filterSearch.get('filter') || ''}
         onChange={(event) => {
           const filter = event.target.value;
@@ -387,7 +395,6 @@ export function SearchToolbarTrabalhados({
             onFilterSearch({ tab, filter: '' });
           }
         }}
-        placeholder="Procurar..."
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">

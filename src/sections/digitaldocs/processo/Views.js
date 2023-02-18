@@ -13,6 +13,7 @@ import {
   IconButton,
   DialogTitle,
   DialogContent,
+  CircularProgress,
   AccordionDetails,
   AccordionSummary,
 } from '@mui/material';
@@ -32,8 +33,8 @@ Views.propTypes = { processoId: PropTypes.number };
 export default function Views({ processoId }) {
   const dispatch = useDispatch();
   const [colabViews, setColabViews] = useState(false);
-  const { visualizacoes, isOpenModalViews } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { visualizacoes, isLoading, isOpenModalViews } = useSelector((state) => state.digitaldocs);
   const viewsGroupByColaborador = groupByColaborador(visualizacoes, 'perfil_id');
 
   const handleColabViews = (panel) => (event, isExpanded) => {
@@ -53,8 +54,8 @@ export default function Views({ processoId }) {
   return (
     <>
       <Tooltip title="VISUALIZAÇÕES" arrow>
-        <Fab color="success" size="small" variant="soft" onClick={handleViews}>
-          <SvgIconStyle src="/assets/icons/eye.svg" />
+        <Fab color="inherit" size="small" variant="soft" onClick={handleViews}>
+          {isLoading ? <CircularProgress color="inherit" /> : <SvgIconStyle src="/assets/icons/eye.svg" />}
         </Fab>
       </Tooltip>
       <Dialog open={isOpenModalViews} onClose={handleClose} fullWidth maxWidth="xs">

@@ -36,7 +36,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 const TABLE_HEAD = [
   { id: 'id', label: 'Número', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
-  { id: 'entidades', label: 'ContaCliente/Entidade(s)', align: 'left' },
+  { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
   { id: 'data_last_transicao', label: 'Modificado em', align: 'center' },
@@ -52,13 +52,13 @@ export default function TableProcessos({ from }) {
   const dispatch = useDispatch();
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { processos, isLoading, meuAmbiente, meuFluxo } = useSelector((state) => state.digitaldocs);
+  const { processos, isLoading, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
   const title =
     (from === 'devolvidosEquipa' && 'Devolvidos da equipa') ||
     (from === 'devolvidosPessoal' && 'Devolvidos pessoal') ||
     (from === 'minhastarefas' && 'Tarefas da equipa') ||
-    (from === 'meuspendentes' && 'Tarefas pendentes') ||
     (from === 'finalizados' && 'Finalizados') ||
+    (from === 'meuspendentes' && 'Retidos') ||
     (from === 'executados' && 'Executados') ||
     (from === 'agendados' && 'Agendados') ||
     '';
@@ -74,7 +74,10 @@ export default function TableProcessos({ from }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'data_last_transicao', defaultOrder: 'asc' });
+  } = useTable({
+    defaultOrderBy: 'data_last_transicao',
+    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+  });
 
   useEffect(() => {
     if (mail && meuAmbiente?.id && meuFluxo?.id && currentColaborador?.perfil_id) {
@@ -98,6 +101,21 @@ export default function TableProcessos({ from }) {
     navigate({ pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`, search: createSearchParams({ from }).toString() });
   };
 
+  const podeAdicionar = () => {
+    if (meuAmbiente?.id === -1) {
+      let i = 0;
+      while (i < meusAmbientes?.length) {
+        if (meusAmbientes[i]?.is_inicial) {
+          return true;
+        }
+        i += 1;
+      }
+    } else if (meuAmbiente?.is_inicial) {
+      return true;
+    }
+    return false;
+  };
+
   const dataFiltered = applySortFilter({ processos, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
 
@@ -107,7 +125,7 @@ export default function TableProcessos({ from }) {
         heading={title}
         links={[{ name: 'Indicadores', href: PATH_DIGITALDOCS.root }, { name: title }]}
         action={
-          meuAmbiente?.is_inicial && (
+          podeAdicionar() && (
             <Button
               variant="soft"
               component={RouterLink}

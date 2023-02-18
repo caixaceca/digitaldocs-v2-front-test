@@ -35,10 +35,7 @@ const modelos = ['Série', 'Paralelo'];
 
 // ----------------------------------------------------------------------
 
-FluxoForm.propTypes = {
-  isOpenModal: PropTypes.bool,
-  onCancel: PropTypes.func,
-};
+FluxoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
 
 export default function FluxoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
@@ -59,12 +56,11 @@ export default function FluxoForm({ isOpenModal, onCancel }) {
   useEffect(() => {
     if (error) {
       enqueueSnackbar(error, { variant: 'error' });
-      onCancel();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const FluxoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     modelo: Yup.string().required('Modelo não pode ficar vazio'),
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
   });
@@ -80,13 +76,8 @@ export default function FluxoForm({ isOpenModal, onCancel }) {
     [selectedFluxo, currentColaborador?.perfil_id]
   );
 
-  const methods = useForm({
-    resolver: yupResolver(FluxoSchema),
-    defaultValues,
-  });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

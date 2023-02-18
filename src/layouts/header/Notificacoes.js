@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions */
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -143,7 +142,9 @@ function NotificationItem({ notificacao, onClose }) {
   const { mail } = useSelector((state) => state.colaborador);
   const _title = '';
   const handleViewRow = (_notificacao) => {
-    !notificacao?.vista && dispatch(getNotificacao(notificacao?.id, mail));
+    if (!notificacao?.vista) {
+      dispatch(getNotificacao(notificacao?.id, mail));
+    }
     switch (_notificacao.objeto) {
       case 'norma':
         navigate(`${PATH_DIGITALDOCS.general}`);

@@ -19,11 +19,7 @@ import { FormProvider } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-AtribuirAcessoForm.propTypes = {
-  open: PropTypes.bool,
-  onCancel: PropTypes.func,
-  processoId: PropTypes.number,
-};
+AtribuirAcessoForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processoId: PropTypes.number };
 
 export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
   const dispatch = useDispatch();
@@ -48,7 +44,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const ArquivoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     perfilID: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),
     datalimite: Yup.mixed()
       .nullable('Data de término não pode ficar vazio')
@@ -64,10 +60,8 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
     [currentColaborador?.perfil_id]
   );
 
-  const methods = useForm({ resolver: yupResolver(ArquivoSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

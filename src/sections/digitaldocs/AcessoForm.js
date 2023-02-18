@@ -34,11 +34,7 @@ import { codacessos, objetos } from '../../_mock';
 
 // ----------------------------------------------------------------------
 
-AcessoForm.propTypes = {
-  onCancel: PropTypes.func,
-  perfilId: PropTypes.number,
-  isOpenModal: PropTypes.bool,
-};
+AcessoForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number, isOpenModal: PropTypes.bool };
 
 export default function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
@@ -63,7 +59,7 @@ export default function AcessoForm({ isOpenModal, perfilId, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const AcessoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     objeto: Yup.string().required('Objeto não pode ficar vazio'),
     acesso: Yup.string().required('Acesso não pode ficar vazio'),
   });
@@ -79,10 +75,8 @@ export default function AcessoForm({ isOpenModal, perfilId, onCancel }) {
     [selectedAcesso, currentColaborador?.perfil?.id, perfilId]
   );
 
-  const methods = useForm({ resolver: yupResolver(AcessoSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

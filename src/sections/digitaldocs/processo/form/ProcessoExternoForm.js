@@ -4,14 +4,16 @@ import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Grid, Card, TextField, CardContent, Autocomplete, InputAdornment } from '@mui/material';
+// hooks
+import { getComparator, applySort } from '../../../../hooks/useTable';
+// redux
+import { useSelector } from '../../../../redux/store';
 // components
 import { RHFTextField } from '../../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
 import ObsNovosAnexos from './ObsNovosAnexos';
 import AnexosExistentes from './AnexosExistentes';
-// redux
-import { useSelector } from '../../../../redux/store';
 
 // ----------------------------------------------------------------------
 
@@ -50,15 +52,14 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Controller
-                  name="data_entrada"
                   control={control}
+                  name="data_entrada"
                   render={({ field, fieldState: { error } }) => (
                     <DatePicker
-                      label="Data de entrada"
+                      disableFuture
                       value={field.value}
-                      onChange={(newValue) => {
-                        field.onChange(newValue);
-                      }}
+                      label="Data de entrada"
+                      onChange={(newValue) => field.onChange(newValue)}
                       renderInput={(params) => (
                         <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
                       )}
@@ -93,7 +94,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
                       {...field}
                       fullWidth
                       onChange={(event, newValue) => field.onChange(newValue)}
-                      options={origensList.map((option) => option)}
+                      options={applySort(origensList, getComparator('asc', 'label'))?.map((option) => option)}
                       getOptionLabel={(option) => option?.label}
                       renderInput={(params) => (
                         <TextField {...params} label="Origem" error={!!error} helperText={error?.message} />

@@ -29,11 +29,7 @@ import { FormProvider } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-PerfisEstadoForm.propTypes = {
-  onCancel: PropTypes.func,
-  estado: PropTypes.object,
-  isOpenModal: PropTypes.bool,
-};
+PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.object, isOpenModal: PropTypes.bool };
 
 export default function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   const dispatch = useDispatch();
@@ -65,11 +61,8 @@ export default function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   );
 
   const methods = useForm({ defaultValues });
-
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
-
   const perfisByCategoria = applyFilter(colaboradoresNA, values?.perfis);
 
   useEffect(() => {
@@ -91,15 +84,12 @@ export default function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
           data_limite: row?.data_limite,
         });
       });
-      dispatch(createItem('perfisEstado', JSON.stringify(values), { mail, mensagem: 'Perfis adicionados' }));
+      dispatch(createItem('perfisEstado', JSON.stringify(formData), { mail, mensagem: 'Perfis adicionados' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'perfis',
-  });
+  const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
 
   const handleAdd = () => {
     append({ perfil: null, data_limite: null, data_inicial: null });

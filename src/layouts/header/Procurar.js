@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useSnackbar } from 'notistack';
 import { useNavigate, createSearchParams } from 'react-router-dom';
 // @mui
-import { styled, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { Input, Slide, Button, InputAdornment, ClickAwayListener } from '@mui/material';
 // utils
 import cssStyles from '../../utils/cssStyles';
@@ -12,7 +11,6 @@ import SvgIconStyle from '../../components/SvgIconStyle';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useToggle from '../../hooks/useToggle';
-import useSettings from '../../hooks/useSettings';
 
 // ----------------------------------------------------------------------
 
@@ -31,19 +29,13 @@ const ProcurarStyle = styled('div')(({ theme }) => ({
   height: APPBAR_MOBILE,
   padding: theme.spacing(0, 3),
   boxShadow: theme.customShadows.z8,
-  [theme.breakpoints.up('md')]: {
-    height: APPBAR_DESKTOP,
-    padding: theme.spacing(0, 5),
-  },
+  [theme.breakpoints.up('md')]: { height: APPBAR_DESKTOP, padding: theme.spacing(0, 5) },
 }));
 
 // ----------------------------------------------------------------------
 
 export default function Procurar() {
-  const theme = useTheme();
   const navigate = useNavigate();
-  const { themeMode } = useSettings();
-  const { enqueueSnackbar } = useSnackbar();
   const [searchQuery, setSearchQuery] = useState('');
   const { toggle: open, onOpen, onClose } = useToggle();
 
@@ -56,16 +48,12 @@ export default function Procurar() {
   };
 
   const handleKeyUpGlobal = (event) => {
-    if (event.key === 'Enter') {
-      if (searchQuery?.length > 2) {
-        navigate({
-          pathname: PATH_DIGITALDOCS.processos.procurar,
-          search: createSearchParams({ chave: searchQuery }).toString(),
-        });
-        onClose();
-      } else {
-        enqueueSnackbar('Introduza pelo menos três (3) caratéres', { variant: 'info' });
-      }
+    if (event.key === 'Enter' && searchQuery.length > 0) {
+      navigate({
+        pathname: PATH_DIGITALDOCS.processos.procurar,
+        search: createSearchParams({ chave: searchQuery }).toString(),
+      });
+      onClose();
     }
   };
 
@@ -77,20 +65,15 @@ export default function Procurar() {
             size="large"
             variant="text"
             onClick={onOpen}
-            startIcon={<SvgIconStyle src="/assets/icons/search.svg" sx={{ width: 25, height: 25 }} />}
-            sx={{ fontSize: { md: 20 } }}
+            sx={{ fontSize: { md: 20 }, pr: { md: 10 } }}
+            startIcon={<SvgIconStyle src="/assets/icons/search.svg" sx={{ width: 26, height: 26 }} />}
           >
             Procurar...
           </Button>
         )}
 
         <Slide direction="down" in={open} mountOnEnter unmountOnExit>
-          <ProcurarStyle
-            sx={{
-              backgroundColor: theme.palette.grey[themeMode === 'light' ? 50 : 800],
-              color: theme.palette.grey[themeMode === 'light' ? 800 : 50],
-            }}
-          >
+          <ProcurarStyle>
             <Input
               autoFocus
               fullWidth
@@ -108,7 +91,7 @@ export default function Procurar() {
               }
               sx={{ mr: 1, fontWeight: 'fontWeightBold' }}
             />
-            {searchQuery.length > 2 && (
+            {searchQuery.length > 0 && (
               <Button variant="contained" onClick={handleSearchGlobal}>
                 Procurar
               </Button>

@@ -39,10 +39,11 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
           )}
           <Grid item xs={12} sm={6} xl={3}>
             <Controller
-              name="data_entrada"
               control={control}
+              name="data_entrada"
               render={({ field, fieldState: { error } }) => (
                 <DatePicker
+                  disableFuture
                   value={field.value}
                   label="Data de entrada"
                   onChange={(newValue) => {

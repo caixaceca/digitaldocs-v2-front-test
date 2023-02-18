@@ -33,10 +33,7 @@ import { createItem, updateItem, deleteItem } from '../../redux/slices/digitaldo
 
 // ----------------------------------------------------------------------
 
-EstadoForm.propTypes = {
-  isOpenModal: PropTypes.bool,
-  onCancel: PropTypes.func,
-};
+EstadoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
 
 export default function EstadoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
@@ -65,7 +62,7 @@ export default function EstadoForm({ isOpenModal, onCancel }) {
   const uosList = uos.map((row) => ({ id: row?.id, label: row?.label }));
   const uoSelect = uosList?.find((row) => row.id === selectedEstado?.uo_id) || null;
 
-  const EstadoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     nome: Yup.string().required('Nome não pode ficar vazio'),
     uo_id: Yup.mixed()
       .nullable('Unidade orgânica não pode ficar vazio')
@@ -86,10 +83,8 @@ export default function EstadoForm({ isOpenModal, onCancel }) {
     [selectedEstado, currentColaborador, uoSelect]
   );
 
-  const methods = useForm({ resolver: yupResolver(EstadoSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

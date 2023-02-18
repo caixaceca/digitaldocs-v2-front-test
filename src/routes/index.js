@@ -74,7 +74,8 @@ export default function Router() {
       path: '/',
       element: <IntranetLayout />,
       children: [
-        { element: <Navigate to="indicadores" replace />, index: true },
+        // { element: <Navigate to="indicadores" replace />, index: true },
+        { element: <Navigate to="processos" replace />, index: true },
         { path: 'indicadores', element: <Indicadores /> },
         {
           path: 'estados',

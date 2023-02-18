@@ -9,8 +9,8 @@ import { ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
@@ -58,10 +58,11 @@ export default function TableTrabalhados() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'trabalhado_em', defaultOrder: 'asc' });
+  } = useTable({ defaultOrderBy: 'trabalhado_em', defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc' });
 
   useEffect(() => {
-    if (mail && colaborador?.id && currentColaborador?.uo_id && data) {
+    dispatch(resetItem('trabalhados'));
+    if (mail && data) {
       dispatch(
         getAll('trabalhados', {
           mail,

@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Fab, Tooltip } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { finalizarProcesso, abandonarProcesso, deleteItem } from '../../../redux/slices/digitaldocs';
+import { finalizarProcesso, abandonarProcesso } from '../../../redux/slices/digitaldocs';
 // hooks
 import useToggle, { useToggle1, useToggle2, useToggle3, useToggle4, useToggle5 } from '../../../hooks/useToggle';
 // routes
@@ -13,14 +13,11 @@ import { PATH_DIGITALDOCS } from '../../../routes/paths';
 import SvgIconStyle from '../../../components/SvgIconStyle';
 import DialogConfirmar from '../../../components/DialogConfirmar';
 //
-import ArquivarForm from '../ArquivarForm';
-import IntervencaoForm from '../IntervencaoForm';
+import { IntervencaoForm, FinalizarForm, ArquivarForm } from '../IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
-Intervencao.propTypes = {
-  processo: PropTypes.object,
-};
+Intervencao.propTypes = { processo: PropTypes.object };
 
 export default function Intervencao({ processo }) {
   const dispatch = useDispatch();
@@ -58,6 +55,7 @@ export default function Intervencao({ processo }) {
 
   const handleFinalizar = () => {
     const formData = {
+      cativos: [],
       perfil_id: perfilId,
       fluxoID: processo?.fluxo_id,
       estado_id: processo?.estado_atual_id,
@@ -74,20 +72,45 @@ export default function Intervencao({ processo }) {
     dispatch(abandonarProcesso(formData, processo?.id, mail));
   };
 
-  const handleEliminar = () => {
-    dispatch(deleteItem('processo', { processoId: processo?.id, perfilId, mail, mensagem: 'Processo eliminado' }));
-  };
+  // const handleEliminar = () => {
+  //   dispatch(deleteItem('processo', { processoId: processo?.id, perfilId, mail, mensagem: 'Processo eliminado' }));
+  // };
 
   const podeFinalizar = () => {
     if (meuAmbiente?.id === -1) {
       let i = 0;
       while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.is_final && (processo?.agendado || !processo?.is_interno) && processo.situacao !== 'X') {
+        if (meusAmbientes[i]?.is_final && processo?.agendado && processo.situacao !== 'X') {
           return true;
         }
         i += 1;
       }
     } else if (meuAmbiente?.is_final && (processo?.agendado || !processo?.is_interno) && processo.situacao !== 'X') {
+      return true;
+    }
+    return false;
+  };
+
+  const podeFinalizarNE = () => {
+    if (meuAmbiente?.id === -1) {
+      let i = 0;
+      while (i < meusAmbientes?.length) {
+        if (
+          meusAmbientes[i]?.is_final &&
+          !processo?.is_interno &&
+          processo?.situacao === 'E' &&
+          processo?.operacao === 'Cativo/Penhora'
+        ) {
+          return true;
+        }
+        i += 1;
+      }
+    } else if (
+      meuAmbiente?.is_final &&
+      !processo?.is_interno &&
+      processo?.situacao === 'E' &&
+      processo?.operacao === 'Cativo/Penhora'
+    ) {
       return true;
     }
     return false;
@@ -200,6 +223,17 @@ export default function Intervencao({ processo }) {
         </>
       )}
 
+      {podeFinalizarNE() && (
+        <>
+          <Tooltip title="FINALIZAR" arrow>
+            <Fab color="success" size="small" variant="soft" onClick={onOpen5}>
+              <SvgIconStyle src="/assets/icons/stop.svg" />
+            </Fab>
+          </Tooltip>
+          <FinalizarForm open={open5} onCancel={onClose5} processo={processo} />
+        </>
+      )}
+
       <Tooltip title="ABANDONAR" arrow>
         <Fab color="warning" size="small" variant="soft" onClick={onOpen2}>
           <SvgIconStyle src="/assets/icons/abandonar.svg" />
@@ -230,7 +264,7 @@ export default function Intervencao({ processo }) {
         </Tooltip>
       )}
 
-      {processo?.htransicoes?.length === 0 ? (
+      {/* {processo?.htransicoes?.length === 0 ? (
         <>
           <Tooltip title="ELIMINAR" arrow>
             <Fab color="error" size="small" variant="soft" onClick={onOpen5}>
@@ -247,20 +281,20 @@ export default function Intervencao({ processo }) {
           />
         </>
       ) : (
+        <> */}
+      {podeArquivar() && (
         <>
-          {podeArquivar() && (
-            <>
-              <Tooltip title="ARQUIVAR" arrow>
-                <Fab color="error" size="small" variant="soft" onClick={onOpen1}>
-                  <SvgIconStyle src="/assets/icons/archive.svg" />
-                </Fab>
-              </Tooltip>
+          <Tooltip title="ARQUIVAR" arrow>
+            <Fab color="error" size="small" variant="soft" onClick={onOpen1}>
+              <SvgIconStyle src="/assets/icons/archive.svg" />
+            </Fab>
+          </Tooltip>
 
-              <ArquivarForm open={open1} processo={processo} onCancel={onClose1} />
-            </>
-          )}
+          <ArquivarForm open={open1} processo={processo} onCancel={onClose1} />
         </>
       )}
     </>
+    //   )}
+    // </>
   );
 }

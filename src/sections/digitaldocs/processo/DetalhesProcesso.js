@@ -1,13 +1,35 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Grid, List, Stack, Paper, Divider, ListItem, Typography } from '@mui/material';
+import {
+  Fab,
+  Grid,
+  List,
+  Stack,
+  Paper,
+  Table,
+  Dialog,
+  Tooltip,
+  Divider,
+  ListItem,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableHead,
+  Typography,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  TableContainer,
+} from '@mui/material';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
-import { ptDate, ptDateTime } from '../../../utils/formatTime';
 import { newLineText } from '../../../utils/normalizeText';
+import { ptDate, ptDateTime } from '../../../utils/formatTime';
+import { fNumber, fCurrency } from '../../../utils/formatNumber';
 import { valorPorExtenso } from '../../../utils/numeroPorExtenso';
 // redux
 import { useSelector } from '../../../redux/store';
+// hooks
+import useToggle from '../../../hooks/useToggle';
 // components
 import Scrollbar from '../../../components/Scrollbar';
 import SvgIconStyle from '../../../components/SvgIconStyle';
@@ -101,7 +123,7 @@ export default function DetalhesProcesso({ processo }) {
                     <Stack direction="row" spacing={0.5} alignItems="center">
                       <SvgIconStyle
                         src="/assets/icons/user.svg"
-                        sx={{ width: 16, height: 16, color: 'text.secondary' }}
+                        sx={{ width: 16, height: 16, mt: 0.25, color: 'text.secondary' }}
                       />
                       <Typography variant="body2">{criador?.perfil?.displayName}</Typography>
                     </Stack>
@@ -122,6 +144,7 @@ export default function DetalhesProcesso({ processo }) {
           </List>
           {(processo?.titular ||
             processo?.docidp ||
+            processo?.docids ||
             processo?.bi_cni ||
             _entidades ||
             processo?.cliente ||
@@ -136,7 +159,7 @@ export default function DetalhesProcesso({ processo }) {
                   <TextItem title="Titular:" text={processo.titular} />
                 </ListItem>
               )}
-              {(processo.docidp || processo.bi_cni) && (
+              {(processo.docidp || processo.docids) && (
                 <ListItem disableGutters>
                   <Stack direction="row" alignItems="center" alignContent="left" spacing={1}>
                     <Typography sx={{ color: 'text.secondary' }}>Doc. identificação:</Typography>
@@ -242,6 +265,7 @@ export default function DetalhesProcesso({ processo }) {
                   <ValorItem
                     title={processo.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
                     valor={processo.saldoca}
+                    contas={processo.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
                   />
                 </ListItem>
               )}
@@ -283,10 +307,7 @@ export default function DetalhesProcesso({ processo }) {
 
 // ----------------------------------------------------------------------
 
-TextItem.propTypes = {
-  title: PropTypes.string,
-  text: PropTypes.string,
-};
+TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string };
 
 function TextItem({ title, text }) {
   return (
@@ -299,12 +320,10 @@ function TextItem({ title, text }) {
 
 // ----------------------------------------------------------------------
 
-ValorItem.propTypes = {
-  title: PropTypes.string,
-  valor: PropTypes.number,
-};
+ValorItem.propTypes = { title: PropTypes.string, valor: PropTypes.number, contas: PropTypes.array };
 
-function ValorItem({ title, valor }) {
+function ValorItem({ title, valor, contas }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
       <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
@@ -314,6 +333,106 @@ function ValorItem({ title, valor }) {
           &nbsp;({valorPorExtenso(valor)})
         </Typography>
       </Typography>
+      {title === 'Saldo disponível p/ cativo:' && contas?.length > 0 && (
+        <>
+          <Tooltip title="DETALHES" arrow>
+            <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
+              <SvgIconStyle src="/assets/icons/info.svg" sx={{ width: 20 }} />
+            </Fab>
+          </Tooltip>
+          <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                Contas eleitas para cativo
+                <Tooltip title="Fechar" arrow>
+                  <IconButton onClick={onClose}>
+                    <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20, opacity: 0.75 }} />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </DialogTitle>
+            <DialogContent>
+              <TableContainer sx={{ minWidth: 500, mt: 2, position: 'relative', overflow: 'hidden' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Conta</TableCell>
+                      <TableCell align="right">Saldo</TableCell>
+                      <TableCell align="right">Saldo em CVE</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {contas?.map((row) => {
+                      const labelId = `checkbox-list-label-${row}`;
+                      return (
+                        <TableRow hover key={labelId}>
+                          <TableCell>{row?.conta}</TableCell>
+                          <TableCell align="right">
+                            {fNumber(row?.saldo)} {row?.moeda}
+                          </TableCell>
+                          <TableCell align="right">{fCurrency(row?.saldocve)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+      {title === 'Valor cativado:' && contas?.length > 0 && (
+        <>
+          <Tooltip title="DETALHES" arrow>
+            <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
+              <SvgIconStyle src="/assets/icons/info.svg" sx={{ width: 20 }} />
+            </Fab>
+          </Tooltip>
+          <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+            <DialogTitle>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                Contas cativadas
+                <Tooltip title="Fechar" arrow>
+                  <IconButton onClick={onClose}>
+                    <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20, opacity: 0.75 }} />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </DialogTitle>
+            <DialogContent>
+              <TableContainer sx={{ minWidth: 500, mt: 2, position: 'relative', overflow: 'hidden' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Conta</TableCell>
+                      <TableCell>Utilizador</TableCell>
+                      <TableCell align="center">Data</TableCell>
+                      <TableCell align="right">Valor</TableCell>
+                      <TableCell align="right">Valor em CVE</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {contas?.map((row) => {
+                      const labelId = `checkbox-list-label-${row}`;
+                      return (
+                        <TableRow hover key={labelId}>
+                          <TableCell>{row?.conta}</TableCell>
+                          <TableCell>{row?.usercativador}</TableCell>
+                          <TableCell align="center">{ptDate(row?.datacativo)}</TableCell>
+                          <TableCell align="right">
+                            {fNumber(row?.saldo)} {row?.moeda}
+                          </TableCell>
+                          <TableCell align="right">{fCurrency(row?.saldocve)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </Stack>
   );
 }

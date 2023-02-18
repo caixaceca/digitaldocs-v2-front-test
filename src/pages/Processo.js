@@ -29,7 +29,7 @@ import {
 } from '../sections/digitaldocs/processo';
 import Ambiente from '../sections/digitaldocs/Ambiente';
 import Views from '../sections/digitaldocs/processo/Views';
-import DesarquivarForm from '../sections/digitaldocs/DesarquivarForm';
+import { DesarquivarForm } from '../sections/digitaldocs/IntervencaoForm';
 import AtribuirAcessoForm from '../sections/digitaldocs/AtribuirAcessoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
@@ -46,9 +46,8 @@ export default function Processo() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { isLoading, done, error, meuAmbiente, processo, meusAmbientes, isOpenModalDesariquivar } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { isLoading, done, error, meuAmbiente, processo, meusAmbientes, isOpenModalDesariquivar, meusacessos } =
+    useSelector((state) => state.digitaldocs);
   const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
   const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
   const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
@@ -170,7 +169,7 @@ export default function Processo() {
                 (fromPorConcluir && 'Por concluir') ||
                 (fromMinhasTarefas && 'Minhas tarefas') ||
                 (fromProcurar && 'Resultado de procura') ||
-                (fromMeusPendentes && 'Tarefas pendentes') ||
+                (fromMeusPendentes && 'Retidos') ||
                 'Processos',
               href:
                 (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
@@ -205,7 +204,7 @@ export default function Processo() {
                           </Fab>
                         </Tooltip>
                       </RoleBasedGuard>
-                      {!fromArquivo && (
+                      {!fromArquivo && meusacessos.includes('arquivo-110') && meusacessos.includes('arquivo-111') && (
                         <Tooltip title="PEDIR ACESSO" arrow>
                           <Fab color="success" size="small" variant="soft" onClick={handlePedirAcesso}>
                             <SvgIconStyle src="/assets/icons/check.svg" />
@@ -274,7 +273,7 @@ export default function Processo() {
                 )}
                 {hasHistorico && (
                   <Grid item xs={12} lg={hasHPrisoes && 6}>
-                    <HistoricoProcesso historico={processo?.htransicoes} fluxoId={processo?.fluxo_id} />
+                    <HistoricoProcesso historico={processo?.htransicoes} />
                   </Grid>
                 )}
                 {hasHPrisoes && (

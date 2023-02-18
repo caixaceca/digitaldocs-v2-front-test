@@ -10,7 +10,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
-import { format } from 'date-fns';
+import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
 import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
@@ -89,7 +89,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         }) ||
         null,
       balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
-      data_entrada: selectedProcesso?.data_entrada ? new Date(selectedProcesso?.data_entrada) : null,
+      data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
     [selectedProcesso, fluxo?.id, meuAmbiente, _entidades, currentColaborador]
   );
@@ -116,6 +116,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         formData.append('agendado', false);
         formData.append('balcao', values.balcao);
         formData.append('fluxo_id', values.fluxo_id);
+        formData.append('uo_perfil_id ', currentColaborador?.uo?.id);
         formData.append('is_interno ', selectedProcesso?.is_interno);
         formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
         // optional

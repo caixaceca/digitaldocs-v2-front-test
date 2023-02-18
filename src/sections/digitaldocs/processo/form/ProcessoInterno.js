@@ -10,7 +10,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
-import { format } from 'date-fns';
+import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
 import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
@@ -98,8 +98,8 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil?.id,
       balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
-      data_entrada: selectedProcesso?.data_entrada ? new Date(selectedProcesso?.data_entrada) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
+      data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
     [selectedProcesso, fluxo?.id, meuAmbiente, currentColaborador, _entidades]
   );
@@ -127,6 +127,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('agendado', values.agendado);
         formData.append('is_interno ', selectedProcesso?.is_interno);
+        formData.append('uo_perfil_id ', currentColaborador?.uo?.id);
         formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
         // optional
         if (values.obs) {

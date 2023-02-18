@@ -81,23 +81,21 @@ export default function NovoEditarProcesso() {
         {(!isEdit && meuAmbiente?.is_inicial) ||
         (processo?.is_lock && processo?.perfil_id === currentColaborador?.perfil_id) ? (
           <>
-            {(!isEdit || processo?.htransicoes?.length === 0) && (
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="center">
-                    <Autocomplete
-                      value={fluxo}
-                      onChange={(event, newValue) => setFluxo(newValue)}
-                      options={meusFluxos.map((option) => option?.id > 0 && option)}
-                      getOptionLabel={(option) => option?.assunto}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
-                      )}
-                    />
-                  </Stack>
-                </CardContent>
-              </Card>
-            )}
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="center">
+                  <Autocomplete
+                    value={fluxo}
+                    onChange={(event, newValue) => setFluxo(newValue)}
+                    options={meusFluxos.map((option) => option?.id > 0 && option)}
+                    getOptionLabel={(option) => option?.assunto}
+                    renderInput={(params) => (
+                      <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
+                    )}
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
             {!fluxo ? (
               <Card sx={{ mb: 3 }}>
                 <CardContent>

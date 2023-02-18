@@ -26,8 +26,8 @@ const TABLE_HEAD = [
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
+  { id: 'colaborador', label: 'Criado por', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
-  { id: 'colaborador', label: 'Criado por', align: 'center' },
   { id: 'trabalhado_em', label: 'Modificado em', align: 'center' },
   { id: 'empty' },
 ];
@@ -55,7 +55,7 @@ export default function TablePorConcluir() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'criado_em', defaultOrder: 'asc' });
+  } = useTable({ defaultOrderBy: 'criado_em', defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc' });
 
   useEffect(() => {
     if (mail && currentColaborador?.perfil_id) {
@@ -162,8 +162,8 @@ export default function TablePorConcluir() {
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
                         </TableCell>
                         <TableCell>{row?.assunto}</TableCell>
+                        <TableCell>{row?.colaborador}</TableCell>
                         <TableCell>{row?.nome}</TableCell>
-                        <TableCell align="center">{row?.colaborador && row.colaborador}</TableCell>
                         <TableCell align="center">{row?.trabalhado_em && ptDateTime(row.trabalhado_em)}</TableCell>
                         <TableCell align="center" width={50}>
                           <Tooltip title="DETALHES" arrow>

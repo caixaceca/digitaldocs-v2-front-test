@@ -41,9 +41,13 @@ export default function Table(theme) {
         body: {
           '&:first-of-type': {
             paddingLeft: theme.spacing(3),
+            borderTopLeftRadius: theme.shape.borderRadius,
+            borderBottomLeftRadius: theme.shape.borderRadius,
           },
           '&:last-of-type': {
             paddingRight: theme.spacing(3),
+            borderTopRightRadius: theme.shape.borderRadius,
+            borderBottomRightRadius: theme.shape.borderRadius,
           },
         },
       },

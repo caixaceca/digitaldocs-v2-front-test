@@ -41,7 +41,7 @@ export default function Processos() {
   const { themeStretch } = useSettings();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
   const [currentTab, setCurrentTab] = useSearchParams({ tab: 'minhastarefas', filter: '' });
-  const { meusProcessos, meuAmbiente, meuFluxo } = useSelector((state) => state.digitaldocs);
+  const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (mail && meuAmbiente?.id && meuFluxo?.id && currentColaborador?.perfil_id) {
@@ -60,7 +60,27 @@ export default function Processos() {
     setCurrentTab({ tab: newValue });
   };
 
-  const outros = meuFluxo?.is_interno
+  const acessoAgendados = () => {
+    let temAcesso = false;
+    meusAmbientes?.forEach((row) => {
+      if (row?.nome === 'Validação OPE' || row?.nome === 'Execução OPE') {
+        temAcesso = true;
+      }
+    });
+    return temAcesso;
+  };
+
+  const acessoFinalizadosExecutados = () => {
+    let temAcesso = false;
+    meusAmbientes?.forEach((row) => {
+      if (row?.nome === 'Validação Notas externas' || row?.nome === 'Execução Notas externas') {
+        temAcesso = true;
+      }
+    });
+    return temAcesso;
+  };
+
+  const agendados = acessoAgendados()
     ? [
         {
           value: 'agendados',
@@ -69,20 +89,31 @@ export default function Processos() {
           num: meusProcessos?.totalagendado || 0,
         },
       ]
-    : [
-        {
-          value: 'finalizados',
-          label: 'Finalizados',
-          component: <TableProcessos from="finalizados" />,
-          num: meusProcessos?.totalfinalizado || 0,
-        },
-        {
-          value: 'executados',
-          label: 'Executados',
-          component: <TableProcessos from="executados" />,
-          num: meusProcessos?.totalexecutado || 0,
-        },
-      ];
+    : [];
+
+  const finalizados =
+    acessoFinalizadosExecutados() && meusProcessos?.totalfinalizado > 0
+      ? [
+          {
+            value: 'finalizados',
+            label: 'Finalizados',
+            component: <TableProcessos from="finalizados" />,
+            num: meusProcessos?.totalfinalizado || 0,
+          },
+        ]
+      : [];
+
+  const executados =
+    acessoFinalizadosExecutados() && meusProcessos?.totalexecutado > 0
+      ? [
+          {
+            value: 'executados',
+            label: 'Executados',
+            component: <TableProcessos from="executados" />,
+            num: meusProcessos?.totalexecutado || 0,
+          },
+        ]
+      : [];
 
   const VIEW_TABS = useMemo(
     () =>
@@ -95,7 +126,7 @@ export default function Processos() {
         },
         {
           value: 'meuspendentes',
-          label: 'Tarefas pendentes',
+          label: 'Retidos',
           component: <TableProcessos from="meuspendentes" />,
           num: meusProcessos?.totalpendente || 0,
         },
@@ -111,10 +142,12 @@ export default function Processos() {
           component: <TableProcessos from="devolvidosPessoal" />,
           num: meusProcessos?.totaldevolvidop || 0,
         },
-        ...outros,
+        ...agendados,
+        ...finalizados,
+        ...executados,
       ] || [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [outros]
+    [agendados, finalizados, executados]
   );
 
   useEffect(() => {

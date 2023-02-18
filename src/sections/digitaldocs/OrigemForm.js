@@ -55,7 +55,7 @@ export default function OrigemForm({ isOpenModal, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const OrigemSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     tipo: Yup.string().required('Tipo não pode ficar vazio'),
     ilha: Yup.string().required('Ilha não pode ficar vazio'),
     cidade: Yup.string().required('Concelho não pode ficar vazio'),
@@ -78,10 +78,8 @@ export default function OrigemForm({ isOpenModal, onCancel }) {
     [selectedOrigem, currentColaborador?.perfil_id]
   );
 
-  const methods = useForm({ resolver: yupResolver(OrigemSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

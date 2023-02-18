@@ -15,8 +15,10 @@ const initialState = {
   isLoading: false,
   isOpenModal: false,
   isLoadingAnexo: false,
+  iAmInGrpGerente: false,
   isOpenModalAnexo: false,
   isOpenModalViews: false,
+  isLoadingIndicadores: false,
   isOpenModalDesariquivar: false,
   anexo: null,
   fluxo: null,
@@ -37,6 +39,7 @@ const initialState = {
   selectedMeuEstado: null,
   indicadoresArquivo: null,
   fluxos: [],
+  ranking: [],
   estados: [],
   origens: [],
   acessos: [],
@@ -52,11 +55,13 @@ const initialState = {
   meusacessos: [],
   trabalhados: [],
   porConcluir: [],
+  indicadores: [],
   visualizacoes: [],
   meusAmbientes: [],
   meusProcessos: [],
   pedidosAcesso: [],
   historicoFluxo: [],
+  indicadoresTipos: [],
   destinosDesarquivamento: [],
 };
 
@@ -125,6 +130,18 @@ const slice = createSlice({
         case 'processos':
           state.processos = [];
           break;
+        case 'indicadores':
+          state.indicadores = [];
+          break;
+        case 'ranking':
+          state.ranking = [];
+          break;
+        case 'indicadoresTipos':
+          state.indicadoresTipos = [];
+          break;
+        case 'trabalhados':
+          state.trabalhados = [];
+          break;
 
         default:
           break;
@@ -150,6 +167,19 @@ const slice = createSlice({
 
     getPorConcluirSuccess(state, action) {
       state.porConcluir = action.payload;
+    },
+
+    getIndicadoresSuccess(state, action) {
+      state.isLoadingIndicadores = false;
+      state.indicadores = action.payload;
+    },
+
+    getIndicadoresRankingSuccess(state, action) {
+      state.ranking = action.payload;
+    },
+
+    getIndicadoresTiposSuccess(state, action) {
+      state.indicadoresTipos = action.payload;
     },
 
     getTrabalhadosSuccess(state, action) {
@@ -264,6 +294,7 @@ const slice = createSlice({
         }
       });
       if (grpGerente) {
+        state.iAmInGrpGerente = true;
         state.meuAmbiente = action.payload?.[grpGerente];
         state.meusFluxos = action.payload?.[grpGerente]?.fluxos;
       } else {
@@ -747,11 +778,6 @@ export function getAll(item, params) {
           dispatch(slice.actions.getPesquisaSuccess(response.data));
           break;
         }
-        case 'fileSystem': {
-          const response = await axios.get(`${BASEURLDD}/v1/indicadores/filesystem/${params?.perfilId}`, options);
-          dispatch(slice.actions.getFyleSystemSuccess(response.data));
-          break;
-        }
         case 'visualizacoes': {
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/visualizacoes/${params?.perfilId}?processoID=${params?.processoId}`,
@@ -791,7 +817,7 @@ export function getAll(item, params) {
               options
             );
             dispatch(slice.actions.getTrabalhadosSuccess(response.data.objeto));
-          } else if (params?.estadoId !== -1) {
+          } else if (params?.estadoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/entradas/trabalhados/estado/${params?.estadoId}?qdia=${params?.data}`,
               options
@@ -826,6 +852,76 @@ export function getAll(item, params) {
     }
   };
 }
+
+// ----------------------------------------------------------------------
+
+export function getIndicadores(item, params) {
+  return async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      const options = { headers: { cc: params?.mail } };
+      switch (item) {
+        case 'fileSystem': {
+          const response = await axios.get(`${BASEURLDD}/v1/indicadores/filesystem/${params?.perfilId}`, options);
+          dispatch(slice.actions.getFyleSystemSuccess(response.data));
+          break;
+        }
+        case 'indicadoresCriacao': {
+          dispatch(slice.actions.resetItem('indicadores'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
+              params?.uo ? `&uoID=${params?.uo}` : ''
+            }${params?.perfilId1 ? `&perfilID1=${params?.perfilId1}` : ''}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          break;
+        }
+        case 'indicadoresRanking': {
+          dispatch(slice.actions.resetItem('ranking'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/top/criacao/${params?.perfilId}?escopo=${params?.escopo}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresRankingSuccess(response.data));
+          break;
+        }
+        case 'indicadoresTipos': {
+          dispatch(slice.actions.resetItem('indicadoresTipos'));
+          const query = `${params?.uoID ? `uoID=${params?.uoID}&` : ''}${
+            params?.perfilPID ? `perfilPID=${params?.perfilPID}&` : ''
+          }${params?.datai ? `datai=${params?.datai}&` : ''}${params?.dataf ? `dataf=${params?.dataf}&` : ''}`;
+          const response = await axios.get(
+            params?.uoID || params?.perfilPID || params?.datai || params?.dataf
+              ? `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}?${query.substr(0, query.length - 1)}`
+              : `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresTiposSuccess(response.data));
+          break;
+        }
+
+        default:
+          break;
+      }
+      dispatch(slice.actions.stopLoading());
+    } catch (error) {
+      dispatch(
+        slice.actions.hasError(
+          error.response?.data?.error ||
+            error.response?.data?.errop ||
+            error.response?.data ||
+            error?.message ||
+            'Ocorreu um erro...'
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch(slice.actions.resetError());
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
 
 export function getItem(item, params) {
   return async (dispatch) => {
@@ -1079,6 +1175,7 @@ export function createItem(item, dados, params) {
             error.response?.data?.errop ||
             error.response?.data ||
             error?.message ||
+            error?.error ||
             'Ocorreu um erro...'
         )
       );
@@ -1147,7 +1244,16 @@ export function updateItem(item, dados, params) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {
-      dispatch(slice.actions.hasError(error?.response?.data?.detail?.msg || 'Ocorreu um erro...'));
+      dispatch(
+        slice.actions.hasError(
+          error.response?.data?.error ||
+            error.response?.data?.errop ||
+            error.response?.data ||
+            error?.message ||
+            error?.error ||
+            'Ocorreu um erro...'
+        )
+      );
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }

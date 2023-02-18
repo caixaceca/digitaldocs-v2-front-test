@@ -33,11 +33,7 @@ import DialogConfirmar from '../../components/DialogConfirmar';
 
 // ----------------------------------------------------------------------
 
-MuesEstadosForm.propTypes = {
-  onCancel: PropTypes.func,
-  perfilId: PropTypes.number,
-  isOpenModal: PropTypes.bool,
-};
+MuesEstadosForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number, isOpenModal: PropTypes.bool };
 
 export default function MuesEstadosForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
@@ -65,7 +61,7 @@ export default function MuesEstadosForm({ isOpenModal, perfilId, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const EstadoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     estado_id: Yup.mixed()
       .nullable('Estado orgânica não pode ficar vazio')
       .required('Estado orgânica não pode ficar vazio'),
@@ -82,10 +78,8 @@ export default function MuesEstadosForm({ isOpenModal, perfilId, onCancel }) {
     [selectedMeuEstado, currentColaborador?.perfil?.id, estado, perfilId]
   );
 
-  const methods = useForm({ resolver: yupResolver(EstadoSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

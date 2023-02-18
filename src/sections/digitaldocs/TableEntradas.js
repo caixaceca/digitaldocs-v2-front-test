@@ -69,7 +69,7 @@ export default function TableEntradas() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'criado_em', defaultOrder: 'asc' });
+  } = useTable({ defaultOrderBy: 'criado_em', defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc' });
 
   useEffect(() => {
     if (mail && currentColaborador?.perfil_id && currentColaborador?.uo_id && data) {

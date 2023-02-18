@@ -39,11 +39,7 @@ const modos = ['Seguimento', 'Devolução'];
 
 // ----------------------------------------------------------------------
 
-TransicaoForm.propTypes = {
-  isOpenModal: PropTypes.bool,
-  onCancel: PropTypes.func,
-  fluxoId: PropTypes.number,
-};
+TransicaoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func, fluxoId: PropTypes.number };
 
 export default function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   const dispatch = useDispatch();
@@ -72,7 +68,7 @@ export default function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const TransicaoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     modo: Yup.string().required('Modo não pode ficar vazio'),
     prazoemdias: Yup.string().required('Prazo não pode ficar vazio'),
     estado_inicial_id: Yup.mixed()
@@ -99,10 +95,8 @@ export default function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
     [fluxoId, selectedTransicao, currentColaborador?.perfil_id, estadoInicial, estadoFinal]
   );
 
-  const methods = useForm({ resolver: yupResolver(TransicaoSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {

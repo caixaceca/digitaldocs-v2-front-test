@@ -71,7 +71,7 @@ export default function Procura() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'id' });
+  } = useTable({ defaultOrderBy: 'noOrderDefault' });
 
   const [filterUo, setFilterUo] = useState('');
   const [filterSearch, setFilterSearch] = useState('');
