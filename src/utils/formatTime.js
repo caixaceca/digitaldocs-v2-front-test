@@ -58,7 +58,9 @@ export function ptDate(date) {
 }
 
 export function ptTime(date) {
-  return format(new Date(date), 'HH:mm a');
+  return format(new Date(date), 'HH:mm', {
+    locale: pt,
+  });
 }
 
 export function fToNow(date) {

@@ -17,7 +17,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { format } from 'date-fns';
-import { ptDateTime } from '../../utils/formatTime';
+import { ptTime } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -201,7 +201,7 @@ export default function TableEntradas() {
                                 src="/assets/icons/header/clock.svg"
                                 sx={{ width: 15, height: 15, color: 'text.secondary' }}
                               />
-                              <Typography variant="body2">{ptDateTime(row.criado_em)}</Typography>
+                              <Typography variant="body2">{ptTime(row.criado_em)}</Typography>
                             </Stack>
                           )}
                           {row?.colaborador && (
