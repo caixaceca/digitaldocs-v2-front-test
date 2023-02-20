@@ -84,30 +84,24 @@ export function SearchToolbarProcura({
         <Autocomplete
           fullWidth
           value={filterAssunto}
-          onChange={(event, newValue) => {
-            onFilterAssunto(newValue);
-          }}
-          options={assuntosList}
+          onChange={(event, newValue) => onFilterAssunto(newValue)}
+          options={assuntosList?.sort()}
           sx={{ width: { md: 180, xl: 250 } }}
           renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
         />
         <Autocomplete
           fullWidth
           value={filterEstado}
-          onChange={(event, newValue) => {
-            onFilterEstado(newValue);
-          }}
-          options={estadosList}
+          onChange={(event, newValue) => onFilterEstado(newValue)}
+          options={estadosList?.sort()}
           sx={{ width: { md: 180, xl: 250 } }}
           renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
         />
         <Autocomplete
           fullWidth
           value={filterUo}
-          onChange={(event, newValue) => {
-            onFilterUo(newValue);
-          }}
-          options={uosorigemList}
+          onChange={(event, newValue) => onFilterUo(newValue)}
+          options={uosorigemList?.sort()}
           sx={{ width: { md: 180, xl: 250 } }}
           renderInput={(params) => <TextField {...params} label="U.O origem" margin="none" />}
         />
@@ -116,9 +110,7 @@ export function SearchToolbarProcura({
         <TextField
           fullWidth
           value={filterSearch || ''}
-          onChange={(event) => {
-            onFilterSearch(event.target.value);
-          }}
+          onChange={(event) => onFilterSearch(event.target.value)}
           placeholder="Procurar..."
           InputProps={{
             startAdornment: (
@@ -259,30 +251,24 @@ export function SearchToolbarEntradas({
         <Autocomplete
           fullWidth
           value={estado}
-          onChange={(event, newValue) => {
-            onFilterEstado(newValue);
-          }}
-          options={estadosList}
+          onChange={(event, newValue) => onFilterEstado(newValue)}
+          options={estadosList?.sort()}
           sx={{ width: { md: 180, xl: 250 } }}
           renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
         />
         <Autocomplete
           fullWidth
           value={assunto}
-          onChange={(event, newValue) => {
-            onFilterAssunto(newValue);
-          }}
-          options={assuntosList}
+          onChange={(event, newValue) => onFilterAssunto(newValue)}
+          options={assuntosList?.sort()}
           sx={{ width: { md: 180, xl: 250 } }}
           renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
         />
         <Autocomplete
           fullWidth
           value={colaborador}
-          onChange={(event, newValue) => {
-            onFilterColaborador(newValue);
-          }}
-          options={colaboradoresList}
+          onChange={(event, newValue) => onFilterColaborador(newValue)}
+          options={colaboradoresList?.sort()}
           sx={{ width: { md: 180, xl: 250 } }}
           renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
         />
@@ -374,9 +360,7 @@ export function SearchToolbarTrabalhados({
         <Autocomplete
           fullWidth
           value={colaborador}
-          onChange={(event, newValue) => {
-            onFilterColaborador(newValue);
-          }}
+          onChange={(event, newValue) => onFilterColaborador(newValue)}
           options={applySort(colaboradoresList, getComparator('asc', 'label'))}
           sx={{ width: { md: 200, xl: 300 } }}
           getOptionLabel={(option) => option.label}

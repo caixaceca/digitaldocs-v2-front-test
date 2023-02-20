@@ -37,7 +37,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 export default function Controle() {
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'minhastarefas', filter: '' });
+  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab({ tab: newValue });

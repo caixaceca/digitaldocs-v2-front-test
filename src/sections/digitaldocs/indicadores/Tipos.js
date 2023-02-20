@@ -151,7 +151,7 @@ export default function Tipos() {
                   size="small"
                   sx={{ minWidth: { sm: 220 } }}
                   onChange={(event, newValue) => setUo(newValue)}
-                  options={applySort(uos, getComparator('asc', 'label'))?.map((option) => option)}
+                  options={applySort(uosList, getComparator('asc', 'label'))?.map((option) => option)}
                   getOptionLabel={(option) => option?.label}
                   renderInput={(params) => <TextField {...params} fullWidth label="U.O" />}
                 />
@@ -173,7 +173,7 @@ export default function Tipos() {
                   inputFormat="dd/MM/yyyy"
                   onChange={(newValue) => setDataInicio(newValue)}
                   renderInput={(params) => (
-                    <TextField size="small" {...params} fullWidth sx={{ maxWidth: { lg: 150 } }} />
+                    <TextField size="small" {...params} fullWidth sx={{ maxWidth: { lg: 155 } }} />
                   )}
                 />
                 <DatePicker
@@ -182,7 +182,7 @@ export default function Tipos() {
                   inputFormat="dd/MM/yyyy"
                   onChange={(newValue) => setDataFim(newValue)}
                   renderInput={(params) => (
-                    <TextField size="small" {...params} fullWidth sx={{ maxWidth: { lg: 150 } }} />
+                    <TextField size="small" {...params} fullWidth sx={{ maxWidth: { lg: 155 } }} />
                   )}
                 />
               </Stack>

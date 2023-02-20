@@ -17,13 +17,13 @@ export default axiosInstance;
 
 /// ---------------------------- LOCAL ----------------------------
 
-// export const BASEURL = 'http://172.17.61.163:5000';
-// export const BASEURLDD = 'http://172.17.61.163:9900';
+export const BASEURL = 'http://172.17.61.163:5000';
+export const BASEURLDD = 'http://172.17.61.163:9900';
 
 /// ---------------------------- TESTE ----------------------------
 
-export const BASEURLDD = 'https://ddocsteste.caixa.cv:9900';
-export const BASEURL = 'https://intraneteste.caixa.cv:5000';
+// export const BASEURLDD = 'https://ddocsteste.caixa.cv:9900';
+// export const BASEURL = 'https://intraneteste.caixa.cv:5000';
 
 /// --------------------------- PRODUÇÃo --------------------------
 

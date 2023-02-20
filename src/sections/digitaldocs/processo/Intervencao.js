@@ -85,7 +85,7 @@ export default function Intervencao({ processo }) {
         }
         i += 1;
       }
-    } else if (meuAmbiente?.is_final && (processo?.agendado || !processo?.is_interno) && processo.situacao !== 'X') {
+    } else if (meuAmbiente?.is_final && processo?.agendado && processo.situacao !== 'X') {
       return true;
     }
     return false;

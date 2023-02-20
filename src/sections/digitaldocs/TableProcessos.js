@@ -56,7 +56,7 @@ export default function TableProcessos({ from }) {
   const title =
     (from === 'devolvidosEquipa' && 'Devolvidos da equipa') ||
     (from === 'devolvidosPessoal' && 'Devolvidos pessoal') ||
-    (from === 'minhastarefas' && 'Tarefas da equipa') ||
+    (from === 'tarefas' && 'Lista de tarefas') ||
     (from === 'finalizados' && 'Finalizados') ||
     (from === 'meuspendentes' && 'Retidos') ||
     (from === 'executados' && 'Executados') ||

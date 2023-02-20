@@ -40,7 +40,7 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'minhastarefas', filter: '' });
+  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
   const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -119,9 +119,9 @@ export default function Processos() {
     () =>
       [
         {
-          value: 'minhastarefas',
-          label: 'Tarefas da equipa',
-          component: <TableProcessos from="minhastarefas" />,
+          value: 'tarefas',
+          label: 'Tarefas',
+          component: <TableProcessos from="tarefas" />,
           num: meusProcessos?.total || 0,
         },
         {

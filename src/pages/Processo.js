@@ -54,10 +54,10 @@ export default function Processo() {
   const perfilId = currentColaborador?.perfil_id;
   const widthC1 = refColumn1?.current?.offsetWidth - 25;
   const fromArquivo = from?.get?.('from') === 'arquivo';
+  const fromTarefas = from?.get?.('from') === 'tarefas';
   const fromEntradas = from?.get?.('from') === 'entradas';
   const fromProcurar = from?.get?.('from') === 'procurar';
   const fromPorConcluir = from?.get?.('from') === 'porconcluir';
-  const fromMinhasTarefas = from?.get?.('from') === 'minhastarefas';
   const fromMeusPendentes = from?.get?.('from') === 'meuspendentes';
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function Processo() {
     } else if (done === 'Processo eliminado') {
       enqueueSnackbar('Processo eliminado com sucesso', { variant: 'success' });
       navigate(
-        (fromMinhasTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=minhastarefas`) ||
+        (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
           (fromMeusPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=meuspendentes`) ||
           (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
           (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
@@ -164,18 +164,18 @@ export default function Processo() {
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             {
               name:
+                (fromTarefas && 'Tarefas') ||
                 (fromArquivo && 'Arquivos') ||
                 (fromEntradas && 'Entradas') ||
-                (fromPorConcluir && 'Por concluir') ||
-                (fromMinhasTarefas && 'Minhas tarefas') ||
-                (fromProcurar && 'Resultado de procura') ||
                 (fromMeusPendentes && 'Retidos') ||
+                (fromPorConcluir && 'Por concluir') ||
+                (fromProcurar && 'Resultado de procura') ||
                 'Processos',
               href:
                 (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
+                (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
                 (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
                 (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
-                (fromMinhasTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=minhastarefas`) ||
                 (fromMeusPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=meuspendentes`) ||
                 (fromProcurar && PATH_DIGITALDOCS.processos.procurar) ||
                 PATH_DIGITALDOCS.processos.root,

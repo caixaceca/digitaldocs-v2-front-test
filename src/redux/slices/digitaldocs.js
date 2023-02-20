@@ -43,6 +43,7 @@ const initialState = {
   estados: [],
   origens: [],
   acessos: [],
+  duracao: [],
   pesquisa: [],
   arquivos: [],
   entradas: [],
@@ -139,6 +140,9 @@ const slice = createSlice({
         case 'indicadoresTipos':
           state.indicadoresTipos = [];
           break;
+        case 'duracao':
+          state.duracao = [];
+          break;
         case 'trabalhados':
           state.trabalhados = [];
           break;
@@ -180,6 +184,10 @@ const slice = createSlice({
 
     getIndicadoresTiposSuccess(state, action) {
       state.indicadoresTipos = action.payload;
+    },
+
+    getIndicadoresDuracaoSuccess(state, action) {
+      state.duracao = action.payload;
     },
 
     getTrabalhadosSuccess(state, action) {
@@ -546,7 +554,7 @@ export function getAll(item, params) {
           dispatch(slice.actions.getHistoticoFluxoSuccess(response.data));
           break;
         }
-        case 'minhastarefas': {
+        case 'tarefas': {
           dispatch(slice.actions.resetItem('processo'));
           dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
@@ -898,6 +906,19 @@ export function getIndicadores(item, params) {
             options
           );
           dispatch(slice.actions.getIndicadoresTiposSuccess(response.data));
+          break;
+        }
+        case 'duracao': {
+          dispatch(slice.actions.resetItem('duracao'));
+          const perfil = params?.perfilPID ? `&perfilPID=${params?.perfilPID}` : '';
+          const fluxo = params?.fluxoID ? `&fluxoID=${params?.fluxoID}` : '';
+          const datai = params?.datai ? `&datai=${params?.datai}` : '';
+          const dataf = params?.dataf ? `&dataf=${params?.dataf}` : '';
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/duracao/${params?.perfilId}?de=${params?.origem}${perfil}${fluxo}${datai}${dataf}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresDuracaoSuccess(response.data));
           break;
         }
 

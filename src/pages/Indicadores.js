@@ -11,7 +11,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 // sections
-import { Tipos, Criacao, Ranking, FileSystem } from '../sections/digitaldocs/indicadores';
+import { Tipos, Criacao, Ranking, Duracao, FileSystem } from '../sections/digitaldocs/indicadores';
 // assets
 import ComingSoonIllustration from '../assets/ComingSoonIllustration';
 
@@ -57,6 +57,7 @@ export default function Indicadores() {
     { value: 'total', label: 'Total de processos', component: <Criacao /> },
     { value: 'ranking', label: 'Ranking', component: <Ranking /> },
     { value: 'tipos', label: 'Tipos', component: <Tipos /> },
+    { value: 'duracao', label: 'Duração', component: <Duracao /> },
   ];
 
   useEffect(() => {

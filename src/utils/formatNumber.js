@@ -40,9 +40,9 @@ export function fNumber(number) {
   return numeral(number).format();
 }
 
-export function fNumber4(number) {
+export function fNumber2(number) {
   numeral.locale('cv-cv' || '');
-  return replace(numeral(number).format('0.0000'), '.0000', '');
+  return replace(numeral(number).format('0.00'), '.00', '');
 }
 
 export function fShortenNumber(number) {

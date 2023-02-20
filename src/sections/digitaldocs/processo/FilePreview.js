@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
+import { Viewer } from '@react-pdf-viewer/core';
+// import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
 import { useTheme } from '@mui/material/styles';
@@ -25,15 +26,15 @@ export function PdfPreview({ url }) {
         localization={pt}
         theme={{ theme: theme.palette.mode }}
         plugins={[defaultLayoutPluginInstance]}
-        defaultScale={SpecialZoomLevel.PageWidth}
+        // defaultScale={SpecialZoomLevel.PageWidth}
       />
     </div>
   );
 }
 
-ImagemPreview.propTypes = { imagem: PropTypes.string };
-
 // --------------------------------------------------------------------------------------------------------------------------------------------
+
+ImagemPreview.propTypes = { imagem: PropTypes.string };
 
 export function ImagemPreview({ imagem }) {
   const [openLightbox, setOpenLightbox] = useState(false);
