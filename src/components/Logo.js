@@ -6,10 +6,7 @@ import { Box } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-Logo.propTypes = {
-  disabledLink: PropTypes.bool,
-  sx: PropTypes.object,
-};
+Logo.propTypes = { disabledLink: PropTypes.bool, sx: PropTypes.object };
 
 export default function Logo({ disabledLink = false, sx }) {
   const theme = useTheme();

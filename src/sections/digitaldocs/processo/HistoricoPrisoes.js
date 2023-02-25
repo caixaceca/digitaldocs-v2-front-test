@@ -30,9 +30,7 @@ import SvgIconStyle from '../../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
-HistoricoPrisoes.propTypes = {
-  historico: PropTypes.object,
-};
+HistoricoPrisoes.propTypes = { historico: PropTypes.object };
 
 export default function HistoricoPrisoes({ historico }) {
   const { colaboradores } = useSelector((state) => state.colaborador);

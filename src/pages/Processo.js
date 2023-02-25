@@ -214,7 +214,7 @@ export default function Processo() {
                     </>
                   ) : (
                     <>
-                      {!processo?.is_lock && processo?.situacao !== 'F' && (
+                      {!processo?.is_lock && (
                         <>
                           {podeAceitar() && (
                             <Tooltip title="ACEITAR" arrow>
