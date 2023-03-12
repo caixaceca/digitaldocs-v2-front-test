@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Grid, Card, TextField, CardContent, Autocomplete, InputAdornment } from '@mui/material';
+import { Grid, Card, TextField, CardContent, Typography, Autocomplete, InputAdornment } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../../../hooks/useTable';
 // redux
 import { useSelector } from '../../../../redux/store';
 // components
-import { RHFTextField } from '../../../../components/hook-form';
+import { RHFTextField, RHFSwitch } from '../../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
 import ObsNovosAnexos from './ObsNovosAnexos';
@@ -32,13 +32,15 @@ const canais = ['Email', 'Correspondência'];
 ProcessoExternoForm.propTypes = {
   operacao: PropTypes.string,
   setOperacao: PropTypes.func,
+  setPendente: PropTypes.func,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoExternoForm({ operacao, setOperacao, selectedProcesso }) {
-  const { control, setValue } = useFormContext();
+export default function ProcessoExternoForm({ operacao, setOperacao, setPendente, selectedProcesso }) {
+  const { control, watch, setValue } = useFormContext();
+  const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
-  const { origens } = useSelector((state) => state.digitaldocs);
+  const { origens, motivosPendencias } = useSelector((state) => state.digitaldocs);
   const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
 
   return (
@@ -150,6 +152,57 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
         <Card>
           <CardContent>
             <DadosCliente />
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <RHFSwitch
+                  name="ispendente"
+                  labelPlacement="start"
+                  onChange={(event, value) => {
+                    setValue('ispendente', value);
+                    setPendente(value);
+                  }}
+                  label={
+                    <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                      Pendente
+                    </Typography>
+                  }
+                  sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
+                />
+              </Grid>
+              {values.ispendente && (
+                <>
+                  <Grid item xs={12} sm={4}>
+                    <Controller
+                      name="motivosPendencias"
+                      control={control}
+                      render={({ field, fieldState: { error } }) => (
+                        <Autocomplete
+                          {...field}
+                          fullWidth
+                          onChange={(event, newValue) => field.onChange(newValue)}
+                          options={applySort(motivosPendencias, getComparator('asc', 'motivo'))?.map(
+                            (option) => option
+                          )}
+                          getOptionLabel={(option) => option?.motivo}
+                          renderInput={(params) => (
+                            <TextField {...params} label="Motivo" error={!!error} helperText={error?.message} />
+                          )}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={8}>
+                    <RHFTextField name="mobs" label="Observação" />
+                  </Grid>
+                </>
+              )}
+            </Grid>
           </CardContent>
         </Card>
       </Grid>

@@ -45,7 +45,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import { FormProvider, RHFTextField, RHFUploadMultiFile } from '../../components/hook-form';
 
-// ----------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
 IntervencaoForm.propTypes = {
   title: PropTypes.object,
@@ -216,7 +216,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { done, error, isLoading, meuAmbiente, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { done, error, isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'arquivado') {
@@ -235,16 +235,12 @@ export function ArquivarForm({ open, onCancel, processo }) {
 
   const deveInformarNConta = () => {
     if (processo?.is_interno) {
-      if (meuAmbiente?.id === -1) {
-        let i = 0;
-        while (i < meusAmbientes?.length) {
-          if (meusAmbientes[i]?.is_final) {
-            return true;
-          }
-          i += 1;
+      let i = 0;
+      while (i < meusAmbientes?.length) {
+        if (meusAmbientes[i]?.is_final) {
+          return true;
         }
-      } else if (meuAmbiente?.is_final) {
-        return true;
+        i += 1;
       }
     }
     return false;
@@ -257,11 +253,14 @@ export function ArquivarForm({ open, onCancel, processo }) {
         .typeError('Introduza o nº de conta do titular')
         .positive('O nº de conta não pode ser negativo')
         .required('Introduza o nº de conta do titular'),
-    data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio').required('Data não pode ficar vazio'),
+    data_entrada: Yup.date()
+      .typeError('Data de entrada não pode ficar vazio')
+      .required('Data de entrada não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
+      anexos: [],
       observacao: '',
       fluxoID: processo?.fluxo_id,
       conta: processo?.conta || '',
@@ -276,7 +275,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, control, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -288,11 +287,50 @@ export function ArquivarForm({ open, onCancel, processo }) {
 
   const onSubmit = async () => {
     try {
-      values.data_entrada = ('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
-      dispatch(arquivarProcesso(JSON.stringify(values), processo.id, mail));
+      const formData = {
+        conta: values?.conta,
+        fluxoID: values?.fluxoID,
+        estadoID: values?.estadoID,
+        perfilID: values?.perfilID,
+        entidades: values?.entidades,
+        noperacao: values?.noperacao,
+        observacao: values?.observacao,
+        data_entrada: format(values.data_entrada, 'yyyy-MM-dd'),
+      };
+      let haveAnexos = false;
+      const formDataAnexos = new FormData();
+      if (values?.anexos?.length > 0) {
+        haveAnexos = true;
+        formDataAnexos.append('perfilID', currentColaborador?.perfil_id);
+        const listaanexo = values.anexos;
+        for (let i = 0; i < listaanexo.length; i += 1) {
+          formDataAnexos.append('anexos', listaanexo[i]);
+        }
+      }
+      dispatch(arquivarProcesso(JSON.stringify(formData), processo.id, haveAnexos, formDataAnexos, mail));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
+  };
+
+  const handleDrop = useCallback(
+    (acceptedFiles) => {
+      const anexos = values.anexos || [];
+      setValue('anexos', [
+        ...anexos,
+        ...acceptedFiles.map((file) => Object.assign(file, { preview: URL.createObjectURL(file) })),
+      ]);
+    },
+    [setValue, values.anexos]
+  );
+
+  const handleRemoveAll = () => {
+    setValue('anexos', []);
+  };
+
+  const handleRemove = (file) => {
+    const filteredItems = values.anexos && values.anexos?.filter((_file) => _file !== file);
+    setValue('anexos', filteredItems);
   };
 
   return (
@@ -331,13 +369,21 @@ export function ArquivarForm({ open, onCancel, processo }) {
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={5} maxRows={8} label="Observação" />
             </Grid>
+            <Grid item xs={12}>
+              <RHFUploadMultiFile
+                name="anexos"
+                onDrop={handleDrop}
+                onRemove={handleRemove}
+                onRemoveAll={handleRemoveAll}
+              />
+            </Grid>
           </Grid>
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             <Box sx={{ flexGrow: 1 }} />
             <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
             </LoadingButton>
-            <LoadingButton type="submit" variant="soft" color="error" loading={isLoading}>
+            <LoadingButton type="submit" variant="soft" color="error" loading={isSaving}>
               Arquivar
             </LoadingButton>
           </DialogActions>
@@ -347,7 +393,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
 DesarquivarForm.propTypes = {
   open: PropTypes.bool,
@@ -460,7 +506,7 @@ export function FinalizarForm({ open, onCancel, processo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
-  const { done, error, isLoading } = useSelector((state) => state.digitaldocs);
+  const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
 
   useEffect(() => {
@@ -576,7 +622,7 @@ export function FinalizarForm({ open, onCancel, processo }) {
             <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
             </LoadingButton>
-            <LoadingButton type="submit" variant="soft" loading={isLoading}>
+            <LoadingButton type="submit" variant="soft" loading={isSaving}>
               Finalizar
             </LoadingButton>
           </DialogActions>

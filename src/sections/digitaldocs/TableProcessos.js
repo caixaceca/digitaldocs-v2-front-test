@@ -61,7 +61,8 @@ export default function TableProcessos({ from }) {
     (from === 'meuspendentes' && 'Retidos') ||
     (from === 'executados' && 'Executados') ||
     (from === 'agendados' && 'Agendados') ||
-    '';
+    (from === 'pendentes' && 'Pendentes') ||
+    from;
 
   const {
     page,
@@ -102,16 +103,12 @@ export default function TableProcessos({ from }) {
   };
 
   const podeAdicionar = () => {
-    if (meuAmbiente?.id === -1) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.is_inicial) {
-          return true;
-        }
-        i += 1;
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.is_inicial) {
+        return true;
       }
-    } else if (meuAmbiente?.is_inicial) {
-      return true;
+      i += 1;
     }
     return false;
   };

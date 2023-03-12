@@ -63,6 +63,8 @@ export default function Indicadores() {
   useEffect(() => {
     if (mail && currentColaborador?.perfil_id) {
       dispatch(getAll('ambientes', { mail, perfilId: currentColaborador?.perfil_id }));
+      dispatch(getAll('meusacessos', { mail, perfilId: currentColaborador?.perfil_id }));
+      dispatch(getAll('motivos pendencias', { mail, perfilId: currentColaborador?.perfil_id }));
     }
   }, [dispatch, currentColaborador, mail]);
 

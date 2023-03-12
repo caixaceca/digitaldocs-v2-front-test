@@ -14,6 +14,7 @@ const ICONS = {
   state: getIcon('state'),
   origin: getIcon('origin'),
   process: getIcon('process'),
+  transition: getIcon('transition'),
   meu_perfil: getIcon('meu_perfil'),
   indicadores: getIcon('indicadores'),
 };
@@ -50,6 +51,12 @@ const navConfig = [
         roles: ['origem-110', 'origem-111', 'Todo-110', 'Todo-111'],
         path: PATH_DIGITALDOCS.general.origens,
         icon: ICONS.origin,
+      },
+      {
+        title: 'Motivos',
+        roles: ['Todo-110', 'Todo-111'],
+        path: PATH_DIGITALDOCS.general.motivos,
+        icon: ICONS.transition,
       },
       {
         title: 'Processos',

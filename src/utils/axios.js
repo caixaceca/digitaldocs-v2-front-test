@@ -22,10 +22,10 @@ export default axiosInstance;
 
 /// ---------------------------- TESTE ----------------------------
 
-export const BASEURLDD = 'https://ddocsteste.caixa.cv:9900';
-export const BASEURL = 'https://intraneteste.caixa.cv:5000';
+// export const BASEURLDD = 'https://ddocsteste.caixa.cv:9900';
+// export const BASEURL = 'https://intraneteste.caixa.cv:5000';
 
 /// --------------------------- PRODUÇÃo --------------------------
 
-// export const BASEURL = 'https://intranet.caixa.cv:5000';
-// export const BASEURLDD = 'https://digitaldocs.caixa.cv:9900';
+export const BASEURL = 'https://intranet.caixa.cv:5000';
+export const BASEURLDD = 'https://digitaldocs.caixa.cv:9900';

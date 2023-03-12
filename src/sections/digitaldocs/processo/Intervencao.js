@@ -28,7 +28,7 @@ export default function Intervencao({ processo }) {
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { isSaving, meuAmbiente, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
 
   const devolucoes = [];
@@ -72,94 +72,76 @@ export default function Intervencao({ processo }) {
     dispatch(abandonarProcesso(formData, processo?.id, mail));
   };
 
-  // const handleEliminar = () => {
-  //   dispatch(deleteItem('processo', { processoId: processo?.id, perfilId, mail, mensagem: 'Processo eliminado' }));
-  // };
-
   const podeFinalizar = () => {
-    if (meuAmbiente?.id === -1) {
+    if (processo?.agendado && processo.situacao !== 'X') {
       let i = 0;
       while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.is_final && processo?.agendado && processo.situacao !== 'X') {
+        if (meusAmbientes[i]?.is_final) {
           return true;
         }
         i += 1;
       }
-    } else if (meuAmbiente?.is_final && processo?.agendado && processo.situacao !== 'X') {
-      return true;
     }
     return false;
   };
 
   const podeFinalizarNE = () => {
-    if (meuAmbiente?.id === -1) {
+    if (
+      !processo?.is_interno &&
+      processo?.situacao === 'E' &&
+      processo?.operacao === 'Cativo/Penhora' &&
+      processo?.nome === 'Validação Notas externas'
+    ) {
       let i = 0;
       while (i < meusAmbientes?.length) {
-        if (
-          meusAmbientes[i]?.is_final &&
-          !processo?.is_interno &&
-          processo?.situacao === 'E' &&
-          processo?.operacao === 'Cativo/Penhora'
-        ) {
+        if (meusAmbientes[i]?.is_final) {
           return true;
         }
         i += 1;
       }
-    } else if (
-      meuAmbiente?.is_final &&
-      !processo?.is_interno &&
-      processo?.situacao === 'E' &&
-      processo?.operacao === 'Cativo/Penhora'
-    ) {
-      return true;
     }
     return false;
   };
 
   const podeEditar = () => {
-    if (meuAmbiente?.id === -1) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.uo_id === processo?.uo_origem_id && meusAmbientes[i]?.id === processo?.estado_atual_id) {
-          return true;
-        }
-        i += 1;
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (
+        (meusAmbientes[i]?.uo_id === processo?.uo_origem_id && meusAmbientes[i]?.id === processo?.estado_atual_id) ||
+        (processo?.assunto === 'Processos Judiciais e Fiscais' &&
+          processo?.nome === 'Secretariado e Relações Públicas' &&
+          meusAmbientes[i]?.nome === 'Secretariado e Relações Públicas')
+      ) {
+        return true;
       }
-    } else if (processo?.uo_origem_id === meuAmbiente?.uo_id && processo?.estado_atual_id === meuAmbiente?.id) {
-      return true;
+      i += 1;
     }
     return false;
   };
 
   const podeEditarNE = () => {
-    if (meuAmbiente?.id === -1) {
+    if (processo?.nome === 'DOP - Execução Notas Externas') {
       let i = 0;
       while (i < meusAmbientes?.length) {
-        if (!processo?.is_interno && meusAmbientes[i]?.nome === 'Execução Notas externas') {
+        if (meusAmbientes[i]?.nome === 'DOP - Execução Notas Externas') {
           return true;
         }
         i += 1;
       }
-    } else if (!processo?.is_interno && meuAmbiente?.nome === 'Execução Notas externas') {
-      return true;
     }
     return false;
   };
 
   const podeArquivar = () => {
-    if (meuAmbiente?.id === -1) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (
-          (meusAmbientes[i]?.is_inicial || meusAmbientes[i]?.is_final) &&
-          meusAmbientes[i]?.id === processo?.estado_atual_id
-        ) {
-          return true;
-        }
-        i += 1;
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (
+        (meusAmbientes[i]?.is_inicial || meusAmbientes[i]?.is_final) &&
+        meusAmbientes[i]?.id === processo?.estado_atual_id
+      ) {
+        return true;
       }
-    } else if ((meuAmbiente?.is_inicial || meuAmbiente?.is_final) && processo?.estado_atual_id === meuAmbiente?.id) {
-      return true;
+      i += 1;
     }
     return false;
   };

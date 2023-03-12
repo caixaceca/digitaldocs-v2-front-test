@@ -14,6 +14,7 @@ export const PATH_DIGITALDOCS = {
     noPath: path(ROOTS_DIGITALDOCS, '/'),
     indicadores: path(ROOTS_DIGITALDOCS, '/indicadores'),
     origens: path(ROOTS_DIGITALDOCS, '/origens'),
+    motivos: path(ROOTS_DIGITALDOCS, '/motivos'),
   },
   estados: {
     root: path(ROOTS_DIGITALDOCS, '/estados'),

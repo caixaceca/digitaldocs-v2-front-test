@@ -29,11 +29,11 @@ const initialState = {
   transicao: null,
   filePreview: null,
   meuAmbiente: null,
+  selectedItem: null,
   selectedFluxo: null,
   selectedOrigem: null,
   selectedEstado: null,
   selectedAcesso: null,
-  selectedItemId: null,
   selectedAnexoId: null,
   selectedTransicao: null,
   selectedMeuEstado: null,
@@ -63,6 +63,7 @@ const initialState = {
   pedidosAcesso: [],
   historicoFluxo: [],
   indicadoresTipos: [],
+  motivosPendencias: [],
   destinosDesarquivamento: [],
 };
 
@@ -321,6 +322,10 @@ const slice = createSlice({
       state.origens = action.payload;
     },
 
+    getMotivosPendenciasSuccess(state, action) {
+      state.motivosPendencias = action.payload;
+    },
+
     getArquivadosSuccess(state, action) {
       state.arquivos = action.payload;
     },
@@ -374,6 +379,10 @@ const slice = createSlice({
       state.origens.push(action.payload);
     },
 
+    createMotivoPendenciaSuccess(state, action) {
+      state.motivosPendencias.push(action.payload);
+    },
+
     createAcessoSuccess(state, action) {
       state.acessos.push(action.payload);
     },
@@ -407,6 +416,11 @@ const slice = createSlice({
       state.origens[index] = action.payload;
     },
 
+    updateMotivoPendenciaSuccess(state, action) {
+      const index = state.motivosPendencias.findIndex((row) => row.id === action.payload.id);
+      state.motivosPendencias[index] = action.payload;
+    },
+
     updateProcessoSuccess(state, action) {
       state.processoId = action.payload;
       state.previewType = '';
@@ -431,6 +445,11 @@ const slice = createSlice({
     deleteOrigemSuccess(state, action) {
       state.isOpenModal = false;
       state.origens = state.origens.filter((row) => row.id !== action.payload.id);
+    },
+
+    deleteMotivoPendenciaSuccess(state, action) {
+      state.isOpenModal = false;
+      state.motivosPendencias = state.motivosPendencias.filter((row) => row.id !== action.payload.id);
     },
 
     deleteAcessosSuccess(state, action) {
@@ -465,7 +484,7 @@ const slice = createSlice({
 
     selectItem(state, action) {
       state.isOpenModal = true;
-      state.selectedItemId = action.payload;
+      state.selectedItem = action.payload;
     },
 
     openModal(state) {
@@ -478,7 +497,7 @@ const slice = createSlice({
       state.isOpenModalDesariquivar = false;
       state.estado = null;
       state.selectedFluxo = null;
-      state.selectedItemId = null;
+      state.selectedItem = null;
       state.selectedOrigem = null;
       state.selectedEstado = null;
       state.selectedAcesso = null;
@@ -726,6 +745,27 @@ export function getAll(item, params) {
           }
           break;
         }
+        case 'pendentes': {
+          dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('processos'));
+          if (params?.estadoId === -1) {
+            const response = await axios.get(`${BASEURLDD}/v1/processos/pendencias/${params?.perfilId}`, options);
+            dispatch(slice.actions.getProcessosSuccess(response.data));
+          } else if (params?.fluxoId === -1) {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/processos/pendencias/estado/${params?.estadoId}/${params?.perfilId}`,
+              options
+            );
+            dispatch(slice.actions.getProcessosSuccess(response.data));
+          } else {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/processos/pendencias/ef/${params?.estadoId}/${params?.perfilId}?fluxoID=${params?.fluxoId}`,
+              options
+            );
+            dispatch(slice.actions.getProcessosSuccess(response.data));
+          }
+          break;
+        }
         case 'estados': {
           const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.perfilId}`, options);
           dispatch(slice.actions.getEstadosSuccess(response.data));
@@ -744,6 +784,11 @@ export function getAll(item, params) {
         case 'origens': {
           const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.perfilId}`, options);
           dispatch(slice.actions.getOrigensSuccess(response.data));
+          break;
+        }
+        case 'motivos pendencias': {
+          const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${params?.perfilId}`, options);
+          dispatch(slice.actions.getMotivosPendenciasSuccess(response.data));
           break;
         }
         case 'acessos': {
@@ -1157,6 +1202,11 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.createOrigemSuccess(response.data));
           break;
         }
+        case 'motivo pendencia': {
+          const response = await axios.post(`${BASEURLDD}/v1/motivos/${params?.perfilId}`, dados, options);
+          dispatch(slice.actions.createMotivoPendenciaSuccess(response.data));
+          break;
+        }
         case 'acesso': {
           const response = await axios.post(`${BASEURLDD}/v1/acessos`, dados, options);
           dispatch(slice.actions.createAcessoSuccess(response.data));
@@ -1229,6 +1279,15 @@ export function updateItem(item, dados, params) {
         case 'origem': {
           const response = await axios.put(`${BASEURLDD}/v1/origens/${params?.id}`, dados, options);
           dispatch(slice.actions.updateOrigemSuccess(response.data));
+          break;
+        }
+        case 'motivo pendencia': {
+          const response = await axios.put(
+            `${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`,
+            dados,
+            options
+          );
+          dispatch(slice.actions.updateMotivoPendenciaSuccess(response.data));
           break;
         }
         case 'transicao': {
@@ -1313,6 +1372,11 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteOrigemSuccess({ id: params?.id }));
           break;
         }
+        case 'motivo pendencia': {
+          await axios.delete(`${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`, options);
+          dispatch(slice.actions.deleteMotivoPendenciaSuccess({ id: params?.id }));
+          break;
+        }
         case 'acesso': {
           await axios.delete(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
           dispatch(slice.actions.deleteAcessosSuccess({ id: params?.id }));
@@ -1353,12 +1417,16 @@ export function deleteItem(item, params) {
 
 // ----------------------------------------------------------------------
 
-export function arquivarProcesso(dados, id, mail) {
+export function arquivarProcesso(dados, processoId, haveAnexos, anexos, mail) {
   return async (dispatch) => {
     dispatch(slice.actions.startSaving());
     try {
       const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.patch(`${BASEURLDD}/v1/processos/arquivar/${id}`, dados, options);
+      const options1 = { headers: { 'content-type': 'multipart/form-data', cc: mail } };
+      if (haveAnexos) {
+        await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${processoId}`, anexos, options1);
+      }
+      await axios.patch(`${BASEURLDD}/v1/processos/arquivar/${processoId}`, dados, options);
       dispatch(slice.actions.done('arquivado'));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());

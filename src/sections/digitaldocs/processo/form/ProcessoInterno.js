@@ -30,8 +30,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { meuAmbiente, processoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, processoId, motivosPendencias, isSaving, done, error } = useSelector(
+    (state) => state.digitaldocs
+  );
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado || false);
+  const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -72,6 +75,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       fluxo?.assunto !== 'Abertura de conta' &&
       fluxo?.assunto !== 'OPE DARH' &&
       Yup.number().typeError('Introduza um nº de conta válido').required('Valor não pode ficar vazio'),
+    mpendencia:
+      pendente &&
+      Yup.mixed()
+        .nullable('Motivo de pendência não pode ficar vazio')
+        .required('Motivo de pendência não pode ficar vazio'),
   });
 
   const _entidades = useMemo(
@@ -88,20 +96,25 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       fluxo_id: fluxo?.id,
       entidades: _entidades,
       obs: selectedProcesso?.obs || '',
+      mobs: selectedProcesso?.mobs || '',
       conta: selectedProcesso?.conta || '',
       cliente: selectedProcesso?.cliente || '',
       diadomes: selectedProcesso?.diadomes || '',
       agendado: selectedProcesso?.agendado || false,
+      ispendente: selectedProcesso?.ispendente || false,
       periodicidade: selectedProcesso?.periodicidade || '',
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil?.id,
       balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
+      mpendencia: selectedProcesso?.mpendencia
+        ? motivosPendencias?.find((row) => row.id === selectedProcesso?.mpendencia)
+        : null,
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, meuAmbiente, currentColaborador, _entidades]
+    [selectedProcesso, fluxo?.id, motivosPendencias, meuAmbiente, currentColaborador, _entidades]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -133,11 +146,18 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
+        if (values.mobs) {
+          formData.append('mobs', values.mobs);
+        }
         if (values.conta) {
           formData.append('conta', values.conta);
         }
         if (values.cliente) {
           formData.append('cliente', values.cliente);
+        }
+        formData.append('ispendente', values.ispendente);
+        if (values.mpendencia) {
+          formData.append('mpendencia', values.mpendencia.id);
         }
         if (values?.entidades?.length !== 0) {
           formData.append(
@@ -150,6 +170,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
           formData.append('periodicidade', values.periodicidade);
           formData.append('data_inicio', format(values.data_inicio, 'yyyy-MM-dd'));
           formData.append('data_arquivamento', format(values.data_arquivamento, 'yyyy-MM-dd'));
+        } else {
+          formData.append('diadomes', '');
+          formData.append('periodicidade', '');
+          formData.append('data_inicio', null);
+          formData.append('data_arquivamento', null);
         }
         if (values?.anexos?.length > 0) {
           for (let i = 0; i < values.anexos.length; i += 1) {
@@ -177,11 +202,18 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
+        if (values.mobs) {
+          formData.append('mobs', values.mobs);
+        }
         if (values.conta) {
           formData.append('conta', values.conta);
         }
         if (values.cliente) {
           formData.append('cliente', values.cliente);
+        }
+        formData.append('ispendente', values.ispendente);
+        if (values.mpendencia) {
+          formData.append('mpendencia', values.mpendencia.id);
         }
         if (values.agendado) {
           formData.append('agendado', values.agendado);
@@ -189,6 +221,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
           formData.append('periodicidade', values.periodicidade);
           formData.append('data_inicio', format(values.data_inicio, 'yyyy-MM-dd'));
           formData.append('data_arquivamento', format(values.data_arquivamento, 'yyyy-MM-dd'));
+        } else {
+          formData.append('diadomes', '');
+          formData.append('periodicidade', '');
+          formData.append('data_inicio', null);
+          formData.append('data_arquivamento', null);
         }
         if (values?.entidades?.length !== 0) {
           formData.append(
@@ -221,7 +258,12 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <ProcessoInternoForm selectedProcesso={selectedProcesso} setAgendado={setAgendado} assunto={fluxo?.assunto} />
+          <ProcessoInternoForm
+            selectedProcesso={selectedProcesso}
+            setAgendado={setAgendado}
+            setPendente={setPendente}
+            assunto={fluxo?.assunto}
+          />
         </Grid>
 
         <Grid item xs={12} textAlign="center">

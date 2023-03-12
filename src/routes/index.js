@@ -61,6 +61,7 @@ export default function Router() {
       if (perfil?.id) {
         dispatch(getAll('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getAll('motivos pendencias', { mail: perfil?.mail, perfilId: perfil?.id }));
       }
       if (perfil?.colaborador?.id) {
         dispatch(getCurrentColaborador(perfil?.colaborador?.id, perfil?.mail));
@@ -86,6 +87,7 @@ export default function Router() {
           ],
         },
         { path: 'origens', element: <Origens /> },
+        { path: 'motivos', element: <Motivos /> },
         {
           path: 'fluxos',
           children: [
@@ -150,6 +152,7 @@ const Arquivo = Loadable(lazy(() => import('../pages/Arquivo')));
 const Origens = Loadable(lazy(() => import('../pages/Origens')));
 const Estados = Loadable(lazy(() => import('../pages/Estados')));
 const Procura = Loadable(lazy(() => import('../pages/Procura')));
+const Motivos = Loadable(lazy(() => import('../pages/Motivos')));
 const Controle = Loadable(lazy(() => import('../pages/Controle')));
 const Processo = Loadable(lazy(() => import('../pages/Processo')));
 const Processos = Loadable(lazy(() => import('../pages/Processos')));

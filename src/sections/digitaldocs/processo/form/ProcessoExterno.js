@@ -30,8 +30,11 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { meuAmbiente, processoId, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, processoId, motivosPendencias, done, error, isSaving } = useSelector(
+    (state) => state.digitaldocs
+  );
   const [operacao, setOperacao] = useState(selectedProcesso?.operacao || '');
+  const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -55,8 +58,14 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
     referencia: Yup.string().required('Referência não pode ficar vazio'),
     canal: Yup.string().required('Canal de entrada não pode ficar vazio'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    valor: operacao === 'Cativo/Penhora' && Yup.string().required('Indique o valor'),
     origem_id: Yup.mixed().nullable('Origem não pode ficar vazio').required('Origem não pode ficar vazio'),
     data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio').required('Data não pode ficar vazio'),
+    mpendencia:
+      pendente &&
+      Yup.mixed()
+        .nullable('Motivo de pendência não pode ficar vazio')
+        .required('Motivo de pendência não pode ficar vazio'),
   });
 
   const _entidades = useMemo(
@@ -70,6 +79,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       fluxo_id: fluxo?.id,
       entidades: _entidades,
       obs: selectedProcesso?.obs || '',
+      mobs: selectedProcesso?.mobs || '',
       canal: selectedProcesso?.canal || '',
       valor: selectedProcesso?.valor || '',
       conta: selectedProcesso?.conta || '',
@@ -79,9 +89,13 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       cliente: selectedProcesso?.cliente || '',
       operacao: selectedProcesso?.operacao || '',
       referencia: selectedProcesso?.referencia || '',
+      ispendente: selectedProcesso?.ispendente || false,
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil?.id,
+      mpendencia: selectedProcesso?.mpendencia
+        ? motivosPendencias?.find((row) => row.id === selectedProcesso?.mpendencia)
+        : null,
       origem_id:
         (selectedProcesso?.origem_id && {
           id: selectedProcesso?.origem_id,
@@ -91,7 +105,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, meuAmbiente, _entidades, currentColaborador]
+    [selectedProcesso, fluxo?.id, motivosPendencias, meuAmbiente, _entidades, currentColaborador]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -122,6 +136,9 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         // optional
         if (values.obs) {
           formData.append('obs', values.obs);
+        }
+        if (values.mobs) {
+          formData.append('mobs', values.mobs);
         }
         if (values.conta) {
           formData.append('conta', values.conta);
@@ -159,6 +176,10 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.operacao) {
           formData.append('operacao', values.operacao);
         }
+        formData.append('ispendente', values.ispendente);
+        if (values.mpendencia) {
+          formData.append('mpendencia', values.mpendencia.id);
+        }
         if (values?.anexos?.length > 0) {
           for (let i = 0; i < values.anexos.length; i += 1) {
             formData.append('anexos', values.anexos[i]);
@@ -186,6 +207,9 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         // optional
         if (values.obs) {
           formData.append('obs', values.obs);
+        }
+        if (values.mobs) {
+          formData.append('mobs', values.mobs);
         }
         if (values.canal) {
           formData.append('canal', values.canal);
@@ -217,6 +241,10 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.operacao) {
           formData.append('operacao', values.operacao);
         }
+        formData.append('ispendente', values.ispendente);
+        if (values.mpendencia) {
+          formData.append('mpendencia', values.mpendencia.id);
+        }
         if (values.anexos) {
           const listaanexo = values.anexos;
           for (let i = 0; i < listaanexo.length; i += 1) {
@@ -242,7 +270,12 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <ProcessoExternoForm operacao={operacao} selectedProcesso={selectedProcesso} setOperacao={setOperacao} />
+          <ProcessoExternoForm
+            operacao={operacao}
+            selectedProcesso={selectedProcesso}
+            setOperacao={setOperacao}
+            setPendente={setPendente}
+          />
         </Grid>
 
         <Grid item xs={12} textAlign="center">

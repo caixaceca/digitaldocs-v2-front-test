@@ -26,10 +26,7 @@ const tipos = ['Fiscal', 'Judicial'];
 
 // ----------------------------------------------------------------------
 
-OrigemForm.propTypes = {
-  isOpenModal: PropTypes.bool,
-  onCancel: PropTypes.func,
-};
+OrigemForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
 
 export default function OrigemForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
@@ -42,7 +39,7 @@ export default function OrigemForm({ isOpenModal, onCancel }) {
 
   useEffect(() => {
     if (done) {
-      enqueueSnackbar(`Origem ${done} com sucesso`, { variant: 'success' });
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       onCancel();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

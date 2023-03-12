@@ -2,12 +2,16 @@ import PropTypes from 'prop-types';
 import { useRef } from 'react';
 import { SnackbarProvider } from 'notistack';
 // @mui
+import InfoIcon from '@mui/icons-material/Info';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
 import { alpha, useTheme } from '@mui/material/styles';
 import { Box, GlobalStyles, Collapse } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 // hooks
 import useSettings from '../hooks/useSettings';
 //
-import Iconify from './Iconify';
+import SvgIconStyle from './SvgIconStyle';
 import { IconButtonAnimate } from './animate';
 
 // ----------------------------------------------------------------------
@@ -30,18 +34,10 @@ function SnackbarStyles() {
             color: theme.palette.grey[isLight ? 0 : 800],
             backgroundColor: theme.palette.grey[isLight ? 900 : 0],
             '&.SnackbarItem-variantSuccess, &.SnackbarItem-variantError, &.SnackbarItem-variantWarning, &.SnackbarItem-variantInfo':
-              {
-                color: theme.palette.text.primary,
-                backgroundColor: theme.palette.background.paper,
-              },
-            [theme.breakpoints.up('md')]: {
-              minWidth: 240,
-            },
+              { color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper },
+            [theme.breakpoints.up('md')]: { minWidth: 240 },
           },
-          '& .SnackbarItem-message': {
-            padding: '0 !important',
-            fontWeight: theme.typography.fontWeightMedium,
-          },
+          '& .SnackbarItem-message': { padding: '0 !important', fontWeight: theme.typography.fontWeightMedium },
           '& .SnackbarItem-action': {
             marginRight: 0,
             color: theme.palette.action.active,
@@ -55,15 +51,11 @@ function SnackbarStyles() {
 
 // ----------------------------------------------------------------------
 
-NotistackProvider.propTypes = {
-  children: PropTypes.node,
-};
+NotistackProvider.propTypes = { children: PropTypes.node };
 
 export default function NotistackProvider({ children }) {
   const { themeDirection } = useSettings();
-
   const isRTL = themeDirection === 'rtl';
-
   const notistackRef = useRef(null);
 
   const onClose = (key) => () => {
@@ -84,15 +76,15 @@ export default function NotistackProvider({ children }) {
         variant="success" // Set default variant
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         iconVariant={{
-          info: <SnackbarIcon icon={'eva:info-fill'} color="info" />,
-          success: <SnackbarIcon icon={'eva:checkmark-circle-2-fill'} color="success" />,
-          warning: <SnackbarIcon icon={'eva:alert-triangle-fill'} color="warning" />,
-          error: <SnackbarIcon icon={'eva:alert-circle-fill'} color="error" />,
+          info: <SnackbarIcon icon={<InfoIcon color="info" />} color="info" />,
+          success: <SnackbarIcon icon={<CheckCircleIcon color="success" />} color="success" />,
+          warning: <SnackbarIcon icon={<WarningIcon color="warning" />} color="warning" />,
+          error: <SnackbarIcon icon={<ErrorIcon color="error" />} color="error" />,
         }}
         // With close as default
         action={(key) => (
           <IconButtonAnimate size="small" onClick={onClose(key)} sx={{ p: 0.5 }}>
-            <Iconify icon={'eva:close-fill'} />
+            <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20 }} />
           </IconButtonAnimate>
         )}
       >
@@ -105,7 +97,7 @@ export default function NotistackProvider({ children }) {
 // ----------------------------------------------------------------------
 
 SnackbarIcon.propTypes = {
-  icon: PropTypes.string,
+  icon: PropTypes.node,
   color: PropTypes.oneOf(['primary', 'secondary', 'info', 'success', 'warning', 'error']),
 };
 
@@ -120,12 +112,12 @@ function SnackbarIcon({ icon, color }) {
         display: 'flex',
         borderRadius: 1.5,
         alignItems: 'center',
-        justifyContent: 'center',
         color: `${color}.main`,
+        justifyContent: 'center',
         bgcolor: (theme) => alpha(theme.palette[color].main, 0.16),
       }}
     >
-      <Iconify icon={icon} width={24} height={24} />
+      {icon}
     </Box>
   );
 }

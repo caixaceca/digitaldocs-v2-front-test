@@ -36,7 +36,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'Número', align: 'left' },
+  { id: 'nentrada', label: 'Número', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -187,7 +187,7 @@ export default function TableEntradas() {
                     });
                     return (
                       <TableRow hover key={row.id}>
-                        <TableCell>{row.id}</TableCell>
+                        <TableCell>{row.nentrada}</TableCell>
                         <TableCell>{row.titular}</TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
@@ -275,7 +275,7 @@ function applySortFilter({ newEntradas, comparator, filterSearch, colaborador, a
   if (text) {
     newEntradas = newEntradas.filter(
       (row) =>
-        (row?.id && row?.id.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

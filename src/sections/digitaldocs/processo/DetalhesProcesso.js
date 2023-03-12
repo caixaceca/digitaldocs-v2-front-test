@@ -31,6 +31,7 @@ import { useSelector } from '../../../redux/store';
 // hooks
 import useToggle from '../../../hooks/useToggle';
 // components
+import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
 import SvgIconStyle from '../../../components/SvgIconStyle';
 // _mock
@@ -43,6 +44,7 @@ DetalhesProcesso.propTypes = { processo: PropTypes.object };
 export default function DetalhesProcesso({ processo }) {
   const { uos } = useSelector((state) => state.uo);
   const { colaboradores } = useSelector((state) => state.colaborador);
+  const { motivosPendencias } = useSelector((state) => state.digitaldocs);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
   const colaboradorLock = processo.is_lock ? colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id) : '';
@@ -52,6 +54,7 @@ export default function DetalhesProcesso({ processo }) {
   });
   const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Primário';
   const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Secundário';
+  const motivo = motivosPendencias?.find((row) => row.id === processo?.mpendecia);
 
   return (
     <>
@@ -140,6 +143,25 @@ export default function DetalhesProcesso({ processo }) {
                   </Stack>
                 </Paper>
               </ListItem>
+            )}
+            {processo.ispendente && (
+              <List>
+                <ListItem disableGutters>
+                  <Label color="warning">
+                    <SvgIconStyle src="/assets/icons/info.svg" sx={{ width: 15, mr: 1 }} /> Processo pendente
+                  </Label>
+                </ListItem>
+                {motivo && (
+                  <ListItem disableGutters>
+                    <TextItem title="Motivo:" text={motivo?.motivo} />
+                  </ListItem>
+                )}
+                {processo.mobs && (
+                  <ListItem disableGutters>
+                    <TextItem title="Observação:" text={processo.mobs} />
+                  </ListItem>
+                )}
+              </List>
             )}
           </List>
           {(processo?.titular ||

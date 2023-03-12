@@ -5,9 +5,7 @@ import { DocIllustration404 } from '../../assets';
 
 // ----------------------------------------------------------------------
 
-SearchNotFound.propTypes = {
-  message: PropTypes.string.isRequired,
-};
+SearchNotFound.propTypes = { message: PropTypes.string.isRequired };
 
 export default function SearchNotFound({ message }) {
   return (
@@ -16,8 +14,8 @@ export default function SearchNotFound({ message }) {
       align="center"
       sx={{ typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
     >
-      <DocIllustration404 sx={{ height: 550 }} />
-      <Typography variant="h5">{message}</Typography>
+      <DocIllustration404 sx={{ height: 450 }} />
+      <Typography variant="h6">{message}</Typography>
     </Stack>
   );
 }

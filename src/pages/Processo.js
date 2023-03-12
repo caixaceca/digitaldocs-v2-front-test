@@ -27,7 +27,6 @@ import {
   HistoricoPrisoes,
   HistoricoProcesso,
 } from '../sections/digitaldocs/processo';
-import Ambiente from '../sections/digitaldocs/Ambiente';
 import Views from '../sections/digitaldocs/processo/Views';
 import { DesarquivarForm } from '../sections/digitaldocs/IntervencaoForm';
 import AtribuirAcessoForm from '../sections/digitaldocs/AtribuirAcessoForm';
@@ -46,8 +45,9 @@ export default function Processo() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { isLoading, done, error, meuAmbiente, processo, meusAmbientes, isOpenModalDesariquivar, meusacessos } =
-    useSelector((state) => state.digitaldocs);
+  const { isLoading, done, error, processo, meusAmbientes, isOpenModalDesariquivar, meusacessos } = useSelector(
+    (state) => state.digitaldocs
+  );
   const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
   const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
   const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
@@ -57,6 +57,7 @@ export default function Processo() {
   const fromTarefas = from?.get?.('from') === 'tarefas';
   const fromEntradas = from?.get?.('from') === 'entradas';
   const fromProcurar = from?.get?.('from') === 'procurar';
+  const fromPendentes = from?.get?.('from') === 'pendentes';
   const fromPorConcluir = from?.get?.('from') === 'porconcluir';
   const fromMeusPendentes = from?.get?.('from') === 'meuspendentes';
 
@@ -78,6 +79,7 @@ export default function Processo() {
       navigate(
         (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
           (fromMeusPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=meuspendentes`) ||
+          (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
           (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
           (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
           (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
@@ -114,31 +116,23 @@ export default function Processo() {
   };
 
   const podeAceitar = () => {
-    if (meuAmbiente?.id === -1) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.id === processo?.estado_atual_id) {
-          return true;
-        }
-        i += 1;
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.id === processo?.estado_atual_id) {
+        return true;
       }
-    } else if (processo?.estado_atual_id === meuAmbiente?.id) {
-      return true;
+      i += 1;
     }
     return false;
   };
 
   const podeResgatar = () => {
-    if (meuAmbiente?.id === -1) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.id === processo?.htransicoes?.[0]?.estado_inicial_id) {
-          return true;
-        }
-        i += 1;
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.id === processo?.htransicoes?.[0]?.estado_inicial_id) {
+        return true;
       }
-    } else if (processo?.htransicoes?.[0]?.estado_inicial_id === meuAmbiente?.id) {
-      return true;
+      i += 1;
     }
     return false;
   };
@@ -167,6 +161,7 @@ export default function Processo() {
                 (fromTarefas && 'Tarefas') ||
                 (fromArquivo && 'Arquivos') ||
                 (fromEntradas && 'Entradas') ||
+                (fromPendentes && 'Pendentes') ||
                 (fromMeusPendentes && 'Retidos') ||
                 (fromPorConcluir && 'Por concluir') ||
                 (fromProcurar && 'Resultado de procura') ||
@@ -175,6 +170,7 @@ export default function Processo() {
                 (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
                 (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
                 (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
+                (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
                 (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
                 (fromMeusPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=meuspendentes`) ||
                 (fromProcurar && PATH_DIGITALDOCS.processos.procurar) ||
@@ -237,7 +233,6 @@ export default function Processo() {
                   )}
                 </Stack>
               )}
-              {meusAmbientes?.length > 1 && <Ambiente origem="processo" />}
             </Stack>
           }
           sx={{ color: 'text.secondary' }}

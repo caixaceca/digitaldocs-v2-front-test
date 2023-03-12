@@ -33,7 +33,7 @@ export default function FileSystem() {
           name: { offsetY: 8 },
           value: { offsetY: -50 },
           total: {
-            label: `Usado de ${fData(250000000000)}`,
+            label: `Usado de ${fData(500000000000)}`,
             color: theme.palette.text.disabled,
             fontSize: theme.typography.body2.fontSize,
             fontWeight: theme.typography.body2.fontWeight,

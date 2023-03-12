@@ -70,10 +70,21 @@ export default function Processos() {
     return temAcesso;
   };
 
+  const acessoPendentes = () => {
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.is_inicial) {
+        return true;
+      }
+      i += 1;
+    }
+    return false;
+  };
+
   const acessoFinalizadosExecutados = () => {
     let temAcesso = false;
     meusAmbientes?.forEach((row) => {
-      if (row?.nome === 'Validação Notas externas' || row?.nome === 'Execução Notas externas') {
+      if (row?.nome === 'DOP - Validação Notas Externas' || row?.nome === 'DOP - Execução Notas Externas') {
         temAcesso = true;
       }
     });
@@ -87,6 +98,17 @@ export default function Processos() {
           label: 'Agendados',
           component: <TableProcessos from="agendados" />,
           num: meusProcessos?.totalagendado || 0,
+        },
+      ]
+    : [];
+
+  const pendentes = acessoPendentes()
+    ? [
+        {
+          value: 'pendentes',
+          label: 'Pendentes',
+          component: <TableProcessos from="pendentes" />,
+          num: meusProcessos?.totalpendentes || 0,
         },
       ]
     : [];
@@ -130,6 +152,7 @@ export default function Processos() {
           component: <TableProcessos from="meuspendentes" />,
           num: meusProcessos?.totalpendente || 0,
         },
+        ...pendentes,
         {
           value: 'devolvidosEquipa',
           label: 'Devolvidos da equipa',
@@ -186,7 +209,7 @@ export default function Processos() {
                       max={999}
                       badgeContent={tab.num}
                       color={
-                        (tab.value === 'meuspendentes' && 'warning') ||
+                        ((tab.value === 'meuspendentes' || tab.value === 'pendentes') && 'warning') ||
                         ((tab.value === 'devolvidosEquipa' || tab.value === 'devolvidosPessoal') && 'error') ||
                         'success'
                       }
