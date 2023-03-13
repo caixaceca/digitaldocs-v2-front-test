@@ -61,6 +61,7 @@ const initialState = {
   meusAmbientes: [],
   meusProcessos: [],
   pedidosAcesso: [],
+  trabalhadosUo: [],
   historicoFluxo: [],
   indicadoresTipos: [],
   motivosPendencias: [],
@@ -193,6 +194,10 @@ const slice = createSlice({
 
     getTrabalhadosSuccess(state, action) {
       state.trabalhados = action.payload;
+    },
+
+    getTrabalhadosUoSuccess(state, action) {
+      state.trabalhadosUo = action.payload;
     },
 
     getArquivosSuccess(state, action) {
@@ -860,6 +865,14 @@ export function getAll(item, params) {
           dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(`${BASEURLDD}/v1/processos/porconcluir/${params?.perfilId}`, options);
           dispatch(slice.actions.getPorConcluirSuccess(response.data.objeto));
+          break;
+        }
+        case 'trabalhadosUo': {
+          const response = await axios.get(
+            `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
+            options
+          );
+          dispatch(slice.actions.getTrabalhadosUoSuccess(response.data.objeto));
           break;
         }
         case 'trabalhados': {

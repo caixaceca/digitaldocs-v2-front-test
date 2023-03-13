@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import { Fab, Card, Table, Tooltip, TableRow, TableBody, TableCell, TextField, TableContainer } from '@mui/material';
+import {
+  Fab,
+  Card,
+  Stack,
+  Table,
+  Divider,
+  Tooltip,
+  TableRow,
+  TableBody,
+  TableCell,
+  TextField,
+  TableContainer,
+} from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { format } from 'date-fns';
@@ -20,6 +32,8 @@ import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarTrabalhados } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+// sections
+import ArquivoAnalytic from './ArquivoAnalytic';
 
 // ----------------------------------------------------------------------
 
@@ -41,11 +55,13 @@ export default function TableTrabalhados() {
   const [data, setData] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { trabalhados, isLoading } = useSelector((state) => state.digitaldocs);
+  const { trabalhados, trabalhadosUo, isLoading } = useSelector((state) => state.digitaldocs);
   const [ambiente, setAmbiente] = useState(null);
   const [colaborador, setColaborador] = useState(
     currentColaborador ? { id: currentColaborador?.perfil_id, label: currentColaborador?.perfil?.displayName } : null
   );
+  const total = trabalhadosUo?.length || 0;
+  const subtotal = trabalhados?.length || 0;
 
   const {
     page,
@@ -74,6 +90,13 @@ export default function TableTrabalhados() {
       );
     }
   }, [dispatch, colaborador?.id, ambiente?.id, currentColaborador?.uo_id, data, mail]);
+
+  useEffect(() => {
+    dispatch(resetItem('trabalhados'));
+    if (mail && data) {
+      dispatch(getAll('trabalhadosUo', { mail, uoId: currentColaborador?.uo_id, data: format(data, 'yyyy-MM-dd') }));
+    }
+  }, [dispatch, currentColaborador?.uo_id, data, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -105,14 +128,42 @@ export default function TableTrabalhados() {
             label="Data"
             inputFormat="dd/MM/yyyy"
             value={data}
-            onChange={(_data) => {
-              setData(_data);
-            }}
+            onChange={(_data) => setData(_data)}
             renderInput={(params) => <TextField {...params} fullWidth />}
           />
         }
         sx={{ color: 'text.secondary', m: 0, p: 1, pt: 0 }}
       />
+      <Card sx={{ mb: 3 }}>
+        <Scrollbar>
+          <Stack
+            direction="row"
+            divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
+            sx={{ py: 2 }}
+          >
+            <ArquivoAnalytic
+              title={`Total - ${currentColaborador?.uo?.label}`}
+              total={total}
+              icon="/assets/icons/navbar/process.svg"
+              color="success.main"
+            />
+            {colaborador?.label && (
+              <ArquivoAnalytic
+                title={colaborador?.label}
+                total={subtotal}
+                percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+              />
+            )}
+            {ambiente?.label && (
+              <ArquivoAnalytic
+                title={ambiente?.label}
+                total={subtotal}
+                percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+              />
+            )}
+          </Stack>
+        </Scrollbar>
+      </Card>
       <Card sx={{ p: 1 }}>
         <SearchToolbarTrabalhados
           ambiente={ambiente}

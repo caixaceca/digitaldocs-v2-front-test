@@ -20,7 +20,7 @@ export default function ArquivoAnalytic({ title, total, icon = '', color = 'focu
   return (
     <Stack direction="row" alignItems="center" justifyContent="center" sx={{ width: 1, minWidth: 200 }}>
       <Stack alignItems="center" justifyContent="center" sx={{ position: 'relative' }}>
-        {title === 'Total' ? (
+        {title?.includes('Total') ? (
           <SvgIconStyle src={icon} sx={{ color, width: 25, height: 25, position: 'absolute' }} />
         ) : (
           <Typography variant="caption" sx={{ position: 'absolute' }}>
