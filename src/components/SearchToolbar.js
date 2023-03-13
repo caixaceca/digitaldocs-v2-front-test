@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
 import { Box, Stack, Tooltip, TextField, IconButton, Autocomplete, InputAdornment } from '@mui/material';
+// utils
+import { findColaboradoresAcesso, uosResponsavel, temNomeacao } from '../utils/validarAcesso';
 // redux
 import { useSelector } from '../redux/store';
 // components
@@ -327,46 +329,47 @@ export function SearchToolbarTrabalhados({
   onFilterColaborador,
   tab,
 }) {
-  const { meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { uos } = useSelector((state) => state.uo);
+  const { meusAmbientes, meusacessos } = useSelector((state) => state.digitaldocs);
   const { currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
+  const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
+  const uosResp = uosResponsavel(uos, currentColaborador);
+  const isChefia = temNomeacao(currentColaborador);
   const colaboradoresList = [];
-  colaboradores
-    ?.filter((row) => row.uo_id === currentColaborador?.uo_id)
-    ?.forEach((row) => {
-      colaboradoresList.push({ id: row?.perfil?.id, label: row?.perfil?.displayName });
-    });
+  findColaboradoresAcesso(colaboradores, currentColaborador, uosResp, isAdmin, isChefia)?.forEach((row) => {
+    colaboradoresList.push({ id: row?.perfil?.id, label: row?.perfil?.displayName });
+  });
   const ambientesList = applySort(
     meusAmbientes?.filter((row) => row.nome !== 'Todos'),
     getComparator('asc', 'nome')
-  ).map((row) => ({
-    id: row?.id,
-    label: row?.nome,
-  }));
+  ).map((row) => ({ id: row?.id, label: row?.nome }));
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-        <Autocomplete
-          fullWidth
-          value={ambiente}
-          onChange={(event, newValue) => {
-            onFilterAmbiente(newValue);
-          }}
-          options={ambientesList}
-          sx={{ width: { md: 200, xl: 300 } }}
-          getOptionLabel={(option) => option.label}
-          renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
-        />
-        <Autocomplete
-          fullWidth
-          value={colaborador}
-          onChange={(event, newValue) => onFilterColaborador(newValue)}
-          options={applySort(colaboradoresList, getComparator('asc', 'label'))}
-          sx={{ width: { md: 200, xl: 300 } }}
-          getOptionLabel={(option) => option.label}
-          renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
-        />
-      </Stack>
+      {(isAdmin || isChefia || uosResp?.length > 0) && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          <Autocomplete
+            fullWidth
+            value={ambiente}
+            onChange={(event, newValue) => {
+              onFilterAmbiente(newValue);
+            }}
+            options={ambientesList}
+            sx={{ width: { md: 200, xl: 300 } }}
+            getOptionLabel={(option) => option.label}
+            renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
+          />
+          <Autocomplete
+            fullWidth
+            value={colaborador}
+            onChange={(event, newValue) => onFilterColaborador(newValue)}
+            options={applySort(colaboradoresList, getComparator('asc', 'label'))}
+            sx={{ width: { md: 200, xl: 300 } }}
+            getOptionLabel={(option) => option.label}
+            renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
+          />
+        </Stack>
+      )}
       <TextField
         fullWidth
         placeholder="Procurar..."

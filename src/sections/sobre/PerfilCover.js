@@ -4,7 +4,7 @@ import { alpha, styled } from '@mui/material/styles';
 import { Box, Badge, Typography, Skeleton, Avatar } from '@mui/material';
 // utils
 import { BASEURL } from '../../utils/axios';
-import nomeacaoBySexo from '../../utils/nomeacaoBySexo';
+import { nomeacaoBySexo } from '../../utils/validarAcesso';
 
 // ----------------------------------------------------------------------
 
@@ -27,24 +27,16 @@ const InfoStyle = styled('div')(({ theme }) => ({
   marginTop: theme.spacing(3),
   right: 'auto',
   display: 'flex',
-  [theme.breakpoints.up('md')]: {
-    alignItems: 'center',
-    left: theme.spacing(2),
-    bottom: theme.spacing(4),
-  },
+  [theme.breakpoints.up('md')]: { alignItems: 'center', left: theme.spacing(2), bottom: theme.spacing(4) },
 }));
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
-  '& .MuiBadge-badge': {
-    border: `2px solid ${theme.palette.common.white}`,
-  },
+  '& .MuiBadge-badge': { border: `2px solid ${theme.palette.common.white}` },
 }));
 
 // ----------------------------------------------------------------------
 
-PerfilCover.propTypes = {
-  perfilColaborador: PropTypes.object,
-};
+PerfilCover.propTypes = { perfilColaborador: PropTypes.object };
 
 export default function PerfilCover({ perfilColaborador }) {
   return (
@@ -86,14 +78,7 @@ export default function PerfilCover({ perfilColaborador }) {
             src="assets/Shape.svg"
           />
         )}
-        <Box
-          sx={{
-            ml: 3,
-            mt: { xs: 2, md: 0 },
-            color: 'common.white',
-            textAlign: { md: 'left' },
-          }}
-        >
+        <Box sx={{ ml: 3, mt: { xs: 2, md: 0 }, color: 'common.white', textAlign: { md: 'left' } }}>
           <Typography variant="h4">
             {perfilColaborador ? (
               perfilColaborador?.perfil?.displayName || perfilColaborador?.perfil?.mail

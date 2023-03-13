@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 // utils
 import { BASEURL } from '../utils/axios';
-import nomeacaoBySexo from '../utils/nomeacaoBySexo';
+import { nomeacaoBySexo } from '../utils/validarAcesso';
 // redux
 import { useSelector } from '../redux/store';
 // routes

@@ -21,7 +21,7 @@ import {
 // utils
 import { BASEURL } from '../utils/axios';
 import { ptDateTime } from '../utils/formatTime';
-import nomeacaoBySexo from '../utils/nomeacaoBySexo';
+import { nomeacaoBySexo } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, resetItem, deleteItem, selectAnexo, closeModalAnexo } from '../redux/slices/digitaldocs';

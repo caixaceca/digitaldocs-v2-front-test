@@ -7,6 +7,8 @@ import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
 import selectTab from '../utils/selectTab';
 // routes
 import useSettings from '../hooks/useSettings';
+// redux
+import { useSelector } from '../redux/store';
 // components
 import Page from '../components/Page';
 // sections
@@ -37,16 +39,30 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 export default function Controle() {
   const { themeStretch } = useSettings();
+  const { meusAmbientes } = useSelector((state) => state.digitaldocs);
   const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab({ tab: newValue });
   };
 
+  const acessoEntradas = () => {
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.is_inicial) {
+        return true;
+      }
+      i += 1;
+    }
+    return false;
+  };
+
+  const entradas = acessoEntradas() ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
+
   const VIEW_TABS = useMemo(
     () =>
       [
-        { value: 'entradas', label: 'Entradas', component: <TableEntradas /> },
+        ...entradas,
         { value: 'porconcluir', label: 'Por concluir', component: <TablePorConcluir /> },
         { value: 'trabalhados', label: 'Trabalhados', component: <TableTrabalhados /> },
       ] || [],
