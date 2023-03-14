@@ -88,6 +88,7 @@ export default function NovoEditarProcesso() {
                     value={fluxo}
                     onChange={(event, newValue) => setFluxo(newValue)}
                     options={meusFluxos.map((option) => option?.id > 0 && option)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => option?.assunto}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />

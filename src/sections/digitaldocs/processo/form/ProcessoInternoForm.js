@@ -167,6 +167,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                           options={applySort(motivosPendencias, getComparator('asc', 'motivo'))?.map(
                             (option) => option
                           )}
+                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
                           getOptionLabel={(option) => option?.motivo}
                           renderInput={(params) => (
                             <TextField {...params} label="Motivo" error={!!error} helperText={error?.message} />

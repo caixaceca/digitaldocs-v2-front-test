@@ -202,18 +202,18 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
-        if (values.mobs) {
-          formData.append('mobs', values.mobs);
-        }
         if (values.conta) {
           formData.append('conta', values.conta);
         }
         if (values.cliente) {
           formData.append('cliente', values.cliente);
         }
-        formData.append('ispendente', values.ispendente);
-        if (values.mpendencia) {
-          formData.append('mpendencia', values.mpendencia.id);
+        if (values.ispendente) {
+          formData.append('ispendente', values.ispendente);
+          formData.append('mpendencia', values?.mpendencia?.id);
+          if (values.mobs) {
+            formData.append('mobs', values.mobs);
+          }
         }
         if (values.agendado) {
           formData.append('agendado', values.agendado);
@@ -221,11 +221,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
           formData.append('periodicidade', values.periodicidade);
           formData.append('data_inicio', format(values.data_inicio, 'yyyy-MM-dd'));
           formData.append('data_arquivamento', format(values.data_arquivamento, 'yyyy-MM-dd'));
-        } else {
-          formData.append('diadomes', '');
-          formData.append('periodicidade', '');
-          formData.append('data_inicio', null);
-          formData.append('data_arquivamento', null);
         }
         if (values?.entidades?.length !== 0) {
           formData.append(

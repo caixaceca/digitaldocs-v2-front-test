@@ -208,9 +208,6 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
-        if (values.mobs) {
-          formData.append('mobs', values.mobs);
-        }
         if (values.canal) {
           formData.append('canal', values.canal);
         }
@@ -241,9 +238,12 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.operacao) {
           formData.append('operacao', values.operacao);
         }
-        formData.append('ispendente', values.ispendente);
-        if (values.mpendencia) {
-          formData.append('mpendencia', values.mpendencia.id);
+        if (values.ispendente) {
+          formData.append('ispendente', values.ispendente);
+          formData.append('mpendencia', values?.mpendencia?.id);
+          if (values.mobs) {
+            formData.append('mobs', values.mobs);
+          }
         }
         if (values.anexos) {
           const listaanexo = values.anexos;

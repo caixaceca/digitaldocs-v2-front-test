@@ -793,7 +793,7 @@ export function getAll(item, params) {
         }
         case 'motivos pendencias': {
           const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${params?.perfilId}`, options);
-          dispatch(slice.actions.getMotivosPendenciasSuccess(response.data));
+          dispatch(slice.actions.getMotivosPendenciasSuccess(response.data.objeto));
           break;
         }
         case 'acessos': {
@@ -1217,7 +1217,7 @@ export function createItem(item, dados, params) {
         }
         case 'motivo pendencia': {
           const response = await axios.post(`${BASEURLDD}/v1/motivos/${params?.perfilId}`, dados, options);
-          dispatch(slice.actions.createMotivoPendenciaSuccess(response.data));
+          dispatch(slice.actions.createMotivoPendenciaSuccess(response.data.objeto));
           break;
         }
         case 'acesso': {
@@ -1300,7 +1300,7 @@ export function updateItem(item, dados, params) {
             dados,
             options
           );
-          dispatch(slice.actions.updateMotivoPendenciaSuccess(response.data));
+          dispatch(slice.actions.updateMotivoPendenciaSuccess(response.data.objeto));
           break;
         }
         case 'transicao': {

@@ -54,7 +54,7 @@ export default function DetalhesProcesso({ processo }) {
   });
   const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Primário';
   const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Secundário';
-  const motivo = motivosPendencias?.find((row) => row.id === processo?.mpendecia);
+  const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
 
   return (
     <>

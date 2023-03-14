@@ -88,7 +88,7 @@ export default function MotivoPendenciaForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(deleteItem('motivo oendencia', { mail, perfilId, id: selectedItem.id, mensagem: 'Motivo eliminado' }));
+      dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem.id, mensagem: 'Motivo eliminado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -104,7 +104,7 @@ export default function MotivoPendenciaForm({ isOpenModal, onCancel }) {
               <RHFTextField name="motivo" label="Motivo" />
             </Grid>
             <Grid item xs={12}>
-              <RHFTextField name=" obs" label="Observação" />
+              <RHFTextField name="obs" label="Observação" />
             </Grid>
           </Grid>
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>

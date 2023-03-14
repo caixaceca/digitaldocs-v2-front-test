@@ -97,6 +97,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                       fullWidth
                       onChange={(event, newValue) => field.onChange(newValue)}
                       options={applySort(origensList, getComparator('asc', 'label'))?.map((option) => option)}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
                       getOptionLabel={(option) => option?.label}
                       renderInput={(params) => (
                         <TextField {...params} label="Origem" error={!!error} helperText={error?.message} />
@@ -179,7 +180,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                 <>
                   <Grid item xs={12} sm={4}>
                     <Controller
-                      name="motivosPendencias"
+                      name="mpendencia"
                       control={control}
                       render={({ field, fieldState: { error } }) => (
                         <Autocomplete
@@ -189,6 +190,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                           options={applySort(motivosPendencias, getComparator('asc', 'motivo'))?.map(
                             (option) => option
                           )}
+                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
                           getOptionLabel={(option) => option?.motivo}
                           renderInput={(params) => (
                             <TextField {...params} label="Motivo" error={!!error} helperText={error?.message} />
