@@ -120,7 +120,7 @@ export default function TableProcessos({ from }) {
     <>
       <HeaderBreadcrumbs
         heading={title}
-        links={[{ name: 'Indicadores', href: PATH_DIGITALDOCS.root }, { name: title }]}
+        links={[{ name: '' }]}
         action={
           podeAdicionar() && (
             <Button
@@ -133,7 +133,7 @@ export default function TableProcessos({ from }) {
             </Button>
           )
         }
-        sx={{ color: 'text.secondary', m: 0, p: 1, pt: 0 }}
+        sx={{ color: 'text.secondary', m: 0, px: 1 }}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos filterSearch={filterSearch} onFilterSearch={handleFilterSearch} origem={from} />

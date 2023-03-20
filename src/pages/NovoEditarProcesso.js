@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 // @mui
-import { Card, Stack, Container, TextField, Autocomplete, CardContent } from '@mui/material';
+import { Card, Stack, Container, TextField, Typography, Autocomplete, CardContent } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, getAll } from '../redux/slices/digitaldocs';
@@ -52,6 +52,8 @@ export default function NovoEditarProcesso() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [processo?.fluxo_id]);
 
+  console.log(meusFluxos);
+
   return (
     <Page title={!isEdit ? 'Novo processo | DigitalDocs' : 'Editar processo | DigitalDocs'}>
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -78,7 +80,7 @@ export default function NovoEditarProcesso() {
           }
           sx={{ color: 'text.secondary' }}
         />
-        {(!isEdit && meuAmbiente?.is_inicial) ||
+        {(!isEdit && meuAmbiente?.is_inicial && meuAmbiente?.id !== -1) ||
         (processo?.is_lock && processo?.perfil_id === currentColaborador?.perfil_id) ? (
           <>
             <Card sx={{ mb: 3 }}>
@@ -114,7 +116,15 @@ export default function NovoEditarProcesso() {
             )}
           </>
         ) : (
-          <RoleBasedGuard hasContent roles={['XXXXX']} />
+          <RoleBasedGuard
+            hasContent
+            roles={['XXXXX']}
+            children={
+              <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                Este ambiente não permite a criação de processos, selecione outro ambiente...
+              </Typography>
+            }
+          />
         )}
       </Container>
     </Page>

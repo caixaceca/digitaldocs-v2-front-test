@@ -143,19 +143,16 @@ export default function TableEntradas() {
     <>
       <HeaderBreadcrumbs
         heading="Entradas"
-        links={[{ name: 'Indicadores', href: PATH_DIGITALDOCS.root }, { name: 'Entradas' }]}
+        links={[{ name: '' }]}
         action={
           <DatePicker
             label="Data"
-            inputFormat="dd/MM/yyyy"
             value={data}
-            onChange={(_data) => {
-              setData(_data);
-            }}
-            renderInput={(params) => <TextField {...params} fullWidth />}
+            onChange={(_data) => setData(_data)}
+            renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: 170 }} />}
           />
         }
-        sx={{ color: 'text.secondary', m: 0, p: 1, pt: 0 }}
+        sx={{ color: 'text.secondary', m: 0, px: 1 }}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarEntradas

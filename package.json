@@ -1,8 +1,8 @@
 {
-  "name": "@intranet/digitaldocs",
+  "name": "digitaldocs",
   "author": "caixa",
-  "version": "2.0",
-  "description": "Javascript Version",
+  "version": "1.0.0",
+  "description": "DigitalDocs, Caixa Económica de Cabo Verde - Gestão Documental",
   "private": true,
   "scripts": {
     "start": "react-app-rewired start",

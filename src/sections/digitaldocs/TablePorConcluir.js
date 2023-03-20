@@ -122,9 +122,9 @@ export default function TablePorConcluir() {
     <>
       <HeaderBreadcrumbs
         heading="Processos por concluir"
-        links={[{ name: 'Indicadores', href: PATH_DIGITALDOCS.root }, { name: 'Por concluir' }]}
+        links={[{ name: '' }]}
         action={''}
-        sx={{ color: 'text.secondary', m: 0, p: 1, pt: 0 }}
+        sx={{ color: 'text.secondary', m: 0, px: 1 }}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarEntradas

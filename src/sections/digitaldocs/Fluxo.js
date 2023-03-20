@@ -1,16 +1,14 @@
 import PropTypes from 'prop-types';
 import { useCallback } from 'react';
 // @mui
-import { MenuItem, TextField } from '@mui/material';
+import { TextField, Autocomplete } from '@mui/material';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { changeMeuFluxo } from '../../redux/slices/digitaldocs';
 
 // ----------------------------------------------------------------------
 
-Fluxo.propTypes = {
-  origem: PropTypes.string,
-};
+Fluxo.propTypes = { origem: PropTypes.string };
 
 export default function Fluxo({ origem }) {
   const dispatch = useDispatch();
@@ -24,25 +22,17 @@ export default function Fluxo({ origem }) {
   );
 
   return (
-    <TextField
-      size={origem === 'processo' ? 'small' : 'medium'}
-      select
+    <Autocomplete
       fullWidth
-      value={meuFluxo?.id}
-      label="Assunto"
-      SelectProps={{ native: false }}
-      sx={{ width: origem === 'processo' ? { sm: 200 } : { md: 250, xl: 350 } }}
-    >
-      {meusFluxos.map((option) => (
-        <MenuItem
-          key={option.id}
-          value={option.id}
-          onClick={() => handleChangeFluxo(option)}
-          sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-        >
-          {option.assunto}
-        </MenuItem>
-      ))}
-    </TextField>
+      disableClearable
+      value={meuFluxo}
+      options={meusFluxos}
+      size={origem === 'processo' ? 'small' : 'medium'}
+      onChange={(event, newValue) => handleChangeFluxo(newValue)}
+      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      getOptionLabel={(option) => option?.assunto}
+      sx={{ width: origem === 'processo' ? { sm: 200 } : { md: 250, xl: 300 } }}
+      renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
+    />
   );
 }

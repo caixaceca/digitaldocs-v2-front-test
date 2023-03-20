@@ -108,7 +108,7 @@ export default function Processos() {
           value: 'pendentes',
           label: 'Pendentes',
           component: <TableProcessos from="pendentes" />,
-          num: meusProcessos?.totalpendentes || 0,
+          num: meusProcessos?.totalpendencias || 0,
         },
       ]
     : [];

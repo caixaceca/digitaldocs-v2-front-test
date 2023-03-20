@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { m } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 // @mui
-import { Button, Container, Typography } from '@mui/material';
+import { Card, Button, Container, Typography, CardContent } from '@mui/material';
 // components
 import { MotionContainer, varBounce } from '../components/animate';
 // assets
@@ -14,8 +14,8 @@ import { useSelector } from '../redux/store';
 
 RoleBasedGuard.propTypes = {
   hasContent: PropTypes.bool,
-  roles: PropTypes.arrayOf(PropTypes.string),
   children: PropTypes.node.isRequired,
+  roles: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default function RoleBasedGuard({ hasContent, roles, children }) {
@@ -31,29 +31,35 @@ export default function RoleBasedGuard({ hasContent, roles, children }) {
 
   if (typeof roles !== 'undefined' && noRole) {
     return hasContent ? (
-      <Container component={MotionContainer} sx={{ textAlign: 'center', mt: 5 }}>
-        <m.div variants={varBounce().in}>
-          <Typography variant="h3" paragraph>
-            Sem permissão
-          </Typography>
-        </m.div>
+      <Card>
+        <CardContent>
+          <Container component={MotionContainer} sx={{ textAlign: 'center' }}>
+            <m.div variants={varBounce().in}>
+              <Typography variant="h3" paragraph>
+                Sem permissão
+              </Typography>
+            </m.div>
 
-        <m.div variants={varBounce().in}>
-          <Typography sx={{ color: 'text.secondary' }}>
-            Não tens permissão para aceder a este item,
-            <br />
-            Contactar o administrador de sistema (DICS)
-          </Typography>
-        </m.div>
+            <m.div variants={varBounce().in}>{children}</m.div>
 
-        <m.div variants={varBounce().in}>
-          <ForbiddenIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
-        </m.div>
+            <m.div variants={varBounce().in}>
+              <Typography sx={{ color: 'text.secondary' }}>
+                Não tens permissão para aceder a este item,
+                <br />
+                Contactar o administrador de sistema (DICS)
+              </Typography>
+            </m.div>
 
-        <Button size="large" variant="contained" onClick={() => navigate(-1)}>
-          Voltar
-        </Button>
-      </Container>
+            <m.div variants={varBounce().in}>
+              <ForbiddenIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
+            </m.div>
+
+            <Button size="large" variant="contained" onClick={() => navigate(-1)}>
+              Voltar
+            </Button>
+          </Container>
+        </CardContent>
+      </Card>
     ) : null;
   }
 
