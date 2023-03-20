@@ -41,7 +41,7 @@ const TABLE_HEAD = [
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
-  { id: 'criado_em', label: 'Criado', align: 'center' },
+  { id: 'criado_em', label: 'Criado', align: 'left' },
   { id: 'empty' },
 ];
 
@@ -191,7 +191,7 @@ export default function TableEntradas() {
                         </TableCell>
                         <TableCell>{row?.assunto}</TableCell>
                         <TableCell>{row?.nome}</TableCell>
-                        <TableCell align="center">
+                        <TableCell>
                           {row?.criado_em && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
                               <SvgIconStyle
