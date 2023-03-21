@@ -38,12 +38,8 @@ import SvgIconStyle from '../components/SvgIconStyle';
 import { SkeletonTable } from '../components/skeleton';
 import DialogConfirmar from '../components/DialogConfirmar';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import {
-  TableHeadCustom,
-  TableSearchNotFound,
-  TablePaginationAlt,
-  TableToolbarPerfilEstados,
-} from '../components/table';
+import { TableToolbarPerfilEstados } from '../components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
 // sections
 import PerfisEstadoForm from '../sections/digitaldocs/PerfisEstadoForm';
 // guards

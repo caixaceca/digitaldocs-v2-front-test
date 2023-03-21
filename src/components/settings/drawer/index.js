@@ -2,6 +2,7 @@ import { AnimatePresence, m } from 'framer-motion';
 import { useState, useEffect } from 'react';
 // @mui
 import { alpha, styled } from '@mui/material/styles';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import { Stack, Divider, Backdrop, Typography, IconButton } from '@mui/material';
 // hooks
 import useSettings from '../../../hooks/useSettings';
@@ -113,7 +114,7 @@ export default function SettingsDrawer() {
                 </IconButton>
 
                 <IconButton onClick={handleClose}>
-                  <SvgIconStyle src={'/assets/icons/close.svg'} sx={{ width: 20 }} />
+                  <CloseOutlinedIcon sx={{ width: 20 }} />
                 </IconButton>
               </Stack>
 

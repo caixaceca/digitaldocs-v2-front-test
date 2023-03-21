@@ -63,7 +63,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         .max(31, 'Dia do mês não pode ser maior que 31')
         .typeError('Introduza um número')
         .required('Valor não pode ficar vazio'),
-    periodicidade: agendado && Yup.string().required('Periodicidade não pode ficar vazio'),
+    periodicidade: agendado && Yup.mixed().nullable('Seleciona a periodicidade').required('Seleciona a periodicidade'),
     data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio').required('Data não pode ficar vazio'),
     data_inicio:
       agendado &&
@@ -108,7 +108,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil?.id,
       balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
       mpendencia: selectedProcesso?.mpendencia
-        ? motivosPendencias?.find((row) => row.id === selectedProcesso?.mpendencia)
+        ? motivosPendencias?.find((row) => row?.id?.toString() === selectedProcesso?.mpendencia?.toString())
         : null,
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
@@ -173,8 +173,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         } else {
           formData.append('diadomes', '');
           formData.append('periodicidade', '');
-          formData.append('data_inicio', null);
-          formData.append('data_arquivamento', null);
         }
         if (values?.anexos?.length > 0) {
           for (let i = 0; i < values.anexos.length; i += 1) {

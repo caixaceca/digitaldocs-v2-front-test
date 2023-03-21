@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { useNavigate, createSearchParams } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
+import SearchIcon from '@mui/icons-material/Search';
 import { Input, Slide, Button, InputAdornment, ClickAwayListener } from '@mui/material';
 // utils
 import cssStyles from '../../utils/cssStyles';
-// components
-import SvgIconStyle from '../../components/SvgIconStyle';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -66,7 +65,7 @@ export default function Procurar() {
             variant="text"
             onClick={onOpen}
             sx={{ fontSize: { md: 20 }, pr: { md: 10 } }}
-            startIcon={<SvgIconStyle src="/assets/icons/search.svg" sx={{ width: 26, height: 26 }} />}
+            startIcon={<SearchIcon sx={{ width: 30, height: 30 }} />}
           >
             Procurar...
           </Button>
@@ -86,7 +85,7 @@ export default function Procurar() {
               }}
               startAdornment={
                 <InputAdornment position="start">
-                  <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.success' }} />
+                  <SearchIcon sx={{ width: 30, height: 30, color: 'text.success' }} />
                 </InputAdornment>
               }
               sx={{ mr: 1, fontWeight: 'fontWeightBold' }}

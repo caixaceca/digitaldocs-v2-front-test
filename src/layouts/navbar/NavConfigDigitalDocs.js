@@ -1,3 +1,5 @@
+// @mui
+import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -44,7 +46,7 @@ const navConfig = [
         title: 'Acessos',
         roles: ['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111'],
         path: PATH_DIGITALDOCS.estadosAcessos.root,
-        icon: <SvgIconStyle src="/assets/icons/group-add.svg" sx={{ width: 1, height: 1 }} />,
+        icon: <GroupAddOutlinedIcon />,
       },
       {
         title: 'Origens',

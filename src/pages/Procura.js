@@ -16,6 +16,9 @@ import {
   TableContainer,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { ptDateTime } from '../utils/formatTime';
 // hooks
@@ -204,19 +207,13 @@ export default function Procura() {
                         <TableCell>
                           {row?.criado_em && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
-                              <SvgIconStyle
-                                src="/assets/icons/header/clock.svg"
-                                sx={{ width: 15, height: 15, color: 'text.secondary' }}
-                              />
+                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                               <Typography variant="body2">{ptDateTime(row.criado_em)}</Typography>
                             </Stack>
                           )}
                           {row?.uo && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
-                              <SvgIconStyle
-                                src="/assets/icons/office.svg"
-                                sx={{ width: 15, height: 15, color: 'text.secondary' }}
-                              />
+                              <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                               <Typography variant="body2">
                                 {row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
                               </Typography>
@@ -224,10 +221,7 @@ export default function Procura() {
                           )}
                           {row?.colaborador && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
-                              <SvgIconStyle
-                                src="/assets/icons/user.svg"
-                                sx={{ width: 16, height: 16, color: 'text.secondary' }}
-                              />
+                              <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                               <Typography variant="body2">{row.colaborador}</Typography>
                             </Stack>
                           )}
@@ -292,12 +286,12 @@ function applySortFilter({ newPesquisa, comparator, filterUo, filterSearch, filt
   if (filterSearch) {
     newPesquisa = newPesquisa.filter(
       (item) =>
-        item?.id.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1 ||
-        item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1 ||
-        item?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1 ||
-        item?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1 ||
-        item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1 ||
-        item?.noperacao.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1
+        (item?.id && item?.id.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (item?.titular && item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (item?.conta && item?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (item?.cliente && item?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (item?.titular && item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (item?.noperacao && item?.noperacao.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1)
     );
   }
 

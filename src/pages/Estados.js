@@ -13,6 +13,9 @@ import {
   Container,
   TableContainer,
 } from '@mui/material';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // hooks
 import useTable, { getComparator } from '../hooks/useTable';
 // redux
@@ -144,26 +147,18 @@ export default function Estados() {
                           <TableRow hover key={key}>
                             <TableCell>{row.nome}</TableCell>
                             <TableCell align="center">
-                              <SvgIconStyle
-                                src={row.is_inicial ? '/assets/icons/checkmark-circle.svg' : '/assets/icons/close.svg'}
-                                sx={{
-                                  width: 20,
-                                  height: 20,
-                                  color: 'success.main',
-                                  ...(!row.is_inicial && { color: 'focus.main' }),
-                                }}
-                              />
+                              {row.is_inicial ? (
+                                <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                              ) : (
+                                <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                              )}
                             </TableCell>
                             <TableCell align="center">
-                              <SvgIconStyle
-                                src={row.is_final ? '/assets/icons/checkmark-circle.svg' : '/assets/icons/close.svg'}
-                                sx={{
-                                  width: 20,
-                                  height: 20,
-                                  color: 'success.main',
-                                  ...(!row.is_final && { color: 'focus.main' }),
-                                }}
-                              />
+                              {row.is_final ? (
+                                <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                              ) : (
+                                <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                              )}
                             </TableCell>
                             <TableCell align="right" width={130}>
                               {row.nome !== 'Arquivo' && (
@@ -182,7 +177,7 @@ export default function Estados() {
                               )}
                               <Tooltip title="Colaboradores associados" arrow>
                                 <Fab color="success" size="small" variant="soft" onClick={() => handleView(row?.id)}>
-                                  <SvgIconStyle src="/assets/icons/swap.svg" />
+                                  <SwapHorizOutlinedIcon sx={{ height: 28, width: 28 }} />
                                 </Fab>
                               </Tooltip>
                             </TableCell>

@@ -54,10 +54,20 @@ export default function Processos() {
         })
       );
     }
-  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, currentColaborador?.perfil_id, currentTab]);
+  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, currentColaborador?.perfil_id]);
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab({ tab: newValue });
+    if (mail && meuAmbiente?.id && meuFluxo?.id && currentColaborador?.perfil_id) {
+      dispatch(
+        getAll('meusprocessos', {
+          mail,
+          fluxoId: meuFluxo?.id,
+          estadoId: meuAmbiente?.id,
+          perfilId: currentColaborador?.perfil_id,
+        })
+      );
+    }
   };
 
   const acessoAgendados = () => {
@@ -147,9 +157,9 @@ export default function Processos() {
           num: meusProcessos?.total || 0,
         },
         {
-          value: 'meuspendentes',
+          value: 'retidos',
           label: 'Retidos',
-          component: <TableProcessos from="meuspendentes" />,
+          component: <TableProcessos from="retidos" />,
           num: meusProcessos?.totalpendente || 0,
         },
         ...pendentes,
@@ -209,7 +219,7 @@ export default function Processos() {
                       max={999}
                       badgeContent={tab.num}
                       color={
-                        ((tab.value === 'meuspendentes' || tab.value === 'pendentes') && 'warning') ||
+                        ((tab.value === 'retidos' || tab.value === 'pendentes') && 'warning') ||
                         ((tab.value === 'devolvidosEquipa' || tab.value === 'devolvidosPessoal') && 'error') ||
                         'success'
                       }

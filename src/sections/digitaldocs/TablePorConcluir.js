@@ -22,7 +22,6 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'Número', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -37,9 +36,9 @@ const TABLE_HEAD = [
 export default function TablePorConcluir() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [estado, setEstado] = useState('');
-  const [assunto, setAssunto] = useState('');
-  const [colaborador, setColaborador] = useState('');
+  const [estado, setEstado] = useState(null);
+  const [assunto, setAssunto] = useState(null);
+  const [colaborador, setColaborador] = useState(null);
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { porConcluir, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
@@ -147,7 +146,7 @@ export default function TablePorConcluir() {
               <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={8} row={10} />
+                  <SkeletonTable column={7} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     let _entidades = '';
@@ -156,7 +155,6 @@ export default function TablePorConcluir() {
                     });
                     return (
                       <TableRow hover key={row.id}>
-                        <TableCell>{row.id}</TableCell>
                         <TableCell>{row.titular}</TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 // @mui
-import { alpha } from '@mui/material/styles';
 import { Button } from '@mui/material';
-//
-import SvgIconStyle from '../../SvgIconStyle';
+import { alpha } from '@mui/material/styles';
+import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
+import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
 
 // ----------------------------------------------------------------------
 
@@ -26,12 +26,7 @@ export default function SettingFullscreen() {
       size="large"
       variant="outlined"
       color={fullscreen ? 'primary' : 'inherit'}
-      startIcon={
-        <SvgIconStyle
-          src={fullscreen ? '/assets/icons/fullscreen-exit.svg' : '/assets/icons/fullscreen.svg'}
-          sx={{ width: 20 }}
-        />
-      }
+      startIcon={fullscreen ? <FullscreenExitOutlinedIcon /> : <FullscreenOutlinedIcon />}
       onClick={toggleFullScreen}
       sx={{
         fontSize: 14,

@@ -94,7 +94,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil?.id,
       mpendencia: selectedProcesso?.mpendencia
-        ? motivosPendencias?.find((row) => row.id === selectedProcesso?.mpendencia)
+        ? motivosPendencias?.find((row) => row?.id?.toString() === selectedProcesso?.mpendencia?.toString())
         : null,
       origem_id:
         (selectedProcesso?.origem_id && {
@@ -189,8 +189,8 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
           updateItem('processo', formData, {
             mail,
             id: selectedProcesso?.id,
-            perfilId: currentColaborador?.perfil_id,
             mensagem: 'processo atualizado',
+            perfilId: currentColaborador?.perfil_id,
           })
         );
       } else {
@@ -256,8 +256,8 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
             mail,
             fluxoId: fluxo?.id,
             estadoId: meuAmbiente?.id,
-            perfilId: currentColaborador?.perfil_id,
             mensagem: 'processo adicionado',
+            perfilId: currentColaborador?.perfil_id,
           })
         );
       }

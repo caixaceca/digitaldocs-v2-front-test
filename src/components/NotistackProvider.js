@@ -8,10 +8,10 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { alpha, useTheme } from '@mui/material/styles';
 import { Box, GlobalStyles, Collapse } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // hooks
 import useSettings from '../hooks/useSettings';
 //
-import SvgIconStyle from './SvgIconStyle';
 import { IconButtonAnimate } from './animate';
 
 // ----------------------------------------------------------------------
@@ -84,7 +84,7 @@ export default function NotistackProvider({ children }) {
         // With close as default
         action={(key) => (
           <IconButtonAnimate size="small" onClick={onClose(key)} sx={{ p: 0.5 }}>
-            <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20 }} />
+            <CloseOutlinedIcon sx={{ width: 20 }} />
           </IconButtonAnimate>
         )}
       >

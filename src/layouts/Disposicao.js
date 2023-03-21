@@ -14,11 +14,11 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { createDisposicao, closeDisposicao } from '../redux/slices/disposicao';
 // components
-import SvgIconStyle from '../components/SvgIconStyle';
 import DialogAnimate from '../components/animate/DialogAnimate';
 // sections
 import FraseContent from '../sections/home/FraseContent';
@@ -137,7 +137,7 @@ function DisposicaoDialog() {
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           Como te sentes hoje?
           <IconButton size="small" onClick={handleClose}>
-            <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 18, opacity: 0.75 }} />
+            <CloseOutlinedIcon sx={{ width: 18, opacity: 0.75 }} />
           </IconButton>
         </Stack>
       </DialogTitle>

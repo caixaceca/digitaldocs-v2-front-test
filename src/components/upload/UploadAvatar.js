@@ -3,9 +3,9 @@ import { useDropzone } from 'react-dropzone';
 // @mui
 import { Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
 //
 import Image from '../Image';
-import SvgIconStyle from '../SvgIconStyle';
 import RejectionFiles from './RejectionFiles';
 
 // ----------------------------------------------------------------------
@@ -103,7 +103,7 @@ export default function UploadAvatar({ error, file, helperText, sx, ...other }) 
               }),
             }}
           >
-            <SvgIconStyle src="/assets/icons/add-photo.svg" sx={{ width: 24, height: 24, my: 1 }} />
+            <AddAPhotoOutlinedIcon sx={{ width: 24, height: 24, my: 1 }} />
             <Typography variant="caption">{file ? 'Alterar imagem' : 'Carregar imagem'}</Typography>
           </PlaceholderStyle>
         </DropZoneStyle>

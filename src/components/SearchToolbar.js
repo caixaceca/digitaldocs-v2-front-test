@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
 // @mui
+
+import SearchIcon from '@mui/icons-material/Search';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { Box, Stack, Tooltip, TextField, IconButton, Autocomplete, InputAdornment } from '@mui/material';
 // utils
 import { findColaboradoresAcesso, uosResponsavel, temNomeacao } from '../utils/validarAcesso';
 // redux
 import { useSelector } from '../redux/store';
-// components
-import SvgIconStyle from './SvgIconStyle';
 // hooks
 import { getComparator, applySort } from '../hooks/useTable';
 // sections
@@ -35,7 +36,7 @@ export function SearchToolbar({ filterSearch, onFilterSearch }) {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.disabled' }} />
+              <SearchIcon sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           ),
         }}
@@ -117,7 +118,7 @@ export function SearchToolbarProcura({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.disabled' }} />
+                <SearchIcon sx={{ color: 'text.disabled' }} />
               </InputAdornment>
             ),
           }}
@@ -125,7 +126,7 @@ export function SearchToolbarProcura({
         {isFiltered && (
           <Tooltip title="Remover filtros" arrow>
             <IconButton color="inherit" onClick={() => handleResetFilter()}>
-              <SvgIconStyle src="/assets/icons/reset.svg" />
+              <ClearAllIcon />
             </IconButton>
           </Tooltip>
         )}
@@ -156,7 +157,7 @@ export function SearchToolbar2({ filterSearch, origem, onFilterSearch }) {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.disabled' }} />
+              <SearchIcon sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           ),
         }}
@@ -198,7 +199,7 @@ export function SearchToolbarProcessos({ filterSearch, onFilterSearch, origem })
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.disabled' }} />
+              <SearchIcon sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           ),
         }}
@@ -291,7 +292,7 @@ export function SearchToolbarEntradas({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.disabled' }} />
+                <SearchIcon sx={{ color: 'text.disabled' }} />
               </InputAdornment>
             ),
           }}
@@ -299,7 +300,7 @@ export function SearchToolbarEntradas({
         {isFiltered && (
           <Tooltip title="Remover filtros" arrow>
             <IconButton color="inherit" onClick={() => handleResetFilter()}>
-              <SvgIconStyle src="/assets/icons/reset.svg" />
+              <ClearAllIcon />
             </IconButton>
           </Tooltip>
         )}
@@ -337,12 +338,12 @@ export function SearchToolbarTrabalhados({
   const isChefia = temNomeacao(currentColaborador);
   const colaboradoresList = [];
   findColaboradoresAcesso(colaboradores, currentColaborador, uosResp, isAdmin, isChefia)?.forEach((row) => {
-    colaboradoresList.push({ id: row?.perfil?.id, label: row?.perfil?.displayName });
+    colaboradoresList.push({ id: row?.perfil?.id, label: row?.perfil?.displayName, uoId: row?.uo_id });
   });
   const ambientesList = applySort(
     meusAmbientes?.filter((row) => row.nome !== 'Todos'),
     getComparator('asc', 'nome')
-  ).map((row) => ({ id: row?.id, label: row?.nome }));
+  ).map((row) => ({ id: row?.id, label: row?.nome, uoId: row?.uo_id }));
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
@@ -351,21 +352,21 @@ export function SearchToolbarTrabalhados({
           <Autocomplete
             fullWidth
             value={ambiente}
-            onChange={(event, newValue) => {
-              onFilterAmbiente(newValue);
-            }}
             options={ambientesList}
             sx={{ width: { md: 200, xl: 300 } }}
             getOptionLabel={(option) => option.label}
+            onChange={(event, newValue) => onFilterAmbiente(newValue)}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
           />
           <Autocomplete
             fullWidth
             value={colaborador}
-            onChange={(event, newValue) => onFilterColaborador(newValue)}
-            options={applySort(colaboradoresList, getComparator('asc', 'label'))}
             sx={{ width: { md: 200, xl: 300 } }}
             getOptionLabel={(option) => option.label}
+            onChange={(event, newValue) => onFilterColaborador(newValue)}
+            options={applySort(colaboradoresList, getComparator('asc', 'label'))}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
           />
         </Stack>
@@ -385,11 +386,69 @@ export function SearchToolbarTrabalhados({
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SvgIconStyle src="/assets/icons/search.svg" sx={{ color: 'text.disabled' }} />
+              <SearchIcon sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           ),
         }}
       />
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+TableToolbarPerfilEstados.propTypes = {
+  filterSearch: PropTypes.object,
+  onFilterSearch: PropTypes.func,
+  options: PropTypes.arrayOf(PropTypes.string),
+};
+
+export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch, options }) {
+  const isFiltered =
+    (filterSearch.get('uo') && filterSearch.get('uo') !== 'Todos') ||
+    (filterSearch.get('filter') && filterSearch.get('filter') !== '');
+
+  const handleResetFilter = () => {
+    onFilterSearch({ uo: 'Todos', filter: '' });
+  };
+
+  return (
+    <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ pt: 0.5, pb: 1.5, px: 0 }}>
+      <Autocomplete
+        fullWidth
+        value={filterSearch.get('uo') || 'Todos'}
+        onChange={(event, value) => {
+          onFilterSearch({ uo: value || 'Todos', filter: filterSearch.get('filter') || '' });
+        }}
+        options={options.map((option) => option)}
+        getOptionLabel={(option) => option}
+        sx={{ maxWidth: { md: 250, sm: 200 }, minWidth: { md: 250, sm: 200 } }}
+        renderInput={(params) => <TextField {...params} label="Unidade orgânicas" margin="none" />}
+      />
+      <Stack spacing={1} direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
+        <TextField
+          fullWidth
+          value={filterSearch.get('filter') || ''}
+          onChange={(event) => {
+            onFilterSearch({ uo: filterSearch.get('uo') || 'Todos', filter: event.target.value || '' });
+          }}
+          placeholder="Procurar..."
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+        {isFiltered && (
+          <Tooltip title="Remover pesquiza" arrow>
+            <IconButton color="inherit" onClick={() => handleResetFilter()}>
+              <ClearAllIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
     </Stack>
   );
 }

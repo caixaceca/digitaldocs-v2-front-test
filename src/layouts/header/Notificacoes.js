@@ -15,6 +15,10 @@ import {
   ListItemAvatar,
   ListItemButton,
 } from '@mui/material';
+import DoneAllOutlinedIcon from '@mui/icons-material/DoneAllOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import MarkChatUnreadOutlinedIcon from '@mui/icons-material/MarkChatUnreadOutlined';
 // utils
 import { sub } from 'date-fns';
 import { fToNow } from '../../utils/formatTime';
@@ -29,7 +33,6 @@ import { getComparator, applySort } from '../../hooks/useTable';
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
 import TextMaxLine from '../../components/TextMaxLine';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 
 // ----------------------------------------------------------------------
@@ -72,10 +75,7 @@ export default function Notificacoes() {
           }}
         >
           <Badge badgeContent={totalUnRead} color="error">
-            <SvgIconStyle
-              src="/assets/icons/header/bell.svg"
-              sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }}
-            />
+            <NotificationsOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />
           </Badge>
         </IconButtonAnimate>
       </Tooltip>
@@ -101,7 +101,7 @@ export default function Notificacoes() {
           {totalUnRead > 0 && (
             <Tooltip title="Marcar todas como vistas" arrow>
               <IconButtonAnimate color="primary" onClick={handleVerTodas}>
-                <SvgIconStyle src="/assets/icons/header/clear_all.svg" />
+                <DoneAllOutlinedIcon />
               </IconButtonAnimate>
             </Tooltip>
           )}
@@ -131,10 +131,7 @@ export default function Notificacoes() {
 
 // ----------------------------------------------------------------------
 
-NotificationItem.propTypes = {
-  onClose: PropTypes.func,
-  notificacao: PropTypes.object,
-};
+NotificationItem.propTypes = { onClose: PropTypes.func, notificacao: PropTypes.object };
 
 function NotificationItem({ notificacao, onClose }) {
   const dispatch = useDispatch();
@@ -158,45 +155,11 @@ function NotificationItem({ notificacao, onClose }) {
   return (
     <ListItemButton
       onClick={() => handleViewRow(notificacao)}
-      sx={{
-        // borderRadius: 1.5,
-        py: 1.5,
-        px: 2.5,
-        mt: '1px',
-        ...(!notificacao.vista && {
-          bgcolor: 'action.focus',
-        }),
-      }}
+      sx={{ py: 1.5, px: 2.5, mt: '1px', ...(!notificacao.vista && { bgcolor: 'action.focus' }) }}
     >
       <ListItemAvatar>
         <Avatar sx={{ bgcolor: 'background.neutral', p: 1.25 }}>
-          {((notificacao.objeto === 'norma' ||
-            notificacao.objeto === 'legislacao' ||
-            notificacao.objeto === 'documento_suporte' ||
-            notificacao.objeto === 'parceria' ||
-            notificacao.objeto === 'doc_suporte') && (
-            <img alt={_title || notificacao.titulo} src="/assets/icons/header/doc-check.svg" />
-          )) ||
-            ((notificacao.objeto === 'feria' ||
-              notificacao.objeto === 'consulta' ||
-              notificacao.objeto === 'requisicao' ||
-              notificacao.objeto === 'feriado' ||
-              notificacao.objeto === 'ausencia' ||
-              notificacao.objeto === 'pedido') && (
-              <img alt={_title || notificacao.titulo} src="/assets/icons/header/calendar-svgrepo.svg" />
-            )) ||
-            (notificacao.objeto === 'noticia' && (
-              <img alt={_title || notificacao.titulo} src="/assets/icons/header/newspaper-news-svgrepo-com.svg" />
-            )) ||
-            ((notificacao.objeto === 'inquerito' || notificacao.objeto === 'inquerito_resposta') && (
-              <img alt={_title || notificacao.titulo} src="/assets/icons/header/inquerito_repo.svg" />
-            )) ||
-            (notificacao.objeto === 'sugestao' && (
-              <img alt={_title || notificacao.titulo} src="/assets/icons/header/chat-svgrepo-com.svg" />
-            )) ||
-            (notificacao.objeto === 'visita' && (
-              <img alt={_title || notificacao.titulo} src="/assets/icons/header/id-card-svgrepo-com.svg" />
-            )) || <img alt={_title || notificacao.titulo} src="/assets/icons/header/notification-svgrepo-com.svg" />}
+          <MarkChatUnreadOutlinedIcon />
         </Avatar>
       </ListItemAvatar>
       <ListItemText
@@ -211,16 +174,8 @@ function NotificationItem({ notificacao, onClose }) {
           </TextMaxLine>
         }
         secondary={
-          <Typography
-            variant="caption"
-            sx={{
-              mt: 0.25,
-              display: 'flex',
-              alignItems: 'center',
-              opacity: 0.75,
-            }}
-          >
-            <SvgIconStyle src="/assets/icons/header/clock.svg" sx={{ mr: 0.5, width: 14, height: 14 }} />
+          <Typography variant="caption" sx={{ mt: 0.25, display: 'flex', alignItems: 'center', opacity: 0.75 }}>
+            <AccessTimeOutlinedIcon sx={{ mr: 0.5, width: 14, height: 14 }} />
             {fToNow(sub(new Date(notificacao.criado_em), { hours: 1 }))}
           </Typography>
         }

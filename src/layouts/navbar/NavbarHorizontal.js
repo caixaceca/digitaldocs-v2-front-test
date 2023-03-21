@@ -2,6 +2,7 @@ import { memo } from 'react';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Container, Avatar, AppBar } from '@mui/material';
+import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 // utils
 import { BASEURL } from '../../utils/axios';
 // redux
@@ -11,7 +12,6 @@ import { HEADER } from '../../config';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // components
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { NavSectionHorizontal } from '../../components/nav-section';
 //
 import navConfigDigitalDocs from './NavConfigDigitalDocs';
@@ -32,11 +32,7 @@ const RootStyle = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-const LogoApp = styled(Avatar)(() => ({
-  p: 0.25,
-  width: '22px',
-  height: '22px',
-}));
+const LogoApp = styled(Avatar)(() => ({ p: 0.25, width: '22px', height: '22px' }));
 
 // ----------------------------------------------------------------------
 
@@ -59,7 +55,7 @@ function NavbarHorizontal() {
         {
           title: 'Aplicações',
           path: '#',
-          icon: <SvgIconStyle src={`/assets/icons/app.svg`} sx={{ width: 1, height: 1 }} />,
+          icon: <GridViewOutlinedIcon sx={{ width: 1, height: 1 }} />,
           children: aplicacoes,
         },
       ],

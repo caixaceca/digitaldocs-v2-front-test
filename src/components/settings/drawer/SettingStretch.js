@@ -1,10 +1,10 @@
 // @mui
 import { styled } from '@mui/material/styles';
 import { CardActionArea, Stack } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 // hooks
 import useSettings from '../../../hooks/useSettings';
-//
-import SvgIconStyle from '../../SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -20,11 +20,7 @@ const BoxStyle = styled(CardActionArea)(({ theme }) => ({
 
 export default function SettingStretch() {
   const { themeStretch, onToggleStretch } = useSettings();
-
-  const ICON_SIZE = {
-    width: themeStretch ? 24 : 18,
-    height: themeStretch ? 24 : 18,
-  };
+  const ICON_SIZE = { width: themeStretch ? 26 : 22, height: themeStretch ? 26 : 22 };
 
   return (
     <BoxStyle
@@ -49,20 +45,11 @@ export default function SettingStretch() {
           bgcolor: 'background.default',
           boxShadow: (theme) => theme.customShadows.z12,
           transition: (theme) => theme.transitions.create('width'),
-          ...(themeStretch && {
-            width: 1,
-            color: 'primary.main',
-          }),
+          ...(themeStretch && { width: 1, color: 'primary.main' }),
         }}
       >
-        <SvgIconStyle
-          src={themeStretch ? '/assets/icons/arrow-ios-forward.svg' : '/assets/icons/arrow-ios-back.svg'}
-          sx={{ ...ICON_SIZE }}
-        />
-        <SvgIconStyle
-          src={themeStretch ? '/assets/icons/arrow-ios-back.svg' : '/assets/icons/arrow-ios-forward.svg'}
-          sx={{ ...ICON_SIZE }}
-        />
+        {themeStretch ? <ChevronRightIcon sx={{ ...ICON_SIZE }} /> : <ChevronLeftIcon sx={{ ...ICON_SIZE }} />}
+        {themeStretch ? <ChevronLeftIcon sx={{ ...ICON_SIZE }} /> : <ChevronRightIcon sx={{ ...ICON_SIZE }} />}
       </Stack>
     </BoxStyle>
   );

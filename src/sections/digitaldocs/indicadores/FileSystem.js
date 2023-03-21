@@ -112,7 +112,7 @@ export default function FileSystem() {
                         height={500}
                         type="radialBar"
                         options={chartOptions}
-                        series={[((total?.tamanho * 100) / 250000000000).toFixed(2)]}
+                        series={[((total?.tamanho * 100) / 500000000000).toFixed(2)]}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>

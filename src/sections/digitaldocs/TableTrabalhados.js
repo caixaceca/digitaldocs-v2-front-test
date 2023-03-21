@@ -54,14 +54,23 @@ export default function TableTrabalhados() {
   const dispatch = useDispatch();
   const [data, setData] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
+  const { uos } = useSelector((state) => state.uo);
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
   const { trabalhados, trabalhadosUo, isLoading } = useSelector((state) => state.digitaldocs);
   const [ambiente, setAmbiente] = useState(null);
   const [colaborador, setColaborador] = useState(
-    currentColaborador ? { id: currentColaborador?.perfil_id, label: currentColaborador?.perfil?.displayName } : null
+    currentColaborador
+      ? {
+          id: currentColaborador?.perfil_id,
+          label: currentColaborador?.perfil?.displayName,
+          uoId: currentColaborador?.uo_id,
+        }
+      : null
   );
   const total = trabalhadosUo?.length || 0;
   const subtotal = trabalhados?.length || 0;
+  const uoId = ambiente?.uoId || colaborador?.uoId;
+  const uo = uos?.find((row) => row?.id === uoId);
 
   const {
     page,
@@ -75,6 +84,16 @@ export default function TableTrabalhados() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'trabalhado_em', defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc' });
+
+  useEffect(() => {
+    if (currentColaborador?.perfil_id) {
+      setColaborador({
+        id: currentColaborador?.perfil_id,
+        label: currentColaborador?.perfil?.displayName,
+        uoId: currentColaborador?.uo_id,
+      });
+    }
+  }, [dispatch, currentColaborador]);
 
   useEffect(() => {
     dispatch(resetItem('trabalhados'));
@@ -93,10 +112,10 @@ export default function TableTrabalhados() {
 
   useEffect(() => {
     dispatch(resetItem('trabalhados'));
-    if (mail && data) {
-      dispatch(getAll('trabalhadosUo', { mail, uoId: currentColaborador?.uo_id, data: format(data, 'yyyy-MM-dd') }));
+    if (mail && data && uoId) {
+      dispatch(getAll('trabalhadosUo', { mail, uoId, data: format(data, 'yyyy-MM-dd') }));
     }
-  }, [dispatch, currentColaborador?.uo_id, data, mail]);
+  }, [dispatch, uoId, data, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -141,8 +160,8 @@ export default function TableTrabalhados() {
             sx={{ py: 2 }}
           >
             <ArquivoAnalytic
-              title={`Total - ${currentColaborador?.uo?.label}`}
-              total={total}
+              title={`Total - ${uo ? uo?.label : currentColaborador?.uo?.label}`}
+              total={uoId ? total : subtotal}
               icon="/assets/icons/navbar/process.svg"
               color="success.main"
             />

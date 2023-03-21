@@ -16,11 +16,16 @@ import {
   TableBody,
   TableHead,
   Typography,
+  IconButton,
   DialogTitle,
   DialogContent,
-  IconButton,
   TableContainer,
 } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { newLineText } from '../../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../../utils/formatTime';
@@ -33,7 +38,6 @@ import useToggle from '../../../hooks/useToggle';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
-import SvgIconStyle from '../../../components/SvgIconStyle';
 // _mock
 import { dis } from '../../../_mock';
 
@@ -104,19 +108,13 @@ export default function DetalhesProcesso({ processo }) {
                 <Stack spacing={0.5}>
                   {processo.criado_em && (
                     <Stack direction="row" spacing={0.5} alignItems="center">
-                      <SvgIconStyle
-                        src="/assets/icons/header/clock.svg"
-                        sx={{ width: 15, height: 15, color: 'text.secondary' }}
-                      />
+                      <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                       <Typography variant="body2">{ptDateTime(processo.criado_em)}</Typography>
                     </Stack>
                   )}
                   {uo && (
                     <Stack direction="row" spacing={0.5} alignItems="center">
-                      <SvgIconStyle
-                        src="/assets/icons/office.svg"
-                        sx={{ width: 15, height: 15, color: 'text.secondary' }}
-                      />
+                      <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                       <Typography variant="body2">
                         {uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label}
                       </Typography>
@@ -124,10 +122,7 @@ export default function DetalhesProcesso({ processo }) {
                   )}
                   {criador && (
                     <Stack direction="row" spacing={0.5} alignItems="center">
-                      <SvgIconStyle
-                        src="/assets/icons/user.svg"
-                        sx={{ width: 16, height: 16, mt: 0.25, color: 'text.secondary' }}
-                      />
+                      <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                       <Typography variant="body2">{criador?.perfil?.displayName}</Typography>
                     </Stack>
                   )}
@@ -148,7 +143,7 @@ export default function DetalhesProcesso({ processo }) {
               <List>
                 <ListItem disableGutters>
                   <Label color="warning">
-                    <SvgIconStyle src="/assets/icons/info.svg" sx={{ width: 15, mr: 1 }} /> Processo pendente
+                    <InfoOutlinedIcon sx={{ width: 15, mr: 1 }} /> Processo pendente
                   </Label>
                 </ListItem>
                 {motivo && (
@@ -359,7 +354,7 @@ function ValorItem({ title, valor, contas }) {
         <>
           <Tooltip title="DETALHES" arrow>
             <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
-              <SvgIconStyle src="/assets/icons/info.svg" sx={{ width: 20 }} />
+              <InfoOutlinedIcon sx={{ width: 20 }} />
             </Fab>
           </Tooltip>
           <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -368,7 +363,7 @@ function ValorItem({ title, valor, contas }) {
                 Contas eleitas para cativo
                 <Tooltip title="Fechar" arrow>
                   <IconButton onClick={onClose}>
-                    <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20, opacity: 0.75 }} />
+                    <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
                   </IconButton>
                 </Tooltip>
               </Stack>
@@ -407,7 +402,7 @@ function ValorItem({ title, valor, contas }) {
         <>
           <Tooltip title="DETALHES" arrow>
             <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
-              <SvgIconStyle src="/assets/icons/info.svg" sx={{ width: 20 }} />
+              <InfoOutlinedIcon sx={{ width: 20 }} />
             </Fab>
           </Tooltip>
           <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -416,7 +411,7 @@ function ValorItem({ title, valor, contas }) {
                 Contas cativadas
                 <Tooltip title="Fechar" arrow>
                   <IconButton onClick={onClose}>
-                    <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20, opacity: 0.75 }} />
+                    <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
                   </IconButton>
                 </Tooltip>
               </Stack>

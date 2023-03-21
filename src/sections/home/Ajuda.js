@@ -16,6 +16,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { BASEURL } from '../../utils/axios';
 import { getFileThumb } from '../../utils/getFileFormat';
@@ -26,7 +27,6 @@ import { getPerguntas, getAjuda } from '../../redux/slices/ajuda';
 import Image from '../../components/Image';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import SearchNotFound from '../../components/table/SearchNotFound';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -118,9 +118,7 @@ export default function Ajuda() {
                           expanded={controlled === item.pergunta}
                           onChange={handleChangeControlled(item.pergunta)}
                         >
-                          <AccordionSummary
-                            expandIcon={<SvgIconStyle src="/assets/icons/arrow-ios-downward.svg" sx={{ width: 15 }} />}
-                          >
+                          <AccordionSummary expandIcon={<KeyboardArrowDownIcon sx={{ width: 20 }} />}>
                             <Stack direction="row">
                               <Typography variant="subtitle2" sx={{ py: 0.5, color: 'text.secondary' }}>
                                 {item.pergunta}

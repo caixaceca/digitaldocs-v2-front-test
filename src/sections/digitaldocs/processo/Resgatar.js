@@ -1,22 +1,18 @@
 import PropTypes from 'prop-types';
 // @mui
 import { Fab, Tooltip } from '@mui/material';
+import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { resgatarProcesso } from '../../../redux/slices/digitaldocs';
 // hooks
 import useToggle from '../../../hooks/useToggle';
 // components
-import SvgIconStyle from '../../../components/SvgIconStyle';
 import DialogConfirmar from '../../../components/DialogConfirmar';
 
 // ----------------------------------------------------------------------
 
-Resgatar.propTypes = {
-  fluxiId: PropTypes.number,
-  estadoId: PropTypes.number,
-  processoId: PropTypes.number,
-};
+Resgatar.propTypes = { fluxiId: PropTypes.number, estadoId: PropTypes.number, processoId: PropTypes.number };
 
 export default function Resgatar({ fluxiId, estadoId, processoId }) {
   const dispatch = useDispatch();
@@ -34,7 +30,7 @@ export default function Resgatar({ fluxiId, estadoId, processoId }) {
     <>
       <Tooltip title="RESGATAR" arrow>
         <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
-          <SvgIconStyle src="/assets/icons/resgatar.svg" />
+          <SettingsBackupRestoreOutlinedIcon />
         </Fab>
       </Tooltip>
 

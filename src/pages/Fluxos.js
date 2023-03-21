@@ -13,6 +13,8 @@ import {
   Container,
   TableContainer,
 } from '@mui/material';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // hooks
 import useTable, { getComparator } from '../hooks/useTable';
 // redux
@@ -139,15 +141,11 @@ export default function Fluxos() {
                           <TableCell>{row.assunto}</TableCell>
                           <TableCell>{row.modelo}</TableCell>
                           <TableCell align="center">
-                            <SvgIconStyle
-                              src={row.is_interno ? '/assets/icons/checkmark-circle.svg' : '/assets/icons/close.svg'}
-                              sx={{
-                                width: 20,
-                                height: 20,
-                                color: 'success.main',
-                                ...(!row.is_interno && { color: 'focus.main' }),
-                              }}
-                            />
+                            {row.is_interno ? (
+                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                            ) : (
+                              <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                            )}
                           </TableCell>
                           <TableCell align="center" width={125}>
                             <RoleBasedGuard roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>

@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
 import { styled } from '@mui/material/styles';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Box, Fab, Stack, AppBar, Dialog, Toolbar, Tooltip } from '@mui/material';
 // utils
 import { format } from 'date-fns';
@@ -81,7 +82,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
 
           {!isDesktop && (
             <IconButtonAnimate onClick={onOpenSidebar} sx={{ mr: 1, color: 'text.primary' }}>
-              <SvgIconStyle src="/assets/icons/menu.svg" />
+              <MenuIcon />
             </IconButtonAnimate>
           )}
 

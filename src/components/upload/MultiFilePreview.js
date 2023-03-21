@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { AnimatePresence } from 'framer-motion';
 // @mui
 import { alpha } from '@mui/material/styles';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import { List, IconButton, ListItemText, ListItemIcon, ListItem } from '@mui/material';
 // utils
 import { fData } from '../../utils/formatNumber';
@@ -9,8 +10,6 @@ import getFileData from '../../utils/getFileData';
 import { getFileThumb } from '../../utils/getFileFormat';
 //
 import Image from '../Image';
-// import { varFade } from '../animate';
-import SvgIconStyle from '../SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -65,7 +64,7 @@ export default function MultiFilePreview({ showPreview = false, files, onRemove 
                       },
                     }}
                   >
-                    <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 15 }} />
+                    <CloseOutlinedIcon sx={{ width: 15 }} />
                   </IconButton>
                 )}
               </ListItem>
@@ -95,7 +94,7 @@ export default function MultiFilePreview({ showPreview = false, files, onRemove 
 
               {onRemove && (
                 <IconButton edge="end" size="small" onClick={() => onRemove(file)}>
-                  <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20 }} />
+                  <CloseOutlinedIcon sx={{ width: 20 }} />
                 </IconButton>
               )}
             </ListItem>

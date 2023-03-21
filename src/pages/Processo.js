@@ -2,6 +2,9 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // @mui
+import LockPersonIcon from '@mui/icons-material/LockPerson';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import { Fab, Grid, Card, Stack, Tooltip, Dialog, Container, CardContent } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
@@ -13,7 +16,6 @@ import useToggle from '../hooks/useToggle';
 import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
-import SvgIconStyle from '../components/SvgIconStyle';
 import { SearchNotFound404 } from '../components/table';
 import { SkeletonProcesso } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
@@ -59,7 +61,7 @@ export default function Processo() {
   const fromProcurar = from?.get?.('from') === 'procurar';
   const fromPendentes = from?.get?.('from') === 'pendentes';
   const fromPorConcluir = from?.get?.('from') === 'porconcluir';
-  const fromMeusPendentes = from?.get?.('from') === 'meuspendentes';
+  const fromRetidos = from?.get?.('from') === 'retidos';
 
   useEffect(() => {
     if (done === 'aceitado') {
@@ -78,7 +80,7 @@ export default function Processo() {
       enqueueSnackbar('Processo eliminado com sucesso', { variant: 'success' });
       navigate(
         (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
-          (fromMeusPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=meuspendentes`) ||
+          (fromRetidos && `${PATH_DIGITALDOCS.processos.lista}?tab=retidos`) ||
           (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
           (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
           (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
@@ -162,7 +164,7 @@ export default function Processo() {
                 (fromArquivo && 'Arquivos') ||
                 (fromEntradas && 'Entradas') ||
                 (fromPendentes && 'Pendentes') ||
-                (fromMeusPendentes && 'Retidos') ||
+                (fromRetidos && 'Retidos') ||
                 (fromPorConcluir && 'Por concluir') ||
                 (fromProcurar && 'Resultado de procura') ||
                 'Processos',
@@ -172,7 +174,7 @@ export default function Processo() {
                 (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
                 (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
                 (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
-                (fromMeusPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=meuspendentes`) ||
+                (fromRetidos && `${PATH_DIGITALDOCS.processos.lista}?tab=retidos`) ||
                 (fromProcurar && PATH_DIGITALDOCS.processos.procurar) ||
                 PATH_DIGITALDOCS.processos.root,
             },
@@ -190,20 +192,20 @@ export default function Processo() {
                       <RoleBasedGuard roles={['arquivo-110', 'arquivo-111']}>
                         <Tooltip title="ATRIBUIR ACESSO" arrow>
                           <Fab color="success" size="small" variant="soft" onClick={onOpen}>
-                            <SvgIconStyle src="/assets/icons/check.svg" />
+                            <TaskAltOutlinedIcon />
                           </Fab>
                         </Tooltip>
 
                         <Tooltip title="DESARQUIVAR" arrow>
                           <Fab color="error" size="small" variant="soft" onClick={handleDesarquivar}>
-                            <SvgIconStyle src="/assets/icons/unarchive.svg" />
+                            <UnarchiveOutlinedIcon />
                           </Fab>
                         </Tooltip>
                       </RoleBasedGuard>
                       {!fromArquivo && meusacessos.includes('arquivo-110') && meusacessos.includes('arquivo-111') && (
                         <Tooltip title="PEDIR ACESSO" arrow>
                           <Fab color="success" size="small" variant="soft" onClick={handlePedirAcesso}>
-                            <SvgIconStyle src="/assets/icons/check.svg" />
+                            <TaskAltOutlinedIcon />
                           </Fab>
                         </Tooltip>
                       )}
@@ -215,7 +217,7 @@ export default function Processo() {
                           {podeAceitar() && (
                             <Tooltip title="ACEITAR" arrow>
                               <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
-                                <SvgIconStyle src="/assets/icons/lock.svg" />
+                                <LockPersonIcon src="/assets/icons/lock.svg" />
                               </Fab>
                             </Tooltip>
                           )}

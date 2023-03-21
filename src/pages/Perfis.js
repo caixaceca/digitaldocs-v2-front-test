@@ -15,6 +15,7 @@ import {
   Typography,
   TableContainer,
 } from '@mui/material';
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 // utils
 import { BASEURL } from '../utils/axios';
 import { nomeacaoBySexo } from '../utils/validarAcesso';
@@ -28,15 +29,10 @@ import useTable, { getComparator, applySort } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
-import SvgIconStyle from '../components/SvgIconStyle';
 import { SkeletonTable } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import {
-  TableHeadCustom,
-  TableSearchNotFound,
-  TablePaginationAlt,
-  TableToolbarPerfilEstados,
-} from '../components/table';
+import { TableToolbarPerfilEstados } from '../components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -165,12 +161,12 @@ export default function Perfis() {
                           <TableCell align="center" width={50}>
                             <Tooltip title="Gerir acessos" arrow>
                               <Fab
-                                color="success"
                                 size="small"
                                 variant="soft"
+                                color="success"
                                 onClick={() => handleUpdate(row?.perfil?.id)}
                               >
-                                <SvgIconStyle src="/assets/icons/swap.svg" />
+                                <SwapHorizOutlinedIcon sx={{ height: 28, width: 28 }} />
                               </Fab>
                             </Tooltip>
                           </TableCell>

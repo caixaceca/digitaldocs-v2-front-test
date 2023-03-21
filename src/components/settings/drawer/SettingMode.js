@@ -1,11 +1,12 @@
 // @mui
 import { styled } from '@mui/material/styles';
 import { Grid, RadioGroup, CardActionArea } from '@mui/material';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 // hooks
 import useSettings from '../../../hooks/useSettings';
 //
 import BoxMask from './BoxMask';
-import SvgIconStyle from '../../SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -35,16 +36,14 @@ export default function SettingMode() {
               <BoxStyle
                 sx={{
                   bgcolor: mode === 'light' ? 'common.white' : 'grey.800',
-                  ...(isSelected && {
-                    color: 'primary.main',
-                    boxShadow: (theme) => theme.customShadows.z20,
-                  }),
+                  ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }),
                 }}
               >
-                <SvgIconStyle
-                  src={index === 0 ? '/assets/icons/sun-duotone.svg' : '/assets/icons/moon-duotone.svg'}
-                  sx={{ width: 28, height: 28 }}
-                />
+                {index === 0 ? (
+                  <LightModeOutlinedIcon sx={{ width: 28, height: 28 }} />
+                ) : (
+                  <DarkModeOutlinedIcon sx={{ width: 28, height: 28 }} />
+                )}
                 <BoxMask value={mode} />
               </BoxStyle>
             </Grid>

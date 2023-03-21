@@ -17,14 +17,15 @@ import {
   AccordionDetails,
   AccordionSummary,
 } from '@mui/material';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { BASEURL } from '../../../utils/axios';
 import { fDateTime } from '../../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getAll, closeModal } from '../../../redux/slices/digitaldocs';
-// components
-import SvgIconStyle from '../../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -55,7 +56,7 @@ export default function Views({ processoId }) {
     <>
       <Tooltip title="VISUALIZAÇÕES" arrow>
         <Fab color="inherit" size="small" variant="soft" onClick={handleViews}>
-          {isLoading ? <CircularProgress color="inherit" /> : <SvgIconStyle src="/assets/icons/eye.svg" />}
+          {isLoading ? <CircularProgress color="inherit" /> : <PreviewOutlinedIcon />}
         </Fab>
       </Tooltip>
       <Dialog open={isOpenModalViews} onClose={handleClose} fullWidth maxWidth="xs">
@@ -64,7 +65,7 @@ export default function Views({ processoId }) {
             Visualizações
             <Tooltip title="Fechar" arrow>
               <IconButton onClick={handleClose}>
-                <SvgIconStyle src="/assets/icons/close.svg" sx={{ width: 20, opacity: 0.75 }} />
+                <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -78,7 +79,7 @@ export default function Views({ processoId }) {
                 expanded={colabViews === row.perfilId}
                 onChange={handleColabViews(row.perfilId)}
               >
-                <AccordionSummary expandIcon={<SvgIconStyle src="/assets/icons/arrow-ios-downward.svg" />}>
+                <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1, pr: 2 }}>
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                       <Avatar

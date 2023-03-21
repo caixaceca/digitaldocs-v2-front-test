@@ -726,7 +726,7 @@ export function getAll(item, params) {
           }
           break;
         }
-        case 'meuspendentes': {
+        case 'retidos': {
           dispatch(slice.actions.resetItem('processo'));
           dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
@@ -855,7 +855,7 @@ export function getAll(item, params) {
         case 'entradas': {
           dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/entradas/agencias/${params?.uoId}/${params?.perfilId}?qdia=${params?.data}`,
+            `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${params?.perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`,
             options
           );
           dispatch(slice.actions.getEntradasSuccess(response.data.objeto));

@@ -44,7 +44,7 @@ const TABLE_HEAD = [
   { id: 'ilha', label: 'Localização', align: 'left' },
   { id: 'email', label: 'Email', align: 'left' },
   { id: 'telefone', label: 'Telefone', align: 'left' },
-  { id: 'empty' },
+  { id: '' },
 ];
 
 // ----------------------------------------------------------------------
@@ -204,8 +204,8 @@ function applySortFilter({ origens, comparator, filterSearch }) {
     origens = origens.filter(
       (item) =>
         item?.designacao.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
+        item?.seguimento.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
         item?.tipo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.codigo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
         item?.ilha.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
         item?.cidade.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
         item?.email.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||

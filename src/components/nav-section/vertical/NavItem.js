@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
 // @mui
 import { Box, Tooltip } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // hooks
 import useLocales from '../../../hooks/useLocales';
 // guards
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
-import SvgIconStyle from '../../SvgIconStyle';
 import { ListItemStyle, ListItemTextStyle, ListItemIconStyle } from './style';
 
 // ----------------------------------------------------------------------
@@ -68,12 +69,12 @@ export default function NavItem({ item, depth, active, open, isCollapse, ...othe
             </Box>
           )}
 
-          {!!children && (
-            <SvgIconStyle
-              src={open ? '/assets/icons/arrow-ios-downward.svg' : '/assets/icons/arrow-ios-forward.svg'}
-              sx={{ width: 16, height: 16, ml: 1, flexShrink: 0 }}
-            />
-          )}
+          {!!children &&
+            (open ? (
+              <KeyboardArrowDownIcon sx={{ width: 16, height: 16, ml: 1, flexShrink: 0 }} />
+            ) : (
+              <ChevronRightIcon sx={{ width: 16, height: 16, ml: 1, flexShrink: 0 }} />
+            ))}
         </>
       )}
     </ListItemStyle>

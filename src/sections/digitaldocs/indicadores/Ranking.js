@@ -10,16 +10,6 @@ import { useDispatch, useSelector } from '../../../redux/store';
 import { BarChart } from '../../../components/skeleton';
 import { SearchNotFound } from '../../../components/table';
 import Chart, { useChart } from '../../../components/chart';
-
-// ----------------------------------------------------------------------
-
-const escopos = [
-  { id: 'uo', label: 'U.O' },
-  { id: 'perfil', label: 'Colaborador' },
-];
-
-const tops = ['5', '10', '20', 'Todos'];
-
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export default function Ranking() {
@@ -89,7 +79,10 @@ export default function Ranking() {
                 disableClearable
                 sx={{ minWidth: 140 }}
                 onChange={(event, newValue) => setEscopo(newValue)}
-                options={escopos?.map((option) => option)}
+                options={[
+                  { id: 'uo', label: 'U.O' },
+                  { id: 'perfil', label: 'Colaborador' },
+                ]?.map((option) => option)}
                 getOptionLabel={(option) => option?.label}
                 renderInput={(params) => <TextField {...params} label="Escopo" />}
               />
@@ -100,7 +93,7 @@ export default function Ranking() {
                 disableClearable
                 sx={{ minWidth: 100 }}
                 onChange={(event, newValue) => setTop(newValue)}
-                options={tops?.map((option) => option)}
+                options={['5', '10', '20', 'Todos']?.map((option) => option)}
                 renderInput={(params) => <TextField {...params} label="Top" />}
               />
             </Stack>
@@ -115,7 +108,7 @@ export default function Ranking() {
             {isNotFound ? (
               <SearchNotFound message="Nenhum registo encontrado" />
             ) : (
-              <Chart type="bar" series={seriesRanking} options={chartOptions} height={400} />
+              <Chart type="bar" series={seriesRanking} options={chartOptions} height={500} />
             )}
           </>
         )}

@@ -1,5 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 // @mui
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -9,11 +11,11 @@ import { useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -98,26 +100,18 @@ export default function Estado() {
                       <TableRow hover key={key}>
                         <TableCell>{row.nome}</TableCell>
                         <TableCell align="center">
-                          <SvgIconStyle
-                            src={row.is_inicial ? '/assets/icons/checkmark-circle.svg' : '/assets/icons/close.svg'}
-                            sx={{
-                              width: 20,
-                              height: 20,
-                              color: 'success.main',
-                              ...(!row.is_inicial && { color: 'focus.main' }),
-                            }}
-                          />
+                          {row.is_inicial ? (
+                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                          ) : (
+                            <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                          )}
                         </TableCell>
                         <TableCell align="center">
-                          <SvgIconStyle
-                            src={row.is_final ? '/assets/icons/checkmark-circle.svg' : '/assets/icons/close.svg'}
-                            sx={{
-                              width: 20,
-                              height: 20,
-                              color: 'success.main',
-                              ...(!row.is_final && { color: 'focus.main' }),
-                            }}
-                          />
+                          {row.is_final ? (
+                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                          ) : (
+                            <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                          )}
                         </TableCell>
                       </TableRow>
                     );

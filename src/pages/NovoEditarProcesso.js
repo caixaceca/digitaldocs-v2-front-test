@@ -52,8 +52,6 @@ export default function NovoEditarProcesso() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [processo?.fluxo_id]);
 
-  console.log(meusFluxos);
-
   return (
     <Page title={!isEdit ? 'Novo processo | DigitalDocs' : 'Editar processo | DigitalDocs'}>
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -120,9 +118,15 @@ export default function NovoEditarProcesso() {
             hasContent
             roles={['XXXXX']}
             children={
-              <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                Este ambiente não permite a criação de processos, selecione outro ambiente...
-              </Typography>
+              isEdit ? (
+                <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                  Este ambiente não permite a edição deste processo...
+                </Typography>
+              ) : (
+                <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                  Este ambiente não permite a criação de processos, selecione outro ambiente...
+                </Typography>
+              )
             }
           />
         )}

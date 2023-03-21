@@ -25,7 +25,7 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 const TABLE_HEAD = [
   { id: 'motivo', label: 'Motivo', align: 'left' },
-  { id: ' obs', label: ' Observação ', align: 'left' },
+  { id: ' obs', label: 'Observação', align: 'left' },
   { id: '' },
 ];
 

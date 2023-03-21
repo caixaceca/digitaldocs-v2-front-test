@@ -1,11 +1,12 @@
 // @mui
 import { styled } from '@mui/material/styles';
 import { Grid, RadioGroup, CardActionArea } from '@mui/material';
+import AlignHorizontalLeftOutlinedIcon from '@mui/icons-material/AlignHorizontalLeftOutlined';
+import AlignHorizontalRightOutlinedIcon from '@mui/icons-material/AlignHorizontalRightOutlined';
 // hooks
 import useSettings from '../../../hooks/useSettings';
 //
 import BoxMask from './BoxMask';
-import SvgIconStyle from '../../SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -33,22 +34,13 @@ export default function SettingDirection() {
           return (
             <Grid key={direction} item xs={6}>
               <BoxStyle
-                sx={{
-                  ...(isSelected && {
-                    color: 'primary.main',
-                    boxShadow: (theme) => theme.customShadows.z20,
-                  }),
-                }}
+                sx={{ ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }) }}
               >
-                {/* <Iconify
-                  icon={index === 0 ? 'ph:align-left-duotone' : 'ph:align-right-duotone'}
-                  width={28}
-                  height={28}
-                /> */}
-                <SvgIconStyle
-                  src={index === 0 ? '/assets/icons/align-left.svg' : '/assets/icons/align-right.svg'}
-                  sx={{ width: 28, height: 28 }}
-                />
+                {index === 0 ? (
+                  <AlignHorizontalLeftOutlinedIcon sx={{ width: 30, height: 30 }} />
+                ) : (
+                  <AlignHorizontalRightOutlinedIcon sx={{ width: 30, height: 30 }} />
+                )}
                 <BoxMask value={direction} />
               </BoxStyle>
             </Grid>

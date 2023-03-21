@@ -18,6 +18,8 @@ import {
   ListItemButton,
   TableContainer,
 } from '@mui/material';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { BASEURL } from '../../../utils/axios';
 import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
@@ -26,7 +28,6 @@ import { useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
-import SvgIconStyle from '../../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -53,9 +54,7 @@ export default function HistoricoPrisoes({ historico }) {
           background: (theme) => theme.palette.background.paper,
         }}
       >
-        <ListItemIcon>
-          <SvgIconStyle src={`/assets/icons/${openHistoricoPrisoes ? 'arrow-ios-upward' : 'arrow-ios-downward'}.svg`} />
-        </ListItemIcon>
+        <ListItemIcon>{openHistoricoPrisoes ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</ListItemIcon>
         <ListItemText primary="Histórico de retenções" />
       </ListItemButton>
       <Collapse in={openHistoricoPrisoes}>

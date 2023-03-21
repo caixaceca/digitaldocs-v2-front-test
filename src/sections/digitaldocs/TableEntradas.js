@@ -12,12 +12,15 @@ import {
   TableCell,
   TextField,
   Typography,
+  Autocomplete,
   TableContainer,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { format } from 'date-fns';
-import { ptTime } from '../../utils/formatTime';
+import { ptDateTime, fYear } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -50,13 +53,25 @@ const TABLE_HEAD = [
 export default function TableEntradas() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [estado, setEstado] = useState('');
-  const [assunto, setAssunto] = useState('');
-  const [data, setData] = useState(new Date());
-  const [colaborador, setColaborador] = useState('');
+  const [estado, setEstado] = useState(null);
+  const [assunto, setAssunto] = useState(null);
+  const [colaborador, setColaborador] = useState(null);
+  const [dataFim, setDataFim] = useState(new Date());
+  const [dataInicio, setDataInicio] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { entradas, isLoading } = useSelector((state) => state.digitaldocs);
+  const { uos } = useSelector((state) => state.uo);
+  const { entradas, meusAmbientes, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const perfilId = currentColaborador?.perfil_id;
+  const [uoId, setUoId] = useState(currentColaborador?.uo_id);
+
+  const minhasUos = [];
+  meusAmbientes?.forEach((row) => {
+    if (row?.nome?.includes('Gerência')) {
+      const uo = uos?.find((_uo) => _uo?.id === row?.uo_id);
+      minhasUos?.push({ id: row?.uo_id, label: uo?.label });
+    }
+  });
 
   const {
     page,
@@ -69,20 +84,27 @@ export default function TableEntradas() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'criado_em', defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc' });
+  } = useTable({ defaultOrderBy: 'nentrada', defaultOrder: 'desc' });
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id && currentColaborador?.uo_id && data) {
+    if (currentColaborador?.uo_id) {
+      setUoId(currentColaborador?.uo_id);
+    }
+  }, [dispatch, currentColaborador?.uo_id]);
+
+  useEffect(() => {
+    if (mail && perfilId && uoId && dataInicio && dataFim) {
       dispatch(
         getAll('entradas', {
-          uoId: currentColaborador?.uo_id,
-          data: format(data, 'yyyy-MM-dd'),
-          perfilId: currentColaborador?.perfil_id,
           mail,
+          uoId,
+          perfilId,
+          dataFim: format(dataFim, 'yyyy-MM-dd'),
+          dataInicio: format(dataInicio, 'yyyy-MM-dd'),
         })
       );
     }
-  }, [dispatch, currentColaborador?.perfil_id, currentColaborador?.uo_id, data, mail]);
+  }, [dispatch, perfilId, uoId, dataInicio, dataFim, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -126,7 +148,11 @@ export default function TableEntradas() {
     if (!assuntosList.includes(row?.assunto)) {
       assuntosList.push(row?.assunto);
     }
-    newEntradas.push({ ...row, colaborador: colaborador?.perfil?.displayName });
+    newEntradas.push({
+      ...row,
+      colaborador: colaborador?.perfil?.displayName,
+      numEntrada: `${row?.nentrada}/${uoId}/${fYear(row?.criado_em || new Date())}`,
+    });
   });
 
   const dataFiltered = applySortFilter({
@@ -145,12 +171,33 @@ export default function TableEntradas() {
         heading="Entradas"
         links={[{ name: '' }]}
         action={
-          <DatePicker
-            label="Data"
-            value={data}
-            onChange={(_data) => setData(_data)}
-            renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: 170 }} />}
-          />
+          <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
+            {minhasUos?.length > 1 && (
+              <Autocomplete
+                fullWidth
+                size="small"
+                disableClearable
+                options={minhasUos}
+                value={minhasUos?.find((row) => row?.id === uoId)}
+                onChange={(event, newValue) => setUoId(newValue?.id)}
+                renderInput={(params) => <TextField {...params} label="U.O" margin="none" />}
+              />
+            )}
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <DatePicker
+                value={dataInicio}
+                label="Data início"
+                onChange={(newValue) => setDataInicio(newValue)}
+                renderInput={(params) => <TextField size="small" {...params} sx={{ minWidth: 160 }} />}
+              />
+              <DatePicker
+                value={dataFim}
+                label="Data fim"
+                onChange={(newValue) => setDataFim(newValue)}
+                renderInput={(params) => <TextField size="small" {...params} sx={{ minWidth: 160 }} />}
+              />
+            </Stack>
+          </Stack>
         }
         sx={{ color: 'text.secondary', m: 0, px: 1 }}
       />
@@ -184,7 +231,7 @@ export default function TableEntradas() {
                     });
                     return (
                       <TableRow hover key={row.id}>
-                        <TableCell>{row.nentrada}</TableCell>
+                        <TableCell>{row.numEntrada}</TableCell>
                         <TableCell>{row.titular}</TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
@@ -194,19 +241,13 @@ export default function TableEntradas() {
                         <TableCell>
                           {row?.criado_em && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
-                              <SvgIconStyle
-                                src="/assets/icons/header/clock.svg"
-                                sx={{ width: 15, height: 15, color: 'text.secondary' }}
-                              />
-                              <Typography variant="body2">{ptTime(row.criado_em)}</Typography>
+                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                              <Typography variant="body2">{row?.criado_em ? ptDateTime(row.criado_em) : ''}</Typography>
                             </Stack>
                           )}
                           {row?.colaborador && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
-                              <SvgIconStyle
-                                src="/assets/icons/user.svg"
-                                sx={{ width: 16, height: 16, color: 'text.secondary' }}
-                              />
+                              <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
                               <Typography variant="body2">{row.colaborador}</Typography>
                             </Stack>
                           )}
@@ -272,7 +313,7 @@ function applySortFilter({ newEntradas, comparator, filterSearch, colaborador, a
   if (text) {
     newEntradas = newEntradas.filter(
       (row) =>
-        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.numEntrada && row?.numEntrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

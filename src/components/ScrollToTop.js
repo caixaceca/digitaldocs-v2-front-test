@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 // @mui
 import { Box, Fab, Stack, Typography } from '@mui/material';
-// components
-import SvgIconStyle from './SvgIconStyle';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +36,7 @@ export default function ScrollToTop() {
       <Box sx={{ right: 75, bottom: 10, position: 'absolute' }}>
         <Fab color="inherit" onClick={goTop} sx={{ width: 49, height: 49 }}>
           <Stack alignItems="center">
-            <SvgIconStyle src="/assets/icons/arrow-ios-upward.svg" sx={{ width: 28, height: 28 }} />
+            <KeyboardArrowUpIcon sx={{ width: 28, height: 28 }} />
             <Typography variant="caption" sx={{ fontWeight: 900, pb: 1, mt: -0.5 }}>
               TOPO
             </Typography>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 // @mui
 import { alpha, styled } from '@mui/material/styles';
+import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import { Box, Avatar, Tooltip, MenuItem, ListItemIcon, ListItemText, Divider, Typography, Link } from '@mui/material';
 // redux
 import { getLinks } from '../../redux/slices/aplicacao';
@@ -12,16 +13,11 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // components
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 
 // ----------------------------------------------------------------------
 
-const LogoApp = styled(Avatar)(() => ({
-  p: 0.5,
-  width: '33px',
-  height: '33px',
-}));
+const LogoApp = styled(Avatar)(() => ({ p: 0.5, width: '33px', height: '33px' }));
 
 //
 
@@ -57,15 +53,10 @@ export default function Linksuteis() {
             width: { xs: 30, sm: 40 },
             height: { xs: 30, sm: 40 },
             color: '#fff',
-            ...(open && {
-              bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity),
-            }),
+            ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
           }}
         >
-          <SvgIconStyle
-            src="/assets/icons/header/link.svg"
-            sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }}
-          />
+          <LinkOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />
         </IconButtonAnimate>
       </Tooltip>
 

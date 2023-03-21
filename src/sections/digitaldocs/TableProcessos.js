@@ -14,6 +14,7 @@ import {
   TableCell,
   TableContainer,
 } from '@mui/material';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // hooks
@@ -43,6 +44,16 @@ const TABLE_HEAD = [
   { id: 'empty' },
 ];
 
+const TABLE_HEAD_PENDECIA = [
+  { id: 'id', label: 'Número', align: 'left' },
+  { id: 'titular', label: 'Titular', align: 'left' },
+  { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
+  { id: 'assunto', label: 'Assunto', align: 'left' },
+  { id: 'motivo', label: 'Motivo', align: 'left' },
+  { id: 'data_last_transicao', label: 'Modificado em', align: 'center' },
+  { id: 'empty' },
+];
+
 // ----------------------------------------------------------------------
 
 TableProcessos.propTypes = { from: PropTypes.string };
@@ -58,10 +69,10 @@ export default function TableProcessos({ from }) {
     (from === 'devolvidosPessoal' && 'Devolvidos pessoal') ||
     (from === 'tarefas' && 'Lista de tarefas') ||
     (from === 'finalizados' && 'Finalizados') ||
-    (from === 'meuspendentes' && 'Retidos') ||
     (from === 'executados' && 'Executados') ||
     (from === 'agendados' && 'Agendados') ||
     (from === 'pendentes' && 'Pendentes') ||
+    (from === 'retidos' && 'Retidos') ||
     from;
 
   const {
@@ -140,7 +151,12 @@ export default function TableProcessos({ from }) {
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
+              <TableHeadCustom
+                order={order}
+                orderBy={orderBy}
+                headLabel={from === 'pendentes' ? TABLE_HEAD_PENDECIA : TABLE_HEAD}
+                onSort={onSort}
+              />
               <TableBody>
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={7} row={10} />
@@ -153,23 +169,20 @@ export default function TableProcessos({ from }) {
                     return (
                       <TableRow hover key={row.id}>
                         <TableCell>
-                          <Stack direction="row" alignrows="center">
-                            {from !== 'arquivados' && (
-                              <SvgIconStyle
-                                src="/assets/icons/dot.svg"
-                                sx={{
-                                  ml: -1.5,
-                                  mt: -0.5,
-                                  width: 30,
-                                  height: 30,
-                                  color:
-                                    (row?.cor === 'verde' && 'text.success') ||
-                                    (row?.cor === 'vermelha' && 'text.error') ||
-                                    (row?.cor === 'amarela' && 'text.warning') ||
-                                    'text.focus',
-                                }}
-                              />
-                            )}
+                          <Stack direction="row" spacing={0.5} alignrows="center">
+                            <FiberManualRecordIcon
+                              sx={{
+                                mt: 0.15,
+                                ml: -1.5,
+                                width: 18,
+                                height: 18,
+                                color:
+                                  (row?.cor === 'verde' && 'text.success') ||
+                                  (row?.cor === 'vermelha' && 'text.error') ||
+                                  (row?.cor === 'amarela' && 'text.warning') ||
+                                  'text.focus',
+                              }}
+                            />
                             <Stack>{row.id}</Stack>
                           </Stack>
                         </TableCell>
@@ -178,7 +191,9 @@ export default function TableProcessos({ from }) {
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
                         </TableCell>
                         <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
-                        <TableCell>{row?.nome ? row.nome : meuAmbiente.nome}</TableCell>
+                        <TableCell>
+                          {(from === 'pendentes' && row?.motivo) || (row?.nome && row.nome) || meuAmbiente.nome}
+                        </TableCell>
                         <TableCell align="center">
                           {row?.data_last_transicao ? ptDateTime(row?.data_last_transicao) : ' - - - - - '}
                         </TableCell>
@@ -241,6 +256,7 @@ function applySortFilter({ processos, comparator, filterSearch }) {
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.motivo && row?.motivo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
     );
   }

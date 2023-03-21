@@ -13,6 +13,9 @@ import {
   ListItemIcon,
   ListItemButton,
 } from '@mui/material';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
 import { BASEURL } from '../../../utils/axios';
@@ -50,9 +53,7 @@ export default function HistoricoProcesso({ historico }) {
           background: (theme) => theme.palette.background.paper,
         }}
       >
-        <ListItemIcon>
-          <SvgIconStyle src={`/assets/icons/${openHistorico ? 'arrow-ios-upward' : 'arrow-ios-downward'}.svg`} />
-        </ListItemIcon>
+        <ListItemIcon>{openHistorico ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</ListItemIcon>
         <ListItemText primary="Histórico de intervenções" />
       </ListItemButton>
       <Collapse in={openHistorico}>
@@ -101,7 +102,7 @@ export default function HistoricoProcesso({ historico }) {
                         </Stack>
                         <Stack direction="row" justifyContent="left" alignItems="center" spacing={0.5}>
                           <Typography variant="caption">{row?.is_resgate ? row?.nomef : row?.nome}</Typography>
-                          <SvgIconStyle src="/assets/icons/arrow-right.svg" sx={{ width: 20 }} />
+                          <ArrowRightAltIcon sx={{ width: 20 }} />
                           <Typography variant="caption">{row?.is_resgate ? row?.nome : row?.nomef}</Typography>
                         </Stack>
                         <Stack direction="row" justifyContent="left" alignItems="center" spacing={1.5} sx={{ pt: 2 }}>

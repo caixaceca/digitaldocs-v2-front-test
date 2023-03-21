@@ -17,8 +17,6 @@ import AnexosExistentes from './AnexosExistentes';
 
 // ----------------------------------------------------------------------
 
-const periodicidades = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
-
 ProcessoInternoForm.propTypes = {
   assunto: PropTypes.string,
   setAgendado: PropTypes.func,
@@ -73,7 +71,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                             {...field}
                             fullWidth
                             onChange={(event, newValue) => field.onChange(newValue)}
-                            options={periodicidades?.map((option) => option)}
+                            options={['Mensal', 'Trimestral', 'Semestral', 'Anual']?.map((option) => option)}
                             getOptionLabel={(option) => option}
                             renderInput={(params) => (
                               <TextField
