@@ -185,12 +185,14 @@ export default function TableEntradas() {
             )}
             <Stack direction="row" alignItems="center" spacing={1}>
               <DatePicker
+                disableFuture
                 value={dataInicio}
                 label="Data início"
                 onChange={(newValue) => setDataInicio(newValue)}
                 renderInput={(params) => <TextField size="small" {...params} sx={{ minWidth: 160 }} />}
               />
               <DatePicker
+                disableFuture
                 value={dataFim}
                 label="Data fim"
                 onChange={(newValue) => setDataFim(newValue)}

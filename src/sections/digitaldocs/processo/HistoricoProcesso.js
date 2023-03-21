@@ -26,7 +26,6 @@ import { useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
-import SvgIconStyle from '../../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -75,10 +74,7 @@ export default function HistoricoProcesso({ historico }) {
                           'success'
                         }
                       >
-                        <SvgIconStyle
-                          src="/assets/icons/arrow-ios-upward.svg"
-                          sx={{ width: 18, height: 18, color: 'common.white' }}
-                        />
+                        <KeyboardArrowUpIcon sx={{ width: 18, height: 18, color: 'common.white' }} />
                       </TimelineDot>
                       {index !== historico?.length - 1 && <TimelineConnector />}
                     </TimelineSeparator>
