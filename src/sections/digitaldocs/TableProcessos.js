@@ -35,7 +35,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'Número', align: 'left' },
+  { id: 'id', label: 'ID', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -45,7 +45,7 @@ const TABLE_HEAD = [
 ];
 
 const TABLE_HEAD_PENDECIA = [
-  { id: 'id', label: 'Número', align: 'left' },
+  { id: 'id', label: 'ID', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },

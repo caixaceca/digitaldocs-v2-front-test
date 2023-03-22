@@ -38,7 +38,7 @@ import ArquivoAnalytic from './ArquivoAnalytic';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'Número', align: 'left' },
+  { id: 'id', label: 'ID', align: 'left' },
   { id: 'referencia', label: 'Referência', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },

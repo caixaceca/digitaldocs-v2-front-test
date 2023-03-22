@@ -42,7 +42,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../com
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'Número', align: 'left' },
+  { id: 'id', label: 'ID', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
