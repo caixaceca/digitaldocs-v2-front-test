@@ -4,10 +4,10 @@ import { SnackbarProvider } from 'notistack';
 // @mui
 import InfoIcon from '@mui/icons-material/Info';
 import ErrorIcon from '@mui/icons-material/Error';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import WarningIcon from '@mui/icons-material/Warning';
 import { alpha, useTheme } from '@mui/material/styles';
 import { Box, GlobalStyles, Collapse } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // hooks
 import useSettings from '../hooks/useSettings';
@@ -77,7 +77,7 @@ export default function NotistackProvider({ children }) {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         iconVariant={{
           info: <SnackbarIcon icon={<InfoIcon color="info" />} color="info" />,
-          success: <SnackbarIcon icon={<CheckCircleIcon color="success" />} color="success" />,
+          success: <SnackbarIcon icon={<TaskAltIcon color="success" />} color="success" />,
           warning: <SnackbarIcon icon={<WarningIcon color="warning" />} color="warning" />,
           error: <SnackbarIcon icon={<ErrorIcon color="error" />} color="error" />,
         }}

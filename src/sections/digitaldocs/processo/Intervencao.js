@@ -28,8 +28,9 @@ export default function Intervencao({ processo }) {
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { isSaving, meusacessos, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
+  const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
 
   const devolucoes = [];
   const seguimentos = [];
@@ -104,6 +105,9 @@ export default function Intervencao({ processo }) {
   };
 
   const podeEditar = () => {
+    if (isAdmin) {
+      return true;
+    }
     let i = 0;
     while (i < meusAmbientes?.length) {
       if (
@@ -120,6 +124,9 @@ export default function Intervencao({ processo }) {
   };
 
   const podeEditarNE = () => {
+    if (isAdmin) {
+      return true;
+    }
     if (processo?.nome === 'DOP - Execução Notas Externas') {
       let i = 0;
       while (i < meusAmbientes?.length) {

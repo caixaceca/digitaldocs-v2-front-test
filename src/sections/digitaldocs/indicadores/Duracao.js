@@ -33,7 +33,7 @@ export default function Duracao() {
   const [dataInicio, setDataInicio] = useState(null);
   const [dataFim, setDataFim] = useState(null);
   const [assunto, setAssunto] = useState(null);
-  const [origem, setOrigem] = useState({ id: 'e', label: 'Entrada' });
+  const [origem, setOrigem] = useState({ id: 'c', label: 'Criação' });
 
   const [perfilPID, setPerfilPID] = useState(
     iAmInGrpGerente
