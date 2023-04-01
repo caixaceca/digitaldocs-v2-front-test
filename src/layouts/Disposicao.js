@@ -1,8 +1,6 @@
 // @mui
 import * as React from 'react';
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useSnackbar } from 'notistack';
 import {
   Radio,
   Stack,
@@ -15,6 +13,10 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import SentimentNeutralOutlinedIcon from '@mui/icons-material/SentimentNeutralOutlined';
+import SentimentSatisfiedOutlinedIcon from '@mui/icons-material/SentimentSatisfiedOutlined';
+import SentimentDissatisfiedOutlinedIcon from '@mui/icons-material/SentimentDissatisfiedOutlined';
+import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVerySatisfiedOutlined';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { createDisposicao, closeDisposicao } from '../redux/slices/disposicao';
@@ -25,53 +27,38 @@ import FraseContent from '../sections/home/FraseContent';
 
 // ----------------------------------------------------------------------
 
-const options = ['desmotivado', 'neutro', 'motivado', 'radiante'];
+const whicon = { width: 60, height: 60 };
 
-const BpIcon = styled('span')(({ icon }) => ({
-  width: 60,
-  height: 60,
-  backgroundImage: `url(/assets/illustrations/${icon}.png)`,
-  backgroundPosition: 'center',
-  backgroundSize: 'cover',
+const disposicoes = [
+  { value: 'desmotivado', cor: '#FF4842', icon: <SentimentDissatisfiedOutlinedIcon sx={whicon} /> },
+  { value: 'neutro', cor: '#FFB107', icon: <SentimentNeutralOutlinedIcon sx={whicon} /> },
+  { value: 'motivado', cor: '#1890FF', icon: <SentimentSatisfiedOutlinedIcon sx={whicon} /> },
+  { value: 'radiante', cor: 'rgb(90, 170, 40)', icon: <SentimentVerySatisfiedOutlinedIcon sx={whicon} /> },
+];
+
+const BpIcon = styled('span')(({ color }) => ({
   filter: 'grayscale(100%)',
-  'input:hover ~ &': {
-    filter: 'grayscale(40%)',
-    transform: 'scale(1.15)',
-  },
+  'input:hover ~ &': { filter: 'grayscale(0%)', transform: 'scale(1.15)', color },
 }));
 
-const BpCheckedIcon = styled('span')(({ icon }) => ({
-  width: 60,
-  height: 60,
+const BpCheckedIcon = styled('span')(({ color }) => ({
   transform: 'scale(1.3)',
-  backgroundImage: `url(/assets/${icon}.png)`,
-  backgroundPosition: 'center',
-  backgroundSize: 'cover',
-  'input:hover ~ &': {
-    filter: 'grayscale(20%)',
-    transform: 'scale(1.15)',
-  },
-  filter: 'grayscale(0%)',
+  filter: 'grayscale(50%)',
+  'input:hover ~ &': { filter: 'grayscale(0%)', transform: 'scale(1.15)', color },
 }));
 
 // ----------------------------------------------------------------------
 
-BpRadio.propTypes = {
-  value: PropTypes.string,
-};
+BpRadio.propTypes = { value: PropTypes.string, cor: PropTypes.string, icon1: PropTypes.node };
 
 function BpRadio(props) {
   return (
     <Radio
-      sx={{
-        '&:hover': {
-          bgcolor: 'transparent',
-        },
-      }}
       disableRipple
       color="default"
-      checkedIcon={<BpCheckedIcon icon={props.value} />}
-      icon={<BpIcon icon={props.value} />}
+      sx={{ py: 0, mb: -1 }}
+      checkedIcon={<BpCheckedIcon color={props.cor}>{props.icon1}</BpCheckedIcon>}
+      icon={<BpIcon color={props.cor}>{props.icon1}</BpIcon>}
       {...props}
     />
   );
@@ -80,23 +67,6 @@ function BpRadio(props) {
 // ----------------------------------------------------------------------
 
 export default function Disposicao() {
-  const { enqueueSnackbar } = useSnackbar();
-  const { done, error } = useSelector((state) => state.disposicao);
-
-  useEffect(() => {
-    if (done === 'disposicao') {
-      enqueueSnackbar('Obrigado(a) por partilhares a sua disposição connosco.', { variant: 'success' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-
   return <DisposicaoDialog id="disposicao-dialog" keepMounted />;
 }
 
@@ -127,12 +97,7 @@ function DisposicaoDialog() {
   };
 
   return (
-    <DialogAnimate
-      // sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
-      maxWidth="sm"
-      TransitionProps={{ onEntering: handleEntering }}
-      open={isOpenDisposicao}
-    >
+    <DialogAnimate maxWidth="sm" TransitionProps={{ onEntering: handleEntering }} open={isOpenDisposicao}>
       <DialogTitle>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           Como te sentes hoje?
@@ -141,20 +106,20 @@ function DisposicaoDialog() {
           </IconButton>
         </Stack>
       </DialogTitle>
-      <DialogContent sx={{ mt: 3, pb: 1 }}>
-        <Stack direction="row" justifyContent="center" sx={{ pb: 3 }}>
+      <DialogContent sx={{ mt: 3 }}>
+        <Stack direction="row" justifyContent="center" sx={{ pb: 5 }}>
           <RadioGroup
-            ref={radioGroupRef}
-            aria-label="disposicao"
-            name="disposicao"
-            value={value}
-            onChange={handleChange}
             row
+            value={value}
+            name="disposicao"
+            ref={radioGroupRef}
             justifyContent="center"
+            aria-label="disposicao"
+            onChange={handleChange}
           >
-            {options.map((option) => (
-              <Tooltip key={option} title={option.toUpperCase()} arrow>
-                <FormControlLabel value={option} control={<BpRadio />} label={false} />
+            {disposicoes.map((option) => (
+              <Tooltip key={option.value} title={option.value.toUpperCase()} arrow>
+                <FormControlLabel value={option.value} control={<BpRadio icon1={option.icon} cor={option.cor} />} />
               </Tooltip>
             ))}
           </RadioGroup>

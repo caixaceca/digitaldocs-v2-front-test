@@ -11,7 +11,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 // sections
-import { Tipos, Criacao, Ranking, Duracao, FileSystem } from '../sections/digitaldocs/indicadores';
+import { Tipos, Criacao, Ranking, Duracao, FileSystem } from '../sections/indicadores';
 // assets
 import ComingSoonIllustration from '../assets/ComingSoonIllustration';
 

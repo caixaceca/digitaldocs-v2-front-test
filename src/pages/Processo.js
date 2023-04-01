@@ -28,10 +28,10 @@ import {
   DetalhesProcesso,
   HistoricoPrisoes,
   HistoricoProcesso,
-} from '../sections/digitaldocs/processo';
-import Views from '../sections/digitaldocs/processo/Views';
-import { DesarquivarForm } from '../sections/digitaldocs/IntervencaoForm';
-import AtribuirAcessoForm from '../sections/digitaldocs/AtribuirAcessoForm';
+} from '../sections/processo';
+import Views from '../sections/processo/Views';
+import { DesarquivarForm } from '../sections/processo/IntervencaoForm';
+import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -54,7 +54,6 @@ export default function Processo() {
   const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
   const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
   const perfilId = currentColaborador?.perfil_id;
-  const widthC1 = refColumn1?.current?.offsetWidth - 25;
   const fromArquivo = from?.get?.('from') === 'arquivo';
   const fromTarefas = from?.get?.('from') === 'tarefas';
   const fromEntradas = from?.get?.('from') === 'entradas';
@@ -250,7 +249,7 @@ export default function Processo() {
             ) : (
               <>
                 <Grid item xs={12} lg={hasAnexos && 5}>
-                  <Card sx={{ minHeight: widthC1 }}>
+                  <Card>
                     <CardContent>
                       <Grid container spacing={3}>
                         {processo?.nota && <NotaProcesso nota={processo.nota} />}

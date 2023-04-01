@@ -79,21 +79,13 @@ export default function Router() {
         { element: <Navigate to="processos" replace />, index: true },
         { path: 'indicadores', element: <Indicadores /> },
         {
-          path: 'estados',
+          path: 'parametrizacao',
           children: [
-            { element: <Navigate to="/estados/lista" replace />, index: true },
-            { path: 'lista', element: <Estados /> },
-            { path: ':id', element: <PerfisEstado /> },
-          ],
-        },
-        { path: 'origens', element: <Origens /> },
-        { path: 'motivos', element: <Motivos /> },
-        {
-          path: 'fluxos',
-          children: [
-            { element: <Navigate to="/fluxos/lista" replace />, index: true },
-            { path: 'lista', element: <Fluxos /> },
-            { path: ':id', element: <Fluxo /> },
+            { element: <Navigate to="/parametrizacao/tabs" replace />, index: true },
+            { path: 'tabs', element: <Parametrizacao /> },
+            { path: 'fluxo/:id', element: <Fluxo /> },
+            { path: 'estado/:id', element: <PerfisEstado /> },
+            { path: 'acesso/:id', element: <PerfilEstadosAcessos /> },
           ],
         },
         {
@@ -123,14 +115,6 @@ export default function Router() {
             { path: ':id', element: <Processo /> },
           ],
         },
-        {
-          path: 'acessos',
-          children: [
-            { element: <Navigate to="/acessos/perfis" replace />, index: true },
-            { path: 'perfis', element: <Perfis /> },
-            { path: ':id', element: <PerfilEstadosAcessos /> },
-          ],
-        },
       ],
     },
 
@@ -146,17 +130,13 @@ const NotFound = Loadable(lazy(() => import('../pages/excecoes/Page404')));
 // //////////////////////////////////////////////// DIGITALDOCS //////////////////////////////////////////////
 
 const Fluxo = Loadable(lazy(() => import('../pages/Fluxo')));
-const Perfis = Loadable(lazy(() => import('../pages/Perfis')));
-const Fluxos = Loadable(lazy(() => import('../pages/Fluxos')));
 const Arquivo = Loadable(lazy(() => import('../pages/Arquivo')));
-const Origens = Loadable(lazy(() => import('../pages/Origens')));
-const Estados = Loadable(lazy(() => import('../pages/Estados')));
 const Procura = Loadable(lazy(() => import('../pages/Procura')));
-const Motivos = Loadable(lazy(() => import('../pages/Motivos')));
 const Controle = Loadable(lazy(() => import('../pages/Controle')));
 const Processo = Loadable(lazy(() => import('../pages/Processo')));
 const Processos = Loadable(lazy(() => import('../pages/Processos')));
 const Indicadores = Loadable(lazy(() => import('../pages/Indicadores')));
 const PerfisEstado = Loadable(lazy(() => import('../pages/PerfisEstado')));
+const Parametrizacao = Loadable(lazy(() => import('../pages/Parametrizacao')));
 const NovoEditarProcesso = Loadable(lazy(() => import('../pages/NovoEditarProcesso')));
 const PerfilEstadosAcessos = Loadable(lazy(() => import('../pages/PerfilEstadosAcessos')));

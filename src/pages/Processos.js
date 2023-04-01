@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from '../redux/store';
 // components
 import Page from '../components/Page';
 // sections
-import TableProcessos from '../sections/digitaldocs/TableProcessos';
+import { TableProcessos } from '../sections/tabela';
 
 // ----------------------------------------------------------------------
 

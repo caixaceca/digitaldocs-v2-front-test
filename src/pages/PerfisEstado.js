@@ -41,7 +41,7 @@ import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { TableToolbarPerfilEstados } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
 // sections
-import PerfisEstadoForm from '../sections/digitaldocs/PerfisEstadoForm';
+import { PerfisEstadoForm } from '../sections/parametrizacao/ParametrizacaoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -155,7 +155,7 @@ export default function PerfisEstado() {
 
   const isNotFound = !dataFiltered.length;
 
-  const title = estado ? `${estado.nome} » Colaboradores associados` : 'Colaboradores associados';
+  const title = estado?.nome ? `${estado.nome} » Colaboradores associados` : 'Colaboradores associados';
 
   return (
     <Page title="Acessos | DigitalDocs">
@@ -164,7 +164,7 @@ export default function PerfisEstado() {
           heading={title}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-            { name: 'Estados', href: PATH_DIGITALDOCS.estados.root },
+            { name: 'Parametrização', href: `${PATH_DIGITALDOCS.parametrizacao.tabs}?tab=estados&filter=` },
             { name: title },
           ]}
           action={
@@ -197,7 +197,7 @@ export default function PerfisEstado() {
                   <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
                   <TableBody>
                     {isLoading && isNotFound ? (
-                      <SkeletonTable column={4} row={10} />
+                      <SkeletonTable column={6} row={10} />
                     ) : (
                       dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                         <TableRow key={row?.id} hover>

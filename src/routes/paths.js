@@ -13,23 +13,13 @@ export const PATH_DIGITALDOCS = {
   general: {
     noPath: path(ROOTS_DIGITALDOCS, '/'),
     indicadores: path(ROOTS_DIGITALDOCS, '/indicadores'),
-    origens: path(ROOTS_DIGITALDOCS, '/origens'),
-    motivos: path(ROOTS_DIGITALDOCS, '/motivos'),
   },
-  estados: {
-    root: path(ROOTS_DIGITALDOCS, '/estados'),
-    lista: path(ROOTS_DIGITALDOCS, '/estados/lista'),
-    estado: path(ROOTS_DIGITALDOCS, '/estados/:id'),
-  },
-  fluxos: {
-    root: path(ROOTS_DIGITALDOCS, '/fluxos'),
-    lista: path(ROOTS_DIGITALDOCS, '/fluxos/lista'),
-    fluxo: path(ROOTS_DIGITALDOCS, '/fluxos/:id'),
-  },
-  estadosAcessos: {
-    root: path(ROOTS_DIGITALDOCS, '/acessos'),
-    perfis: path(ROOTS_DIGITALDOCS, '/acessos/lista'),
-    estadosAcesso: path(ROOTS_DIGITALDOCS, '/acessos/:id'),
+  parametrizacao: {
+    root: path(ROOTS_DIGITALDOCS, '/parametrizacao'),
+    tabs: path(ROOTS_DIGITALDOCS, '/parametrizacao/tabs'),
+    fluxo: path(ROOTS_DIGITALDOCS, '/parametrizacao/fluxo/:id'),
+    estado: path(ROOTS_DIGITALDOCS, '/parametrizacao/estado/:id'),
+    acesso: path(ROOTS_DIGITALDOCS, '/parametrizacao/acesso/:id'),
   },
   processos: {
     root: path(ROOTS_DIGITALDOCS, '/processos'),

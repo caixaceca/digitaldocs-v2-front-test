@@ -13,8 +13,8 @@ import Page from '../components/Page';
 import SvgIconStyle from '../components/SvgIconStyle';
 import { SearchNotFound404 } from '../components/table';
 // sections
-import Estado from '../sections/digitaldocs/Estado';
-import Transicao from '../sections/digitaldocs/Transicao';
+import Estado from '../sections/parametrizacao/Estado';
+import Transicao from '../sections/parametrizacao/Transicao';
 
 // ----------------------------------------------------------------------
 
@@ -24,13 +24,8 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
   width: '100%',
   display: 'flex',
   position: 'absolute',
-  [theme.breakpoints.up('sm')]: {
-    justifyContent: 'center',
-  },
-  [theme.breakpoints.up('md')]: {
-    justifyContent: 'flex-end',
-    paddingRight: theme.spacing(3),
-  },
+  [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
+  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
   backgroundColor: theme.palette.background.paper,
 }));
 

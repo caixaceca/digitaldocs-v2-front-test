@@ -1,5 +1,5 @@
 // @mui
-import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -11,12 +11,8 @@ const getIcon = (name) => <SvgIconStyle src={`/assets/icons/navbar/${name}.svg`}
 
 const ICONS = {
   in: getIcon('in'),
-  flow: getIcon('flow'),
   home: getIcon('home'),
-  state: getIcon('state'),
-  origin: getIcon('origin'),
   process: getIcon('process'),
-  transition: getIcon('transition'),
   meu_perfil: getIcon('meu_perfil'),
   indicadores: getIcon('indicadores'),
 };
@@ -29,36 +25,6 @@ const navConfig = [
         title: 'Indicadores',
         path: PATH_DIGITALDOCS.general.indicadores,
         icon: ICONS.indicadores,
-      },
-      {
-        title: 'Fluxos',
-        roles: ['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111'],
-        path: PATH_DIGITALDOCS.fluxos.root,
-        icon: ICONS.flow,
-      },
-      {
-        title: 'Estados',
-        roles: ['estado-110', 'estado-111', 'Todo-110', 'Todo-111'],
-        path: PATH_DIGITALDOCS.estados.root,
-        icon: ICONS.state,
-      },
-      {
-        title: 'Acessos',
-        roles: ['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111'],
-        path: PATH_DIGITALDOCS.estadosAcessos.root,
-        icon: <GroupAddOutlinedIcon />,
-      },
-      {
-        title: 'Origens',
-        roles: ['origem-110', 'origem-111', 'Todo-110', 'Todo-111'],
-        path: PATH_DIGITALDOCS.general.origens,
-        icon: ICONS.origin,
-      },
-      {
-        title: 'Motivos',
-        roles: ['Todo-110', 'Todo-111'],
-        path: PATH_DIGITALDOCS.general.motivos,
-        icon: ICONS.transition,
       },
       {
         title: 'Processos',
@@ -75,6 +41,25 @@ const navConfig = [
         roles: ['arquivo-100', 'arquivo-110', 'arquivo-111'],
         path: PATH_DIGITALDOCS.arquivo.root,
         icon: <SvgIconStyle src={`/assets/icons/archive.svg`} sx={{ width: 1, height: 1 }} />,
+      },
+      {
+        title: 'Parametrização',
+        roles: [
+          'Todo-111',
+          'Todo-110',
+          'fluxo-110',
+          'fluxo-111',
+          'origem-110',
+          'origem-111',
+          'estado-110',
+          'estado-111',
+          'acesso-110',
+          'acesso-111',
+          'perfilestado-110',
+          'perfilestado-111',
+        ],
+        path: PATH_DIGITALDOCS.parametrizacao.root,
+        icon: <SettingsOutlinedIcon />,
       },
     ],
   },

@@ -14,9 +14,9 @@ import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
-import Ambiente from '../sections/digitaldocs/Ambiente';
-import ProcessoInterno from '../sections/digitaldocs/processo/form/ProcessoInterno';
-import ProcessoExterno from '../sections/digitaldocs/processo/form/ProcessoExterno';
+import Ambiente from '../sections/Ambiente';
+import ProcessoInterno from '../sections/processo/form/ProcessoInterno';
+import ProcessoExterno from '../sections/processo/form/ProcessoExterno';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 

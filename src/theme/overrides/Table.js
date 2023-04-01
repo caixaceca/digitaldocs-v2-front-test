@@ -8,18 +8,14 @@ export default function Table(theme) {
           '&:last-child td, &:last-child th': { border: 0 },
           '&.Mui-selected': {
             backgroundColor: theme.palette.action.selected,
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
-            },
+            '&:hover': { backgroundColor: theme.palette.action.hover },
           },
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
-        root: {
-          borderBottom: `dotted 1px ${theme.palette.divider}`,
-        },
+        root: { borderBottom: `dotted 1px ${theme.palette.divider}` },
         head: {
           color: theme.palette.text.secondary,
           backgroundColor: theme.palette.background.neutral,
@@ -54,22 +50,10 @@ export default function Table(theme) {
     },
     MuiTablePagination: {
       styleOverrides: {
-        root: {
-          borderTop: `solid 1px ${theme.palette.divider}`,
-        },
-        toolbar: {
-          height: 60,
-        },
-        select: {
-          '&:focus': {
-            borderRadius: theme.shape.borderRadius,
-          },
-        },
-        selectIcon: {
-          width: 20,
-          height: 20,
-          marginTop: -4,
-        },
+        root: { borderTop: `solid 1px ${theme.palette.divider}` },
+        toolbar: { height: 60 },
+        select: { '&:focus': { borderRadius: theme.shape.borderRadius } },
+        selectIcon: { width: 20, height: 20, marginTop: -4 },
       },
     },
   };

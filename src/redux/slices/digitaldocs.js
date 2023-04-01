@@ -1202,11 +1202,25 @@ export function createItem(item, dados, params) {
         }
         case 'processo interno': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/interno`, dados, options1);
+          if (params?.ispendente) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/abandonar/${response?.data?.processo?.id}`,
+              JSON.stringify(params?.abandonar),
+              options
+            );
+          }
           dispatch(slice.actions.createProcessoSuccess(response?.data?.processo?.id));
           break;
         }
         case 'processo externo': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/externo`, dados, options1);
+          if (params?.ispendente) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/abandonar/${response?.data?.processo?.id}`,
+              JSON.stringify(params?.abandonar),
+              options
+            );
+          }
           dispatch(slice.actions.createProcessoSuccess(response?.data?.processo?.id));
           break;
         }
@@ -1326,6 +1340,13 @@ export function updateItem(item, dados, params) {
         }
         case 'processo': {
           await axios.put(`${BASEURLDD}/v1/processos/ei/pro/${params?.id}/${params?.perfilId}`, dados, options1);
+          if (params?.ispendente) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/abandonar/${params?.id}`,
+              JSON.stringify(params?.abandonar),
+              options
+            );
+          }
           dispatch(slice.actions.updateProcessoSuccess(params?.id));
           break;
         }

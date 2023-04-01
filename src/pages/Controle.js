@@ -12,9 +12,7 @@ import { useSelector } from '../redux/store';
 // components
 import Page from '../components/Page';
 // sections
-import TableEntradas from '../sections/digitaldocs/TableEntradas';
-import TablePorConcluir from '../sections/digitaldocs/TablePorConcluir';
-import TableTrabalhados from '../sections/digitaldocs/TableTrabalhados';
+import { TableEntradas, TablePorConcluir, TableTrabalhados } from '../sections/tabela';
 
 // ----------------------------------------------------------------------
 

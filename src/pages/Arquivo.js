@@ -7,8 +7,8 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 // sections
-import Arquivos from '../sections/digitaldocs/Arquivos';
-import PedidosAcesso from '../sections/digitaldocs/PedidosAcesso';
+import Arquivos from '../sections/arquivo/Arquivos';
+import PedidosAcesso from '../sections/arquivo/PedidosAcesso';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 

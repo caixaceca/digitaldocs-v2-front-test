@@ -11,25 +11,28 @@ import { useSelector } from '../redux/store';
 // hooks
 import { getComparator, applySort } from '../hooks/useTable';
 // sections
-import Fluxo from '../sections/digitaldocs/Fluxo';
-import Ambiente from '../sections/digitaldocs/Ambiente';
+import Fluxo from '../sections/Fluxo';
+import Ambiente from '../sections/Ambiente';
 
 // ----------------------------------------------------------------------
 
-SearchToolbar.propTypes = { filterSearch: PropTypes.string, onFilterSearch: PropTypes.func };
+SearchToolbar.propTypes = { filterSearch: PropTypes.string, onFilterSearch: PropTypes.func, tab: PropTypes.string };
 
-export function SearchToolbar({ filterSearch, onFilterSearch }) {
+export function SearchToolbar({ filterSearch, onFilterSearch, tab }) {
+  const handleResetFilter = () => {
+    onFilterSearch({ tab, filter: '' });
+  };
   return (
-    <Box sx={{ pb: 1 }}>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
       <TextField
         fullWidth
         value={filterSearch.get('filter') || ''}
         onChange={(event) => {
           const filter = event.target.value;
           if (filter) {
-            onFilterSearch({ filter });
+            onFilterSearch({ tab, filter });
           } else {
-            onFilterSearch({});
+            onFilterSearch({ tab, filter: '' });
           }
         }}
         placeholder="Procurar..."
@@ -41,7 +44,15 @@ export function SearchToolbar({ filterSearch, onFilterSearch }) {
           ),
         }}
       />
-    </Box>
+
+      {filterSearch?.get('filter') && (
+        <Tooltip title="Limpar" arrow>
+          <IconButton color="inherit" onClick={() => handleResetFilter()}>
+            <ClearAllIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Stack>
   );
 }
 
@@ -400,16 +411,21 @@ export function SearchToolbarTrabalhados({
 TableToolbarPerfilEstados.propTypes = {
   filterSearch: PropTypes.object,
   onFilterSearch: PropTypes.func,
-  options: PropTypes.arrayOf(PropTypes.string),
 };
 
-export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch, options }) {
+export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch }) {
+  const { uos } = useSelector((state) => state.uo);
+  const _uosList = ['Todos'];
+  applySort(uos, getComparator('asc', 'label'))?.forEach((_uo) => {
+    _uosList.push(_uo?.label);
+  });
+
   const isFiltered =
     (filterSearch.get('uo') && filterSearch.get('uo') !== 'Todos') ||
     (filterSearch.get('filter') && filterSearch.get('filter') !== '');
 
   const handleResetFilter = () => {
-    onFilterSearch({ uo: 'Todos', filter: '' });
+    onFilterSearch({ tab: 'acessos', uo: 'Todos', filter: '' });
   };
 
   return (
@@ -418,9 +434,9 @@ export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch, option
         fullWidth
         value={filterSearch.get('uo') || 'Todos'}
         onChange={(event, value) => {
-          onFilterSearch({ uo: value || 'Todos', filter: filterSearch.get('filter') || '' });
+          onFilterSearch({ tab: 'acessos', uo: value || 'Todos', filter: filterSearch.get('filter') || '' });
         }}
-        options={options.map((option) => option)}
+        options={_uosList?.map((option) => option)}
         getOptionLabel={(option) => option}
         sx={{ maxWidth: { md: 250, sm: 200 }, minWidth: { md: 250, sm: 200 } }}
         renderInput={(params) => <TextField {...params} label="Unidade orgânicas" margin="none" />}
@@ -430,7 +446,7 @@ export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch, option
           fullWidth
           value={filterSearch.get('filter') || ''}
           onChange={(event) => {
-            onFilterSearch({ uo: filterSearch.get('uo') || 'Todos', filter: event.target.value || '' });
+            onFilterSearch({ tab: 'acessos', uo: filterSearch.get('uo') || 'Todos', filter: event.target.value || '' });
           }}
           placeholder="Procurar..."
           InputProps={{

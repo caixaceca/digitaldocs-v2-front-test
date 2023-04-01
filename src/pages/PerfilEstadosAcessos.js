@@ -10,9 +10,9 @@ import useSettings from '../hooks/useSettings';
 import Page from '../components/Page';
 import { SearchNotFound404 } from '../components/table';
 // sections
-import Acessos from '../sections/digitaldocs/Acessos';
 import PerfilCover from '../sections/sobre/PerfilCover';
-import MeusEstados from '../sections/digitaldocs/MeusEstados';
+import AcessosPerfil from '../sections/parametrizacao/AcessosPerfil';
+import EstadosPerfil from '../sections/parametrizacao/EstadosPerfil';
 
 // ----------------------------------------------------------------------
 
@@ -23,13 +23,8 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
   display: 'flex',
   position: 'absolute',
   backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('sm')]: {
-    justifyContent: 'center',
-  },
-  [theme.breakpoints.up('md')]: {
-    justifyContent: 'flex-end',
-    paddingRight: theme.spacing(3),
-  },
+  [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
+  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
 }));
 
 // ----------------------------------------------------------------------
@@ -46,8 +41,8 @@ export default function PerfilEstadosAcessos() {
   };
 
   const TABS = [
-    { value: 'acessos', label: 'Acessos', component: <Acessos /> },
-    { value: 'estados', label: 'Estados ', component: <MeusEstados /> },
+    { value: 'acessos', label: 'Acessos', component: <AcessosPerfil /> },
+    { value: 'estados', label: 'Estados ', component: <EstadosPerfil /> },
   ];
 
   return (
