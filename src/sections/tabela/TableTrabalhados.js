@@ -160,7 +160,7 @@ export default function TableTrabalhados() {
             sx={{ py: 2 }}
           >
             <ArquivoAnalytic
-              title={`Total - ${uo ? uo?.label : currentColaborador?.uo?.label}`}
+              title={uo ? uo?.label : currentColaborador?.uo?.label}
               total={uoId ? total : subtotal}
               icon="/assets/icons/navbar/process.svg"
               color="success.main"
