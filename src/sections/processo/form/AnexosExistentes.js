@@ -33,7 +33,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [selectedAnexoID, setSelectedAnexoID] = useState(null);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { done, error, isOpenModalAnexo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = anexos?.filter((row) => row.is_ativo);
 

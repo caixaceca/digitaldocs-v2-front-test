@@ -14,6 +14,7 @@ import {
   TableHead,
   TableContainer,
 } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // redux
@@ -49,7 +50,7 @@ export default function AcessosPerfil() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { done, error, isLoading, isOpenModal, isSaving, isOpenModalAnexo, selectedAnexoId, acessos } = useSelector(
     (state) => state.digitaldocs
   );
@@ -116,11 +117,7 @@ export default function AcessosPerfil() {
         ]}
         action={
           <RoleBasedGuard roles={['acesso-110', 'Todo-110', 'Todo-111']}>
-            <Button
-              variant="soft"
-              onClick={handleAdd}
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-            >
+            <Button variant="soft" onClick={handleAdd} startIcon={<AddCircleIcon />}>
               Adicionar
             </Button>
           </RoleBasedGuard>

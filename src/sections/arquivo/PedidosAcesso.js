@@ -36,7 +36,7 @@ export default function PedidosAcesso() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pedidosAcesso, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
 
   const {
     page,

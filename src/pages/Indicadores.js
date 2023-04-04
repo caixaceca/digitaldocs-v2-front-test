@@ -41,7 +41,7 @@ export default function Indicadores() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
   const { meusacessos } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState(meusacessos.includes('Todo-111') ? 'files' : 'total');
 
   const handleChangeTab = (event, newValue) => {

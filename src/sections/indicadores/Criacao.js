@@ -27,9 +27,8 @@ const vistas = [
 
 export default function Criacao() {
   const dispatch = useDispatch();
-  const { uos } = useSelector((state) => state.uo);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
   const { isLoading, iAmInGrpGerente, indicadores } = useSelector((state) => state.digitaldocs);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
   const perfilId = currentColaborador?.perfil_id;
   const [mes, setMes] = useState(null);
   const [vista, setVista] = useState({ id: 'diario', label: 'Diária' });

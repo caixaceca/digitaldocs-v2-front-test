@@ -23,8 +23,7 @@ import MarkChatUnreadOutlinedIcon from '@mui/icons-material/MarkChatUnreadOutlin
 import { sub } from 'date-fns';
 import { fToNow } from '../../utils/formatTime';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getNotificacao, lerTodasNotificacoes } from '../../redux/slices/ajuda';
+import { useSelector } from '../../redux/store';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -38,10 +37,8 @@ import { IconButtonAnimate } from '../../components/animate';
 // ----------------------------------------------------------------------
 
 export default function Notificacoes() {
-  const dispatch = useDispatch();
   const [open, setOpen] = useState(null);
-  const { mail } = useSelector((state) => state.colaborador);
-  const { notificacoes } = useSelector((state) => state.ajuda);
+  const { notificacoes } = useSelector((state) => state.intranet);
   const total = notificacoes?.length;
   const totalUnRead = notificacoes.filter((item) => !item.vista).length;
   const dataSorted = applySort(notificacoes, getComparator('desc', 'criado_em'));
@@ -55,7 +52,7 @@ export default function Notificacoes() {
   };
 
   const handleVerTodas = () => {
-    dispatch(lerTodasNotificacoes(mail));
+    // dispatch(lerTodasNotificacoes(mail));
     setOpen(null);
   };
 
@@ -134,13 +131,11 @@ export default function Notificacoes() {
 NotificationItem.propTypes = { onClose: PropTypes.func, notificacao: PropTypes.object };
 
 function NotificationItem({ notificacao, onClose }) {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mail } = useSelector((state) => state.colaborador);
   const _title = '';
   const handleViewRow = (_notificacao) => {
     if (!notificacao?.vista) {
-      dispatch(getNotificacao(notificacao?.id, mail));
+      // dispatch(getNotificacao(notificacao?.id, mail));
     }
     switch (_notificacao.objeto) {
       case 'norma':

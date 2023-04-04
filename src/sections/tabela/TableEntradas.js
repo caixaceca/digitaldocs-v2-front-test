@@ -59,9 +59,8 @@ export default function TableEntradas() {
   const [dataFim, setDataFim] = useState(new Date());
   const [dataInicio, setDataInicio] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { uos } = useSelector((state) => state.uo);
   const { entradas, meusAmbientes, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
   const perfilId = currentColaborador?.perfil_id;
   const [uoId, setUoId] = useState(currentColaborador?.uo_id);
 
@@ -189,14 +188,14 @@ export default function TableEntradas() {
                 value={dataInicio}
                 label="Data início"
                 onChange={(newValue) => setDataInicio(newValue)}
-                renderInput={(params) => <TextField size="small" {...params} sx={{ minWidth: 160 }} />}
+                renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: { sm: 160 } }} />}
               />
               <DatePicker
                 disableFuture
                 value={dataFim}
                 label="Data fim"
                 onChange={(newValue) => setDataFim(newValue)}
-                renderInput={(params) => <TextField size="small" {...params} sx={{ minWidth: 160 }} />}
+                renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: { sm: 160 } }} />}
               />
             </Stack>
           </Stack>

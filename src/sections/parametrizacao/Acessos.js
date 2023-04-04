@@ -47,7 +47,7 @@ const TABLE_HEAD = [
 export default function Acessos() {
   const navigate = useNavigate();
   const { isLoading } = useSelector((state) => state.digitaldocs);
-  const { colaboradores } = useSelector((state) => state.colaborador);
+  const { colaboradores } = useSelector((state) => state.intranet);
 
   const {
     page,

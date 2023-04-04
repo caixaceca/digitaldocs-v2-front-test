@@ -45,7 +45,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   const theme = useTheme();
   const { pathname } = useLocation();
   const isDesktop = useResponsive('up', 'lg');
-  const { myAplicacoes } = useSelector((state) => state.aplicacao);
+  const { myAplicacoes } = useSelector((state) => state.intranet);
   const appsOrder = applySort(myAplicacoes, getComparator('asc', 'nome'));
   const noApp = appsOrder.length === 0;
 

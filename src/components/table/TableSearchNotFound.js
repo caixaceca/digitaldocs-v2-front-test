@@ -5,9 +5,7 @@ import { DocIllustration } from '../../assets';
 
 // ----------------------------------------------------------------------
 
-TableSearchNotFound.propTypes = {
-  message: PropTypes.string.isRequired,
-};
+TableSearchNotFound.propTypes = { message: PropTypes.string.isRequired };
 
 export default function TableSearchNotFound({ message }) {
   return (

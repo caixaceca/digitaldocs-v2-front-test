@@ -26,8 +26,7 @@ const origens = [
 
 export default function Duracao() {
   const dispatch = useDispatch();
-  const { uos } = useSelector((state) => state.uo);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
   const { isLoading, iAmInGrpGerente, duracao, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
   const [dataInicio, setDataInicio] = useState(null);

@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 // @mui
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Fab, Grid, Button, Tooltip, TextField, InputAdornment } from '@mui/material';
 // hooks
@@ -65,7 +66,7 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
                   variant="soft"
                   sx={{ py: 3.5 }}
                   onClick={handleAdd}
-                  startIcon={<SvgIconStyle src="/assets/icons/add.svg" />}
+                  startIcon={<AddCircleIcon />}
                 >
                   Entidade
                 </Button>
@@ -136,7 +137,7 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
               variant="soft"
               sx={{ py: 3.5 }}
               onClick={handleAdd}
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" />}
+              startIcon={<AddCircleIcon />}
             >
               Entidade
             </Button>

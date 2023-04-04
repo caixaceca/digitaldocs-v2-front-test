@@ -14,6 +14,7 @@ import {
   TableCell,
   TableContainer,
 } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
@@ -62,7 +63,7 @@ export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { processos, isLoading, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
   const title =
     (from === 'devolvidosEquipa' && 'Devolvidos da equipa') ||
@@ -140,7 +141,7 @@ export default function TableProcessos({ from }) {
               variant="soft"
               component={RouterLink}
               to={PATH_DIGITALDOCS.processos.novoProcesso}
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
+              startIcon={<AddCircleIcon />}
             >
               Adicionar
             </Button>

@@ -1,39 +1,14 @@
 import { combineReducers } from 'redux';
 import storage from 'redux-persist/lib/storage';
 // slices
-import uoReducer from './slices/uo';
-import fraseReducer from './slices/frase';
-import ajudaReducer from './slices/ajuda';
-import denunciaReducer from './slices/denuncia';
-import aplicacaoReducer from './slices/aplicacao';
-import colaboradorReducer from './slices/colaborador';
-import disposicaoReducer from './slices/disposicao';
-import certificacaoReducer from './slices/certificacao';
+import intranetReducer from './slices/intranet';
 //
 import digitaldocsReducer from './slices/digitaldocs';
 
 // ----------------------------------------------------------------------
 
-const rootPersistConfig = {
-  key: 'root',
-  storage,
-  keyPrefix: 'redux-',
-  whitelist: [],
-};
+const rootPersistConfig = { key: 'root', storage, keyPrefix: 'redux-', whitelist: [] };
 
-const rootReducer = combineReducers({
-  uo: uoReducer,
-  frase: fraseReducer,
-  ajuda: ajudaReducer,
-  denuncia: denunciaReducer,
-  aplicacao: aplicacaoReducer,
-  // SOBRE
-  certificacao: certificacaoReducer,
-  disposicao: disposicaoReducer,
-  // COLABORADOR
-  colaborador: colaboradorReducer,
-  //
-  digitaldocs: digitaldocsReducer,
-});
+const rootReducer = combineReducers({ intranet: intranetReducer, digitaldocs: digitaldocsReducer });
 
 export { rootPersistConfig, rootReducer };

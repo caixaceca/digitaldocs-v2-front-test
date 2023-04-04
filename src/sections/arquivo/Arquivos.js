@@ -48,7 +48,7 @@ const TABLE_HEAD = [
 export default function Arquivos() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { arquivos, indicadoresArquivo, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {

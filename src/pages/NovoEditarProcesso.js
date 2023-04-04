@@ -29,7 +29,7 @@ export default function NovoEditarProcesso() {
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
   const [fluxo, setFluxo] = useState(null);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { processo, origens, meusAmbientes, meusFluxos, meuAmbiente } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
 

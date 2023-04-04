@@ -13,6 +13,7 @@ import {
   TableHead,
   TableContainer,
 } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // redux
@@ -36,7 +37,7 @@ import { EstadosPerfilForm } from './ParametrizacaoForm';
 export default function EstadosPerfil() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { isLoading, meusEstados, estados, isOpenModal } = useSelector((state) => state.digitaldocs);
 
   const isNotFound = !meusEstados?.length;
@@ -73,11 +74,7 @@ export default function EstadosPerfil() {
         ]}
         action={
           <RoleBasedGuard roles={['perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}>
-            <Button
-              variant="soft"
-              onClick={handleAdd}
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-            >
+            <Button variant="soft" onClick={handleAdd} startIcon={<AddCircleIcon />}>
               Adicionar
             </Button>
           </RoleBasedGuard>

@@ -33,7 +33,7 @@ HistoricoProcesso.propTypes = { historico: PropTypes.array };
 
 export default function HistoricoProcesso({ historico }) {
   const [openHistorico, setOpenHistorico] = useState(false);
-  const { colaboradores } = useSelector((state) => state.colaborador);
+  const { colaboradores } = useSelector((state) => state.intranet);
 
   const handleHistorico = () => {
     setOpenHistorico(!openHistorico);

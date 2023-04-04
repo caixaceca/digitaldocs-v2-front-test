@@ -9,7 +9,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoadingButton } from '@mui/lab';
 import { Box, Grid, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 // redux
-import { enviarSugestao } from '../../redux/slices/ajuda';
+import { createItem } from '../../redux/slices/intranet';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
 import { FormProvider, RHFTextField, RHFUploadSingleFile } from '../../components/hook-form';
@@ -21,11 +21,11 @@ FormSugestao.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 export function FormSugestao({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail } = useSelector((state) => state.colaborador);
-  const { done, error, isLoading } = useSelector((state) => state.ajuda);
+  const { mail } = useSelector((state) => state.intranet);
+  const { done, error, isLoading } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (done) {
+    if (done === 'sugestao') {
       enqueueSnackbar('Sugestão enviada com sucesso. Obrigado(a)!', { variant: 'success' });
       onCancel();
     }
@@ -67,7 +67,7 @@ export function FormSugestao({ open, onCancel }) {
       if (values.imagem instanceof File) {
         formData.append('imagem', values.imagem);
       }
-      dispatch(enviarSugestao(formData, mail));
+      dispatch(createItem('sugestao', formData, { mail, mensagem: 'sugestao' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

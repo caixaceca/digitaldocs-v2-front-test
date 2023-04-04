@@ -10,7 +10,7 @@ import { BASEURL } from '../utils/axios';
 // ----------------------------------------------------------------------
 
 export default function Certificados() {
-  const { certificacoes } = useSelector((state) => state.certificacao);
+  const { certificacoes } = useSelector((state) => state.intranet);
 
   return (
     <Stack spacing={3} alignItems="center" sx={{ px: 5.5, pb: 5, my: 10, width: 1, textAlign: 'center' }}>

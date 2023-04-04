@@ -60,7 +60,7 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (done === 'realizada') {
@@ -215,7 +215,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { done, error, isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -406,7 +406,7 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { done, error, isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -507,7 +507,7 @@ export function FinalizarForm({ open, onCancel, processo }) {
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
   const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (open) {

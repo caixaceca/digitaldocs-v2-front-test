@@ -27,10 +27,11 @@ export default function Intervencao({ processo }) {
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
-  const { isSaving, meusacessos, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { mail, currentColaborador, uos } = useSelector((state) => state.intranet);
+  const { isSaving, meusAmbientes, iAmInGrpGerente } = useSelector((state) => state.digitaldocs);
+  const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências' || false;
   const perfilId = currentColaborador?.perfil_id;
-  const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
+  // const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
 
   const devolucoes = [];
   const seguimentos = [];
@@ -88,7 +89,6 @@ export default function Intervencao({ processo }) {
 
   const podeFinalizarNE = () => {
     if (
-      !processo?.is_interno &&
       processo?.situacao === 'E' &&
       processo?.operacao === 'Cativo/Penhora' &&
       processo?.nome === 'Validação Notas externas'
@@ -104,46 +104,48 @@ export default function Intervencao({ processo }) {
     return false;
   };
 
-  const podeEditar = () => {
-    if (isAdmin) {
-      return true;
-    }
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (
-        (meusAmbientes[i]?.uo_id === processo?.uo_origem_id && meusAmbientes[i]?.id === processo?.estado_atual_id) ||
-        (processo?.assunto === 'Processos Judiciais e Fiscais' &&
-          processo?.nome === 'Secretariado e Relações Públicas' &&
-          meusAmbientes[i]?.nome === 'Secretariado e Relações Públicas')
-      ) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
+  // const podeEditar = () => {
+  //   if (isAdmin) {
+  //     return true;
+  //   }
+  //   let i = 0;
+  //   while (i < meusAmbientes?.length) {
+  //     if (
+  //       (meusAmbientes[i]?.uo_id === processo?.uo_origem_id && meusAmbientes[i]?.id === processo?.estado_atual_id) ||
+  //       (processo?.assunto === 'Processos Judiciais e Fiscais' &&
+  //         processo?.nome === 'Secretariado e Relações Públicas' &&
+  //         meusAmbientes[i]?.nome === 'Secretariado e Relações Públicas')
+  //     ) {
+  //       return true;
+  //     }
+  //     i += 1;
+  //   }
+  //   return false;
+  // };
 
-  const podeEditarNE = () => {
-    if (isAdmin) {
-      return true;
-    }
-    if (processo?.nome === 'DOP - Execução Notas Externas') {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.nome === 'DOP - Execução Notas Externas') {
-          return true;
-        }
-        i += 1;
-      }
-    }
-    return false;
-  };
+  // const podeEditarNE = () => {
+  //   if (isAdmin) {
+  //     return true;
+  //   }
+  //   if (processo?.nome === 'DOP - Execução Notas Externas') {
+  //     let i = 0;
+  //     while (i < meusAmbientes?.length) {
+  //       if (meusAmbientes[i]?.nome === 'DOP - Execução Notas Externas') {
+  //         return true;
+  //       }
+  //       i += 1;
+  //     }
+  //   }
+  //   return false;
+  // };
 
   const podeArquivar = () => {
     let i = 0;
     while (i < meusAmbientes?.length) {
       if (
-        (meusAmbientes[i]?.is_inicial || meusAmbientes[i]?.is_final) &&
+        ((meusAmbientes[i]?.is_inicial && fromAgencia && iAmInGrpGerente) ||
+          (meusAmbientes[i]?.is_inicial && !fromAgencia) ||
+          meusAmbientes[i]?.is_final) &&
         meusAmbientes[i]?.id === processo?.estado_atual_id
       ) {
         return true;
@@ -155,7 +157,7 @@ export default function Intervencao({ processo }) {
 
   return (
     <>
-      {processo?.destinos?.length !== 0 && (
+      {processo?.destinos?.length !== 0 && !processo.ispendente && (
         <>
           {devolucoes?.length > 0 && (
             <>
@@ -222,13 +224,11 @@ export default function Intervencao({ processo }) {
           <FinalizarForm open={open5} onCancel={onClose5} processo={processo} />
         </>
       )}
-
       <Tooltip title="ABANDONAR" arrow>
         <Fab color="warning" size="small" variant="soft" onClick={onOpen2}>
           <SvgIconStyle src="/assets/icons/abandonar.svg" />
         </Fab>
       </Tooltip>
-
       <DialogConfirmar
         open={open2}
         onClose={onClose2}
@@ -239,38 +239,18 @@ export default function Intervencao({ processo }) {
         desc="abandonar este processo"
       />
 
-      {(podeEditar() || podeEditarNE()) && (
-        <Tooltip title="EDITAR" arrow>
-          <Fab
-            size="small"
-            variant="soft"
-            color="warning"
-            component={RouterLink}
-            to={`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`}
-          >
-            <SvgIconStyle src="/assets/icons/editar.svg" />
-          </Fab>
-        </Tooltip>
-      )}
-
-      {/* {processo?.htransicoes?.length === 0 ? (
-        <>
-          <Tooltip title="ELIMINAR" arrow>
-            <Fab color="error" size="small" variant="soft" onClick={onOpen5}>
-              <SvgIconStyle src="/assets/icons/trash.svg" />
-            </Fab>
-          </Tooltip>
-          <DialogConfirmar
-            open={open5}
-            onClose={onClose5}
-            isLoading={isSaving}
-            handleOk={handleEliminar}
-            title="Eliminar"
-            desc="eliminar este processo"
-          />
-        </>
-      ) : (
-        <> */}
+      {/* {(podeEditar() || podeEditarNE()) && ( */}
+      <Tooltip title="EDITAR" arrow>
+        <Fab
+          size="small"
+          variant="soft"
+          color="warning"
+          component={RouterLink}
+          to={`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`}
+        >
+          <SvgIconStyle src="/assets/icons/editar.svg" />
+        </Fab>
+      </Tooltip>
       {podeArquivar() && (
         <>
           <Tooltip title="ARQUIVAR" arrow>
@@ -283,7 +263,5 @@ export default function Intervencao({ processo }) {
         </>
       )}
     </>
-    //   )}
-    // </>
   );
 }

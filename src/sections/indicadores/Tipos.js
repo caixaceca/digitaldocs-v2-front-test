@@ -33,8 +33,7 @@ import Chart, { useChart } from '../../components/chart';
 export default function Tipos() {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { uos } = useSelector((state) => state.uo);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
   const { isLoading, iAmInGrpGerente, indicadoresTipos } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
   const [dataInicio, setDataInicio] = useState(null);

@@ -38,7 +38,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 export default function Controle() {
   const { themeStretch } = useSettings();
   const { meusAmbientes } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
+  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'entradas', filter: '' });
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab({ tab: newValue });

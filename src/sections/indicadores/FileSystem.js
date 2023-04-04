@@ -17,7 +17,7 @@ export default function FileSystem() {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { fileSystem, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const isNotFound = !fileSystem.length;
   const chartColors = [theme.palette.primary.main, theme.palette.primary.dark];
   const chartOptions = useChart({

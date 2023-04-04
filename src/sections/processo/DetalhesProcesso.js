@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 // @mui
 import {
   Fab,
-  Grid,
   List,
   Stack,
   Paper,
@@ -46,8 +45,7 @@ import { dis } from '../../_mock';
 DetalhesProcesso.propTypes = { processo: PropTypes.object };
 
 export default function DetalhesProcesso({ processo }) {
-  const { uos } = useSelector((state) => state.uo);
-  const { colaboradores } = useSelector((state) => state.colaborador);
+  const { colaboradores, uos } = useSelector((state) => state.intranet);
   const { motivosPendencias } = useSelector((state) => state.digitaldocs);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
@@ -61,47 +59,55 @@ export default function DetalhesProcesso({ processo }) {
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
 
   return (
-    <>
-      <Grid item xs={12} sx={{ pt: '5px !important' }}>
-        <Scrollbar>
-          <List>
-            <ListItem disableGutters secondaryAction="">
-              <Typography variant="subtitle1">Processo</Typography>
+    <Scrollbar>
+      {(processo?.referencia ||
+        processo?.assunto ||
+        processo?.data_entrada ||
+        processo?.nome ||
+        processo.criado_em ||
+        uo ||
+        criador ||
+        processo?.obs ||
+        processo.ispendente) && (
+        <List>
+          <ListItem disableGutters secondaryAction="">
+            <Typography variant="subtitle1">Processo</Typography>
+          </ListItem>
+          <Divider />
+          {processo?.referencia && (
+            <ListItem disableGutters>
+              <TextItem title="Referência:" text={processo.referencia} />
             </ListItem>
-            <Divider />
-            {processo?.referencia && (
-              <ListItem disableGutters>
-                <TextItem title="Referência:" text={processo.referencia} />
-              </ListItem>
-            )}
-            {processo?.assunto && (
-              <ListItem disableGutters>
-                <TextItem title="Fluxo:" text={processo.assunto} />
-              </ListItem>
-            )}
-            {processo?.data_entrada && (
-              <ListItem disableGutters>
-                <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />
-              </ListItem>
-            )}
-            {processo?.nome && (
-              <ListItem disableGutters>
-                <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
-                  <Typography sx={{ color: 'text.secondary' }}>Estado atual:</Typography>
-                  <Typography sx={{ fontWeight: 900, color: 'success.main' }}>
-                    {processo.nome}
-                    {colaboradorLock && (
-                      <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
-                        <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                          {colaboradorLock?.perfil?.displayName}
-                        </Typography>
-                        &nbsp;está trabalhando neste processo
+          )}
+          {processo?.assunto && (
+            <ListItem disableGutters>
+              <TextItem title="Fluxo:" text={processo.assunto} />
+            </ListItem>
+          )}
+          {processo?.data_entrada && (
+            <ListItem disableGutters>
+              <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />
+            </ListItem>
+          )}
+          {processo?.nome && (
+            <ListItem disableGutters>
+              <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
+                <Typography sx={{ color: 'text.secondary' }}>Estado atual:</Typography>
+                <Typography sx={{ fontWeight: 900, color: 'success.main' }}>
+                  {processo.nome}
+                  {colaboradorLock && (
+                    <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
+                      <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                        {colaboradorLock?.perfil?.displayName}
                       </Typography>
-                    )}
-                  </Typography>
-                </Stack>
-              </ListItem>
-            )}
+                      &nbsp;está trabalhando neste processo
+                    </Typography>
+                  )}
+                </Typography>
+              </Stack>
+            </ListItem>
+          )}
+          {(processo.criado_em || uo || criador) && (
             <ListItem disableGutters>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Typography sx={{ color: 'text.secondary' }}>Criado:</Typography>
@@ -129,18 +135,20 @@ export default function DetalhesProcesso({ processo }) {
                 </Stack>
               </Stack>
             </ListItem>
-            {processo?.obs && (
-              <ListItem disableGutters>
-                <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
-                    <Typography>{newLineText(processo.obs)}</Typography>
-                  </Stack>
-                </Paper>
-              </ListItem>
-            )}
-            {processo.ispendente && (
-              <List>
+          )}
+          {processo?.obs && (
+            <ListItem disableGutters>
+              <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
+                  <Typography>{newLineText(processo.obs)}</Typography>
+                </Stack>
+              </Paper>
+            </ListItem>
+          )}
+          {processo.ispendente && (
+            <List>
+              <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
                 <ListItem disableGutters>
                   <Label color="warning">
                     <InfoOutlinedIcon sx={{ width: 15, mr: 1 }} /> Processo pendente
@@ -153,172 +161,172 @@ export default function DetalhesProcesso({ processo }) {
                 )}
                 {processo.mobs && (
                   <ListItem disableGutters>
-                    <TextItem title="Observação:" text={processo.mobs} />
+                    <TextItem title="Obs:" text={processo.mobs} />
                   </ListItem>
                 )}
-              </List>
-            )}
-          </List>
-          {(processo?.titular ||
-            processo?.docidp ||
-            processo?.docids ||
-            processo?.bi_cni ||
-            _entidades ||
-            processo?.cliente ||
-            processo?.conta) && (
-            <List>
-              <ListItem disableGutters>
-                <Typography variant="subtitle1">Identificação</Typography>
-              </ListItem>
-              <Divider />
-              {processo.titular && (
-                <ListItem disableGutters>
-                  <TextItem title="Titular:" text={processo.titular} />
-                </ListItem>
-              )}
-              {(processo.docidp || processo.docids) && (
-                <ListItem disableGutters>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography sx={{ color: 'text.secondary' }}>Doc. identificação:</Typography>
-                    <Stack spacing={0.5}>
-                      {processo.docidp && (
-                        <Typography>
-                          {processo.docidp}{' '}
-                          <Typography variant="spam" sx={{ color: 'text.secondary' }}>
-                            ({docPLabel})
-                          </Typography>
-                        </Typography>
-                      )}
-                      {processo.docids && (
-                        <Typography>
-                          {processo.docids}{' '}
-                          <Typography variant="spam" sx={{ color: 'text.secondary' }}>
-                            ({docSLabel})
-                          </Typography>
-                        </Typography>
-                      )}
-                    </Stack>
-                  </Stack>
-                </ListItem>
-              )}
-              {_entidades && (
-                <ListItem disableGutters>
-                  <TextItem title="Nº de entidade(s):" text={_entidades} />
-                </ListItem>
-              )}
-              {processo.cliente && (
-                <ListItem disableGutters>
-                  <TextItem title="Nº de cliente:" text={processo.cliente} />
-                </ListItem>
-              )}
-              {processo.conta && (
-                <ListItem disableGutters>
-                  <TextItem title="Nº de conta:" text={processo.conta} />
-                </ListItem>
-              )}
+              </Paper>
             </List>
           )}
-          {(processo.operacao || processo?.noperacao) && (
-            <List>
-              <ListItem disableGutters>
-                <Typography variant="subtitle1">Operação</Typography>
-              </ListItem>
-              <Divider />
-              {processo.noperacao && (
-                <ListItem disableGutters>
-                  <TextItem title="Nº de operação:" text={processo.noperacao} />
-                </ListItem>
-              )}
-              {processo.operacao && (
-                <ListItem disableGutters>
-                  <TextItem title="Descrição:" text={processo.operacao} />
-                </ListItem>
-              )}
-              {(processo.designacao || processo?.seguimento || processo?.telefone || processo?.email) && (
-                <ListItem disableGutters>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography sx={{ color: 'text.secondary' }}>Origem:</Typography>
-                    <Stack spacing={0.5}>
-                      <Typography>
-                        {processo?.designacao} {processo?.seguimento && `- ${processo?.seguimento}`}
+        </List>
+      )}
+      {(processo?.titular ||
+        processo?.docidp ||
+        processo?.docids ||
+        processo?.bi_cni ||
+        _entidades ||
+        processo?.cliente ||
+        processo?.conta) && (
+        <List>
+          <ListItem disableGutters>
+            <Typography variant="subtitle1">Identificação</Typography>
+          </ListItem>
+          <Divider />
+          {processo.titular && (
+            <ListItem disableGutters>
+              <TextItem title="Titular:" text={processo.titular} />
+            </ListItem>
+          )}
+          {(processo.docidp || processo.docids) && (
+            <ListItem disableGutters>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography sx={{ color: 'text.secondary' }}>Doc. identificação:</Typography>
+                <Stack spacing={0.5}>
+                  {processo.docidp && (
+                    <Typography>
+                      {processo.docidp}{' '}
+                      <Typography variant="spam" sx={{ color: 'text.secondary' }}>
+                        ({docPLabel})
                       </Typography>
-                      {processo?.telefone ||
-                        (processo?.email && (
-                          <Stack
-                            spacing={1}
-                            direction="row"
-                            alignItems="center"
-                            divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
-                          >
-                            {processo?.telefone && (
-                              <Typography variant="body2">
-                                <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                                  Tel:
-                                </Typography>
-                                &nbsp;{processo.telefone}
-                              </Typography>
-                            )}
-                            {processo?.email && (
-                              <Typography variant="body2">
-                                <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                                  Email:
-                                </Typography>
-                                &nbsp;{processo.email}
-                              </Typography>
-                            )}
-                          </Stack>
-                        ))}
-                    </Stack>
-                  </Stack>
-                </ListItem>
-              )}
-              {processo.valor > 0 && (
-                <ListItem disableGutters>
-                  <ValorItem title="Valor para cativo:" valor={processo.valor} />
-                </ListItem>
-              )}
-              {processo.saldoca > 0 && (
-                <ListItem disableGutters>
-                  <ValorItem
-                    title={processo.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
-                    valor={processo.saldoca}
-                    contas={processo.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
-                  />
-                </ListItem>
-              )}
-            </List>
+                    </Typography>
+                  )}
+                  {processo.docids && (
+                    <Typography>
+                      {processo.docids}{' '}
+                      <Typography variant="spam" sx={{ color: 'text.secondary' }}>
+                        ({docSLabel})
+                      </Typography>
+                    </Typography>
+                  )}
+                </Stack>
+              </Stack>
+            </ListItem>
           )}
-          {processo.agendado && (
-            <List>
-              <ListItem disableGutters>
-                <Typography variant="subtitle1">Agendamento</Typography>
-              </ListItem>
-              <Divider />
-              {processo.periodicidade && (
-                <ListItem disableGutters>
-                  <TextItem title="Periodicidade:" text={processo.periodicidade} />
-                </ListItem>
-              )}
-              {processo.diadomes && (
-                <ListItem disableGutters>
-                  <TextItem title="Dia do mês para execução:" text={processo.diadomes} />
-                </ListItem>
-              )}
-              {processo.data_inicio && (
-                <ListItem disableGutters>
-                  <TextItem title="Data de início:" text={ptDate(processo.data_inicio)} />
-                </ListItem>
-              )}
-              {processo.data_arquivamento && (
-                <ListItem disableGutters>
-                  <TextItem title="Data de término:" text={ptDate(processo.data_arquivamento)} />
-                </ListItem>
-              )}
-            </List>
+          {_entidades && (
+            <ListItem disableGutters>
+              <TextItem title="Nº de entidade(s):" text={_entidades} />
+            </ListItem>
           )}
-        </Scrollbar>
-      </Grid>
-    </>
+          {processo.cliente && (
+            <ListItem disableGutters>
+              <TextItem title="Nº de cliente:" text={processo.cliente} />
+            </ListItem>
+          )}
+          {processo.conta && (
+            <ListItem disableGutters>
+              <TextItem title="Nº de conta:" text={processo.conta} />
+            </ListItem>
+          )}
+        </List>
+      )}
+      {(processo.operacao || processo?.noperacao) && (
+        <List>
+          <ListItem disableGutters>
+            <Typography variant="subtitle1">Operação</Typography>
+          </ListItem>
+          <Divider />
+          {processo.noperacao && (
+            <ListItem disableGutters>
+              <TextItem title="Nº de operação:" text={processo.noperacao} />
+            </ListItem>
+          )}
+          {processo.operacao && (
+            <ListItem disableGutters>
+              <TextItem title="Descrição:" text={processo.operacao} />
+            </ListItem>
+          )}
+          {(processo.designacao || processo?.seguimento || processo?.telefone || processo?.email) && (
+            <ListItem disableGutters>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography sx={{ color: 'text.secondary' }}>Origem:</Typography>
+                <Stack spacing={0.5}>
+                  <Typography>
+                    {processo?.designacao} {processo?.seguimento && `- ${processo?.seguimento}`}
+                  </Typography>
+                  {processo?.telefone ||
+                    (processo?.email && (
+                      <Stack
+                        spacing={1}
+                        direction="row"
+                        alignItems="center"
+                        divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
+                      >
+                        {processo?.telefone && (
+                          <Typography variant="body2">
+                            <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                              Tel:
+                            </Typography>
+                            &nbsp;{processo.telefone}
+                          </Typography>
+                        )}
+                        {processo?.email && (
+                          <Typography variant="body2">
+                            <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                              Email:
+                            </Typography>
+                            &nbsp;{processo.email}
+                          </Typography>
+                        )}
+                      </Stack>
+                    ))}
+                </Stack>
+              </Stack>
+            </ListItem>
+          )}
+          {processo.valor > 0 && (
+            <ListItem disableGutters>
+              <ValorItem title="Valor para cativo:" valor={processo.valor} />
+            </ListItem>
+          )}
+          {processo.saldoca > 0 && (
+            <ListItem disableGutters>
+              <ValorItem
+                title={processo.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
+                valor={processo.saldoca}
+                contas={processo.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
+              />
+            </ListItem>
+          )}
+        </List>
+      )}
+      {processo.agendado && (
+        <List>
+          <ListItem disableGutters>
+            <Typography variant="subtitle1">Agendamento</Typography>
+          </ListItem>
+          <Divider />
+          {processo.periodicidade && (
+            <ListItem disableGutters>
+              <TextItem title="Periodicidade:" text={processo.periodicidade} />
+            </ListItem>
+          )}
+          {processo.diadomes && (
+            <ListItem disableGutters>
+              <TextItem title="Dia do mês para execução:" text={processo.diadomes} />
+            </ListItem>
+          )}
+          {processo.data_inicio && (
+            <ListItem disableGutters>
+              <TextItem title="Data de início:" text={ptDate(processo.data_inicio)} />
+            </ListItem>
+          )}
+          {processo.data_arquivamento && (
+            <ListItem disableGutters>
+              <TextItem title="Data de término:" text={ptDate(processo.data_arquivamento)} />
+            </ListItem>
+          )}
+        </List>
+      )}
+    </Scrollbar>
   );
 }
 

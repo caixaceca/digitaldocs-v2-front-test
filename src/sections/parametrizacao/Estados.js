@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
@@ -8,8 +9,8 @@ import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, Tabl
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { getPerfis } from '../../redux/slices/colaborador';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getFromIntranet } from '../../redux/slices/intranet';
 import { getAll, openModal, closeModal, getItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -39,7 +40,7 @@ const TABLE_HEAD = [
 export default function Estados() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mail, perfis, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, perfis, currentColaborador } = useSelector((state) => state.intranet);
   const { estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -63,7 +64,7 @@ export default function Estados() {
       dispatch(getAll('estados', { mail, perfilId: currentColaborador?.perfil_id }));
     }
     if (mail && perfis.length === 0) {
-      dispatch(getPerfis(mail));
+      dispatch(getFromIntranet('perfis', { mail }));
     }
   }, [dispatch, perfis, currentColaborador?.perfil_id, mail]);
 
@@ -102,11 +103,7 @@ export default function Estados() {
         ]}
         action={
           <RoleBasedGuard roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
-            <Button
-              variant="soft"
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-              onClick={handleAdd}
-            >
+            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
               Adicionar
             </Button>
           </RoleBasedGuard>

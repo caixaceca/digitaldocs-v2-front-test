@@ -18,7 +18,7 @@ export default function Resgatar({ fluxiId, estadoId, processoId }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
 
   const handleResgatar = () => {
     const formData = { estado_id: estadoId, fluxoID: fluxiId, perfil_id: currentColaborador?.perfil_id };

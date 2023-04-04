@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 // @mui
 import { alpha, styled } from '@mui/material/styles';
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import { Box, Avatar, Tooltip, MenuItem, ListItemIcon, ListItemText, Divider, Typography, Link } from '@mui/material';
 // redux
-import { getLinks } from '../../redux/slices/aplicacao';
-import { useDispatch, useSelector } from '../../redux/store';
+import { useSelector } from '../../redux/store';
 // utils
 import { BASEURL } from '../../utils/axios';
 // hooks
@@ -22,17 +21,11 @@ const LogoApp = styled(Avatar)(() => ({ p: 0.5, width: '33px', height: '33px' })
 //
 
 export default function Linksuteis() {
-  const dispatch = useDispatch();
-  const { links } = useSelector((state) => state.aplicacao);
-  const { mail } = useSelector((state) => state.colaborador);
+  const { links } = useSelector((state) => state.intranet);
   const noLink = links.length === 0;
   const [open, setOpen] = useState(false);
 
   const linksOrder = applySort(links, getComparator('asc', 'nome'));
-
-  useEffect(() => {
-    dispatch(getLinks(mail));
-  }, [dispatch, mail]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);

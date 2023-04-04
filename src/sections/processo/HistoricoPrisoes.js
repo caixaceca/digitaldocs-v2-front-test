@@ -34,7 +34,7 @@ import Scrollbar from '../../components/Scrollbar';
 HistoricoPrisoes.propTypes = { historico: PropTypes.object };
 
 export default function HistoricoPrisoes({ historico }) {
-  const { colaboradores } = useSelector((state) => state.colaborador);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const [openHistoricoPrisoes, setOpenHistoricoPrisoes] = useState(false);
 
   const handleHistoricoPrisoes = () => {

@@ -9,8 +9,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoadingButton } from '@mui/lab';
 import { Box, Grid, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 // redux
+import { createItem } from '../../redux/slices/intranet';
 import { useDispatch, useSelector } from '../../redux/store';
-import { createDenuncia } from '../../redux/slices/denuncia';
 // components
 import { FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
 
@@ -21,12 +21,11 @@ DenunciaForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 export function DenunciaForm({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail } = useSelector((state) => state.colaborador);
-  const { done, error, isLoading } = useSelector((state) => state.denuncia);
+  const { mail, done, error, isLoading } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`Denúncia ${done} com sucesso`, { variant: 'success' });
+    if (done === 'denuncia') {
+      enqueueSnackbar('Denúncia enviada com sucesso', { variant: 'success' });
       onCancel();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,7 +38,7 @@ export function DenunciaForm({ open, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const denunciaSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
     denuncia: Yup.string().required('Descrição não pode ficar vazio'),
   });
@@ -49,10 +48,8 @@ export function DenunciaForm({ open, onCancel }) {
     [mail]
   );
 
-  const methods = useForm({ resolver: yupResolver(denunciaSchema), defaultValues });
-
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, setValue, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {
@@ -71,7 +68,7 @@ export function DenunciaForm({ open, onCancel }) {
       if (values.comprovativo instanceof File) {
         formData.append('comprovativo', values.comprovativo);
       }
-      dispatch(createDenuncia(formData, mail));
+      dispatch(createItem('denuncia', formData, { mail, mensagem: 'denuncia' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -81,12 +78,7 @@ export function DenunciaForm({ open, onCancel }) {
     (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) {
-        setValue(
-          'comprovativo',
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        );
+        setValue('comprovativo', Object.assign(file, { preview: URL.createObjectURL(file) }));
       }
     },
     [setValue]

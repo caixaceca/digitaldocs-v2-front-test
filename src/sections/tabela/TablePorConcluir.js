@@ -41,7 +41,7 @@ export default function TablePorConcluir() {
   const [colaborador, setColaborador] = useState(null);
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { porConcluir, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.intranet);
 
   const {
     page,

@@ -341,9 +341,9 @@ export function SearchToolbarTrabalhados({
   onFilterColaborador,
   tab,
 }) {
-  const { uos } = useSelector((state) => state.uo);
+  const { uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusacessos } = useSelector((state) => state.digitaldocs);
-  const { currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
+  const { currentColaborador, colaboradores } = useSelector((state) => state.intranet);
   const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
   const uosResp = uosResponsavel(uos, currentColaborador);
   const isChefia = temNomeacao(currentColaborador);
@@ -414,7 +414,7 @@ TableToolbarPerfilEstados.propTypes = {
 };
 
 export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch }) {
-  const { uos } = useSelector((state) => state.uo);
+  const { uos } = useSelector((state) => state.intranet);
   const _uosList = ['Todos'];
   applySort(uos, getComparator('asc', 'label'))?.forEach((_uo) => {
     _uosList.push(_uo?.label);

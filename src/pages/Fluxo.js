@@ -43,7 +43,7 @@ export default function Fluxo() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('transicoes');
   const { fluxo, estados } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (mail && estados?.length === 0 && currentColaborador?.perfil_id) {

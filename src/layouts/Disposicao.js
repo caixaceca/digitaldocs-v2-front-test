@@ -19,7 +19,7 @@ import SentimentDissatisfiedOutlinedIcon from '@mui/icons-material/SentimentDiss
 import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVerySatisfiedOutlined';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { createDisposicao, closeDisposicao } from '../redux/slices/disposicao';
+import { createItem, closeDisposicao } from '../redux/slices/intranet';
 // components
 import DialogAnimate from '../components/animate/DialogAnimate';
 // sections
@@ -76,9 +76,7 @@ function DisposicaoDialog() {
   const dispatch = useDispatch();
   const value = React.useState(null);
   const radioGroupRef = React.useRef(null);
-  const { frase } = useSelector((state) => state.frase);
-  const { mail } = useSelector((state) => state.colaborador);
-  const { isOpenDisposicao } = useSelector((state) => state.disposicao);
+  const { isOpenDisposicao, mail, frase } = useSelector((state) => state.intranet);
 
   const handleEntering = () => {
     if (radioGroupRef.current != null) {
@@ -89,7 +87,7 @@ function DisposicaoDialog() {
   const handleChange = (event) => {
     const values = { disposicao: event.target.value };
     const formData = JSON.stringify(values);
-    dispatch(createDisposicao(formData, mail));
+    dispatch(createItem('disposicao', formData, { mail, mensagem: 'disposicao' }));
   };
 
   const handleClose = () => {

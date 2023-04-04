@@ -39,7 +39,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
   const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
 

@@ -50,11 +50,11 @@ export function ImagemPreview({ imagem }) {
       <Image src={imagem} sx={{ cursor: 'zoom-in' }} onClick={() => handleOpenLightbox()} />
 
       <LightboxModal
-        images={[imagem]}
         mainSrc={imagem}
+        images={[imagem]}
+        isOpen={openLightbox}
         photoIndex={selectedImage}
         setPhotoIndex={setSelectedImage}
-        isOpen={openLightbox}
         onCloseRequest={() => setOpenLightbox(false)}
       />
     </>

@@ -29,7 +29,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { meuAmbiente, processoId, motivosPendencias, done, error, isSaving } = useSelector(
     (state) => state.digitaldocs
   );

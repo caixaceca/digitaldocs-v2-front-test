@@ -32,7 +32,7 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 export default function PerfilEstadosAcessos() {
   const { id } = useParams();
   const { themeStretch } = useSettings();
-  const { colaboradores } = useSelector((state) => state.colaborador);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useSearchParams({ tab: 'acessos' });
   const colaborador = colaboradores?.find((row) => Number(row?.perfil?.id) === Number(id));
 

@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 // @mui
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -34,7 +35,7 @@ const TABLE_HEAD = [
 
 export default function Transicao() {
   const dispatch = useDispatch();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { fluxo, estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
   const transicoes = [];
   fluxo?.transicoes?.forEach((row) => {
@@ -96,11 +97,7 @@ export default function Transicao() {
         ]}
         action={
           <RoleBasedGuard roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}>
-            <Button
-              variant="soft"
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-              onClick={handleAdd}
-            >
+            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
               Adicionar
             </Button>
           </RoleBasedGuard>

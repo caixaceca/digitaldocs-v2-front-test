@@ -24,6 +24,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // components
 import SvgIconStyle from '../../components/SvgIconStyle';
@@ -46,7 +47,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { done, error, isSaving, selectedFluxo } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedFluxo;
 
@@ -151,7 +152,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
                 name="is_interno"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Processo interno
                   </Typography>
                 }
@@ -201,9 +202,8 @@ EstadoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func }
 export function EstadoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { uos } = useSelector((state) => state.uo);
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador, uos } = useSelector((state) => state.intranet);
   const { done, error, isSaving, selectedEstado } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedEstado;
 
@@ -326,11 +326,11 @@ export function EstadoForm({ isOpenModal, onCancel }) {
                 name="is_inicial"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Inicial
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={4}>
@@ -338,11 +338,11 @@ export function EstadoForm({ isOpenModal, onCancel }) {
                 name="is_final"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Final
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={4}>
@@ -350,11 +350,11 @@ export function EstadoForm({ isOpenModal, onCancel }) {
                 name="is_decisao"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Decisão
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -401,7 +401,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { done, error, isSaving, selectedAcesso } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedAcesso;
 
@@ -578,7 +578,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
   const isEdit = !!selectedItem;
@@ -700,7 +700,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const [findConcelhos, setFindConcelhos] = useState([]);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { selectedOrigem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedOrigem;
 
@@ -905,13 +905,10 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { selectedTransicao, estados, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedTransicao;
-
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
-  const estadoInicial = estadosList?.find((row) => row.id === selectedTransicao?.estado_inicial_id) || null;
-  const estadoFinal = estadosList?.find((row) => row.id === selectedTransicao?.estado_final_id) || null;
 
   useEffect(() => {
     if (done) {
@@ -941,18 +938,19 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
 
   const defaultValues = useMemo(
     () => ({
-      estado_final_id: estadoFinal,
-      estado_inicial_id: estadoInicial,
-      modo: selectedTransicao?.modo || '',
+      modo: selectedTransicao?.modo || null,
       perfilIDCC: currentColaborador?.perfil_id,
       to_alert: selectedTransicao?.to_alert || false,
       fluxo_id: selectedTransicao?.fluxo_id || fluxoId,
       prazoemdias: selectedTransicao?.prazoemdias || '',
       hasopnumero: selectedTransicao?.hasopnumero || false,
+      is_paralelo: selectedTransicao?.is_paralelo || false,
       arqhasopnumero: selectedTransicao?.arqhasopnumero || false,
       is_after_devolucao: selectedTransicao?.is_after_devolucao || false,
+      estado_final_id: estadosList?.find((row) => row.id === selectedTransicao?.estado_final_id) || null,
+      estado_inicial_id: estadosList?.find((row) => row.id === selectedTransicao?.estado_inicial_id) || null,
     }),
-    [fluxoId, selectedTransicao, currentColaborador?.perfil_id, estadoInicial, estadoFinal]
+    [fluxoId, selectedTransicao, currentColaborador?.perfil_id, estadosList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -1023,6 +1021,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
                     options={applySort(estadosList, getComparator('asc', 'label'))?.map((option) => option)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
                       <TextField {...params} label="Estado de origem" error={!!error} helperText={error?.message} />
@@ -1041,6 +1040,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
                     options={applySort(estadosList, getComparator('asc', 'label'))?.map((option) => option)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
                       <TextField {...params} label="Estado de destino" error={!!error} helperText={error?.message} />
@@ -1050,17 +1050,21 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSelect name="modo" label="Modo" SelectProps={{ native: false }}>
-                {['Seguimento', 'Devolução'].map((option) => (
-                  <MenuItem
-                    key={option}
-                    value={option}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+              <Controller
+                name="modo"
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    options={['Seguimento', 'Devolução']?.map((option) => option)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Modo" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFTextField
@@ -1074,11 +1078,11 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                 name="is_after_devolucao"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Depois de devolução
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1086,11 +1090,11 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                 name="to_alert"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Notificar
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1098,11 +1102,11 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                 name="hasopnumero"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Indicar nº de operação
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1110,11 +1114,23 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                 name="arqhasopnumero"
                 labelPlacement="start"
                 label={
-                  <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
                     Nº de operação no arquivo
                   </Typography>
                 }
-                sx={{ mx: 0, width: 1, justifyContent: 'center' }}
+                sx={{ justifyContent: 'center' }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <RHFSwitch
+                name="is_paralelo"
+                labelPlacement="start"
+                label={
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+                    Paralelo
+                  </Typography>
+                }
+                sx={{ width: 1, justifyContent: 'center' }}
               />
             </Grid>
           </Grid>
@@ -1158,7 +1174,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { estados, done, error, isSaving, selectedMeuEstado } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedMeuEstado;
 
@@ -1350,7 +1366,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
   const colaboradoresNA = applyFilter1(colaboradores, estado?.perfis);
 
   useEffect(() => {
@@ -1491,12 +1507,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
             ))}
             {perfisByCategoria.length > 0 && (
               <Grid item xs={12}>
-                <Button
-                  size="small"
-                  variant="soft"
-                  startIcon={<SvgIconStyle src="/assets/icons/add.svg" />}
-                  onClick={handleAdd}
-                >
+                <Button size="small" variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
                   Colaborador
                 </Button>
               </Grid>

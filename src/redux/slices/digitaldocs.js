@@ -17,7 +17,6 @@ const initialState = {
   isLoadingAnexo: false,
   iAmInGrpGerente: false,
   isOpenModalAnexo: false,
-  isOpenModalViews: false,
   isLoadingIndicadores: false,
   isOpenModalDesariquivar: false,
   anexo: null,
@@ -39,6 +38,7 @@ const initialState = {
   selectedMeuEstado: null,
   indicadoresArquivo: null,
   fluxos: [],
+  versoes: [],
   ranking: [],
   estados: [],
   origens: [],
@@ -108,9 +108,9 @@ const slice = createSlice({
     },
 
     resetDone(state) {
+      state.done = '';
       state.isSaving = false;
       state.isLoading = false;
-      state.done = '';
     },
 
     resetItem(state, action) {
@@ -118,11 +118,12 @@ const slice = createSlice({
         case 'processo':
           state.anexo = null;
           state.processo = null;
-          state.previewType = '';
-          state.visualizacoes = [];
           state.filePreview = null;
-          state.historicoFluxo = [];
+          state.previewType = '';
           state.isLoadingAnexo = false;
+          state.versoes = [];
+          state.visualizacoes = [];
+          state.historicoFluxo = [];
           break;
         case 'fluxo':
           state.fluxo = null;
@@ -239,8 +240,11 @@ const slice = createSlice({
     },
 
     getVisualizacoesSuccess(state, action) {
-      state.isOpenModalViews = true;
       state.visualizacoes = action.payload;
+    },
+
+    getVersoesSuccess(state, action) {
+      state.versoes = action.payload;
     },
 
     getDestinosDesarquivamentoSuccess(state, action) {
@@ -498,7 +502,6 @@ const slice = createSlice({
 
     closeModal(state) {
       state.isOpenModal = false;
-      state.isOpenModalViews = false;
       state.isOpenModalDesariquivar = false;
       state.estado = null;
       state.selectedFluxo = null;
@@ -508,7 +511,6 @@ const slice = createSlice({
       state.selectedAcesso = null;
       state.selectedTransicao = null;
       state.selectedMeuEstado = null;
-      state.visualizacoes = [];
       state.destinosDesarquivamento = [];
     },
 
@@ -559,7 +561,7 @@ export const {
 
 export function getAll(item, params) {
   return async (dispatch) => {
-    if (item !== 'visualizacoes' && item !== 'destinosDesarquivamento') {
+    if (item !== 'visualizacoes' && item !== 'destinosDesarquivamento' && item !== 'versoes') {
       dispatch(slice.actions.startLoading());
     }
     try {
@@ -842,6 +844,14 @@ export function getAll(item, params) {
             options
           );
           dispatch(slice.actions.getVisualizacoesSuccess(response.data));
+          break;
+        }
+        case 'versoes': {
+          const response = await axios.get(
+            `${BASEURLDD}/v1/processos/versoes/${params?.perfilId}?processoID=${params?.processoId}`,
+            options
+          );
+          dispatch(slice.actions.getVersoesSuccess(response.data));
           break;
         }
         case 'destinosDesarquivamento': {

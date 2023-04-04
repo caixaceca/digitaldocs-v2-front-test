@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -32,7 +33,7 @@ const TABLE_HEAD = [
 export default function MotivosPendencias() {
   const dispatch = useDispatch();
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { motivosPendencias, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -81,11 +82,7 @@ export default function MotivosPendencias() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-            <Button
-              variant="soft"
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-              onClick={handleAdd}
-            >
+            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
               Adicionar
             </Button>
           </RoleBasedGuard>

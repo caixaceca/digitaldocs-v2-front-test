@@ -12,18 +12,8 @@ import IntranetLayout from '../layouts';
 import LoadingScreen from '../components/LoadingScreen';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import {
-  getColaboradores,
-  getCurrentColaborador,
-  AzureIntranetHandShake,
-  AuthenticateColaborador,
-} from '../redux/slices/colaborador';
-import { getUos } from '../redux/slices/uo';
 import { getAll } from '../redux/slices/digitaldocs';
-import { getFraseAtiva } from '../redux/slices/frase';
-import { getDisposicao } from '../redux/slices/disposicao';
-import { getMyAplicacoes } from '../redux/slices/aplicacao';
-import { getCertificacoes } from '../redux/slices/certificacao';
+import { getFromIntranet, AzureIntranetHandShake, AuthenticateColaborador } from '../redux/slices/intranet';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +27,7 @@ const Loadable = (Component) => (props) =>
 export default function Router() {
   const dispatch = useDispatch();
   const { instance, accounts } = useMsal();
-  const { perfil, msalProfile, accessToken } = useSelector((state) => state.colaborador);
+  const { perfil, msalProfile, accessToken } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (!msalProfile?.mail) {
@@ -53,19 +43,26 @@ export default function Router() {
 
   useEffect(() => {
     if (perfil?.mail) {
-      dispatch(getUos(perfil?.mail));
-      dispatch(getFraseAtiva(perfil?.mail));
-      dispatch(getMyAplicacoes(perfil?.mail));
-      dispatch(getCertificacoes(perfil?.mail));
-      dispatch(getColaboradores(perfil?.mail));
+      dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
+      dispatch(getFromIntranet('uos', { mail: perfil?.mail }));
+      dispatch(getFromIntranet('links', { mail: perfil?.mail }));
+      dispatch(getFromIntranet('frase', { mail: perfil?.mail }));
+      dispatch(getFromIntranet('aplicacoes', { mail: perfil?.mail }));
+      dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
       if (perfil?.id) {
         dispatch(getAll('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('motivos pendencias', { mail: perfil?.mail, perfilId: perfil?.id }));
       }
       if (perfil?.colaborador?.id) {
-        dispatch(getCurrentColaborador(perfil?.colaborador?.id, perfil?.mail));
-        dispatch(getDisposicao(perfil?.colaborador?.id, format(new Date(), 'yyyy-MM-dd'), perfil?.mail));
+        dispatch(getFromIntranet('colaborador', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
+        dispatch(
+          getFromIntranet('disposicao', {
+            mail: perfil?.mail,
+            idColaborador: perfil?.colaborador?.id,
+            data: format(new Date(), 'yyyy-MM-dd'),
+          })
+        );
       }
     }
   }, [dispatch, perfil]);

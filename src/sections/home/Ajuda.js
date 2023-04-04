@@ -1,5 +1,4 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-
 import React, { useState, useEffect } from 'react';
 // @mui
 import {
@@ -22,7 +21,7 @@ import { BASEURL } from '../../utils/axios';
 import { getFileThumb } from '../../utils/getFileFormat';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getPerguntas, getAjuda } from '../../redux/slices/ajuda';
+import { getFromIntranet } from '../../redux/slices/intranet';
 // components
 import Image from '../../components/Image';
 import Markdown from '../../components/Markdown';
@@ -37,13 +36,12 @@ export default function Ajuda() {
   const dispatch = useDispatch();
   const [controlled, setControlled] = useState(false);
   const [isOpenVideo, setIsOpenVideo] = useState(false);
-  const { mail } = useSelector((state) => state.colaborador);
-  const { perguntas, ajuda, isLoading } = useSelector((state) => state.ajuda);
+  const { mail, perguntas, ajuda, isLoading } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (mail) {
-      dispatch(getPerguntas(mail));
-      dispatch(getAjuda(mail));
+      dispatch(getFromIntranet('ajuda', { mail }));
+      dispatch(getFromIntranet('perguntas', { mail }));
     }
   }, [dispatch, mail]);
 

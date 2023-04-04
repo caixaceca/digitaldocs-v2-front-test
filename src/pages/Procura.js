@@ -58,9 +58,8 @@ export default function Procura() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { themeStretch, themeMode } = useSettings();
-  const { uos } = useSelector((state) => state.uo);
   const { pesquisa, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
 
   const {
     page,

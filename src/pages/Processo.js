@@ -21,7 +21,9 @@ import { SkeletonProcesso } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
 import {
+  Views,
   Anexos,
+  Versoes,
   Resgatar,
   Intervencao,
   NotaProcesso,
@@ -29,7 +31,6 @@ import {
   HistoricoPrisoes,
   HistoricoProcesso,
 } from '../sections/processo';
-import Views from '../sections/processo/Views';
 import { DesarquivarForm } from '../sections/processo/IntervencaoForm';
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
 // guards
@@ -46,7 +47,7 @@ export default function Processo() {
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { isLoading, done, error, processo, meusAmbientes, isOpenModalDesariquivar, meusacessos } = useSelector(
     (state) => state.digitaldocs
   );
@@ -129,11 +130,13 @@ export default function Processo() {
 
   const podeResgatar = () => {
     let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.id === processo?.htransicoes?.[0]?.estado_inicial_id) {
-        return true;
+    if (!processo.ispendente && processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id) {
+      while (i < meusAmbientes?.length) {
+        if (meusAmbientes[i]?.id === processo?.htransicoes?.[0]?.estado_inicial_id) {
+          return true;
+        }
+        i += 1;
       }
-      i += 1;
     }
     return false;
   };
@@ -184,6 +187,7 @@ export default function Processo() {
               {processo && (
                 <Stack spacing={1} direction={{ xs: 'row' }}>
                   <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
+                    <Versoes processoId={processo?.id} />
                     <Views processoId={processo?.id} />
                   </RoleBasedGuard>
                   {processo?.situacao === 'A' ? (
@@ -251,10 +255,8 @@ export default function Processo() {
                 <Grid item xs={12} lg={hasAnexos && 5}>
                   <Card>
                     <CardContent>
-                      <Grid container spacing={3}>
-                        {processo?.nota && <NotaProcesso nota={processo.nota} />}
-                        <DetalhesProcesso processo={processo} />
-                      </Grid>
+                      {processo?.nota && <NotaProcesso nota={processo.nota} />}
+                      <DetalhesProcesso processo={processo} />
                     </CardContent>
                   </Card>
                 </Grid>

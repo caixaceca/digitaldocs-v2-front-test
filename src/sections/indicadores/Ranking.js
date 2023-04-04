@@ -16,9 +16,8 @@ export default function Ranking() {
   const dispatch = useDispatch();
   const [top, setTop] = useState('10');
   const [escopo, setEscopo] = useState({ id: 'uo', label: 'U.O' });
-  const { uos } = useSelector((state) => state.uo);
   const { isLoading, ranking } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
   const perfilId = currentColaborador?.perfil_id;
 
   const rankingByItem = [];

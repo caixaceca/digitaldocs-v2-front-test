@@ -25,7 +25,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
 
   const colaboradoresList = colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
 

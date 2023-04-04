@@ -12,7 +12,7 @@ import { BASEURL } from '../utils/axios';
 
 export default function MyAvatar({ ...other }) {
   const { accounts } = useMsal();
-  const { currentColaborador } = useSelector((state) => state.colaborador);
+  const { currentColaborador } = useSelector((state) => state.intranet);
 
   return (
     <Avatar

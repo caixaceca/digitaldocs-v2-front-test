@@ -5,9 +5,7 @@ import { DocIllustration } from '../../assets';
 
 // ----------------------------------------------------------------------
 
-SearchNotFound.propTypes = {
-  message: PropTypes.string.isRequired
-};
+SearchNotFound.propTypes = { message: PropTypes.string.isRequired };
 
 export default function SearchNotFound({ message }) {
   return (

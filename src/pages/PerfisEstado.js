@@ -18,6 +18,7 @@ import {
   Typography,
   TableContainer,
 } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { BASEURL } from '../utils/axios';
 import { ptDateTime } from '../utils/formatTime';
@@ -63,13 +64,12 @@ export default function PerfisEstado() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
-  const { uos } = useSelector((state) => state.uo);
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { isLoading, isSaving, estado, done, isOpenModalAnexo, selectedAnexoId } = useSelector(
     (state) => state.digitaldocs
   );
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
 
   const {
     page,
@@ -169,11 +169,7 @@ export default function PerfisEstado() {
           ]}
           action={
             <RoleBasedGuard roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
-              <Button
-                variant="soft"
-                startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-                onClick={onOpen}
-              >
+              <Button variant="soft" startIcon={<AddCircleIcon />} onClick={onOpen}>
                 Adicionar
               </Button>
             </RoleBasedGuard>
@@ -232,8 +228,14 @@ export default function PerfisEstado() {
                           <TableCell>{row.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}</TableCell>
                           <TableCell align="center" width={50}>
                             <Tooltip title="Eliminar" arrow>
-                              <Fab color="error" size="small" variant="soft" onClick={() => handleDelete(row?.peid)}>
-                                <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 22, height: 22 }} />
+                              <Fab
+                                color="error"
+                                size="small"
+                                variant="soft"
+                                onClick={() => handleDelete(row?.peid)}
+                                sx={{ width: 34, height: 34 }}
+                              >
+                                <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20, height: 20 }} />
                               </Fab>
                             </Tooltip>
                           </TableCell>

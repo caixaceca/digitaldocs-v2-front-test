@@ -54,8 +54,7 @@ export default function TableTrabalhados() {
   const dispatch = useDispatch();
   const [data, setData] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { uos } = useSelector((state) => state.uo);
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador, uos } = useSelector((state) => state.intranet);
   const { trabalhados, trabalhadosUo, isLoading } = useSelector((state) => state.digitaldocs);
   const [ambiente, setAmbiente] = useState(null);
   const [colaborador, setColaborador] = useState(

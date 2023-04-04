@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
@@ -37,7 +38,7 @@ const TABLE_HEAD = [
 export default function Fluxos() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mail, currentColaborador } = useSelector((state) => state.colaborador);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { fluxos, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -93,11 +94,7 @@ export default function Fluxos() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111']}>
-            <Button
-              variant="soft"
-              startIcon={<SvgIconStyle src="/assets/icons/add.svg" sx={{ width: 20 }} />}
-              onClick={handleAdd}
-            >
+            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
               Adicionar
             </Button>
           </RoleBasedGuard>

@@ -37,7 +37,7 @@ const LogoApp = styled(Avatar)(() => ({ p: 0.25, width: '22px', height: '22px' }
 // ----------------------------------------------------------------------
 
 function NavbarHorizontal() {
-  const { myAplicacoes } = useSelector((state) => state.aplicacao);
+  const { myAplicacoes } = useSelector((state) => state.intranet);
   const appsOrder = applySort(myAplicacoes, getComparator('asc', 'nome'));
   const noApp = appsOrder.length === 0;
   const aplicacoes = [];

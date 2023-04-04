@@ -14,12 +14,12 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
-Anexos.propTypes = { anexos: PropTypes.object };
+Anexos.propTypes = { anexos: PropTypes.array };
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
   const [selectedAnexo, setSelectedAnexo] = useState(null);
-  const { mail } = useSelector((state) => state.colaborador);
+  const { mail } = useSelector((state) => state.intranet);
   const { anexo, filePreview, previewType, isLoadingAnexo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = anexos?.filter((row) => row.is_ativo);
   const anexosInativos = anexos?.filter((row) => !row.is_ativo);
@@ -28,6 +28,7 @@ export default function Anexos({ anexos }) {
   const [selectedAnexoPreview, setSelectedAnexoPreview] = useState(
     (anexosAtivos?.[0]?.conteudo && isPdf) || (anexosAtivos?.[0]?.anexo && isImg) ? anexosAtivos?.[0] : null
   );
+  const [url, setUrl] = useState('');
 
   useEffect(() => {
     if (anexo?.ficheiro) {
@@ -68,6 +69,13 @@ export default function Anexos({ anexos }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, mail, anexosAtivos?.[0], filePreview?.ficheiro]);
 
+  useEffect(() => {
+    if (filePreview?.ficheiro) {
+      setUrl(URL?.createObjectURL(b64toBlob(filePreview?.ficheiro)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, filePreview?.ficheiro]);
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sx={{ mb: -2 }}>
@@ -81,14 +89,14 @@ export default function Anexos({ anexos }) {
         </Grid>
       ) : (
         <>
-          {filePreview?.ficheiro && previewType === 'pdf' && (
+          {url && previewType === 'pdf' && (
             <Grid item xs={12}>
-              <PdfPreview url={URL?.createObjectURL(b64toBlob(filePreview?.ficheiro))} />
+              <PdfPreview url={url} />
             </Grid>
           )}
-          {filePreview?.ficheiro && previewType === 'image' && (
+          {url && previewType === 'image' && (
             <Grid item xs={12}>
-              <ImagemPreview imagem={URL?.createObjectURL(b64toBlob(filePreview?.ficheiro))} />
+              <ImagemPreview imagem={url} />
             </Grid>
           )}
         </>
