@@ -179,7 +179,9 @@ export default function TableEntradas() {
                 options={minhasUos}
                 value={minhasUos?.find((row) => row?.id === uoId)}
                 onChange={(event, newValue) => setUoId(newValue?.id)}
-                renderInput={(params) => <TextField {...params} label="U.O" margin="none" />}
+                renderInput={(params) => (
+                  <TextField {...params} label="U.O" margin="none" sx={{ width: { md: 200 } }} />
+                )}
               />
             )}
             <Stack direction="row" alignItems="center" spacing={1}>
@@ -188,14 +190,14 @@ export default function TableEntradas() {
                 value={dataInicio}
                 label="Data início"
                 onChange={(newValue) => setDataInicio(newValue)}
-                renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: { sm: 160 } }} />}
+                renderInput={(params) => <TextField size="small" {...params} sx={{ width: { sm: 160 } }} />}
               />
               <DatePicker
                 disableFuture
                 value={dataFim}
                 label="Data fim"
                 onChange={(newValue) => setDataFim(newValue)}
-                renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: { sm: 160 } }} />}
+                renderInput={(params) => <TextField size="small" {...params} sx={{ width: { sm: 160 } }} />}
               />
             </Stack>
           </Stack>

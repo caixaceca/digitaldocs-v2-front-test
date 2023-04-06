@@ -27,7 +27,7 @@ import FraseContent from '../sections/home/FraseContent';
 
 // ----------------------------------------------------------------------
 
-const whicon = { width: 60, height: 60 };
+const whicon = { width: 65, height: 65 };
 
 const disposicoes = [
   { value: 'desmotivado', cor: '#FF4842', icon: <SentimentDissatisfiedOutlinedIcon sx={whicon} /> },

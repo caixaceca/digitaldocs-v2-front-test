@@ -73,7 +73,7 @@ export default function Versoes({ processoId }) {
         open={open}
         onClose={onClose}
         BackdropProps={{ invisible: true }}
-        PaperProps={{ sx: { width: { xs: 400, sm: 600, md: 800 } } }}
+        PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}
         sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>

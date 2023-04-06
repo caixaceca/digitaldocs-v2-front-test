@@ -14,7 +14,6 @@ import {
   Button,
   Dialog,
   Tooltip,
-  MenuItem,
   TextField,
   Typography,
   DialogTitle,
@@ -29,7 +28,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // components
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
-import { FormProvider, RHFTextField, RHFSwitch, RHFSelect } from '../../components/hook-form';
+import { FormProvider, RHFTextField, RHFSwitch } from '../../components/hook-form';
 // hooks
 import useToggle from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
@@ -75,15 +74,16 @@ export function FluxoForm({ isOpenModal, onCancel }) {
     () => ({
       modelo: selectedFluxo?.modelo || '',
       assunto: selectedFluxo?.assunto || '',
+      perfilID: currentColaborador?.perfil_id,
       observacao: selectedFluxo?.observacao || '',
       is_interno: selectedFluxo?.is_interno || false,
-      perfilID: currentColaborador?.perfil_id,
+      is_credito: selectedFluxo?.is_credito || false,
     }),
     [selectedFluxo, currentColaborador?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -135,25 +135,41 @@ export function FluxoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="assunto" label="Assunto" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSelect name="modelo" label="Modelos" SelectProps={{ native: false }}>
-                {['Série', 'Paralelo'].map((option) => (
-                  <MenuItem
-                    key={option}
-                    value={option}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+              <Controller
+                name="modelo"
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    options={['Série', 'Paralelo']}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Modelo" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={6} sm={3}>
               <RHFSwitch
                 name="is_interno"
                 labelPlacement="start"
                 label={
                   <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Processo interno
+                    Interno
+                  </Typography>
+                }
+                sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <RHFSwitch
+                name="is_credito"
+                labelPlacement="start"
+                label={
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+                    Crédito
                   </Typography>
                 }
                 sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
@@ -312,7 +328,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
                     {...field}
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(uosList, getComparator('asc', 'label'))?.map((option) => option)}
+                    options={applySort(uosList, getComparator('asc', 'label'))}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
                       <TextField {...params} label="Unidade orgânica" error={!!error} helperText={error?.message} />
@@ -421,17 +437,17 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    objeto: Yup.string().required('Objeto não pode ficar vazio'),
-    acesso: Yup.string().required('Acesso não pode ficar vazio'),
+    objeto: Yup.mixed().nullable('Objeto pode ficar vazio').required('Objeto pode ficar vazio'),
+    acesso: Yup.mixed().nullable('Acesso não pode ficar vazio').required('Acesso não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
       perfilID: Number(perfilId),
-      objeto: selectedAcesso?.objeto || '',
-      acesso: selectedAcesso?.acesso || '',
-      datalimite: selectedAcesso?.datalimite || null,
       perfilIDCC: currentColaborador?.perfil?.id,
+      datalimite: selectedAcesso?.datalimite || null,
+      objeto: selectedAcesso?.objeto ? objetos?.find((row) => row?.id === selectedAcesso?.objeto) : null,
+      acesso: selectedAcesso?.acesso ? codacessos?.find((row) => row?.id === selectedAcesso?.acesso) : null,
     }),
     [selectedAcesso, currentColaborador?.perfil?.id, perfilId]
   );
@@ -453,10 +469,14 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const onSubmit = async () => {
     try {
       if (isEdit) {
+        values.objeto = values.objeto.id;
+        values.acesso = values.acesso.id;
         dispatch(
           updateItem('acesso', JSON.stringify(values), { mail, id: selectedAcesso.id, mensagem: 'Acesso atualizado' })
         );
       } else {
+        values.objeto = values.objeto.id;
+        values.acesso = values.acesso.id;
         dispatch(createItem('acesso', JSON.stringify(values), { mail, mensagem: 'Acesso atribuido' }));
       }
     } catch (error) {
@@ -486,38 +506,42 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFSelect
+              <Controller
                 name="objeto"
-                label="Objeto"
-                SelectProps={{ native: false, MenuProps: { sx: { '& .MuiPaper-root': { maxHeight: 260 } } } }}
-              >
-                {objetos.map((option) => (
-                  <MenuItem
-                    key={option.label}
-                    value={option.id}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    options={objetos}
+                    getOptionLabel={(option) => option?.label}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Objeto" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12}>
-              <RHFSelect
+              <Controller
                 name="acesso"
-                label="Acesso"
-                SelectProps={{ native: false, MenuProps: { sx: { '& .MuiPaper-root': { maxHeight: 260 } } } }}
-              >
-                {codacessos.map((option) => (
-                  <MenuItem
-                    key={option.label}
-                    value={option.id}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    options={codacessos}
+                    getOptionLabel={(option) => option?.label}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Acesso" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12}>
               <Controller
@@ -527,9 +551,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
                   <DateTimePicker
                     label="Data"
                     value={field.value}
-                    onChange={(newValue) => {
-                      field.onChange(newValue);
-                    }}
+                    onChange={(newValue) => field.onChange(newValue)}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
                     )}
@@ -743,7 +765,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -805,55 +827,55 @@ export function OrigemForm({ isOpenModal, onCancel }) {
               <RHFTextField name="codigo" label="Código" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSelect
+              <Controller
                 name="tipo"
-                label="Tipo"
-                SelectProps={{ native: false, MenuProps: { sx: { '& .MuiPaper-root': { maxHeight: 260 } } } }}
-              >
-                {['Fiscal', 'Judicial'].map((option) => (
-                  <MenuItem
-                    key={option}
-                    value={option}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    options={['Fiscal', 'Judicial']}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Tipo" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSelect
+              <Controller
                 name="ilha"
-                label="Ilha"
-                SelectProps={{ native: false, MenuProps: { sx: { '& .MuiPaper-root': { maxHeight: 260 } } } }}
-              >
-                {[...new Set(_concelhos.map((obj) => obj.ilha))].map((option) => (
-                  <MenuItem
-                    key={option}
-                    value={option}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    options={[...new Set(_concelhos.map((obj) => obj.ilha))]}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Ilha" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSelect
+              <Controller
                 name="cidade"
-                label="Concelho"
-                SelectProps={{ native: false, MenuProps: { sx: { '& .MuiPaper-root': { maxHeight: 260 } } } }}
-              >
-                {[...new Set(findConcelhos.map((obj) => obj.concelho))].map((option) => (
-                  <MenuItem
-                    key={option}
-                    value={option}
-                    sx={{ minHeight: 30, mx: 1, my: 0.5, borderRadius: 0.75, typography: 'body2' }}
-                  >
-                    {option}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    options={[...new Set(findConcelhos.map((obj) => obj.concelho))]}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Concelho" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFTextField name="email" label="Email" />
@@ -897,7 +919,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
 TransicaoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func, fluxoId: PropTypes.number };
 
@@ -926,14 +948,14 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    modo: Yup.string().required('Modo não pode ficar vazio'),
     prazoemdias: Yup.string().required('Prazo não pode ficar vazio'),
     estado_inicial_id: Yup.mixed()
       .nullable('Estado inicial não pode ficar vazio')
       .required('Estado inicial não pode ficar vazio'),
     estado_final_id: Yup.mixed()
-      .nullable('Estado dinal não pode ficar vazio')
-      .required('Estado dinal não pode ficar vazio'),
+      .nullable('Estado final não pode ficar vazio')
+      .required('Estado final não pode ficar vazio'),
+    modo: Yup.mixed().nullable('Modo não pode ficar vazio').required('Modo não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -1020,7 +1042,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                     {...field}
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(estadosList, getComparator('asc', 'label'))?.map((option) => option)}
+                    options={applySort(estadosList, getComparator('asc', 'label'))}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
@@ -1039,7 +1061,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                     {...field}
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(estadosList, getComparator('asc', 'label'))?.map((option) => option)}
+                    options={applySort(estadosList, getComparator('asc', 'label'))}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
@@ -1058,7 +1080,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
                     {...field}
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={['Seguimento', 'Devolução']?.map((option) => option)}
+                    options={['Seguimento', 'Devolução']}
                     renderInput={(params) => (
                       <TextField {...params} label="Modo" error={!!error} helperText={error?.message} />
                     )}
@@ -1278,7 +1300,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
                     {...field}
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(estadosList, getComparator('asc', 'label'))?.map((option) => option)}
+                    options={applySort(estadosList, getComparator('asc', 'label'))}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
                       <TextField {...params} label="Estado" error={!!error} helperText={error?.message} />
@@ -1403,11 +1425,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
 
   const onSubmit = async () => {
     try {
-      const formData = {
-        estado_id: estado?.id,
-        perfil_id_cc: currentColaborador?.perfil?.id,
-        perfis: [],
-      };
+      const formData = { estado_id: estado?.id, perfil_id_cc: currentColaborador?.perfil?.id, perfis: [] };
       values?.perfis?.forEach((row) => {
         formData?.perfis?.push({
           perfil_id: row?.perfil?.id,
@@ -1447,9 +1465,9 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
                         <Autocomplete
                           {...field}
                           fullWidth
-                          onChange={(event, newValue) => field.onChange(newValue)}
-                          options={perfisByCategoria.map((option) => option)}
+                          options={perfisByCategoria}
                           getOptionLabel={(option) => option?.label}
+                          onChange={(event, newValue) => field.onChange(newValue)}
                           renderInput={(params) => <TextField required fullWidth {...params} label="Colaborador" />}
                         />
                       )}

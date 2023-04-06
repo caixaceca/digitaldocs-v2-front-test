@@ -1,5 +1,5 @@
+import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
-import { useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // @mui
 import LockPersonIcon from '@mui/icons-material/LockPerson';
@@ -8,7 +8,14 @@ import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import { Fab, Grid, Card, Stack, Tooltip, Dialog, Container, CardContent } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getItem, getAll, aceitarProcesso, pedirAcessoProcesso, closeModal } from '../redux/slices/digitaldocs';
+import {
+  getAll,
+  getItem,
+  resetItem,
+  closeModal,
+  aceitarProcesso,
+  pedirAcessoProcesso,
+} from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -40,7 +47,6 @@ import RoleBasedGuard from '../guards/RoleBasedGuard';
 
 export default function Processo() {
   const { id } = useParams();
-  const refColumn1 = useRef();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [from] = useSearchParams();
@@ -63,31 +69,39 @@ export default function Processo() {
   const fromPorConcluir = from?.get?.('from') === 'porconcluir';
   const fromRetidos = from?.get?.('from') === 'retidos';
 
+  const linkNavigate =
+    (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
+    (fromRetidos && `${PATH_DIGITALDOCS.processos.lista}?tab=retidos`) ||
+    (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
+    (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
+    (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
+    (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
+    (fromProcurar && PATH_DIGITALDOCS.processos.procurar) ||
+    PATH_DIGITALDOCS.processos.root;
+
   useEffect(() => {
     if (done === 'aceitado') {
       enqueueSnackbar('Processo aceitado com sucesso', { variant: 'success' });
+    } else if (done === 'arquivado') {
+      enqueueSnackbar('Processo arquivado com sucesso', { variant: 'success' });
+      navigate(linkNavigate);
+    } else if (done === 'realizada') {
+      enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
+      dispatch(resetItem('processo'));
+      navigate(linkNavigate);
     } else if (done === 'resgatado') {
       enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
     } else if (done === 'finalizado') {
       enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
-      navigate(PATH_DIGITALDOCS.processos.root);
+      navigate(linkNavigate);
     } else if (done === 'abandonado') {
       enqueueSnackbar('Processo abandonado com sucesso', { variant: 'success' });
-      navigate(PATH_DIGITALDOCS.processos.root);
+      navigate(linkNavigate);
     } else if (done === 'solicitado') {
       enqueueSnackbar('Pedido enviado com sucesso', { variant: 'success' });
-    } else if (done === 'Processo eliminado') {
-      enqueueSnackbar('Processo eliminado com sucesso', { variant: 'success' });
-      navigate(
-        (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
-          (fromRetidos && `${PATH_DIGITALDOCS.processos.lista}?tab=retidos`) ||
-          (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
-          (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
-          (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
-          (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
-          (fromProcurar && PATH_DIGITALDOCS.processos.procurar) ||
-          PATH_DIGITALDOCS.processos.root
-      );
+    } else if (done === 'desarquivado') {
+      enqueueSnackbar('Processo desarquivado com sucesso', { variant: 'success' });
+      navigate(linkNavigate);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -168,17 +182,9 @@ export default function Processo() {
                 (fromPendentes && 'Pendentes') ||
                 (fromRetidos && 'Retidos') ||
                 (fromPorConcluir && 'Por concluir') ||
-                (fromProcurar && 'Resultado de procura') ||
+                (fromProcurar && 'Pesquisa') ||
                 'Processos',
-              href:
-                (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
-                (fromTarefas && `${PATH_DIGITALDOCS.processos.lista}?tab=tarefas`) ||
-                (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}?tab=entradas`) ||
-                (fromPendentes && `${PATH_DIGITALDOCS.processos.lista}?tab=pendentes`) ||
-                (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir`) ||
-                (fromRetidos && `${PATH_DIGITALDOCS.processos.lista}?tab=retidos`) ||
-                (fromProcurar && PATH_DIGITALDOCS.processos.procurar) ||
-                PATH_DIGITALDOCS.processos.root,
+              href: linkNavigate,
             },
             { name: processo?.referencia || 'Detalhes do processo' },
           ]}
@@ -204,6 +210,17 @@ export default function Processo() {
                             <UnarchiveOutlinedIcon />
                           </Fab>
                         </Tooltip>
+                        <Dialog open={isOpenModalDesariquivar} onClose={handleClose} fullWidth maxWidth="sm">
+                          <DesarquivarForm
+                            open={isOpenModalDesariquivar}
+                            onCancel={handleClose}
+                            processoID={processo?.id}
+                            fluxoID={processo?.fluxo_id}
+                          />
+                        </Dialog>
+                        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+                          <AtribuirAcessoForm open={open} onCancel={onClose} processoId={processo?.id} />
+                        </Dialog>
                       </RoleBasedGuard>
                       {!fromArquivo && meusacessos.includes('arquivo-110') && meusacessos.includes('arquivo-111') && (
                         <Tooltip title="PEDIR ACESSO" arrow>
@@ -220,7 +237,7 @@ export default function Processo() {
                           {podeAceitar() && (
                             <Tooltip title="ACEITAR" arrow>
                               <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
-                                <LockPersonIcon src="/assets/icons/lock.svg" />
+                                <LockPersonIcon />
                               </Fab>
                             </Tooltip>
                           )}
@@ -252,8 +269,16 @@ export default function Processo() {
               </Grid>
             ) : (
               <>
+                {(hasHistorico || hasHPrisoes) && (
+                  <Grid item xs={12}>
+                    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+                      {hasHistorico && <HistoricoProcesso historico={processo?.htransicoes} />}
+                      {hasHPrisoes && <HistoricoPrisoes historico={processo?.hprisoes} />}
+                    </Stack>
+                  </Grid>
+                )}
                 <Grid item xs={12} lg={hasAnexos && 5}>
-                  <Card>
+                  <Card sx={{ height: 1 }}>
                     <CardContent>
                       {processo?.nota && <NotaProcesso nota={processo.nota} />}
                       <DetalhesProcesso processo={processo} />
@@ -262,38 +287,12 @@ export default function Processo() {
                 </Grid>
                 {hasAnexos && (
                   <Grid item xs={12} lg={7}>
-                    <Card ref={refColumn1}>
+                    <Card sx={{ height: 1 }}>
                       <CardContent>
                         <Anexos anexos={processo?.anexos} />
                       </CardContent>
                     </Card>
                   </Grid>
-                )}
-                {hasHistorico && (
-                  <Grid item xs={12} lg={hasHPrisoes && 6}>
-                    <HistoricoProcesso historico={processo?.htransicoes} />
-                  </Grid>
-                )}
-                {hasHPrisoes && (
-                  <Grid item xs={12} lg={hasHistorico && 6}>
-                    <HistoricoPrisoes historico={processo?.hprisoes} />
-                  </Grid>
-                )}
-
-                {processo?.situacao === 'A' && (
-                  <>
-                    <Dialog open={isOpenModalDesariquivar} onClose={handleClose} fullWidth maxWidth="sm">
-                      <DesarquivarForm
-                        open={isOpenModalDesariquivar}
-                        onCancel={handleClose}
-                        processoID={processo?.id}
-                        fluxoID={processo?.fluxo_id}
-                      />
-                    </Dialog>
-                    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-                      <AtribuirAcessoForm open={open} onCancel={onClose} processoId={processo?.id} />
-                    </Dialog>
-                  </>
                 )}
               </>
             )}

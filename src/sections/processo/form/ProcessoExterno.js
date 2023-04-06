@@ -138,9 +138,6 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
-        if (values.mobs) {
-          formData.append('mobs', values.mobs);
-        }
         if (values.conta) {
           formData.append('conta', values.conta);
         }
@@ -177,9 +174,22 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.operacao) {
           formData.append('operacao', values.operacao);
         }
-        formData.append('ispendente', values.ispendente);
-        if (values.mpendencia) {
-          formData.append('mpendencia', values.mpendencia.id);
+        if (values.ispendente) {
+          formData.append('ispendente', true);
+          if (values.mpendencia) {
+            formData.append('mpendencia', values.mpendencia.id);
+          }
+          if (values.mobs) {
+            formData.append('mobs', values.mobs);
+          }
+        } else {
+          formData.append('ispendente', false);
+          if (selectedProcesso.mpendencia) {
+            formData.append('mpendencia', selectedProcesso.mpendencia);
+          }
+          if (selectedProcesso.mobs) {
+            formData.append('mobs', selectedProcesso.mobs);
+          }
         }
         if (values?.anexos?.length > 0) {
           for (let i = 0; i < values.anexos.length; i += 1) {
@@ -243,7 +253,9 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         }
         if (values.ispendente) {
           formData.append('ispendente', values.ispendente);
-          formData.append('mpendencia', values?.mpendencia?.id);
+          if (values.mpendencia) {
+            formData.append('mpendencia', values.mpendencia.id);
+          }
           if (values.mobs) {
             formData.append('mobs', values.mobs);
           }

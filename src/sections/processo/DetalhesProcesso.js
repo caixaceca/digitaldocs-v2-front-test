@@ -59,7 +59,7 @@ export default function DetalhesProcesso({ processo }) {
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
 
   return (
-    <Scrollbar>
+    <Scrollbar sx={{ mt: -2 }}>
       {(processo?.referencia ||
         processo?.assunto ||
         processo?.data_entrada ||
@@ -70,10 +70,9 @@ export default function DetalhesProcesso({ processo }) {
         processo?.obs ||
         processo.ispendente) && (
         <List>
-          <ListItem disableGutters secondaryAction="">
+          <ListItem disableGutters divider secondaryAction="">
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
-          <Divider />
           {processo?.referencia && (
             <ListItem disableGutters>
               <TextItem title="Referência:" text={processo.referencia} />
@@ -146,13 +145,19 @@ export default function DetalhesProcesso({ processo }) {
               </Paper>
             </ListItem>
           )}
-          {processo.ispendente && (
+          {(processo.ispendente || motivo || processo.mobs) && (
             <List>
               <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
                 <ListItem disableGutters>
-                  <Label color="warning">
-                    <InfoOutlinedIcon sx={{ width: 15, mr: 1 }} /> Processo pendente
-                  </Label>
+                  {processo.ispendente ? (
+                    <Label color="warning" startIcon={<InfoOutlinedIcon />}>
+                      Processo pendente
+                    </Label>
+                  ) : (
+                    <Label color="default" startIcon={<InfoOutlinedIcon />}>
+                      Este processo esteve pendente
+                    </Label>
+                  )}
                 </ListItem>
                 {motivo && (
                   <ListItem disableGutters>
@@ -160,7 +165,7 @@ export default function DetalhesProcesso({ processo }) {
                   </ListItem>
                 )}
                 {processo.mobs && (
-                  <ListItem disableGutters>
+                  <ListItem disableGutters disablePadding>
                     <TextItem title="Obs:" text={processo.mobs} />
                   </ListItem>
                 )}
@@ -177,10 +182,9 @@ export default function DetalhesProcesso({ processo }) {
         processo?.cliente ||
         processo?.conta) && (
         <List>
-          <ListItem disableGutters>
+          <ListItem disableGutters divider>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
-          <Divider />
           {processo.titular && (
             <ListItem disableGutters>
               <TextItem title="Titular:" text={processo.titular} />
@@ -230,10 +234,9 @@ export default function DetalhesProcesso({ processo }) {
       )}
       {(processo.operacao || processo?.noperacao) && (
         <List>
-          <ListItem disableGutters>
+          <ListItem disableGutters divider>
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
-          <Divider />
           {processo.noperacao && (
             <ListItem disableGutters>
               <TextItem title="Nº de operação:" text={processo.noperacao} />
@@ -300,10 +303,9 @@ export default function DetalhesProcesso({ processo }) {
       )}
       {processo.agendado && (
         <List>
-          <ListItem disableGutters>
+          <ListItem disableGutters divider>
             <Typography variant="subtitle1">Agendamento</Typography>
           </ListItem>
-          <Divider />
           {processo.periodicidade && (
             <ListItem disableGutters>
               <TextItem title="Periodicidade:" text={processo.periodicidade} />

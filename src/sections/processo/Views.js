@@ -65,7 +65,7 @@ export default function Views({ processoId }) {
         anchor="right"
         onClose={onClose}
         BackdropProps={{ invisible: true }}
-        PaperProps={{ sx: { width: 400 } }}
+        PaperProps={{ sx: { width: { xs: 1, sm: 400 } } }}
         sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>

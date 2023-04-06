@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 // form
 import { useForm, Controller } from 'react-hook-form';
@@ -32,7 +31,6 @@ import { fNumber, fCurrency } from '../../utils/formatNumber';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import {
-  resetItem,
   arquivarProcesso,
   finalizarProcesso,
   encaminharProcesso,
@@ -40,8 +38,6 @@ import {
 } from '../../redux/slices/digitaldocs';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import { FormProvider, RHFTextField, RHFUploadMultiFile } from '../../components/hook-form';
 
@@ -56,20 +52,10 @@ IntervencaoForm.propTypes = {
 };
 
 export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, processo }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { error, isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
-
-  useEffect(() => {
-    if (done === 'realizada') {
-      enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
-      dispatch(resetItem('processo'));
-      navigate(PATH_DIGITALDOCS.processos.root);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
 
   useEffect(() => {
     if (error) {
@@ -84,12 +70,7 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
   });
 
   const defaultValues = useMemo(
-    () => ({
-      anexos: [],
-      noperacao: '',
-      observacao: '',
-      acao: destinos?.length === 1 ? destinos?.[0] : null,
-    }),
+    () => ({ anexos: [], noperacao: '', observacao: '', acao: destinos?.length === 1 ? destinos?.[0] : null }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [processo]
   );
@@ -212,19 +193,10 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
 ArquivarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processo: PropTypes.object };
 
 export function ArquivarForm({ open, onCancel, processo }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (done === 'arquivado') {
-      enqueueSnackbar('Processo arquivado com sucesso', { variant: 'success' });
-      navigate(PATH_DIGITALDOCS.processos.root);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
+  const { error, isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (error) {
@@ -403,19 +375,10 @@ DesarquivarForm.propTypes = {
 };
 
 export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (done === 'desarquivado') {
-      enqueueSnackbar('Processo desarquivado com sucesso', { variant: 'success' });
-      navigate(PATH_DIGITALDOCS.arquivo.root);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
+  const { error, isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (error) {
@@ -502,11 +465,10 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
 FinalizarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processo: PropTypes.object };
 
 export function FinalizarForm({ open, onCancel, processo }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
-  const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { error, isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
 
   useEffect(() => {
@@ -514,14 +476,6 @@ export function FinalizarForm({ open, onCancel, processo }) {
       setSelecionados([]);
     }
   }, [open]);
-
-  useEffect(() => {
-    if (done === 'finalizado') {
-      enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
-      navigate(PATH_DIGITALDOCS.processos.root);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
 
   useEffect(() => {
     if (error) {

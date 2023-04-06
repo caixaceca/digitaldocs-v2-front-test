@@ -91,7 +91,7 @@ export default function Intervencao({ processo }) {
     if (
       processo?.situacao === 'E' &&
       processo?.operacao === 'Cativo/Penhora' &&
-      processo?.nome === 'Validação Notas externas'
+      processo?.nome === 'DOP - Validação Notas Externas'
     ) {
       let i = 0;
       while (i < meusAmbientes?.length) {
@@ -224,6 +224,7 @@ export default function Intervencao({ processo }) {
           <FinalizarForm open={open5} onCancel={onClose5} processo={processo} />
         </>
       )}
+
       <Tooltip title="ABANDONAR" arrow>
         <Fab color="warning" size="small" variant="soft" onClick={onOpen2}>
           <SvgIconStyle src="/assets/icons/abandonar.svg" />

@@ -39,7 +39,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
           </CardContent>
         </Card>
       </Grid>
-      {(assunto === 'OPE DARH' || assunto === 'Ordem de Pagamento Emitido') && (
+      {(assunto === 'OPE DARH' || assunto === 'Transferência Internacional') && (
         <Grid item xs={12}>
           <Card>
             <CardContent>

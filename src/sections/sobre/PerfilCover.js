@@ -57,7 +57,6 @@ export default function PerfilCover({ perfilColaborador }) {
                 borderColor: 'common.white',
                 width: { xs: 80, md: 128 },
                 height: { xs: 80, md: 128 },
-                cursor: 'zoom-in',
               }}
               src={
                 perfilColaborador?.foto_disk &&

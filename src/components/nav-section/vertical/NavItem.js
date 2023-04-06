@@ -55,10 +55,7 @@ export default function NavItem({ item, depth, active, open, isCollapse, ...othe
           textTransform: 'none !important',
           variant: active ? 'subtitle2' : 'body2',
         }}
-        secondaryTypographyProps={{
-          noWrap: true,
-          variant: 'caption',
-        }}
+        secondaryTypographyProps={{ noWrap: true, variant: 'caption' }}
       />
 
       {!isCollapse && (
@@ -85,9 +82,7 @@ export default function NavItem({ item, depth, active, open, isCollapse, ...othe
 
 // ----------------------------------------------------------------------
 
-DotIcon.propTypes = {
-  active: PropTypes.bool,
-};
+DotIcon.propTypes = { active: PropTypes.bool };
 
 export function DotIcon({ active }) {
   return (
@@ -100,13 +95,8 @@ export function DotIcon({ active }) {
           borderRadius: '50%',
           bgcolor: 'text.disabled',
           transition: (theme) =>
-            theme.transitions.create('transform', {
-              duration: theme.transitions.duration.shorter,
-            }),
-          ...(active && {
-            transform: 'scale(2)',
-            bgcolor: 'primary.main',
-          }),
+            theme.transitions.create('transform', { duration: theme.transitions.duration.shorter }),
+          ...(active && { transform: 'scale(2)', bgcolor: 'primary.main' }),
         }}
       />
     </ListItemIconStyle>

@@ -14,9 +14,7 @@ const RootStyle = styled('div')(({ theme }) => ({
   padding: theme.spacing(2, 1.5),
   borderRadius: Number(theme.shape.borderRadius) * 1.5,
   backgroundColor: theme.palette.grey[500_12],
-  transition: theme.transitions.create('opacity', {
-    duration: theme.transitions.duration.shorter,
-  }),
+  transition: theme.transitions.create('opacity', { duration: theme.transitions.duration.shorter }),
   border: `1px solid ${theme.palette.grey[500_8]}`,
   '&:hover': { backgroundColor: theme.palette.grey[500_32], border: '1px solid rgba(90,170,40,.5)' },
   marginLeft: '-10px',
@@ -26,9 +24,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-NavbarAcount.propTypes = {
-  isCollapse: PropTypes.bool,
-};
+NavbarAcount.propTypes = { isCollapse: PropTypes.bool };
 
 export default function NavbarAcount({ isCollapse }) {
   const { accounts } = useMsal();
@@ -41,10 +37,7 @@ export default function NavbarAcount({ isCollapse }) {
         <Box
           sx={{
             ml: 2,
-            transition: (theme) =>
-              theme.transitions.create('width', {
-                duration: theme.transitions.duration.shorter,
-              }),
+            transition: (theme) => theme.transitions.create('width', { duration: theme.transitions.duration.shorter }),
             ...(isCollapse && { ml: 0, width: 0 }),
           }}
         >

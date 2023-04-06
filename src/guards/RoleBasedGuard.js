@@ -40,8 +40,6 @@ export default function RoleBasedGuard({ hasContent, roles, children }) {
               </Typography>
             </m.div>
 
-            <m.div variants={varBounce().in}>{children}</m.div>
-
             <m.div variants={varBounce().in}>
               <Typography sx={{ color: 'text.secondary' }}>
                 Não tens permissão para aceder a este item,

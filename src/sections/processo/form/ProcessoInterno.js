@@ -147,9 +147,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
-        if (values.mobs) {
-          formData.append('mobs', values.mobs);
-        }
         if (values.conta) {
           formData.append('conta', values.conta);
         }
@@ -157,8 +154,22 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
           formData.append('cliente', values.cliente);
         }
         formData.append('ispendente', values.ispendente);
-        if (values.mpendencia) {
-          formData.append('mpendencia', values.mpendencia.id);
+        if (values.ispendente) {
+          formData.append('ispendente', true);
+          if (values.mpendencia) {
+            formData.append('mpendencia', values.mpendencia.id);
+          }
+          if (values.mobs) {
+            formData.append('mobs', values.mobs);
+          }
+        } else {
+          formData.append('ispendente', false);
+          if (selectedProcesso.mpendencia) {
+            formData.append('mpendencia', selectedProcesso.mpendencia);
+          }
+          if (selectedProcesso.mobs) {
+            formData.append('mobs', selectedProcesso.mobs);
+          }
         }
         if (values?.entidades?.length !== 0) {
           formData.append(
@@ -210,8 +221,10 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
           formData.append('cliente', values.cliente);
         }
         if (values.ispendente) {
-          formData.append('ispendente', values.ispendente);
-          formData.append('mpendencia', values?.mpendencia?.id);
+          formData.append('ispendente', true);
+          if (values.mpendencia) {
+            formData.append('mpendencia', values.mpendencia.id);
+          }
           if (values.mobs) {
             formData.append('mobs', values.mobs);
           }

@@ -10,7 +10,7 @@ export default function NotaProcesso({ nota }) {
   return (
     <>
       <Grid item xs={12}>
-        <Stack direction="row" justifyContent="center" alignItems="center">
+        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mb: 2 }}>
           {(nota === 'Essa Entidade não possui nenhuma conta CVE elegivel para cativo/penhora no valor indicado!' && (
             <Alert severity="error">
               Este entidade não possui nenhuma conta CVE elegivel para cativo/penhora no valor indicado!

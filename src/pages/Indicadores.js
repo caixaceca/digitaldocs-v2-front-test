@@ -29,9 +29,9 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 }));
 
 const RootStyle = styled('div')(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.primary.main, 1),
   width: '100%',
   height: '100%',
+  backgroundColor: alpha(theme.palette.primary.main, 1),
 }));
 
 // ----------------------------------------------------------------------
@@ -100,21 +100,23 @@ export default function Indicadores() {
             })}
           </>
         ) : (
-          <Stack sx={{ alignItems: 'center' }}>
-            <Typography variant="h3" paragraph sx={{ mt: 5 }}>
-              Brevemente
-            </Typography>
+          <Card sx={{ p: 5 }}>
+            <Stack sx={{ alignItems: 'center' }}>
+              <Typography variant="h3" paragraph sx={{ mt: 5 }}>
+                Brevemente
+              </Typography>
 
-            <Typography sx={{ color: 'text.secondary' }}>
-              Estamos trabalhando nos seus indicadores, da sua equipa, da sua unidade orgânica e da Caixa!
-            </Typography>
+              <Typography sx={{ color: 'text.secondary' }}>
+                Estamos trabalhando nos seus indicadores, da sua equipa, da sua unidade orgânica e da Caixa!
+              </Typography>
 
-            <ComingSoonIllustration sx={{ mb: 7, height: { xs: 300, sm: 450 } }} />
+              <ComingSoonIllustration sx={{ mb: 7, height: { xs: 300, sm: 450 } }} />
 
-            <Button size="large" variant="contained" onClick={() => navigate(-1)}>
-              Voltar
-            </Button>
-          </Stack>
+              <Button size="large" variant="contained" onClick={() => navigate(-1)}>
+                Voltar
+              </Button>
+            </Stack>
+          </Card>
         )}
       </Container>
     </Page>
