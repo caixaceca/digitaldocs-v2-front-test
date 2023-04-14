@@ -21,6 +21,7 @@ const initialState = {
   isOpenModalDesariquivar: false,
   anexo: null,
   fluxo: null,
+  acesso: null,
   estado: null,
   origem: null,
   meuFluxo: null,
@@ -29,6 +30,7 @@ const initialState = {
   filePreview: null,
   meuAmbiente: null,
   selectedItem: null,
+  anexoParecer: null,
   selectedFluxo: null,
   selectedOrigem: null,
   selectedEstado: null,
@@ -38,6 +40,7 @@ const initialState = {
   selectedMeuEstado: null,
   indicadoresArquivo: null,
   fluxos: [],
+  linhas: [],
   versoes: [],
   ranking: [],
   estados: [],
@@ -343,6 +346,10 @@ const slice = createSlice({
       state.acessos = action.payload;
     },
 
+    getLinhasSuccess(state, action) {
+      state.linhas = action.payload;
+    },
+
     getMeusAcessosSuccess(state, action) {
       action.payload?.forEach((row) => {
         const acesso = `${row.objeto}-${row.acesso}`;
@@ -366,6 +373,10 @@ const slice = createSlice({
       state.anexo = action.payload;
     },
 
+    getAnexoParecerSuccess(state, action) {
+      state.anexoParecer = action.payload;
+    },
+
     getanexoFilePreviewSuccess(state, action) {
       state.isLoadingAnexo = false;
       state.filePreview = action.payload.file;
@@ -378,6 +389,10 @@ const slice = createSlice({
 
     createEstadoSuccess(state, action) {
       state.estados.push(action.payload);
+    },
+
+    createLinhaSuccess(state, action) {
+      state.linhas.push(action.payload);
     },
 
     createTransicaoSuccess(state, action) {
@@ -420,9 +435,20 @@ const slice = createSlice({
       state.acessos[index] = action.payload;
     },
 
+    patchParecerSuccess(state, action) {
+      const index = state.processo.pareceres.findIndex((row) => row.id === action.payload.id);
+      const parecer = action.payload.dados.pareceres.find((row) => row.id === action.payload.id);
+      state.processo.pareceres[index] = parecer;
+    },
+
     updateOrigemSuccess(state, action) {
       const index = state.origens.findIndex((row) => row.id === action.payload.id);
       state.origens[index] = action.payload;
+    },
+
+    updateLinhaSuccess(state, action) {
+      const index = state.linhas.findIndex((row) => row.id === action.payload.id);
+      state.linhas[index] = action.payload;
     },
 
     updateMotivoPendenciaSuccess(state, action) {
@@ -456,6 +482,11 @@ const slice = createSlice({
       state.origens = state.origens.filter((row) => row.id !== action.payload.id);
     },
 
+    deleteLinhaSuccess(state, action) {
+      state.isOpenModal = false;
+      state.linhas = state.linhas.filter((row) => row.id !== action.payload.id);
+    },
+
     deleteMotivoPendenciaSuccess(state, action) {
       state.isOpenModal = false;
       state.motivosPendencias = state.motivosPendencias.filter((row) => row.id !== action.payload.id);
@@ -475,6 +506,14 @@ const slice = createSlice({
       state.estado.perfis = state.estado.perfis.filter((row) => row.peid !== action.payload.id);
       state.isOpenModalAnexo = false;
       state.selectedAnexoId = null;
+    },
+
+    deleteAnexoParecerSuccess(state, action) {
+      const index = state.processo.pareceres.findIndex((row) => row.id === action.payload.parecerId);
+      state.processo.pareceres[index].anexos = state.processo.pareceres[index].anexos.filter(
+        (row) => row.id !== action.payload.id
+      );
+      state.selectedItem.anexos = state.selectedItem.anexos.filter((row) => row.id !== action.payload.id);
     },
 
     desarquivarProcessoSuccess(state) {
@@ -536,6 +575,7 @@ const slice = createSlice({
 
     resetAnexo(state) {
       state.anexo = null;
+      state.anexoParecer = null;
     },
   },
 });
@@ -838,6 +878,15 @@ export function getAll(item, params) {
           dispatch(slice.actions.getPesquisaSuccess(response.data));
           break;
         }
+        case 'pesquisa v2': {
+          dispatch(slice.actions.resetItem('processo'));
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/search/${params?.perfilId}?uoID=${params?.uoID}&chave=${params?.chave}`,
+            options
+          );
+          dispatch(slice.actions.getPesquisaSuccess(response.data));
+          break;
+        }
         case 'visualizacoes': {
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/visualizacoes/${params?.perfilId}?processoID=${params?.processoId}`,
@@ -899,13 +948,18 @@ export function getAll(item, params) {
               options
             );
             dispatch(slice.actions.getTrabalhadosSuccess(response.data.objeto));
-          } else {
+          } else if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
               options
             );
             dispatch(slice.actions.getTrabalhadosSuccess(response.data.objeto));
           }
+          break;
+        }
+        case 'linhas': {
+          const response = await axios.get(`${BASEURLDD}/v1/linhas/${params?.perfilId}`, options);
+          dispatch(slice.actions.getLinhasSuccess(response.data.objeto));
           break;
         }
 
@@ -1106,21 +1160,27 @@ export function getItem(item, params) {
 
 // ----------------------------------------------------------------------
 
-export function getAnexo(from, anexo, type, mail) {
+export function getAnexo(item, anexo, type, mail) {
   return async (dispatch) => {
-    dispatch(slice.actions.startLoadingAnexo());
+    if (item !== 'anexoParecer') {
+      dispatch(slice.actions.startLoadingAnexo());
+    }
     try {
-      switch (from) {
+      const options = { headers: { cc: mail } };
+      switch (item) {
         case 'filepreview': {
-          const options = { headers: { cc: mail } };
           const response = await axios.get(`${BASEURLDD}/v1/processos/file/${anexo}`, options);
           dispatch(slice.actions.getanexoFilePreviewSuccess({ file: response.data, type }));
           break;
         }
         case 'anotherone': {
-          const options = { headers: { cc: mail } };
           const response = await axios.get(`${BASEURLDD}/v1/processos/file/${anexo}`, options);
           dispatch(slice.actions.getAnexoSuccess(response.data));
+          break;
+        }
+        case 'anexoParecer': {
+          const response = await axios.get(`${BASEURLDD}/v1/processos/file/parecer/${anexo?.anexo}`, options);
+          dispatch(slice.actions.getAnexoParecerSuccess({ ...response.data, anexo }));
           break;
         }
 
@@ -1208,6 +1268,11 @@ export function createItem(item, dados, params) {
         case 'transicao': {
           const response = await axios.post(`${BASEURLDD}/v1/transicoes`, dados, options);
           dispatch(slice.actions.createTransicaoSuccess(response.data));
+          break;
+        }
+        case 'linha': {
+          const response = await axios.post(`${BASEURLDD}/v1/linhas`, dados, options);
+          dispatch(slice.actions.createLinhaSuccess(response.data.objeto));
           break;
         }
         case 'processo interno': {
@@ -1318,6 +1383,11 @@ export function updateItem(item, dados, params) {
           dispatch(slice.actions.updateOrigemSuccess(response.data));
           break;
         }
+        case 'linha': {
+          const response = await axios.put(`${BASEURLDD}/v1/linhas/${params?.id}`, dados, options);
+          dispatch(slice.actions.updateLinhaSuccess(response.data.objeto));
+          break;
+        }
         case 'motivo pendencia': {
           const response = await axios.put(
             `${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`,
@@ -1358,6 +1428,15 @@ export function updateItem(item, dados, params) {
             );
           }
           dispatch(slice.actions.updateProcessoSuccess(params?.id));
+          break;
+        }
+        case 'parecer': {
+          const response = await axios.patch(
+            `${BASEURLDD}/v1/processos/parecer/${params?.processoId}`,
+            dados,
+            options1
+          );
+          dispatch(slice.actions.patchParecerSuccess({ id: params?.id, dados: response.data }));
           break;
         }
 
@@ -1416,6 +1495,11 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteOrigemSuccess({ id: params?.id }));
           break;
         }
+        case 'linha': {
+          await axios.delete(`${BASEURLDD}/v1/linhas/${params?.linhaID}/${params?.perfilID}`, options);
+          dispatch(slice.actions.deleteLinhaSuccess({ id: params?.id }));
+          break;
+        }
         case 'motivo pendencia': {
           await axios.delete(`${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`, options);
           dispatch(slice.actions.deleteMotivoPendenciaSuccess({ id: params?.id }));
@@ -1434,6 +1518,14 @@ export function deleteItem(item, params) {
         case 'perfil from estado': {
           await axios.delete(`${BASEURLDD}/v1/estados/asscc/perfil/${params?.perfilId}?peID=${params?.id}`, options);
           dispatch(slice.actions.deletePerfilFromEstadoSuccess({ id: params?.id }));
+          break;
+        }
+        case 'anexoParecer': {
+          await axios.delete(
+            `${BASEURLDD}/v1/processos/parecer/remover/anexos/${params?.perfilId}/${params?.parecerId}/${params?.id}`,
+            options
+          );
+          dispatch(slice.actions.deleteAnexoParecerSuccess({ id: params?.id, parecerId: params?.parecerId }));
           break;
         }
 

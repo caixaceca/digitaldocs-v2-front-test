@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import { Grid, Button, Skeleton, Typography } from '@mui/material';
+import { Grid, Button, Divider, Skeleton, Typography } from '@mui/material';
 // utils
 import { getFileFormat, getFileThumb, b64toBlob } from '../../utils/getFileFormat';
 // redux
@@ -82,6 +82,7 @@ export default function Anexos({ anexos }) {
         <Typography variant="subtitle1" gutterBottom>
           Anexos
         </Typography>
+        <Divider />
       </Grid>
       {isLoadingAnexo ? (
         <Grid item xs={12}>
@@ -101,52 +102,58 @@ export default function Anexos({ anexos }) {
           )}
         </>
       )}
-      {anexosAtivos.length > 0 && (
-        <Grid item xs={12}>
-          {anexosAtivos.map(
-            (row) =>
-              row?.nome && (
-                <Button
-                  fullWidth
-                  color="inherit"
-                  key={row?.anexo}
-                  variant="outlined"
-                  onClick={() => handleAnexo(row)}
-                  startIcon={getFileThumb(row.nome)}
-                  disabled={row?.anexo === selectedAnexoPreview?.anexo}
-                  sx={{ justifyContent: 'left', textAlign: 'left', mt: 1, py: 1 }}
-                >
-                  {row?.nome}
-                </Button>
-              )
-          )}
-        </Grid>
-      )}
-      {anexosInativos?.length > 0 && (
-        <RoleBasedGuard roles={['Todo-111']}>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom>
-              Eliminados
-            </Typography>
-            {anexosInativos?.map(
-              (row) =>
-                row?.nome && (
-                  <Button
-                    fullWidth
-                    color="inherit"
-                    key={row?.anexo}
-                    variant="outlined"
-                    onClick={() => handleAnexo(row)}
-                    startIcon={getFileThumb(row?.nome)}
-                    disabled={row?.anexo === selectedAnexoPreview?.anexo}
-                    sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: 0.5 }}
-                  >
-                    {row?.nome}
-                  </Button>
-                )
+      {(anexosInativos?.length > 0 || anexosAtivos.length > 0) && (
+        <Grid item xs={12} id="list_anexos">
+          <Grid container spacing={3}>
+            {anexosAtivos.length > 0 && (
+              <Grid item xs={12}>
+                {anexosAtivos.map(
+                  (row) =>
+                    row?.nome && (
+                      <Button
+                        fullWidth
+                        color="inherit"
+                        key={row?.anexo}
+                        variant="outlined"
+                        onClick={() => handleAnexo(row)}
+                        startIcon={getFileThumb(row.nome)}
+                        disabled={row?.anexo === selectedAnexoPreview?.anexo}
+                        sx={{ justifyContent: 'left', textAlign: 'left', mt: 1, py: 1 }}
+                      >
+                        {row?.nome}
+                      </Button>
+                    )
+                )}
+              </Grid>
+            )}
+            {anexosInativos?.length > 0 && (
+              <RoleBasedGuard roles={['Todo-111']}>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Eliminados
+                  </Typography>
+                  {anexosInativos?.map(
+                    (row) =>
+                      row?.nome && (
+                        <Button
+                          fullWidth
+                          color="inherit"
+                          key={row?.anexo}
+                          variant="outlined"
+                          onClick={() => handleAnexo(row)}
+                          startIcon={getFileThumb(row?.nome)}
+                          disabled={row?.anexo === selectedAnexoPreview?.anexo}
+                          sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: 0.5 }}
+                        >
+                          {row?.nome}
+                        </Button>
+                      )
+                  )}
+                </Grid>
+              </RoleBasedGuard>
             )}
           </Grid>
-        </RoleBasedGuard>
+        </Grid>
       )}
     </Grid>
   );

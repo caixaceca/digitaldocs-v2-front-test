@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
 // @mui
 import {
@@ -36,7 +36,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'ID', align: 'left' },
+  { id: 'nentrada', label: 'Nº entrada', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -46,7 +46,7 @@ const TABLE_HEAD = [
 ];
 
 const TABLE_HEAD_PENDECIA = [
-  { id: 'id', label: 'ID', align: 'left' },
+  { id: 'nentrada', label: 'Nº entrada', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -62,6 +62,7 @@ TableProcessos.propTypes = { from: PropTypes.string };
 export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [segmento, setSegmento] = useState(null);
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const { processos, isLoading, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
@@ -112,6 +113,11 @@ export default function TableProcessos({ from }) {
     setPage(0);
   };
 
+  const handleFilterSegmento = (event) => {
+    setSegmento(event);
+    setPage(0);
+  };
+
   const handleViewRow = (id) => {
     navigate({ pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`, search: createSearchParams({ from }).toString() });
   };
@@ -127,7 +133,12 @@ export default function TableProcessos({ from }) {
     return false;
   };
 
-  const dataFiltered = applySortFilter({ processos, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    processos,
+    comparator: getComparator(order, orderBy),
+    filterSearch,
+    segmento,
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -150,7 +161,13 @@ export default function TableProcessos({ from }) {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        <SearchToolbarProcessos filterSearch={filterSearch} onFilterSearch={handleFilterSearch} origem={from} />
+        <SearchToolbarProcessos
+          filterSearch={filterSearch}
+          onFilterSearch={handleFilterSearch}
+          segmento={segmento}
+          onFilterSegmento={handleFilterSegmento}
+          origem={from}
+        />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -186,10 +203,13 @@ export default function TableProcessos({ from }) {
                                   'text.focus',
                               }}
                             />
-                            <Stack>{row.id}</Stack>
+                            <Stack>{row.nentrada}</Stack>
                           </Stack>
                         </TableCell>
-                        <TableCell>{row.titular}</TableCell>
+                        <TableCell>
+                          {row.titular}
+                          {/* {row?.segcliente && <Typography>{row?.segcliente}</Typography>} */}
+                        </TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
                         </TableCell>
@@ -238,7 +258,7 @@ export default function TableProcessos({ from }) {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ processos, comparator, filterSearch }) {
+function applySortFilter({ processos, comparator, filterSearch, segmento }) {
   const stabilizedThis = processos.map((el, index) => [el, index]);
   const text = filterSearch.get('filter');
 
@@ -247,13 +267,19 @@ function applySortFilter({ processos, comparator, filterSearch }) {
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-
   processos = stabilizedThis.map((el) => el[0]);
+
+  if (segmento === 'Particulares') {
+    processos = processos.filter((row) => row?.segcliente === 'P');
+  }
+  if (segmento === 'Empresas') {
+    processos = processos.filter((row) => row?.segcliente === 'E');
+  }
 
   if (text) {
     processos = processos.filter(
       (row) =>
-        (row?.id && row?.id.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.assunto && row?.assunto.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.nome && row?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

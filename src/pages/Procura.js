@@ -83,10 +83,17 @@ export default function Procura() {
   const _chave = chave?.get('chave');
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id && _chave) {
-      dispatch(getAll('pesquisa', { mail, perfilId: currentColaborador?.perfil_id, chave: _chave }));
+    if (mail && currentColaborador?.perfil_id && currentColaborador?.uo_id && _chave) {
+      dispatch(
+        getAll('pesquisa v2', {
+          mail,
+          chave: _chave,
+          uoID: currentColaborador?.uo_id,
+          perfilId: currentColaborador?.perfil_id,
+        })
+      );
     }
-  }, [dispatch, _chave, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, _chave, currentColaborador?.perfil_id, currentColaborador?.uo_id, mail]);
 
   const handleFilterUo = (value) => {
     setFilterUo(value);

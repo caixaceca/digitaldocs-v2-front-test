@@ -32,7 +32,7 @@ import Scrollbar from '../../components/Scrollbar';
 
 // ----------------------------------------------------------------------
 
-HistoricoPrisoes.propTypes = { historico: PropTypes.object };
+HistoricoPrisoes.propTypes = { historico: PropTypes.array };
 
 export default function HistoricoPrisoes({ historico }) {
   const { toggle: open, onOpen, onClose } = useToggle();

@@ -6,6 +6,7 @@ import SchemaOutlinedIcon from '@mui/icons-material/SchemaOutlined';
 import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
 import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
 import ModeStandbyOutlinedIcon from '@mui/icons-material/ModeStandbyOutlined';
+import CreditScoreOutlinedIcon from '@mui/icons-material/CreditScoreOutlined';
 import CorporateFareOutlinedIcon from '@mui/icons-material/CorporateFareOutlined';
 // utils
 import selectTab from '../utils/selectTab';
@@ -17,6 +18,7 @@ import { useSelector } from '../redux/store';
 import Page from '../components/Page';
 import SvgIconStyle from '../components/SvgIconStyle';
 // sections
+import Linhas from '../sections/parametrizacao/Linhas';
 import Fluxos from '../sections/parametrizacao/Fluxos';
 import Origens from '../sections/parametrizacao/Origens';
 import Estados from '../sections/parametrizacao/Estados';
@@ -111,6 +113,12 @@ export default function Parametrizacao() {
               icon: <ModeStandbyOutlinedIcon />,
               component: <MotivosPendencias />,
             },
+            {
+              value: 'linhasCredito',
+              label: 'Linhas crédito',
+              icon: <CreditScoreOutlinedIcon />,
+              component: <Linhas />,
+            },
           ]
         : [],
     [acessoMotivosPendencias]
@@ -154,7 +162,7 @@ export default function Parametrizacao() {
                   value={tab.value}
                   icon={tab.icon}
                   label={tab.label}
-                  sx={{ px: 0.5, typography: 'subtitle1' }}
+                  sx={{ px: 0.5, typography: 'subtitle2' }}
                 />
               ))}
             </Tabs>

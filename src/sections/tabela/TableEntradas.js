@@ -190,14 +190,14 @@ export default function TableEntradas() {
                 value={dataInicio}
                 label="Data início"
                 onChange={(newValue) => setDataInicio(newValue)}
-                renderInput={(params) => <TextField size="small" {...params} sx={{ width: { sm: 160 } }} />}
+                slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: { sm: 170 } } } }}
               />
               <DatePicker
                 disableFuture
                 value={dataFim}
                 label="Data fim"
                 onChange={(newValue) => setDataFim(newValue)}
-                renderInput={(params) => <TextField size="small" {...params} sx={{ width: { sm: 160 } }} />}
+                slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: { sm: 170 } } } }}
               />
             </Stack>
           </Stack>

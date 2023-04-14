@@ -181,11 +181,13 @@ export function SearchToolbar2({ filterSearch, origem, onFilterSearch }) {
 
 SearchToolbarProcessos.propTypes = {
   origem: PropTypes.string,
+  segmento: PropTypes.string,
   filterSearch: PropTypes.string,
   onFilterSearch: PropTypes.func,
+  onFilterSegmento: PropTypes.func,
 };
 
-export function SearchToolbarProcessos({ filterSearch, onFilterSearch, origem }) {
+export function SearchToolbarProcessos({ filterSearch, onFilterSearch, segmento, onFilterSegmento, origem }) {
   const { meusAmbientes, meusFluxos } = useSelector((state) => state.digitaldocs);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
@@ -193,6 +195,14 @@ export function SearchToolbarProcessos({ filterSearch, onFilterSearch, origem })
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
           {meusAmbientes?.length > 1 && <Ambiente />}
           {meusFluxos?.length > 1 && <Fluxo />}
+          <Autocomplete
+            fullWidth
+            value={segmento}
+            onChange={(event, newValue) => onFilterSegmento(newValue)}
+            options={['Particulares', 'Empresas']}
+            sx={{ width: { md: 150, xl: 200 } }}
+            renderInput={(params) => <TextField {...params} label="Segmento" margin="none" />}
+          />
         </Stack>
       )}
       <TextField

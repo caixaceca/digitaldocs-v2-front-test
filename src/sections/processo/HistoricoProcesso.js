@@ -8,7 +8,7 @@ import { Box, Stack, Paper, Button, Avatar, Drawer, Divider, IconButton, Typogra
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
 import { BASEURL } from '../../utils/axios';
-import { ptDate, ptTime } from '../../utils/formatTime';
+import { ptDateTime } from '../../utils/formatTime';
 import { newLineText } from '../../utils/normalizeText';
 // hooks
 import useToggle from '../../hooks/useToggle';
@@ -34,6 +34,7 @@ export default function HistoricoProcesso({ historico }) {
         variant="soft"
         color="inherit"
         onClick={onOpen}
+        sx={{ justifyContent: 'left' }}
         startIcon={
           <SvgIconStyle
             src={`/assets/icons/navbar/transition.svg`}
@@ -86,9 +87,11 @@ export default function HistoricoProcesso({ historico }) {
                   <TimelineContent sx={{ pr: 0 }}>
                     <Paper sx={{ p: 2, bgcolor: 'background.neutral' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
-                          {ptDate(row.data_transicao)} - {ptTime(row.data_transicao)}
-                        </Typography>
+                        {row.data_transicao && (
+                          <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
+                            {ptDateTime(row.data_transicao)}
+                          </Typography>
+                        )}
                         <Label
                           variant="ghost"
                           color={

@@ -4,7 +4,7 @@ import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 // @mui
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Fab, Grid, Button, Tooltip, TextField, InputAdornment } from '@mui/material';
+import { Fab, Grid, Button, Tooltip, InputAdornment } from '@mui/material';
 // hooks
 import useResponsive from '../../../hooks/useResponsive';
 // components
@@ -47,12 +47,8 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
                   disableFuture
                   value={field.value}
                   label="Data de entrada"
-                  onChange={(newValue) => {
-                    field.onChange(newValue);
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                  )}
+                  onChange={(newValue) => field.onChange(newValue)}
+                  slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                 />
               )}
             />

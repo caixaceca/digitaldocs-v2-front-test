@@ -15,7 +15,6 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
-  ListItemSecondaryAction,
 } from '@mui/material';
 // utils
 import { getFileThumb } from '../../../utils/getFileFormat';
@@ -78,8 +77,8 @@ export default function AnexosExistentes({ anexos, processoId }) {
 
   return (
     <>
-      <Typography variant="body2" sx={{ mt: 4, color: 'text.secondary' }}>
-        Existentes
+      <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+        Anexos existentes
       </Typography>
       <List disablePadding sx={{ mt: 1 }}>
         {anexosAtivos.map(
@@ -87,25 +86,23 @@ export default function AnexosExistentes({ anexos, processoId }) {
             anexo.nome && (
               <ListItem
                 key={anexo?.anexo}
-                sx={{ p: 1.5, mb: 1.5, borderRadius: 1, border: (theme) => `solid 1px ${theme.palette.divider}` }}
+                sx={{ p: 1, mb: 1, borderRadius: 1, border: (theme) => `solid 1px ${theme.palette.divider}` }}
               >
                 <ListItemIcon>{getFileThumb(anexo.nome)}</ListItemIcon>
                 <ListItemText>{anexo.nome}</ListItemText>
-                <ListItemSecondaryAction>
-                  {anexosAtivos.length > 1 && (
-                    <Fab
-                      color="error"
-                      size="small"
-                      variant="soft"
-                      onClick={() => {
-                        handleClickOpen(anexo.id);
-                      }}
-                      sx={{ width: 30, height: 30 }}
-                    >
-                      <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
-                    </Fab>
-                  )}
-                </ListItemSecondaryAction>
+                {anexosAtivos.length > 1 && (
+                  <Fab
+                    color="error"
+                    size="small"
+                    variant="soft"
+                    onClick={() => {
+                      handleClickOpen(anexo.id);
+                    }}
+                    sx={{ width: 30, height: 30 }}
+                  >
+                    <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
+                  </Fab>
+                )}
               </ListItem>
             )
         )}

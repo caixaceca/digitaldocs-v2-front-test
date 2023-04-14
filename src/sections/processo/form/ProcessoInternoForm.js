@@ -18,13 +18,13 @@ import AnexosExistentes from './AnexosExistentes';
 // ----------------------------------------------------------------------
 
 ProcessoInternoForm.propTypes = {
-  assunto: PropTypes.string,
+  fluxo: PropTypes.object,
   setAgendado: PropTypes.func,
   setPendente: PropTypes.func,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setPendente, assunto }) {
+export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setPendente, fluxo }) {
   const { control, watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
@@ -32,14 +32,16 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <DadosCliente isInterno assunto={assunto} />
-          </CardContent>
-        </Card>
-      </Grid>
-      {(assunto === 'OPE DARH' || assunto === 'Transferência Internacional') && (
+      {fluxo?.modelo !== 'Paralelo' && (
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <DadosCliente isInterno assunto={fluxo?.assunto} />
+            </CardContent>
+          </Card>
+        </Grid>
+      )}
+      {(fluxo?.assunto === 'OPE DARH' || fluxo?.assunto === 'Transferência Internacional') && (
         <Grid item xs={12}>
           <Card>
             <CardContent>
@@ -96,12 +98,8 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                           <DatePicker
                             label="Data de início"
                             value={field.value}
-                            onChange={(newValue) => {
-                              field.onChange(newValue);
-                            }}
-                            renderInput={(params) => (
-                              <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                            )}
+                            onChange={(newValue) => field.onChange(newValue)}
+                            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                           />
                         )}
                       />
@@ -114,12 +112,8 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                           <DatePicker
                             label="Data de término"
                             value={field.value}
-                            onChange={(newValue) => {
-                              field.onChange(newValue);
-                            }}
-                            renderInput={(params) => (
-                              <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                            )}
+                            onChange={(newValue) => field.onChange(newValue)}
+                            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                           />
                         )}
                       />

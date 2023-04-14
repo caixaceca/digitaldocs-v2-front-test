@@ -54,3 +54,9 @@ export const _concelhos = [
   { regiao: 'Sul', ilha: 'Fogo', concelho: 'São Filipe' },
   { regiao: 'Sul', ilha: 'Brava', concelho: 'Brava' },
 ];
+
+export const segmentos = ['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública'];
+
+export const escaloes = ['1º Comitê', '2º Comitê', '3º Comitê'];
+
+export const situacoes = ['Em análise', 'Aprovado', 'Contratado', 'Indeferido'];

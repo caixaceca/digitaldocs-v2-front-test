@@ -8,17 +8,23 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import {
   Box,
+  Fab,
+  List,
   Grid,
   Table,
   Dialog,
+  ListItem,
   TableRow,
   Checkbox,
   TextField,
   TableBody,
   TableCell,
   TableHead,
+  Typography,
   DialogTitle,
   Autocomplete,
+  ListItemIcon,
+  ListItemText,
   DialogContent,
   DialogActions,
   TableContainer,
@@ -27,19 +33,25 @@ import { LoadingButton } from '@mui/lab';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { format, add } from 'date-fns';
+import { getFileThumb } from '../../utils/getFileFormat';
 import { fNumber, fCurrency } from '../../utils/formatNumber';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import {
+  updateItem,
+  deleteItem,
   arquivarProcesso,
   finalizarProcesso,
   encaminharProcesso,
   desarquivarProcesso,
 } from '../../redux/slices/digitaldocs';
 // hooks
+import { useToggle1 } from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
 // components
-import { FormProvider, RHFTextField, RHFUploadMultiFile } from '../../components/hook-form';
+import SvgIconStyle from '../../components/SvgIconStyle';
+import DialogConfirmar from '../../components/DialogConfirmar';
+import { FormProvider, RHFTextField, RHFUploadMultiFile, RHFSwitch } from '../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -146,8 +158,9 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
                   <Autocomplete
                     {...field}
                     fullWidth
+                    options={destinos}
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={destinos?.map((option) => option)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => `${option?.modo} para ${option?.estado_final_label}`}
                     renderInput={(params) => (
                       <TextField {...params} label="Ação" error={!!error} helperText={error?.message} />
@@ -206,7 +219,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
   }, [error]);
 
   const deveInformarNConta = () => {
-    if (processo?.is_interno) {
+    if (processo?.is_interno && processo?.assunto !== 'Encerramento de conta') {
       let i = 0;
       while (i < meusAmbientes?.length) {
         if (meusAmbientes[i]?.is_final) {
@@ -320,12 +333,8 @@ export function ArquivarForm({ open, onCancel, processo }) {
                     disableFuture
                     value={field.value}
                     label="Data de entrada"
-                    onChange={(newValue) => {
-                      field.onChange(newValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                    )}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
                 )}
               />
@@ -335,9 +344,11 @@ export function ArquivarForm({ open, onCancel, processo }) {
                 <RHFTextField name="conta" label="Nº de conta" InputProps={{ type: 'number' }} />
               </Grid>
             )}
-            <Grid item xs={12}>
-              <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
-            </Grid>
+            {processo?.assunto !== 'Encerramento de conta' && (
+              <Grid item xs={12}>
+                <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
+              </Grid>
+            )}
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={5} maxRows={8} label="Observação" />
             </Grid>
@@ -431,9 +442,10 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
                   <Autocomplete
                     {...field}
                     fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(destinosDesarquivamento, getComparator('asc', 'nome'))?.map((option) => option)}
                     getOptionLabel={(option) => option?.nome}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    options={applySort(destinosDesarquivamento, getComparator('asc', 'nome'))}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Estado" error={!!error} helperText={error?.message} />
                     )}
@@ -581,6 +593,235 @@ export function FinalizarForm({ open, onCancel, processo }) {
             </LoadingButton>
           </DialogActions>
         </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+ParecerForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processoId: PropTypes.number };
+
+export function ParecerForm({ open, onCancel, processoId }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const [idAnexo, setIdAnexo] = useState('');
+  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { selectedItem, error, done, isSaving } = useSelector((state) => state.digitaldocs);
+
+  useEffect(() => {
+    if (done === 'parecer enviado') {
+      enqueueSnackbar('Parecer enviado com sucesso', { variant: 'success' });
+      onCancel();
+    } else if (done === 'anexo parecer eliminado') {
+      enqueueSnackbar('Anexo eliminado com sucesso', { variant: 'success' });
+      setIdAnexo('');
+      onClose1();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  const formSchema = Yup.object().shape({
+    descricao: Yup.string().required('Descrição não pode ficar vazio'),
+    parecer: Yup.string().nullable('Parecer não pode ficar vazio').required('Parecer não pode ficar vazio'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      anexos: [],
+      parecerID: selectedItem?.id || '',
+      parecer: selectedItem?.parecer || null,
+      descricao: selectedItem?.descricao || '',
+      validado: selectedItem?.validado || false,
+      perfilID: selectedItem?.parecer_perfil_id || currentColaborador?.perfil_id,
+    }),
+    [selectedItem, currentColaborador?.perfil_id]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, control, setValue, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    if (selectedItem) {
+      reset(defaultValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem, open]);
+
+  const onSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('parecer', values.parecer);
+      formData.append('validado', values.validado);
+      formData.append('perfilID', values.perfilID);
+      formData.append('descricao', values.descricao);
+      formData.append('parecerID', values.parecerID);
+      if (values.anexos) {
+        const listaanexo = values.anexos;
+        for (let i = 0; i < listaanexo.length; i += 1) {
+          formData.append('anexos', listaanexo[i]);
+        }
+      }
+      dispatch(updateItem('parecer', formData, { mail, id: selectedItem.id, processoId, mensagem: 'parecer enviado' }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDrop = useCallback(
+    (acceptedFiles) => {
+      const anexos = values.anexos || [];
+      setValue('anexos', [
+        ...anexos,
+        ...acceptedFiles.map((file) => Object.assign(file, { preview: URL.createObjectURL(file) })),
+      ]);
+    },
+    [setValue, values.anexos]
+  );
+
+  const handleRemoveAll = () => {
+    setValue('anexos', []);
+  };
+
+  const handleRemove = (file) => {
+    const filteredItems = values.anexos && values.anexos?.filter((_file) => _file !== file);
+    setValue('anexos', filteredItems);
+  };
+
+  const handleEliminar = (id) => {
+    setIdAnexo(id);
+    onOpen1();
+  };
+
+  const handleCloseEliminar = () => {
+    setIdAnexo('');
+    onClose1();
+  };
+
+  const handleConfirmeEliminar = () => {
+    dispatch(
+      deleteItem('anexoParecer', {
+        mail,
+        id: idAnexo,
+        parecerId: selectedItem?.id,
+        mensagem: 'anexo parecer eliminado',
+        perfilId: currentColaborador?.perfil_id,
+      })
+    );
+  };
+
+  return (
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>Parecer - {selectedItem?.nome}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12} sm={8}>
+              <Controller
+                name="parecer"
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <Autocomplete
+                    {...field}
+                    fullWidth
+                    options={['Favorável', 'Não favorável', 'Favorável parcial']}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Parecer" error={!!error} helperText={error?.message} />
+                    )}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <RHFSwitch
+                name="validado"
+                labelPlacement="start"
+                label={
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+                    Validar
+                  </Typography>
+                }
+                sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="descricao" multiline minRows={5} maxRows={8} label="Descrição" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFUploadMultiFile
+                name="anexos"
+                onDrop={handleDrop}
+                onRemove={handleRemove}
+                onRemoveAll={handleRemoveAll}
+              />
+              {selectedItem?.anexos?.filter((row) => row?.is_ativo)?.length > 0 && (
+                <>
+                  <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                    Anexos existentes
+                  </Typography>
+                  <List disablePadding sx={{ mt: 1 }}>
+                    {selectedItem?.anexos
+                      ?.filter((item) => item?.is_ativo)
+                      .map(
+                        (anexo) =>
+                          anexo.nome && (
+                            <ListItem
+                              key={anexo?.anexo}
+                              sx={{
+                                p: 1,
+                                mb: 1,
+                                borderRadius: 1,
+                                border: (theme) => `solid 1px ${theme.palette.divider}`,
+                              }}
+                            >
+                              <ListItemIcon>{getFileThumb(anexo.nome)}</ListItemIcon>
+                              <ListItemText>{anexo.nome}</ListItemText>
+                              <Fab
+                                size="small"
+                                color="error"
+                                variant="soft"
+                                sx={{ width: 30, height: 30 }}
+                                onClick={() => handleEliminar(anexo.id)}
+                              >
+                                <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
+                              </Fab>
+                            </ListItem>
+                          )
+                      )}
+                  </List>
+                </>
+              )}
+            </Grid>
+          </Grid>
+          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+            <Box sx={{ flexGrow: 1 }} />
+            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
+              Cancelar
+            </LoadingButton>
+            <LoadingButton type="submit" variant="soft" loading={isSaving}>
+              Enviar
+            </LoadingButton>
+          </DialogActions>
+        </FormProvider>
+        <DialogConfirmar
+          open={open1}
+          isLoading={isSaving}
+          onClose={handleCloseEliminar}
+          handleOk={handleConfirmeEliminar}
+          color="error"
+          title="Eliminar"
+          desc="eliminar este anexo"
+        />
       </DialogContent>
     </Dialog>
   );

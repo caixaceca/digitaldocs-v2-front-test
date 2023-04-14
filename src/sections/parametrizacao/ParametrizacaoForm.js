@@ -552,9 +552,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
                     label="Data"
                     value={field.value}
                     onChange={(newValue) => field.onChange(newValue)}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                    )}
+                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
                 )}
               />
@@ -921,6 +919,130 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+LinhaForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+
+export function LinhaForm({ isOpenModal, onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
+
+  useEffect(() => {
+    if (done) {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
+      onCancel();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error, { variant: 'error' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  const formSchema = Yup.object().shape({ linha: Yup.string().required('Linha não pode ficar vazio') });
+  const defaultValues = useMemo(
+    () => ({ linha: selectedItem?.linha || '', descricao: selectedItem?.descricao || '' }),
+    [selectedItem]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    if (isEdit && selectedItem) {
+      reset(defaultValues);
+    }
+    if (!isEdit) {
+      reset(defaultValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, selectedItem, isOpenModal]);
+
+  const onSubmit = async () => {
+    try {
+      if (isEdit) {
+        dispatch(
+          updateItem('linha', JSON.stringify(values), {
+            mail,
+            id: selectedItem.id,
+            mensagem: 'Linha de crédito atualizada',
+          })
+        );
+      } else {
+        dispatch(createItem('linha', JSON.stringify(values), { mail, mensagem: 'Linha de crédito adicionada' }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(
+        deleteItem('linha', {
+          mail,
+          linhaID: selectedItem.id,
+          mensagem: 'Linha de crédito eliminada',
+          perfilID: currentColaborador?.perfil_id,
+        })
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{selectedItem ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12}>
+              <RHFTextField name="linha" label="Linha" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="descricao" multiline minRows={2} maxRows={4} label="Descrição" />
+            </Grid>
+          </Grid>
+          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+            {isEdit && (
+              <>
+                <Tooltip title="Eliminar" arrow>
+                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
+                    <SvgIconStyle src="/assets/icons/trash.svg" />
+                  </Fab>
+                </Tooltip>
+                <DialogConfirmar
+                  open={open}
+                  onClose={onClose}
+                  isLoading={isSaving}
+                  handleOk={handleDelete}
+                  title="Eliminar linha de crédito"
+                  desc="eliminar esta linha de crédito"
+                />
+              </>
+            )}
+            <Box sx={{ flexGrow: 1 }} />
+            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
+              Cancelar
+            </LoadingButton>
+            <LoadingButton type="submit" variant="contained" loading={isSaving}>
+              {!isEdit ? 'Adicionar' : 'Guardar'}
+            </LoadingButton>
+          </DialogActions>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 TransicaoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func, fluxoId: PropTypes.number };
 
 export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
@@ -934,7 +1056,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
 
   useEffect(() => {
     if (done) {
-      enqueueSnackbar(`Transição ${done} com sucesso`, { variant: 'success' });
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       onCancel();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1315,15 +1437,11 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <DateTimePicker
-                    disablePast
+                    fullWidth
                     label="Data de início"
                     value={field.value}
-                    onChange={(newValue) => {
-                      field.onChange(newValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                    )}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
                 )}
               />
@@ -1334,15 +1452,11 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <DateTimePicker
-                    disablePast
+                    fullWidth
                     label="Data de término"
                     value={field.value}
-                    onChange={(newValue) => {
-                      field.onChange(newValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                    )}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
                 )}
               />
@@ -1482,13 +1596,10 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
                           render={({ field }) => (
                             <DateTimePicker
                               fullWidth
-                              disablePast
                               label="Data de início"
                               value={field.value}
-                              onChange={(newValue) => {
-                                field.onChange(newValue);
-                              }}
-                              renderInput={(params) => <TextField {...params} fullWidth />}
+                              onChange={(newValue) => field.onChange(newValue)}
+                              slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                             />
                           )}
                         />
@@ -1498,13 +1609,10 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
                           render={({ field }) => (
                             <DateTimePicker
                               fullWidth
-                              disablePast
                               label="Data de término"
                               value={field.value}
-                              onChange={(newValue) => {
-                                field.onChange(newValue);
-                              }}
-                              renderInput={(params) => <TextField {...params} fullWidth />}
+                              onChange={(newValue) => field.onChange(newValue)}
+                              slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                             />
                           )}
                         />
@@ -1546,7 +1654,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
 function applyFilter(colaboradores, perfisSelect) {
   perfisSelect?.forEach((row) => {

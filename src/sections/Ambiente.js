@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useCallback } from 'react';
 // @mui
 import { TextField, Autocomplete } from '@mui/material';
@@ -8,9 +7,7 @@ import { changeMeuAmbiente } from '../redux/slices/digitaldocs';
 
 // ----------------------------------------------------------------------
 
-Ambiente.propTypes = { origem: PropTypes.string };
-
-export default function Ambiente({ origem = '' }) {
+export default function Ambiente() {
   const dispatch = useDispatch();
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.digitaldocs);
 
@@ -27,11 +24,10 @@ export default function Ambiente({ origem = '' }) {
       disableClearable
       value={meuAmbiente}
       options={meusAmbientes}
-      sx={{ width: { md: 200, xl: 220 } }}
-      size={origem === 'processo' ? 'small' : 'medium'}
+      sx={{ width: { md: 200, xl: 250 } }}
+      getOptionLabel={(option) => option?.nome}
       onChange={(event, newValue) => handleChangeAmbiente(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      getOptionLabel={(option) => option?.nome}
       renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
     />
   );

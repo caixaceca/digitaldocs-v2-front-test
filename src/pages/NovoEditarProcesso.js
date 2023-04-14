@@ -17,6 +17,7 @@ import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import Ambiente from '../sections/Ambiente';
 import ProcessoInterno from '../sections/processo/form/ProcessoInterno';
 import ProcessoExterno from '../sections/processo/form/ProcessoExterno';
+import ProcessoCredito from '../sections/processo/form/ProcessoCredito';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -30,7 +31,9 @@ export default function NovoEditarProcesso() {
   const isEdit = pathname.includes('edit');
   const [fluxo, setFluxo] = useState(null);
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { processo, origens, meusAmbientes, meusFluxos, meuAmbiente } = useSelector((state) => state.digitaldocs);
+  const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente } = useSelector(
+    (state) => state.digitaldocs
+  );
   const perfilId = currentColaborador?.perfil_id;
 
   useEffect(() => {
@@ -46,11 +49,16 @@ export default function NovoEditarProcesso() {
   }, [dispatch, origens, fluxo, processo, perfilId, mail]);
 
   useEffect(() => {
-    if (processo?.fluxo_id) {
-      setFluxo({ id: processo?.fluxo_id, assunto: processo?.assunto, is_interno: processo?.is_interno });
+    if (mail && perfilId && linhas?.length === 0 && fluxo?.is_credito) {
+      dispatch(getAll('linhas', { mail, perfilId }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processo?.fluxo_id]);
+  }, [dispatch, linhas, fluxo, processo, perfilId, mail]);
+
+  useEffect(() => {
+    if (processo?.fluxo_id) {
+      setFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id));
+    }
+  }, [processo?.fluxo_id, meusFluxos]);
 
   return (
     <Page title={!isEdit ? 'Novo processo | DigitalDocs' : 'Editar processo | DigitalDocs'}>
@@ -86,10 +94,10 @@ export default function NovoEditarProcesso() {
                 <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="center">
                   <Autocomplete
                     value={fluxo}
+                    getOptionLabel={(option) => option?.assunto}
                     onChange={(event, newValue) => setFluxo(newValue)}
                     options={meusFluxos.map((option) => option?.id > 0 && option)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    getOptionLabel={(option) => option?.assunto}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
                     )}
@@ -105,10 +113,16 @@ export default function NovoEditarProcesso() {
               </Card>
             ) : (
               <>
-                {fluxo?.is_interno ? (
-                  <ProcessoInterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                {fluxo?.is_credito ? (
+                  <ProcessoCredito isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
                 ) : (
-                  <ProcessoExterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                  <>
+                    {fluxo?.is_interno ? (
+                      <ProcessoInterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                    ) : (
+                      <ProcessoExterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                    )}
+                  </>
                 )}
               </>
             )}

@@ -2,6 +2,7 @@ export { default as Views } from './Views';
 export { default as Anexos } from './Anexos';
 export { default as Versoes } from './Versoes';
 export { default as Resgatar } from './Resgatar';
+export { default as Pareceres } from './Pareceres';
 export { default as Intervencao } from './Intervencao';
 export { default as NotaProcesso } from './NotaProcesso';
 export { default as HistoricoPrisoes } from './HistoricoPrisoes';

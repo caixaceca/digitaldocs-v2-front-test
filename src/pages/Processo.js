@@ -3,6 +3,7 @@ import { useSnackbar } from 'notistack';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // @mui
 import LockPersonIcon from '@mui/icons-material/LockPerson';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import { Fab, Grid, Card, Stack, Tooltip, Dialog, Container, CardContent } from '@mui/material';
@@ -13,6 +14,7 @@ import {
   getItem,
   resetItem,
   closeModal,
+  selectItem,
   aceitarProcesso,
   pedirAcessoProcesso,
 } from '../redux/slices/digitaldocs';
@@ -32,14 +34,15 @@ import {
   Anexos,
   Versoes,
   Resgatar,
+  Pareceres,
   Intervencao,
   NotaProcesso,
   DetalhesProcesso,
   HistoricoPrisoes,
   HistoricoProcesso,
 } from '../sections/processo';
-import { DesarquivarForm } from '../sections/processo/IntervencaoForm';
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
+import { DesarquivarForm, ParecerForm } from '../sections/processo/IntervencaoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -54,10 +57,10 @@ export default function Processo() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { isLoading, done, error, processo, meusAmbientes, isOpenModalDesariquivar, meusacessos } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { isLoading, isOpenModal, done, error, processo, meusAmbientes, isOpenModalDesariquivar, meusacessos } =
+    useSelector((state) => state.digitaldocs);
   const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
+  const hasPareceres = processo?.pareceres && processo?.pareceres?.length > 0;
   const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
   const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
   const perfilId = currentColaborador?.perfil_id;
@@ -142,6 +145,18 @@ export default function Processo() {
     return false;
   };
 
+  const podeDarParecer = () => {
+    let parecer = false;
+    processo?.pareceres?.forEach((element) => {
+      const belongTome = meusAmbientes.some((row) => row.id === element?.estado_id);
+      if (belongTome && !element?.validado) {
+        parecer = element;
+      }
+      return parecer;
+    });
+    return parecer;
+  };
+
   const podeResgatar = () => {
     let i = 0;
     if (!processo.ispendente && processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id) {
@@ -165,6 +180,10 @@ export default function Processo() {
 
   const handleClose = () => {
     dispatch(closeModal());
+  };
+
+  const handleParecer = () => {
+    dispatch(selectItem(podeDarParecer()));
   };
 
   return (
@@ -232,7 +251,7 @@ export default function Processo() {
                     </>
                   ) : (
                     <>
-                      {!processo?.is_lock && (
+                      {!processo?.is_lock && !processo?.in_paralelo_mode && (
                         <>
                           {podeAceitar() && (
                             <Tooltip title="ACEITAR" arrow>
@@ -248,6 +267,16 @@ export default function Processo() {
                               estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
                             />
                           )}
+                        </>
+                      )}
+                      {podeDarParecer() && (
+                        <>
+                          <Tooltip title="PARECER" arrow>
+                            <Fab color="success" size="small" variant="soft" onClick={handleParecer}>
+                              <ChatOutlinedIcon />
+                            </Fab>
+                          </Tooltip>
+                          <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} />
                         </>
                       )}
                       {processo?.is_lock && processo?.perfil_id === perfilId && <Intervencao processo={processo} />}
@@ -269,9 +298,10 @@ export default function Processo() {
               </Grid>
             ) : (
               <>
-                {(hasHistorico || hasHPrisoes) && (
-                  <Grid item xs={12}>
+                {(hasHistorico || hasHPrisoes || hasPareceres) && (
+                  <Grid item xs={12} sx={{ mt: { sm: -1 } }}>
                     <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+                      {hasPareceres && <Pareceres pareceres={processo?.pareceres} processoId={processo?.id} />}
                       {hasHistorico && <HistoricoProcesso historico={processo?.htransicoes} />}
                       {hasHPrisoes && <HistoricoPrisoes historico={processo?.hprisoes} />}
                     </Stack>
@@ -279,7 +309,7 @@ export default function Processo() {
                 )}
                 <Grid item xs={12} lg={hasAnexos && 5}>
                   <Card sx={{ height: 1 }}>
-                    <CardContent>
+                    <CardContent id="card_detail">
                       {processo?.nota && <NotaProcesso nota={processo.nota} />}
                       <DetalhesProcesso processo={processo} />
                     </CardContent>

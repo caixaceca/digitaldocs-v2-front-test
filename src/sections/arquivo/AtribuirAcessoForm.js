@@ -46,9 +46,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
 
   const formSchema = Yup.object().shape({
     perfilID: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),
-    datalimite: Yup.mixed()
-      .nullable('Data de término não pode ficar vazio')
-      .required('Data de término não pode ficar vazio'),
+    datalimite: Yup.date().typeError('Introduza a data de término').required('Data de término não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -108,15 +106,10 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <DateTimePicker
-                    disablePast
                     label="Data de término"
                     value={field.value}
-                    onChange={(newValue) => {
-                      field.onChange(newValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                    )}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
                 )}
               />

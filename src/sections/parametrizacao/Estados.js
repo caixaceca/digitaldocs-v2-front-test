@@ -96,11 +96,7 @@ export default function Estados() {
     <>
       <HeaderBreadcrumbs
         heading="Estados"
-        links={[
-          { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-          { name: 'Parametrização - Acessos', href: `${PATH_DIGITALDOCS.parametrizacao.tabs}?tab=acessos&filter=` },
-          { name: 'Estados' },
-        ]}
+        links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
             <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>

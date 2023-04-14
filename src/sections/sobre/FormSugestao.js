@@ -45,11 +45,8 @@ export function FormSugestao({ open, onCancel }) {
   });
 
   const defaultValues = useMemo(() => ({ titulo: '', descricao: '', imagem: '' }), []);
-
   const methods = useForm({ resolver: yupResolver(sugestaoSchema), defaultValues });
-
   const { reset, watch, setValue, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {
@@ -77,12 +74,7 @@ export function FormSugestao({ open, onCancel }) {
     (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) {
-        setValue(
-          'imagem',
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        );
+        setValue('imagem', Object.assign(file, { preview: URL.createObjectURL(file) }));
       }
     },
     [setValue]

@@ -28,8 +28,8 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 // utils
 import { newLineText } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { fNumber, fCurrency } from '../../utils/formatNumber';
 import { valorPorExtenso } from '../../utils/numeroPorExtenso';
+import { fNumber, fCurrency, fPercent } from '../../utils/formatNumber';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -58,6 +58,17 @@ export default function DetalhesProcesso({ processo }) {
   const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Secundário';
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
 
+  const pareceresNaoValidados = () => {
+    let pareceres = '';
+    processo?.pareceres?.forEach((row, index) => {
+      if (!row?.validado) {
+        pareceres += processo?.pareceres?.length - 1 === index ? row?.nome : `${row?.nome} / `;
+      }
+      return pareceres;
+    });
+    return pareceres;
+  };
+
   return (
     <Scrollbar sx={{ mt: -2 }}>
       {(processo?.referencia ||
@@ -73,104 +84,80 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider secondaryAction="">
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
-          {processo?.referencia && (
-            <ListItem disableGutters>
-              <TextItem title="Referência:" text={processo.referencia} />
-            </ListItem>
-          )}
-          {processo?.assunto && (
-            <ListItem disableGutters>
-              <TextItem title="Fluxo:" text={processo.assunto} />
-            </ListItem>
-          )}
-          {processo?.data_entrada && (
-            <ListItem disableGutters>
-              <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />
-            </ListItem>
-          )}
-          {processo?.nome && (
-            <ListItem disableGutters>
-              <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
-                <Typography sx={{ color: 'text.secondary' }}>Estado atual:</Typography>
-                <Typography sx={{ fontWeight: 900, color: 'success.main' }}>
-                  {processo.nome}
-                  {colaboradorLock && (
-                    <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
-                      <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                        {colaboradorLock?.perfil?.displayName}
+          {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
+          {processo?.assunto && <TextItem title="Fluxo:" text={processo.assunto} />}
+          {processo?.data_entrada && <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />}
+          {(processo?.nome || processo?.in_paralelo_mode) && (
+            <Stack direction="row" alignItems="center" justifyContent="left" spacing={1} sx={{ py: 0.75 }}>
+              <Typography sx={{ color: 'text.secondary' }}>Estado atual:</Typography>
+              <Typography sx={{ fontWeight: 900, color: 'success.main' }}>
+                {processo?.in_paralelo_mode ? (
+                  pareceresNaoValidados()
+                ) : (
+                  <>
+                    {processo.nome}
+                    {colaboradorLock && (
+                      <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
+                        <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                          {colaboradorLock?.perfil?.displayName}
+                        </Typography>
+                        &nbsp;está trabalhando neste processo
                       </Typography>
-                      &nbsp;está trabalhando neste processo
-                    </Typography>
-                  )}
-                </Typography>
-              </Stack>
-            </ListItem>
+                    )}
+                  </>
+                )}
+              </Typography>
+            </Stack>
           )}
           {(processo.criado_em || uo || criador) && (
-            <ListItem disableGutters>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography sx={{ color: 'text.secondary' }}>Criado:</Typography>
-                <Stack spacing={0.5}>
-                  {processo.criado_em && (
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                      <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                      <Typography variant="body2">{ptDateTime(processo.criado_em)}</Typography>
-                    </Stack>
-                  )}
-                  {uo && (
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                      <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                      <Typography variant="body2">
-                        {uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label}
-                      </Typography>
-                    </Stack>
-                  )}
-                  {criador && (
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                      <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                      <Typography variant="body2">{criador?.perfil?.displayName}</Typography>
-                    </Stack>
-                  )}
-                </Stack>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+              <Typography sx={{ color: 'text.secondary' }}>Criado:</Typography>
+              <Stack spacing={0.5}>
+                {processo.criado_em && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                    <Typography variant="body2">{ptDateTime(processo.criado_em)}</Typography>
+                  </Stack>
+                )}
+                {uo && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                    <Typography variant="body2">
+                      {uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label}
+                    </Typography>
+                  </Stack>
+                )}
+                {criador && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                    <Typography variant="body2">{criador?.perfil?.displayName}</Typography>
+                  </Stack>
+                )}
               </Stack>
-            </ListItem>
+            </Stack>
           )}
           {processo?.obs && (
-            <ListItem disableGutters>
-              <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
-                  <Typography>{newLineText(processo.obs)}</Typography>
-                </Stack>
-              </Paper>
-            </ListItem>
+            <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1, my: 0.75 }}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
+                <Typography>{newLineText(processo.obs)}</Typography>
+              </Stack>
+            </Paper>
           )}
           {(processo.ispendente || motivo || processo.mobs) && (
-            <List>
-              <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
-                <ListItem disableGutters>
-                  {processo.ispendente ? (
-                    <Label color="warning" startIcon={<InfoOutlinedIcon />}>
-                      Processo pendente
-                    </Label>
-                  ) : (
-                    <Label color="default" startIcon={<InfoOutlinedIcon />}>
-                      Este processo esteve pendente
-                    </Label>
-                  )}
-                </ListItem>
-                {motivo && (
-                  <ListItem disableGutters>
-                    <TextItem title="Motivo:" text={motivo?.motivo} />
-                  </ListItem>
-                )}
-                {processo.mobs && (
-                  <ListItem disableGutters disablePadding>
-                    <TextItem title="Obs:" text={processo.mobs} />
-                  </ListItem>
-                )}
-              </Paper>
-            </List>
+            <Paper sx={{ p: 2, pb: 1, bgcolor: 'background.neutral', flexGrow: 1, my: 0.75 }}>
+              {processo.ispendente ? (
+                <Label color="warning" startIcon={<InfoOutlinedIcon />}>
+                  Processo pendente
+                </Label>
+              ) : (
+                <Label color="default" startIcon={<InfoOutlinedIcon />}>
+                  Este processo esteve pendente
+                </Label>
+              )}
+              {motivo && <TextItem title="Motivo:" text={motivo?.motivo} />}
+              {processo.mobs && <TextItem title="Obs:" text={processo.mobs} />}
+            </Paper>
           )}
         </List>
       )}
@@ -180,55 +167,46 @@ export default function DetalhesProcesso({ processo }) {
         processo?.bi_cni ||
         _entidades ||
         processo?.cliente ||
-        processo?.conta) && (
+        processo?.conta ||
+        processo?.segcliente) && (
         <List>
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
-          {processo.titular && (
-            <ListItem disableGutters>
-              <TextItem title="Titular:" text={processo.titular} />
-            </ListItem>
-          )}
+          {processo.titular && <TextItem title="Titular:" text={processo.titular} />}
           {(processo.docidp || processo.docids) && (
-            <ListItem disableGutters>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography sx={{ color: 'text.secondary' }}>Doc. identificação:</Typography>
-                <Stack spacing={0.5}>
-                  {processo.docidp && (
-                    <Typography>
-                      {processo.docidp}{' '}
-                      <Typography variant="spam" sx={{ color: 'text.secondary' }}>
-                        ({docPLabel})
-                      </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+              <Typography sx={{ color: 'text.secondary' }}>Documento:</Typography>
+              <Stack spacing={0.5}>
+                {processo.docidp && (
+                  <Typography>
+                    {processo.docidp}{' '}
+                    <Typography variant="spam" sx={{ color: 'text.secondary' }}>
+                      ({docPLabel})
                     </Typography>
-                  )}
-                  {processo.docids && (
-                    <Typography>
-                      {processo.docids}{' '}
-                      <Typography variant="spam" sx={{ color: 'text.secondary' }}>
-                        ({docSLabel})
-                      </Typography>
+                  </Typography>
+                )}
+                {processo.docids && (
+                  <Typography>
+                    {processo.docids}{' '}
+                    <Typography variant="spam" sx={{ color: 'text.secondary' }}>
+                      ({docSLabel})
                     </Typography>
-                  )}
-                </Stack>
+                  </Typography>
+                )}
               </Stack>
-            </ListItem>
+            </Stack>
           )}
           {_entidades && (
-            <ListItem disableGutters>
-              <TextItem title="Nº de entidade(s):" text={_entidades} />
-            </ListItem>
+            <TextItem title={_entidades?.includes('/') ? 'Nº de entidade(s)' : 'Nº de entidade:'} text={_entidades} />
           )}
-          {processo.cliente && (
-            <ListItem disableGutters>
-              <TextItem title="Nº de cliente:" text={processo.cliente} />
-            </ListItem>
-          )}
-          {processo.conta && (
-            <ListItem disableGutters>
-              <TextItem title="Nº de conta:" text={processo.conta} />
-            </ListItem>
+          {processo.cliente && <TextItem title="Nº de cliente:" text={processo.cliente} />}
+          {processo.conta && <TextItem title="Nº de conta:" text={processo.conta} />}
+          {processo.segcliente && (
+            <TextItem
+              title="Segmento:"
+              text={(processo.segcliente === 'P' && 'Particular') || (processo.segcliente === 'E' && 'Empresa')}
+            />
           )}
         </List>
       )}
@@ -237,67 +215,51 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
-          {processo.noperacao && (
-            <ListItem disableGutters>
-              <TextItem title="Nº de operação:" text={processo.noperacao} />
-            </ListItem>
-          )}
-          {processo.operacao && (
-            <ListItem disableGutters>
-              <TextItem title="Descrição:" text={processo.operacao} />
-            </ListItem>
-          )}
+          {processo.noperacao && <TextItem title="Nº de operação:" text={processo.noperacao} />}
+          {processo.operacao && <TextItem title="Descrição:" text={processo.operacao} />}
           {(processo.designacao || processo?.seguimento || processo?.telefone || processo?.email) && (
-            <ListItem disableGutters>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography sx={{ color: 'text.secondary' }}>Origem:</Typography>
-                <Stack spacing={0.5}>
-                  <Typography>
-                    {processo?.designacao} {processo?.seguimento && `- ${processo?.seguimento}`}
-                  </Typography>
-                  {processo?.telefone ||
-                    (processo?.email && (
-                      <Stack
-                        spacing={1}
-                        direction="row"
-                        alignItems="center"
-                        divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
-                      >
-                        {processo?.telefone && (
-                          <Typography variant="body2">
-                            <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                              Tel:
-                            </Typography>
-                            &nbsp;{processo.telefone}
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+              <Typography sx={{ color: 'text.secondary' }}>Origem:</Typography>
+              <Stack spacing={0.5}>
+                <Typography>
+                  {processo?.designacao} {processo?.seguimento && `- ${processo?.seguimento}`}
+                </Typography>
+                {processo?.telefone ||
+                  (processo?.email && (
+                    <Stack
+                      spacing={1}
+                      direction="row"
+                      alignItems="center"
+                      divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
+                    >
+                      {processo?.telefone && (
+                        <Typography variant="body2">
+                          <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                            Tel:
                           </Typography>
-                        )}
-                        {processo?.email && (
-                          <Typography variant="body2">
-                            <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                              Email:
-                            </Typography>
-                            &nbsp;{processo.email}
+                          &nbsp;{processo.telefone}
+                        </Typography>
+                      )}
+                      {processo?.email && (
+                        <Typography variant="body2">
+                          <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                            Email:
                           </Typography>
-                        )}
-                      </Stack>
-                    ))}
-                </Stack>
+                          &nbsp;{processo.email}
+                        </Typography>
+                      )}
+                    </Stack>
+                  ))}
               </Stack>
-            </ListItem>
+            </Stack>
           )}
-          {processo.valor > 0 && (
-            <ListItem disableGutters>
-              <ValorItem title="Valor para cativo:" valor={processo.valor} />
-            </ListItem>
-          )}
+          {processo.valor > 0 && <ValorItem title="Valor para cativo:" valor={processo.valor} />}
           {processo.saldoca > 0 && (
-            <ListItem disableGutters>
-              <ValorItem
-                title={processo.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
-                valor={processo.saldoca}
-                contas={processo.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
-              />
-            </ListItem>
+            <ValorItem
+              title={processo.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
+              valor={processo.saldoca}
+              contas={processo.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
+            />
           )}
         </List>
       )}
@@ -306,25 +268,55 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Agendamento</Typography>
           </ListItem>
-          {processo.periodicidade && (
-            <ListItem disableGutters>
-              <TextItem title="Periodicidade:" text={processo.periodicidade} />
-            </ListItem>
-          )}
-          {processo.diadomes && (
-            <ListItem disableGutters>
-              <TextItem title="Dia do mês para execução:" text={processo.diadomes} />
-            </ListItem>
-          )}
-          {processo.data_inicio && (
-            <ListItem disableGutters>
-              <TextItem title="Data de início:" text={ptDate(processo.data_inicio)} />
-            </ListItem>
-          )}
+          {processo.periodicidade && <TextItem title="Periodicidade:" text={processo.periodicidade} />}
+          {processo.diadomes && <TextItem title="Dia do mês para execução:" text={processo.diadomes} />}
+          {processo.data_inicio && <TextItem title="Data de início:" text={ptDate(processo.data_inicio)} />}
           {processo.data_arquivamento && (
-            <ListItem disableGutters>
-              <TextItem title="Data de término:" text={ptDate(processo.data_arquivamento)} />
-            </ListItem>
+            <TextItem title="Data de término:" text={ptDate(processo.data_arquivamento)} />
+          )}
+        </List>
+      )}
+      {processo.is_credito && processo?.credito && (
+        <List>
+          <ListItem disableGutters divider>
+            <Typography variant="subtitle1">Info. crédito</Typography>
+          </ListItem>
+          {processo?.credito?.nproposta && <TextItem title="Nº de proposta:" text={processo?.credito?.nproposta} />}
+          {processo?.credito?.segmento && <TextItem title="Segmento:" text={processo?.credito?.segmento} />}
+          {processo?.credito?.linha?.linha && (
+            <TextItem title="Linha de crédito:" text={processo?.credito?.linha?.linha} />
+          )}
+          {processo?.credito?.montantes && (
+            <TextItem title="Montante:" text={fCurrency(processo?.credito?.montantes)} />
+          )}
+          {processo?.credito?.setor_atividade && (
+            <TextItem title="Setor de atividade:" text={processo?.credito?.setor_atividade} />
+          )}
+          {processo?.credito?.finalidade && <TextItem title="Finalidade:" text={processo?.credito?.finalidade} />}
+          {processo?.credito?.montante_aprovado && (
+            <TextItem title="Montante aprovado:" text={fCurrency(processo?.credito?.montante_aprovado)} />
+          )}
+          {processo?.credito?.data_aprovacao && (
+            <TextItem title="Data de aprovação:" text={ptDate(processo?.credito?.data_aprovacao)} />
+          )}
+          {processo?.credito?.montante_contratado && (
+            <TextItem title="Montante contratado:" text={fCurrency(processo?.credito?.montante_contratado)} />
+          )}
+          {processo?.credito?.data_contratacao && (
+            <TextItem title="Data de contratação:" text={ptDate(processo?.credito?.data_contratacao)} />
+          )}
+          {processo?.credito?.prazo_amortizacao && (
+            <TextItem title="Prazo de amortização:" text={processo?.credito?.prazo_amortizacao} />
+          )}
+          {processo?.credito?.taxa_juro && (
+            <TextItem title="Taxa de juro:" text={fPercent(processo?.credito?.taxa_juro)} />
+          )}
+          {processo?.credito?.garantia && <TextItem title="Garantia:" text={processo?.credito?.garantia} />}
+          {processo?.credito?.escalao_decisao && (
+            <TextItem title="Escalão de decisão:" text={processo?.credito?.escalao_decisao} />
+          )}
+          {processo?.credito?.situacao_final_mes && (
+            <TextItem title="Situação final do mês:" text={processo?.credito?.situacao_final_mes} />
           )}
         </List>
       )}
@@ -338,7 +330,7 @@ TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string };
 
 function TextItem({ title, text }) {
   return (
-    <Stack direction="row" alignItems="center" spacing={1}>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
       <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
       <Typography>{text}</Typography>
     </Stack>

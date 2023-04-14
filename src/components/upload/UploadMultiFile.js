@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 // @mui
+import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Box, Stack, Button } from '@mui/material';
 //
 import BlockContent from './BlockContent';
 import RejectionFiles from './RejectionFiles';
@@ -25,9 +25,9 @@ UploadMultiFile.propTypes = {
   files: PropTypes.array.isRequired,
   error: PropTypes.bool,
   showPreview: PropTypes.bool,
-  onUpload: PropTypes.func,
+  // onUpload: PropTypes.func,
   onRemove: PropTypes.func,
-  onRemoveAll: PropTypes.func,
+  // onRemoveAll: PropTypes.func,
   helperText: PropTypes.node,
   sx: PropTypes.object,
 };
@@ -36,9 +36,9 @@ export default function UploadMultiFile({
   error,
   showPreview = false,
   files,
-  onUpload,
+  // onUpload,
   onRemove,
-  onRemoveAll,
+  // onRemoveAll,
   helperText,
   sx,
   ...other
@@ -69,7 +69,7 @@ export default function UploadMultiFile({
 
       <MultiFilePreview files={files} showPreview={showPreview} onRemove={onRemove} />
 
-      {files.length > 0 && (
+      {/* {files.length > 0 && (
         <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
           <Button color="inherit" size="small" onClick={onRemoveAll}>
             Remover todos
@@ -80,7 +80,7 @@ export default function UploadMultiFile({
             </Button>
           )}
         </Stack>
-      )}
+      )} */}
 
       {helperText && helperText}
     </Box>

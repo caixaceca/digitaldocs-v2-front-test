@@ -32,8 +32,6 @@ export default function MultiFilePreview({ showPreview = false, files, onRemove 
             return (
               <ListItem
                 key={key}
-                // component={m.div}
-                // {...varFade().inRight}
                 sx={{
                   p: 0,
                   m: 0.5,
@@ -74,11 +72,10 @@ export default function MultiFilePreview({ showPreview = false, files, onRemove 
           return (
             <ListItem
               key={key}
-              // component={m.div}
-              // {...varFade().inRight}
               sx={{
                 my: 1,
-                px: 1.5,
+                px: 1,
+                py: 0.5,
                 borderRadius: 1,
                 border: (theme) => `solid 1px ${theme.palette.divider}`,
               }}

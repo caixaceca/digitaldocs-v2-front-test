@@ -18,9 +18,11 @@ PdfPreview.propTypes = { url: PropTypes.string };
 export function PdfPreview({ url }) {
   const theme = useTheme();
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
+  const heightContent =
+    document.getElementById('card_detail').clientHeight - document.getElementById('list_anexos').clientHeight - 100;
 
   return (
-    <div style={{ height: '630px', borderRadius: '10px !important' }}>
+    <div style={{ height: `${heightContent}px`, minHeight: '630px' }}>
       <Viewer
         fileUrl={url}
         localization={pt}
@@ -47,7 +49,7 @@ export function ImagemPreview({ imagem }) {
 
   return (
     <>
-      <Image src={imagem} sx={{ cursor: 'zoom-in' }} onClick={() => handleOpenLightbox()} />
+      <Image src={imagem} sx={{ cursor: 'zoom-in', borderRadius: 2 }} onClick={() => handleOpenLightbox()} />
 
       <LightboxModal
         mainSrc={imagem}

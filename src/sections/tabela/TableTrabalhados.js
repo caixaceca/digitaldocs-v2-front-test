@@ -68,7 +68,7 @@ export default function TableTrabalhados() {
   );
   const total = trabalhadosUo?.length || 0;
   const subtotal = trabalhados?.length || 0;
-  const uoId = ambiente?.uoId || colaborador?.uoId;
+  const uoId = ambiente?.uoId || colaborador?.uoId || currentColaborador?.uo_id;
   const uo = uos?.find((row) => row?.id === uoId);
 
   const {
@@ -96,18 +96,18 @@ export default function TableTrabalhados() {
 
   useEffect(() => {
     dispatch(resetItem('trabalhados'));
-    if (mail && data) {
+    if (mail && data && (ambiente?.id || colaborador?.id || uoId)) {
       dispatch(
         getAll('trabalhados', {
           mail,
+          uoId,
           estadoId: ambiente?.id,
           perfilId: colaborador?.id,
-          uoId: currentColaborador?.uo_id,
           data: format(data, 'yyyy-MM-dd'),
         })
       );
     }
-  }, [dispatch, colaborador?.id, ambiente?.id, currentColaborador?.uo_id, data, mail]);
+  }, [dispatch, colaborador?.id, ambiente?.id, uoId, data, mail]);
 
   useEffect(() => {
     dispatch(resetItem('trabalhados'));
@@ -146,50 +146,53 @@ export default function TableTrabalhados() {
             label="Data"
             value={data}
             onChange={(_data) => setData(_data)}
-            renderInput={(params) => <TextField size="small" {...params} sx={{ maxWidth: 170 }} />}
+            renderInput={(params) => <TextField {...params} />}
+            slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
           />
         }
         sx={{ color: 'text.secondary', px: 1 }}
       />
-      <Card sx={{ mb: 3 }}>
-        <Scrollbar>
-          <Stack
-            direction="row"
-            divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-            sx={{ py: 2 }}
-          >
-            <ArquivoAnalytic
-              title={uo ? uo?.label : currentColaborador?.uo?.label}
-              total={uoId ? total : subtotal}
-              icon="/assets/icons/navbar/process.svg"
-              color="success.main"
-            />
-            {colaborador?.label && (
+      {total !== 0 && subtotal !== 0 && (
+        <Card sx={{ mb: 3 }}>
+          <Scrollbar>
+            <Stack
+              sx={{ py: 2 }}
+              direction="row"
+              divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
+            >
               <ArquivoAnalytic
-                title={colaborador?.label}
-                total={subtotal}
-                percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+                title={uo ? uo?.label : currentColaborador?.uo?.label}
+                total={uoId ? total : subtotal}
+                icon="/assets/icons/navbar/process.svg"
+                color="success.main"
               />
-            )}
-            {ambiente?.label && (
-              <ArquivoAnalytic
-                title={ambiente?.label}
-                total={subtotal}
-                percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
-              />
-            )}
-          </Stack>
-        </Scrollbar>
-      </Card>
+              {colaborador?.label && (
+                <ArquivoAnalytic
+                  title={colaborador?.label}
+                  total={subtotal}
+                  percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+                />
+              )}
+              {ambiente?.label && (
+                <ArquivoAnalytic
+                  title={ambiente?.label}
+                  total={subtotal}
+                  percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+                />
+              )}
+            </Stack>
+          </Scrollbar>
+        </Card>
+      )}
       <Card sx={{ p: 1 }}>
         <SearchToolbarTrabalhados
+          tab="trabalhados"
           ambiente={ambiente}
           colaborador={colaborador}
           filterSearch={filterSearch}
           onFilterSearch={handleFilterSearch}
           onFilterAmbiente={handleFilterAmbiente}
           onFilterColaborador={handleFilterColaborador}
-          tab="trabalhados"
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>

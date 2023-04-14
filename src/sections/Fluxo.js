@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useCallback } from 'react';
 // @mui
 import { TextField, Autocomplete } from '@mui/material';
@@ -8,9 +7,7 @@ import { changeMeuFluxo } from '../redux/slices/digitaldocs';
 
 // ----------------------------------------------------------------------
 
-Fluxo.propTypes = { origem: PropTypes.string };
-
-export default function Fluxo({ origem }) {
+export default function Fluxo() {
   const dispatch = useDispatch();
   const { meusFluxos, meuFluxo } = useSelector((state) => state.digitaldocs);
 
@@ -27,11 +24,10 @@ export default function Fluxo({ origem }) {
       disableClearable
       value={meuFluxo}
       options={meusFluxos}
-      size={origem === 'processo' ? 'small' : 'medium'}
+      sx={{ width: { md: 200, xl: 250 } }}
+      getOptionLabel={(option) => option?.assunto}
       onChange={(event, newValue) => handleChangeFluxo(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      getOptionLabel={(option) => option?.assunto}
-      sx={{ width: origem === 'processo' ? { sm: 200 } : { md: 250, xl: 300 } }}
       renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
     />
   );

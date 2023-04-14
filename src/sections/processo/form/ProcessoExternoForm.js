@@ -62,9 +62,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                       value={field.value}
                       label="Data de entrada"
                       onChange={(newValue) => field.onChange(newValue)}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth error={!!error} helperText={error?.message} />
-                      )}
+                      slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                     />
                   )}
                 />

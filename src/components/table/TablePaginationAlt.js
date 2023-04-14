@@ -25,7 +25,7 @@ export default function TablePaginationAlt({
   return (
     <Box sx={{ position: 'relative' }}>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 15, 20, 25, 50, 100, { value: count, label: 'Todos' }]}
+        rowsPerPageOptions={[5, 10, 25, 50, 100, { value: count, label: 'Todos' }]}
         component="div"
         count={count}
         rowsPerPage={rowsPerPage}

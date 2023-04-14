@@ -141,20 +141,14 @@ export default function Duracao() {
                 <DatePicker
                   label="Data"
                   value={dataInicio}
-                  inputFormat="dd/MM/yyyy"
                   onChange={(newValue) => setDataInicio(newValue)}
-                  renderInput={(params) => (
-                    <TextField size="small" {...params} fullWidth sx={{ maxWidth: { lg: 155 } }} />
-                  )}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: { lg: 155 } } } }}
                 />
                 <DatePicker
                   label="Data"
                   value={dataFim}
-                  inputFormat="dd/MM/yyyy"
                   onChange={(newValue) => setDataFim(newValue)}
-                  renderInput={(params) => (
-                    <TextField size="small" {...params} fullWidth sx={{ maxWidth: { lg: 155 } }} />
-                  )}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: { lg: 155 } } } }}
                 />
               </Stack>
             </Stack>
