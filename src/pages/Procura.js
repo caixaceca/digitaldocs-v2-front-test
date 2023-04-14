@@ -42,7 +42,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../com
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'ID', align: 'left' },
+  { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
@@ -203,7 +203,7 @@ export default function Procura() {
                   ) : (
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow hover key={row.id}>
-                        <TableCell>{row.id}</TableCell>
+                        <TableCell>{row.nentrada}</TableCell>
                         <TableCell>{row.assunto}</TableCell>
                         <TableCell>{row.titular}</TableCell>
                         <TableCell>
@@ -292,7 +292,7 @@ function applySortFilter({ newPesquisa, comparator, filterUo, filterSearch, filt
   if (filterSearch) {
     newPesquisa = newPesquisa.filter(
       (item) =>
-        (item?.id && item?.id.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (item?.nentrada && item?.nentrada.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
         (item?.titular && item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
         (item?.conta && item?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
         (item?.cliente && item?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||

@@ -172,7 +172,6 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       if (selectedProcesso) {
         const formData = new FormData();
         // required
-        formData.append('numero', 1);
         formData.append('agendado', false);
         formData.append('balcao', values.balcao);
         formData.append('titular', values.titular);
@@ -267,7 +266,6 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       } else {
         const formData = new FormData();
         // required
-        formData.append('numero', 1);
         formData.append('balcao', values.balcao);
         formData.append('titular', values.titular);
         formData.append('segmento', values.segmento);

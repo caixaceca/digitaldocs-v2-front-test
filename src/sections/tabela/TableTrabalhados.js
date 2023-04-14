@@ -38,7 +38,7 @@ import ArquivoAnalytic from '../arquivo/ArquivoAnalytic';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'ID', align: 'left' },
+  { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'referencia', label: 'Referência', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -209,7 +209,7 @@ export default function TableTrabalhados() {
                     });
                     return (
                       <TableRow hover key={row.referencia}>
-                        <TableCell>{row.id}</TableCell>
+                        <TableCell>{row.nentrada}</TableCell>
                         <TableCell>{row.referencia}</TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
@@ -272,7 +272,7 @@ function applySortFilter({ trabalhados, comparator, filterSearch }) {
   if (text) {
     trabalhados = trabalhados.filter(
       (row) =>
-        (row?.id && row?.id.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.referencia && row?.referencia.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.assunto && row?.assunto.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.nome && row?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

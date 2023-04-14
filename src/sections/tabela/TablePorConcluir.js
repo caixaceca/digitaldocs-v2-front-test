@@ -22,6 +22,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
+  { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -146,7 +147,7 @@ export default function TablePorConcluir() {
               <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={7} row={10} />
+                  <SkeletonTable column={8} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     let _entidades = '';
@@ -155,6 +156,7 @@ export default function TablePorConcluir() {
                     });
                     return (
                       <TableRow hover key={row.id}>
+                        <TableCell>{row.nentrada}</TableCell>
                         <TableCell>{row.titular}</TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
@@ -224,7 +226,7 @@ function applySortFilter({ newList, comparator, filterSearch, colaborador, assun
   if (text) {
     newList = newList.filter(
       (row) =>
-        (row?.id && row?.id.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

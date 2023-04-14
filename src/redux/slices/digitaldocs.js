@@ -438,6 +438,7 @@ const slice = createSlice({
     patchParecerSuccess(state, action) {
       const index = state.processo.pareceres.findIndex((row) => row.id === action.payload.id);
       const parecer = action.payload.dados.pareceres.find((row) => row.id === action.payload.id);
+      state.processo.in_paralelo_mode = action.payload.in_paralelo_mode;
       state.processo.pareceres[index] = parecer;
     },
 

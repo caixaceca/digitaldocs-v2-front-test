@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 // utils
 import { BASEURL } from '../../utils/axios';
@@ -68,10 +69,10 @@ export default function Pareceres({ pareceres, processoId }) {
     dispatch(closeModal());
   };
 
-  const podeEditar = (id) => {
+  const podeDarParecer = (estadoId) => {
     let i = 0;
     while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.id === id) {
+      if (meusAmbientes[i]?.id === estadoId) {
         return true;
       }
       i += 1;
@@ -173,7 +174,7 @@ export default function Pareceres({ pareceres, processoId }) {
                               )}
                             </Box>
                           </Stack>
-                          {podeEditar(row?.estado_id) && !row?.validado && (
+                          {podeDarParecer(row?.estado_id) && !row?.validado && (
                             <Tooltip title="EDITAR" arrow>
                               <Fab size="small" variant="soft" color="warning" onClick={() => handleEditar(row)}>
                                 <SvgIconStyle src="/assets/icons/editar.svg" />
@@ -203,9 +204,23 @@ export default function Pareceres({ pareceres, processoId }) {
                           )}
                       </>
                     ) : (
-                      <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                        Ainda não foi adicionado o parecer...
-                      </Typography>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
+                        <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                          Ainda não foi adicionado o parecer...
+                        </Typography>
+                        {podeDarParecer(row?.estado_id) && !row?.validado && (
+                          <Tooltip title="EDITAR" arrow>
+                            <Button
+                              variant="soft"
+                              color="success"
+                              onClick={() => handleEditar(row)}
+                              startIcon={<AddCircleIcon />}
+                            >
+                              Adicionar
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </Stack>
                     )}
                   </Stack>
                 </Paper>

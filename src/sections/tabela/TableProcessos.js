@@ -12,6 +12,7 @@ import {
   TableRow,
   TableBody,
   TableCell,
+  Typography,
   TableContainer,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -36,7 +37,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'nentrada', label: 'Nº entrada', align: 'left' },
+  { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -46,7 +47,7 @@ const TABLE_HEAD = [
 ];
 
 const TABLE_HEAD_PENDECIA = [
-  { id: 'nentrada', label: 'Nº entrada', align: 'left' },
+  { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -207,11 +208,20 @@ export default function TableProcessos({ from }) {
                           </Stack>
                         </TableCell>
                         <TableCell>
-                          {row.titular}
-                          {/* {row?.segcliente && <Typography>{row?.segcliente}</Typography>} */}
+                          {row.titular ? (
+                            row.titular
+                          ) : (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não identificado
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
+                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não identificado
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
                         <TableCell>

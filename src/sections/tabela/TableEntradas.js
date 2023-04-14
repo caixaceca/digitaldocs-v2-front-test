@@ -20,7 +20,7 @@ import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { format } from 'date-fns';
-import { ptDateTime, fYear } from '../../utils/formatTime';
+import { ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -39,7 +39,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'nentrada', label: 'Número', align: 'left' },
+  { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -150,7 +150,7 @@ export default function TableEntradas() {
     newEntradas.push({
       ...row,
       colaborador: colaborador?.perfil?.displayName,
-      numEntrada: `${row?.nentrada}/${uoId}/${fYear(row?.criado_em || new Date())}`,
+      // numEntrada: `${row?.nentrada}/${uoId}/${fYear(row?.criado_em || new Date())}`,
     });
   });
 
@@ -234,7 +234,7 @@ export default function TableEntradas() {
                     });
                     return (
                       <TableRow hover key={row.id}>
-                        <TableCell>{row.numEntrada}</TableCell>
+                        <TableCell>{row.nentrada}</TableCell>
                         <TableCell>{row.titular}</TableCell>
                         <TableCell>
                           {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
@@ -316,7 +316,7 @@ function applySortFilter({ newEntradas, comparator, filterSearch, colaborador, a
   if (text) {
     newEntradas = newEntradas.filter(
       (row) =>
-        (row?.numEntrada && row?.numEntrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
+        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

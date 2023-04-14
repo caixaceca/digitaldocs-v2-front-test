@@ -77,7 +77,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
 
   return (
     <>
-      <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Anexos existentes
       </Typography>
       <List disablePadding sx={{ mt: 1 }}>

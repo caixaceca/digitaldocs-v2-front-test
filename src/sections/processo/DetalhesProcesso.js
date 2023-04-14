@@ -71,21 +71,23 @@ export default function DetalhesProcesso({ processo }) {
 
   return (
     <Scrollbar sx={{ mt: -2 }}>
-      {(processo?.referencia ||
-        processo?.assunto ||
-        processo?.data_entrada ||
-        processo?.nome ||
-        processo.criado_em ||
-        uo ||
+      {(uo ||
         criador ||
         processo?.obs ||
+        processo?.nome ||
+        processo?.assunto ||
+        processo?.nentrada ||
+        processo.criado_em ||
+        processo?.referencia ||
+        processo?.data_entrada ||
         processo.ispendente) && (
         <List>
           <ListItem disableGutters divider secondaryAction="">
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
           {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
-          {processo?.assunto && <TextItem title="Fluxo:" text={processo.assunto} />}
+          {processo?.assunto && <TextItem title="Assunto:" text={processo.assunto} />}
+          {processo?.nentrada && <TextItem title="Nº de entrada:" text={processo.nentrada} />}
           {processo?.data_entrada && <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />}
           {(processo?.nome || processo?.in_paralelo_mode) && (
             <Stack direction="row" alignItems="center" justifyContent="left" spacing={1} sx={{ py: 0.75 }}>
@@ -202,7 +204,7 @@ export default function DetalhesProcesso({ processo }) {
           )}
           {processo.cliente && <TextItem title="Nº de cliente:" text={processo.cliente} />}
           {processo.conta && <TextItem title="Nº de conta:" text={processo.conta} />}
-          {processo.segcliente && (
+          {processo.segcliente && !processo?.is_credito && (
             <TextItem
               title="Segmento:"
               text={(processo.segcliente === 'P' && 'Particular') || (processo.segcliente === 'E' && 'Empresa')}
