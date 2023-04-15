@@ -118,7 +118,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, motivosPendencias, meuAmbiente, currentColaborador, _entidades, fluxo?.modelo]
+    [selectedProcesso, fluxo?.id, motivosPendencias, meuAmbiente, currentColaborador, _entidades]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
