@@ -106,7 +106,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       diadomes: selectedProcesso?.diadomes || '',
       agendado: selectedProcesso?.agendado || false,
       ispendente: selectedProcesso?.ispendente || false,
-      modelo: selectedProcesso?.modelo || fluxo?.modelo,
       periodicidade: selectedProcesso?.periodicidade || null,
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
@@ -141,7 +140,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       if (selectedProcesso) {
         const formData = new FormData();
         // required
-        formData.append('modelo', values.modelo);
+        formData.append('modelo', fluxo?.modelo);
         formData.append('balcao', values.balcao);
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('agendado', values.agendado);
@@ -211,7 +210,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       } else {
         const formData = new FormData();
         // required
-        formData.append('modelo', values.modelo);
+        formData.append('modelo', fluxo?.modelo);
         formData.append('balcao', values.balcao);
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('perfil_id', values.perfil_id);

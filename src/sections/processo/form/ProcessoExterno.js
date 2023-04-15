@@ -130,6 +130,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         // required
         formData.append('agendado', false);
         formData.append('balcao', values.balcao);
+        formData.append('modelo', fluxo?.modelo);
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('uo_perfil_id ', currentColaborador?.uo?.id);
         formData.append('is_interno ', selectedProcesso?.is_interno);
@@ -210,6 +211,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         const formData = new FormData();
         // required
         formData.append('balcao', values.balcao);
+        formData.append('modelo', fluxo?.modelo);
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('perfil_id', values.perfil_id);
         formData.append('referencia', values.referencia);
