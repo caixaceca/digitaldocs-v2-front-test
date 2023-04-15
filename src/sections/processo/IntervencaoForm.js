@@ -219,10 +219,11 @@ export function ArquivarForm({ open, onCancel, processo }) {
   }, [error]);
 
   const deveInformarNConta = () => {
-    if (processo?.is_interno && processo?.assunto !== 'Encerramento de conta') {
+    if (processo?.is_interno && processo?.assunto !== 'Encerramento de conta' && processo?.modelo !== 'Paralelo') {
       let i = 0;
       while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.is_final) {
+        // const iHaveThisState = meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id);
+        if (meusAmbientes[i]?.id === processo?.estado_atual_id && meusAmbientes[i]?.is_final) {
           return true;
         }
         i += 1;
