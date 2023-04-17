@@ -55,8 +55,8 @@ export default function TableEntradas() {
   const dispatch = useDispatch();
   const [estado, setEstado] = useState(null);
   const [assunto, setAssunto] = useState(null);
-  const [colaborador, setColaborador] = useState(null);
   const [dataFim, setDataFim] = useState(new Date());
+  const [colaborador, setColaborador] = useState(null);
   const [dataInicio, setDataInicio] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
   const { entradas, meusAmbientes, isLoading } = useSelector((state) => state.digitaldocs);
@@ -67,7 +67,7 @@ export default function TableEntradas() {
   const minhasUos = [];
   meusAmbientes?.forEach((row) => {
     if (row?.nome?.includes('Gerência')) {
-      const uo = uos?.find((_uo) => _uo?.id === row?.uo_id);
+      const uo = uos?.find((uo) => uo?.id === row?.uo_id);
       minhasUos?.push({ id: row?.uo_id, label: uo?.label });
     }
   });

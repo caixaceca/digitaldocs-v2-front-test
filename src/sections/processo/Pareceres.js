@@ -191,12 +191,13 @@ export default function Pareceres({ pareceres, processoId }) {
                             (row) =>
                               row?.nome && (
                                 <Button
+                                  size="small"
                                   fullWidth
                                   color="inherit"
                                   key={row?.anexo}
                                   onClick={() => handleAnexo(row)}
                                   startIcon={getFileThumb(row.nome)}
-                                  sx={{ justifyContent: 'left', textAlign: 'left', py: 1 }}
+                                  sx={{ justifyContent: 'left', textAlign: 'left', py: 2.25 }}
                                 >
                                   {row?.nome}
                                 </Button>

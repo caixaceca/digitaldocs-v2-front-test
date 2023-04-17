@@ -271,32 +271,40 @@ export function SearchToolbarEntradas({
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-        <Autocomplete
-          fullWidth
-          value={estado}
-          onChange={(event, newValue) => onFilterEstado(newValue)}
-          options={estadosList?.sort()}
-          sx={{ width: { md: 180, xl: 250 } }}
-          renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
-        />
-        <Autocomplete
-          fullWidth
-          value={assunto}
-          onChange={(event, newValue) => onFilterAssunto(newValue)}
-          options={assuntosList?.sort()}
-          sx={{ width: { md: 180, xl: 250 } }}
-          renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
-        />
-        <Autocomplete
-          fullWidth
-          value={colaborador}
-          onChange={(event, newValue) => onFilterColaborador(newValue)}
-          options={colaboradoresList?.sort()}
-          sx={{ width: { md: 180, xl: 250 } }}
-          renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
-        />
-      </Stack>
+      {(estadosList?.length > 1 || assuntosList?.length > 1 || colaboradoresList?.length > 1) && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          {estadosList?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={estado}
+              options={estadosList?.sort()}
+              sx={{ width: { md: 180, xl: 230 } }}
+              onChange={(event, newValue) => onFilterEstado(newValue)}
+              renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
+            />
+          )}
+          {assuntosList?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={assunto}
+              options={assuntosList?.sort()}
+              sx={{ width: { md: 180, xl: 230 } }}
+              onChange={(event, newValue) => onFilterAssunto(newValue)}
+              renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
+            />
+          )}
+          {colaboradoresList?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={colaborador}
+              options={colaboradoresList?.sort()}
+              sx={{ width: { md: 180, xl: 230 } }}
+              onChange={(event, newValue) => onFilterColaborador(newValue)}
+              renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
+            />
+          )}
+        </Stack>
+      )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth

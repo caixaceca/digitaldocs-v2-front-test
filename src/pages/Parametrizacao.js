@@ -159,8 +159,8 @@ export default function Parametrizacao() {
                 <Tab
                   disableRipple
                   key={tab.value}
-                  value={tab.value}
                   icon={tab.icon}
+                  value={tab.value}
                   label={tab.label}
                   sx={{ px: 0.5, typography: 'subtitle2' }}
                 />

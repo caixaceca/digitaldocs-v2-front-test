@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import CircleIcon from '@mui/icons-material/Circle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 // utils
 import { BASEURL } from '../../utils/axios';
@@ -27,7 +28,6 @@ import useToggle from '../../hooks/useToggle';
 // redux
 import { useSelector } from '../../redux/store';
 // components
-import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 
 // ----------------------------------------------------------------------
@@ -75,7 +75,8 @@ export default function HistoricoPrisoes({ historico }) {
                   <TableCell>Colaborador</TableCell>
                   <TableCell align="center">Retido em</TableCell>
                   <TableCell align="center">Solto em</TableCell>
-                  <TableCell align="center">Duração</TableCell>
+                  <TableCell align="right">Duração</TableCell>
+                  <TableCell align="right"> </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -104,24 +105,28 @@ export default function HistoricoPrisoes({ historico }) {
                         </Stack>
                       </TableCell>
                       <TableCell align="center">{item?.preso_em ? ptDateTime(item?.preso_em) : '--'}</TableCell>
-                      <TableCell align="center">
-                        {item?.solto_em ? ptDateTime(item?.solto_em) : '--'}
-                        {colaborador?.perfil?.mail?.toLowerCase() !== item.por?.toLowerCase() && (
-                          <Typography>
-                            <Label variant="outlined" color="error">
-                              Pelo Sistema
-                            </Label>
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell align="center">
+                      <TableCell align="center">{item?.solto_em ? ptDateTime(item?.solto_em) : '--'}</TableCell>
+                      <TableCell align="right">
                         {(item?.preso_em && item?.solto_em && fDistance(item?.preso_em, item?.solto_em)) ||
                           (item?.preso_em && !item?.solto_em && fToNow(item?.preso_em)) ||
                           '--'}
                       </TableCell>
+                      <TableCell align="right">
+                        {colaborador?.perfil?.mail?.toLowerCase() !== item.por?.toLowerCase() && (
+                          <CircleIcon color="error" sx={{ width: 15, mt: 1.5 }} />
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <Stack direction="row" justifyContent="right" alignItems="center" spacing={0.5}>
+                      <CircleIcon color="error" sx={{ width: 15, mt: 0.25 }} />
+                      <Typography variant="caption">Solto pelo sistema</Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>

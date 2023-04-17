@@ -42,7 +42,7 @@ export default function HistoricoProcesso({ historico }) {
           />
         }
       >
-        Histórico de intervenções
+        Histórico de transições
       </Button>
 
       <Drawer
@@ -54,8 +54,7 @@ export default function HistoricoProcesso({ historico }) {
         sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
-          <Typography variant="h6">Histórico de intervenções</Typography>
-
+          <Typography variant="h6">Histórico de transições</Typography>
           <IconButton onClick={onClose}>
             <CloseIcon sx={{ width: 20 }} />
           </IconButton>
@@ -69,7 +68,7 @@ export default function HistoricoProcesso({ historico }) {
               const key = row.data_transicao;
               const _criador = colaboradores?.find((_row) => _row?.perfil?.id === row?.perfil_id);
               return (
-                <TimelineItem key={key} sx={{ '&:before': { display: 'none' }, mb: 0.5 }}>
+                <TimelineItem key={key} sx={{ '&:before': { display: 'none' }, mt: 0.5 }}>
                   <TimelineSeparator>
                     <TimelineDot
                       sx={{ p: 0 }}
@@ -85,45 +84,55 @@ export default function HistoricoProcesso({ historico }) {
                     {index !== historico?.length - 1 && <TimelineConnector />}
                   </TimelineSeparator>
                   <TimelineContent sx={{ pr: 0 }}>
-                    <Paper sx={{ p: 2, bgcolor: 'background.neutral' }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-                        {row.data_transicao && (
-                          <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
-                            {ptDateTime(row.data_transicao)}
-                          </Typography>
-                        )}
-                        <Label
-                          variant="ghost"
-                          color={
-                            (row?.is_resgate && 'warning') ||
-                            (row?.modo === 'Seguimento' && 'info') ||
-                            ((row?.modo === 'Devolução' || row?.modo === 'desarquivamento') && 'error') ||
-                            'success'
-                          }
-                        >
-                          {row?.is_resgate ? 'Resgate' : row?.modo}
-                        </Label>
+                    <Paper sx={{ bgcolor: 'background.neutral' }}>
+                      <Paper
+                        key={key}
+                        sx={{
+                          p: 2,
+                          borderBottomLeftRadius: 0,
+                          borderBottomRightRadius: 0,
+                          bgcolor: 'background.neutral',
+                          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+                        }}
+                      >
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
+                          <Label
+                            variant="ghost"
+                            color={
+                              (row?.is_resgate && 'warning') ||
+                              (row?.modo === 'Seguimento' && 'info') ||
+                              ((row?.modo === 'Devolução' || row?.modo === 'desarquivamento') && 'error') ||
+                              'success'
+                            }
+                          >
+                            {row?.is_resgate ? 'Resgate' : row?.modo}
+                          </Label>
+                          <Stack direction="row" justifyContent="left" alignItems="center" spacing={0.5}>
+                            <Typography variant="body2">{row?.is_resgate ? row?.nomef : row?.nome}</Typography>
+                            <ArrowRightAltIcon sx={{ width: 20 }} />
+                            <Typography variant="body2">{row?.is_resgate ? row?.nome : row?.nomef}</Typography>
+                          </Stack>
+                        </Stack>
+                      </Paper>
+                      <Stack sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="left" alignItems="center" spacing={1.5}>
+                          <Avatar
+                            alt={_criador?.perfil?.displayName || _criador?.perfil?.displayName}
+                            src={`${BASEURL}/colaborador/file/colaborador/${_criador?.foto_disk}`}
+                          />
+                          <Box>
+                            <Typography variant="body2" noWrap>
+                              {_criador?.perfil?.displayName} ({_criador?.uo?.label})
+                            </Typography>
+                            {row.data_transicao && (
+                              <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
+                                {ptDateTime(row.data_transicao)}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Stack>
+                        {row?.observacao && <Typography sx={{ pt: 2 }}>{newLineText(row.observacao)}</Typography>}
                       </Stack>
-                      <Stack direction="row" justifyContent="left" alignItems="center" spacing={0.5} sx={{ pt: 0.5 }}>
-                        <Typography variant="caption">{row?.is_resgate ? row?.nomef : row?.nome}</Typography>
-                        <ArrowRightAltIcon sx={{ width: 20 }} />
-                        <Typography variant="caption">{row?.is_resgate ? row?.nome : row?.nomef}</Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="left" alignItems="center" spacing={1.5} sx={{ pt: 1.5 }}>
-                        <Avatar
-                          alt={_criador?.perfil?.displayName || _criador?.perfil?.displayName}
-                          src={`${BASEURL}/colaborador/file/colaborador/${_criador?.foto_disk}`}
-                        />
-                        <Box>
-                          <Typography variant="body2" noWrap>
-                            {_criador?.perfil?.displayName} ({_criador?.uo?.label})
-                          </Typography>
-                          <Typography noWrap variant="body2" sx={{ color: (theme) => theme.palette.text.disabled }}>
-                            {_criador?.perfil?.mail}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                      {row?.observacao && <Typography sx={{ pt: 2 }}>{newLineText(row.observacao)}</Typography>}
                     </Paper>
                   </TimelineContent>
                 </TimelineItem>
