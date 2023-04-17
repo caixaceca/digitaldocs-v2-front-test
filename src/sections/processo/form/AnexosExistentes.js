@@ -90,19 +90,15 @@ export default function AnexosExistentes({ anexos, processoId }) {
               >
                 <ListItemIcon>{getFileThumb(anexo.nome)}</ListItemIcon>
                 <ListItemText>{anexo.nome}</ListItemText>
-                {anexosAtivos.length > 1 && (
-                  <Fab
-                    color="error"
-                    size="small"
-                    variant="soft"
-                    onClick={() => {
-                      handleClickOpen(anexo.id);
-                    }}
-                    sx={{ width: 30, height: 30 }}
-                  >
-                    <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
-                  </Fab>
-                )}
+                <Fab
+                  size="small"
+                  color="error"
+                  variant="soft"
+                  sx={{ width: 30, height: 30 }}
+                  onClick={() => handleClickOpen(anexo.id)}
+                >
+                  <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
+                </Fab>
               </ListItem>
             )
         )}
