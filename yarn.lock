@@ -1203,13 +1203,6 @@
   dependencies:
     "@date-io/core" "^2.16.0"
 
-"@date-io/dayjs@^2.16.0":
-  "integrity" "sha512-y5qKyX2j/HG3zMvIxTobYZRGnd1FUW2olZLS0vTj7bEkBQkjd2RO7/FEwDY03Z1geVGlXKnzIATEVBVaGzV4Iw=="
-  "resolved" "https://registry.npmjs.org/@date-io/dayjs/-/dayjs-2.16.0.tgz"
-  "version" "2.16.0"
-  dependencies:
-    "@date-io/core" "^2.16.0"
-
 "@date-io/hijri@^2.16.1":
   "integrity" "sha512-6BxY0mtnqj5cBiXluRs3uWN0mSJwGw0AB2ZxqtEHvBFoiSYEojW51AETnfPIWpdvDsBn+WAC7QrfBvQZnoyIkQ=="
   "resolved" "https://registry.npmjs.org/@date-io/hijri/-/hijri-2.16.1.tgz"
@@ -1835,16 +1828,31 @@
     "prop-types" "^15.8.1"
     "react-is" "^18.2.0"
 
-"@mui/x-date-pickers@^6.0.4":
-  "integrity" "sha512-blh91rqgnr8mdm+bn5vdde7fQII0gUDmeOMttKrMLv6P6OxkQXdz5aLSroXUpPTAAbX53zciFW/UG5Ynxqxtpw=="
-  "resolved" "https://registry.npmjs.org/@mui/x-date-pickers/-/x-date-pickers-6.0.4.tgz"
-  "version" "6.0.4"
+"@mui/x-date-pickers-pro@^6.2.0":
+  "integrity" "sha512-lb9UDVvMdEjKWLqv/e/spbwgKZO6UIKjo0xYgCag9cfr7S+fSyaBVGsYwDjykwropBr7lRfyc2Gs0XCIPjuRqQ=="
+  "resolved" "https://registry.npmjs.org/@mui/x-date-pickers-pro/-/x-date-pickers-pro-6.2.0.tgz"
+  "version" "6.2.0"
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@date-io/date-fns" "^2.16.0"
+    "@date-io/luxon" "^2.16.1"
+    "@date-io/moment" "^2.16.1"
+    "@mui/utils" "^5.11.13"
+    "@mui/x-date-pickers" "6.2.0"
+    "@mui/x-license-pro" "6.0.4"
+    "clsx" "^1.2.1"
+    "prop-types" "^15.8.1"
+    "react-transition-group" "^4.4.5"
+
+"@mui/x-date-pickers@^6.0.4", "@mui/x-date-pickers@6.2.0":
+  "integrity" "sha512-/u2X2VVQ67wS6yJNrL1upUUwSSevH1HIkMZeAo/tyTHc3Ek4WlS+kbCWByjL9PT+Z2Dmck8+xSfXIe/F1rypng=="
+  "resolved" "https://registry.npmjs.org/@mui/x-date-pickers/-/x-date-pickers-6.2.0.tgz"
+  "version" "6.2.0"
   dependencies:
     "@babel/runtime" "^7.21.0"
     "@date-io/core" "^2.16.0"
     "@date-io/date-fns" "^2.16.0"
     "@date-io/date-fns-jalali" "^2.16.0"
-    "@date-io/dayjs" "^2.16.0"
     "@date-io/hijri" "^2.16.1"
     "@date-io/jalaali" "^2.16.1"
     "@date-io/luxon" "^2.16.1"
@@ -1854,6 +1862,14 @@
     "clsx" "^1.2.1"
     "prop-types" "^15.8.1"
     "react-transition-group" "^4.4.5"
+
+"@mui/x-license-pro@^6.0.4", "@mui/x-license-pro@6.0.4":
+  "integrity" "sha512-4E9TRDb0Enc7OngSz/Lx34++WdiD95tsYuFCdhicq/FImahgLEg799qUj+il5UQJ5mxQP/pKdVqv0T8FZg2JPA=="
+  "resolved" "https://registry.npmjs.org/@mui/x-license-pro/-/x-license-pro-6.0.4.tgz"
+  "version" "6.0.4"
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@mui/utils" "^5.11.13"
 
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   "integrity" "sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg=="
