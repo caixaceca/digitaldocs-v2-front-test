@@ -60,10 +60,7 @@ export default function ProcuraAvancada() {
       id: Number(parametros?.get('uoId')),
       label: uos?.find((row) => row?.id === Number(parametros?.get('uoId')))?.label,
     }) ||
-      (currentColaborador?.uo?.tipo === 'Agências' && {
-        id: currentColaborador?.uo?.id,
-        label: currentColaborador?.uo?.label,
-      }) ||
+      (currentColaborador?.uo && { id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label }) ||
       null
   );
 
@@ -129,11 +126,7 @@ export default function ProcuraAvancada() {
     setSearchQuery('');
     setColaborador(null);
     setData([null, null]);
-    setUo(
-      currentColaborador?.uo?.tipo === 'Agências'
-        ? { id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label }
-        : null
-    );
+    setUo(currentColaborador?.uo ? { id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label } : null);
     onClose();
   };
 
