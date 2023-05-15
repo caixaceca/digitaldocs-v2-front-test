@@ -3,7 +3,7 @@ import { useMsal } from '@azure/msal-react';
 import React, { createRef, useEffect } from 'react';
 // @mui
 import { styled } from '@mui/material/styles';
-import { Paper, Box, Card, Stack, Alert, Container, Typography, Button } from '@mui/material';
+import { Paper, Card, Stack, Alert, Container, Typography, Button } from '@mui/material';
 // config
 import { loginRequest } from '../../config';
 // components
@@ -57,14 +57,13 @@ export default function LoginPage() {
       <Container maxWidth="sm">
         <ContentStyle>
           <SectionStyle>
-            <Stack direction="row" alignItems="center" sx={{ mb: 5 }}>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="h3">Olá, bem-vindo(a)</Typography>
-              </Box>
+            <Stack direction="column" sx={{ mb: 5 }} spacing={2}>
+              <Typography variant="h3">Olá, bem-vindo(a)</Typography>
+              <Typography variant="h5">Intranet da Caixa Económica de Cabo Verde</Typography>
             </Stack>
 
             <Alert severity="success" sx={{ mb: 3 }}>
-              Para aceder a intranet faça login com a sua conta <strong>Microsoft</strong>
+              Para aceder faça login com a sua conta <strong>Microsoft</strong>
             </Alert>
             <Button fullWidth size="large" ref={referencia} variant="contained" onClick={() => handleLogin()}>
               Login

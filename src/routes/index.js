@@ -6,8 +6,6 @@ import { useMsal } from '@azure/msal-react';
 import { format } from 'date-fns';
 // layouts
 import IntranetLayout from '../layouts';
-// config
-// import { PATH_AFTER_LOGIN } from '../config';
 // components
 import LoadingScreen from '../components/LoadingScreen';
 // redux
@@ -43,12 +41,12 @@ export default function Router() {
 
   useEffect(() => {
     if (perfil?.mail) {
-      dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
       dispatch(getFromIntranet('uos', { mail: perfil?.mail }));
       dispatch(getFromIntranet('links', { mail: perfil?.mail }));
       dispatch(getFromIntranet('frase', { mail: perfil?.mail }));
       dispatch(getFromIntranet('aplicacoes', { mail: perfil?.mail }));
       dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
+      dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
       if (perfil?.id) {
         dispatch(getAll('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));

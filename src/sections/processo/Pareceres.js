@@ -106,7 +106,7 @@ export default function Pareceres({ pareceres, processoId }) {
           <Stack spacing={2} sx={{ p: 2 }}>
             {pareceres.map((row) => {
               const key = `parecer_${row.id}`;
-              const _criador = colaboradores?.find((_row) => _row?.perfil?.id === row?.parecer_perfil_id);
+              const criador = colaboradores?.find((_row) => _row?.perfil?.id === row?.parecer_perfil_id);
               return (
                 <Paper key={key} sx={{ bgcolor: 'background.neutral' }}>
                   <Paper
@@ -152,12 +152,12 @@ export default function Pareceres({ pareceres, processoId }) {
                         <Stack spacing={3} direction="row" alignItems="center" justifyContent="space-between">
                           <Stack direction="row" alignItems="center" spacing={1.5}>
                             <Avatar
-                              alt={_criador?.perfil?.displayName || _criador?.perfil?.displayName}
-                              src={`${BASEURL}/colaborador/file/colaborador/${_criador?.foto_disk}`}
+                              alt={criador?.perfil?.displayName || criador?.perfil?.displayName}
+                              src={`${BASEURL}/colaborador/file/colaborador/${criador?.foto_disk}`}
                             />
                             <Box>
                               <Typography variant="body2" noWrap>
-                                {_criador?.perfil?.displayName} ({_criador?.uo?.label})
+                                {criador?.perfil?.displayName} ({criador?.uo?.label})
                               </Typography>
                               {row?.data_parecer && (
                                 <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
@@ -183,8 +183,8 @@ export default function Pareceres({ pareceres, processoId }) {
                             (row) =>
                               row?.nome && (
                                 <Button
-                                  size="small"
                                   fullWidth
+                                  size="small"
                                   color="inherit"
                                   key={row?.anexo}
                                   onClick={() => handleAnexo(row)}
