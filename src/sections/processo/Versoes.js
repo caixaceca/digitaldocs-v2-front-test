@@ -15,7 +15,6 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import HistoryIcon from '@mui/icons-material/History';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -68,17 +67,9 @@ export default function Versoes({ processoId }) {
         </Fab>
       </Tooltip>
 
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={onClose}
-        BackdropProps={{ invisible: true }}
-        PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}
-        sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
-      >
+      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Versões anteriores do processo</Typography>
-
           <IconButton onClick={onClose}>
             <CloseIcon sx={{ width: 20 }} />
           </IconButton>

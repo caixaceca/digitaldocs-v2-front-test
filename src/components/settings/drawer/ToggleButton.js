@@ -48,7 +48,7 @@ export default function ToggleButton({ notDefault, open, onToggle }) {
     <RootStyle>
       {notDefault && !open && <DotStyle />}
 
-      <Tooltip title="Definições" placement="left">
+      <Tooltip title="Definições" placement="left" arrow>
         <IconButtonAnimate
           color="inherit"
           onClick={onToggle}

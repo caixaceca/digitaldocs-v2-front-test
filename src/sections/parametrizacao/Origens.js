@@ -98,7 +98,9 @@ export default function Origens() {
 
       <RoleBasedGuard hasContent roles={['origem-110', 'origem-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="origens" />
+          {dataFiltered.length > 1 && (
+            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="origens" />
+          )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -141,7 +143,7 @@ export default function Origens() {
             </TableContainer>
           </Scrollbar>
 
-          {!isNotFound && (
+          {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
               dense={dense}
               onChangeDense={onChangeDense}

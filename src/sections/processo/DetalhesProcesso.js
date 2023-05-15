@@ -22,9 +22,6 @@ import {
 } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { newLineText } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
@@ -49,13 +46,13 @@ export default function DetalhesProcesso({ processo }) {
   const { motivosPendencias } = useSelector((state) => state.digitaldocs);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
-  const colaboradorLock = processo.is_lock ? colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id) : '';
+  const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);
   let _entidades = '';
   processo?.entidades?.split(';')?.forEach((row, index) => {
     _entidades += processo?.entidades?.split(';')?.length - 1 === index ? row : `${row} / `;
   });
-  const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Primário';
-  const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Secundário';
+  const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Doc. primário';
+  const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Doc. secundário';
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
 
   const pareceresNaoValidados = () => {
@@ -85,10 +82,13 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider secondaryAction="">
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
-          {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
+          {uo?.label && <TextItem title="U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />}
           {processo?.assunto && <TextItem title="Assunto:" text={processo.assunto} />}
+          {processo?.criado_em && <TextItem title="Criado em:" text={ptDateTime(processo.criado_em)} />}
+          {criador?.perfil?.displayName && <TextItem title="Criado por:" text={criador?.perfil?.displayName} />}
           {processo?.nentrada && <TextItem title="Nº de entrada:" text={processo.nentrada} />}
           {processo?.data_entrada && <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />}
+          {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
           {(processo?.nome || processo?.in_paralelo_mode) && (
             <Stack direction="row" alignItems="center" justifyContent="left" spacing={1} sx={{ py: 0.75 }}>
               <Typography sx={{ color: 'text.secondary' }}>Estado atual:</Typography>
@@ -99,67 +99,55 @@ export default function DetalhesProcesso({ processo }) {
                   <>
                     {processo.nome}
                     {colaboradorLock && (
-                      <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
-                        <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                          {colaboradorLock?.perfil?.displayName}
-                        </Typography>
-                        &nbsp;está trabalhando neste processo
-                      </Typography>
+                      <>
+                        {processo.is_lock ? (
+                          <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
+                            <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                              {colaboradorLock?.perfil?.displayName}
+                            </Typography>
+                            &nbsp;está trabalhando neste processo
+                          </Typography>
+                        ) : (
+                          <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
+                            Este processo foi atribuído a&nbsp;
+                            <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                              {colaboradorLock?.perfil?.displayName}
+                            </Typography>
+                          </Typography>
+                        )}
+                      </>
                     )}
                   </>
                 )}
               </Typography>
             </Stack>
           )}
-          {(processo.criado_em || uo || criador) && (
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
-              <Typography sx={{ color: 'text.secondary' }}>Criado:</Typography>
-              <Stack spacing={0.5}>
-                {processo.criado_em && (
-                  <Stack direction="row" spacing={0.5} alignItems="center">
-                    <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                    <Typography variant="body2">{ptDateTime(processo.criado_em)}</Typography>
-                  </Stack>
-                )}
-                {uo && (
-                  <Stack direction="row" spacing={0.5} alignItems="center">
-                    <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                    <Typography variant="body2">
-                      {uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label}
-                    </Typography>
-                  </Stack>
-                )}
-                {criador && (
-                  <Stack direction="row" spacing={0.5} alignItems="center">
-                    <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                    <Typography variant="body2">{criador?.perfil?.displayName}</Typography>
-                  </Stack>
-                )}
-              </Stack>
+          {processo?.obs && (
+            <Stack sx={{ py: 0.75 }}>
+              <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
+                  <Typography>{newLineText(processo.obs)}</Typography>
+                </Stack>
+              </Paper>
             </Stack>
           )}
-          {processo?.obs && (
-            <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1, my: 0.75 }}>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
-                <Typography>{newLineText(processo.obs)}</Typography>
-              </Stack>
-            </Paper>
-          )}
           {(processo.ispendente || motivo || processo.mobs) && (
-            <Paper sx={{ p: 2, pb: 1, bgcolor: 'background.neutral', flexGrow: 1, my: 0.75 }}>
-              {processo.ispendente ? (
-                <Label color="warning" startIcon={<InfoOutlinedIcon />}>
-                  Processo pendente
-                </Label>
-              ) : (
-                <Label color="default" startIcon={<InfoOutlinedIcon />}>
-                  Este processo esteve pendente
-                </Label>
-              )}
-              {motivo && <TextItem title="Motivo:" text={motivo?.motivo} />}
-              {processo.mobs && <TextItem title="Obs:" text={processo.mobs} />}
-            </Paper>
+            <Stack sx={{ py: 0.75 }}>
+              <Paper sx={{ p: 2, pb: 1, bgcolor: 'background.neutral', flexGrow: 1 }}>
+                {processo.ispendente ? (
+                  <Label color="warning" startIcon={<InfoOutlinedIcon />}>
+                    Processo pendente
+                  </Label>
+                ) : (
+                  <Label color="default" startIcon={<InfoOutlinedIcon />}>
+                    Este processo esteve pendente
+                  </Label>
+                )}
+                {motivo && <TextItem title="Motivo:" text={motivo?.motivo} />}
+                {processo.mobs && <TextItem title="Obs:" text={processo.mobs} />}
+              </Paper>
+            </Stack>
           )}
         </List>
       )}
@@ -176,29 +164,8 @@ export default function DetalhesProcesso({ processo }) {
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
           {processo.titular && <TextItem title="Titular:" text={processo.titular} />}
-          {(processo.docidp || processo.docids) && (
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
-              <Typography sx={{ color: 'text.secondary' }}>Documento:</Typography>
-              <Stack spacing={0.5}>
-                {processo.docidp && (
-                  <Typography>
-                    {processo.docidp}{' '}
-                    <Typography variant="spam" sx={{ color: 'text.secondary' }}>
-                      ({docPLabel})
-                    </Typography>
-                  </Typography>
-                )}
-                {processo.docids && (
-                  <Typography>
-                    {processo.docids}{' '}
-                    <Typography variant="spam" sx={{ color: 'text.secondary' }}>
-                      ({docSLabel})
-                    </Typography>
-                  </Typography>
-                )}
-              </Stack>
-            </Stack>
-          )}
+          {processo?.docidp && <TextItem title={`${docPLabel}:`} text={processo.docidp} />}
+          {processo?.docids && <TextItem title={`${docSLabel}:`} text={processo.docids} />}
           {_entidades && (
             <TextItem title={_entidades?.includes('/') ? 'Nº de entidade(s)' : 'Nº de entidade:'} text={_entidades} />
           )}

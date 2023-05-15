@@ -12,6 +12,7 @@ import {
   TableBody,
   TableCell,
   TextField,
+  Typography,
   TableContainer,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -39,12 +40,12 @@ import ArquivoAnalytic from '../arquivo/ArquivoAnalytic';
 
 const TABLE_HEAD = [
   { id: 'nentrada', label: 'Nº', align: 'left' },
-  { id: 'referencia', label: 'Referência', align: 'left' },
+  { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
   { id: 'trabalhado_em', label: 'Trabalhado em', align: 'center' },
-  { id: 'empty' },
+  { id: 'empty', width: 50 },
 ];
 
 // ----------------------------------------------------------------------
@@ -68,6 +69,7 @@ export default function TableTrabalhados() {
   );
   const total = trabalhadosUo?.length || 0;
   const subtotal = trabalhados?.length || 0;
+  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
   const uoId = ambiente?.uoId || colaborador?.uoId || currentColaborador?.uo_id;
   const uo = uos?.find((row) => row?.id === uoId);
 
@@ -82,7 +84,12 @@ export default function TableTrabalhados() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'trabalhado_em', defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc' });
+  } = useTable({
+    defaultOrderBy: 'trabalhado_em',
+    defaultRowsPerPage: fromAgencia ? 100 : 25,
+    defaultDense: currentColaborador?.id === 362,
+    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+  });
 
   useEffect(() => {
     if (currentColaborador?.perfil_id) {
@@ -185,15 +192,17 @@ export default function TableTrabalhados() {
         </Card>
       )}
       <Card sx={{ p: 1 }}>
-        <SearchToolbarTrabalhados
-          tab="trabalhados"
-          ambiente={ambiente}
-          colaborador={colaborador}
-          filterSearch={filterSearch}
-          onFilterSearch={handleFilterSearch}
-          onFilterAmbiente={handleFilterAmbiente}
-          onFilterColaborador={handleFilterColaborador}
-        />
+        {dataFiltered.length > 1 && (
+          <SearchToolbarTrabalhados
+            tab="trabalhados"
+            ambiente={ambiente}
+            colaborador={colaborador}
+            filterSearch={filterSearch}
+            onFilterSearch={handleFilterSearch}
+            onFilterAmbiente={handleFilterAmbiente}
+            onFilterColaborador={handleFilterColaborador}
+          />
+        )}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -210,14 +219,20 @@ export default function TableTrabalhados() {
                     return (
                       <TableRow hover key={row.referencia}>
                         <TableCell>{row.nentrada}</TableCell>
-                        <TableCell>{row.referencia}</TableCell>
+                        <TableCell>{row.titular}</TableCell>
                         <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
+                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não identificado
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell>{row?.assunto}</TableCell>
                         <TableCell>{row?.nome}</TableCell>
-                        <TableCell align="center">
-                          {row?.trabalhado_em ? ptDateTime(row?.trabalhado_em) : ' - - - - - '}
+                        <TableCell align="center" sx={{ width: 10 }}>
+                          <Typography noWrap variant="body2">
+                            {row?.trabalhado_em && ptDateTime(row.trabalhado_em)}
+                          </Typography>
                         </TableCell>
                         <TableCell align="center" width={50}>
                           <Tooltip title="DETALHES" arrow>
@@ -239,15 +254,15 @@ export default function TableTrabalhados() {
           </TableContainer>
         </Scrollbar>
 
-        {!isNotFound && (
+        {!isNotFound && dataFiltered.length > 10 && (
           <TablePaginationAlt
+            page={page}
             dense={dense}
+            rowsPerPage={rowsPerPage}
+            onChangePage={onChangePage}
+            count={dataFiltered.length}
             onChangeDense={onChangeDense}
             onChangeRowsPerPage={onChangeRowsPerPage}
-            onChangePage={onChangePage}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            count={dataFiltered.length}
           />
         )}
       </Card>
@@ -273,7 +288,6 @@ function applySortFilter({ trabalhados, comparator, filterSearch }) {
     trabalhados = trabalhados.filter(
       (row) =>
         (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.referencia && row?.referencia.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.assunto && row?.assunto.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.nome && row?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
         (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||

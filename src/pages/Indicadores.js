@@ -11,7 +11,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 // sections
-import { Tipos, Criacao, Ranking, Duracao, FileSystem } from '../sections/indicadores';
+import { Tipos, Criacao, Volume, Duracao, FileSystem, Execucao } from '../sections/indicadores/Indicadores';
 // assets
 import ComingSoonIllustration from '../assets/ComingSoonIllustration';
 
@@ -55,9 +55,10 @@ export default function Indicadores() {
   const tabs = [
     ...tabFiles,
     { value: 'total', label: 'Total de processos', component: <Criacao /> },
-    { value: 'ranking', label: 'Ranking', component: <Ranking /> },
+    { value: 'voloume', label: 'Volume', component: <Volume /> },
     { value: 'tipos', label: 'Tipos', component: <Tipos /> },
     { value: 'duracao', label: 'Duração', component: <Duracao /> },
+    { value: 'tempoExecucao', label: 'Tempo execução', component: <Execucao /> },
   ];
 
   useEffect(() => {

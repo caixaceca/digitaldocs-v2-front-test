@@ -15,12 +15,11 @@ import {
   Typography,
   TableContainer,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
-import { ptDateTime } from '../utils/formatTime';
+import { ptDateTime, ptDate } from '../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../hooks/useTable';
 // redux
@@ -32,6 +31,7 @@ import useSettings from '../hooks/useSettings';
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // components
 import Page from '../components/Page';
+import Panel from '../components/Panel';
 import Scrollbar from '../components/Scrollbar';
 import SvgIconStyle from '../components/SvgIconStyle';
 import { SkeletonTable } from '../components/skeleton';
@@ -54,12 +54,17 @@ const TABLE_HEAD = [
 // ----------------------------------------------------------------------
 
 export default function Procura() {
-  const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { themeStretch, themeMode } = useSettings();
+  const { themeStretch } = useSettings();
+  const [parametros] = useSearchParams();
+  const [filterUo, setFilterUo] = useState(null);
+  const [filterSearch, setFilterSearch] = useState('');
+  const [filterEstado, setFilterEstado] = useState(null);
+  const [filterAssunto, setFilterAssunto] = useState(null);
   const { pesquisa, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
+  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
 
   const {
     page,
@@ -73,27 +78,43 @@ export default function Procura() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'noOrderDefault' });
-
-  const [filterUo, setFilterUo] = useState('');
-  const [filterSearch, setFilterSearch] = useState('');
-  const [filterEstado, setFilterEstado] = useState('');
-  const [filterAssunto, setFilterAssunto] = useState('');
-  const [chave] = useSearchParams();
-  const _chave = chave?.get('chave');
+  } = useTable({
+    defaultOrderBy: 'noOrderDefault',
+    defaultRowsPerPage: fromAgencia ? 100 : 25,
+    defaultDense: currentColaborador?.id === 362,
+    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+  });
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id && currentColaborador?.uo_id && _chave) {
-      dispatch(
-        getAll('pesquisa v2', {
-          mail,
-          chave: _chave,
-          uoID: currentColaborador?.uo_id,
-          perfilId: currentColaborador?.perfil_id,
-        })
-      );
+    if (mail && currentColaborador?.perfil_id && currentColaborador?.uo_id && parametros) {
+      if (parametros?.get('avancada') === 'false') {
+        dispatch(
+          getAll('pesquisa v2', {
+            mail,
+            chave: parametros?.get('chave'),
+            uoID: currentColaborador?.uo_id,
+            perfilId: currentColaborador?.perfil_id,
+          })
+        );
+      } else {
+        dispatch(
+          getAll('pesquisa avancada', {
+            mail,
+            uoID: parametros?.get('uoId'),
+            conta: parametros?.get('conta'),
+            datai: parametros?.get('datai'),
+            dataf: parametros?.get('dataf'),
+            cliente: parametros?.get('cliente'),
+            entidade: parametros?.get('entidade'),
+            nentrada: parametros?.get('nentrada'),
+            noperacao: parametros?.get('noperacao'),
+            perfilID: currentColaborador?.perfil_id,
+            perfilDono: parametros?.get('perfilId'),
+          })
+        );
+      }
     }
-  }, [dispatch, _chave, currentColaborador?.perfil_id, currentColaborador?.uo_id, mail]);
+  }, [dispatch, parametros, currentColaborador?.perfil_id, currentColaborador?.uo_id, mail]);
 
   const handleFilterUo = (value) => {
     setFilterUo(value);
@@ -113,10 +134,33 @@ export default function Procura() {
   };
 
   const handleViewRow = (id) => {
-    navigate({
-      pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`,
-      search: createSearchParams({ from: 'procurar' }).toString(),
-    });
+    if (parametros?.get('avancada') === 'false') {
+      navigate({
+        pathname: PATH_DIGITALDOCS.processos.procurar,
+        search: createSearchParams({
+          from: 'procurar',
+          avancada: 'false',
+          chave: parametros?.get('chave'),
+        }).toString(),
+      });
+    } else {
+      navigate({
+        pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`,
+        search: createSearchParams({
+          from: 'procurar',
+          avancada: 'true',
+          uoId: parametros?.get('uoId'),
+          conta: parametros?.get('conta'),
+          datai: parametros?.get('datai'),
+          dataf: parametros?.get('dataf'),
+          cliente: parametros?.get('cliente'),
+          entidade: parametros?.get('entidade'),
+          nentrada: parametros?.get('nentrada'),
+          perfilId: parametros?.get('perfilId'),
+          noperacao: parametros?.get('noperacao'),
+        }).toString(),
+      });
+    }
   };
 
   const newPesquisa = [];
@@ -158,41 +202,100 @@ export default function Procura() {
   });
   const isNotFound = !dataFiltered.length;
 
+  console.log(colaboradores);
+
   return (
     <Page title="Pesquisa | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
           heading={
-            <>
-              Resultado da procura [{pesquisa?.length || 0}]:
-              <Box component="span" sx={{ color: theme.palette.grey[themeMode === 'light' ? 800 : 50], pl: 1 }}>
-                {_chave}
-              </Box>
-            </>
+            <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
+              <Typography variant="h4">Resultado da procura [{pesquisa?.length || 0}]:</Typography>
+              {parametros?.get('avancada') === 'false' ? (
+                <Box component="span" sx={{ color: 'text.primary' }}>
+                  {parametros?.get('chave')}
+                </Box>
+              ) : (
+                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+                  {parametros?.get('uoId') && (
+                    <Panel label="U.O">
+                      <Typography noWrap>
+                        {uos?.find((row) => row?.id?.toString() === parametros?.get('uoId')?.toString())?.label}
+                      </Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('perfilId') && (
+                    <Panel label="Criado por">
+                      <Typography noWrap>
+                        {
+                          colaboradores?.find(
+                            (row) => row?.perfil_id?.toString() === parametros?.get('perfilId')?.toString()
+                          )?.perfil?.displayName
+                        }
+                      </Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('conta') && (
+                    <Panel label="Nº conta">
+                      <Typography noWrap>{parametros?.get('conta')}</Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('cliente') && (
+                    <Panel label="Nº cliente">
+                      <Typography noWrap>{parametros?.get('cliente')}</Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('entidade') && (
+                    <Panel label="Nº entidade">
+                      <Typography noWrap>{parametros?.get('entidade')}</Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('nentrada') && (
+                    <Panel label="Nº entrada">
+                      <Typography noWrap>{parametros?.get('nentrada')}</Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('noperacao') && (
+                    <Panel label="Nº operação">
+                      <Typography noWrap>{parametros?.get('noperacao')}</Typography>
+                    </Panel>
+                  )}
+                  {parametros?.get('datai') && parametros?.get('dataf') && (
+                    <Panel label="Data">
+                      <Typography noWrap>
+                        {ptDate(parametros?.get('datai'))} - {ptDate(parametros?.get('dataf'))}
+                      </Typography>
+                    </Panel>
+                  )}
+                </Stack>
+              )}
+            </Stack>
           }
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
-            { name: `Procurar: ${_chave}` },
+            { name: 'Procurar' },
           ]}
           action=""
           sx={{ color: 'text.secondary' }}
         />
 
         <Card sx={{ p: 1 }}>
-          <SearchToolbarProcura
-            estadosList={estadosList}
-            assuntosList={assuntosList}
-            uosorigemList={uosorigemList}
-            filterUo={filterUo}
-            filterSearch={filterSearch}
-            filterEstado={filterEstado}
-            filterAssunto={filterAssunto}
-            onFilterUo={handleFilterUo}
-            onFilterSearch={handleFilterSearch}
-            onFilterEstado={handleFilterEstado}
-            onFilterAssunto={handleFilterAssunto}
-          />
+          {dataFiltered.length > 1 && (
+            <SearchToolbarProcura
+              filterUo={filterUo}
+              estadosList={estadosList}
+              assuntosList={assuntosList}
+              filterSearch={filterSearch}
+              filterEstado={filterEstado}
+              onFilterUo={handleFilterUo}
+              filterAssunto={filterAssunto}
+              uosorigemList={uosorigemList}
+              onFilterSearch={handleFilterSearch}
+              onFilterEstado={handleFilterEstado}
+              onFilterAssunto={handleFilterAssunto}
+            />
+          )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -201,46 +304,68 @@ export default function Procura() {
                   {isLoading && isNotFound ? (
                     <SkeletonTable column={7} row={10} />
                   ) : (
-                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow hover key={row.id}>
-                        <TableCell>{row.nentrada}</TableCell>
-                        <TableCell>{row.assunto}</TableCell>
-                        <TableCell>{row.titular}</TableCell>
-                        <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || row?.entidades}
-                        </TableCell>
-                        <TableCell>{row.estado}</TableCell>
-                        <TableCell>
-                          {row?.criado_em && (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="body2">{ptDateTime(row.criado_em)}</Typography>
-                            </Stack>
-                          )}
-                          {row?.uo && (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="body2">
-                                {row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
+                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                      let _entidades = '';
+                      row?.entidades?.split(';')?.forEach((_row, index) => {
+                        _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
+                      });
+                      return (
+                        <TableRow hover key={row.id}>
+                          <TableCell>{row.nentrada}</TableCell>
+                          <TableCell>{row.assunto}</TableCell>
+                          <TableCell>
+                            {row?.titular ? (
+                              row.titular
+                            ) : (
+                              <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                Não identificado
                               </Typography>
-                            </Stack>
-                          )}
-                          {row?.colaborador && (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="body2">{row.colaborador}</Typography>
-                            </Stack>
-                          )}
-                        </TableCell>
-                        <TableCell align="center" width={50}>
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
+                              <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                Não identificado
+                              </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell>{row.estado}</TableCell>
+                          <TableCell sx={{ width: 10 }}>
+                            {row?.criado_em && (
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                                <Typography noWrap variant="body2">
+                                  {ptDateTime(row.criado_em)}
+                                </Typography>
+                              </Stack>
+                            )}
+                            {row?.uo && (
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                                <Typography noWrap variant="body2">
+                                  {row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
+                                </Typography>
+                              </Stack>
+                            )}
+                            {row?.colaborador && (
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                                <Typography noWrap variant="body2">
+                                  {row.colaborador}
+                                </Typography>
+                              </Stack>
+                            )}
+                          </TableCell>
+                          <TableCell align="center" width={50}>
+                            <Tooltip title="DETALHES" arrow>
+                              <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
+                                <SvgIconStyle src="/assets/icons/view.svg" />
+                              </Fab>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
 
@@ -251,15 +376,15 @@ export default function Procura() {
             </TableContainer>
           </Scrollbar>
 
-          {!isNotFound && (
+          {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
+              page={page}
               dense={dense}
+              rowsPerPage={rowsPerPage}
+              onChangePage={onChangePage}
+              count={dataFiltered.length}
               onChangeDense={onChangeDense}
               onChangeRowsPerPage={onChangeRowsPerPage}
-              onChangePage={onChangePage}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              count={dataFiltered.length}
             />
           )}
         </Card>

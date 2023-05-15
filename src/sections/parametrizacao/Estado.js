@@ -85,7 +85,7 @@ export default function Estado() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+        {dataFiltered.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -126,7 +126,7 @@ export default function Estado() {
           </TableContainer>
         </Scrollbar>
 
-        {!isNotFound && (
+        {!isNotFound && dataFiltered.length > 10 && (
           <TablePaginationAlt
             dense={dense}
             onChangeDense={onChangeDense}

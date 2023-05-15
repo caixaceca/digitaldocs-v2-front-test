@@ -182,11 +182,13 @@ export default function PerfisEstado() {
           roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
         >
           <Card sx={{ p: 1 }}>
-            <TableToolbarPerfilEstados
-              options={_uosList}
-              filterSearch={filterSearch}
-              onFilterSearch={handleFilterSearch}
-            />
+            {dataFiltered.length > 1 && (
+              <TableToolbarPerfilEstados
+                options={_uosList}
+                filterSearch={filterSearch}
+                onFilterSearch={handleFilterSearch}
+              />
+            )}
             <Scrollbar>
               <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
                 <Table size={dense ? 'small' : 'medium'}>
@@ -251,7 +253,7 @@ export default function PerfisEstado() {
               </TableContainer>
             </Scrollbar>
 
-            {!isNotFound && (
+            {!isNotFound && dataFiltered.length > 10 && (
               <TablePaginationAlt
                 dense={dense}
                 onChangeDense={onChangeDense}

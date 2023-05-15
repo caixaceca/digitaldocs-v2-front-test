@@ -15,7 +15,6 @@ import {
   AccordionDetails,
   AccordionSummary,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -64,9 +63,7 @@ export default function Views({ processoId }) {
         open={open}
         anchor="right"
         onClose={onClose}
-        BackdropProps={{ invisible: true }}
         PaperProps={{ sx: { width: { xs: 1, sm: 400 } } }}
-        sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Visualizações</Typography>

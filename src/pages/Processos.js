@@ -80,17 +80,6 @@ export default function Processos() {
     return temAcesso;
   };
 
-  const acessoPendentes = () => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.is_inicial) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
-
   const acessoFinalizadosExecutados = () => {
     let temAcesso = false;
     meusAmbientes?.forEach((row) => {
@@ -108,17 +97,6 @@ export default function Processos() {
           label: 'Agendados',
           component: <TableProcessos from="agendados" />,
           num: meusProcessos?.totalagendado || 0,
-        },
-      ]
-    : [];
-
-  const pendentes = acessoPendentes()
-    ? [
-        {
-          value: 'pendentes',
-          label: 'Pendentes',
-          component: <TableProcessos from="pendentes" />,
-          num: meusProcessos?.totalpendencias || 0,
         },
       ]
     : [];
@@ -160,20 +138,19 @@ export default function Processos() {
           value: 'retidos',
           label: 'Retidos',
           component: <TableProcessos from="retidos" />,
-          num: meusProcessos?.totalpendente || 0,
-        },
-        ...pendentes,
-        {
-          value: 'devolvidosEquipa',
-          label: 'Devolvidos da equipa',
-          component: <TableProcessos from="devolvidosEquipa" />,
-          num: meusProcessos?.totaldevolvido || 0,
+          num: meusProcessos?.totalpendenteEQ || 0,
         },
         {
-          value: 'devolvidosPessoal',
-          label: 'Devolvidos pessoal',
-          component: <TableProcessos from="devolvidosPessoal" />,
-          num: meusProcessos?.totaldevolvidop || 0,
+          value: 'pendentes',
+          label: 'Pendentes',
+          component: <TableProcessos from="pendentes" />,
+          num: meusProcessos?.totalpendencias || 0,
+        },
+        {
+          value: 'atribuidos',
+          label: 'Atribuídos',
+          component: <TableProcessos from="atribuidos" />,
+          num: meusProcessos?.totalafetosEQ || 0,
         },
         ...agendados,
         ...finalizados,
@@ -219,8 +196,9 @@ export default function Processos() {
                       max={999}
                       badgeContent={tab.num}
                       color={
-                        ((tab.value === 'retidos' || tab.value === 'pendentes') && 'warning') ||
-                        ((tab.value === 'devolvidosEquipa' || tab.value === 'devolvidosPessoal') && 'error') ||
+                        (tab.value === 'retidos' && 'warning') ||
+                        (tab.value === 'pendentes' && 'focus') ||
+                        (tab.value === 'atribuidos' && 'info') ||
                         'success'
                       }
                       sx={{

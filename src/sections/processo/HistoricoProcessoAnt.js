@@ -1,60 +1,61 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 // @mui
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  Box,
+  Card,
+  Stack,
+  Paper,
+  Avatar,
+  Collapse,
+  Typography,
+  ListItemText,
+  ListItemIcon,
+  ListItemButton,
+} from '@mui/material';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { Box, Stack, Paper, Button, Avatar, Drawer, Divider, IconButton, Typography } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
 import { BASEURL } from '../../utils/axios';
 import { ptDateTime } from '../../utils/formatTime';
 import { newLineText } from '../../utils/normalizeText';
-// hooks
-import useToggle from '../../hooks/useToggle';
 // redux
 import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
-import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
-HistoricoProcesso.propTypes = { historico: PropTypes.array };
+HistoricoProcessoAnt.propTypes = { historico: PropTypes.array };
 
-export default function HistoricoProcesso({ historico }) {
-  const { toggle: open, onOpen, onClose } = useToggle();
+export default function HistoricoProcessoAnt({ historico }) {
+  const [openHistorico, setOpenHistorico] = useState(false);
   const { colaboradores } = useSelector((state) => state.intranet);
+
+  const handleHistorico = () => {
+    setOpenHistorico(!openHistorico);
+  };
 
   return (
     <>
-      <Button
-        size="large"
-        variant="soft"
-        color="inherit"
-        onClick={onOpen}
-        sx={{ justifyContent: 'left' }}
-        startIcon={
-          <SvgIconStyle
-            src={`/assets/icons/navbar/transition.svg`}
-            sx={{ width: 20, height: 20, transform: 'rotate(180deg)' }}
-          />
-        }
+      <ListItemButton
+        onClick={handleHistorico}
+        sx={{
+          py: 3,
+          borderRadius: 1.5,
+          borderBottomLeftRadius: openHistorico && 0,
+          borderBottomRightRadius: openHistorico && 0,
+          boxShadow: (theme) => theme.customShadows.card,
+          background: (theme) => theme.palette.background.paper,
+        }}
       >
-        Histórico de transições
-      </Button>
-
-      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
-          <Typography variant="h6">Histórico de transições</Typography>
-          <IconButton onClick={onClose}>
-            <CloseIcon sx={{ width: 20 }} />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-
-        <Scrollbar>
+        <ListItemIcon>{openHistorico ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</ListItemIcon>
+        <ListItemText primary="Histórico de transições" />
+      </ListItemButton>
+      <Collapse in={openHistorico}>
+        <Card sx={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, pb: 1 }}>
           <Timeline position="right">
             {historico.map((row, index) => {
               const key = row.data_transicao;
@@ -131,8 +132,8 @@ export default function HistoricoProcesso({ historico }) {
               );
             })}
           </Timeline>
-        </Scrollbar>
-      </Drawer>
+        </Card>
+      </Collapse>
     </>
   );
 }

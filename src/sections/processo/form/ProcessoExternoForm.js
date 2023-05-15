@@ -75,9 +75,9 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                     <Autocomplete
                       {...field}
                       fullWidth
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      options={canais.map((option) => option)}
+                      options={canais}
                       getOptionLabel={(option) => option}
+                      onChange={(event, newValue) => field.onChange(newValue)}
                       renderInput={(params) => (
                         <TextField {...params} label="Canal de entrada" error={!!error} helperText={error?.message} />
                       )}
@@ -94,7 +94,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                       {...field}
                       fullWidth
                       onChange={(event, newValue) => field.onChange(newValue)}
-                      options={applySort(origensList, getComparator('asc', 'label'))?.map((option) => option)}
+                      options={applySort(origensList, getComparator('asc', 'label'))}
                       isOptionEqualToValue={(option, value) => option?.id === value?.id}
                       getOptionLabel={(option) => option?.label}
                       renderInput={(params) => (
@@ -119,7 +119,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                         setValue('operacao', value);
                         setOperacao(value);
                       }}
-                      options={operacoes.map((option) => option)}
+                      options={operacoes}
                       getOptionLabel={(option) => option}
                       renderInput={(params) => (
                         <TextField {...params} label="Operação" error={!!error} helperText={error?.message} />

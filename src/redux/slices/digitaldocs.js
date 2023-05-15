@@ -42,7 +42,7 @@ const initialState = {
   fluxos: [],
   linhas: [],
   versoes: [],
-  ranking: [],
+  volume: [],
   estados: [],
   origens: [],
   acessos: [],
@@ -60,6 +60,7 @@ const initialState = {
   trabalhados: [],
   porConcluir: [],
   indicadores: [],
+  tempoExecucao: [],
   visualizacoes: [],
   meusAmbientes: [],
   meusProcessos: [],
@@ -68,6 +69,7 @@ const initialState = {
   historicoFluxo: [],
   indicadoresTipos: [],
   motivosPendencias: [],
+  colaboradoresEstado: [],
   destinosDesarquivamento: [],
 };
 
@@ -140,11 +142,14 @@ const slice = createSlice({
         case 'indicadores':
           state.indicadores = [];
           break;
-        case 'ranking':
-          state.ranking = [];
+        case 'volume':
+          state.volume = [];
           break;
         case 'indicadoresTipos':
           state.indicadoresTipos = [];
+          break;
+        case 'tempoExecucao':
+          state.tempoExecucao = [];
           break;
         case 'duracao':
           state.duracao = [];
@@ -184,12 +189,16 @@ const slice = createSlice({
       state.indicadores = action.payload;
     },
 
-    getIndicadoresRankingSuccess(state, action) {
-      state.ranking = action.payload;
+    getIndicadoresVolumeSuccess(state, action) {
+      state.volume = action.payload;
     },
 
     getIndicadoresTiposSuccess(state, action) {
       state.indicadoresTipos = action.payload;
+    },
+
+    getTempoExecucaoSuccess(state, action) {
+      state.tempoExecucao = action.payload;
     },
 
     getIndicadoresDuracaoSuccess(state, action) {
@@ -238,6 +247,13 @@ const slice = createSlice({
       state.processo.perfil_id = action.payload.perfilId;
     },
 
+    getAtribuirSuccess(state, action) {
+      state.processo.perfil_id = action.payload;
+      if (!action.payload) {
+        state.processo.is_lock = false;
+      }
+    },
+
     getPesquisaSuccess(state, action) {
       state.pesquisa = action.payload;
     },
@@ -270,6 +286,10 @@ const slice = createSlice({
     getSelectEstadoSuccess(state, action) {
       state.isOpenModal = true;
       state.selectedEstado = action.payload;
+    },
+
+    getColaboradoresEstadoSuccess(state, action) {
+      state.colaboradoresEstado = action.payload?.perfis;
     },
 
     getSelectMeuEstadoSuccess(state, action) {
@@ -769,30 +789,30 @@ export function getAll(item, params) {
           }
           break;
         }
-        case 'retidos': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
-          if (params?.estadoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meuspendentes/all/${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else if (params?.fluxoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meuspendentes/estado/${params?.estadoId}/${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meuspendentes/${params?.fluxoId}/${params?.estadoId}?perfilID=${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          }
-          break;
-        }
+        // case 'retidos': {
+        //   dispatch(slice.actions.resetItem('processo'));
+        //   dispatch(slice.actions.resetItem('processos'));
+        //   if (params?.estadoId === -1) {
+        //     const response = await axios.get(
+        //       `${BASEURLDD}/v1/processos/meuspendentes/all/${params?.perfilId}`,
+        //       options
+        //     );
+        //     dispatch(slice.actions.getProcessosSuccess(response.data));
+        //   } else if (params?.fluxoId === -1) {
+        //     const response = await axios.get(
+        //       `${BASEURLDD}/v1/processos/meuspendentes/estado/${params?.estadoId}/${params?.perfilId}`,
+        //       options
+        //     );
+        //     dispatch(slice.actions.getProcessosSuccess(response.data));
+        //   } else {
+        //     const response = await axios.get(
+        //       `${BASEURLDD}/v1/processos/meuspendentes/${params?.fluxoId}/${params?.estadoId}?perfilID=${params?.perfilId}`,
+        //       options
+        //     );
+        //     dispatch(slice.actions.getProcessosSuccess(response.data));
+        //   }
+        //   break;
+        // }
         case 'pendentes': {
           dispatch(slice.actions.resetItem('processo'));
           dispatch(slice.actions.resetItem('processos'));
@@ -812,6 +832,26 @@ export function getAll(item, params) {
             );
             dispatch(slice.actions.getProcessosSuccess(response.data));
           }
+          break;
+        }
+        case 'atribuidos': {
+          dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('processos'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/processos/minhastarefas/afetos/${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessosSuccess(response.data));
+          break;
+        }
+        case 'retidos': {
+          dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('processos'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/processos/minhastarefas/retidoseq/${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessosSuccess(response.data));
           break;
         }
         case 'estados': {
@@ -883,6 +923,23 @@ export function getAll(item, params) {
           dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/search/${params?.perfilId}?uoID=${params?.uoID}&chave=${params?.chave}`,
+            options
+          );
+          dispatch(slice.actions.getPesquisaSuccess(response.data));
+          break;
+        }
+        case 'pesquisa avancada': {
+          dispatch(slice.actions.resetItem('processo'));
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/search/interno/${params?.perfilID}?uoID=${params?.uoID}${
+              params?.nentrada ? `&nentrada=${params?.nentrada}` : ''
+            }${params?.noperacao ? `&noperacao=${params?.noperacao}` : ''}${
+              params?.conta ? `&conta=${params?.conta}` : ''
+            }${params?.cliente ? `&cliente=${params?.cliente}` : ''}${
+              params?.entidade ? `&entidade=${params?.entidade}` : ''
+            }${params?.perfilDono ? `&perfilDono=${params?.perfilDono}` : ''}${
+              params?.datai ? `&datai=${params?.datai}` : ''
+            }${params?.dataf ? `&dataf=${params?.dataf}` : ''}`,
             options
           );
           dispatch(slice.actions.getPesquisaSuccess(response.data));
@@ -1008,13 +1065,13 @@ export function getIndicadores(item, params) {
           dispatch(slice.actions.getIndicadoresSuccess(response.data));
           break;
         }
-        case 'indicadoresRanking': {
-          dispatch(slice.actions.resetItem('ranking'));
+        case 'indicadoresVolume': {
+          dispatch(slice.actions.resetItem('volume'));
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/top/criacao/${params?.perfilId}?escopo=${params?.escopo}`,
             options
           );
-          dispatch(slice.actions.getIndicadoresRankingSuccess(response.data));
+          dispatch(slice.actions.getIndicadoresVolumeSuccess(response.data));
           break;
         }
         case 'indicadoresTipos': {
@@ -1029,6 +1086,18 @@ export function getIndicadores(item, params) {
             options
           );
           dispatch(slice.actions.getIndicadoresTiposSuccess(response.data));
+          break;
+        }
+        case 'tempoExecucao': {
+          dispatch(slice.actions.resetItem('tempoExecucao'));
+          const query = `${params?.estadoIDFilter ? `estadoIDFilter=${params?.estadoIDFilter}&` : ''}${
+            params?.fluxoIDFilter ? `fluxoIDFilter=${params?.fluxoIDFilter}&` : ''
+          }${params?.perfilIDFilter ? `perfilIDFilter=${params?.perfilIDFilter}&` : ''}`;
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query.substr(0, query.length - 1)}`,
+            options
+          );
+          dispatch(slice.actions.getTempoExecucaoSuccess(response.data));
           break;
         }
         case 'duracao': {
@@ -1090,6 +1159,15 @@ export function getItem(item, params) {
           dispatch(slice.actions.getProcessoSuccess(response.data));
           break;
         }
+        case 'prevnext': {
+          const response = await axios.get(
+            `${BASEURLDD}/v1/processos/prev/next/${params?.perfilId}/${params?.estadoId}/${params?.nentrada}?next=${params?.next}`,
+            options
+          );
+          dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.getProcessoSuccess(response.data));
+          break;
+        }
         case 'estado': {
           const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
           if (params?.from === 'estados') {
@@ -1097,6 +1175,11 @@ export function getItem(item, params) {
           } else {
             dispatch(slice.actions.getEstadoSuccess(response.data));
           }
+          break;
+        }
+        case 'colaboradoresEstado': {
+          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
+          dispatch(slice.actions.getColaboradoresEstadoSuccess(response.data));
           break;
         }
         case 'meuEstado': {
@@ -1824,6 +1907,34 @@ export function resgatarProcesso(dados, id, mail) {
       const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${id}`, dados, options);
       dispatch(slice.actions.getProcessoSuccess(response.data));
       dispatch(slice.actions.done('resgatado'));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch(slice.actions.resetDone());
+    } catch (error) {
+      dispatch(
+        slice.actions.hasError(
+          error[0]?.msg || error?.response?.data?.detail || error.response?.data || 'Ocorreu um erro...'
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch(slice.actions.resetError());
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export function atribuirProcesso(mail, processoID, perfilIDAfeto, perfilID, mensagem) {
+  return async (dispatch) => {
+    dispatch(slice.actions.startSaving());
+    try {
+      const options = { headers: { 'content-type': 'application/json', cc: mail } };
+      await axios.patch(
+        `${BASEURLDD}/v1/processos/afetar/${processoID}?perfilID=${perfilID}&perfilIDAfeto=${perfilIDAfeto}`,
+        '',
+        options
+      );
+      dispatch(slice.actions.getAtribuirSuccess(perfilIDAfeto));
+      dispatch(slice.actions.done(mensagem));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {

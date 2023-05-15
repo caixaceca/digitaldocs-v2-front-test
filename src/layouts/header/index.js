@@ -24,7 +24,7 @@ import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 import { FormSugestao } from '../../sections/sobre/FormSugestao';
 //
-import Procurar from './Procurar';
+import ProcuraAvancada from './ProcuraAvancada';
 
 // ----------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
             </IconButtonAnimate>
           )}
 
-          <Procurar />
+          <ProcuraAvancada />
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>

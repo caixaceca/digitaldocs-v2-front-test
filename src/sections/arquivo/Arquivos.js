@@ -11,6 +11,7 @@ import {
   TableRow,
   TableBody,
   TableCell,
+  Typography,
   TableContainer,
 } from '@mui/material';
 // utils
@@ -127,7 +128,9 @@ export default function Arquivos() {
         </Scrollbar>
       </Card>
       <Card sx={{ p: 1 }}>
-        <SearchToolbar2 origem="arquivos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+        {dataFiltered.length > 1 && (
+          <SearchToolbar2 origem="arquivos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+        )}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -144,7 +147,15 @@ export default function Arquivos() {
                     return (
                       <TableRow hover key={row.referencia}>
                         <TableCell>{row.referencia}</TableCell>
-                        <TableCell>{row.titular}</TableCell>
+                        <TableCell>
+                          {row?.titular ? (
+                            row.titular
+                          ) : (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não identificado
+                            </Typography>
+                          )}
+                        </TableCell>
                         <TableCell>{_entidades}</TableCell>
                         <TableCell align="center">
                           {row?.data_last_transicao ? ptDateTime(row?.data_last_transicao) : ' - - - - - '}
@@ -169,15 +180,15 @@ export default function Arquivos() {
           </TableContainer>
         </Scrollbar>
 
-        {!isNotFound && (
+        {!isNotFound && dataFiltered.length > 10 && (
           <TablePaginationAlt
+            page={page}
             dense={dense}
+            rowsPerPage={rowsPerPage}
+            onChangePage={onChangePage}
+            count={dataFiltered.length}
             onChangeDense={onChangeDense}
             onChangeRowsPerPage={onChangeRowsPerPage}
-            onChangePage={onChangePage}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            count={dataFiltered.length}
           />
         )}
       </Card>

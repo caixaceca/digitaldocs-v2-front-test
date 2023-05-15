@@ -16,7 +16,6 @@ import {
   IconButton,
   TableContainer,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import CircleIcon from '@mui/icons-material/Circle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
@@ -35,6 +34,7 @@ import Scrollbar from '../../components/Scrollbar';
 HistoricoPrisoes.propTypes = { historico: PropTypes.array };
 
 export default function HistoricoPrisoes({ historico }) {
+  let soltoPeloSistema = 0;
   const { toggle: open, onOpen, onClose } = useToggle();
   const { colaboradores } = useSelector((state) => state.intranet);
 
@@ -50,14 +50,7 @@ export default function HistoricoPrisoes({ historico }) {
         Histórico de retenções
       </Button>
 
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={onClose}
-        BackdropProps={{ invisible: true }}
-        PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}
-        sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
-      >
+      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Histórico de retenções</Typography>
 
@@ -82,8 +75,11 @@ export default function HistoricoPrisoes({ historico }) {
               <TableBody>
                 {historico?.map((item) => {
                   const colaborador = colaboradores?.find((row) => Number(row?.perfil_id) === Number(item?.perfil_id));
+                  if (colaborador?.perfil?.mail?.toLowerCase() !== item.por?.toLowerCase()) {
+                    soltoPeloSistema += 1;
+                  }
                   return (
-                    <TableRow key={item?.solto_em}>
+                    <TableRow key={item?.preso_em} hover>
                       <TableCell>
                         <Stack direction="row" alignItems="center" spacing={1.5}>
                           <Avatar
@@ -119,14 +115,16 @@ export default function HistoricoPrisoes({ historico }) {
                     </TableRow>
                   );
                 })}
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <Stack direction="row" justifyContent="right" alignItems="center" spacing={0.5}>
-                      <CircleIcon color="error" sx={{ width: 15, mt: 0.25 }} />
-                      <Typography variant="caption">Solto pelo sistema</Typography>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
+                {soltoPeloSistema > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <Stack direction="row" justifyContent="right" alignItems="center" spacing={0.5}>
+                        <CircleIcon color="error" sx={{ width: 15, mt: 0.25 }} />
+                        <Typography variant="caption">Solto pelo sistema</Typography>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>

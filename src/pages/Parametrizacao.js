@@ -125,7 +125,7 @@ export default function Parametrizacao() {
   );
 
   const VIEW_TABS = useMemo(
-    () => [...acessos, ...fluxos, ...origens, ...estados, ...motivosPendencias] || [],
+    () => [...acessos, ...fluxos, ...estados, ...origens, ...motivosPendencias] || [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fluxos]
   );

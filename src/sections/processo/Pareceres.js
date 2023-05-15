@@ -14,7 +14,6 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
@@ -93,14 +92,7 @@ export default function Pareceres({ pareceres, processoId }) {
         Pareceres
       </Button>
 
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={onClose}
-        BackdropProps={{ invisible: true }}
-        PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}
-        sx={{ backgroundColor: (theme) => alpha(theme.palette.grey[900], 0.8) }}
-      >
+      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Pareceres</Typography>
           <IconButton onClick={onClose}>

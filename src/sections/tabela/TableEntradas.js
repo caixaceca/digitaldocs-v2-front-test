@@ -15,11 +15,13 @@ import {
   Autocomplete,
   TableContainer,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import TodayIcon from '@mui/icons-material/Today';
+import { DateRangePicker } from '@mui/x-date-pickers-pro';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
 // utils
-import { format } from 'date-fns';
+import { add, format } from 'date-fns';
 import { ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -53,16 +55,24 @@ const TABLE_HEAD = [
 export default function TableEntradas() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [estado, setEstado] = useState(null);
-  const [assunto, setAssunto] = useState(null);
-  const [dataFim, setDataFim] = useState(new Date());
-  const [colaborador, setColaborador] = useState(null);
-  const [dataInicio, setDataInicio] = useState(new Date());
-  const [filterSearch, setFilterSearch] = useSearchParams();
+  const [filter, setFilter] = useSearchParams({
+    estado: '',
+    assunto: '',
+    colaborador: '',
+    tab: 'entradas',
+    filterSearch: '',
+    datai: format(new Date(), 'yyyy-MM-dd'),
+    dataf: format(new Date(), 'yyyy-MM-dd'),
+  });
+  const [data, setData] = useState([
+    filter?.get('datai') || format(new Date(), 'yyyy-MM-dd'),
+    filter?.get('dataf') || format(new Date(), 'yyyy-MM-dd'),
+  ]);
   const { entradas, meusAmbientes, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
   const perfilId = currentColaborador?.perfil_id;
   const [uoId, setUoId] = useState(currentColaborador?.uo_id);
+  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
 
   const minhasUos = [];
   meusAmbientes?.forEach((row) => {
@@ -83,7 +93,12 @@ export default function TableEntradas() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'nentrada', defaultOrder: 'desc' });
+  } = useTable({
+    defaultOrder: 'desc',
+    defaultOrderBy: 'nentrada',
+    defaultRowsPerPage: fromAgencia ? 100 : 25,
+    defaultDense: currentColaborador?.id === 362,
+  });
 
   useEffect(() => {
     if (currentColaborador?.uo_id) {
@@ -92,43 +107,28 @@ export default function TableEntradas() {
   }, [dispatch, currentColaborador?.uo_id]);
 
   useEffect(() => {
-    if (mail && perfilId && uoId && dataInicio && dataFim) {
-      dispatch(
-        getAll('entradas', {
-          mail,
-          uoId,
-          perfilId,
-          dataFim: format(dataFim, 'yyyy-MM-dd'),
-          dataInicio: format(dataInicio, 'yyyy-MM-dd'),
-        })
-      );
+    if (mail && perfilId && uoId) {
+      dispatch(getAll('entradas', { mail, uoId, perfilId, dataInicio: data[0], dataFim: data[1] }));
     }
-  }, [dispatch, perfilId, uoId, dataInicio, dataFim, mail]);
+  }, [dispatch, perfilId, uoId, mail, data]);
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
-
-  const handleFilterAssunto = (event) => {
-    setAssunto(event);
-    setPage(0);
-  };
-
-  const handleFilterEstado = (event) => {
-    setEstado(event);
-    setPage(0);
-  };
-
-  const handleFilterColaborador = (event) => {
-    setColaborador(event);
-    setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleViewRow = (id) => {
     navigate({
       pathname: `${PATH_DIGITALDOCS.controle.root}/${id}`,
-      search: createSearchParams({ from: 'entradas' }).toString(),
+      search: createSearchParams({
+        from: 'entradas',
+        datai: filter?.get('datai'),
+        dataf: filter?.get('dataf'),
+        estado: filter?.get('estado'),
+        assunto: filter?.get('assunto'),
+        colaborador: filter?.get('colaborador'),
+        filterSearch: filter?.get('filterSearch'),
+      }).toString(),
     });
   };
 
@@ -144,6 +144,9 @@ export default function TableEntradas() {
     if (!estadosList.includes(row?.nome)) {
       estadosList.push(row?.nome);
     }
+    if (row?.nome === 'Arquivo' && !estadosList.includes('Excepto Arquivo')) {
+      estadosList.push('Excepto Arquivo');
+    }
     if (!assuntosList.includes(row?.assunto)) {
       assuntosList.push(row?.assunto);
     }
@@ -156,11 +159,11 @@ export default function TableEntradas() {
 
   const dataFiltered = applySortFilter({
     newEntradas,
+    estado: filter?.get('estado'),
+    assunto: filter?.get('assunto'),
+    colaborador: filter?.get('colaborador'),
+    filterSearch: filter?.get('filterSearch'),
     comparator: getComparator(order, orderBy),
-    filterSearch,
-    colaborador,
-    estado,
-    assunto,
   });
   const isNotFound = !dataFiltered.length;
 
@@ -184,41 +187,64 @@ export default function TableEntradas() {
                 )}
               />
             )}
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <DatePicker
-                disableFuture
-                value={dataInicio}
-                label="Data início"
-                onChange={(newValue) => setDataInicio(newValue)}
-                slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: { sm: 170 } } } }}
-              />
-              <DatePicker
-                disableFuture
-                value={dataFim}
-                label="Data fim"
-                onChange={(newValue) => setDataFim(newValue)}
-                slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: { sm: 170 } } } }}
-              />
-            </Stack>
+            <DateRangePicker
+              disableFuture
+              slots={{ field: SingleInputDateRangeField }}
+              value={[add(new Date(data[0]), { hours: 2 }), add(new Date(data[1]), { hours: 2 })]}
+              slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 220 } } }}
+              onChange={(newValue) => {
+                setFilter({
+                  tab: 'entradas',
+                  estado: filter?.get('estado'),
+                  assunto: filter?.get('assunto'),
+                  colaborador: filter?.get('colaborador'),
+                  filterSearch: filter?.get('filterSearch'),
+                  datai: format(new Date(newValue?.[0]), 'yyyy-MM-dd'),
+                  dataf: format(new Date(newValue?.[1]), 'yyyy-MM-dd'),
+                });
+                setData([format(new Date(newValue?.[0]), 'yyyy-MM-dd'), format(new Date(newValue?.[1]), 'yyyy-MM-dd')]);
+              }}
+            />
+            {(data[0] !== format(new Date(), 'yyyy-MM-dd') || data[1] !== format(new Date(), 'yyyy-MM-dd')) && (
+              <Stack>
+                <Tooltip title="Hoje" arrow>
+                  <Fab
+                    color="inherit"
+                    size="small"
+                    variant="soft"
+                    onClick={() => {
+                      setFilter({
+                        tab: 'entradas',
+                        estado: filter?.get('estado'),
+                        assunto: filter?.get('assunto'),
+                        datai: format(new Date(), 'yyyy-MM-dd'),
+                        dataf: format(new Date(), 'yyyy-MM-dd'),
+                        colaborador: filter?.get('colaborador'),
+                        filterSearch: filter?.get('filterSearch'),
+                      });
+                      setData([format(new Date(), 'yyyy-MM-dd'), format(new Date(), 'yyyy-MM-dd')]);
+                    }}
+                  >
+                    <TodayIcon />
+                  </Fab>
+                </Tooltip>
+              </Stack>
+            )}
           </Stack>
         }
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        <SearchToolbarEntradas
-          estado={estado}
-          assunto={assunto}
-          colaborador={colaborador}
-          estadosList={estadosList}
-          assuntosList={assuntosList}
-          filterSearch={filterSearch}
-          onFilterSearch={handleFilterSearch}
-          onFilterEstado={handleFilterEstado}
-          onFilterAssunto={handleFilterAssunto}
-          colaboradoresList={colaboradoresList}
-          onFilterColaborador={handleFilterColaborador}
-          tab="entradas"
-        />
+        {dataFiltered.length > 1 && (
+          <SearchToolbarEntradas
+            tab="entradas"
+            filter={filter}
+            setFilter={setFilter}
+            estadosList={estadosList}
+            assuntosList={assuntosList}
+            colaboradoresList={colaboradoresList}
+          />
+        )}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -235,23 +261,39 @@ export default function TableEntradas() {
                     return (
                       <TableRow hover key={row.id}>
                         <TableCell>{row.nentrada}</TableCell>
-                        <TableCell>{row.titular}</TableCell>
                         <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades}
+                          {row?.titular ? (
+                            row.titular
+                          ) : (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não identificado
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não identificado
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell>{row?.assunto}</TableCell>
                         <TableCell>{row?.nome}</TableCell>
-                        <TableCell>
+                        <TableCell sx={{ width: 10 }}>
                           {row?.criado_em && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
                               <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="body2">{row?.criado_em ? ptDateTime(row.criado_em) : ''}</Typography>
+                              <Typography noWrap variant="body2">
+                                {row?.criado_em ? ptDateTime(row.criado_em) : ''}
+                              </Typography>
                             </Stack>
                           )}
                           {row?.colaborador && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
                               <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="body2">{row.colaborador}</Typography>
+                              <Typography noWrap variant="body2">
+                                {row.colaborador}
+                              </Typography>
                             </Stack>
                           )}
                         </TableCell>
@@ -275,15 +317,15 @@ export default function TableEntradas() {
           </TableContainer>
         </Scrollbar>
 
-        {!isNotFound && (
+        {!isNotFound && dataFiltered.length > 10 && (
           <TablePaginationAlt
-            dense={dense}
-            onChangeDense={onChangeDense}
-            onChangeRowsPerPage={onChangeRowsPerPage}
-            onChangePage={onChangePage}
             page={page}
+            dense={dense}
             rowsPerPage={rowsPerPage}
             count={dataFiltered.length}
+            onChangePage={onChangePage}
+            onChangeDense={onChangeDense}
+            onChangeRowsPerPage={onChangeRowsPerPage}
           />
         )}
       </Card>
@@ -295,7 +337,6 @@ export default function TableEntradas() {
 
 function applySortFilter({ newEntradas, comparator, filterSearch, colaborador, assunto, estado }) {
   const stabilizedThis = newEntradas.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -307,20 +348,23 @@ function applySortFilter({ newEntradas, comparator, filterSearch, colaborador, a
   if (colaborador) {
     newEntradas = newEntradas.filter((row) => row?.colaborador === colaborador);
   }
-  if (estado) {
+  if (estado && estado !== 'Excepto Arquivo') {
     newEntradas = newEntradas.filter((row) => row?.nome === estado);
+  }
+  if (estado === 'Excepto Arquivo') {
+    newEntradas = newEntradas.filter((row) => row?.nome !== 'Arquivo');
   }
   if (assunto) {
     newEntradas = newEntradas.filter((row) => row?.assunto === assunto);
   }
-  if (text) {
+  if (filterSearch) {
     newEntradas = newEntradas.filter(
       (row) =>
-        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
+        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (row?.conta && row?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (row?.titular && row?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
+        (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1)
     );
   }
 

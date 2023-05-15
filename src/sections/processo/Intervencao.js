@@ -1,10 +1,11 @@
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { Fab, Tooltip } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { finalizarProcesso, abandonarProcesso } from '../../redux/slices/digitaldocs';
+import { finalizarProcesso, abandonarProcesso, atribuirProcesso } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle, { useToggle1, useToggle2, useToggle3, useToggle4, useToggle5 } from '../../hooks/useToggle';
 // routes
@@ -17,9 +18,9 @@ import { IntervencaoForm, FinalizarForm, ArquivarForm } from './IntervencaoForm'
 
 // ----------------------------------------------------------------------
 
-Intervencao.propTypes = { processo: PropTypes.object };
+Intervencao.propTypes = { processo: PropTypes.object, colaboradoresList: PropTypes.array };
 
-export default function Intervencao({ processo }) {
+export default function Intervencao({ processo, colaboradoresList }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
@@ -66,11 +67,7 @@ export default function Intervencao({ processo }) {
   };
 
   const handleAbandonar = () => {
-    const formData = {
-      perfilID: perfilId,
-      fluxoID: processo?.fluxo_id,
-      estadoID: processo?.estado_atual_id,
-    };
+    const formData = { perfilID: perfilId, fluxoID: processo?.fluxo_id, estadoID: processo?.estado_atual_id };
     dispatch(abandonarProcesso(formData, processo?.id, mail));
   };
 
@@ -104,41 +101,6 @@ export default function Intervencao({ processo }) {
     return false;
   };
 
-  // const podeEditar = () => {
-  //   if (isAdmin) {
-  //     return true;
-  //   }
-  //   let i = 0;
-  //   while (i < meusAmbientes?.length) {
-  //     if (
-  //       (meusAmbientes[i]?.uo_id === processo?.uo_origem_id && meusAmbientes[i]?.id === processo?.estado_atual_id) ||
-  //       (processo?.assunto === 'Processos Judiciais e Fiscais' &&
-  //         processo?.nome === 'Secretariado e Relações Públicas' &&
-  //         meusAmbientes[i]?.nome === 'Secretariado e Relações Públicas')
-  //     ) {
-  //       return true;
-  //     }
-  //     i += 1;
-  //   }
-  //   return false;
-  // };
-
-  // const podeEditarNE = () => {
-  //   if (isAdmin) {
-  //     return true;
-  //   }
-  //   if (processo?.nome === 'DOP - Execução Notas Externas') {
-  //     let i = 0;
-  //     while (i < meusAmbientes?.length) {
-  //       if (meusAmbientes[i]?.nome === 'DOP - Execução Notas Externas') {
-  //         return true;
-  //       }
-  //       i += 1;
-  //     }
-  //   }
-  //   return false;
-  // };
-
   const podeArquivar = () => {
     let i = 0;
     while (i < meusAmbientes?.length) {
@@ -167,11 +129,12 @@ export default function Intervencao({ processo }) {
                 </Fab>
               </Tooltip>
               <IntervencaoForm
-                isOpenModal={open}
                 title="Devolver"
+                onCancel={onClose}
+                isOpenModal={open}
                 processo={processo}
                 destinos={devolucoes}
-                onCancel={onClose}
+                colaboradoresList={colaboradoresList}
               />
             </>
           )}
@@ -185,10 +148,11 @@ export default function Intervencao({ processo }) {
               </Tooltip>
               <IntervencaoForm
                 isOpenModal={open3}
-                title={processo?.nome === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
                 processo={processo}
-                destinos={seguimentos}
                 onCancel={onClose3}
+                destinos={seguimentos}
+                colaboradoresList={colaboradoresList}
+                title={processo?.nome === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
               />
             </>
           )}
@@ -263,6 +227,45 @@ export default function Intervencao({ processo }) {
           <ArquivarForm open={open1} processo={processo} onCancel={onClose1} />
         </>
       )}
+    </>
+  );
+}
+
+Libertar.propTypes = { perfilID: PropTypes.number, processoID: PropTypes.number };
+
+export function Libertar({ perfilID, processoID }) {
+  const dispatch = useDispatch();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { mail } = useSelector((state) => state.intranet);
+  const { isSaving, done } = useSelector((state) => state.digitaldocs);
+
+  useEffect(() => {
+    if (done === 'processo libertado') {
+      onClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  const handleAbandonar = () => {
+    dispatch(atribuirProcesso(mail, processoID, '', perfilID, 'processo libertado'));
+  };
+
+  return (
+    <>
+      <Tooltip title="LIBERTAR" arrow>
+        <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
+          <SvgIconStyle src="/assets/icons/abandonar.svg" />
+        </Fab>
+      </Tooltip>
+      <DialogConfirmar
+        open={open}
+        onClose={onClose}
+        isLoading={isSaving}
+        handleOk={handleAbandonar}
+        color="warning"
+        title="Libertar"
+        desc="libertar este processo"
+      />
     </>
   );
 }

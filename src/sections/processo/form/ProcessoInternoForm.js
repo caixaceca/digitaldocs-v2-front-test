@@ -73,7 +73,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                             {...field}
                             fullWidth
                             onChange={(event, newValue) => field.onChange(newValue)}
-                            options={['Mensal', 'Trimestral', 'Semestral', 'Anual']?.map((option) => option)}
+                            options={['Mensal', 'Trimestral', 'Semestral', 'Anual']}
                             getOptionLabel={(option) => option}
                             renderInput={(params) => (
                               <TextField

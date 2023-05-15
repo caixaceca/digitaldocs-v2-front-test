@@ -10,7 +10,7 @@ export function fDate(date) {
 }
 
 export function padraoDate(date) {
-  return format(add(new Date(date), { hours: 2 }), 'dd/MM/yyyy', {
+  return format(add(new Date(date), { hours: 2 }), 'yyyy-MM-dd', {
     locale: pt,
   });
 }

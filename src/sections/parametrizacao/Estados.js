@@ -109,7 +109,9 @@ export default function Estados() {
 
       <RoleBasedGuard hasContent roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="estados" />
+          {dataFiltered.length > 1 && (
+            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="estados" />
+          )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -166,7 +168,7 @@ export default function Estados() {
             </TableContainer>
           </Scrollbar>
 
-          {!isNotFound && (
+          {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
               dense={dense}
               onChangeDense={onChangeDense}

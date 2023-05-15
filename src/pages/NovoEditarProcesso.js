@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 // @mui
-import { Card, Stack, Container, TextField, Typography, Autocomplete, CardContent } from '@mui/material';
+import { Card, Stack, Container, TextField, Skeleton, Typography, Autocomplete, CardContent } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, getAll } from '../redux/slices/digitaldocs';
@@ -31,7 +31,7 @@ export default function NovoEditarProcesso() {
   const isEdit = pathname.includes('edit');
   const [fluxo, setFluxo] = useState(null);
   const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente } = useSelector(
+  const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente, isLoading } = useSelector(
     (state) => state.digitaldocs
   );
   const perfilId = currentColaborador?.perfil_id;
@@ -96,7 +96,7 @@ export default function NovoEditarProcesso() {
                     value={fluxo}
                     getOptionLabel={(option) => option?.assunto}
                     onChange={(event, newValue) => setFluxo(newValue)}
-                    options={meusFluxos.map((option) => option?.id > 0 && option)}
+                    options={meusFluxos.filter((option) => option?.id > 0)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
@@ -105,22 +105,34 @@ export default function NovoEditarProcesso() {
                 </Stack>
               </CardContent>
             </Card>
-            {!fluxo ? (
+            {isLoading ? (
               <Card sx={{ mb: 3 }}>
                 <CardContent>
-                  <SearchNotFound message="Seleciona um fluxo válido para inciar um processo..." />
+                  <Skeleton sx={{ height: 170, transform: 'scale(1)', mb: 3 }} />
+                  <Skeleton sx={{ height: 170, transform: 'scale(1)', mb: 3 }} />
+                  <Skeleton sx={{ height: 170, transform: 'scale(1)' }} />
                 </CardContent>
               </Card>
             ) : (
               <>
-                {fluxo?.is_credito ? (
-                  <ProcessoCredito isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                {!fluxo ? (
+                  <Card sx={{ mb: 3 }}>
+                    <CardContent>
+                      <SearchNotFound message="Seleciona um fluxo válido para inciar um processo..." />
+                    </CardContent>
+                  </Card>
                 ) : (
                   <>
-                    {fluxo?.is_interno ? (
-                      <ProcessoInterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                    {fluxo?.is_credito ? (
+                      <ProcessoCredito isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
                     ) : (
-                      <ProcessoExterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                      <>
+                        {fluxo?.is_interno ? (
+                          <ProcessoInterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                        ) : (
+                          <ProcessoExterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                        )}
+                      </>
                     )}
                   </>
                 )}

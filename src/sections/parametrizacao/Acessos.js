@@ -99,7 +99,9 @@ export default function Acessos() {
         roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
       >
         <Card sx={{ p: 1 }}>
-          <TableToolbarPerfilEstados filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+          {dataFiltered.length > 1 && (
+            <TableToolbarPerfilEstados filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+          )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -158,7 +160,7 @@ export default function Acessos() {
             </TableContainer>
           </Scrollbar>
 
-          {!isNotFound && (
+          {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
               dense={dense}
               onChangeDense={onChangeDense}

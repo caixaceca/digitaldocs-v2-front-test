@@ -2,8 +2,6 @@ const numero = require('numero-por-extenso');
 
 // ----------------------------------------------------------------------
 
-// ----------------------------------------------------------------------
-
 export function valorPorExtenso(valor) {
   let _valor = '';
   if (valor > 1999 || valor < 1000) {

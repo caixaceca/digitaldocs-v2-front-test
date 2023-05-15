@@ -17,13 +17,3 @@ export function newLineText(text) {
   );
   return newText;
 }
-
-// ----------------------------------------------------------------------
-
-export function newHtmlText(text) {
-  let newText = '';
-  text.split('\n').forEach((str) => {
-    newText = `${newText}<p><span style="font-family: NeoSansStd;">${str}</span></p>`;
-  });
-  return newText;
-}

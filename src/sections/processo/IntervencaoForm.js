@@ -13,6 +13,7 @@ import {
   Grid,
   Table,
   Dialog,
+  Tooltip,
   ListItem,
   TableRow,
   Checkbox,
@@ -30,7 +31,9 @@ import {
   TableContainer,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // utils
 import { format, add } from 'date-fns';
 import { getFileThumb } from '../../utils/getFileFormat';
@@ -40,13 +43,15 @@ import { useSelector, useDispatch } from '../../redux/store';
 import {
   updateItem,
   deleteItem,
+  atribuirProcesso,
+  resgatarProcesso,
   arquivarProcesso,
   finalizarProcesso,
   encaminharProcesso,
   desarquivarProcesso,
 } from '../../redux/slices/digitaldocs';
 // hooks
-import { useToggle1 } from '../../hooks/useToggle';
+import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
 // components
 import SvgIconStyle from '../../components/SvgIconStyle';
@@ -56,14 +61,15 @@ import { FormProvider, RHFTextField, RHFUploadMultiFile, RHFSwitch } from '../..
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 IntervencaoForm.propTypes = {
-  title: PropTypes.object,
+  title: PropTypes.string,
   onCancel: PropTypes.func,
   destinos: PropTypes.array,
   processo: PropTypes.object,
-  isOpenModal: PropTypes.object,
+  isOpenModal: PropTypes.bool,
+  colaboradoresList: PropTypes.array,
 };
 
-export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, processo }) {
+export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenModal, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, isSaving } = useSelector((state) => state.digitaldocs);
@@ -76,18 +82,24 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const IntervencaoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
-    acao: Yup.mixed().nullable('Ação não pode ficar vazio').required('Ação não pode ficar vazio'),
+    acao: Yup.mixed().nullable('Ação não pode ficar vazio').required('Escolhe uma ação'),
   });
 
   const defaultValues = useMemo(
-    () => ({ anexos: [], noperacao: '', observacao: '', acao: destinos?.length === 1 ? destinos?.[0] : null }),
+    () => ({
+      anexos: [],
+      noperacao: '',
+      observacao: '',
+      perfilIDAfeto: null,
+      acao: destinos?.length === 1 ? destinos?.[0] : null,
+    }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [processo]
   );
 
-  const methods = useForm({ resolver: yupResolver(IntervencaoSchema), defaultValues });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, setValue, handleSubmit } = methods;
   const values = watch();
 
@@ -101,6 +113,11 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
   const onSubmit = async () => {
     try {
       let haveAnexos = false;
+      if (values?.acao?.estado_final_label?.indexOf('Atendimento') !== -1 && values?.perfilIDAfeto?.id) {
+        // values.perfilIDAfeto.id = values?.perfilIDAfeto?.id;
+      } else {
+        values.perfilIDAfeto = null;
+      }
       const formData = {
         modo: values?.acao?.modo,
         noperacao: values.noperacao,
@@ -108,6 +125,7 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
         transicaoID: values?.acao?.id,
         perfilID: currentColaborador?.perfil_id,
         estado_finalID: values?.acao?.estado_final_id,
+        perfilIDAfeto: values?.perfilIDAfeto?.id || '',
       };
       const formDataAnexos = new FormData();
       if (values?.anexos?.length > 0) {
@@ -169,6 +187,37 @@ export function IntervencaoForm({ isOpenModal, title, onCancel, destinos, proces
                 )}
               />
             </Grid>
+            {((processo?.nome?.indexOf('Gerência') !== -1 &&
+              values?.acao?.estado_final_label?.indexOf('Atendimento') !== -1) ||
+              (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento') ||
+              processo?.nome === 'Diário') &&
+              colaboradoresList?.length > 0 && (
+                <Grid item xs={12}>
+                  <Controller
+                    name="perfilIDAfeto"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <Autocomplete
+                        {...field}
+                        fullWidth
+                        getOptionLabel={(option) => option?.label}
+                        onChange={(event, newValue) => field.onChange(newValue)}
+                        isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                        options={applySort(colaboradoresList, getComparator('asc', 'label'))}
+                        renderInput={(params) => (
+                          <TextField
+                            fullWidth
+                            {...params}
+                            error={!!error}
+                            label="Colaborador"
+                            helperText={error?.message}
+                          />
+                        )}
+                      />
+                    )}
+                  />
+                </Grid>
+              )}
             {values?.acao?.hasopnumero && (
               <Grid item xs={12}>
                 <RHFTextField name="noperacao" required label="Nº de operação" InputProps={{ type: 'number' }} />
@@ -825,5 +874,184 @@ export function ParecerForm({ open, onCancel, processoId }) {
         />
       </DialogContent>
     </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+Resgatar.propTypes = { fluxiId: PropTypes.number, estadoId: PropTypes.number, processoId: PropTypes.number };
+
+export function Resgatar({ fluxiId, estadoId, processoId }) {
+  const dispatch = useDispatch();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+
+  const handleResgatar = () => {
+    const formData = { estado_id: estadoId, fluxoID: fluxiId, perfil_id: currentColaborador?.perfil_id };
+    dispatch(resgatarProcesso(JSON.stringify(formData), processoId, mail));
+    onClose();
+  };
+
+  return (
+    <>
+      <Tooltip title="RESGATAR" arrow>
+        <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
+          <SettingsBackupRestoreOutlinedIcon />
+        </Fab>
+      </Tooltip>
+
+      <DialogConfirmar
+        open={open}
+        onClose={onClose}
+        isLoading={isSaving}
+        handleOk={handleResgatar}
+        color="warning"
+        title="Resgatar"
+        desc="resgatar este processo"
+      />
+    </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+AtribuirForm.propTypes = {
+  perfilId: PropTypes.number,
+  processoID: PropTypes.number,
+  colaboradoresList: PropTypes.array,
+};
+
+export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { error, done, isSaving } = useSelector((state) => state.digitaldocs);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+
+  useEffect(() => {
+    if (done === 'atribuido') {
+      enqueueSnackbar('Processo atribuído com sucesso', { variant: 'success' });
+      onClose();
+    } else if (done === 'atribuicao eliminada') {
+      enqueueSnackbar('Atribuição eliminada com sucesso', { variant: 'success' });
+      onClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  const formSchema = Yup.object().shape({
+    perfilIDAfeto: Yup.mixed()
+      .nullable('Colaborador não pode ficar vazio')
+      .required('Colaborador não pode ficar vazio'),
+  });
+  const defaultValues = useMemo(
+    () => ({ perfilIDAfeto: perfilId ? colaboradoresList?.find((row) => row?.id === perfilId) : null }),
+    [colaboradoresList, perfilId]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, control, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const onSubmit = async () => {
+    try {
+      dispatch(
+        atribuirProcesso(mail, processoID, values?.perfilIDAfeto?.id, currentColaborador?.perfil_id, 'atribuido')
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(atribuirProcesso(mail, processoID, '', currentColaborador?.perfil_id, 'atribuicao eliminada'));
+    } catch (error) {
+      enqueueSnackbar('Erro ao eliminar esta atribução', { variant: 'error' });
+    }
+  };
+
+  return (
+    <>
+      <Tooltip title="ATRIBUIR" arrow>
+        <Fab color="info" size="small" variant="soft" onClick={onOpen}>
+          <PersonAddIcon />
+        </Fab>
+      </Tooltip>
+
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+        <DialogTitle>Atribuir processo</DialogTitle>
+        <DialogContent>
+          <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <Controller
+                  name="perfilIDAfeto"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <Autocomplete
+                      {...field}
+                      fullWidth
+                      getOptionLabel={(option) => option?.label}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                      options={applySort(colaboradoresList, getComparator('asc', 'label'))}
+                      renderInput={(params) => (
+                        <TextField
+                          fullWidth
+                          {...params}
+                          error={!!error}
+                          label="Colaborador"
+                          helperText={error?.message}
+                        />
+                      )}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+            <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+              {perfilId && (
+                <>
+                  <Tooltip title="Eliminar atribuição" arrow>
+                    <Fab color="error" size="small" variant="soft" onClick={onOpen1}>
+                      <SvgIconStyle src="/assets/icons/trash.svg" />
+                    </Fab>
+                  </Tooltip>
+                  <DialogConfirmar
+                    open={open1}
+                    onClose={onClose1}
+                    isLoading={isSaving}
+                    handleOk={handleDelete}
+                    title="Eliminar atribuição"
+                    desc="eliminar esta atribuição"
+                  />
+                </>
+              )}
+              <Box sx={{ flexGrow: 1 }} />
+              <LoadingButton variant="outlined" color="inherit" onClick={onClose}>
+                Cancelar
+              </LoadingButton>
+              <LoadingButton type="submit" variant="soft" color="info" loading={isSaving}>
+                Atribuir
+              </LoadingButton>
+            </DialogActions>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -91,7 +91,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
                     {...field}
                     fullWidth
                     onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(colaboradoresList, getComparator('asc', 'label'))?.map((option) => option)}
+                    options={applySort(colaboradoresList, getComparator('asc', 'label'))}
                     getOptionLabel={(option) => option?.label}
                     renderInput={(params) => (
                       <TextField {...params} label="Colaborador" error={!!error} helperText={error?.message} />

@@ -15,6 +15,16 @@ export function temNomeacao(colaborador) {
 
 // ----------------------------------------------------------------------
 
+export function isResponsavelUo(uo, mail) {
+  let isResponsavel = false;
+  if (mail?.toLowerCase() === uo?.responsavel?.toLowerCase()) {
+    isResponsavel = true;
+  }
+  return isResponsavel;
+}
+
+// ----------------------------------------------------------------------
+
 export function uosResponsavel(uos, colaborador) {
   const responsavel = [];
   uos?.forEach((_row) => {
@@ -53,8 +63,18 @@ export function findColaboradoresAcesso(colaboradores, currentColaborador, uosRe
     colaboradoresAcesso = colaboradores;
   } else if (uosResp?.length > 0) {
     colaboradoresAcesso = colaboradores?.filter((row) => uosResp?.includes(row?.uo?.id));
+  } else if (currentColaborador?.uo?.label === 'DOP') {
+    colaboradoresAcesso = colaboradores?.filter((row) => row?.uo?.label?.encludes('DOP'));
   } else if (isChefia) {
     colaboradoresAcesso = colaboradores?.filter((row) => row?.uo?.id === currentColaborador?.uo?.id);
+  } else if (currentColaborador?.uo?.label === 'DCN') {
+    colaboradoresAcesso = colaboradores?.filter(
+      (row) => row?.uo?.tipo === 'Agências' && row?.uo?.morada?.regiao === 'Norte'
+    );
+  } else if (currentColaborador?.uo?.label === 'DCS') {
+    colaboradoresAcesso = colaboradores?.filter(
+      (row) => row?.uo?.tipo === 'Agências' && row?.uo?.morada?.regiao === 'Sul'
+    );
   } else {
     colaboradoresAcesso = colaboradores?.filter((row) => row?.id === currentColaborador?.id);
   }

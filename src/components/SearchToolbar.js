@@ -94,32 +94,40 @@ export function SearchToolbarProcura({
   };
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-        <Autocomplete
-          fullWidth
-          value={filterAssunto}
-          onChange={(event, newValue) => onFilterAssunto(newValue)}
-          options={assuntosList?.sort()}
-          sx={{ width: { md: 180, xl: 250 } }}
-          renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
-        />
-        <Autocomplete
-          fullWidth
-          value={filterEstado}
-          onChange={(event, newValue) => onFilterEstado(newValue)}
-          options={estadosList?.sort()}
-          sx={{ width: { md: 180, xl: 250 } }}
-          renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
-        />
-        <Autocomplete
-          fullWidth
-          value={filterUo}
-          onChange={(event, newValue) => onFilterUo(newValue)}
-          options={uosorigemList?.sort()}
-          sx={{ width: { md: 180, xl: 250 } }}
-          renderInput={(params) => <TextField {...params} label="U.O origem" margin="none" />}
-        />
-      </Stack>
+      {(filterAssunto?.length > 1 || estadosList?.length > 1 || uosorigemList?.length > 1) && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          {assuntosList?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={filterAssunto}
+              onChange={(event, newValue) => onFilterAssunto(newValue)}
+              options={assuntosList?.sort()}
+              sx={{ width: { md: 180, xl: 250 } }}
+              renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
+            />
+          )}
+          {estadosList?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={filterEstado}
+              onChange={(event, newValue) => onFilterEstado(newValue)}
+              options={estadosList?.sort()}
+              sx={{ width: { md: 180, xl: 250 } }}
+              renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
+            />
+          )}
+          {uosorigemList?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={filterUo}
+              onChange={(event, newValue) => onFilterUo(newValue)}
+              options={uosorigemList?.sort()}
+              sx={{ width: { md: 180, xl: 250 } }}
+              renderInput={(params) => <TextField {...params} label="U.O origem" margin="none" />}
+            />
+          )}
+        </Stack>
+      )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth
@@ -182,29 +190,53 @@ export function SearchToolbar2({ filterSearch, origem, onFilterSearch }) {
 SearchToolbarProcessos.propTypes = {
   origem: PropTypes.string,
   segmento: PropTypes.string,
-  filterSearch: PropTypes.string,
+  colaborador: PropTypes.string,
+  filterSearch: PropTypes.object,
   onFilterSearch: PropTypes.func,
   onFilterSegmento: PropTypes.func,
+  colaboradoresList: PropTypes.array,
+  onFilterColaborador: PropTypes.func,
 };
 
-export function SearchToolbarProcessos({ filterSearch, onFilterSearch, segmento, onFilterSegmento, origem }) {
+export function SearchToolbarProcessos({
+  origem,
+  segmento,
+  colaborador,
+  filterSearch,
+  onFilterSearch,
+  onFilterSegmento,
+  colaboradoresList,
+  onFilterColaborador,
+}) {
   const { meusAmbientes, meusFluxos } = useSelector((state) => state.digitaldocs);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {(meusAmbientes?.length > 1 || meusFluxos?.length > 1) && (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {meusAmbientes?.length > 1 && <Ambiente />}
-          {meusFluxos?.length > 1 && <Fluxo />}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        {(meusAmbientes?.length > 1 || meusFluxos?.length > 1) && origem !== 'retidos' && origem !== 'atribuidos' && (
+          <>
+            {meusAmbientes?.length > 1 && <Ambiente />}
+            {meusFluxos?.length > 1 && <Fluxo />}
+          </>
+        )}
+        {colaboradoresList?.length > 0 && (
           <Autocomplete
             fullWidth
-            value={segmento}
-            onChange={(event, newValue) => onFilterSegmento(newValue)}
-            options={['Particulares', 'Empresas']}
+            value={colaborador}
+            options={colaboradoresList}
             sx={{ width: { md: 150, xl: 200 } }}
-            renderInput={(params) => <TextField {...params} label="Segmento" margin="none" />}
+            onChange={(event, newValue) => onFilterColaborador(newValue)}
+            renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
           />
-        </Stack>
-      )}
+        )}
+        <Autocomplete
+          fullWidth
+          value={segmento}
+          sx={{ width: { md: 150, xl: 200 } }}
+          options={['Particulares', 'Empresas']}
+          onChange={(event, newValue) => onFilterSegmento(newValue)}
+          renderInput={(params) => <TextField {...params} label="Segmento" margin="none" />}
+        />
+      </Stack>
       <TextField
         fullWidth
         value={filterSearch.get('filter') || ''}
@@ -233,73 +265,89 @@ export function SearchToolbarProcessos({ filterSearch, onFilterSearch, segmento,
 
 SearchToolbarEntradas.propTypes = {
   tab: PropTypes.string,
-  estado: PropTypes.string,
-  assunto: PropTypes.string,
+  filter: PropTypes.object,
+  setFilter: PropTypes.func,
   estadosList: PropTypes.array,
   assuntosList: PropTypes.array,
-  colaborador: PropTypes.string,
-  filterSearch: PropTypes.string,
-  onFilterSearch: PropTypes.func,
-  onFilterEstado: PropTypes.func,
-  onFilterAssunto: PropTypes.func,
   colaboradoresList: PropTypes.array,
-  onFilterColaborador: PropTypes.func,
 };
 
-export function SearchToolbarEntradas({
-  estado,
-  assunto,
-  colaborador,
-  estadosList,
-  assuntosList,
-  filterSearch,
-  onFilterSearch,
-  onFilterEstado,
-  onFilterAssunto,
-  colaboradoresList,
-  onFilterColaborador,
-  tab,
-}) {
+export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, assuntosList, colaboradoresList }) {
   const isFiltered =
-    (filterSearch.get('filter') && filterSearch.get('filter') !== '') || assunto || colaborador || estado;
+    filter?.get('filterSearch') || filter?.get('assunto') || filter?.get('colaborador') || filter?.get('estado');
   const handleResetFilter = () => {
-    onFilterEstado('');
-    onFilterAssunto('');
-    onFilterColaborador('');
-    onFilterSearch({ tab, filter: '' });
+    setFilter({
+      tab,
+      estado: '',
+      assunto: '',
+      colaborador: '',
+      filterSearch: '',
+      datai: filter?.get('datai'),
+      dataf: filter?.get('dataf'),
+    });
   };
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {(estadosList?.length > 1 || assuntosList?.length > 1 || colaboradoresList?.length > 1) && (
+      {(estadosList?.length > 0 || assuntosList?.length > 0 || colaboradoresList?.length > 0) && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {estadosList?.length > 1 && (
+          {estadosList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={estado}
+              value={filter?.get('estado')}
               options={estadosList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              onChange={(event, newValue) => onFilterEstado(newValue)}
+              onChange={(event, newValue) =>
+                setFilter({
+                  tab,
+                  estado: newValue || '',
+                  datai: filter?.get('datai'),
+                  dataf: filter?.get('dataf'),
+                  assunto: filter?.get('assunto'),
+                  colaborador: filter?.get('colaborador'),
+                  filterSearch: filter?.get('filterSearch'),
+                })
+              }
               renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
             />
           )}
-          {assuntosList?.length > 1 && (
+          {assuntosList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={assunto}
+              value={filter?.get('assunto')}
               options={assuntosList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              onChange={(event, newValue) => onFilterAssunto(newValue)}
+              onChange={(event, newValue) =>
+                setFilter({
+                  tab,
+                  estado: filter?.get('estado'),
+                  datai: filter?.get('datai'),
+                  dataf: filter?.get('dataf'),
+                  assunto: newValue || '',
+                  colaborador: filter?.get('colaborador'),
+                  filterSearch: filter?.get('filterSearch'),
+                })
+              }
               renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
             />
           )}
-          {colaboradoresList?.length > 1 && (
+          {colaboradoresList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={colaborador}
+              value={filter?.get('colaborador')}
               options={colaboradoresList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              onChange={(event, newValue) => onFilterColaborador(newValue)}
+              onChange={(event, newValue) =>
+                setFilter({
+                  tab,
+                  estado: filter?.get('estado'),
+                  datai: filter?.get('datai'),
+                  dataf: filter?.get('dataf'),
+                  assunto: filter?.get('assunto'),
+                  colaborador: newValue || '',
+                  filterSearch: filter?.get('filterSearch'),
+                })
+              }
               renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
             />
           )}
@@ -308,15 +356,18 @@ export function SearchToolbarEntradas({
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth
-          value={filterSearch.get('filter') || ''}
-          onChange={(event) => {
-            const filter = event.target.value;
-            if (filter) {
-              onFilterSearch({ tab, filter });
-            } else {
-              onFilterSearch({ tab, filter: '' });
-            }
-          }}
+          value={filter?.get('filterSearch')}
+          onChange={(event) =>
+            setFilter({
+              tab,
+              estado: filter?.get('estado'),
+              datai: filter?.get('datai'),
+              dataf: filter?.get('dataf'),
+              assunto: filter?.get('assunto'),
+              colaborador: filter?.get('colaborador'),
+              filterSearch: event.target.value || '',
+            })
+          }
           placeholder="Procurar..."
           InputProps={{
             startAdornment: (
@@ -454,7 +505,7 @@ export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch }) {
         onChange={(event, value) => {
           onFilterSearch({ tab: 'acessos', uo: value || 'Todos', filter: filterSearch.get('filter') || '' });
         }}
-        options={_uosList?.map((option) => option)}
+        options={_uosList}
         getOptionLabel={(option) => option}
         sx={{ maxWidth: { md: 250, sm: 200 }, minWidth: { md: 250, sm: 200 } }}
         renderInput={(params) => <TextField {...params} label="Unidade orgânicas" margin="none" />}

@@ -53,3 +53,17 @@ export function fShortenNumber(number) {
 export function fData(number) {
   return numeral(number).format('0.0 b');
 }
+
+export function converterSegundos(number) {
+  let valor = '';
+  if (number < 60) {
+    valor = `${number} ${number === 1 ? 'segundo' : 'segundos'}`;
+  } else if (number < 3600) {
+    valor = `${Math.round(number / 60)} ${Math.round(number / 60) === 1 ? 'minuto' : 'minutos'}`;
+  } else if (number < 86400) {
+    valor = `${Math.round(number / 3600)} ${Math.round(number / 3600) === 1 ? 'hora' : 'horas'}`;
+  } else {
+    valor = `${Math.round(number / 86400)} ${Math.round(number / 86400) === 1 ? 'dia' : 'dias'}`;
+  }
+  return valor;
+}

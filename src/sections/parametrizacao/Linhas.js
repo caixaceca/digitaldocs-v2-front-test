@@ -94,7 +94,9 @@ export default function Linhas() {
 
       <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="linhasCredito" />
+          {dataFiltered.length > 1 && (
+            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="linhasCredito" />
+          )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -131,7 +133,7 @@ export default function Linhas() {
             </TableContainer>
           </Scrollbar>
 
-          {!isNotFound && (
+          {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
               dense={dense}
               onChangeDense={onChangeDense}

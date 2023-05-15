@@ -103,7 +103,9 @@ export default function PedidosAcesso() {
         sx={{ color: 'text.secondary', m: 0, px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        <SearchToolbar2 origem="pedidos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+        {dataFiltered.length > 1 && (
+          <SearchToolbar2 origem="pedidos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
+        )}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -141,7 +143,7 @@ export default function PedidosAcesso() {
           </TableContainer>
         </Scrollbar>
 
-        {!isNotFound && (
+        {!isNotFound && dataFiltered.length > 10 && (
           <TablePaginationAlt
             dense={dense}
             onChangeDense={onChangeDense}

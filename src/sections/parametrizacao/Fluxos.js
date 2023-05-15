@@ -104,7 +104,9 @@ export default function Fluxos() {
 
       <RoleBasedGuard hasContent roles={['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="fluxos" />
+          {dataFiltered.length > 1 && (
+            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="fluxos" />
+          )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -150,7 +152,7 @@ export default function Fluxos() {
             </TableContainer>
           </Scrollbar>
 
-          {!isNotFound && (
+          {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
               dense={dense}
               onChangeDense={onChangeDense}
