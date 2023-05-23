@@ -61,11 +61,11 @@ const SUCCESS = {
   contrastText: '#fff',
 };
 const WARNING = {
-  lighter: '#FFF7CD',
-  light: '#FFE16A',
-  main: '#FFB107',
-  dark: '#B78103',
-  darker: '#7A4F01',
+  lighter: '#FFF5CC',
+  light: '#FFD666',
+  main: '#FFAB00',
+  dark: '#B76E00',
+  darker: '#7A4100',
   contrastText: GREY[800],
 };
 const ERROR = {

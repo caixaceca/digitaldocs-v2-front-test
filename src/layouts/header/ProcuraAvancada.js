@@ -77,8 +77,10 @@ export default function ProcuraAvancada() {
         id: Number(parametros?.get('uoId')),
         label: uos?.find((row) => row?.id === Number(parametros?.get('uoId')))?.label,
       });
+    } else if (currentColaborador?.uo) {
+      setUo({ id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label });
     }
-  }, [colaboradores, uos, parametros]);
+  }, [colaboradores, uos, currentColaborador?.uo, parametros]);
 
   const handleSearch = () => {
     if (avancada) {
@@ -142,7 +144,13 @@ export default function ProcuraAvancada() {
         Procurar...
       </Button>
 
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth={avancada ? 'md' : 'sm'}>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth={avancada ? 'md' : 'sm'}
+        sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
+      >
         <DialogContent sx={{ pb: 0 }}>
           <Grid container spacing={2}>
             {avancada ? (

@@ -57,7 +57,7 @@ export function fData(number) {
 export function converterSegundos(number) {
   let valor = '';
   if (number < 60) {
-    valor = `${number} ${number === 1 ? 'segundo' : 'segundos'}`;
+    valor = `${Math.round(number)} ${number === 1 ? 'segundo' : 'segundos'}`;
   } else if (number < 3600) {
     valor = `${Math.round(number / 60)} ${Math.round(number / 60) === 1 ? 'minuto' : 'minutos'}`;
   } else if (number < 86400) {

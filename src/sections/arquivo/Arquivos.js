@@ -40,8 +40,8 @@ const TABLE_HEAD = [
   { id: 'referencia', label: 'Referência', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Entidade(s)', align: 'left' },
-  { id: 'data_last_transicao', label: 'Data', align: 'center' },
-  { id: 'empty' },
+  { id: 'data_last_transicao', label: 'Data', align: 'center', width: 50 },
+  { id: 'empty', width: 50 },
 ];
 
 // ----------------------------------------------------------------------
@@ -87,11 +87,7 @@ export default function Arquivos() {
     });
   };
 
-  const dataFiltered = applySortFilter({
-    arquivos,
-    comparator: getComparator(order, orderBy),
-    filterSearch,
-  });
+  const dataFiltered = applySortFilter({ arquivos, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -128,7 +124,7 @@ export default function Arquivos() {
         </Scrollbar>
       </Card>
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && (
+        {arquivos.length > 1 && (
           <SearchToolbar2 origem="arquivos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
         )}
         <Scrollbar>
@@ -158,9 +154,13 @@ export default function Arquivos() {
                         </TableCell>
                         <TableCell>{_entidades}</TableCell>
                         <TableCell align="center">
-                          {row?.data_last_transicao ? ptDateTime(row?.data_last_transicao) : ' - - - - - '}
+                          {row?.data_last_transicao && (
+                            <Typography variant="body2" noWrap>
+                              {ptDateTime(row?.data_last_transicao)}
+                            </Typography>
+                          )}
                         </TableCell>
-                        <TableCell align="center" width={100}>
+                        <TableCell align="center">
                           <Tooltip title="DETALHES" arrow>
                             <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row)}>
                               <SvgIconStyle src="/assets/icons/view.svg" />

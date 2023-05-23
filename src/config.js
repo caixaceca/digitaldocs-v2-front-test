@@ -1,8 +1,6 @@
 import { LogLevel } from '@azure/msal-browser';
 // @mui
 import { enUS, frFR, ptPT } from '@mui/material/locale';
-// routes
-import { PATH_DIGITALDOCS } from './routes/paths';
 
 /**
  * Configuration object to be passed to MSAL instance on creation.
@@ -17,10 +15,7 @@ export const msalConfig = {
     // redirectUri: 'https://digitaldocs.caixa.cv/indicadores',
     redirectUri: 'https://ddocsteste.caixa.cv/indicadores',
   },
-  cache: {
-    cacheLocation: 'sessionStorage', // This configures where your cache will be stored
-    storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
-  },
+  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false },
   system: {
     loggerOptions: {
       loggerCallback: (level, message, containsPii) => {
@@ -55,7 +50,6 @@ export const msalConfig = {
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest = {
-  // Ivandro add the line bellow
   authority: 'https://login.microsoftonline.com/353efa45-1c51-4b33-a7e4-b129dc92beb4',
   scopes: ['User.Read', 'openid', 'profile'],
 };
@@ -64,41 +58,15 @@ export const loginRequest = {
  * Add here the scopes to request when obtaining an access token for MS Graph API. For more information, see:
  * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/resources-and-scopes.md
  */
-export const graphConfig = {
-  graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me',
-};
+export const graphConfig = { graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me' };
 
 // API
 // ----------------------------------------------------------------------
 
 export const HOST_API = process.env.REACT_APP_HOST_API_KEY || '';
 
-export const FIREBASE_API = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APPID,
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
-};
-
-export const COGNITO_API = {
-  userPoolId: process.env.REACT_APP_AWS_COGNITO_USER_POOL_ID,
-  clientId: process.env.REACT_APP_AWS_COGNITO_CLIENT_ID,
-};
-
-export const AUTH0_API = {
-  clientId: process.env.REACT_APP_AUTH0_CLIENT_ID,
-  domain: process.env.REACT_APP_AUTH0_DOMAIN,
-};
-
 export const MAPBOX_API =
   'pk.eyJ1IjoiaXZhbmRyb2V2b3JhIiwiYSI6ImNrejlxZnN2MzA0NWsyd2xybDc2dHdmMDMifQ.YQN8sr2IRJzOw5FfRWNlaA';
-
-// ROOT PATH AFTER LOGIN SUCCESSFUL
-export const PATH_AFTER_LOGIN = PATH_DIGITALDOCS.general.indicadores;
 
 // LAYOUT
 // ----------------------------------------------------------------------
@@ -120,10 +88,7 @@ export const NAVBAR = {
   DASHBOARD_ITEM_HORIZONTAL_HEIGHT: 32,
 };
 
-export const ICON = {
-  NAVBAR_ITEM: 22,
-  NAVBAR_ITEM_HORIZONTAL: 20,
-};
+export const ICON = { NAVBAR_ITEM: 22, NAVBAR_ITEM_HORIZONTAL: 20 };
 
 // SETTINGS
 // Please remove `localStorage` when you change settings.
@@ -143,24 +108,9 @@ export const defaultSettings = {
 // ----------------------------------------------------------------------
 
 export const allLangs = [
-  {
-    label: 'Português',
-    value: 'pt',
-    systemValue: ptPT,
-    icon: '/assets/icons/flags/ic_flag_pt.svg',
-  },
-  {
-    label: 'English',
-    value: 'en',
-    systemValue: enUS,
-    icon: '/assets/icons/flags/ic_flag_en.svg',
-  },
-  {
-    label: 'French',
-    value: 'fr',
-    systemValue: frFR,
-    icon: '/assets/icons/flags/ic_flag_fr.svg',
-  },
+  { label: 'Português', value: 'pt', systemValue: ptPT, icon: '/assets/icons/flags/ic_flag_pt.svg' },
+  { label: 'English', value: 'en', systemValue: enUS, icon: '/assets/icons/flags/ic_flag_en.svg' },
+  { label: 'French', value: 'fr', systemValue: frFR, icon: '/assets/icons/flags/ic_flag_fr.svg' },
 ];
 
-export const defaultLang = allLangs[0]; // English
+export const defaultLang = allLangs[0]; // Português

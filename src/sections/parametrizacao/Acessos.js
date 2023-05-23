@@ -99,7 +99,7 @@ export default function Acessos() {
         roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
       >
         <Card sx={{ p: 1 }}>
-          {dataFiltered.length > 1 && (
+          {colaboradoresByName.length > 1 && (
             <TableToolbarPerfilEstados filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
           )}
           <Scrollbar>

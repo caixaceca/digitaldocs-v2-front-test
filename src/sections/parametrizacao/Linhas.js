@@ -94,7 +94,7 @@ export default function Linhas() {
 
       <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          {dataFiltered.length > 1 && (
+          {linhas.length > 1 && (
             <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="linhasCredito" />
           )}
           <Scrollbar>

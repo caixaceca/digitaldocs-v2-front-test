@@ -147,14 +147,8 @@ export default function PerfisEstado() {
     }
   });
 
-  const dataFiltered = applySortFilter({
-    perfisAssociados,
-    comparator: getComparator(order, orderBy),
-    filterSearch,
-  });
-
+  const dataFiltered = applySortFilter({ perfisAssociados, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
-
   const title = estado?.nome ? `${estado.nome} » Colaboradores associados` : 'Colaboradores associados';
 
   return (
@@ -182,7 +176,7 @@ export default function PerfisEstado() {
           roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
         >
           <Card sx={{ p: 1 }}>
-            {dataFiltered.length > 1 && (
+            {perfisAssociados.length > 1 && (
               <TableToolbarPerfilEstados
                 options={_uosList}
                 filterSearch={filterSearch}

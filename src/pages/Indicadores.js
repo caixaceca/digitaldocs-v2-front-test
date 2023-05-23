@@ -11,6 +11,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 // sections
+import EstatisticaCredito from '../sections/indicadores/EstatisticaCredito';
 import { Tipos, Criacao, Volume, Duracao, FileSystem, Execucao } from '../sections/indicadores/Indicadores';
 // assets
 import ComingSoonIllustration from '../assets/ComingSoonIllustration';
@@ -59,6 +60,7 @@ export default function Indicadores() {
     { value: 'tipos', label: 'Tipos', component: <Tipos /> },
     { value: 'duracao', label: 'Duração', component: <Duracao /> },
     { value: 'tempoExecucao', label: 'Tempo execução', component: <Execucao /> },
+    { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
   ];
 
   useEffect(() => {

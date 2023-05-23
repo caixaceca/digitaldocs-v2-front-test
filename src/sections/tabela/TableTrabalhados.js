@@ -192,7 +192,7 @@ export default function TableTrabalhados() {
         </Card>
       )}
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && (
+        {trabalhados.length > 1 && (
           <SearchToolbarTrabalhados
             tab="trabalhados"
             ambiente={ambiente}
@@ -234,7 +234,7 @@ export default function TableTrabalhados() {
                             {row?.trabalhado_em && ptDateTime(row.trabalhado_em)}
                           </Typography>
                         </TableCell>
-                        <TableCell align="center" width={50}>
+                        <TableCell align="center">
                           <Tooltip title="DETALHES" arrow>
                             <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
                               <SvgIconStyle src="/assets/icons/view.svg" />

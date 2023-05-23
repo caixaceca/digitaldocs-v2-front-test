@@ -1,13 +1,17 @@
 import { sumBy } from 'lodash';
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
+import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import {
+  Fab,
   Box,
   Grid,
   Card,
   Stack,
   Table,
   Paper,
+  Tooltip,
   TableRow,
   TableCell,
   TextField,
@@ -16,7 +20,7 @@ import {
   CardContent,
   Autocomplete,
   TableContainer,
-  ListItemButton,
+  TableHead,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -29,12 +33,12 @@ import { fNumber, fPercent, fNumber2, fData, converterSegundos } from '../../uti
 import { getIndicadores } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
+import Image from '../../components/Image';
 import Scrollbar from '../../components/Scrollbar';
 import Chart, { useChart } from '../../components/chart';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
 import { TableHeadCustom, TableSearchNotFound, SearchNotFound, TablePaginationAlt } from '../../components/table';
-
 // ----------------------------------------------------------------------
 
 const vistas = [
@@ -199,6 +203,27 @@ export function Criacao() {
             options={applySort(colaboradoresList, getComparator('asc', 'label'))}
             renderInput={(params) => <TextField {...params} label="Colaborador" />}
           />
+          {dataFiltered.length > 0 && (
+            <>
+              <ReactHTMLTableToExcel
+                id="table-xls-button-tipo"
+                className="MuiButtonBase-root-MuiButton-root"
+                table="table-to-xls-tipo"
+                filename="Criação de processos"
+                sheet="Criação de processos"
+                buttonText={
+                  <Tooltip arrow title="EXPORTAR">
+                    <Fab color="success" size="small" variant="soft">
+                      <Image src="/assets/icons/file_format/format_excel.svg" />
+                    </Fab>
+                  </Tooltip>
+                }
+              />
+              <Table id="table-to-xls-tipo" sx={{ display: 'none' }}>
+                <TableExport label="Data" label1="Quantidade" dados={dataFiltered} />
+              </Table>
+            </>
+          )}
         </Stack>
         <CardContent>
           {isLoading ? (
@@ -214,17 +239,11 @@ export function Criacao() {
                   <Grid container spacing={3} sx={{ mb: 7 }}>
                     {resumo?.map((row) => (
                       <Grid key={row?.label} item xs={12} sm={6} md={3}>
-                        <Card
-                          sx={{
-                            py: 2,
-                            textAlign: 'center',
-                            border: (theme) => theme.palette.mode === 'dark' && `solid 1px ${theme.palette.divider}`,
-                          }}
-                        >
-                          <Typography variant="subtitle1">{row?.label}</Typography>
-                          <Typography variant="subtitle1" sx={{ color: 'text.success' }}>
-                            &nbsp;
-                            {row?.label !== 'Total' && row?.label !== 'Média' ? (
+                        <CardInfo
+                          title={row?.label}
+                          total={row?.valor}
+                          label={
+                            row?.label !== 'Total' && row?.label !== 'Média' ? (
                               <>
                                 {(vista?.id === 'anual' && fYear(row?.desc)) ||
                                   (vista?.id === 'mensal' && fMonthYear(row?.desc)) ||
@@ -232,13 +251,9 @@ export function Criacao() {
                               </>
                             ) : (
                               row?.desc
-                            )}
-                            &nbsp;
-                          </Typography>
-                          <Typography variant="h3" sx={{ color: 'text.secondary' }}>
-                            {fNumber(row?.valor)}
-                          </Typography>
-                        </Card>
+                            )
+                          }
+                        />
                       </Grid>
                     ))}
                   </Grid>
@@ -328,7 +343,7 @@ export function Execucao() {
             fullWidth
             value={fluxo}
             getOptionLabel={(option) => option?.label}
-            disableClearable={!perfil?.id && !fluxo?.id}
+            disableClearable={!perfil?.id && !estado?.id}
             onChange={(event, newValue) => setFuxo(newValue)}
             options={applySort(fluxosList, getComparator('asc', 'label'))}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
@@ -337,14 +352,9 @@ export function Execucao() {
           <Autocomplete
             fullWidth
             value={estado}
-            onChange={(event, newValue) => {
-              if (fluxo?.id && newValue) {
-                setFuxo(null);
-              }
-              setEstado(newValue);
-            }}
             getOptionLabel={(option) => option?.nome}
-            disableClearable={!estado?.id && !perfil?.id}
+            disableClearable={!fluxo?.id && !perfil?.id}
+            onChange={(event, newValue) => setEstado(newValue)}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
             options={applySort(
               meusAmbientes?.filter((option) => option?.id > 0),
@@ -376,41 +386,58 @@ export function Execucao() {
                   {converterSegundos(sumBy(dataFiltered, 'tempo_execucao') / dataFiltered.length)}
                 </Typography>{' '}
                 trabalhando em um processo{' '}
-                {fluxo?.nome && (
+                {fluxo?.label && (
                   <>
                     de{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {fluxo?.nome}
+                      {fluxo?.label}
                     </Typography>
                   </>
                 )}{' '}
-                {estado?.label && (
+                {estado?.nome && (
                   <>
                     no estado{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {estado?.label}
+                      {estado?.nome}
                     </Typography>
                   </>
                 )}
               </Typography>
             ) : (
               <>
-                {fluxo?.nome ? (
+                {fluxo?.label ? (
                   <Typography sx={{ textAlign: 'center' }}>
                     Em média um processo de{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {fluxo?.nome}
+                      {fluxo?.label}
                     </Typography>{' '}
                     passa{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {converterSegundos(sumBy(dataFiltered, 'tempo_execucao'))}
+                      {converterSegundos(
+                        sumBy(
+                          dataFiltered?.filter(
+                            (row) => !row?.nome?.includes('Atendimento') && !row?.nome?.includes('Gerência')
+                          ),
+                          'tempo_execucao'
+                        ) +
+                          sumBy(
+                            dataFiltered?.filter((row) => row?.nome?.includes('Atendimento')),
+                            'tempo_execucao'
+                          ) /
+                            dataFiltered?.filter((row) => row?.nome?.includes('Atendimento'))?.length +
+                          sumBy(
+                            dataFiltered?.filter((row) => row?.nome?.includes('Gerência')),
+                            'tempo_execucao'
+                          ) /
+                            dataFiltered?.filter((row) => row?.nome?.includes('Gerência'))?.length
+                      )}
                     </Typography>{' '}
                     sendo executado{' '}
-                    {estado?.label && (
+                    {estado?.nome && (
                       <>
                         no estado{' '}
                         <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                          {estado?.label}
+                          {estado?.nome}
                         </Typography>
                       </>
                     )}
@@ -423,7 +450,7 @@ export function Execucao() {
                     </Typography>{' '}
                     sendo exectado no estado{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {estado?.label}
+                      {estado?.nome}
                     </Typography>
                   </Typography>
                 )}
@@ -515,6 +542,20 @@ export function Duracao() {
   });
   const isNotFound = !duracaoByItem.length;
 
+  const resumo = [
+    { label: 'Média', valor: sumBy(duracaoByItem, 'dias') / duracaoByItem?.length, desc: '' },
+    {
+      label: 'Maior duração',
+      valor: Math.max(...duracaoByItem?.map((row) => row.dias)),
+      desc: duracaoByItem?.find((row) => row.dias === Math.max(...duracaoByItem?.map((row) => row.dias)))?.label,
+    },
+    {
+      label: 'Menor duração',
+      valor: Math.min(...duracaoByItem?.map((row) => row.dias)),
+      desc: duracaoByItem?.find((row) => row.dias === Math.min(...duracaoByItem?.map((row) => row.dias)))?.label,
+    },
+  ];
+
   const seriesVolume = [{ name: 'Média em dias', data: duracaoByItem?.map((row) => row?.dias) }];
   const chartOptions = useChart({
     grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
@@ -600,6 +641,27 @@ export function Duracao() {
               onChange={(newValue) => setDataFim(newValue)}
               slotProps={{ textField: { fullWidth: true, sx: { minWidth: { xs: 150, lg: 200 } } } }}
             />
+            {duracaoByItem.length > 0 && (
+              <>
+                <ReactHTMLTableToExcel
+                  id="table-xls-button-tipo"
+                  className="MuiButtonBase-root-MuiButton-root"
+                  table="table-to-xls-tipo"
+                  filename="Média de duração dos processos"
+                  sheet="Média de duração dos processos"
+                  buttonText={
+                    <Tooltip arrow title="EXPORTAR">
+                      <Fab color="success" size="small" variant="soft">
+                        <Image src="/assets/icons/file_format/format_excel.svg" />
+                      </Fab>
+                    </Tooltip>
+                  }
+                />
+                <Table id="table-to-xls-tipo" sx={{ display: 'none' }}>
+                  <TableExport label="Label" label1="Dias" dados={duracaoByItem} />
+                </Table>
+              </>
+            )}
           </Stack>
         </Stack>
         <CardContent>
@@ -612,11 +674,16 @@ export function Duracao() {
               {isNotFound ? (
                 <SearchNotFound message="Nenhum registo encontrado" />
               ) : (
-                <Grid container spacing={3} alignItems="center">
-                  <Grid item xs={12}>
-                    <Chart type="bar" series={seriesVolume} options={chartOptions} height={500} />
+                <>
+                  <Grid container spacing={3} sx={{ mb: 7 }}>
+                    {resumo?.map((row) => (
+                      <Grid key={row?.label} item xs={12} sm={4}>
+                        <CardInfo title={row?.label} total={row?.valor} label={row?.desc} duracao />
+                      </Grid>
+                    ))}
                   </Grid>
-                </Grid>
+                  <Chart type="bar" series={seriesVolume} options={chartOptions} height={500} />
+                </>
               )}
             </>
           )}
@@ -767,7 +834,7 @@ export function FileSystem() {
                                     </Stack>
                                   </Stack>
 
-                                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                                  <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={0.5}>
                                     <Typography variant="h6"> {fData(folder.tamanho)} </Typography>
                                     {folder.tipo !== 'Total' && (
                                       <Typography
@@ -799,7 +866,7 @@ export function FileSystem() {
 
 export function Volume() {
   const dispatch = useDispatch();
-  const [top, setTop] = useState('10');
+  const [top, setTop] = useState('Todos');
   const [escopo, setEscopo] = useState({ id: 'uo', label: 'U.O' });
   const { isLoading, volume } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
@@ -824,6 +891,21 @@ export function Volume() {
     }
   });
   const isNotFound = !volumeByItem.length;
+
+  const resumo = [
+    { label: 'Total', valor: sumBy(volumeByItem, 'total'), desc: '' },
+    { label: 'Média', valor: sumBy(volumeByItem, 'total') / volumeByItem?.length, desc: '' },
+    {
+      label: 'Mais processos',
+      valor: Math.max(...volumeByItem?.map((row) => row.total)),
+      desc: volumeByItem?.find((row) => row.total === Math.max(...volumeByItem?.map((row) => row.total)))?.label,
+    },
+    {
+      label: 'Menos processos',
+      valor: Math.min(...volumeByItem?.map((row) => row.total)),
+      desc: volumeByItem?.find((row) => row.total === Math.min(...volumeByItem?.map((row) => row.total)))?.label,
+    },
+  ];
 
   const seriesVolume = [{ name: 'Nº de processos', data: volumeByItem?.map((row) => row?.total) }];
   const chartOptions = useChart({
@@ -880,20 +962,52 @@ export function Volume() {
             onChange={(event, newValue) => setTop(newValue)}
             renderInput={(params) => <TextField {...params} label="Top" />}
           />
+          {volumeByItem.length > 0 && (
+            <>
+              <ReactHTMLTableToExcel
+                id="table-xls-button-tipo"
+                className="MuiButtonBase-root-MuiButton-root"
+                table="table-to-xls-tipo"
+                filename="Volume de criação de processos"
+                sheet="Volume de criação de processos"
+                buttonText={
+                  <Tooltip arrow title="EXPORTAR">
+                    <Fab color="success" size="small" variant="soft">
+                      <Image src="/assets/icons/file_format/format_excel.svg" />
+                    </Fab>
+                  </Tooltip>
+                }
+              />
+              <Table id="table-to-xls-tipo" sx={{ display: 'none' }}>
+                <TableExport label="Label" label1="Quantidade" dados={volumeByItem} />
+              </Table>
+            </>
+          )}
         </Stack>
-        {isLoading ? (
-          <Stack direction="row" justifyContent="center">
-            <BarChart />
-          </Stack>
-        ) : (
-          <>
-            {isNotFound ? (
-              <SearchNotFound message="Nenhum registo encontrado" />
-            ) : (
-              <Chart type="bar" series={seriesVolume} options={chartOptions} height={500} />
-            )}
-          </>
-        )}
+        <CardContent>
+          {isLoading ? (
+            <Stack direction="row" justifyContent="center">
+              <BarChart />
+            </Stack>
+          ) : (
+            <>
+              {isNotFound ? (
+                <SearchNotFound message="Nenhum registo encontrado" />
+              ) : (
+                <>
+                  <Grid container spacing={3} sx={{ mb: 7 }}>
+                    {resumo?.map((row) => (
+                      <Grid key={row?.label} item xs={12} sm={6} md={3}>
+                        <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <Chart type="bar" series={seriesVolume} options={chartOptions} height={500} />
+                </>
+              )}
+            </>
+          )}
+        </CardContent>
       </Card>
     </>
   );
@@ -902,9 +1016,10 @@ export function Volume() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Tipos() {
+  const theme = useTheme();
   const dispatch = useDispatch();
   const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
-  const { isLoading, iAmInGrpGerente, indicadoresTipos } = useSelector((state) => state.digitaldocs);
+  const { isLoading, indicadoresTipos, iAmInGrpGerente } = useSelector((state) => state.digitaldocs);
   const perfilId = currentColaborador?.perfil_id;
   const [dataInicio, setDataInicio] = useState(null);
   const [dataFim, setDataFim] = useState(null);
@@ -939,6 +1054,70 @@ export function Tipos() {
   });
   const isNotFound = !indicadoresTipos.length;
 
+  const total = sumBy(indicadoresTipos, 'total');
+  const labels = indicadoresTipos?.map((row) => row?.assunto);
+  const quantidades = indicadoresTipos?.map((row) => row?.total);
+  const percentagem = indicadoresTipos?.map((row) => (row?.total * 100) / total);
+
+  const resumo = [
+    { label: 'Total', valor: sumBy(indicadoresTipos, 'total'), desc: '' },
+    {
+      label: 'Mais processos',
+      valor: Math.max(...indicadoresTipos?.map((row) => row.total)),
+      desc: indicadoresTipos?.find((row) => row.total === Math.max(...indicadoresTipos?.map((row) => row.total)))
+        ?.assunto,
+    },
+    {
+      label: 'Menos processos',
+      valor: Math.min(...indicadoresTipos?.map((row) => row.total)),
+      desc: indicadoresTipos?.find((row) => row.total === Math.min(...indicadoresTipos?.map((row) => row.total)))
+        ?.assunto,
+    },
+  ];
+
+  const series = [
+    { name: 'Quantidade', type: 'column', data: quantidades },
+    { name: 'Percentagem', type: 'line', data: percentagem },
+  ];
+
+  const chartOptions = useChart({
+    colors: [theme.palette.success.main, theme.palette.focus.main],
+    legend: { horizontalAlign: 'center' },
+    chart: { height: 350, type: 'line', stacked: false },
+    grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
+    xaxis: { categories: labels, labels: { maxHeight: 250 }, tooltip: { enabled: false } },
+    stroke: { curve: 'straight', width: 4 },
+    yaxis: [
+      {
+        labels: {
+          formatter(val) {
+            return fNumber(val);
+          },
+        },
+        title: { text: 'Quantidade', style: { color: theme.palette.success.main } },
+      },
+      {
+        min: 0,
+        max: 100,
+        opposite: true,
+        seriesName: 'Percentagem',
+        labels: {
+          formatter(val) {
+            return fPercent(val);
+          },
+        },
+        title: { text: 'Percentagem', style: { color: theme.palette.focus.main } },
+      },
+    ],
+    tooltip: {
+      y: [
+        { formatter: (value) => fNumber(value) },
+        { seriesName: 'Percentagem', formatter: (value) => fPercent(value) },
+      ],
+      x: { show: true },
+    },
+  });
+
   useEffect(() => {
     if (mail && perfilId) {
       dispatch(
@@ -964,7 +1143,7 @@ export function Tipos() {
       />
 
       <Card sx={{ p: 1 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ pb: 1 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
           <Autocomplete
             fullWidth
             value={uo}
@@ -998,6 +1177,27 @@ export function Tipos() {
               onChange={(newValue) => setDataFim(newValue)}
               slotProps={{ textField: { fullWidth: true, sx: { minWidth: { xs: 150, md: 200 } } } }}
             />
+            {indicadoresTipos.length > 0 && (
+              <>
+                <ReactHTMLTableToExcel
+                  id="table-xls-button-tipo"
+                  className="MuiButtonBase-root-MuiButton-root"
+                  table="table-to-xls-tipo"
+                  filename="Tipos de processos"
+                  sheet="Tipos de processos"
+                  buttonText={
+                    <Tooltip arrow title="EXPORTAR">
+                      <Fab color="success" size="small" variant="soft">
+                        <Image src="/assets/icons/file_format/format_excel.svg" />
+                      </Fab>
+                    </Tooltip>
+                  }
+                />
+                <Table id="table-to-xls-tipo" sx={{ display: 'none' }}>
+                  <TableExport label="Processo" label1="Quantidade" dados={indicadoresTipos} />
+                </Table>
+              </>
+            )}
           </Stack>
         </Stack>
         <CardContent>
@@ -1010,28 +1210,78 @@ export function Tipos() {
               {isNotFound ? (
                 <SearchNotFound message="Nenhum registo encontrado" />
               ) : (
-                <Grid container spacing={3} alignItems="center">
-                  <Grid item xs={12}>
-                    {indicadoresTipos.map((row) => (
-                      <ListItemButton key={row?.assunto} sx={{ borderRadius: 0.5 }}>
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ flexGrow: 1 }}>
-                          <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
-                            {row.assunto}
-                          </Typography>
-                          <Typography variant="h5">{fNumber(row.total)}</Typography>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            ({fPercent((row.total * 100) / sumBy(indicadoresTipos, 'total'))})
-                          </Typography>
-                        </Stack>
-                      </ListItemButton>
+                <>
+                  <Grid container spacing={3} sx={{ mb: 7 }}>
+                    {resumo?.map((row) => (
+                      <Grid key={row?.label} item xs={12} sm={4}>
+                        <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
+                      </Grid>
                     ))}
                   </Grid>
-                </Grid>
+                  <Chart type="line" series={series} options={chartOptions} height={500} />
+                </>
               )}
             </>
           )}
         </CardContent>
       </Card>
+    </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+CardInfo.propTypes = {
+  title: PropTypes.string,
+  label: PropTypes.string,
+  total: PropTypes.number,
+  duracao: PropTypes.bool,
+};
+
+function CardInfo({ title, label, total, duracao }) {
+  return (
+    <Card
+      sx={{
+        pb: 1,
+        height: 1,
+        textAlign: 'center',
+        pt: { xs: 2, md: label ? 2 : 4 },
+        '&:hover': { bgcolor: 'background.neutral' },
+        border: (theme) => theme.palette.mode === 'dark' && `solid 1px ${theme.palette.divider}`,
+      }}
+    >
+      <Typography variant="subtitle1">{title}</Typography>
+      <Typography variant="h5" sx={{ color: 'text.success', py: 0.5 }}>
+        {label}
+      </Typography>
+      <Typography variant="h3" sx={{ color: 'text.secondary' }}>
+        {duracao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
+      </Typography>
+    </Card>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+TableExport.propTypes = { label: PropTypes.string, label1: PropTypes.string, dados: PropTypes.array };
+
+function TableExport({ label, label1, dados }) {
+  return (
+    <>
+      <TableHead>
+        <TableRow>
+          <TableCell>{label}</TableCell>
+          <TableCell align="right">{label1}</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {dados?.map((row, index) => (
+          <TableRow key={`table_row_export_${index}`}>
+            <TableCell>{row?.assunto || row?.criado_em || row?.label}</TableCell>
+            <TableCell align="right">{row?.total || row?.dias}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
     </>
   );
 }

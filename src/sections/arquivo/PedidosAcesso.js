@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
 // @mui
-import { Fab, Card, Table, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Fab, Card, Table, Tooltip, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // hooks
@@ -27,7 +27,7 @@ const TABLE_HEAD = [
   { id: 'nome', label: 'Colaborador', align: 'left' },
   { id: 'processo', label: 'Processo', align: 'left' },
   { id: 'criado_em', label: 'Data do pedido', align: 'center' },
-  { id: 'empty' },
+  { id: 'empty', width: 50 },
 ];
 
 // ----------------------------------------------------------------------
@@ -87,11 +87,7 @@ export default function PedidosAcesso() {
     }
   });
 
-  const dataFiltered = applySortFilter({
-    pedidosAcessoLabel,
-    comparator: getComparator(order, orderBy),
-    filterSearch,
-  });
+  const dataFiltered = applySortFilter({ pedidosAcessoLabel, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -103,7 +99,7 @@ export default function PedidosAcesso() {
         sx={{ color: 'text.secondary', m: 0, px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && (
+        {pedidosAcessoLabel.length > 1 && (
           <SearchToolbar2 origem="pedidos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
         )}
         <Scrollbar>
@@ -118,8 +114,14 @@ export default function PedidosAcesso() {
                     <TableRow hover key={row.criado_em}>
                       <TableCell>{row.nome}</TableCell>
                       <TableCell>{row.processo}</TableCell>
-                      <TableCell align="center">{row?.criado_em && ptDateTime(row?.criado_em)}</TableCell>
                       <TableCell align="center" width={50}>
+                        {row?.criado_em && (
+                          <Typography variant="body2" noWrap>
+                            {ptDateTime(row?.criado_em)}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
                         <Tooltip title="VER PROCESSO" arrow>
                           <Fab
                             color="success"

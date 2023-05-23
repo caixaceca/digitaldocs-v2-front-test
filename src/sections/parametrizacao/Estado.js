@@ -65,11 +65,7 @@ export default function Estado() {
     setPage(0);
   };
 
-  const dataFiltered = applySortFilter({
-    estadosByFluxo,
-    comparator: getComparator(order, orderBy),
-    filterSearch,
-  });
+  const dataFiltered = applySortFilter({ estadosByFluxo, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -85,7 +81,7 @@ export default function Estado() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
+        {estadosByFluxo.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

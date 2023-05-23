@@ -133,7 +133,7 @@ export default function TablePorConcluir() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && (
+        {newList.length > 1 && (
           <SearchToolbarEntradas
             tab="porconcluir"
             filter={filter}
@@ -192,7 +192,7 @@ export default function TablePorConcluir() {
                             </Typography>
                           )}
                         </TableCell>
-                        <TableCell align="center" width={50}>
+                        <TableCell align="center">
                           <Tooltip title="DETALHES" arrow>
                             <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
                               <SvgIconStyle src="/assets/icons/view.svg" />

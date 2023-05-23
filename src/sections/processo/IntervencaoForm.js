@@ -33,6 +33,7 @@ import {
 import { LoadingButton } from '@mui/lab';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // utils
 import { format, add } from 'date-fns';
@@ -46,6 +47,7 @@ import {
   atribuirProcesso,
   resgatarProcesso,
   arquivarProcesso,
+  cancelarProcesso,
   finalizarProcesso,
   encaminharProcesso,
   desarquivarProcesso,
@@ -56,7 +58,7 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // components
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
-import { FormProvider, RHFTextField, RHFUploadMultiFile, RHFSwitch } from '../../components/hook-form';
+import { FormProvider, RHFTextField, RHFUploadMultiFile } from '../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -775,7 +777,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12}>
               <Controller
                 name="parecer"
                 control={control}
@@ -790,18 +792,6 @@ export function ParecerForm({ open, onCancel, processoId }) {
                     )}
                   />
                 )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <RHFSwitch
-                name="validado"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Validar
-                  </Typography>
-                }
-                sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -909,6 +899,45 @@ export function Resgatar({ fluxiId, estadoId, processoId }) {
         color="warning"
         title="Resgatar"
         desc="resgatar este processo"
+      />
+    </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+Cancelar.propTypes = { fluxiId: PropTypes.number, estadoId: PropTypes.number, processoId: PropTypes.number };
+
+export function Cancelar({ fluxiId, estadoId, processoId }) {
+  const dispatch = useDispatch();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+
+  const handleCancelar = () => {
+    const formData = { estadoID: estadoId, fluxoID: fluxiId, perfilID: currentColaborador?.perfil_id };
+    dispatch(
+      cancelarProcesso(JSON.stringify(formData), { mail, id: processoId, perfilId: currentColaborador?.perfil_id })
+    );
+    onClose();
+  };
+
+  return (
+    <>
+      <Tooltip title="CANCELAR" arrow>
+        <Fab color="error" size="small" variant="soft" onClick={onOpen}>
+          <CancelOutlinedIcon />
+        </Fab>
+      </Tooltip>
+
+      <DialogConfirmar
+        open={open}
+        onClose={onClose}
+        isLoading={isSaving}
+        handleOk={handleCancelar}
+        color="error"
+        title="Cancelar"
+        desc="cancelar o envio deste processo para parecer"
       />
     </>
   );

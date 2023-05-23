@@ -108,7 +108,7 @@ export default function Intervencao({ processo, colaboradoresList }) {
         ((meusAmbientes[i]?.is_inicial && fromAgencia && iAmInGrpGerente) ||
           (meusAmbientes[i]?.is_inicial && !fromAgencia) ||
           meusAmbientes[i]?.is_final) &&
-        meusAmbientes[i]?.id === processo?.estado_atual_id
+        Number(meusAmbientes[i]?.id) === Number(processo?.estado_atual_id)
       ) {
         return true;
       }
@@ -204,7 +204,6 @@ export default function Intervencao({ processo, colaboradoresList }) {
         desc="abandonar este processo"
       />
 
-      {/* {(podeEditar() || podeEditarNE()) && ( */}
       <Tooltip title="EDITAR" arrow>
         <Fab
           size="small"
@@ -216,6 +215,7 @@ export default function Intervencao({ processo, colaboradoresList }) {
           <SvgIconStyle src="/assets/icons/editar.svg" />
         </Fab>
       </Tooltip>
+
       {podeArquivar() && (
         <>
           <Tooltip title="ARQUIVAR" arrow>

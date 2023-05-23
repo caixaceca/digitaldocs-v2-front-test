@@ -109,7 +109,7 @@ export default function Estados() {
 
       <RoleBasedGuard hasContent roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          {dataFiltered.length > 1 && (
+          {estados.length > 1 && (
             <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="estados" />
           )}
           <Scrollbar>

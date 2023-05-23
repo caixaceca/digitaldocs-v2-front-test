@@ -136,7 +136,7 @@ export default function Procura() {
   const handleViewRow = (id) => {
     if (parametros?.get('avancada') === 'false') {
       navigate({
-        pathname: PATH_DIGITALDOCS.processos.procurar,
+        pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`,
         search: createSearchParams({
           from: 'procurar',
           avancada: 'false',
@@ -201,8 +201,6 @@ export default function Procura() {
     filterAssunto,
   });
   const isNotFound = !dataFiltered.length;
-
-  console.log(colaboradores);
 
   return (
     <Page title="Pesquisa | DigitalDocs">
@@ -281,7 +279,7 @@ export default function Procura() {
         />
 
         <Card sx={{ p: 1 }}>
-          {dataFiltered.length > 1 && (
+          {newPesquisa.length > 1 && (
             <SearchToolbarProcura
               filterUo={filterUo}
               estadosList={estadosList}

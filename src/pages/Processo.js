@@ -48,7 +48,7 @@ import {
   HistoricoProcessoAnt,
 } from '../sections/processo';
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
-import { DesarquivarForm, ParecerForm, Resgatar, AtribuirForm } from '../sections/processo/IntervencaoForm';
+import { DesarquivarForm, ParecerForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/IntervencaoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -75,6 +75,7 @@ export default function Processo() {
     colaboradoresEstado,
     isOpenModalDesariquivar,
   } = useSelector((state) => state.digitaldocs);
+  const estadoId = processo?.estado_atual_id;
   const perfilId = currentColaborador?.perfil_id;
   const fromArquivo = from?.get?.('from') === 'arquivo';
   const fromProcurar = from?.get?.('from') === 'procurar';
@@ -86,13 +87,16 @@ export default function Processo() {
   const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
   const hasPareceres = processo?.pareceres && processo?.pareceres?.length > 0;
   const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
-  const estadoAtual = meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id);
+  const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
   const isResponsavel = temNomeacao(currentColaborador) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
 
   const linkNavigate =
     (fromProcurar &&
       from?.get('avancada') === 'false' &&
-      `${PATH_DIGITALDOCS.processos.procurar}?avancada=false&conta=${from?.get?.('conta')}&cliente=${from?.get?.(
+      `${PATH_DIGITALDOCS.processos.procurar}?avancada=false&chave=${from?.get?.('chave')}`) ||
+    (fromProcurar &&
+      from?.get('avancada') === 'true' &&
+      `${PATH_DIGITALDOCS.processos.procurar}?avancada=true&conta=${from?.get?.('conta')}&cliente=${from?.get?.(
         'cliente'
       )}&entidade=${from?.get?.('entidade')}&nentrada=${from?.get?.('nentrada')}&noperacao=${from?.get?.(
         'noperacao'
@@ -137,21 +141,33 @@ export default function Processo() {
     return null;
   };
 
+  const handlePrevNext = (next) => {
+    if (mail && perfilId && processo?.nentrada && estadoId) {
+      dispatch(
+        getItem('prevnext', { mail, perfilId, estadoId, nentrada: processo?.nentrada, next, estado: processo?.nome })
+      );
+    } else {
+      navigate(linkNavigate);
+    }
+  };
+
   useEffect(() => {
     if (done === 'aceitado') {
       enqueueSnackbar('Processo aceitado com sucesso', { variant: 'success' });
     } else if (done === 'arquivado') {
       enqueueSnackbar('Processo arquivado com sucesso', { variant: 'success' });
-      navigate(linkNavigate);
+      handlePrevNext(true);
     } else if (done === 'realizada') {
       enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
       dispatch(resetItem('processo'));
-      navigate(linkNavigate);
+      handlePrevNext(true);
     } else if (done === 'resgatado') {
       enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
+    } else if (done === 'cancelado') {
+      enqueueSnackbar('Envio cancelado com sucesso', { variant: 'success' });
     } else if (done === 'finalizado') {
       enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
-      navigate(linkNavigate);
+      handlePrevNext(true);
     } else if (done === 'abandonado') {
       enqueueSnackbar('Processo abandonado com sucesso', { variant: 'success' });
       navigate(linkNavigate);
@@ -167,15 +183,19 @@ export default function Processo() {
   }, [done]);
 
   useEffect(() => {
-    if (error) {
+    const errorStd = error[0]?.msg || error?.error || error;
+    if (errorStd) {
       enqueueSnackbar(
-        error === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
-          ? 'Processo não encontrado ou não tens acesso a este item'
-          : error[0]?.msg || error,
+        errorStd === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
+          ? 'Processo não encontrado ou não tens acesso'
+          : errorStd,
         {
-          variant: 'error',
+          variant: errorStd?.includes('Sem mais processos disponíveis no estado') ? 'info' : 'error',
         }
       );
+      if (errorStd?.includes('Sem mais processos disponíveis no estado')) {
+        navigate(linkNavigate);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -194,15 +214,15 @@ export default function Processo() {
         dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('devdop')?.id }));
       } else if (processo?.nome === 'Diário' && idEstado('diario')?.id) {
         dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('diario')?.id }));
-      } else if (processo?.estado_atual_id) {
-        dispatch(getItem('colaboradoresEstado', { mail, id: processo?.estado_atual_id, perfilId }));
+      } else if (estadoId) {
+        dispatch(getItem('colaboradoresEstado', { mail, id: estadoId, perfilId }));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mail, dispatch, perfilId, processo?.nome, processo?.estado_atual_id]);
+  }, [mail, dispatch, perfilId, processo?.nome, estadoId]);
 
   const handleAceitar = () => {
-    const formData = { fluxoID: processo?.fluxo_id, perfilID: perfilId, estadoID: processo?.estado_atual_id };
+    const formData = { fluxoID: processo?.fluxo_id, perfilID: perfilId, estadoID: estadoId };
     dispatch(aceitarProcesso(JSON.stringify(formData), { processoId: processo?.id, perfilId, mail }));
   };
 
@@ -246,6 +266,17 @@ export default function Processo() {
     return false;
   };
 
+  const podeCancelar = () => {
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.id === processo?.estado_atual_id) {
+        return true;
+      }
+      i += 1;
+    }
+    return false;
+  };
+
   const handlePedirAcesso = () => {
     dispatch(pedirAcessoProcesso(perfilId, processo?.id, mail));
   };
@@ -260,14 +291,6 @@ export default function Processo() {
 
   const handleParecer = () => {
     dispatch(selectItem(podeDarParecer()));
-  };
-
-  const handlePrevNext = (next) => {
-    if (mail && perfilId && processo?.nentrada && processo?.estado_atual_id) {
-      dispatch(
-        getItem('prevnext', { mail, perfilId, estadoId: processo?.estado_atual_id, nentrada: processo?.nentrada, next })
-      );
-    }
   };
 
   return (
@@ -349,6 +372,13 @@ export default function Processo() {
                     </>
                   ) : (
                     <>
+                      {processo?.in_paralelo_mode && podeCancelar() && (
+                        <Cancelar
+                          processoId={processo?.id}
+                          fluxiId={processo?.fluxo_id}
+                          estadoId={processo?.estado_atual_id}
+                        />
+                      )}
                       {!processo?.is_lock && !processo?.in_paralelo_mode && (
                         <>
                           {podeAceitarAtribuir() && (
@@ -408,7 +438,7 @@ export default function Processo() {
           <Grid container spacing={3}>
             {!processo ? (
               <Grid item xs={12}>
-                <SearchNotFound404 message="Processo não encontrado ou não tens acesso a este item..." />
+                <SearchNotFound404 message="Processo não encontrado ou não tens acesso..." />
               </Grid>
             ) : (
               <>
@@ -442,7 +472,6 @@ export default function Processo() {
                   <>
                     {hasHistorico && (
                       <Grid item xs={12} lg={hasHPrisoes && 6}>
-                        <HistoricoProcessoAnt historico={processo?.htransicoes} />
                         <HistoricoProcessoAnt historico={processo?.htransicoes} />
                       </Grid>
                     )}

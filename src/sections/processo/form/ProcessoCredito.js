@@ -191,7 +191,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
           formData.append('montante_aprovado', values.montante_aprovado);
           formData.append('data_aprovacao', format(values.data_aprovacao, 'yyyy-MM-dd'));
         } else {
-          formData.append('data_aprovacao', null);
+          formData.append('data_aprovacao', '');
           formData.append('montante_aprovado', '');
         }
         if (values.contratado) {
@@ -206,7 +206,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
           formData.append('taxa_juro', '');
           formData.append('escalao_decisao', '');
           formData.append('prazo_amortizacao', '');
-          formData.append('data_contratacao', null);
+          formData.append('data_contratacao', '');
           formData.append('montante_contratado', '');
         }
         if (values.obs) {

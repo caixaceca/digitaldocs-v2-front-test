@@ -27,8 +27,6 @@ import Image from '../../components/Image';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
 import SearchNotFound from '../../components/table/SearchNotFound';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -73,7 +71,7 @@ export default function Ajuda() {
               sx={{ p: 0.5 }}
             >
               <Image
-                src={`${PATH_DIGITALDOCS.general.noPath}assets/manual_utilizador.png`}
+                src="https://intranet.caixa.cv/assets/manual_utilizador.png"
                 sx={{ borderRadius: '10px !important' }}
               />
             </Button>

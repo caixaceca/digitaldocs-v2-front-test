@@ -14,6 +14,7 @@ const initialState = {
   isSaving: false,
   isLoading: false,
   isOpenModal: false,
+  isOpenParecer: false,
   isLoadingAnexo: false,
   iAmInGrpGerente: false,
   isOpenModalAnexo: false,
@@ -36,6 +37,7 @@ const initialState = {
   selectedEstado: null,
   selectedAcesso: null,
   selectedAnexoId: null,
+  selectedParecer: null,
   selectedTransicao: null,
   selectedMeuEstado: null,
   indicadoresArquivo: null,
@@ -67,9 +69,12 @@ const initialState = {
   pedidosAcesso: [],
   trabalhadosUo: [],
   historicoFluxo: [],
+  entradasCredito: [],
   indicadoresTipos: [],
   motivosPendencias: [],
+  creditosAprovados: [],
   colaboradoresEstado: [],
+  creditosContratados: [],
   destinosDesarquivamento: [],
 };
 
@@ -157,6 +162,11 @@ const slice = createSlice({
         case 'trabalhados':
           state.trabalhados = [];
           break;
+        case 'estatisticaCredito':
+          state.entradasCredito = [];
+          state.creditosAprovados = [];
+          state.creditosContratados = [];
+          break;
 
         default:
           break;
@@ -191,6 +201,18 @@ const slice = createSlice({
 
     getIndicadoresVolumeSuccess(state, action) {
       state.volume = action.payload;
+    },
+
+    getEntradaCreditosSuccess(state, action) {
+      state.entradasCredito = action.payload;
+    },
+
+    getCreditosAprovadosSuccess(state, action) {
+      state.creditosAprovados = action.payload;
+    },
+
+    getCreditosContratadosSuccess(state, action) {
+      state.creditosContratados = action.payload;
     },
 
     getIndicadoresTiposSuccess(state, action) {
@@ -594,6 +616,16 @@ const slice = createSlice({
       state.selectedAnexoId = null;
     },
 
+    selectParecer(state, action) {
+      state.selectedParecer = action.payload;
+      state.isOpenParecer = true;
+    },
+
+    closeParecer(state) {
+      state.isOpenParecer = false;
+      state.selectedParecer = null;
+    },
+
     resetAnexo(state) {
       state.anexo = null;
       state.anexoParecer = null;
@@ -612,6 +644,8 @@ export const {
   selectItem,
   resetAnexo,
   selectAnexo,
+  closeParecer,
+  selectParecer,
   changeMeuFluxo,
   closeModalAnexo,
   changeMeuAmbiente,
@@ -1113,6 +1147,25 @@ export function getIndicadores(item, params) {
           dispatch(slice.actions.getIndicadoresDuracaoSuccess(response.data));
           break;
         }
+        case 'estatisticaCredito': {
+          dispatch(slice.actions.resetItem('estatisticaCredito'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=entrada&ano=${params?.ano}&mes=${params?.mes}`,
+            options
+          );
+          dispatch(slice.actions.getEntradaCreditosSuccess(response.data));
+          const aprovado = await axios.get(
+            `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=aprovado&ano=${params?.ano}&mes=${params?.mes}`,
+            options
+          );
+          dispatch(slice.actions.getCreditosAprovadosSuccess(aprovado.data));
+          const contratado = await axios.get(
+            `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=contratado&ano=${params?.ano}&mes=${params?.mes}`,
+            options
+          );
+          dispatch(slice.actions.getCreditosContratadosSuccess(contratado.data));
+          break;
+        }
 
         default:
           break;
@@ -1227,15 +1280,19 @@ export function getItem(item, params) {
       if (item === 'processo') {
         dispatch(slice.actions.resetItem('processo'));
       }
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
+      if (item === 'prevnext') {
+        dispatch(slice.actions.hasError(`Sem mais processos disponíveis no estado ${params?.estado}`));
+      } else {
+        dispatch(
+          slice.actions.hasError(
+            error.response?.data?.error ||
+              error.response?.data?.errop ||
+              error.response?.data ||
+              error?.message ||
+              'Ocorreu um erro...'
+          )
+        );
+      }
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1810,7 +1867,11 @@ export function aceitarProcesso(dados, params) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
+      dispatch(
+        slice.actions.hasError(
+          error[0]?.msg || error?.response?.data?.detail || error.response?.data?.errop || 'Ocorreu um erro...'
+        )
+      );
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1907,6 +1968,34 @@ export function resgatarProcesso(dados, id, mail) {
       const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${id}`, dados, options);
       dispatch(slice.actions.getProcessoSuccess(response.data));
       dispatch(slice.actions.done('resgatado'));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch(slice.actions.resetDone());
+    } catch (error) {
+      dispatch(
+        slice.actions.hasError(
+          error[0]?.msg || error?.response?.data?.detail || error.response?.data || 'Ocorreu um erro...'
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch(slice.actions.resetError());
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export function cancelarProcesso(dados, params) {
+  return async (dispatch) => {
+    dispatch(slice.actions.startSaving());
+    try {
+      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
+      await axios.patch(`${BASEURLDD}/v1/processos/cancelar/${params?.id}`, dados, options);
+      const response = await axios.get(
+        `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
+        options
+      );
+      dispatch(slice.actions.getProcessoSuccess(response.data));
+      dispatch(slice.actions.done('cancelado'));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {

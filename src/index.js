@@ -2,6 +2,9 @@ import { LicenseInfo } from '@mui/x-license-pro';
 // i18n
 import './locales/i18n';
 
+// styles
+import './style.css';
+
 // highlight
 import './utils/highlight';
 

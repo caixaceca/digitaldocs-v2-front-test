@@ -79,11 +79,7 @@ export default function Transicao() {
     dispatch(closeModal());
   };
 
-  const dataFiltered = applySortFilter({
-    transicoes,
-    comparator: getComparator(order, orderBy),
-    filterSearch,
-  });
+  const dataFiltered = applySortFilter({ transicoes, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -105,7 +101,7 @@ export default function Transicao() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
+        {transicoes.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

@@ -46,8 +46,8 @@ const TABLE_HEAD = [
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
-  { id: 'criado_em', label: 'Criado', align: 'left' },
-  { id: 'empty' },
+  { id: 'criado_em', label: 'Criado', align: 'left', width: 50 },
+  { id: 'empty', width: 50 },
 ];
 
 // ----------------------------------------------------------------------
@@ -191,7 +191,7 @@ export default function TableEntradas() {
               disableFuture
               slots={{ field: SingleInputDateRangeField }}
               value={[add(new Date(data[0]), { hours: 2 }), add(new Date(data[1]), { hours: 2 })]}
-              slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 220 } } }}
+              slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 240 } } }}
               onChange={(newValue) => {
                 setFilter({
                   tab: 'entradas',
@@ -199,10 +199,10 @@ export default function TableEntradas() {
                   assunto: filter?.get('assunto'),
                   colaborador: filter?.get('colaborador'),
                   filterSearch: filter?.get('filterSearch'),
-                  datai: format(new Date(newValue?.[0]), 'yyyy-MM-dd'),
-                  dataf: format(new Date(newValue?.[1]), 'yyyy-MM-dd'),
+                  datai: format(newValue?.[0], 'yyyy-MM-dd'),
+                  dataf: format(newValue?.[1], 'yyyy-MM-dd'),
                 });
-                setData([format(new Date(newValue?.[0]), 'yyyy-MM-dd'), format(new Date(newValue?.[1]), 'yyyy-MM-dd')]);
+                setData([format(newValue?.[0], 'yyyy-MM-dd'), format(newValue?.[1], 'yyyy-MM-dd')]);
               }}
             />
             {(data[0] !== format(new Date(), 'yyyy-MM-dd') || data[1] !== format(new Date(), 'yyyy-MM-dd')) && (
@@ -235,7 +235,7 @@ export default function TableEntradas() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {dataFiltered.length > 1 && (
+        {newEntradas.length > 1 && (
           <SearchToolbarEntradas
             tab="entradas"
             filter={filter}
@@ -279,7 +279,7 @@ export default function TableEntradas() {
                         </TableCell>
                         <TableCell>{row?.assunto}</TableCell>
                         <TableCell>{row?.nome}</TableCell>
-                        <TableCell sx={{ width: 10 }}>
+                        <TableCell>
                           {row?.criado_em && (
                             <Stack direction="row" spacing={0.5} alignItems="center">
                               <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
@@ -297,7 +297,7 @@ export default function TableEntradas() {
                             </Stack>
                           )}
                         </TableCell>
-                        <TableCell align="center" width={50}>
+                        <TableCell align="center">
                           <Tooltip title="DETALHES" arrow>
                             <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
                               <SvgIconStyle src="/assets/icons/view.svg" />

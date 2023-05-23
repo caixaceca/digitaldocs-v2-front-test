@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from '../../redux/store';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
+import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
@@ -158,8 +159,8 @@ export default function TableProcessos({ from }) {
         'Estado',
       align: 'left',
     },
-    { id: 'data_last_transicao', label: 'Desde', align: 'center' },
-    { id: 'empty' },
+    { id: 'data_last_transicao', label: 'Desde', align: 'center', width: 50 },
+    { id: 'empty', width: 50 },
   ];
 
   return (
@@ -242,7 +243,16 @@ export default function TableProcessos({ from }) {
                         </TableCell>
                         <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
                         <TableCell>
-                          {from === 'pendentes' && row?.motivo}
+                          {from === 'pendentes' && (
+                            <>
+                              <Typography variant="body2">{row?.motivo}</Typography>
+                              {row?.nome && (
+                                <Label variant="ghost" color="default" sx={{ mt: 1 }}>
+                                  {row?.nome}
+                                </Label>
+                              )}
+                            </>
+                          )}
                           {from === 'tarefas' && row.nome && row?.nome}
                           {from === 'tarefas' && !row.nome && meuAmbiente.nome}
                           {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
@@ -265,7 +275,7 @@ export default function TableProcessos({ from }) {
                             </>
                           )}
                         </TableCell>
-                        <TableCell align="center" width={50}>
+                        <TableCell align="center">
                           <Tooltip title="DETALHES" arrow>
                             <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
                               <SvgIconStyle src="/assets/icons/view.svg" />
