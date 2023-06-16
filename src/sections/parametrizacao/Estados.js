@@ -40,7 +40,7 @@ const TABLE_HEAD = [
 export default function Estados() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mail, perfis, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, perfis, cc } = useSelector((state) => state.intranet);
   const { estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -55,18 +55,22 @@ export default function Estados() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'id' });
+  } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
   const [filterSearch, setFilterSearch] = useSearchParams('');
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('estados', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('estados', { mail, perfilId: cc?.perfil_id }));
     }
-    if (mail && perfis.length === 0) {
+  }, [dispatch, cc?.perfil_id, mail]);
+
+  useEffect(() => {
+    if (mail && cc?.perfil_id && perfis.length === 0) {
       dispatch(getFromIntranet('perfis', { mail }));
     }
-  }, [dispatch, perfis, currentColaborador?.perfil_id, mail]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -78,7 +82,7 @@ export default function Estados() {
   };
 
   const handleUpdate = (id) => {
-    dispatch(getItem('estado', { id, mail, from: 'estados', perfilId: currentColaborador?.perfil_id }));
+    dispatch(getItem('estado', { id, mail, from: 'estados', perfilId: cc?.perfil_id }));
   };
 
   const handleView = (id) => {
@@ -127,16 +131,16 @@ export default function Estados() {
                           <TableCell>{row.nome}</TableCell>
                           <TableCell align="center">
                             {row.is_inicial ? (
-                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
                             ) : (
-                              <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                              <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
                             )}
                           </TableCell>
                           <TableCell align="center">
                             {row.is_final ? (
-                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
                             ) : (
-                              <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                              <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
                             )}
                           </TableCell>
                           <TableCell align="right" width={130}>

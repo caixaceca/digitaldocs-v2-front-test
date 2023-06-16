@@ -8,14 +8,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { LoadingButton } from '@mui/lab';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Box, Grid, TextField, Autocomplete, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Grid, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { atribuirAcesso } from '../../redux/slices/digitaldocs';
 // components
-import { FormProvider } from '../../components/hook-form';
+import { FormProvider, RHFAutocompleteObject } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
 
   const colaboradoresList = colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
 
@@ -53,9 +53,9 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
     () => ({
       perfilID: null,
       datalimite: null,
-      perfilIDCC: currentColaborador?.perfil_id,
+      perfilIDCC: cc?.perfil_id,
     }),
-    [currentColaborador?.perfil_id]
+    [cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -83,21 +83,10 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <Controller
+              <RHFAutocompleteObject
                 name="perfilID"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(colaboradoresList, getComparator('asc', 'label'))}
-                    getOptionLabel={(option) => option?.label}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Colaborador" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Colaborador"
+                options={applySort(colaboradoresList, getComparator('asc', 'label'))}
               />
             </Grid>
             <Grid item xs={12}>

@@ -35,7 +35,7 @@ const TABLE_HEAD = [
 
 export default function Transicao() {
   const dispatch = useDispatch();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { fluxo, estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
   const transicoes = [];
   fluxo?.transicoes?.forEach((row) => {
@@ -68,7 +68,7 @@ export default function Transicao() {
   };
 
   const handleUpdate = (id) => {
-    dispatch(getItem('tansicao', { id, mail, from: 'transicoes', perfilId: currentColaborador?.perfil_id }));
+    dispatch(getItem('tansicao', { id, mail, from: 'transicoes', perfilId: cc?.perfil_id }));
   };
 
   const handleAdd = () => {

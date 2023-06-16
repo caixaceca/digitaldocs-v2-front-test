@@ -69,7 +69,7 @@ export default function PerfisEstado() {
   const { isLoading, isSaving, estado, done, isOpenModalAnexo, selectedAnexoId } = useSelector(
     (state) => state.digitaldocs
   );
-  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
+  const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
 
   const {
     page,
@@ -98,11 +98,11 @@ export default function PerfisEstado() {
   });
 
   useEffect(() => {
-    if (mail && id && currentColaborador?.perfil_id) {
-      dispatch(getItem('estado', { id, mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && id && cc?.perfil_id) {
+      dispatch(getItem('estado', { id, mail, perfilId: cc?.perfil_id }));
     }
     return () => dispatch(resetItem('estado'));
-  }, [dispatch, currentColaborador?.perfil_id, mail, id]);
+  }, [dispatch, cc?.perfil_id, mail, id]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -119,7 +119,7 @@ export default function PerfisEstado() {
         mail,
         id: selectedAnexoId,
         mensagem: 'Perfil eliminado',
-        perfilId: currentColaborador?.perfil_id,
+        perfilId: cc?.perfil_id,
       })
     );
   };

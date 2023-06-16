@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
 import { Stack, Typography } from '@mui/material';
+//
+import Label from './Label';
 
 // ----------------------------------------------------------------------
 
@@ -12,32 +14,25 @@ export default function Panel({ label, children, sx }) {
       direction="row"
       alignItems="stretch"
       sx={{
+        p: 0.5,
+        pl: 1,
         flexGrow: 1,
-        borderRadius: 0.5,
+        borderRadius: 1,
         overflow: 'hidden',
-        border: (theme) => `solid 1px ${theme.palette.divider}`,
+        bgcolor: 'background.neutral',
+        border: (theme) => `dashed 1px ${theme.palette.divider}`,
         ...sx,
       }}
     >
-      <Stack
-        component="span"
-        direction="row"
-        alignItems="center"
-        sx={{
-          px: 1,
-          color: 'text.secondary',
-          bgcolor: 'background.neutral',
-          borderRight: (theme) => `solid 1px ${theme.palette.divider}`,
-        }}
-      >
-        <Typography noWrap variant="subtitle2">
+      <Stack component="span" direction="row" alignItems="center" sx={{ mr: 1, color: 'text.primary' }}>
+        <Typography noWrap variant="body2">
           {label}
         </Typography>
       </Stack>
 
-      <Stack component="span" direction="row" alignItems="center" sx={{ px: 1, py: 0.5, color: 'text.primary' }}>
+      <Label variant="filled" sx={{ textTransform: 'none', py: 1.75 }}>
         {children}
-      </Stack>
+      </Label>
     </Stack>
   );
 }

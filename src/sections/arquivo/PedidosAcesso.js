@@ -36,7 +36,7 @@ export default function PedidosAcesso() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pedidosAcesso, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
 
   const {
     page,
@@ -55,10 +55,10 @@ export default function PedidosAcesso() {
   const [filterSearch, setFilterSearch] = useSearchParams();
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getArquivos('pedidosAcesso', currentColaborador?.perfil_id, mail));
+    if (mail && cc?.perfil_id) {
+      dispatch(getArquivos('pedidosAcesso', cc?.perfil_id, mail));
     }
-  }, [dispatch, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);

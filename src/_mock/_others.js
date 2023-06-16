@@ -59,4 +59,4 @@ export const segmentos = ['Empresa', 'Particular', 'Produtor Individual', 'Entid
 
 export const escaloes = ['1º Comitê', '2º Comitê', '3º Comitê'];
 
-export const situacoes = ['Em análise', 'Aprovado', 'Contratado', 'Indeferido'];
+export const situacoes = ['Em análise', 'Aprovado', 'Contratado', 'Indeferido', 'Desistido'];

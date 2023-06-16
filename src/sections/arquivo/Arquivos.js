@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
+import { entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -49,7 +50,7 @@ const TABLE_HEAD = [
 export default function Arquivos() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { arquivos, indicadoresArquivo, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -69,11 +70,11 @@ export default function Arquivos() {
   const [filterSearch, setFilterSearch] = useSearchParams();
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getArquivos('arquivados', currentColaborador?.perfil_id, mail));
-      dispatch(getAll('indicadores arquivos', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getArquivos('arquivados', cc?.perfil_id, mail));
+      dispatch(getAll('indicadores arquivos', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -135,41 +136,27 @@ export default function Arquivos() {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={5} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    let _entidades = '';
-                    row?.entidades?.split(';')?.forEach((_row, index) => {
-                      _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
-                    });
-                    return (
-                      <TableRow hover key={row.referencia}>
-                        <TableCell>{row.referencia}</TableCell>
-                        <TableCell>
-                          {row?.titular ? (
-                            row.titular
-                          ) : (
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                              Não identificado
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>{_entidades}</TableCell>
-                        <TableCell align="center">
-                          {row?.data_last_transicao && (
-                            <Typography variant="body2" noWrap>
-                              {ptDateTime(row?.data_last_transicao)}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow hover key={row.referencia}>
+                      <TableCell>{row.referencia}</TableCell>
+                      <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
+                      <TableCell>{entidadesParse(row?.entidades) || noDados()}</TableCell>
+                      <TableCell align="center">
+                        {row?.data_last_transicao && (
+                          <Typography variant="body2" noWrap>
+                            {ptDateTime(row?.data_last_transicao)}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="DETALHES" arrow>
+                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row)}>
+                            <SvgIconStyle src="/assets/icons/view.svg" />
+                          </Fab>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
 

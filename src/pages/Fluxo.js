@@ -42,18 +42,22 @@ export default function Fluxo() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('transicoes');
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { fluxo, estados } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (mail && estados?.length === 0 && currentColaborador?.perfil_id) {
-      dispatch(getAll('estados', { mail, perfilId: currentColaborador?.perfil_id }));
-    }
-    if (mail && id && currentColaborador?.perfil_id) {
-      dispatch(getItem('fluxo', { id, mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && id && cc?.perfil_id) {
+      dispatch(getItem('fluxo', { id, mail, perfilId: cc?.perfil_id }));
     }
     return () => dispatch(resetItem('fluxo'));
-  }, [dispatch, estados, currentColaborador?.perfil_id, mail, id]);
+  }, [dispatch, cc?.perfil_id, mail, id]);
+
+  useEffect(() => {
+    if (mail && cc?.perfil_id && estados?.length === 0) {
+      dispatch(getAll('estados', { mail, perfilId: cc?.perfil_id }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);

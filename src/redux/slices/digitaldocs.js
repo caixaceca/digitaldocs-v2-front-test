@@ -9,8 +9,11 @@ import { BASEURLDD } from '../../utils/axios';
 const initialState = {
   done: '',
   error: '',
+  fluxoId: '',
+  estadoId: '',
   processoId: '',
   previewType: '',
+  isAdmin: false,
   isSaving: false,
   isLoading: false,
   isOpenModal: false,
@@ -18,7 +21,6 @@ const initialState = {
   isLoadingAnexo: false,
   iAmInGrpGerente: false,
   isOpenModalAnexo: false,
-  isLoadingIndicadores: false,
   isOpenModalDesariquivar: false,
   anexo: null,
   fluxo: null,
@@ -32,23 +34,17 @@ const initialState = {
   meuAmbiente: null,
   selectedItem: null,
   anexoParecer: null,
-  selectedFluxo: null,
-  selectedOrigem: null,
-  selectedEstado: null,
-  selectedAcesso: null,
+  estadoFilter: null,
   selectedAnexoId: null,
   selectedParecer: null,
-  selectedTransicao: null,
   selectedMeuEstado: null,
   indicadoresArquivo: null,
   fluxos: [],
   linhas: [],
   versoes: [],
-  volume: [],
   estados: [],
   origens: [],
   acessos: [],
-  duracao: [],
   pesquisa: [],
   arquivos: [],
   entradas: [],
@@ -62,17 +58,16 @@ const initialState = {
   trabalhados: [],
   porConcluir: [],
   indicadores: [],
-  tempoExecucao: [],
   visualizacoes: [],
   meusAmbientes: [],
   meusProcessos: [],
   pedidosAcesso: [],
   trabalhadosUo: [],
-  historicoFluxo: [],
   entradasCredito: [],
-  indicadoresTipos: [],
   motivosPendencias: [],
   creditosAprovados: [],
+  creditosDesistidos: [],
+  creditosIndeferidos: [],
   colaboradoresEstado: [],
   creditosContratados: [],
   destinosDesarquivamento: [],
@@ -133,7 +128,6 @@ const slice = createSlice({
           state.isLoadingAnexo = false;
           state.versoes = [];
           state.visualizacoes = [];
-          state.historicoFluxo = [];
           break;
         case 'fluxo':
           state.fluxo = null;
@@ -147,39 +141,20 @@ const slice = createSlice({
         case 'indicadores':
           state.indicadores = [];
           break;
-        case 'volume':
-          state.volume = [];
-          break;
-        case 'indicadoresTipos':
-          state.indicadoresTipos = [];
-          break;
-        case 'tempoExecucao':
-          state.tempoExecucao = [];
-          break;
-        case 'duracao':
-          state.duracao = [];
-          break;
         case 'trabalhados':
           state.trabalhados = [];
           break;
         case 'estatisticaCredito':
           state.entradasCredito = [];
           state.creditosAprovados = [];
+          state.creditosDesistidos = [];
+          state.creditosIndeferidos = [];
           state.creditosContratados = [];
           break;
 
         default:
           break;
       }
-    },
-
-    getHistoticoFluxoSuccess(state, action) {
-      state.historicoFluxo = action.payload;
-    },
-
-    getSelectFluxoSuccess(state, action) {
-      state.isOpenModal = true;
-      state.selectedFluxo = action.payload;
     },
 
     getProcessosSuccess(state, action) {
@@ -195,12 +170,7 @@ const slice = createSlice({
     },
 
     getIndicadoresSuccess(state, action) {
-      state.isLoadingIndicadores = false;
       state.indicadores = action.payload;
-    },
-
-    getIndicadoresVolumeSuccess(state, action) {
-      state.volume = action.payload;
     },
 
     getEntradaCreditosSuccess(state, action) {
@@ -211,20 +181,16 @@ const slice = createSlice({
       state.creditosAprovados = action.payload;
     },
 
+    getCreditosDesistidosSuccess(state, action) {
+      state.creditosDesistidos = action.payload;
+    },
+
+    getCreditosIndeferidosSuccess(state, action) {
+      state.creditosIndeferidos = action.payload;
+    },
+
     getCreditosContratadosSuccess(state, action) {
       state.creditosContratados = action.payload;
-    },
-
-    getIndicadoresTiposSuccess(state, action) {
-      state.indicadoresTipos = action.payload;
-    },
-
-    getTempoExecucaoSuccess(state, action) {
-      state.tempoExecucao = action.payload;
-    },
-
-    getIndicadoresDuracaoSuccess(state, action) {
-      state.duracao = action.payload;
     },
 
     getTrabalhadosSuccess(state, action) {
@@ -302,12 +268,8 @@ const slice = createSlice({
     },
 
     getEstadoSuccess(state, action) {
+      state.estadoId = '';
       state.estado = action.payload;
-    },
-
-    getSelectEstadoSuccess(state, action) {
-      state.isOpenModal = true;
-      state.selectedEstado = action.payload;
     },
 
     getColaboradoresEstadoSuccess(state, action) {
@@ -326,18 +288,8 @@ const slice = createSlice({
       state.origem = action.payload;
     },
 
-    getSelectOrigemSuccess(state, action) {
-      state.isOpenModal = true;
-      state.selectedOrigem = action.payload;
-    },
-
     getTransicoesSuccess(state, action) {
       state.transicoes = action.payload;
-    },
-
-    getSelectTransicaoSuccess(state, action) {
-      state.isOpenModal = true;
-      state.selectedTransicao = action.payload;
     },
 
     getTransicaoSuccess(state, action) {
@@ -345,12 +297,15 @@ const slice = createSlice({
     },
 
     getFluxoSuccess(state, action) {
+      state.fluxoId = '';
       state.fluxo = action.payload;
     },
 
     getMeusAmbientesSuccess(state, action) {
       let grpGerente = false;
       state.meusAmbientes = action.payload;
+      const firstAmbiente = action.payload?.find((row) => row?.nome?.includes('Gerência') || row?.id > 0);
+      state.estadoFilter = firstAmbiente ? { id: firstAmbiente?.id, label: firstAmbiente?.nome } : null;
       action.payload?.forEach((row, index) => {
         if (row?.nome?.indexOf('Gerência') !== -1) {
           grpGerente = index;
@@ -398,16 +353,14 @@ const slice = createSlice({
         if (!state.meusacessos.includes(acesso)) {
           state.meusacessos.push(acesso);
         }
+        if (acesso === 'Todo-111' || acesso === 'Todo-110') {
+          state.isAdmin = true;
+        }
       });
     },
 
     getAcessoSuccess(state, action) {
       state.acesso = action.payload;
-    },
-
-    getSelectAcessoSuccess(state, action) {
-      state.isOpenModal = true;
-      state.selectedAcesso = action.payload;
     },
 
     getAnexoSuccess(state, action) {
@@ -426,11 +379,11 @@ const slice = createSlice({
     },
 
     createFluxoSuccess(state, action) {
-      state.fluxos.push(action.payload);
+      state.fluxoId = action.payload.id;
     },
 
     createEstadoSuccess(state, action) {
-      state.estados.push(action.payload);
+      state.estadoId = action.payload.id;
     },
 
     createLinhaSuccess(state, action) {
@@ -458,13 +411,11 @@ const slice = createSlice({
     },
 
     updateFluxoSuccess(state, action) {
-      const index = state.fluxos.findIndex((row) => row.id === action.payload.id);
-      state.fluxos[index] = action.payload;
+      state.fluxoId = action.payload.id;
     },
 
     updateEstadoSuccess(state, action) {
-      const index = state.estados.findIndex((row) => row.id === action.payload.id);
-      state.estados[index] = action.payload;
+      state.estadoId = action.payload.id;
     },
 
     updateTransicaoSuccess(state, action) {
@@ -579,6 +530,7 @@ const slice = createSlice({
     },
 
     openModal(state) {
+      state.selectedItem = null;
       state.isOpenModal = true;
     },
 
@@ -586,12 +538,7 @@ const slice = createSlice({
       state.isOpenModal = false;
       state.isOpenModalDesariquivar = false;
       state.estado = null;
-      state.selectedFluxo = null;
       state.selectedItem = null;
-      state.selectedOrigem = null;
-      state.selectedEstado = null;
-      state.selectedAcesso = null;
-      state.selectedTransicao = null;
       state.selectedMeuEstado = null;
       state.destinosDesarquivamento = [];
     },
@@ -621,6 +568,10 @@ const slice = createSlice({
       state.isOpenParecer = true;
     },
 
+    setEstadoFilter(state, action) {
+      state.estadoFilter = action.payload;
+    },
+
     closeParecer(state) {
       state.isOpenParecer = false;
       state.selectedParecer = null;
@@ -648,6 +599,7 @@ export const {
   selectParecer,
   changeMeuFluxo,
   closeModalAnexo,
+  setEstadoFilter,
   changeMeuAmbiente,
   getSelectMeuEstadoSuccess,
 } = slice.actions;
@@ -823,30 +775,6 @@ export function getAll(item, params) {
           }
           break;
         }
-        // case 'retidos': {
-        //   dispatch(slice.actions.resetItem('processo'));
-        //   dispatch(slice.actions.resetItem('processos'));
-        //   if (params?.estadoId === -1) {
-        //     const response = await axios.get(
-        //       `${BASEURLDD}/v1/processos/meuspendentes/all/${params?.perfilId}`,
-        //       options
-        //     );
-        //     dispatch(slice.actions.getProcessosSuccess(response.data));
-        //   } else if (params?.fluxoId === -1) {
-        //     const response = await axios.get(
-        //       `${BASEURLDD}/v1/processos/meuspendentes/estado/${params?.estadoId}/${params?.perfilId}`,
-        //       options
-        //     );
-        //     dispatch(slice.actions.getProcessosSuccess(response.data));
-        //   } else {
-        //     const response = await axios.get(
-        //       `${BASEURLDD}/v1/processos/meuspendentes/${params?.fluxoId}/${params?.estadoId}?perfilID=${params?.perfilId}`,
-        //       options
-        //     );
-        //     dispatch(slice.actions.getProcessosSuccess(response.data));
-        //   }
-        //   break;
-        // }
         case 'pendentes': {
           dispatch(slice.actions.resetItem('processo'));
           dispatch(slice.actions.resetItem('processos'));
@@ -1080,6 +1008,7 @@ export function getAll(item, params) {
 export function getIndicadores(item, params) {
   return async (dispatch) => {
     dispatch(slice.actions.startLoading());
+    dispatch(slice.actions.resetItem('indicadores'));
     try {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
@@ -1088,63 +1017,110 @@ export function getIndicadores(item, params) {
           dispatch(slice.actions.getFyleSystemSuccess(response.data));
           break;
         }
-        case 'indicadoresCriacao': {
-          dispatch(slice.actions.resetItem('indicadores'));
+        case 'criacao': {
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
               params?.uo ? `&uoID=${params?.uo}` : ''
-            }${params?.perfilId1 ? `&perfilID1=${params?.perfilId1}` : ''}`,
+            }${params?.perfil ? `&perfilID1=${params?.perfil}` : ''}`,
             options
           );
           dispatch(slice.actions.getIndicadoresSuccess(response.data));
           break;
         }
-        case 'indicadoresVolume': {
-          dispatch(slice.actions.resetItem('volume'));
+        case 'entradas': {
+          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+            params?.dataf ? `dataf=${params?.dataf}&` : ''
+          }`;
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/top/criacao/${params?.perfilId}?escopo=${params?.escopo}`,
+            params?.datai || params?.dataf
+              ? `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}?${query.substr(0, query.length - 1)}`
+              : `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}`,
             options
           );
-          dispatch(slice.actions.getIndicadoresVolumeSuccess(response.data));
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
           break;
         }
-        case 'indicadoresTipos': {
-          dispatch(slice.actions.resetItem('indicadoresTipos'));
-          const query = `${params?.uoID ? `uoID=${params?.uoID}&` : ''}${
-            params?.perfilPID ? `perfilPID=${params?.perfilPID}&` : ''
+        case 'trabalhados': {
+          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+            params?.dataf ? `dataf=${params?.dataf}&` : ''
+          }`;
+          const response = await axios.get(
+            params?.datai || params?.dataf
+              ? `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}?${query.substr(0, query.length - 1)}`
+              : `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          break;
+        }
+        case 'devolucoesInternas': {
+          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+            params?.dataf ? `dataf=${params?.dataf}&` : ''
+          }`;
+          const response = await axios.get(
+            params?.datai || params?.dataf
+              ? `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}?${query.substr(0, query.length - 1)}`
+              : `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          break;
+        }
+        case 'devolucoesExternas': {
+          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+            params?.dataf ? `dataf=${params?.dataf}&` : ''
+          }`;
+          const response = await axios.get(
+            params?.datai || params?.dataf
+              ? `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}?${query.substr(0, query.length - 1)}`
+              : `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          break;
+        }
+        case 'volume': {
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/top/criacao/${params?.perfilId}?escopo=${params?.agrupamento}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          break;
+        }
+        case 'tipos': {
+          const query = `${params?.uo ? `uoID=${params?.uo}&` : ''}${
+            params?.perfil ? `perfilPID=${params?.perfil}&` : ''
           }${params?.datai ? `datai=${params?.datai}&` : ''}${params?.dataf ? `dataf=${params?.dataf}&` : ''}`;
           const response = await axios.get(
-            params?.uoID || params?.perfilPID || params?.datai || params?.dataf
+            params?.uo || params?.perfil || params?.datai || params?.dataf
               ? `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}?${query.substr(0, query.length - 1)}`
               : `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}`,
             options
           );
-          dispatch(slice.actions.getIndicadoresTiposSuccess(response.data));
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
           break;
         }
-        case 'tempoExecucao': {
-          dispatch(slice.actions.resetItem('tempoExecucao'));
-          const query = `${params?.estadoIDFilter ? `estadoIDFilter=${params?.estadoIDFilter}&` : ''}${
-            params?.fluxoIDFilter ? `fluxoIDFilter=${params?.fluxoIDFilter}&` : ''
-          }${params?.perfilIDFilter ? `perfilIDFilter=${params?.perfilIDFilter}&` : ''}`;
+        case 'execucao': {
+          const query = `${params?.estado ? `estadoIDFilter=${params?.estado}&` : ''}${
+            params?.fluxo ? `fluxoIDFilter=${params?.fluxo}&` : ''
+          }${params?.perfil ? `perfilIDFilter=${params?.perfil}&` : ''}`;
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query.substr(0, query.length - 1)}`,
             options
           );
-          dispatch(slice.actions.getTempoExecucaoSuccess(response.data));
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
           break;
         }
         case 'duracao': {
-          dispatch(slice.actions.resetItem('duracao'));
-          const perfil = params?.perfilPID ? `&perfilPID=${params?.perfilPID}` : '';
-          const fluxo = params?.fluxoID ? `&fluxoID=${params?.fluxoID}` : '';
+          const perfil = params?.perfil ? `&perfilPID=${params?.perfil}` : '';
+          const fluxo = params?.fluxo ? `&fluxoID=${params?.fluxo}` : '';
           const datai = params?.datai ? `&datai=${params?.datai}` : '';
           const dataf = params?.dataf ? `&dataf=${params?.dataf}` : '';
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/duracao/${params?.perfilId}?de=${params?.origem}${perfil}${fluxo}${datai}${dataf}`,
+            `${BASEURLDD}/v1/indicadores/duracao/${params?.perfilId}?de=${params?.momento}${perfil}${fluxo}${datai}${dataf}`,
             options
           );
-          dispatch(slice.actions.getIndicadoresDuracaoSuccess(response.data));
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
           break;
         }
         case 'estatisticaCredito': {
@@ -1164,6 +1140,16 @@ export function getIndicadores(item, params) {
             options
           );
           dispatch(slice.actions.getCreditosContratadosSuccess(contratado.data));
+          const indeferido = await axios.get(
+            `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=indeferido&ano=${params?.ano}&mes=${params?.mes}`,
+            options
+          );
+          dispatch(slice.actions.getCreditosIndeferidosSuccess(indeferido.data));
+          const desistido = await axios.get(
+            `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=desistido&ano=${params?.ano}&mes=${params?.mes}`,
+            options
+          );
+          dispatch(slice.actions.getCreditosDesistidosSuccess(desistido.data));
           break;
         }
 
@@ -1198,7 +1184,7 @@ export function getItem(item, params) {
         case 'fluxo': {
           const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
           if (params?.from === 'fluxos') {
-            dispatch(slice.actions.getSelectFluxoSuccess(response.data));
+            dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getFluxoSuccess(response.data));
           }
@@ -1224,7 +1210,7 @@ export function getItem(item, params) {
         case 'estado': {
           const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
           if (params?.from === 'estados') {
-            dispatch(slice.actions.getSelectEstadoSuccess(response.data));
+            dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getEstadoSuccess(response.data));
           }
@@ -1247,7 +1233,7 @@ export function getItem(item, params) {
         case 'origem': {
           const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.id}/${params?.perfilId}`, options);
           if (params?.from === 'origens') {
-            dispatch(slice.actions.getSelectOrigemSuccess(response.data));
+            dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getOrigemSuccess(response.data));
           }
@@ -1256,7 +1242,7 @@ export function getItem(item, params) {
         case 'tansicao': {
           const response = await axios.get(`${BASEURLDD}/v1/transicoes/${params?.id}/${params?.perfilId}`, options);
           if (params?.from === 'transicoes') {
-            dispatch(slice.actions.getSelectTransicaoSuccess(response.data));
+            dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getTransicaoSuccess(response.data));
           }
@@ -1265,7 +1251,7 @@ export function getItem(item, params) {
         case 'acesso': {
           const response = await axios.get(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
           if (params?.from === 'acessos') {
-            dispatch(slice.actions.getSelectAcessoSuccess(response.data));
+            dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getAcessoSuccess(response.data));
           }
@@ -1475,6 +1461,13 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.getEstadoSuccess(response.data));
           break;
         }
+        case 'encaminhar': {
+          if (params?.haveAnexos) {
+            await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${params?.id}`, params?.anexos, options1);
+          }
+          await axios.post(`${BASEURLDD}/v1/processos/encaminhar/${params?.id}`, dados, options);
+          break;
+        }
 
         default:
           break;
@@ -1565,6 +1558,11 @@ export function updateItem(item, dados, params) {
             await axios.patch(
               `${BASEURLDD}/v1/processos/abandonar/${params?.id}`,
               JSON.stringify(params?.abandonar),
+              options
+            );
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
+              '',
               options
             );
           }
@@ -1925,29 +1923,6 @@ export function finalizarProcesso(dados, processoId, mail) {
       const options = { headers: { 'content-type': 'application/json', cc: mail } };
       await axios.patch(`${BASEURLDD}/v1/processos/finalizar/${processoId}`, dados, options);
       dispatch(slice.actions.done('finalizado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function encaminharProcesso(processoId, dados, haveAnexos, anexos, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      const options1 = { headers: { 'content-type': 'multipart/form-data', cc: mail } };
-      if (haveAnexos) {
-        await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${processoId}`, anexos, options1);
-      }
-      await axios.post(`${BASEURLDD}/v1/processos/encaminhar/${processoId}`, dados, options);
-      dispatch(slice.actions.done('realizada'));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {

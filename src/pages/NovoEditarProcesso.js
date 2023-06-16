@@ -30,11 +30,11 @@ export default function NovoEditarProcesso() {
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
   const [fluxo, setFluxo] = useState(null);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente, isLoading } = useSelector(
     (state) => state.digitaldocs
   );
-  const perfilId = currentColaborador?.perfil_id;
+  const perfilId = cc?.perfil_id;
 
   useEffect(() => {
     if (mail && id && perfilId) {
@@ -87,7 +87,7 @@ export default function NovoEditarProcesso() {
           sx={{ color: 'text.secondary' }}
         />
         {(!isEdit && meuAmbiente?.is_inicial && meuAmbiente?.id !== -1) ||
-        (processo?.is_lock && processo?.perfil_id === currentColaborador?.perfil_id) ? (
+        (processo?.is_lock && processo?.perfil_id === cc?.perfil_id) ? (
           <>
             <Card sx={{ mb: 3 }}>
               <CardContent>

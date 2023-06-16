@@ -29,13 +29,14 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { meuAmbiente, processoId, motivosPendencias, isSaving, done, error } = useSelector(
     (state) => state.digitaldocs
   );
-  const perfilId = currentColaborador?.perfil_id;
+  const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado || false);
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
+  const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -57,6 +58,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
 
   const formSchema = Yup.object().shape({
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    noperacao: selectedProcesso?.noperacao && Yup.string().required('Nº de operação não pode ficar vazio'),
     diadomes:
       agendado &&
       Yup.number()
@@ -102,23 +104,23 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       obs: selectedProcesso?.obs || '',
       mobs: selectedProcesso?.mobs || '',
       conta: selectedProcesso?.conta || '',
+      titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       diadomes: selectedProcesso?.diadomes || '',
+      noperacao: selectedProcesso?.noperacao || '',
       agendado: selectedProcesso?.agendado || false,
       ispendente: selectedProcesso?.ispendente || false,
       periodicidade: selectedProcesso?.periodicidade || null,
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
-      perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil_id,
-      balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
-      mpendencia: selectedProcesso?.mpendencia
-        ? motivosPendencias?.find((row) => row?.id?.toString() === selectedProcesso?.mpendencia?.toString())
-        : null,
+      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
+      balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
+      mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, motivosPendencias, meuAmbiente, currentColaborador, _entidades]
+    [selectedProcesso, fluxo?.id, mpendencia, meuAmbiente, cc, _entidades]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -144,8 +146,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         formData.append('balcao', values.balcao);
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('agendado', values.agendado);
+        formData.append('uo_perfil_id ', cc?.uo?.id);
+        formData.append('ispendente', values.ispendente);
         formData.append('is_interno ', selectedProcesso?.is_interno);
-        formData.append('uo_perfil_id ', currentColaborador?.uo?.id);
         formData.append('data_entrada', format(values.data_entrada ? values.data_entrada : new Date(), 'yyyy-MM-dd'));
         // optional
         if (values.obs) {
@@ -154,10 +157,15 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.conta) {
           formData.append('conta', values.conta);
         }
+        if (values.titular) {
+          formData.append('titular', values.titular);
+        }
         if (values.cliente) {
           formData.append('cliente', values.cliente);
         }
-        formData.append('ispendente', values.ispendente);
+        if (values.noperacao) {
+          formData.append('noperacao', values.noperacao);
+        }
         if (values.ispendente) {
           formData.append('ispendente', true);
           if (values.mpendencia) {
@@ -226,6 +234,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         }
         if (values.cliente) {
           formData.append('cliente', values.cliente);
+        }
+        if (values.titular) {
+          formData.append('titular', values.titular);
         }
         if (values.ispendente) {
           formData.append('ispendente', true);

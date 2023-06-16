@@ -33,7 +33,7 @@ const TABLE_HEAD = [
 export default function MotivosPendencias() {
   const dispatch = useDispatch();
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { motivosPendencias, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -47,13 +47,13 @@ export default function MotivosPendencias() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'motivo' });
+  } = useTable({ defaultOrderBy: 'motivo', defaultOrder: 'asc' });
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('motivos pendencias', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('motivos pendencias', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, mail, currentColaborador?.perfil_id]);
+  }, [dispatch, mail, cc?.perfil_id]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);

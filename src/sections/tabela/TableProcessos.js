@@ -21,6 +21,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 // utils
 import { fToNow, ptDateTime } from '../../utils/formatTime';
+import { entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -46,10 +47,10 @@ export default function TableProcessos({ from }) {
   const dispatch = useDispatch();
   const [segmento, setSegmento] = useState(null);
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, meuAmbiente, meusAmbientes, meuFluxo, processos } = useSelector((state) => state.digitaldocs);
-  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
-  const [colaborador, setColaborador] = useState(currentColaborador?.perfil?.displayName);
+  const fromAgencia = cc?.uo?.tipo === 'Agências';
+  const [colaborador, setColaborador] = useState(cc?.perfil?.displayName);
   const title =
     (from === 'tarefas' && 'Lista de tarefas') ||
     (from === 'finalizados' && 'Finalizados') ||
@@ -74,24 +75,24 @@ export default function TableProcessos({ from }) {
   } = useTable({
     defaultOrderBy: 'data_last_transicao',
     defaultRowsPerPage: fromAgencia ? 100 : 25,
-    defaultDense: currentColaborador?.id === 362,
-    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+    defaultDense: cc?.id === 362,
+    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
   });
 
   useEffect(() => {
-    if (mail && meuAmbiente?.id && meuFluxo?.id && currentColaborador?.perfil_id) {
+    if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
       setPage(0);
       dispatch(
         getAll(from, {
           mail,
           fluxoId: meuFluxo?.id,
           estadoId: meuAmbiente?.id,
-          perfilId: currentColaborador?.perfil_id,
+          perfilId: cc?.perfil_id,
         })
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, meuAmbiente?.id, meuFluxo?.id, currentColaborador?.perfil_id, from, mail]);
+  }, [dispatch, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, from, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -201,90 +202,70 @@ export default function TableProcessos({ from }) {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={7} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    let _entidades = '';
-                    row?.entidades?.split(';')?.forEach((_row, index) => {
-                      _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
-                    });
-                    return (
-                      <TableRow hover key={row.id}>
-                        <TableCell>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <CircleIcon
-                              sx={{
-                                ml: -1.5,
-                                width: 15,
-                                height: 15,
-                                color:
-                                  (row?.cor === 'verde' && 'text.success') ||
-                                  (row?.cor === 'vermelha' && 'text.error') ||
-                                  (row?.cor === 'amarela' && 'text.warning') ||
-                                  'text.focus',
-                              }}
-                            />
-                            <Stack>{row.nentrada}</Stack>
-                          </Stack>
-                        </TableCell>
-                        <TableCell>
-                          {row?.titular ? (
-                            row.titular
-                          ) : (
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                              Não identificado
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                              Não identificado
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
-                        <TableCell>
-                          {from === 'pendentes' && (
-                            <>
-                              <Typography variant="body2">{row?.motivo}</Typography>
-                              {row?.nome && (
-                                <Label variant="ghost" color="default" sx={{ mt: 1 }}>
-                                  {row?.nome}
-                                </Label>
-                              )}
-                            </>
-                          )}
-                          {from === 'tarefas' && row.nome && row?.nome}
-                          {from === 'tarefas' && !row.nome && meuAmbiente.nome}
-                          {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
-                        </TableCell>
-                        <TableCell align="center" sx={{ width: 10 }}>
-                          {row?.data_last_transicao && (
-                            <>
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <CalendarTodayIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                                <Typography variant="caption" noWrap>
-                                  {ptDateTime(row.data_last_transicao)}
-                                </Typography>
-                              </Stack>
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                                <Typography variant="caption" noWrap>
-                                  {fToNow(row.data_last_transicao)?.replace('aproximadamente', 'aprox.')}
-                                </Typography>
-                              </Stack>
-                            </>
-                          )}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow hover key={row.id}>
+                      <TableCell>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <CircleIcon
+                            sx={{
+                              ml: -1.5,
+                              width: 15,
+                              height: 15,
+                              color:
+                                (row?.cor === 'verde' && 'text.success') ||
+                                (row?.cor === 'vermelha' && 'text.error') ||
+                                (row?.cor === 'amarela' && 'text.warning') ||
+                                'text.focus',
+                            }}
+                          />
+                          <Stack>{row.nentrada}</Stack>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
+                      <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
+                      <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
+                      <TableCell>
+                        {from === 'pendentes' && (
+                          <>
+                            <Typography variant="body2">{row?.motivo}</Typography>
+                            {row?.nome && (
+                              <Label variant="ghost" color="default" sx={{ mt: 1 }}>
+                                {row?.nome}
+                              </Label>
+                            )}
+                          </>
+                        )}
+                        {from === 'tarefas' && row.nome && row?.nome}
+                        {from === 'tarefas' && !row.nome && meuAmbiente.nome}
+                        {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
+                      </TableCell>
+                      <TableCell align="center" sx={{ width: 10 }}>
+                        {row?.data_last_transicao && (
+                          <>
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <CalendarTodayIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                              <Typography variant="caption" noWrap>
+                                {ptDateTime(row.data_last_transicao)}
+                              </Typography>
+                            </Stack>
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                              <Typography variant="caption" noWrap>
+                                {fToNow(row.data_last_transicao)?.replace('aproximadamente', 'aprox.')}
+                              </Typography>
+                            </Stack>
+                          </>
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="DETALHES" arrow>
+                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
+                            <SvgIconStyle src="/assets/icons/view.svg" />
+                          </Fab>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
 

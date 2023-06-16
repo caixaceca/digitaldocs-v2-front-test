@@ -1,15 +1,20 @@
 import PropTypes from 'prop-types';
 // form
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 // @mui
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Grid, Card, TextField, CardContent, Typography, Autocomplete } from '@mui/material';
+import { Grid, Card, CardContent, Typography } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useSelector } from '../../../redux/store';
 // components
-import { RHFTextField, RHFSwitch } from '../../../components/hook-form';
+import {
+  RHFSwitch,
+  RHFTextField,
+  RHFDatePicker,
+  RHFAutocompleteSimple,
+  RHFAutocompleteObject,
+} from '../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
 import ObsNovosAnexos from './ObsNovosAnexos';
@@ -25,7 +30,7 @@ ProcessoInternoForm.propTypes = {
 };
 
 export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setPendente, fluxo }) {
-  const { control, watch, setValue } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
   const { motivosPendencias } = useSelector((state) => state.digitaldocs);
@@ -37,6 +42,13 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
           <Card>
             <CardContent>
               <DadosCliente isInterno assunto={fluxo?.assunto} />
+              {selectedProcesso?.noperacao && (
+                <Grid container spacing={3} sx={{ mt: 0 }} justifyContent="center">
+                  <Grid item xs={12} sm={6} xl={3}>
+                    <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
+                  </Grid>
+                </Grid>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -65,58 +77,20 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                 {values.agendado && (
                   <>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <Controller
+                      <RHFAutocompleteSimple
                         name="periodicidade"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <Autocomplete
-                            {...field}
-                            fullWidth
-                            onChange={(event, newValue) => field.onChange(newValue)}
-                            options={['Mensal', 'Trimestral', 'Semestral', 'Anual']}
-                            getOptionLabel={(option) => option}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Periodicidade"
-                                error={!!error}
-                                helperText={error?.message}
-                              />
-                            )}
-                          />
-                        )}
+                        label="Periodicidade"
+                        options={['Mensal', 'Trimestral', 'Semestral', 'Anual']}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
                       <RHFTextField name="diadomes" label="Dia do mês" InputProps={{ type: 'number' }} />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <Controller
-                        name="data_inicio"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <DatePicker
-                            label="Data de início"
-                            value={field.value}
-                            onChange={(newValue) => field.onChange(newValue)}
-                            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                          />
-                        )}
-                      />
+                      <RHFDatePicker name="data_inicio" label="Data de início" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <Controller
-                        name="data_arquivamento"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <DatePicker
-                            label="Data de término"
-                            value={field.value}
-                            onChange={(newValue) => field.onChange(newValue)}
-                            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                          />
-                        )}
-                      />
+                      <RHFDatePicker name="data_arquivamento" label="Data de término" />
                     </Grid>
                   </>
                 )}
@@ -148,23 +122,12 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
               {values.ispendente && (
                 <>
                   <Grid item xs={12} sm={4}>
-                    <Controller
+                    <RHFAutocompleteObject
                       name="mpendencia"
-                      control={control}
-                      render={({ field, fieldState: { error } }) => (
-                        <Autocomplete
-                          {...field}
-                          fullWidth
-                          onChange={(event, newValue) => field.onChange(newValue)}
-                          options={applySort(motivosPendencias, getComparator('asc', 'motivo'))?.map(
-                            (option) => option
-                          )}
-                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                          getOptionLabel={(option) => option?.motivo}
-                          renderInput={(params) => (
-                            <TextField {...params} label="Motivo" error={!!error} helperText={error?.message} />
-                          )}
-                        />
+                      label="Motivo"
+                      options={applySort(
+                        motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
+                        getComparator('asc', 'label')
                       )}
                     />
                   </Grid>

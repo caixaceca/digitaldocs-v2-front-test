@@ -28,15 +28,18 @@ export default function Intervencao({ processo, colaboradoresList }) {
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
-  const { mail, currentColaborador, uos } = useSelector((state) => state.intranet);
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { isSaving, meusAmbientes, iAmInGrpGerente } = useSelector((state) => state.digitaldocs);
   const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências' || false;
-  const perfilId = currentColaborador?.perfil_id;
-  // const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
+  const perfilId = cc?.perfil_id;
 
   const devolucoes = [];
   const seguimentos = [];
+  const destinosFora = [];
   processo.destinos?.forEach((row) => {
+    if (processo?.uo_origem_id !== row?.uo_id) {
+      destinosFora.push(row?.nome);
+    }
     if (row.modo === 'Seguimento') {
       seguimentos.push({
         id: row.transicao_id,
@@ -223,8 +226,12 @@ export default function Intervencao({ processo, colaboradoresList }) {
               <SvgIconStyle src="/assets/icons/archive.svg" />
             </Fab>
           </Tooltip>
-
-          <ArquivarForm open={open1} processo={processo} onCancel={onClose1} />
+          <ArquivarForm
+            open={open1}
+            processo={processo}
+            onCancel={onClose1}
+            arquivoAg={fromAgencia && iAmInGrpGerente && destinosFora?.length > 0 ? destinosFora : []}
+          />
         </>
       )}
     </>

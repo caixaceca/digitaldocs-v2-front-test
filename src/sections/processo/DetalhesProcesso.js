@@ -23,10 +23,10 @@ import {
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // utils
-import { newLineText } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { valorPorExtenso } from '../../utils/numeroPorExtenso';
 import { fNumber, fCurrency, fPercent } from '../../utils/formatNumber';
+import { newLineText, entidadesParse } from '../../utils/normalizeText';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -43,18 +43,16 @@ DetalhesProcesso.propTypes = { processo: PropTypes.object };
 
 export default function DetalhesProcesso({ processo }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const { motivosPendencias } = useSelector((state) => state.digitaldocs);
+  const { motivosPendencias, origem } = useSelector((state) => state.digitaldocs);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
   const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);
-  let _entidades = '';
-  processo?.entidades?.split(';')?.forEach((row, index) => {
-    _entidades += processo?.entidades?.split(';')?.length - 1 === index ? row : `${row} / `;
-  });
+  const _entidades = entidadesParse(processo?.entidades);
+  const isOrigemProcesso = origem?.id === processo.origem_id;
+  const situacao = processo?.credito?.situacao_final_mes || '';
   const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Doc. primário';
   const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Doc. secundário';
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
-
   const pareceresNaoValidados = () => {
     let pareceres = '';
     processo?.pareceres?.forEach((row, index) => {
@@ -82,11 +80,13 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider secondaryAction="">
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
-          {uo?.label && <TextItem title="U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />}
+          {processo?.nentrada && <TextItem title="Nº de entrada:" text={processo.nentrada} />}
+          {uo?.label && (
+            <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
+          )}
           {processo?.assunto && <TextItem title="Assunto:" text={processo.assunto} />}
           {processo?.criado_em && <TextItem title="Criado em:" text={ptDateTime(processo.criado_em)} />}
           {criador?.perfil?.displayName && <TextItem title="Criado por:" text={criador?.perfil?.displayName} />}
-          {processo?.nentrada && <TextItem title="Nº de entrada:" text={processo.nentrada} />}
           {processo?.data_entrada && <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />}
           {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
           {(processo?.nome || processo?.in_paralelo_mode) && (
@@ -186,39 +186,64 @@ export default function DetalhesProcesso({ processo }) {
           </ListItem>
           {processo.noperacao && <TextItem title="Nº de operação:" text={processo.noperacao} />}
           {processo.operacao && <TextItem title="Descrição:" text={processo.operacao} />}
-          {(processo.designacao || processo?.seguimento || processo?.telefone || processo?.email) && (
+          {(processo.origem || processo?.telefone || processo?.email) && (
             <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
               <Typography sx={{ color: 'text.secondary' }}>Origem:</Typography>
               <Stack spacing={0.5}>
-                <Typography>
-                  {processo?.designacao} {processo?.seguimento && `- ${processo?.seguimento}`}
-                </Typography>
-                {processo?.telefone ||
-                  (processo?.email && (
-                    <Stack
-                      spacing={1}
-                      direction="row"
-                      alignItems="center"
-                      divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
-                    >
-                      {processo?.telefone && (
-                        <Typography variant="body2">
-                          <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                            Tel:
-                          </Typography>
-                          &nbsp;{processo.telefone}
+                <Typography>{processo?.designacao}</Typography>
+                {isOrigemProcesso && origem?.seguimento && (
+                  <Typography>{processo?.seguimento || origem?.seguimento}</Typography>
+                )}
+                {isOrigemProcesso && (origem?.tipo || origem?.codigo) && (
+                  <Stack
+                    spacing={1}
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
+                  >
+                    {origem?.tipo && (
+                      <Typography variant="body2">
+                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                          Tipo:
                         </Typography>
-                      )}
-                      {processo?.email && (
-                        <Typography variant="body2">
-                          <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                            Email:
-                          </Typography>
-                          &nbsp;{processo.email}
+                        &nbsp;{origem?.tipo}
+                      </Typography>
+                    )}
+                    {origem?.codigo && (
+                      <Typography variant="body2">
+                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                          Código:
                         </Typography>
-                      )}
-                    </Stack>
-                  ))}
+                        &nbsp;{origem?.codigo}
+                      </Typography>
+                    )}
+                  </Stack>
+                )}
+                {(processo?.telefone || processo?.email) && (
+                  <Stack
+                    spacing={1}
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
+                  >
+                    {processo?.telefone && (
+                      <Typography variant="body2">
+                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                          Tel:
+                        </Typography>
+                        &nbsp;{processo.telefone}
+                      </Typography>
+                    )}
+                    {processo?.email && (
+                      <Typography variant="body2">
+                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+                          Email:
+                        </Typography>
+                        &nbsp;{processo.email}
+                      </Typography>
+                    )}
+                  </Stack>
+                )}
               </Stack>
             </Stack>
           )}
@@ -250,13 +275,29 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Info. crédito</Typography>
           </ListItem>
+          {situacao && (
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+              <Typography sx={{ color: 'text.secondary' }}>Situação:</Typography>
+              <Label
+                color={
+                  (situacao === 'Em análise' && 'default') ||
+                  (situacao === 'Aprovado' && 'success') ||
+                  (situacao === 'Contratado' && 'primary') ||
+                  'error'
+                }
+                sx={{ typography: 'subtitle2', py: 1.5 }}
+              >
+                {situacao}
+              </Label>
+            </Stack>
+          )}
           {processo?.credito?.nproposta && <TextItem title="Nº de proposta:" text={processo?.credito?.nproposta} />}
           {processo?.credito?.segmento && <TextItem title="Segmento:" text={processo?.credito?.segmento} />}
           {processo?.credito?.linha?.linha && (
             <TextItem title="Linha de crédito:" text={processo?.credito?.linha?.linha} />
           )}
           {processo?.credito?.montantes && (
-            <TextItem title="Montante:" text={fCurrency(processo?.credito?.montantes)} />
+            <TextItem title="Montante solicitado:" text={fCurrency(processo?.credito?.montantes)} />
           )}
           {processo?.credito?.setor_atividade && (
             <TextItem title="Setor de atividade:" text={processo?.credito?.setor_atividade} />
@@ -284,8 +325,11 @@ export default function DetalhesProcesso({ processo }) {
           {processo?.credito?.escalao_decisao && (
             <TextItem title="Escalão de decisão:" text={processo?.credito?.escalao_decisao} />
           )}
-          {processo?.credito?.situacao_final_mes && (
-            <TextItem title="Situação final do mês:" text={processo?.credito?.situacao_final_mes} />
+          {processo?.credito?.data_desistido && (
+            <TextItem title="Data de desistência:" text={ptDate(processo?.credito?.data_desistido)} />
+          )}
+          {processo?.credito?.data_indeferido && (
+            <TextItem title="Data de indeferimento:" text={ptDate(processo?.credito?.data_indeferido)} />
           )}
         </List>
       )}

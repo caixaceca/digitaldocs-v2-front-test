@@ -41,7 +41,7 @@ export default function Versoes({ processoId }) {
   const [accord, setAccord] = useState(false);
   const { toggle: open, onOpen, onClose } = useToggle();
   const { versoes, processo } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
@@ -54,10 +54,10 @@ export default function Versoes({ processoId }) {
   }, [dispatch, versoes]);
 
   useEffect(() => {
-    if (mail && processoId && currentColaborador?.perfil_id && open) {
-      dispatch(getAll('versoes', { mail, processoId, perfilId: currentColaborador?.perfil_id }));
+    if (mail && processoId && cc?.perfil_id && open) {
+      dispatch(getAll('versoes', { mail, processoId, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, processoId, mail, open, currentColaborador?.perfil_id]);
+  }, [dispatch, processoId, mail, open, cc?.perfil_id]);
 
   return (
     <>

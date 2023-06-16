@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 // @mui
 import { alpha, styled } from '@mui/material/styles';
-import { Tab, Box, Card, Tabs, Stack, Button, Container, Typography } from '@mui/material';
+import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
 // redux
-import { getAll } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
+import { getAll, resetItem } from '../redux/slices/digitaldocs';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 // sections
 import EstatisticaCredito from '../sections/indicadores/EstatisticaCredito';
-import { Tipos, Criacao, Volume, Duracao, FileSystem, Execucao } from '../sections/indicadores/Indicadores';
-// assets
-import ComingSoonIllustration from '../assets/ComingSoonIllustration';
+import { TotalProcessos, Duracao, FileSystem, Execucao } from '../sections/indicadores/Indicadores';
 
 // ----------------------------------------------------------------------
 
@@ -39,88 +36,64 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 export default function Indicadores() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { themeStretch } = useSettings();
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { meusacessos } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState(meusacessos.includes('Todo-111') ? 'files' : 'total');
 
   const handleChangeTab = (event, newValue) => {
+    dispatch(resetItem('indicadores'));
     setCurrentTab(newValue);
   };
 
   const tabFiles = meusacessos.includes('Todo-111')
     ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }]
-    : [];
+    : [meusacessos];
 
   const tabs = [
     ...tabFiles,
-    { value: 'total', label: 'Total de processos', component: <Criacao /> },
-    { value: 'voloume', label: 'Volume', component: <Volume /> },
-    { value: 'tipos', label: 'Tipos', component: <Tipos /> },
+    { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
     { value: 'duracao', label: 'Duração', component: <Duracao /> },
-    { value: 'tempoExecucao', label: 'Tempo execução', component: <Execucao /> },
+    { value: 'execucao', label: 'Tempo execução', component: <Execucao /> },
     { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
   ];
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('ambientes', { mail, perfilId: currentColaborador?.perfil_id }));
-      dispatch(getAll('meusacessos', { mail, perfilId: currentColaborador?.perfil_id }));
-      dispatch(getAll('motivos pendencias', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('ambientes', { mail, perfilId: cc?.perfil_id }));
+      dispatch(getAll('meusacessos', { mail, perfilId: cc?.perfil_id }));
+      dispatch(getAll('motivos pendencias', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, currentColaborador, mail]);
+  }, [dispatch, cc, mail]);
 
   return (
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        {meusacessos.includes('transicao-111') ? (
-          <>
-            <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-              <RootStyle>
-                <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>
-                  <Typography variant="h4">Indicadores</Typography>
-                </Box>
-              </RootStyle>
-              <TabsWrapperStyle>
-                <Tabs
-                  value={currentTab}
-                  scrollButtons="auto"
-                  variant="scrollable"
-                  allowScrollButtonsMobile
-                  onChange={handleChangeTab}
-                >
-                  {tabs.map((tab) => (
-                    <Tab disableRipple key={tab.value} value={tab.value} label={tab.label} sx={{ px: 0.5 }} />
-                  ))}
-                </Tabs>
-              </TabsWrapperStyle>
-            </Card>
+        <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
+          <RootStyle>
+            <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>
+              <Typography variant="h4">Indicadores</Typography>
+            </Box>
+          </RootStyle>
+          <TabsWrapperStyle>
+            <Tabs
+              value={currentTab}
+              scrollButtons="auto"
+              variant="scrollable"
+              allowScrollButtonsMobile
+              onChange={handleChangeTab}
+            >
+              {tabs.map((tab) => (
+                <Tab disableRipple key={tab.value} value={tab.value} label={tab.label} sx={{ px: 0.5 }} />
+              ))}
+            </Tabs>
+          </TabsWrapperStyle>
+        </Card>
 
-            {tabs.map((tab) => {
-              const isMatched = tab.value === currentTab;
-              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-            })}
-          </>
-        ) : (
-          <Card sx={{ p: 5 }}>
-            <Stack sx={{ alignItems: 'center' }}>
-              <Typography variant="h3" paragraph sx={{ mt: 5 }}>
-                Brevemente
-              </Typography>
-
-              <Typography sx={{ color: 'text.secondary' }}>
-                Estamos trabalhando nos seus indicadores, da sua equipa, da sua unidade orgânica e da Caixa!
-              </Typography>
-
-              <ComingSoonIllustration sx={{ mb: 7, height: { xs: 300, sm: 450 } }} />
-
-              <Button size="large" variant="contained" onClick={() => navigate(-1)}>
-                Voltar
-              </Button>
-            </Stack>
-          </Card>
-        )}
+        {tabs.map((tab) => {
+          const isMatched = tab.value === currentTab;
+          return isMatched && <Box key={tab.value}>{tab.component}</Box>;
+        })}
       </Container>
     </Page>
   );

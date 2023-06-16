@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -14,10 +15,8 @@ import {
   Button,
   Dialog,
   Tooltip,
-  TextField,
   Typography,
   DialogTitle,
-  Autocomplete,
   DialogActions,
   DialogContent,
   InputAdornment,
@@ -25,16 +24,24 @@ import {
 import { LoadingButton } from '@mui/lab';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-// components
-import SvgIconStyle from '../../components/SvgIconStyle';
-import DialogConfirmar from '../../components/DialogConfirmar';
-import { FormProvider, RHFTextField, RHFSwitch } from '../../components/hook-form';
+// routes
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useToggle from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/digitaldocs';
+// components
+import {
+  RHFSwitch,
+  FormProvider,
+  RHFTextField,
+  RHFAutocompleteSimple,
+  RHFAutocompleteObject,
+} from '../../components/hook-form';
+import SvgIconStyle from '../../components/SvgIconStyle';
+import DialogConfirmar from '../../components/DialogConfirmar';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
 
@@ -44,16 +51,22 @@ FluxoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
 
 export function FluxoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, selectedFluxo } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedFluxo;
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { done, error, isSaving, fluxoId, selectedItem } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
 
   useEffect(() => {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
+      if (done === 'Fluxo eliminado') {
+        onCancel();
+      } else {
+        onCancel();
+        navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${fluxoId}`);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -72,35 +85,35 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      modelo: selectedFluxo?.modelo || '',
-      assunto: selectedFluxo?.assunto || '',
-      perfilID: currentColaborador?.perfil_id,
-      observacao: selectedFluxo?.observacao || '',
-      is_interno: selectedFluxo?.is_interno || false,
-      is_credito: selectedFluxo?.is_credito || false,
+      perfilID: cc?.perfil_id,
+      modelo: selectedItem?.modelo || '',
+      assunto: selectedItem?.assunto || '',
+      observacao: selectedItem?.observacao || '',
+      is_interno: selectedItem?.is_interno || false,
+      is_credito: selectedItem?.is_credito || false,
     }),
-    [selectedFluxo, currentColaborador?.perfil_id]
+    [selectedItem, cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedFluxo) {
+    if (isEdit && selectedItem) {
       reset(defaultValues);
     }
     if (!isEdit) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedFluxo]);
+  }, [isEdit, selectedItem]);
 
   const onSubmit = async () => {
     try {
-      if (selectedFluxo) {
+      if (selectedItem) {
         dispatch(
-          updateItem('fluxo', JSON.stringify(values), { mail, id: selectedFluxo.id, mensagem: 'Fluxo atualizado' })
+          updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Fluxo atualizado' })
         );
       } else {
         dispatch(createItem('fluxo', JSON.stringify(values), { mail, mensagem: 'Fluxo atualizado' }));
@@ -115,9 +128,9 @@ export function FluxoForm({ isOpenModal, onCancel }) {
       dispatch(
         deleteItem('fluxo', {
           mail,
-          id: selectedFluxo.id,
+          id: selectedItem.id,
           mensagem: 'Fluxo eliminado',
-          perfilId: currentColaborador?.perfil_id,
+          perfilId: cc?.perfil_id,
         })
       );
     } catch (error) {
@@ -127,7 +140,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedFluxo ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
+      <DialogTitle>{selectedItem ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -135,21 +148,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="assunto" label="Assunto" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Controller
-                name="modelo"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={['Série', 'Paralelo']}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Modelo" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
-              />
+              <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
             </Grid>
             <Grid item xs={6} sm={3}>
               <RHFSwitch
@@ -217,16 +216,22 @@ EstadoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func }
 
 export function EstadoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador, uos } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, selectedEstado } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedEstado;
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { done, error, isSaving, estadoId, selectedItem } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
 
   useEffect(() => {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
+      if (done === 'Estado eliminado') {
+        onCancel();
+      } else {
+        onCancel();
+        navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/estado/${estadoId}`);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -239,7 +244,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
   }, [error]);
 
   const uosList = uos.map((row) => ({ id: row?.id, label: row?.label }));
-  const uoSelect = uosList?.find((row) => row.id === selectedEstado?.uo_id) || null;
+  const uoSelect = uosList?.find((row) => row.id === selectedItem?.uo_id) || null;
 
   const formSchema = Yup.object().shape({
     nome: Yup.string().required('Nome não pode ficar vazio'),
@@ -251,37 +256,37 @@ export function EstadoForm({ isOpenModal, onCancel }) {
   const defaultValues = useMemo(
     () => ({
       uo_id: uoSelect,
-      nome: selectedEstado?.nome || '',
-      email: selectedEstado?.email || '',
-      perfilID: currentColaborador?.perfil_id,
-      is_final: selectedEstado?.is_final || false,
-      observacao: selectedEstado?.observacao || '',
-      is_decisao: selectedEstado?.is_decisao || false,
-      is_inicial: selectedEstado?.is_inicial || false,
+      nome: selectedItem?.nome || '',
+      email: selectedItem?.email || '',
+      perfilID: cc?.perfil_id,
+      is_final: selectedItem?.is_final || false,
+      observacao: selectedItem?.observacao || '',
+      is_decisao: selectedItem?.is_decisao || false,
+      is_inicial: selectedItem?.is_inicial || false,
     }),
-    [selectedEstado, currentColaborador, uoSelect]
+    [selectedItem, cc, uoSelect]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedEstado) {
+    if (isEdit && selectedItem) {
       reset(defaultValues);
     }
     if (!isEdit) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedEstado, isOpenModal]);
+  }, [isEdit, selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
-      if (selectedEstado) {
+      if (selectedItem) {
         values.uo_id = values?.uo_id?.id;
         dispatch(
-          updateItem('estado', JSON.stringify(values), { mail, id: selectedEstado.id, mensagem: 'Estado atualizado' })
+          updateItem('estado', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Estado atualizado' })
         );
       } else {
         values.uo_id = values?.uo_id?.id;
@@ -297,9 +302,9 @@ export function EstadoForm({ isOpenModal, onCancel }) {
       dispatch(
         deleteItem('estado', {
           mail,
-          id: selectedEstado.id,
+          id: selectedItem.id,
+          perfilId: cc?.perfil_id,
           mensagem: 'Estado eliminado',
-          perfilId: currentColaborador?.perfil_id,
         })
       );
     } catch (error) {
@@ -309,7 +314,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedEstado ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
+      <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -320,21 +325,10 @@ export function EstadoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="email" label="Email" />
             </Grid>
             <Grid item xs={12}>
-              <Controller
+              <RHFAutocompleteObject
                 name="uo_id"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(uosList, getComparator('asc', 'label'))}
-                    getOptionLabel={(option) => option?.label}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Unidade orgânica" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Unidade orgânica"
+                options={applySort(uosList, getComparator('asc', 'label'))}
               />
             </Grid>
             <Grid item xs={4}>
@@ -417,9 +411,9 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, selectedAcesso } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedAcesso;
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { done, error, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
 
   useEffect(() => {
     if (done) {
@@ -444,12 +438,12 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const defaultValues = useMemo(
     () => ({
       perfilID: Number(perfilId),
-      perfilIDCC: currentColaborador?.perfil?.id,
-      datalimite: selectedAcesso?.datalimite || null,
-      objeto: selectedAcesso?.objeto ? objetos?.find((row) => row?.id === selectedAcesso?.objeto) : null,
-      acesso: selectedAcesso?.acesso ? codacessos?.find((row) => row?.id === selectedAcesso?.acesso) : null,
+      perfilIDCC: cc?.perfil?.id,
+      datalimite: selectedItem?.datalimite || null,
+      objeto: selectedItem?.objeto ? objetos?.find((row) => row?.id === selectedItem?.objeto) : null,
+      acesso: selectedItem?.acesso ? codacessos?.find((row) => row?.id === selectedItem?.acesso) : null,
     }),
-    [selectedAcesso, currentColaborador?.perfil?.id, perfilId]
+    [selectedItem, cc?.perfil?.id, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -457,14 +451,14 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedAcesso) {
+    if (isEdit && selectedItem) {
       reset(defaultValues);
     }
     if (!isEdit) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedAcesso, isOpenModal]);
+  }, [isEdit, selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -472,7 +466,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
         values.objeto = values.objeto.id;
         values.acesso = values.acesso.id;
         dispatch(
-          updateItem('acesso', JSON.stringify(values), { mail, id: selectedAcesso.id, mensagem: 'Acesso atualizado' })
+          updateItem('acesso', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Acesso atualizado' })
         );
       } else {
         values.objeto = values.objeto.id;
@@ -489,9 +483,9 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
       dispatch(
         deleteItem('acesso', {
           mail,
-          id: selectedAcesso.id,
+          id: selectedItem.id,
           mensagem: 'Acesso eliminado',
-          perfilId: currentColaborador?.perfil_id,
+          perfilId: cc?.perfil_id,
         })
       );
     } catch (error) {
@@ -501,47 +495,15 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitle>{selectedAcesso ? 'Editar acesso' : 'Adicionar acesso'}</DialogTitle>
+      <DialogTitle>{selectedItem ? 'Editar acesso' : 'Adicionar acesso'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <Controller
-                name="objeto"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    options={objetos}
-                    getOptionLabel={(option) => option?.label}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Objeto" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
-              />
+              <RHFAutocompleteObject name="objeto" label="Objeto" options={objetos} />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                name="acesso"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    options={codacessos}
-                    getOptionLabel={(option) => option?.label}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Acesso" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
-              />
+              <RHFAutocompleteObject name="acesso" label="Acesso" options={codacessos} />
             </Grid>
             <Grid item xs={12}>
               <Controller
@@ -598,9 +560,9 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const perfilId = currentColaborador?.perfil_id;
+  const perfilId = cc?.perfil_id;
   const isEdit = !!selectedItem;
 
   useEffect(() => {
@@ -720,9 +682,9 @@ export function OrigemForm({ isOpenModal, onCancel }) {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const [findConcelhos, setFindConcelhos] = useState([]);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { selectedOrigem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedOrigem;
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
 
   useEffect(() => {
     if (done) {
@@ -748,39 +710,39 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      tipo: selectedOrigem?.tipo || '',
-      ilha: selectedOrigem?.ilha || '',
-      email: selectedOrigem?.email || '',
-      cidade: selectedOrigem?.cidade || '',
-      codigo: selectedOrigem?.codigo || '',
-      perfilID: currentColaborador?.perfil_id,
-      telefone: selectedOrigem?.telefone || '',
-      seguimento: selectedOrigem?.seguimento || '',
-      observacao: selectedOrigem?.observacao || '',
-      designacao: selectedOrigem?.designacao || '',
+      tipo: selectedItem?.tipo || '',
+      ilha: selectedItem?.ilha || '',
+      email: selectedItem?.email || '',
+      cidade: selectedItem?.cidade || '',
+      codigo: selectedItem?.codigo || '',
+      perfilID: cc?.perfil_id,
+      telefone: selectedItem?.telefone || '',
+      seguimento: selectedItem?.seguimento || '',
+      observacao: selectedItem?.observacao || '',
+      designacao: selectedItem?.designacao || '',
     }),
-    [selectedOrigem, currentColaborador?.perfil_id]
+    [selectedItem, cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedOrigem) {
+    if (isEdit && selectedItem) {
       reset(defaultValues);
     }
     if (!isEdit) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedOrigem, isOpenModal]);
+  }, [isEdit, selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
       if (isEdit) {
         dispatch(
-          updateItem('origem', JSON.stringify(values), { mail, id: selectedOrigem.id, mensagem: 'Origem atualizada' })
+          updateItem('origem', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Origem atualizada' })
         );
       } else {
         dispatch(createItem('origem', JSON.stringify(values), { mail, mensagem: 'Origem adicionada' }));
@@ -795,9 +757,9 @@ export function OrigemForm({ isOpenModal, onCancel }) {
       dispatch(
         deleteItem('origem', {
           mail,
-          id: selectedOrigem.id,
+          id: selectedItem.id,
           mensagem: 'Origem eliminada',
-          perfilId: currentColaborador?.perfil_id,
+          perfilId: cc?.perfil_id,
         })
       );
     } catch (error) {
@@ -811,7 +773,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedOrigem ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
+      <DialogTitle>{selectedItem ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -825,54 +787,20 @@ export function OrigemForm({ isOpenModal, onCancel }) {
               <RHFTextField name="codigo" label="Código" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Controller
-                name="tipo"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={['Fiscal', 'Judicial']}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Tipo" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
-              />
+              <RHFAutocompleteSimple name="tipo" label="Tipo" options={['Fiscal', 'Judicial']} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Controller
+              <RHFAutocompleteSimple
                 name="ilha"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={[...new Set(_concelhos.map((obj) => obj.ilha))]}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Ilha" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Ilha"
+                options={[...new Set(_concelhos.map((obj) => obj.ilha))]}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Controller
+              <RHFAutocompleteSimple
                 name="cidade"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={[...new Set(findConcelhos.map((obj) => obj.concelho))]}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Concelho" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Concelho"
+                options={[...new Set(findConcelhos.map((obj) => obj.concelho))]}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -925,7 +853,7 @@ export function LinhaForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
 
@@ -988,7 +916,7 @@ export function LinhaForm({ isOpenModal, onCancel }) {
           mail,
           linhaID: selectedItem.id,
           mensagem: 'Linha de crédito eliminada',
-          perfilID: currentColaborador?.perfil_id,
+          perfilID: cc?.perfil_id,
         })
       );
     } catch (error) {
@@ -1049,9 +977,9 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { selectedTransicao, estados, done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedTransicao;
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { selectedItem, estados, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
 
   useEffect(() => {
@@ -1082,44 +1010,44 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
 
   const defaultValues = useMemo(
     () => ({
-      modo: selectedTransicao?.modo || null,
-      perfilIDCC: currentColaborador?.perfil_id,
-      to_alert: selectedTransicao?.to_alert || false,
-      fluxo_id: selectedTransicao?.fluxo_id || fluxoId,
-      prazoemdias: selectedTransicao?.prazoemdias || '',
-      hasopnumero: selectedTransicao?.hasopnumero || false,
-      is_paralelo: selectedTransicao?.is_paralelo || false,
-      arqhasopnumero: selectedTransicao?.arqhasopnumero || false,
-      is_after_devolucao: selectedTransicao?.is_after_devolucao || false,
-      estado_final_id: estadosList?.find((row) => row.id === selectedTransicao?.estado_final_id) || null,
-      estado_inicial_id: estadosList?.find((row) => row.id === selectedTransicao?.estado_inicial_id) || null,
+      modo: selectedItem?.modo || null,
+      perfilIDCC: cc?.perfil_id,
+      to_alert: selectedItem?.to_alert || false,
+      fluxo_id: selectedItem?.fluxo_id || fluxoId,
+      prazoemdias: selectedItem?.prazoemdias || '',
+      hasopnumero: selectedItem?.hasopnumero || false,
+      is_paralelo: selectedItem?.is_paralelo || false,
+      arqhasopnumero: selectedItem?.arqhasopnumero || false,
+      is_after_devolucao: selectedItem?.is_after_devolucao || false,
+      estado_final_id: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
+      estado_inicial_id: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
     }),
-    [fluxoId, selectedTransicao, currentColaborador?.perfil_id, estadosList]
+    [fluxoId, selectedItem, cc?.perfil_id, estadosList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedTransicao) {
+    if (isEdit && selectedItem) {
       reset(defaultValues);
     }
     if (!isEdit) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedTransicao, isOpenModal]);
+  }, [isEdit, selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
-      if (selectedTransicao) {
+      if (selectedItem) {
         values.estado_final_id = values?.estado_final_id?.id;
         values.estado_inicial_id = values?.estado_inicial_id?.id;
         dispatch(
           updateItem('transicao', JSON.stringify(values), {
             mail,
-            id: selectedTransicao.id,
+            id: selectedItem.id,
             mensagem: 'Transição atualizada',
           })
         );
@@ -1138,9 +1066,9 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
       dispatch(
         deleteItem('transicao', {
           mail,
-          id: selectedTransicao.id,
+          id: selectedItem.id,
           mensagem: 'Transição eliminada',
-          perfilId: currentColaborador?.perfil_id,
+          perfilId: cc?.perfil_id,
         })
       );
       onClose();
@@ -1151,64 +1079,26 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedTransicao ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
+      <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12} sm={6}>
-              <Controller
+              <RHFAutocompleteObject
                 name="estado_inicial_id"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(estadosList, getComparator('asc', 'label'))}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    getOptionLabel={(option) => option?.label}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Estado de origem" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Estado de origem"
+                options={applySort(estadosList, getComparator('asc', 'label'))}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Controller
+              <RHFAutocompleteObject
                 name="estado_final_id"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(estadosList, getComparator('asc', 'label'))}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    getOptionLabel={(option) => option?.label}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Estado de destino" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Estado de destino"
+                options={applySort(estadosList, getComparator('asc', 'label'))}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Controller
-                name="modo"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={['Seguimento', 'Devolução']}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Modo" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
-              />
+              <RHFAutocompleteSimple name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFTextField
@@ -1318,7 +1208,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { estados, done, error, isSaving, selectedMeuEstado } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedMeuEstado;
 
@@ -1350,11 +1240,11 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
     () => ({
       estado_id: estado,
       perfil_id: Number(perfilId),
-      perfil_id_cc: currentColaborador?.perfil?.id,
+      perfil_id_cc: cc?.perfil?.id,
       data_limite: selectedMeuEstado?.data_limite ? new Date(selectedMeuEstado?.data_limite) : null,
       data_inicial: selectedMeuEstado?.data_inicial ? new Date(selectedMeuEstado?.data_inicial) : null,
     }),
-    [selectedMeuEstado, currentColaborador?.perfil?.id, estado, perfilId]
+    [selectedMeuEstado, cc?.perfil?.id, estado, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -1398,7 +1288,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
           mail,
           id: selectedMeuEstado.id,
           mensagem: 'Estado eliminado',
-          perfilId: currentColaborador?.perfil_id,
+          perfilId: cc?.perfil_id,
         })
       );
       onClose();
@@ -1414,21 +1304,10 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <Controller
+              <RHFAutocompleteObject
                 name="estado_id"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    options={applySort(estadosList, getComparator('asc', 'label'))}
-                    getOptionLabel={(option) => option?.label}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Estado" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Estado"
+                options={applySort(estadosList, getComparator('asc', 'label'))}
               />
             </Grid>
             <Grid item xs={12}>
@@ -1502,7 +1381,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const colaboradoresNA = applyFilter1(colaboradores, estado?.perfis);
 
   useEffect(() => {
@@ -1539,7 +1418,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
 
   const onSubmit = async () => {
     try {
-      const formData = { estado_id: estado?.id, perfil_id_cc: currentColaborador?.perfil?.id, perfis: [] };
+      const formData = { estado_id: estado?.id, perfil_id_cc: cc?.perfil?.id, perfis: [] };
       values?.perfis?.forEach((row) => {
         formData?.perfis?.push({
           perfil_id: row?.perfil?.id,
@@ -1572,19 +1451,10 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
               <Grid item xs={12} key={item.id}>
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
-                    <Controller
+                    <RHFAutocompleteObject
                       name={`perfis[${index}].perfil`}
-                      control={control}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          fullWidth
-                          options={perfisByCategoria}
-                          getOptionLabel={(option) => option?.label}
-                          onChange={(event, newValue) => field.onChange(newValue)}
-                          renderInput={(params) => <TextField required fullWidth {...params} label="Colaborador" />}
-                        />
-                      )}
+                      label="Colaborador"
+                      options={perfisByCategoria}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>

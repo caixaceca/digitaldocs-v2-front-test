@@ -36,7 +36,7 @@ const TABLE_HEAD = [
 
 export default function Origens() {
   const dispatch = useDispatch();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { origens, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -51,15 +51,15 @@ export default function Origens() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'id' });
+  } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
 
   const [filterSearch, setFilterSearch] = useSearchParams();
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('origens', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('origens', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -67,7 +67,7 @@ export default function Origens() {
   };
 
   const handleUpdate = (id) => {
-    dispatch(getItem('origem', { id, mail, from: 'origens', perfilId: currentColaborador?.perfil_id }));
+    dispatch(getItem('origem', { id, mail, from: 'origens', perfilId: cc?.perfil_id }));
   };
 
   const handleAdd = () => {

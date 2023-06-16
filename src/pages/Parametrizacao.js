@@ -48,9 +48,8 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 export default function Parametrizacao() {
   const { themeStretch } = useSettings();
-  const { meusacessos } = useSelector((state) => state.digitaldocs);
+  const { meusacessos, isAdmin } = useSelector((state) => state.digitaldocs);
   const [currentTab, setCurrentTab] = useSearchParams({ tab: 'acessos', filter: '' });
-  const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
   const acessoMotivosPendencias = isAdmin;
   const acessoFluxos = isAdmin || meusacessos?.includes('fluxo-110') || meusacessos?.includes('fluxo-110');
   const acessoOrigens = isAdmin || meusacessos?.includes('origem-110') || meusacessos?.includes('origem-110');

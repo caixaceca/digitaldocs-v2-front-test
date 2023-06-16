@@ -39,7 +39,7 @@ export default function Views({ processoId }) {
   const [accord, setAccord] = useState(false);
   const { toggle: open, onOpen, onClose } = useToggle();
   const { visualizacoes } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
   const viewsGroupByColaborador = groupByColaborador(visualizacoes, 'perfil_id');
 
   const handleAccord = (panel) => (event, isExpanded) => {
@@ -47,10 +47,10 @@ export default function Views({ processoId }) {
   };
 
   useEffect(() => {
-    if (mail && processoId && currentColaborador?.perfil_id && open) {
-      dispatch(getAll('visualizacoes', { mail, processoId, perfilId: currentColaborador?.perfil_id }));
+    if (mail && processoId && cc?.perfil_id && open) {
+      dispatch(getAll('visualizacoes', { mail, processoId, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, processoId, mail, open, currentColaborador?.perfil_id]);
+  }, [dispatch, processoId, mail, open, cc?.perfil_id]);
 
   return (
     <>
@@ -59,12 +59,7 @@ export default function Views({ processoId }) {
           <PreviewOutlinedIcon />
         </Fab>
       </Tooltip>
-      <Drawer
-        open={open}
-        anchor="right"
-        onClose={onClose}
-        PaperProps={{ sx: { width: { xs: 1, sm: 400 } } }}
-      >
+      <Drawer open={open} anchor="right" onClose={onClose} PaperProps={{ sx: { width: { xs: 1, sm: 400 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Visualizações</Typography>
           <IconButton onClick={onClose}>

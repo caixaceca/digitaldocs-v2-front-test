@@ -59,7 +59,7 @@ export default function Pareceres({ pareceres, processoId }) {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { mail, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { anexoParecer, meusAmbientes, isOpenModal, selectedParecer, isOpenParecer, done, isSaving } = useSelector(
     (state) => state.digitaldocs
   );
@@ -111,7 +111,7 @@ export default function Pareceres({ pareceres, processoId }) {
     formData.append('parecerID', selectedParecer.id);
     formData.append('parecer', selectedParecer.parecer);
     formData.append('descricao', selectedParecer.descricao);
-    formData.append('perfilID', currentColaborador?.perfil_id);
+    formData.append('perfilID', cc?.perfil_id);
     dispatch(
       updateItem('parecer', formData, { mail, id: selectedParecer.id, processoId, mensagem: 'parecer validado' })
     );
@@ -251,7 +251,7 @@ export default function Pareceres({ pareceres, processoId }) {
                                         parecer: selectedParecer?.parecer,
                                         descricao: selectedParecer?.descricao,
                                         data_limite: selectedParecer?.data_limite,
-                                        nome: currentColaborador?.perfil?.displayName,
+                                        nome: cc?.perfil?.displayName,
                                       }}
                                     />
                                   </PDFViewer>

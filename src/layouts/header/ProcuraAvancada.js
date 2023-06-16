@@ -41,7 +41,7 @@ export default function ProcuraAvancada() {
   const [noperacao, setNoperacao] = useState(parametros?.get('noperacao') || '');
   const [searchQuery, setSearchQuery] = useState(parametros?.get('chave') || '');
   const [avancada, setAvancada] = useState(parametros?.get('avancada') === 'true');
-  const { uos, colaboradores, currentColaborador } = useSelector((state) => state.intranet);
+  const { uos, colaboradores, cc } = useSelector((state) => state.intranet);
   const [data, setData] = useState([
     parametros?.get('datai') ? add(new Date(parametros?.get('datai')), { hours: 2 }) : null,
     parametros?.get('dataf') ? add(new Date(parametros?.get('dataf')), { hours: 2 }) : null,
@@ -60,7 +60,7 @@ export default function ProcuraAvancada() {
       id: Number(parametros?.get('uoId')),
       label: uos?.find((row) => row?.id === Number(parametros?.get('uoId')))?.label,
     }) ||
-      (currentColaborador?.uo && { id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label }) ||
+      (cc?.uo && { id: cc?.uo?.id, label: cc?.uo?.label }) ||
       null
   );
 
@@ -77,10 +77,10 @@ export default function ProcuraAvancada() {
         id: Number(parametros?.get('uoId')),
         label: uos?.find((row) => row?.id === Number(parametros?.get('uoId')))?.label,
       });
-    } else if (currentColaborador?.uo) {
-      setUo({ id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label });
+    } else if (cc?.uo) {
+      setUo({ id: cc?.uo?.id, label: cc?.uo?.label });
     }
-  }, [colaboradores, uos, currentColaborador?.uo, parametros]);
+  }, [colaboradores, uos, cc?.uo, parametros]);
 
   const handleSearch = () => {
     if (avancada) {
@@ -128,7 +128,7 @@ export default function ProcuraAvancada() {
     setSearchQuery('');
     setColaborador(null);
     setData([null, null]);
-    setUo(currentColaborador?.uo ? { id: currentColaborador?.uo?.id, label: currentColaborador?.uo?.label } : null);
+    setUo(cc?.uo ? { id: cc?.uo?.id, label: cc?.uo?.label } : null);
     onClose();
   };
 

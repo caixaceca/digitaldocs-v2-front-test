@@ -29,13 +29,15 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
-  const { meuAmbiente, processoId, motivosPendencias, done, error, isSaving } = useSelector(
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { meuAmbiente, processoId, origens, motivosPendencias, done, error, isSaving } = useSelector(
     (state) => state.digitaldocs
   );
-  const perfilId = currentColaborador?.perfil_id;
+  const perfilId = cc?.perfil_id;
   const [operacao, setOperacao] = useState(selectedProcesso?.operacao || '');
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
+  const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
+  const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -93,20 +95,15 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       ispendente: selectedProcesso?.ispendente || false,
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
-      perfil_id: selectedProcesso?.perfil_id || currentColaborador?.perfil_id,
-      mpendencia: selectedProcesso?.mpendencia
-        ? motivosPendencias?.find((row) => row?.id?.toString() === selectedProcesso?.mpendencia?.toString())
+      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
+      mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
+      origem_id: selectedProcesso?.origem_id
+        ? origensList?.find((row) => row.id === selectedProcesso?.origem_id)
         : null,
-      origem_id:
-        (selectedProcesso?.origem_id && {
-          id: selectedProcesso?.origem_id,
-          label: `${selectedProcesso?.designacao} - ${selectedProcesso?.seguimento}`,
-        }) ||
-        null,
-      balcao: selectedProcesso?.balcao || Number(currentColaborador?.uo?.balcao),
+      balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, motivosPendencias, meuAmbiente, _entidades, currentColaborador]
+    [selectedProcesso, fluxo?.id, mpendencia, meuAmbiente, origensList, _entidades, cc]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -132,7 +129,7 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         formData.append('balcao', values.balcao);
         formData.append('modelo', fluxo?.modelo);
         formData.append('fluxo_id', values.fluxo_id);
-        formData.append('uo_perfil_id ', currentColaborador?.uo?.id);
+        formData.append('uo_perfil_id ', cc?.uo?.id);
         formData.append('is_interno ', selectedProcesso?.is_interno);
         formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
         // optional
@@ -291,9 +288,10 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
         <Grid item xs={12}>
           <ProcessoExternoForm
             operacao={operacao}
-            selectedProcesso={selectedProcesso}
             setOperacao={setOperacao}
             setPendente={setPendente}
+            origensList={origensList}
+            selectedProcesso={selectedProcesso}
           />
         </Grid>
 

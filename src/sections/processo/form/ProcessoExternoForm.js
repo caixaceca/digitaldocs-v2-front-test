@@ -2,14 +2,19 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Grid, Card, TextField, CardContent, Typography, Autocomplete, InputAdornment } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useSelector } from '../../../redux/store';
 // components
-import { RHFTextField, RHFSwitch } from '../../../components/hook-form';
+import {
+  RHFSwitch,
+  RHFTextField,
+  RHFDatePicker,
+  RHFAutocompleteSimple,
+  RHFAutocompleteObject,
+} from '../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
 import ObsNovosAnexos from './ObsNovosAnexos';
@@ -25,23 +30,21 @@ const operacoes = [
   'Outras',
 ];
 
-const canais = ['Email', 'Correspondência'];
-
 // ----------------------------------------------------------------------
 
 ProcessoExternoForm.propTypes = {
   operacao: PropTypes.string,
   setOperacao: PropTypes.func,
   setPendente: PropTypes.func,
+  origensList: PropTypes.array,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoExternoForm({ operacao, setOperacao, setPendente, selectedProcesso }) {
+export default function ProcessoExternoForm({ operacao, setOperacao, setPendente, selectedProcesso, origensList }) {
   const { control, watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
-  const { origens, motivosPendencias } = useSelector((state) => state.digitaldocs);
-  const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
+  const { motivosPendencias } = useSelector((state) => state.digitaldocs);
 
   return (
     <Grid container spacing={3}>
@@ -53,55 +56,16 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                 <RHFTextField name="referencia" label="Referência" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Controller
-                  control={control}
-                  name="data_entrada"
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      disableFuture
-                      value={field.value}
-                      label="Data de entrada"
-                      onChange={(newValue) => field.onChange(newValue)}
-                      slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                    />
-                  )}
-                />
+                <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Controller
-                  name="canal"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <Autocomplete
-                      {...field}
-                      fullWidth
-                      options={canais}
-                      getOptionLabel={(option) => option}
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Canal de entrada" error={!!error} helperText={error?.message} />
-                      )}
-                    />
-                  )}
-                />
+                <RHFAutocompleteSimple name="canal" label="Canal de entrada" options={['Email', 'Correspondência']} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Controller
+                <RHFAutocompleteObject
                   name="origem_id"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <Autocomplete
-                      {...field}
-                      fullWidth
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      options={applySort(origensList, getComparator('asc', 'label'))}
-                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                      getOptionLabel={(option) => option?.label}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Origem" error={!!error} helperText={error?.message} />
-                      )}
-                    />
-                  )}
+                  label="Origem"
+                  options={applySort(origensList, getComparator('asc', 'label'))}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -177,23 +141,12 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
               {values.ispendente && (
                 <>
                   <Grid item xs={12} sm={4}>
-                    <Controller
+                    <RHFAutocompleteObject
                       name="mpendencia"
-                      control={control}
-                      render={({ field, fieldState: { error } }) => (
-                        <Autocomplete
-                          {...field}
-                          fullWidth
-                          onChange={(event, newValue) => field.onChange(newValue)}
-                          options={applySort(motivosPendencias, getComparator('asc', 'motivo'))?.map(
-                            (option) => option
-                          )}
-                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                          getOptionLabel={(option) => option?.motivo}
-                          renderInput={(params) => (
-                            <TextField {...params} label="Motivo" error={!!error} helperText={error?.message} />
-                          )}
-                        />
+                      label="Motivo"
+                      options={applySort(
+                        motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
+                        getComparator('asc', 'label')
                       )}
                     />
                   </Grid>

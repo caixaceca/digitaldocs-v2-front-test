@@ -8,3 +8,7 @@ export { default as RHFSelect } from './RHFSelect';
 export { default as RHFEditor } from './RHFEditor';
 export { default as RHFTextField } from './RHFTextField';
 export { default as RHFRadioGroup } from './RHFRadioGroup';
+//
+export { RHFDatePicker } from './RHF';
+export { RHFAutocompleteObject } from './RHF';
+export { default as RHFAutocompleteSimple } from './RHF';

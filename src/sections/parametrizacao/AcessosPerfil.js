@@ -50,7 +50,7 @@ export default function AcessosPerfil() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { done, error, isLoading, isOpenModal, isSaving, isOpenModalAnexo, selectedAnexoId, acessos } = useSelector(
     (state) => state.digitaldocs
   );
@@ -77,8 +77,8 @@ export default function AcessosPerfil() {
   }, [dispatch, id, mail]);
 
   const handleUpdate = (id) => {
-    if (id && currentColaborador?.perfil_id && mail) {
-      dispatch(getItem('acesso', { id, mail, from: 'acessos', perfilId: currentColaborador?.perfil_id }));
+    if (id && cc?.perfil_id && mail) {
+      dispatch(getItem('acesso', { id, mail, from: 'acessos', perfilId: cc?.perfil_id }));
     }
   };
 
@@ -101,7 +101,7 @@ export default function AcessosPerfil() {
         mail,
         id: selectedAnexoId,
         mensagem: 'acesso eliminado',
-        perfilId: currentColaborador?.perfil_id,
+        perfilId: cc?.perfil_id,
       })
     );
   };

@@ -5,7 +5,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { Box, Stack, Tooltip, TextField, IconButton, Autocomplete, InputAdornment } from '@mui/material';
 // utils
-import { findColaboradoresAcesso, uosResponsavel, temNomeacao } from '../utils/validarAcesso';
+import { ColaboradoresAcesso, uosResponsavel, temNomeacao } from '../utils/validarAcesso';
 // redux
 import { useSelector } from '../redux/store';
 // hooks
@@ -410,16 +410,11 @@ export function SearchToolbarTrabalhados({
   onFilterColaborador,
   tab,
 }) {
-  const { uos } = useSelector((state) => state.intranet);
-  const { meusAmbientes, meusacessos } = useSelector((state) => state.digitaldocs);
-  const { currentColaborador, colaboradores } = useSelector((state) => state.intranet);
-  const isAdmin = meusacessos?.includes('Todo-111') || meusacessos?.includes('Todo-110');
-  const uosResp = uosResponsavel(uos, currentColaborador);
-  const isChefia = temNomeacao(currentColaborador);
-  const colaboradoresList = [];
-  findColaboradoresAcesso(colaboradores, currentColaborador, uosResp, isAdmin, isChefia)?.forEach((row) => {
-    colaboradoresList.push({ id: row?.perfil?.id, label: row?.perfil?.displayName, uoId: row?.uo_id });
-  });
+  const { cc, uos, colaboradores } = useSelector((state) => state.intranet);
+  const { meusAmbientes, isAdmin } = useSelector((state) => state.digitaldocs);
+  const isChefia = temNomeacao(cc);
+  const uosResp = uosResponsavel(uos, cc);
+  const colaboradoresList = ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes);
   const ambientesList = applySort(
     meusAmbientes?.filter((row) => row.nome !== 'Todos'),
     getComparator('asc', 'nome')

@@ -39,13 +39,13 @@ export function FormSugestao({ open, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const sugestaoSchema = Yup.object().shape({
+  const formSchema = Yup.object().shape({
     titulo: Yup.string().required('Título não pode ficar vazio'),
     descricao: Yup.string().required('Descrção não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(() => ({ titulo: '', descricao: '', imagem: '' }), []);
-  const methods = useForm({ resolver: yupResolver(sugestaoSchema), defaultValues });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 

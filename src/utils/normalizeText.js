@@ -1,3 +1,8 @@
+// @mui
+import { Typography } from '@mui/material';
+
+// ----------------------------------------------------------------------
+
 export function normalizeText(text) {
   return text
     .toLowerCase()
@@ -16,4 +21,24 @@ export function newLineText(text) {
     </>
   );
   return newText;
+}
+
+// ----------------------------------------------------------------------
+
+export function entidadesParse(entidades) {
+  let _entidades = '';
+  entidades?.split(';')?.forEach((row, index) => {
+    _entidades += entidades?.split(';')?.length - 1 === index ? row : `${row} / `;
+  });
+  return _entidades;
+}
+
+// ----------------------------------------------------------------------
+
+export function noDados() {
+  return (
+    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+      Não identificado
+    </Typography>
+  );
 }

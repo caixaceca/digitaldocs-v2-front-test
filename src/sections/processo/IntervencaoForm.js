@@ -11,6 +11,8 @@ import {
   Fab,
   List,
   Grid,
+  Stack,
+  Alert,
   Table,
   Dialog,
   Tooltip,
@@ -31,8 +33,8 @@ import {
   TableContainer,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import CircleIcon from '@mui/icons-material/Circle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // utils
@@ -42,6 +44,7 @@ import { fNumber, fCurrency } from '../../utils/formatNumber';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import {
+  createItem,
   updateItem,
   deleteItem,
   atribuirProcesso,
@@ -49,7 +52,6 @@ import {
   arquivarProcesso,
   cancelarProcesso,
   finalizarProcesso,
-  encaminharProcesso,
   desarquivarProcesso,
 } from '../../redux/slices/digitaldocs';
 // hooks
@@ -58,7 +60,14 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // components
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
-import { FormProvider, RHFTextField, RHFUploadMultiFile } from '../../components/hook-form';
+import {
+  FormProvider,
+  RHFTextField,
+  RHFDatePicker,
+  RHFUploadMultiFile,
+  RHFAutocompleteSimple,
+  RHFAutocompleteObject,
+} from '../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -75,7 +84,7 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (error) {
@@ -85,8 +94,8 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
     acao: Yup.mixed().nullable('Ação não pode ficar vazio').required('Escolhe uma ação'),
+    observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -105,6 +114,14 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   const { reset, watch, control, setValue, handleSubmit } = methods;
   const values = watch();
 
+  const aberturaSemEntidadeGerencia =
+    !processo?.entidades &&
+    title === 'Encaminhar' &&
+    processo?.nome?.includes('Gerência') &&
+    processo?.assunto === 'Abertura de conta' &&
+    values?.acao &&
+    !values?.acao?.estado_final_label?.includes('Atendimento');
+
   useEffect(() => {
     if (processo) {
       reset(defaultValues);
@@ -115,30 +132,33 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   const onSubmit = async () => {
     try {
       let haveAnexos = false;
-      if (values?.acao?.estado_final_label?.indexOf('Atendimento') !== -1 && values?.perfilIDAfeto?.id) {
-        // values.perfilIDAfeto.id = values?.perfilIDAfeto?.id;
-      } else {
-        values.perfilIDAfeto = null;
-      }
       const formData = {
         modo: values?.acao?.modo,
         noperacao: values.noperacao,
         observacao: values.observacao,
         transicaoID: values?.acao?.id,
-        perfilID: currentColaborador?.perfil_id,
+        perfilID: cc?.perfil_id,
         estado_finalID: values?.acao?.estado_final_id,
         perfilIDAfeto: values?.perfilIDAfeto?.id || '',
       };
-      const formDataAnexos = new FormData();
+      const anexos = new FormData();
       if (values?.anexos?.length > 0) {
         haveAnexos = true;
-        formDataAnexos.append('perfilID', currentColaborador?.perfil_id);
+        anexos.append('perfilID', cc?.perfil_id);
         const listaanexo = values.anexos;
         for (let i = 0; i < listaanexo.length; i += 1) {
-          formDataAnexos.append('anexos', listaanexo[i]);
+          anexos.append('anexos', listaanexo[i]);
         }
       }
-      dispatch(encaminharProcesso(processo.id, JSON.stringify(formData), haveAnexos, formDataAnexos, mail));
+      dispatch(
+        createItem('encaminhar', JSON.stringify(formData), {
+          mail,
+          anexos,
+          haveAnexos,
+          id: processo.id,
+          mensagem: 'realizada',
+        })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -164,10 +184,16 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
     setValue('anexos', filteredItems);
   };
 
+  const podeAtribuir =
+    ((processo?.nome?.includes('Gerência') && values?.acao?.estado_final_label?.includes('Atendimento')) ||
+      (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento') ||
+      processo?.nome === 'Diário') &&
+    colaboradoresList?.length > 0;
+
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{title}</DialogTitle>
-      <DialogContent sx={{ minWidth: { sm: 600 } }}>
+      <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
@@ -179,7 +205,11 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
                     {...field}
                     fullWidth
                     options={destinos}
-                    onChange={(event, newValue) => field.onChange(newValue)}
+                    onChange={(event, newValue) => {
+                      field.onChange(newValue);
+                      setValue('ispendente', false);
+                      setValue('perfilIDAfeto', null);
+                    }}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     getOptionLabel={(option) => `${option?.modo} para ${option?.estado_final_label}`}
                     renderInput={(params) => (
@@ -189,62 +219,58 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
                 )}
               />
             </Grid>
-            {((processo?.nome?.indexOf('Gerência') !== -1 &&
-              values?.acao?.estado_final_label?.indexOf('Atendimento') !== -1) ||
-              (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento') ||
-              processo?.nome === 'Diário') &&
-              colaboradoresList?.length > 0 && (
+            {aberturaSemEntidadeGerencia ? (
+              <Grid item xs={12}>
+                <Typography>
+                  Processo de <b>Abertura de conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
+                </Typography>
+                <Typography>
+                  Por favor edita o processo, adicionando a(s) entidade(s) e depois prossiga com o devido
+                  encaminhamento.
+                </Typography>
+              </Grid>
+            ) : (
+              <>
+                {podeAtribuir && (
+                  <Grid item xs={12}>
+                    <RHFAutocompleteObject
+                      name="perfilIDAfeto"
+                      label="Colaborador"
+                      options={applySort(colaboradoresList, getComparator('asc', 'label'))}
+                    />
+                  </Grid>
+                )}
+                {values?.acao?.hasopnumero && (
+                  <Grid item xs={12}>
+                    <RHFTextField name="noperacao" required label="Nº de operação" InputProps={{ type: 'number' }} />
+                  </Grid>
+                )}
                 <Grid item xs={12}>
-                  <Controller
-                    name="perfilIDAfeto"
-                    control={control}
-                    render={({ field, fieldState: { error } }) => (
-                      <Autocomplete
-                        {...field}
-                        fullWidth
-                        getOptionLabel={(option) => option?.label}
-                        onChange={(event, newValue) => field.onChange(newValue)}
-                        isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                        options={applySort(colaboradoresList, getComparator('asc', 'label'))}
-                        renderInput={(params) => (
-                          <TextField
-                            fullWidth
-                            {...params}
-                            error={!!error}
-                            label="Colaborador"
-                            helperText={error?.message}
-                          />
-                        )}
-                      />
-                    )}
+                  <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
+                </Grid>
+                <Grid item xs={12}>
+                  <RHFUploadMultiFile
+                    name="anexos"
+                    onDrop={handleDrop}
+                    onRemove={handleRemove}
+                    onRemoveAll={handleRemoveAll}
                   />
                 </Grid>
-              )}
-            {values?.acao?.hasopnumero && (
-              <Grid item xs={12}>
-                <RHFTextField name="noperacao" required label="Nº de operação" InputProps={{ type: 'number' }} />
-              </Grid>
+              </>
             )}
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={5} maxRows={8} label="Observação" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFUploadMultiFile
-                name="anexos"
-                onDrop={handleDrop}
-                onRemove={handleRemove}
-                onRemoveAll={handleRemoveAll}
-              />
-            </Grid>
           </Grid>
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             <Box sx={{ flexGrow: 1 }} />
             <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
             </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              Enviar
-            </LoadingButton>
+            {aberturaSemEntidadeGerencia ? (
+              ''
+            ) : (
+              <LoadingButton type="submit" variant="contained" loading={isSaving}>
+                Enviar
+              </LoadingButton>
+            )}
           </DialogActions>
         </FormProvider>
       </DialogContent>
@@ -254,12 +280,17 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ArquivarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processo: PropTypes.object };
+ArquivarForm.propTypes = {
+  open: PropTypes.bool,
+  onCancel: PropTypes.func,
+  arquivoAg: PropTypes.bool,
+  processo: PropTypes.object,
+};
 
-export function ArquivarForm({ open, onCancel, processo }) {
+export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { error, isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -299,12 +330,12 @@ export function ArquivarForm({ open, onCancel, processo }) {
     () => ({
       anexos: [],
       observacao: '',
+      perfilID: cc?.perfil?.id,
       fluxoID: processo?.fluxo_id,
       conta: processo?.conta || '',
       entidades: processo?.entidades,
       estadoID: processo?.estado_atual_id,
       noperacao: processo?.noperacao || '',
-      perfilID: currentColaborador?.perfil?.id,
       data_entrada: processo?.data_entrada ? add(new Date(processo?.data_entrada), { hours: 2 }) : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -312,7 +343,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, setValue, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -338,7 +369,7 @@ export function ArquivarForm({ open, onCancel, processo }) {
       const formDataAnexos = new FormData();
       if (values?.anexos?.length > 0) {
         haveAnexos = true;
-        formDataAnexos.append('perfilID', currentColaborador?.perfil_id);
+        formDataAnexos.append('perfilID', cc?.perfil_id);
         const listaanexo = values.anexos;
         for (let i = 0; i < listaanexo.length; i += 1) {
           formDataAnexos.append('anexos', listaanexo[i]);
@@ -376,33 +407,40 @@ export function ArquivarForm({ open, onCancel, processo }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <Controller
-                control={control}
-                name="data_entrada"
-                render={({ field, fieldState: { error } }) => (
-                  <DatePicker
-                    disableFuture
-                    value={field.value}
-                    label="Data de entrada"
-                    onChange={(newValue) => field.onChange(newValue)}
-                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                  />
-                )}
-              />
+            {arquivoAg?.length > 0 && (
+              <Grid item xs={12}>
+                <Alert severity="error">
+                  <Typography variant="body2">
+                    Este processo geralmente é encaminhado para outro estado fora da sua U.O.
+                  </Typography>
+                  <Typography variant="body2">
+                    Certifique de que pretendes mesmo o arquivar em vez de encaminhar.
+                  </Typography>
+                  <Typography sx={{ typography: 'caption', fontWeight: 700 }}>Posssíveis destinos:</Typography>
+                  {arquivoAg?.map((row) => (
+                    <Stack key={row} direction="row" spacing={0.5} alignItems="center">
+                      <CircleIcon sx={{ width: 8, height: 8, ml: 1 }} />
+                      <Typography variant="caption">{row}</Typography>
+                    </Stack>
+                  ))}
+                </Alert>
+              </Grid>
+            )}
+            <Grid item xs={12} sm={processo?.assunto !== 'Encerramento de conta' ? 6 : 12}>
+              <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
+            {processo?.assunto !== 'Encerramento de conta' && (
+              <Grid item xs={12} sm={6}>
+                <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
+              </Grid>
+            )}
             {deveInformarNConta() && (
               <Grid item xs={12}>
                 <RHFTextField name="conta" label="Nº de conta" InputProps={{ type: 'number' }} />
               </Grid>
             )}
-            {processo?.assunto !== 'Encerramento de conta' && (
-              <Grid item xs={12}>
-                <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
-              </Grid>
-            )}
             <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={5} maxRows={8} label="Observação" />
+              <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
             </Grid>
             <Grid item xs={12}>
               <RHFUploadMultiFile
@@ -440,7 +478,7 @@ DesarquivarForm.propTypes = {
 export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { error, isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -457,7 +495,6 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
   const defaultValues = useMemo(() => ({ estadoID: null, observacao: '' }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
-
   const values = watch();
 
   useEffect(() => {
@@ -472,7 +509,7 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
         perfilID: null,
         estadoID: values?.estadoID?.id,
         observacao: values?.observacao,
-        perfilIDCC: currentColaborador?.perfil_id,
+        perfilIDCC: cc?.perfil_id,
       };
       dispatch(desarquivarProcesso(JSON.stringify(dados), processoID, mail));
     } catch (error) {
@@ -533,7 +570,7 @@ export function FinalizarForm({ open, onCancel, processo }) {
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
   const { error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (open) {
@@ -553,9 +590,9 @@ export function FinalizarForm({ open, onCancel, processo }) {
       cativos: [],
       fluxoID: processo?.fluxo_id,
       estado_id: processo?.estado_atual_id,
-      perfil_id: currentColaborador?.perfil_id,
+      perfil_id: cc?.perfil_id,
     }),
-    [processo, currentColaborador]
+    [processo, cc]
   );
 
   const methods = useForm({ defaultValues });
@@ -659,7 +696,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
   const { enqueueSnackbar } = useSnackbar();
   const [idAnexo, setIdAnexo] = useState('');
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, error, done, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -693,13 +730,13 @@ export function ParecerForm({ open, onCancel, processoId }) {
       parecer: selectedItem?.parecer || null,
       descricao: selectedItem?.descricao || '',
       validado: selectedItem?.validado || false,
-      perfilID: selectedItem?.parecer_perfil_id || currentColaborador?.perfil_id,
+      perfilID: selectedItem?.parecer_perfil_id || cc?.perfil_id,
     }),
-    [selectedItem, currentColaborador?.perfil_id]
+    [selectedItem, cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, setValue, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -766,7 +803,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
         id: idAnexo,
         parecerId: selectedItem?.id,
         mensagem: 'anexo parecer eliminado',
-        perfilId: currentColaborador?.perfil_id,
+        perfilId: cc?.perfil_id,
       })
     );
   };
@@ -778,20 +815,10 @@ export function ParecerForm({ open, onCancel, processoId }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <Controller
+              <RHFAutocompleteSimple
                 name="parecer"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    options={['Favorável', 'Não favorável', 'Favorável parcial']}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Parecer" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
+                label="Parecer"
+                options={['Favorável', 'Não favorável', 'Favorável parcial']}
               />
             </Grid>
             <Grid item xs={12}>
@@ -875,10 +902,10 @@ export function Resgatar({ fluxiId, estadoId, processoId }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
 
   const handleResgatar = () => {
-    const formData = { estado_id: estadoId, fluxoID: fluxiId, perfil_id: currentColaborador?.perfil_id };
+    const formData = { estado_id: estadoId, fluxoID: fluxiId, perfil_id: cc?.perfil_id };
     dispatch(resgatarProcesso(JSON.stringify(formData), processoId, mail));
     onClose();
   };
@@ -912,13 +939,11 @@ export function Cancelar({ fluxiId, estadoId, processoId }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
 
   const handleCancelar = () => {
-    const formData = { estadoID: estadoId, fluxoID: fluxiId, perfilID: currentColaborador?.perfil_id };
-    dispatch(
-      cancelarProcesso(JSON.stringify(formData), { mail, id: processoId, perfilId: currentColaborador?.perfil_id })
-    );
+    const formData = { estadoID: estadoId, fluxoID: fluxiId, perfilID: cc?.perfil_id };
+    dispatch(cancelarProcesso(JSON.stringify(formData), { mail, id: processoId, perfilId: cc?.perfil_id }));
     onClose();
   };
 
@@ -957,7 +982,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { error, done, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (done === 'atribuido') {
@@ -987,7 +1012,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
     [colaboradoresList, perfilId]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -997,9 +1022,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(
-        atribuirProcesso(mail, processoID, values?.perfilIDAfeto?.id, currentColaborador?.perfil_id, 'atribuido')
-      );
+      dispatch(atribuirProcesso(mail, processoID, values?.perfilIDAfeto?.id, cc?.perfil_id, 'atribuido'));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -1007,7 +1030,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(atribuirProcesso(mail, processoID, '', currentColaborador?.perfil_id, 'atribuicao eliminada'));
+      dispatch(atribuirProcesso(mail, processoID, '', cc?.perfil_id, 'atribuicao eliminada'));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar esta atribução', { variant: 'error' });
     }
@@ -1027,28 +1050,10 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
           <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
               <Grid item xs={12}>
-                <Controller
+                <RHFAutocompleteObject
                   name="perfilIDAfeto"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <Autocomplete
-                      {...field}
-                      fullWidth
-                      getOptionLabel={(option) => option?.label}
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                      options={applySort(colaboradoresList, getComparator('asc', 'label'))}
-                      renderInput={(params) => (
-                        <TextField
-                          fullWidth
-                          {...params}
-                          error={!!error}
-                          label="Colaborador"
-                          helperText={error?.message}
-                        />
-                      )}
-                    />
-                  )}
+                  label="Colaborador"
+                  options={applySort(colaboradoresList, getComparator('asc', 'label'))}
                 />
               </Grid>
             </Grid>

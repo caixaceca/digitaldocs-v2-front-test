@@ -20,6 +20,7 @@ import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { ptDateTime, ptDate } from '../utils/formatTime';
+import { entidadesParse, noDados } from '../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../hooks/useTable';
 // redux
@@ -63,8 +64,8 @@ export default function Procura() {
   const [filterEstado, setFilterEstado] = useState(null);
   const [filterAssunto, setFilterAssunto] = useState(null);
   const { pesquisa, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador, uos } = useSelector((state) => state.intranet);
-  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
+  const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
+  const fromAgencia = cc?.uo?.tipo === 'Agências';
 
   const {
     page,
@@ -81,19 +82,19 @@ export default function Procura() {
   } = useTable({
     defaultOrderBy: 'noOrderDefault',
     defaultRowsPerPage: fromAgencia ? 100 : 25,
-    defaultDense: currentColaborador?.id === 362,
-    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+    defaultDense: cc?.id === 362,
+    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
   });
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id && currentColaborador?.uo_id && parametros) {
+    if (mail && cc?.perfil_id && cc?.uo_id && parametros) {
       if (parametros?.get('avancada') === 'false') {
         dispatch(
           getAll('pesquisa v2', {
             mail,
             chave: parametros?.get('chave'),
-            uoID: currentColaborador?.uo_id,
-            perfilId: currentColaborador?.perfil_id,
+            uoID: cc?.uo_id,
+            perfilId: cc?.perfil_id,
           })
         );
       } else {
@@ -108,13 +109,13 @@ export default function Procura() {
             entidade: parametros?.get('entidade'),
             nentrada: parametros?.get('nentrada'),
             noperacao: parametros?.get('noperacao'),
-            perfilID: currentColaborador?.perfil_id,
+            perfilID: cc?.perfil_id,
             perfilDono: parametros?.get('perfilId'),
           })
         );
       }
     }
-  }, [dispatch, parametros, currentColaborador?.perfil_id, currentColaborador?.uo_id, mail]);
+  }, [dispatch, parametros, cc?.perfil_id, cc?.uo_id, mail]);
 
   const handleFilterUo = (value) => {
     setFilterUo(value);
@@ -168,10 +169,6 @@ export default function Procura() {
   const assuntosList = [];
   const uosorigemList = [];
   pesquisa?.forEach((row) => {
-    let _entidades = '';
-    row?.entidades?.split(';')?.forEach((_row, index) => {
-      _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
-    });
     const uo = uos?.find((uo) => uo?.id === row?.uo_origem_id);
     const colaborador = colaboradores?.find((colaborador) => colaborador?.perfil_id === row?.dono);
     if (uo && !uosorigemList.includes(uo?.label)) {
@@ -187,7 +184,7 @@ export default function Procura() {
       ...row,
       uo: uo?.label,
       tipo: uo?.tipo,
-      entidades: _entidades,
+      entidades: entidadesParse(row?.entidades),
       colaborador: colaborador?.perfil?.displayName,
     });
   });
@@ -214,9 +211,9 @@ export default function Procura() {
                   {parametros?.get('chave')}
                 </Box>
               ) : (
-                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
                   {parametros?.get('uoId') && (
-                    <Panel label="U.O">
+                    <Panel label="Agência/U.O">
                       <Typography noWrap>
                         {uos?.find((row) => row?.id?.toString() === parametros?.get('uoId')?.toString())?.label}
                       </Typography>
@@ -302,68 +299,48 @@ export default function Procura() {
                   {isLoading && isNotFound ? (
                     <SkeletonTable column={7} row={10} />
                   ) : (
-                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                      let _entidades = '';
-                      row?.entidades?.split(';')?.forEach((_row, index) => {
-                        _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
-                      });
-                      return (
-                        <TableRow hover key={row.id}>
-                          <TableCell>{row.nentrada}</TableCell>
-                          <TableCell>{row.assunto}</TableCell>
-                          <TableCell>
-                            {row?.titular ? (
-                              row.titular
-                            ) : (
-                              <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                Não identificado
+                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                      <TableRow hover key={row.id}>
+                        <TableCell>{row.nentrada}</TableCell>
+                        <TableCell>{row.assunto}</TableCell>
+                        <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
+                        <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
+                        <TableCell>{row.estado}</TableCell>
+                        <TableCell sx={{ width: 10 }}>
+                          {row?.criado_em && (
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                              <Typography noWrap variant="body2">
+                                {ptDateTime(row.criado_em)}
                               </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
-                              <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                Não identificado
+                            </Stack>
+                          )}
+                          {row?.uo && (
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                              <Typography noWrap variant="body2">
+                                {row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
                               </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell>{row.estado}</TableCell>
-                          <TableCell sx={{ width: 10 }}>
-                            {row?.criado_em && (
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                                <Typography noWrap variant="body2">
-                                  {ptDateTime(row.criado_em)}
-                                </Typography>
-                              </Stack>
-                            )}
-                            {row?.uo && (
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                                <Typography noWrap variant="body2">
-                                  {row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
-                                </Typography>
-                              </Stack>
-                            )}
-                            {row?.colaborador && (
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                                <Typography noWrap variant="body2">
-                                  {row.colaborador}
-                                </Typography>
-                              </Stack>
-                            )}
-                          </TableCell>
-                          <TableCell align="center" width={50}>
-                            <Tooltip title="DETALHES" arrow>
-                              <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                                <SvgIconStyle src="/assets/icons/view.svg" />
-                              </Fab>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
+                            </Stack>
+                          )}
+                          {row?.colaborador && (
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
+                              <Typography noWrap variant="body2">
+                                {row.colaborador}
+                              </Typography>
+                            </Stack>
+                          )}
+                        </TableCell>
+                        <TableCell align="center" width={50}>
+                          <Tooltip title="DETALHES" arrow>
+                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
+                              <SvgIconStyle src="/assets/icons/view.svg" />
+                            </Fab>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
 

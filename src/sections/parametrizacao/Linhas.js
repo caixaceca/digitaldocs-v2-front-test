@@ -32,7 +32,7 @@ const TABLE_HEAD = [
 
 export default function Linhas() {
   const dispatch = useDispatch();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { linhas, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -47,15 +47,15 @@ export default function Linhas() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'id' });
+  } = useTable({ defaultOrderBy: 'linha', defaultOrder: 'asc' });
 
   const [filterSearch, setFilterSearch] = useSearchParams();
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('linhas', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('linhas', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);

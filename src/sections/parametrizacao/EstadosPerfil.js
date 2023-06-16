@@ -37,19 +37,23 @@ import { EstadosPerfilForm } from './ParametrizacaoForm';
 export default function EstadosPerfil() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { isLoading, meusEstados, estados, isOpenModal } = useSelector((state) => state.digitaldocs);
 
   const isNotFound = !meusEstados?.length;
 
   useEffect(() => {
-    if (mail && id && currentColaborador?.perfil_id) {
-      dispatch(getAll('meusEstados', { mail, estadoId: id, perfilId: currentColaborador?.perfil_id }));
+    if (mail && id && cc?.perfil_id) {
+      dispatch(getAll('meusEstados', { mail, estadoId: id, perfilId: cc?.perfil_id }));
     }
-    if (mail && estados?.length === 0) {
-      dispatch(getAll('estados', { mail, perfilId: currentColaborador?.perfil_id }));
+  }, [dispatch, id, cc?.perfil_id, mail]);
+
+  useEffect(() => {
+    if (mail && cc?.perfil_id && estados?.length === 0) {
+      dispatch(getAll('estados', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, id, estados, currentColaborador?.perfil_id, mail]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleUpdate = (id) => {
     dispatch(getSelectMeuEstadoSuccess(id));

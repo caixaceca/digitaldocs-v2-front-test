@@ -1,15 +1,14 @@
 import PropTypes from 'prop-types';
 // form
-import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
+import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Fab, Grid, Button, Tooltip, InputAdornment } from '@mui/material';
 // hooks
 import useResponsive from '../../../hooks/useResponsive';
 // components
 import SvgIconStyle from '../../../components/SvgIconStyle';
-import { RHFTextField } from '../../../components/hook-form';
+import { RHFTextField, RHFDatePicker } from '../../../components/hook-form';
 // utils
 
 // ----------------------------------------------------------------------
@@ -39,19 +38,7 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
             </Grid>
           )}
           <Grid item xs={12} sm={6} xl={3}>
-            <Controller
-              control={control}
-              name="data_entrada"
-              render={({ field, fieldState: { error } }) => (
-                <DatePicker
-                  disableFuture
-                  value={field.value}
-                  label="Data de entrada"
-                  onChange={(newValue) => field.onChange(newValue)}
-                  slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                />
-              )}
-            />
+            <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
           </Grid>
           {assunto === 'Abertura de conta' || assunto === 'OPE DARH' ? (
             <>
@@ -75,7 +62,7 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
                     name={`entidades[${index}].numero`}
                     label="Nº de entidade"
                     InputProps={{
-                      endAdornment: fields?.length > 1 && (
+                      endAdornment: (
                         <InputAdornment position="end">
                           <Tooltip title="Remover" arrow>
                             <Fab
@@ -95,6 +82,11 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
                   />
                 </Grid>
               ))}
+              {fields?.length === 0 && (
+                <Grid item xs={12} xl={6}>
+                  <RHFTextField name="titular" label="Titular" required />
+                </Grid>
+              )}
             </>
           ) : (
             <>

@@ -48,6 +48,8 @@ export default function Router() {
       dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
       dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
       if (perfil?.id) {
+        dispatch(getAll('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getAll('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('motivos pendencias', { mail: perfil?.mail, perfilId: perfil?.id }));

@@ -62,7 +62,7 @@ export default function Processo() {
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, uos, currentColaborador, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, uos, cc, colaboradores } = useSelector((state) => state.intranet);
   const {
     done,
     error,
@@ -76,7 +76,7 @@ export default function Processo() {
     isOpenModalDesariquivar,
   } = useSelector((state) => state.digitaldocs);
   const estadoId = processo?.estado_atual_id;
-  const perfilId = currentColaborador?.perfil_id;
+  const perfilId = cc?.perfil_id;
   const fromArquivo = from?.get?.('from') === 'arquivo';
   const fromProcurar = from?.get?.('from') === 'procurar';
   const fromEntradas = from?.get?.('from') === 'entradas';
@@ -88,7 +88,7 @@ export default function Processo() {
   const hasPareceres = processo?.pareceres && processo?.pareceres?.length > 0;
   const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
   const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
-  const isResponsavel = temNomeacao(currentColaborador) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
+  const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
 
   const linkNavigate =
     (fromProcurar &&
@@ -129,7 +129,7 @@ export default function Processo() {
   });
 
   const idEstado = (item) => {
-    if (item === 'dopan') {
+    if (item === 'devdop') {
       return processo?.destinos?.find((row) => row?.modo === 'Seguimento');
     }
     if (item === 'gerencia') {
@@ -184,16 +184,21 @@ export default function Processo() {
 
   useEffect(() => {
     const errorStd = error[0]?.msg || error?.error || error;
+    const noMoreProcess = errorStd?.includes('Sem mais processos disponíveis no estado');
     if (errorStd) {
-      enqueueSnackbar(
-        errorStd === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
-          ? 'Processo não encontrado ou não tens acesso'
-          : errorStd,
-        {
-          variant: errorStd?.includes('Sem mais processos disponíveis no estado') ? 'info' : 'error',
-        }
-      );
-      if (errorStd?.includes('Sem mais processos disponíveis no estado')) {
+      if (noMoreProcess && errorStd?.includes('Atendimento')) {
+        //
+      } else {
+        enqueueSnackbar(
+          errorStd === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
+            ? 'Processo não encontrado ou não tens acesso'
+            : errorStd,
+          {
+            variant: noMoreProcess ? 'info' : 'error',
+          }
+        );
+      }
+      if (noMoreProcess) {
         navigate(linkNavigate);
       }
     }
@@ -205,6 +210,12 @@ export default function Processo() {
       dispatch(getItem('processo', { id, mail, perfilId }));
     }
   }, [dispatch, perfilId, mail, id]);
+
+  useEffect(() => {
+    if (mail && processo?.origem_id && perfilId) {
+      dispatch(getItem('origem', { id: processo?.origem_id, mail, perfilId }));
+    }
+  }, [dispatch, perfilId, mail, processo?.origem_id]);
 
   useEffect(() => {
     if (mail && perfilId) {
@@ -266,7 +277,7 @@ export default function Processo() {
     return false;
   };
 
-  const podeCancelar = () => {
+  const processoPertence = () => {
     let i = 0;
     while (i < meusAmbientes?.length) {
       if (meusAmbientes[i]?.id === processo?.estado_atual_id) {
@@ -372,7 +383,7 @@ export default function Processo() {
                     </>
                   ) : (
                     <>
-                      {processo?.in_paralelo_mode && podeCancelar() && (
+                      {processo?.in_paralelo_mode && processoPertence() && (
                         <Cancelar
                           processoId={processo?.id}
                           fluxiId={processo?.fluxo_id}
@@ -421,7 +432,7 @@ export default function Processo() {
                       {processo?.is_lock && processo?.perfil_id === perfilId && (
                         <Intervencao processo={processo} colaboradoresList={colaboradoresList} />
                       )}
-                      {processo?.is_lock && processo?.perfil_id !== perfilId && isResponsavel && (
+                      {processo?.is_lock && processo?.perfil_id !== perfilId && isResponsavel && processoPertence() && (
                         <Libertar processoID={processo?.id} perfilID={perfilId} />
                       )}
                     </>
@@ -468,7 +479,7 @@ export default function Processo() {
                     </Card>
                   </Grid>
                 )}
-                {currentColaborador?.id === 423 && (
+                {cc?.id === 423 && (
                   <>
                     {hasHistorico && (
                       <Grid item xs={12} lg={hasHPrisoes && 6}>

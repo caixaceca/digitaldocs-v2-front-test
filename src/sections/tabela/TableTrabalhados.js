@@ -19,6 +19,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { format } from 'date-fns';
 import { ptDateTime } from '../../utils/formatTime';
+import { entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -55,22 +56,22 @@ export default function TableTrabalhados() {
   const dispatch = useDispatch();
   const [data, setData] = useState(new Date());
   const [filterSearch, setFilterSearch] = useSearchParams();
-  const { mail, currentColaborador, uos } = useSelector((state) => state.intranet);
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { trabalhados, trabalhadosUo, isLoading } = useSelector((state) => state.digitaldocs);
   const [ambiente, setAmbiente] = useState(null);
   const [colaborador, setColaborador] = useState(
-    currentColaborador
+    cc
       ? {
-          id: currentColaborador?.perfil_id,
-          label: currentColaborador?.perfil?.displayName,
-          uoId: currentColaborador?.uo_id,
+          id: cc?.perfil_id,
+          label: cc?.perfil?.displayName,
+          uoId: cc?.uo_id,
         }
       : null
   );
   const total = trabalhadosUo?.length || 0;
   const subtotal = trabalhados?.length || 0;
-  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
-  const uoId = ambiente?.uoId || colaborador?.uoId || currentColaborador?.uo_id;
+  const fromAgencia = cc?.uo?.tipo === 'Agências';
+  const uoId = ambiente?.uoId || colaborador?.uoId || cc?.uo_id;
   const uo = uos?.find((row) => row?.id === uoId);
 
   const {
@@ -87,19 +88,19 @@ export default function TableTrabalhados() {
   } = useTable({
     defaultOrderBy: 'trabalhado_em',
     defaultRowsPerPage: fromAgencia ? 100 : 25,
-    defaultDense: currentColaborador?.id === 362,
-    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+    defaultDense: cc?.id === 362,
+    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
   });
 
   useEffect(() => {
-    if (currentColaborador?.perfil_id) {
+    if (cc?.perfil_id) {
       setColaborador({
-        id: currentColaborador?.perfil_id,
-        label: currentColaborador?.perfil?.displayName,
-        uoId: currentColaborador?.uo_id,
+        id: cc?.perfil_id,
+        label: cc?.perfil?.displayName,
+        uoId: cc?.uo_id,
       });
     }
-  }, [dispatch, currentColaborador]);
+  }, [dispatch, cc]);
 
   useEffect(() => {
     dispatch(resetItem('trabalhados'));
@@ -168,7 +169,7 @@ export default function TableTrabalhados() {
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
             >
               <ArquivoAnalytic
-                title={uo ? uo?.label : currentColaborador?.uo?.label}
+                title={uo ? uo?.label : cc?.uo?.label}
                 total={uoId ? total : subtotal}
                 icon="/assets/icons/navbar/process.svg"
                 color="success.main"
@@ -211,39 +212,27 @@ export default function TableTrabalhados() {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={7} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    let _entidades = '';
-                    row?.entidades?.split(';')?.forEach((_row, index) => {
-                      _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
-                    });
-                    return (
-                      <TableRow hover key={row.referencia}>
-                        <TableCell>{row.nentrada}</TableCell>
-                        <TableCell>{row.titular}</TableCell>
-                        <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                              Não identificado
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>{row?.assunto}</TableCell>
-                        <TableCell>{row?.nome}</TableCell>
-                        <TableCell align="center" sx={{ width: 10 }}>
-                          <Typography noWrap variant="body2">
-                            {row?.trabalhado_em && ptDateTime(row.trabalhado_em)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow hover key={row.referencia}>
+                      <TableCell>{row.nentrada}</TableCell>
+                      <TableCell>{row.titular || noDados()}</TableCell>
+                      <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
+                      <TableCell>{row?.assunto}</TableCell>
+                      <TableCell>{row?.nome}</TableCell>
+                      <TableCell align="center" sx={{ width: 10 }}>
+                        <Typography noWrap variant="body2">
+                          {row?.trabalhado_em && ptDateTime(row.trabalhado_em)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="DETALHES" arrow>
+                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
+                            <SvgIconStyle src="/assets/icons/view.svg" />
+                          </Fab>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
 

@@ -10,11 +10,11 @@ import { BASEURL } from '../utils/axios';
 
 export default function MyAvatar({ ...other }) {
   const { accounts } = useMsal();
-  const { currentColaborador } = useSelector((state) => state.intranet);
+  const { cc } = useSelector((state) => state.intranet);
 
   return (
     <Avatar
-      src={currentColaborador?.foto_disk && `${BASEURL}/colaborador/file/colaborador/${currentColaborador?.foto_disk}`}
+      src={cc?.foto_disk && `${BASEURL}/colaborador/file/colaborador/${cc?.foto_disk}`}
       alt={accounts[0]?.name}
       {...other}
     />

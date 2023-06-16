@@ -20,7 +20,7 @@ const initialState = {
   frase: null,
   ajuda: null,
   accessToken: null,
-  currentColaborador: null,
+  cc: null,
   uos: [],
   links: [],
   perfis: [],
@@ -104,11 +104,11 @@ const slice = createSlice({
     },
 
     getColaboradoresSuccess(state, action) {
-      state.colaboradores = action.payload;
+      state.colaboradores = action.payload?.filter((row) => row?.is_active);
     },
 
     getCurrentColaboradorSuccess(state, action) {
-      state.currentColaborador = action.payload;
+      state.cc = action.payload;
     },
 
     getPerfisSuccess(state, action) {

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams, createSearchParams } from 'react-router-d
 import { Fab, Card, Table, Tooltip, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
+import { entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -46,8 +47,8 @@ export default function TablePorConcluir() {
     filterSearch: '',
   });
   const { porConcluir, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, currentColaborador } = useSelector((state) => state.intranet);
-  const fromAgencia = currentColaborador?.uo?.tipo === 'Agências';
+  const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
+  const fromAgencia = cc?.uo?.tipo === 'Agências';
   const {
     page,
     dense,
@@ -62,15 +63,15 @@ export default function TablePorConcluir() {
   } = useTable({
     defaultOrderBy: 'trabalhado_em',
     defaultRowsPerPage: fromAgencia ? 100 : 25,
-    defaultDense: currentColaborador?.id === 362,
-    defaultOrder: currentColaborador?.id === 362 ? 'desc' : 'asc',
+    defaultDense: cc?.id === 362,
+    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
   });
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('porconcluir', { perfilId: currentColaborador?.perfil_id, mail }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('porconcluir', { perfilId: cc?.perfil_id, mail }));
     }
-  }, [dispatch, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, cc?.perfil_id, mail]);
 
   useEffect(() => {
     setPage(0);
@@ -151,57 +152,37 @@ export default function TablePorConcluir() {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={8} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    let _entidades = '';
-                    row?.entidades?.split(';')?.forEach((_row, index) => {
-                      _entidades += row?.entidades?.split(';')?.length - 1 === index ? _row : `${_row} / `;
-                    });
-                    return (
-                      <TableRow hover key={row.id}>
-                        <TableCell>{row.nentrada}</TableCell>
-                        <TableCell>
-                          {row?.titular ? (
-                            row.titular
-                          ) : (
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                              Não identificado
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {(row?.conta && row.conta) || (row?.cliente && row.cliente) || _entidades || (
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                              Não identificado
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>{row?.assunto}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2">{row?.nome}</Typography>
-                          {row?.motivo && (
-                            <Label variant="ghost" color="warning" sx={{ mt: 1 }}>
-                              {row?.motivo}
-                            </Label>
-                          )}
-                        </TableCell>
-                        <TableCell>{row?.colaborador}</TableCell>
-                        <TableCell align="center" sx={{ width: 10 }}>
-                          {row?.trabalhado_em && (
-                            <Typography noWrap variant="body2">
-                              {ptDateTime(row.trabalhado_em)}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow hover key={row.id}>
+                      <TableCell>{row.nentrada}</TableCell>
+                      <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
+                      <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
+                      <TableCell>{row?.assunto}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{row?.nome}</Typography>
+                        {row?.motivo && (
+                          <Label variant="ghost" color="warning" sx={{ mt: 1 }}>
+                            {row?.motivo}
+                          </Label>
+                        )}
+                      </TableCell>
+                      <TableCell>{row?.colaborador}</TableCell>
+                      <TableCell align="center" sx={{ width: 10 }}>
+                        {row?.trabalhado_em && (
+                          <Typography noWrap variant="body2">
+                            {ptDateTime(row.trabalhado_em)}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="DETALHES" arrow>
+                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
+                            <SvgIconStyle src="/assets/icons/view.svg" />
+                          </Fab>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
 

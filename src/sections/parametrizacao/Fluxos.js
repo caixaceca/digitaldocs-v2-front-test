@@ -38,7 +38,7 @@ const TABLE_HEAD = [
 export default function Fluxos() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { fluxos, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
@@ -53,15 +53,15 @@ export default function Fluxos() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'id' });
+  } = useTable({ defaultOrderBy: 'assunto', defaultOrder: 'asc' });
 
   const [filterSearch, setFilterSearch] = useSearchParams();
 
   useEffect(() => {
-    if (mail && currentColaborador?.perfil_id) {
-      dispatch(getAll('fluxos', { mail, perfilId: currentColaborador?.perfil_id }));
+    if (mail && cc?.perfil_id) {
+      dispatch(getAll('fluxos', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, currentColaborador?.perfil_id, mail]);
+  }, [dispatch, cc?.perfil_id, mail]);
 
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
@@ -73,7 +73,7 @@ export default function Fluxos() {
   };
 
   const handleUpdate = (id) => {
-    dispatch(getItem('fluxo', { id, mail, from: 'fluxos', perfilId: currentColaborador?.perfil_id }));
+    dispatch(getItem('fluxo', { id, mail, from: 'fluxos', perfilId: cc?.perfil_id }));
   };
 
   const handleCloseModal = () => {
@@ -121,9 +121,9 @@ export default function Fluxos() {
                         <TableCell>{row.modelo}</TableCell>
                         <TableCell align="center">
                           {row.is_interno ? (
-                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
+                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
                           ) : (
-                            <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
+                            <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
                           )}
                         </TableCell>
                         <TableCell align="center" width={125}>

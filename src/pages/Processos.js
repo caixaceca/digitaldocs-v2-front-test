@@ -29,9 +29,9 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 }));
 
 const RootStyle = styled('div')(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.primary.main, 1),
   width: '100%',
   height: '100%',
+  backgroundColor: alpha(theme.palette.primary.main, 1),
 }));
 
 // ----------------------------------------------------------------------
@@ -39,35 +39,20 @@ const RootStyle = styled('div')(({ theme }) => ({
 export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { mail, currentColaborador } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
   const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
-    if (mail && meuAmbiente?.id && meuFluxo?.id && currentColaborador?.perfil_id) {
+    if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
       dispatch(
-        getAll('meusprocessos', {
-          mail,
-          fluxoId: meuFluxo?.id,
-          estadoId: meuAmbiente?.id,
-          perfilId: currentColaborador?.perfil_id,
-        })
+        getAll('meusprocessos', { mail, fluxoId: meuFluxo?.id, estadoId: meuAmbiente?.id, perfilId: cc?.perfil_id })
       );
     }
-  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, currentColaborador?.perfil_id]);
+  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, currentTab]);
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab({ tab: newValue });
-    if (mail && meuAmbiente?.id && meuFluxo?.id && currentColaborador?.perfil_id) {
-      dispatch(
-        getAll('meusprocessos', {
-          mail,
-          fluxoId: meuFluxo?.id,
-          estadoId: meuAmbiente?.id,
-          perfilId: currentColaborador?.perfil_id,
-        })
-      );
-    }
   };
 
   const acessoAgendados = () => {
@@ -95,8 +80,8 @@ export default function Processos() {
         {
           value: 'agendados',
           label: 'Agendados',
-          component: <TableProcessos from="agendados" />,
           num: meusProcessos?.totalagendado || 0,
+          component: <TableProcessos from="agendados" />,
         },
       ]
     : [];
@@ -107,8 +92,8 @@ export default function Processos() {
           {
             value: 'finalizados',
             label: 'Finalizados',
-            component: <TableProcessos from="finalizados" />,
             num: meusProcessos?.totalfinalizado || 0,
+            component: <TableProcessos from="finalizados" />,
           },
         ]
       : [];
@@ -119,8 +104,8 @@ export default function Processos() {
           {
             value: 'executados',
             label: 'Executados',
-            component: <TableProcessos from="executados" />,
             num: meusProcessos?.totalexecutado || 0,
+            component: <TableProcessos from="executados" />,
           },
         ]
       : [];
@@ -131,26 +116,26 @@ export default function Processos() {
         {
           value: 'tarefas',
           label: 'Tarefas',
-          component: <TableProcessos from="tarefas" />,
           num: meusProcessos?.total || 0,
+          component: <TableProcessos from="tarefas" />,
         },
         {
           value: 'retidos',
           label: 'Retidos',
-          component: <TableProcessos from="retidos" />,
           num: meusProcessos?.totalpendenteEQ || 0,
+          component: <TableProcessos from="retidos" />,
         },
         {
           value: 'pendentes',
           label: 'Pendentes',
-          component: <TableProcessos from="pendentes" />,
           num: meusProcessos?.totalpendencias || 0,
+          component: <TableProcessos from="pendentes" />,
         },
         {
           value: 'atribuidos',
           label: 'Atribuídos',
-          component: <TableProcessos from="atribuidos" />,
           num: meusProcessos?.totalafetosEQ || 0,
+          component: <TableProcessos from="atribuidos" />,
         },
         ...agendados,
         ...finalizados,
