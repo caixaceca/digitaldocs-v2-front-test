@@ -154,9 +154,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
-        if (values.conta) {
-          formData.append('conta', values.conta);
-        }
         if (isPSC) {
           formData.append(
             'titular',
@@ -165,8 +162,16 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         } else if (values.titular) {
           formData.append('titular', values.titular);
         }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
+        if (fluxo?.assunto === 'Abertura de conta') {
+          formData.append('conta', '');
+          formData.append('cliente', '');
+        } else {
+          if (values.conta) {
+            formData.append('conta', values.conta);
+          }
+          if (values.cliente) {
+            formData.append('cliente', values.cliente);
+          }
         }
         if (values.noperacao) {
           formData.append('noperacao', values.noperacao);
@@ -235,11 +240,16 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.obs) {
           formData.append('obs', values.obs);
         }
-        if (values.conta) {
-          formData.append('conta', values.conta);
-        }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
+        if (fluxo?.assunto === 'Abertura de conta') {
+          formData.append('conta', '');
+          formData.append('cliente', '');
+        } else {
+          if (values.conta) {
+            formData.append('conta', values.conta);
+          }
+          if (values.cliente) {
+            formData.append('cliente', values.cliente);
+          }
         }
         if (isPSC) {
           formData.append(

@@ -296,7 +296,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
             {aberturaSemEntidadeGerencia ? (
               <Grid item xs={12}>
                 <Typography>
-                  Processo de <b>Abertura de conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
+                  Processo de <b>Abertura de Conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
                 </Typography>
                 <Typography>
                   Por favor edita o processo, adicionando a(s) entidade(s) e depois prossiga com o devido

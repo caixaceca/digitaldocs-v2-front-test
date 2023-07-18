@@ -76,19 +76,6 @@ export default function Intervencao({ processo, colaboradoresList }) {
     dispatch(updateItem('abandonar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'abandonado' }));
   };
 
-  const podeFinalizar = () => {
-    if (processo?.agendado && processo.situacao !== 'X') {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.is_final) {
-          return true;
-        }
-        i += 1;
-      }
-    }
-    return false;
-  };
-
   const podeFinalizarNE = () => {
     if (
       processo?.situacao === 'E' &&
@@ -162,24 +149,27 @@ export default function Intervencao({ processo, colaboradoresList }) {
         </>
       )}
 
-      {podeFinalizar() && (
-        <>
-          <Tooltip title="FINALIZAR" arrow>
-            <Fab color="success" size="small" variant="soft" onClick={onOpen4}>
-              <SvgIconStyle src="/assets/icons/stop.svg" />
-            </Fab>
-          </Tooltip>
-          <DialogConfirmar
-            open={open4}
-            onClose={onClose4}
-            isLoading={isSaving}
-            handleOk={handleFinalizar}
-            color="success"
-            title="Finalizar"
-            desc="finalizar este processo"
-          />
-        </>
-      )}
+      {processo?.agendado &&
+        processo.situacao !== 'X' &&
+        (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
+        processo?.nome === 'Autorização SWIFT' && (
+          <>
+            <Tooltip title="FINALIZAR" arrow>
+              <Fab color="success" size="small" variant="soft" onClick={onOpen4}>
+                <SvgIconStyle src="/assets/icons/stop.svg" />
+              </Fab>
+            </Tooltip>
+            <DialogConfirmar
+              open={open4}
+              onClose={onClose4}
+              isLoading={isSaving}
+              handleOk={handleFinalizar}
+              color="success"
+              title="Finalizar"
+              desc="finalizar este processo"
+            />
+          </>
+        )}
 
       {podeFinalizarNE() && (
         <>
