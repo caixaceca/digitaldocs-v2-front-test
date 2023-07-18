@@ -1,17 +1,18 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText, newLineText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, openModal, closeModal, selectItem } from '../../redux/slices/digitaldocs';
+import { getAll, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -62,14 +63,6 @@ export default function Linhas() {
     setPage(0);
   };
 
-  const handleUpdate = (item) => {
-    dispatch(selectItem(item));
-  };
-
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -84,9 +77,7 @@ export default function Linhas() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -110,14 +101,10 @@ export default function Linhas() {
                       return (
                         <TableRow hover key={key}>
                           <TableCell>{row.linha}</TableCell>
-                          <TableCell>{row.descricao}</TableCell>
+                          <TableCell>{newLineText(row.descricao)}</TableCell>
                           <TableCell align="center" width={50}>
                             <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-                              <Tooltip title="Editar" arrow>
-                                <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row)}>
-                                  <SvgIconStyle src="/assets/icons/editar.svg" />
-                                </Fab>
-                              </Tooltip>
+                              <UpdateItem dados={row} />
                             </RoleBasedGuard>
                           </TableCell>
                         </TableRow>
@@ -135,13 +122,13 @@ export default function Linhas() {
 
           {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
-              dense={dense}
-              onChangeDense={onChangeDense}
-              onChangeRowsPerPage={onChangeRowsPerPage}
-              onChangePage={onChangePage}
               page={page}
+              dense={dense}
               rowsPerPage={rowsPerPage}
               count={dataFiltered.length}
+              onChangePage={onChangePage}
+              onChangeDense={onChangeDense}
+              onChangeRowsPerPage={onChangeRowsPerPage}
             />
           )}
         </Card>
@@ -169,8 +156,8 @@ function applySortFilter({ linhas, comparator, filterSearch }) {
   if (text) {
     linhas = linhas.filter(
       (item) =>
-        item?.linha.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.descricao.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1
+        (item?.linha && normalizeText(item?.linha).indexOf(normalizeText(text)) !== -1) ||
+        (item?.descricao && normalizeText(item?.descricao).indexOf(normalizeText(text)) !== -1)
     );
   }
 

@@ -76,11 +76,6 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: { paddingRight: theme.spacing(3) },
 }));
 
-const TABS = [
-  { value: 'grafico', label: 'Gráfico' },
-  { value: 'tabela', label: 'Tabela' },
-];
-
 const TABLE_HEAD = [
   { id: 'assunto', label: 'Fluxo/Assunto', align: 'left' },
   { id: 'nome', label: 'Estado/Ambiente', align: 'left' },
@@ -230,6 +225,7 @@ export function FileSystem() {
                                 key={folder.tipo}
                                 sx={{
                                   p: 2,
+                                  borderRadius: 1,
                                   boxShadow: 'none',
                                   border: `solid 1px ${theme.palette.divider}`,
                                   '&:hover': { bgcolor: 'background.neutral', boxShadow: theme.customShadows.z2 },
@@ -429,9 +425,7 @@ export function Criacao({ vista }) {
                     {currentTab === 'grafico' ? (
                       <Chart type="area" series={series} options={chartOptions} height={400} />
                     ) : (
-                      <Table id="table-to-xls-tipo">
-                        <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
-                      </Table>
+                      <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
                     )}
                   </Grid>
                 </Grid>
@@ -712,15 +706,7 @@ export function DevolvidosTipos() {
                     {currentTab === 'grafico' ? (
                       <Chart type="line" series={series} options={chartOptions} height={500} />
                     ) : (
-                      <Table id="table-to-xls-tipo">
-                        <TableExport
-                          percentagem
-                          total={total}
-                          label="Processo"
-                          label1="Quantidade"
-                          dados={indicadores}
-                        />
-                      </Table>
+                      <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
                     )}
                   </Grid>
                 </Grid>
@@ -964,9 +950,7 @@ export function Duracao() {
                       {currentTab === 'grafico' ? (
                         <Chart type="bar" series={seriesVolume} options={chartOptions} height={500} />
                       ) : (
-                        <Table id="table-to-xls-tipo">
-                          <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
-                        </Table>
+                        <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
                       )}
                     </Grid>
                   </Grid>
@@ -1063,15 +1047,13 @@ export function Volume({ agrupamento, topLabel }) {
                     {currentTab === 'grafico' ? (
                       <Chart type="line" series={series} options={chartOptions} height={500} />
                     ) : (
-                      <Table id="table-to-xls-tipo">
-                        <TableExport
-                          percentagem
-                          total={total}
-                          label={agrupamento}
-                          label1="Quantidade"
-                          dados={volumeByItem}
-                        />
-                      </Table>
+                      <TableExport
+                        percentagem
+                        total={total}
+                        label={agrupamento}
+                        label1="Quantidade"
+                        dados={volumeByItem}
+                      />
                     )}
                   </Grid>
                 </Grid>
@@ -1579,7 +1561,7 @@ TableExport.propTypes = {
 
 function TableExport({ label, label1, dados, total = 0, percentagem = false, vista = '' }) {
   return (
-    <>
+    <Table id="table-to-xls-tipo">
       <TableHead>
         <TableRow>
           <TableCell>{label}</TableCell>
@@ -1615,7 +1597,7 @@ function TableExport({ label, label1, dados, total = 0, percentagem = false, vis
           </TableRow>
         )}
       </TableBody>
-    </>
+    </Table>
   );
 }
 
@@ -1632,7 +1614,10 @@ function TabView({ currentTab, setCurrentTab }) {
         onChange={(event, newValue) => setCurrentTab(newValue)}
         sx={{ width: 120, minHeight: '35px' }}
       >
-        {TABS.map((tab) => (
+        {[
+          { value: 'grafico', label: 'Gráfico' },
+          { value: 'tabela', label: 'Tabela' },
+        ].map((tab) => (
           <Tab key={tab.value} label={tab.label} value={tab.value} sx={{ mx: '5px !important', minHeight: '35px' }} />
         ))}
       </Tabs>
@@ -1702,16 +1687,16 @@ function applySortFilter({ indicadores, comparator }) {
 // ----------------------------------------------------------------------
 
 function indicadoresGroupBy(dados, item) {
-  const _dados = [];
+  const dadosGrouped = [];
   dados = applySort(dados, getComparator('asc', 'assunto'));
   dados.reduce((res, value) => {
     if (!res[value[item]]) {
       res[value[item]] = { item: value[item], processos: [] };
-      _dados.push(res[value[item]]);
+      dadosGrouped.push(res[value[item]]);
     }
     res[value[item]].processos.push({ assunto: value?.assunto, total: value?.total });
     return res;
   }, {});
 
-  return _dados;
+  return dadosGrouped;
 }

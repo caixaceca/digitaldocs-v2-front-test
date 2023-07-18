@@ -5,6 +5,7 @@ import { styled, alpha } from '@mui/material/styles';
 import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
 // utils
 import selectTab from '../utils/selectTab';
+import { paramsObject } from '../utils/normalizeText';
 // routes
 import useSettings from '../hooks/useSettings';
 // redux
@@ -28,20 +29,39 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 }));
 
 const RootStyle = styled('div')(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.primary.main, 1),
   width: '100%',
   height: '100%',
+  backgroundColor: alpha(theme.palette.primary.main, 1),
 }));
 
 // ----------------------------------------------------------------------
 
 export default function Controle() {
   const { themeStretch } = useSettings();
+  const { cc } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'entradas', filter: '' });
+  const [currentTab, setCurrentTab] = useSearchParams({
+    tab: 'entradas',
+    uoId: cc?.uo?.id || '',
+    colaborador: cc?.perfil?.displayName || '',
+  });
+
+  useEffect(() => {
+    if (cc?.uo && !currentTab?.get('uoId')) {
+      setCurrentTab({ tab: 'trabalhados', ...paramsObject(currentTab), uoId: cc?.uo?.id });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cc?.uo]);
+
+  useEffect(() => {
+    if (cc?.perfil?.displayName && !currentTab?.get('colaborador')) {
+      setCurrentTab({ tab: 'trabalhados', ...paramsObject(currentTab), colaborador: cc?.perfil?.displayName });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cc?.perfil?.displayName]);
 
   const handleChangeTab = (event, newValue) => {
-    setCurrentTab({ tab: newValue });
+    setCurrentTab({ tab: newValue, ...paramsObject(currentTab) });
   };
 
   const acessoEntradas = () => {
@@ -70,7 +90,7 @@ export default function Controle() {
 
   useEffect(() => {
     if (currentTab.get('tab') !== selectTab(VIEW_TABS, currentTab.get('tab'))) {
-      setCurrentTab({ tab: VIEW_TABS?.[0]?.value });
+      setCurrentTab({ tab: VIEW_TABS?.[0]?.value, ...paramsObject(currentTab) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [VIEW_TABS]);

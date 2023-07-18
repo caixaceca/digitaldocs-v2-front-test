@@ -1,29 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import {
-  Fab,
-  Card,
-  Table,
-  Stack,
-  Tooltip,
-  TableRow,
-  TableBody,
-  TableCell,
-  TextField,
-  Typography,
-  Autocomplete,
-  TableContainer,
-} from '@mui/material';
-import TodayIcon from '@mui/icons-material/Today';
-import { DateRangePicker } from '@mui/x-date-pickers-pro';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
+import { Card, Table, TableBody, TableContainer } from '@mui/material';
 // utils
-import { add, format } from 'date-fns';
-import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
+import { format } from 'date-fns';
+import { UosAcesso } from '../../utils/validarAcesso';
+import { parametrosPesquisa, paramsObject } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -33,11 +15,13 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+//
+import { UoData, RowItem } from './Dados';
+import applySortFilter from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -56,32 +40,19 @@ const TABLE_HEAD = [
 export default function TableEntradas() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [filter, setFilter] = useSearchParams({
-    estado: '',
-    assunto: '',
-    colaborador: '',
-    tab: 'entradas',
-    filterSearch: '',
-    datai: format(new Date(), 'yyyy-MM-dd'),
-    dataf: format(new Date(), 'yyyy-MM-dd'),
-  });
+  const [filter, setFilter] = useSearchParams({ colaborador: '' });
   const [data, setData] = useState([
     filter?.get('datai') || format(new Date(), 'yyyy-MM-dd'),
     filter?.get('dataf') || format(new Date(), 'yyyy-MM-dd'),
   ]);
-  const { entradas, meusAmbientes, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
+  const { entradas, meusAmbientes, isAdmin, isLoading } = useSelector((state) => state.digitaldocs);
+  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes);
   const perfilId = cc?.perfil_id;
-  const [uoId, setUoId] = useState(cc?.uo_id);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
-
-  const minhasUos = [];
-  meusAmbientes?.forEach((row) => {
-    if (row?.nome?.includes('Gerência')) {
-      const uo = uos?.find((uo) => uo?.id === row?.uo_id);
-      minhasUos?.push({ id: row?.uo_id, label: uo?.label });
-    }
-  });
+  const [uo, setUo] = useState(
+    filter?.get('uoId') ? uosList?.find((row) => row?.id?.toString() === filter?.get('uoId')?.toString()) : null
+  );
 
   const {
     page,
@@ -102,16 +73,18 @@ export default function TableEntradas() {
   });
 
   useEffect(() => {
-    if (cc?.uo_id) {
-      setUoId(cc?.uo_id);
+    if (cc?.uo && !filter?.get('uoId')) {
+      setFilter({ tab: 'entradas', ...paramsObject(filter), uoId: cc?.uo?.id });
+      setUo({ id: cc?.uo?.id, label: cc?.uo?.label });
     }
-  }, [dispatch, cc?.uo_id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, cc?.uo]);
 
   useEffect(() => {
-    if (mail && perfilId && uoId) {
-      dispatch(getAll('entradas', { mail, uoId, perfilId, dataInicio: data[0], dataFim: data[1] }));
+    if (mail && perfilId && uo?.id) {
+      dispatch(getAll('entradas', { mail, uoId: uo?.id, perfilId, dataInicio: data[0], dataFim: data[1] }));
     }
-  }, [dispatch, perfilId, uoId, mail, data]);
+  }, [dispatch, perfilId, uo?.id, mail, data]);
 
   useEffect(() => {
     setPage(0);
@@ -119,21 +92,10 @@ export default function TableEntradas() {
   }, [filter]);
 
   const handleViewRow = (id) => {
-    navigate({
-      pathname: `${PATH_DIGITALDOCS.controle.root}/${id}`,
-      search: createSearchParams({
-        from: 'entradas',
-        datai: filter?.get('datai'),
-        dataf: filter?.get('dataf'),
-        estado: filter?.get('estado'),
-        assunto: filter?.get('assunto'),
-        colaborador: filter?.get('colaborador'),
-        filterSearch: filter?.get('filterSearch'),
-      }).toString(),
-    });
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=entradas${parametrosPesquisa(filter)}`);
   };
 
-  const newEntradas = [];
+  const dados = [];
   const estadosList = [];
   const assuntosList = [];
   const colaboradoresList = [];
@@ -151,19 +113,15 @@ export default function TableEntradas() {
     if (!assuntosList.includes(row?.assunto)) {
       assuntosList.push(row?.assunto);
     }
-    newEntradas.push({
-      ...row,
-      colaborador: colaborador?.perfil?.displayName,
-      // numEntrada: `${row?.nentrada}/${uoId}/${fYear(row?.criado_em || new Date())}`,
-    });
+    dados.push({ ...row, colaborador: colaborador?.perfil?.displayName });
   });
 
   const dataFiltered = applySortFilter({
-    newEntradas,
+    dados,
+    filter: filter?.get('filter'),
     estado: filter?.get('estado'),
     assunto: filter?.get('assunto'),
     colaborador: filter?.get('colaborador'),
-    filterSearch: filter?.get('filterSearch'),
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
@@ -174,78 +132,28 @@ export default function TableEntradas() {
         heading="Entradas"
         links={[{ name: '' }]}
         action={
-          <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
-            {minhasUos?.length > 1 && (
-              <Autocomplete
-                fullWidth
-                size="small"
-                disableClearable
-                options={minhasUos}
-                value={minhasUos?.find((row) => row?.id === uoId)}
-                onChange={(event, newValue) => setUoId(newValue?.id)}
-                renderInput={(params) => (
-                  <TextField {...params} label="Agência/U.O" margin="none" sx={{ width: { md: 200 } }} />
-                )}
-              />
-            )}
-            <DateRangePicker
-              disableFuture
-              slots={{ field: SingleInputDateRangeField }}
-              value={[add(new Date(data[0]), { hours: 2 }), add(new Date(data[1]), { hours: 2 })]}
-              slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 240 } } }}
-              onChange={(newValue) => {
-                setFilter({
-                  tab: 'entradas',
-                  estado: filter?.get('estado'),
-                  assunto: filter?.get('assunto'),
-                  colaborador: filter?.get('colaborador'),
-                  filterSearch: filter?.get('filterSearch'),
-                  datai: format(newValue?.[0], 'yyyy-MM-dd'),
-                  dataf: format(newValue?.[1], 'yyyy-MM-dd'),
-                });
-                setData([format(newValue?.[0], 'yyyy-MM-dd'), format(newValue?.[1], 'yyyy-MM-dd')]);
-              }}
-            />
-            {(data[0] !== format(new Date(), 'yyyy-MM-dd') || data[1] !== format(new Date(), 'yyyy-MM-dd')) && (
-              <Stack>
-                <Tooltip title="Hoje" arrow>
-                  <Fab
-                    color="inherit"
-                    size="small"
-                    variant="soft"
-                    onClick={() => {
-                      setFilter({
-                        tab: 'entradas',
-                        estado: filter?.get('estado'),
-                        assunto: filter?.get('assunto'),
-                        datai: format(new Date(), 'yyyy-MM-dd'),
-                        dataf: format(new Date(), 'yyyy-MM-dd'),
-                        colaborador: filter?.get('colaborador'),
-                        filterSearch: filter?.get('filterSearch'),
-                      });
-                      setData([format(new Date(), 'yyyy-MM-dd'), format(new Date(), 'yyyy-MM-dd')]);
-                    }}
-                  >
-                    <TodayIcon />
-                  </Fab>
-                </Tooltip>
-              </Stack>
-            )}
-          </Stack>
+          <UoData
+            uo={uo}
+            entradas
+            setUo={setUo}
+            filter={filter}
+            dataRange={data}
+            setData={setData}
+            uosList={uosList}
+            setFilter={setFilter}
+          />
         }
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {newEntradas.length > 1 && (
-          <SearchToolbarEntradas
-            tab="entradas"
-            filter={filter}
-            setFilter={setFilter}
-            estadosList={estadosList}
-            assuntosList={assuntosList}
-            colaboradoresList={colaboradoresList}
-          />
-        )}
+        <SearchToolbarEntradas
+          tab="entradas"
+          filter={filter}
+          setFilter={setFilter}
+          estadosList={estadosList}
+          assuntosList={assuntosList}
+          colaboradoresList={colaboradoresList}
+        />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -254,40 +162,9 @@ export default function TableEntradas() {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={7} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow hover key={row.id}>
-                      <TableCell>{row.nentrada}</TableCell>
-                      <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
-                      <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
-                      <TableCell>{row?.assunto}</TableCell>
-                      <TableCell>{row?.nome}</TableCell>
-                      <TableCell>
-                        {row?.criado_em && (
-                          <Stack direction="row" spacing={0.5} alignItems="center">
-                            <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                            <Typography noWrap variant="body2">
-                              {row?.criado_em ? ptDateTime(row.criado_em) : ''}
-                            </Typography>
-                          </Stack>
-                        )}
-                        {row?.colaborador && (
-                          <Stack direction="row" spacing={0.5} alignItems="center">
-                            <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                            <Typography noWrap variant="body2">
-                              {row.colaborador}
-                            </Typography>
-                          </Stack>
-                        )}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title="DETALHES" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                            <SvgIconStyle src="/assets/icons/view.svg" />
-                          </Fab>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index) => <RowItem row={row} key={`${row.id}_${index}`} handleViewRow={handleViewRow} />)
                 )}
               </TableBody>
 
@@ -312,42 +189,4 @@ export default function TableEntradas() {
       </Card>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ newEntradas, comparator, filterSearch, colaborador, assunto, estado }) {
-  const stabilizedThis = newEntradas.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  newEntradas = stabilizedThis.map((el) => el[0]);
-
-  if (colaborador) {
-    newEntradas = newEntradas.filter((row) => row?.colaborador === colaborador);
-  }
-  if (estado && estado !== 'Excepto Arquivo') {
-    newEntradas = newEntradas.filter((row) => row?.nome === estado);
-  }
-  if (estado === 'Excepto Arquivo') {
-    newEntradas = newEntradas.filter((row) => row?.nome !== 'Arquivo');
-  }
-  if (assunto) {
-    newEntradas = newEntradas.filter((row) => row?.assunto === assunto);
-  }
-  if (filterSearch) {
-    newEntradas = newEntradas.filter(
-      (row) =>
-        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.conta && row?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.titular && row?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1)
-    );
-  }
-
-  return newEntradas;
 }

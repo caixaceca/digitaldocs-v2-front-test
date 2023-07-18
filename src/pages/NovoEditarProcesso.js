@@ -15,9 +15,7 @@ import { SearchNotFound } from '../components/table';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
 import Ambiente from '../sections/Ambiente';
-import ProcessoInterno from '../sections/processo/form/ProcessoInterno';
-import ProcessoExterno from '../sections/processo/form/ProcessoExterno';
-import ProcessoCredito from '../sections/processo/form/ProcessoCredito';
+import { ProcessoInterno, ProcessoExterno, ProcessoCredito } from '../sections/processo/form';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -55,10 +53,8 @@ export default function NovoEditarProcesso() {
   }, [dispatch, linhas, fluxo, processo, perfilId, mail]);
 
   useEffect(() => {
-    if (processo?.fluxo_id) {
-      setFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id));
-    }
-  }, [processo?.fluxo_id, meusFluxos]);
+    setFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null);
+  }, [meuAmbiente?.id, meusFluxos, processo?.fluxo_id]);
 
   return (
     <Page title={!isEdit ? 'Novo processo | DigitalDocs' : 'Editar processo | DigitalDocs'}>
@@ -87,7 +83,9 @@ export default function NovoEditarProcesso() {
           sx={{ color: 'text.secondary' }}
         />
         {(!isEdit && meuAmbiente?.is_inicial && meuAmbiente?.id !== -1) ||
-        (processo?.is_lock && processo?.perfil_id === cc?.perfil_id) ? (
+        (processo?.is_lock &&
+          processo?.perfil_id === cc?.perfil_id &&
+          processo?.estado_atual_id === meuAmbiente?.id) ? (
           <>
             <Card sx={{ mb: 3 }}>
               <CardContent>
@@ -108,9 +106,9 @@ export default function NovoEditarProcesso() {
             {isLoading ? (
               <Card sx={{ mb: 3 }}>
                 <CardContent>
+                  <Skeleton sx={{ height: 150, transform: 'scale(1)', mb: 3 }} />
                   <Skeleton sx={{ height: 170, transform: 'scale(1)', mb: 3 }} />
-                  <Skeleton sx={{ height: 170, transform: 'scale(1)', mb: 3 }} />
-                  <Skeleton sx={{ height: 170, transform: 'scale(1)' }} />
+                  <Skeleton sx={{ height: 200, transform: 'scale(1)' }} />
                 </CardContent>
               </Card>
             ) : (

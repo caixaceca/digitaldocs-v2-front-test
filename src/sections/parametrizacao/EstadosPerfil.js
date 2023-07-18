@@ -1,31 +1,19 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
-import {
-  Fab,
-  Card,
-  Table,
-  Button,
-  Tooltip,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableHead,
-  TableContainer,
-} from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Card, Table, TableRow, TableCell, TableBody, TableHead, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, getSelectMeuEstadoSuccess, openModal, closeModal } from '../../redux/slices/digitaldocs';
+import { getAll, closeModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { TableSearchNotFound } from '../../components/table';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -38,13 +26,13 @@ export default function EstadosPerfil() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isLoading, meusEstados, estados, isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { isLoading, estadosPerfil, estados, isOpenModal } = useSelector((state) => state.digitaldocs);
 
-  const isNotFound = !meusEstados?.length;
+  const isNotFound = !estadosPerfil?.length;
 
   useEffect(() => {
     if (mail && id && cc?.perfil_id) {
-      dispatch(getAll('meusEstados', { mail, estadoId: id, perfilId: cc?.perfil_id }));
+      dispatch(getAll('estadosPerfil', { mail, estadoId: id, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, id, cc?.perfil_id, mail]);
 
@@ -54,14 +42,6 @@ export default function EstadosPerfil() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, cc?.perfil_id, mail]);
-
-  const handleUpdate = (id) => {
-    dispatch(getSelectMeuEstadoSuccess(id));
-  };
-
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
 
   const handleCloseModal = () => {
     dispatch(closeModal());
@@ -78,9 +58,7 @@ export default function EstadosPerfil() {
         ]}
         action={
           <RoleBasedGuard roles={['perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}>
-            <Button variant="soft" onClick={handleAdd} startIcon={<AddCircleIcon />}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -102,17 +80,13 @@ export default function EstadosPerfil() {
                   {isLoading && isNotFound ? (
                     <SkeletonTable column={4} row={10} />
                   ) : (
-                    meusEstados?.map((row) => (
+                    estadosPerfil?.map((row) => (
                       <TableRow key={row?.id} hover>
                         <TableCell>{row.nome}</TableCell>
                         <TableCell>{row.data_inicial ? ptDateTime(row.data_inicial) : 'Acesso permanente'}</TableCell>
                         <TableCell>{row.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}</TableCell>
                         <TableCell align="center" width={50}>
-                          <Tooltip title="Editar" arrow>
-                            <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row)}>
-                              <SvgIconStyle src="/assets/icons/editar.svg" />
-                            </Fab>
-                          </Tooltip>
+                          <UpdateItem dados={row} />
                         </TableCell>
                       </TableRow>
                     ))

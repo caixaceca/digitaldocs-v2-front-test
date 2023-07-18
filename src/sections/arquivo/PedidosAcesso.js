@@ -4,11 +4,12 @@ import { useNavigate, useSearchParams, createSearchParams } from 'react-router-d
 import { Fab, Card, Table, Tooltip, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getArquivos, resetItem } from '../../redux/slices/digitaldocs';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -56,7 +57,7 @@ export default function PedidosAcesso() {
 
   useEffect(() => {
     if (mail && cc?.perfil_id) {
-      dispatch(getArquivos('pedidosAcesso', cc?.perfil_id, mail));
+      dispatch(getAll('pedidosAcesso', { perfilId: cc?.perfil_id, mail }));
     }
   }, [dispatch, cc?.perfil_id, mail]);
 
@@ -165,7 +166,7 @@ export default function PedidosAcesso() {
 
 function applySortFilter({ pedidosAcessoLabel, comparator, filterSearch }) {
   const stabilizedThis = pedidosAcessoLabel.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
+  const text = filterSearch.get('filter')?.toString() || '';
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -177,9 +178,9 @@ function applySortFilter({ pedidosAcessoLabel, comparator, filterSearch }) {
 
   if (text) {
     pedidosAcessoLabel = pedidosAcessoLabel.filter(
-      (item) =>
-        (item?.nome && item?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (item?.processo && item?.processo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
+      (row) =>
+        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(text)) !== -1) ||
+        (row?.processo && normalizeText(row?.processo).indexOf(normalizeText(text)) !== -1)
     );
   }
 

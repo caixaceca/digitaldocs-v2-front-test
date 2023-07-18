@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
 import {
   Box,
-  Fab,
   Card,
   Table,
   Stack,
-  Tooltip,
   TableRow,
   TableBody,
   TableCell,
@@ -20,7 +18,7 @@ import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { ptDateTime, ptDate } from '../utils/formatTime';
-import { entidadesParse, noDados } from '../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados, parametrosPesquisa } from '../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../hooks/useTable';
 // redux
@@ -34,7 +32,7 @@ import { PATH_DIGITALDOCS } from '../routes/paths';
 import Page from '../components/Page';
 import Panel from '../components/Panel';
 import Scrollbar from '../components/Scrollbar';
-import SvgIconStyle from '../components/SvgIconStyle';
+import { ViewItem } from '../components/Actions';
 import { SkeletonTable } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../components/SearchToolbar';
@@ -58,7 +56,7 @@ export default function Procura() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [parametros] = useSearchParams();
+  const [params] = useSearchParams();
   const [filterUo, setFilterUo] = useState(null);
   const [filterSearch, setFilterSearch] = useState('');
   const [filterEstado, setFilterEstado] = useState(null);
@@ -87,35 +85,30 @@ export default function Procura() {
   });
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && cc?.uo_id && parametros) {
-      if (parametros?.get('avancada') === 'false') {
+    if (mail && cc?.perfil_id && cc?.uo_id && params) {
+      if (params?.get('avancada') === 'false') {
         dispatch(
-          getAll('pesquisa v2', {
-            mail,
-            chave: parametros?.get('chave'),
-            uoID: cc?.uo_id,
-            perfilId: cc?.perfil_id,
-          })
+          getAll('pesquisa v2', { mail, uoID: cc?.uo_id, perfilId: cc?.perfil_id, chave: params?.get('chave') })
         );
       } else {
         dispatch(
           getAll('pesquisa avancada', {
             mail,
-            uoID: parametros?.get('uoId'),
-            conta: parametros?.get('conta'),
-            datai: parametros?.get('datai'),
-            dataf: parametros?.get('dataf'),
-            cliente: parametros?.get('cliente'),
-            entidade: parametros?.get('entidade'),
-            nentrada: parametros?.get('nentrada'),
-            noperacao: parametros?.get('noperacao'),
             perfilID: cc?.perfil_id,
-            perfilDono: parametros?.get('perfilId'),
+            uoID: params?.get('uoId'),
+            conta: params?.get('conta'),
+            datai: params?.get('datai'),
+            dataf: params?.get('dataf'),
+            cliente: params?.get('cliente'),
+            entidade: params?.get('entidade'),
+            nentrada: params?.get('nentrada'),
+            noperacao: params?.get('noperacao'),
+            perfilDono: params?.get('perfilId'),
           })
         );
       }
     }
-  }, [dispatch, parametros, cc?.perfil_id, cc?.uo_id, mail]);
+  }, [dispatch, params, cc?.perfil_id, cc?.uo_id, mail]);
 
   const handleFilterUo = (value) => {
     setFilterUo(value);
@@ -135,33 +128,7 @@ export default function Procura() {
   };
 
   const handleViewRow = (id) => {
-    if (parametros?.get('avancada') === 'false') {
-      navigate({
-        pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`,
-        search: createSearchParams({
-          from: 'procurar',
-          avancada: 'false',
-          chave: parametros?.get('chave'),
-        }).toString(),
-      });
-    } else {
-      navigate({
-        pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`,
-        search: createSearchParams({
-          from: 'procurar',
-          avancada: 'true',
-          uoId: parametros?.get('uoId'),
-          conta: parametros?.get('conta'),
-          datai: parametros?.get('datai'),
-          dataf: parametros?.get('dataf'),
-          cliente: parametros?.get('cliente'),
-          entidade: parametros?.get('entidade'),
-          nentrada: parametros?.get('nentrada'),
-          perfilId: parametros?.get('perfilId'),
-          noperacao: parametros?.get('noperacao'),
-        }).toString(),
-      });
-    }
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=procurar${parametrosPesquisa(params)}`);
   };
 
   const newPesquisa = [];
@@ -206,59 +173,59 @@ export default function Procura() {
           heading={
             <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
               <Typography variant="h4">Resultado da procura [{pesquisa?.length || 0}]:</Typography>
-              {parametros?.get('avancada') === 'false' ? (
+              {params?.get('avancada') === 'false' ? (
                 <Box component="span" sx={{ color: 'text.primary' }}>
-                  {parametros?.get('chave')}
+                  {params?.get('chave')}
                 </Box>
               ) : (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-                  {parametros?.get('uoId') && (
+                  {params?.get('uoId') && (
                     <Panel label="Agência/U.O">
                       <Typography noWrap>
-                        {uos?.find((row) => row?.id?.toString() === parametros?.get('uoId')?.toString())?.label}
+                        {uos?.find((row) => row?.id?.toString() === params?.get('uoId')?.toString())?.label}
                       </Typography>
                     </Panel>
                   )}
-                  {parametros?.get('perfilId') && (
+                  {params?.get('perfilId') && (
                     <Panel label="Criado por">
                       <Typography noWrap>
                         {
                           colaboradores?.find(
-                            (row) => row?.perfil_id?.toString() === parametros?.get('perfilId')?.toString()
+                            (row) => row?.perfil_id?.toString() === params?.get('perfilId')?.toString()
                           )?.perfil?.displayName
                         }
                       </Typography>
                     </Panel>
                   )}
-                  {parametros?.get('conta') && (
+                  {params?.get('conta') && (
                     <Panel label="Nº conta">
-                      <Typography noWrap>{parametros?.get('conta')}</Typography>
+                      <Typography noWrap>{params?.get('conta')}</Typography>
                     </Panel>
                   )}
-                  {parametros?.get('cliente') && (
+                  {params?.get('cliente') && (
                     <Panel label="Nº cliente">
-                      <Typography noWrap>{parametros?.get('cliente')}</Typography>
+                      <Typography noWrap>{params?.get('cliente')}</Typography>
                     </Panel>
                   )}
-                  {parametros?.get('entidade') && (
+                  {params?.get('entidade') && (
                     <Panel label="Nº entidade">
-                      <Typography noWrap>{parametros?.get('entidade')}</Typography>
+                      <Typography noWrap>{params?.get('entidade')}</Typography>
                     </Panel>
                   )}
-                  {parametros?.get('nentrada') && (
+                  {params?.get('nentrada') && (
                     <Panel label="Nº entrada">
-                      <Typography noWrap>{parametros?.get('nentrada')}</Typography>
+                      <Typography noWrap>{params?.get('nentrada')}</Typography>
                     </Panel>
                   )}
-                  {parametros?.get('noperacao') && (
+                  {params?.get('noperacao') && (
                     <Panel label="Nº operação">
-                      <Typography noWrap>{parametros?.get('noperacao')}</Typography>
+                      <Typography noWrap>{params?.get('noperacao')}</Typography>
                     </Panel>
                   )}
-                  {parametros?.get('datai') && parametros?.get('dataf') && (
+                  {params?.get('datai') && params?.get('dataf') && (
                     <Panel label="Data">
                       <Typography noWrap>
-                        {ptDate(parametros?.get('datai'))} - {ptDate(parametros?.get('dataf'))}
+                        {ptDate(params?.get('datai'))} - {ptDate(params?.get('dataf'))}
                       </Typography>
                     </Panel>
                   )}
@@ -333,11 +300,7 @@ export default function Procura() {
                           )}
                         </TableCell>
                         <TableCell align="center" width={50}>
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
+                          <ViewItem handleView={() => handleViewRow(row?.id)} />
                         </TableCell>
                       </TableRow>
                     ))
@@ -391,13 +354,13 @@ function applySortFilter({ newPesquisa, comparator, filterUo, filterSearch, filt
   }
   if (filterSearch) {
     newPesquisa = newPesquisa.filter(
-      (item) =>
-        (item?.nentrada && item?.nentrada.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (item?.titular && item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (item?.conta && item?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (item?.cliente && item?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (item?.titular && item?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (item?.noperacao && item?.noperacao.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1)
+      (row) =>
+        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filterSearch)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filterSearch)) !== -1) ||
+        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filterSearch)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filterSearch)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filterSearch)) !== -1) ||
+        (row?.noperacao && normalizeText(row?.noperacao).indexOf(normalizeText(filterSearch)) !== -1)
     );
   }
 

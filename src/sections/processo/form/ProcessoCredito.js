@@ -34,8 +34,13 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     (state) => state.digitaldocs
   );
   const perfilId = cc?.perfil_id;
+  const podeAtribuir =
+    !fluxo?.assunto?.includes('Cartão') &&
+    !fluxo?.assunto?.includes('Extrato') &&
+    !fluxo?.assunto?.includes('Declarações');
+  const credito = selectedProcesso?.credito || null;
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
-  const [estado, setEstado] = useState(selectedProcesso?.situacao_final_mes);
+  const [estado, setEstado] = useState(credito?.situacao_final_mes);
   const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
 
   useEffect(() => {
@@ -57,54 +62,38 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
+    linha_id: Yup.mixed().required('Linha não pode ficar vazio'),
     titular: Yup.string().required('Proponente não pode ficar vazio'),
+    segmento: Yup.string().required('Segmento  não pode ficar vazio'),
     finalidade: Yup.string().required('Finalidade não pode ficar vazio'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     setor_atividade: Yup.string().required('Setor de atividade não pode ficar vazio'),
-    numero_proposta:
-      (estado === 'Aprovado' || estado === 'Contratado' || estado === 'Indeferido') &&
-      Yup.string().required('Nº de proposta não pode ficar vazio'),
-    linha_id: Yup.mixed().nullable('Linha não pode ficar vazio').required('Linha não pode ficar vazio'),
-    segmento: Yup.string().nullable('Segmento  não pode ficar vazio').required('Segmento  não pode ficar vazio'),
-    cliente:
-      (estado === 'Aprovado' || estado === 'Contratado' || estado === 'Indeferido') &&
-      Yup.number().typeError('Introduza o nº de cliente').required('Introduza o nº de cliente'),
-    situacao_final_mes:
-      isEdit && Yup.string().nullable('Situação não pode ficar vazio').required('Situação não pode ficar vazio'),
-    data_entrada: Yup.date().typeError().required('Data de entrada não pode ficar vazio'),
+    situacao_final_mes: isEdit && Yup.string().required('Situação não pode ficar vazio'),
+    cliente: estado === 'Contratado' && Yup.number().typeError('Introduza o nº de cliente'),
+    taxa_juro: estado === 'Contratado' && Yup.number().typeError('Introduza a taxa de juro'),
+    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
+    garantia: estado === 'Contratado' && Yup.string().required('Garantia não pode ficar vazio'),
+    montante_contratado: estado === 'Contratado' && Yup.number().typeError('Introduza o montante contratado'),
+    data_entrada: Yup.date().typeError('Introduza uma data válida').required('Data de entrada não pode ficar vazio'),
+    data_desistido:
+      estado === 'Desistido' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de desistência não pode ficar vazio'),
+    escalao_decisao: estado === 'Contratado' && Yup.string().required('Escalão de decisão não pode ficar vazio'),
+    data_contratacao:
+      estado === 'Contratado' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de contratação não pode ficar vazio'),
+    data_indeferido:
+      estado === 'Indeferido' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de indeferimento não pode ficar vazio'),
+    prazo_amortizacao: estado === 'Contratado' && Yup.string().required('Prazo de amortização não pode ficar vazio'),
     data_aprovacao:
       (estado === 'Aprovado' || estado === 'Contratado') &&
-      Yup.date().typeError().required('Data de aprovação não pode ficar vazio'),
-    data_contratacao:
-      estado === 'Contratado' && Yup.date().typeError().required('Data de contratação não pode ficar vazio'),
-    data_indeferido:
-      estado === 'Indeferido' && Yup.date().typeError().required('Data de indeferimento não pode ficar vazio'),
-    data_desistido:
-      estado === 'Desistido' && Yup.date().typeError().required('Data de desistência não pode ficar vazio'),
+      Yup.date().typeError('Introduza uma data válida').required('Data de aprovação não pode ficar vazio'),
     montante_solicitado: Yup.number()
       .typeError('Introduza o montante solicitado')
       .required('Introduza o montante solicitado'),
     montante_aprovado:
-      (estado === 'Aprovado' || estado === 'Contratado') &&
-      Yup.number().typeError('Introduza o montante aprovado').required('Introduza o montante aprovado'),
-    montante_contratado:
-      estado === 'Contratado' &&
-      Yup.number().typeError('Introduza o montante contratado').required('Introduza o montante contratado'),
-    mpendencia:
-      pendente &&
-      Yup.mixed()
-        .nullable('Motivo de pendência não pode ficar vazio')
-        .required('Motivo de pendência não pode ficar vazio'),
-    escalao_decisao:
-      estado === 'Contratado' &&
-      Yup.string()
-        .nullable('Escalão de decisão não pode ficar vazio')
-        .required('Escalão de decisão não pode ficar vazio'),
-    garantia: estado === 'Contratado' && Yup.string().required('Garantia não pode ficar vazio'),
-    prazo_amortizacao: estado === 'Contratado' && Yup.string().required('Prazo de amortização não pode ficar vazio'),
-    taxa_juro:
-      estado === 'Contratado' &&
-      Yup.number().typeError('Introduza a taxa de juro').required('Introduza a taxa de juro'),
+      (estado === 'Aprovado' || estado === 'Contratado') && Yup.number().typeError('Introduza o montante aprovado'),
   });
   const _entidades = useMemo(
     () => selectedProcesso?.entidades?.split(';')?.map((row) => ({ numero: row })) || [],
@@ -123,42 +112,32 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       cliente: selectedProcesso?.cliente || '',
       agendado: selectedProcesso?.agendado || false,
       ispendente: selectedProcesso?.ispendente || false,
-      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
-      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
       balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
+      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
+      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       // info credito
-      segmento: selectedProcesso?.credito?.segmento || null,
-      garantia: selectedProcesso?.credito?.garantia || null,
-      taxa_juro: selectedProcesso?.credito?.taxa_juro || '',
-      finalidade: selectedProcesso?.credito?.finalidade || '',
-      numero_proposta: selectedProcesso?.credito?.nproposta || '',
-      montante_solicitado: selectedProcesso?.credito?.montantes || '',
-      setor_atividade: selectedProcesso?.credito?.setor_atividade || '',
-      escalao_decisao: selectedProcesso?.credito?.escalao_decisao || null,
-      montante_aprovado: selectedProcesso?.credito?.montante_aprovado || '',
-      prazo_amortizacao: selectedProcesso?.credito?.prazo_amortizacao || '',
-      situacao_final_mes: selectedProcesso?.credito?.situacao_final_mes || null,
-      montante_contratado: selectedProcesso?.credito?.montante_contratado || '',
-      linha_id: selectedProcesso?.credito?.linha
-        ? { id: selectedProcesso?.credito?.linha?.id, label: selectedProcesso?.credito?.linha?.linha }
-        : null,
-      data_aprovacao: selectedProcesso?.credito?.data_aprovacao
-        ? add(new Date(selectedProcesso?.credito?.data_aprovacao), { hours: 2 })
-        : null,
-      data_contratacao: selectedProcesso?.credito?.data_contratacao
-        ? add(new Date(selectedProcesso?.credito?.data_contratacao), { hours: 2 })
-        : null,
-      data_indeferido: selectedProcesso?.credito?.data_indeferido
-        ? add(new Date(selectedProcesso?.credito?.data_indeferido), { hours: 2 })
-        : null,
-      data_desistido: selectedProcesso?.credito?.data_desistido
-        ? add(new Date(selectedProcesso?.credito?.data_desistido), { hours: 2 })
-        : null,
+      segmento: credito?.segmento || null,
+      garantia: credito?.garantia || null,
+      taxa_juro: credito?.taxa_juro || '',
+      finalidade: credito?.finalidade || '',
+      numero_proposta: credito?.nproposta || '',
+      montante_solicitado: credito?.montantes || '',
+      setor_atividade: credito?.setor_atividade || '',
+      escalao_decisao: credito?.escalao_decisao || null,
+      montante_aprovado: credito?.montante_aprovado || '',
+      prazo_amortizacao: credito?.prazo_amortizacao || '',
+      situacao_final_mes: credito?.situacao_final_mes || null,
+      montante_contratado: credito?.montante_contratado || '',
+      linha_id: credito?.linha ? { id: credito?.linha?.id, label: credito?.linha?.linha } : null,
+      data_desistido: credito?.data_desistido ? add(new Date(credito?.data_desistido), { hours: 2 }) : null,
+      data_aprovacao: credito?.data_aprovacao ? add(new Date(credito?.data_aprovacao), { hours: 2 }) : null,
+      data_indeferido: credito?.data_indeferido ? add(new Date(credito?.data_indeferido), { hours: 2 }) : null,
+      data_contratacao: credito?.data_contratacao ? add(new Date(credito?.data_contratacao), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, mpendencia, _entidades, meuAmbiente, cc]
+    [selectedProcesso, fluxo?.id, credito, mpendencia, _entidades, meuAmbiente, cc]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, reset, handleSubmit } = methods;
@@ -185,11 +164,11 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
         formData.append('titular', values.titular);
         formData.append('fluxo_id', values.fluxo_id);
         formData.append('segmento', values.segmento);
+        formData.append('uo_perfil_id ', cc?.uo?.id);
         formData.append('finalidade', values.finalidade);
         formData.append('linha_id', values?.linha_id?.id);
         formData.append('setor_atividade', values.setor_atividade);
         formData.append('is_interno ', selectedProcesso?.is_interno);
-        formData.append('uo_perfil_id ', cc?.uo?.id);
         formData.append('situacao_final_mes', values.situacao_final_mes);
         formData.append('montante_solicitado', values.montante_solicitado);
         formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
@@ -280,8 +259,9 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
             mail,
             perfilId,
             id: selectedProcesso?.id,
-            ispendente: values.ispendente,
-            mensagem: 'processo atualizado',
+            msg: 'processo atualizado',
+            isPendente: values.ispendente,
+            atribuir: values.ispendente && podeAtribuir,
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );
@@ -333,8 +313,9 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
             perfilId,
             fluxoId: fluxo?.id,
             estadoId: meuAmbiente?.id,
-            ispendente: values.ispendente,
-            mensagem: 'processo adicionado',
+            msg: 'processo adicionado',
+            isPendente: values.ispendente,
+            atribuir: values.ispendente && podeAtribuir,
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );

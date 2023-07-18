@@ -1,25 +1,24 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Fab, Card, Stack, Table, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
-import { getAll, openModal, closeModal, getItem } from '../../redux/slices/digitaldocs';
+import { getAll, closeModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { Checked, AddItem, UpdateItem } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -77,14 +76,6 @@ export default function Estados() {
     setPage(0);
   };
 
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
-  const handleUpdate = (id) => {
-    dispatch(getItem('estado', { id, mail, from: 'estados', perfilId: cc?.perfil_id }));
-  };
-
   const handleView = (id) => {
     navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/estado/${id}`);
   };
@@ -103,9 +94,7 @@ export default function Estados() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
-            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -130,34 +119,20 @@ export default function Estados() {
                         <TableRow hover key={key}>
                           <TableCell>{row.nome}</TableCell>
                           <TableCell align="center">
-                            {row.is_inicial ? (
-                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
-                            ) : (
-                              <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
-                            )}
+                            <Checked check={row.is_inicial} />
                           </TableCell>
                           <TableCell align="center">
-                            {row.is_final ? (
-                              <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
-                            ) : (
-                              <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
-                            )}
+                            <Checked check={row.is_final} />
                           </TableCell>
                           <TableCell align="right" width={130}>
-                            {row.nome !== 'Arquivo' && (
-                              <>
-                                <Tooltip title="Editar" arrow>
-                                  <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row.id)}>
-                                    <SvgIconStyle src="/assets/icons/editar.svg" />
-                                  </Fab>
-                                </Tooltip>{' '}
-                              </>
-                            )}
-                            <Tooltip title="Colaboradores associados" arrow>
-                              <Fab color="success" size="small" variant="soft" onClick={() => handleView(row?.id)}>
-                                <SwapHorizOutlinedIcon sx={{ height: 28, width: 28 }} />
-                              </Fab>
-                            </Tooltip>
+                            <Stack direction="row" spacing={1} justifyContent="right">
+                              {row.nome !== 'Arquivo' && <UpdateItem item="estado" id={row.id} />}
+                              <Tooltip title="Colaboradores associados" arrow>
+                                <Fab color="success" size="small" variant="soft" onClick={() => handleView(row?.id)}>
+                                  <SwapHorizOutlinedIcon sx={{ height: 28, width: 28 }} />
+                                </Fab>
+                              </Tooltip>
+                            </Stack>
                           </TableCell>
                         </TableRow>
                       );
@@ -174,13 +149,13 @@ export default function Estados() {
 
           {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
-              dense={dense}
-              onChangeDense={onChangeDense}
-              onChangeRowsPerPage={onChangeRowsPerPage}
-              onChangePage={onChangePage}
               page={page}
+              dense={dense}
               rowsPerPage={rowsPerPage}
               count={dataFiltered.length}
+              onChangePage={onChangePage}
+              onChangeDense={onChangeDense}
+              onChangeRowsPerPage={onChangeRowsPerPage}
             />
           )}
         </Card>
@@ -206,7 +181,7 @@ function applySortFilter({ estados, comparator, filterSearch }) {
   estados = stabilizedThis.map((el) => el[0]);
 
   if (text) {
-    estados = estados.filter((item) => item?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1);
+    estados = estados.filter((row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(text)) !== -1);
   }
 
   return estados;

@@ -4,8 +4,8 @@ import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { Fab, Tooltip } from '@mui/material';
 // redux
+import { updateItem } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-import { finalizarProcesso, abandonarProcesso, atribuirProcesso } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle, { useToggle1, useToggle2, useToggle3, useToggle4, useToggle5 } from '../../hooks/useToggle';
 // routes
@@ -42,19 +42,21 @@ export default function Intervencao({ processo, colaboradoresList }) {
     }
     if (row.modo === 'Seguimento') {
       seguimentos.push({
-        id: row.transicao_id,
         modo: row.modo,
+        id: row.transicao_id,
         estado_final_id: row.id,
-        estado_final_label: row.nome,
+        paralelo: row?.is_paralelo,
         hasopnumero: row.hasopnumero,
+        label: row?.is_paralelo ? row?.nome : `${row?.modo} para ${row?.nome}`,
       });
     } else {
       devolucoes.push({
-        id: row.transicao_id,
         modo: row.modo,
+        id: row.transicao_id,
         estado_final_id: row.id,
-        estado_final_label: row.nome,
+        paralelo: row?.is_paralelo,
         hasopnumero: row.hasopnumero,
+        label: row?.is_paralelo ? row?.nome : `${row?.modo} para ${row?.nome}`,
       });
     }
   });
@@ -66,12 +68,12 @@ export default function Intervencao({ processo, colaboradoresList }) {
       fluxoID: processo?.fluxo_id,
       estado_id: processo?.estado_atual_id,
     };
-    dispatch(finalizarProcesso(JSON.stringify(formData), processo?.id, mail));
+    dispatch(updateItem('finalizar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'finalizado' }));
   };
 
   const handleAbandonar = () => {
     const formData = { perfilID: perfilId, fluxoID: processo?.fluxo_id, estadoID: processo?.estado_atual_id };
-    dispatch(abandonarProcesso(formData, processo?.id, mail));
+    dispatch(updateItem('abandonar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'abandonado' }));
   };
 
   const podeFinalizar = () => {
@@ -135,7 +137,6 @@ export default function Intervencao({ processo, colaboradoresList }) {
                 title="Devolver"
                 onCancel={onClose}
                 isOpenModal={open}
-                processo={processo}
                 destinos={devolucoes}
                 colaboradoresList={colaboradoresList}
               />
@@ -151,7 +152,6 @@ export default function Intervencao({ processo, colaboradoresList }) {
               </Tooltip>
               <IntervencaoForm
                 isOpenModal={open3}
-                processo={processo}
                 onCancel={onClose3}
                 destinos={seguimentos}
                 colaboradoresList={colaboradoresList}
@@ -254,7 +254,7 @@ export function Libertar({ perfilID, processoID }) {
   }, [done]);
 
   const handleAbandonar = () => {
-    dispatch(atribuirProcesso(mail, processoID, '', perfilID, 'processo libertado'));
+    dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'processo libertado' }));
   };
 
   return (

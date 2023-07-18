@@ -14,6 +14,7 @@ import {
   Stack,
   Alert,
   Table,
+  Switch,
   Dialog,
   Tooltip,
   ListItem,
@@ -31,43 +32,38 @@ import {
   DialogContent,
   DialogActions,
   TableContainer,
+  FormControlLabel,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import CircleIcon from '@mui/icons-material/Circle';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // utils
 import { format, add } from 'date-fns';
 import { getFileThumb } from '../../utils/getFileFormat';
 import { fNumber, fCurrency } from '../../utils/formatNumber';
 // redux
+import { createItem, updateItem, deleteItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
-import {
-  createItem,
-  updateItem,
-  deleteItem,
-  atribuirProcesso,
-  resgatarProcesso,
-  arquivarProcesso,
-  cancelarProcesso,
-  finalizarProcesso,
-  desarquivarProcesso,
-} from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
 // components
-import SvgIconStyle from '../../components/SvgIconStyle';
-import DialogConfirmar from '../../components/DialogConfirmar';
 import {
   FormProvider,
   RHFTextField,
   RHFDatePicker,
+  RHFAutocomplete,
   RHFUploadMultiFile,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
+import { DeleteItem } from '../../components/Actions';
+import SvgIconStyle from '../../components/SvgIconStyle';
+import DialogConfirmar from '../../components/DialogConfirmar';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -80,11 +76,27 @@ IntervencaoForm.propTypes = {
   colaboradoresList: PropTypes.array,
 };
 
-export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenModal, colaboradoresList }) {
+export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { error, isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { error, isSaving, processo } = useSelector((state) => state.digitaldocs);
+  const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
+  const podeSerAtribuido =
+    !processo?.assunto?.includes('Cartão') &&
+    !processo?.assunto?.includes('Extrato') &&
+    !processo?.assunto?.includes('Declarações');
+
+  const destinosSingulares = [];
+  const destinosParalelo = [];
+  destinos?.forEach((row) => {
+    if (row?.paralelo) {
+      destinosParalelo.push(row);
+    } else {
+      destinosSingulares.push(row);
+    }
+  });
+  const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
 
   useEffect(() => {
     if (error) {
@@ -94,16 +106,18 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    acao: Yup.mixed().nullable('Ação não pode ficar vazio').required('Escolhe uma ação'),
+    destinos_par: inParalelo && Yup.array().min(1, 'Escolhe os destinos'),
     observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
+    acao: !inParalelo && Yup.mixed().nullable('Ação não pode ficar vazio').required('Escolhe uma ação'),
   });
 
   const defaultValues = useMemo(
     () => ({
       anexos: [],
+      perfil: null,
       noperacao: '',
       observacao: '',
-      perfilIDAfeto: null,
+      destinos_par: [],
       acao: destinos?.length === 1 ? destinos?.[0] : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,12 +129,12 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   const values = watch();
 
   const aberturaSemEntidadeGerencia =
+    values?.acao &&
     !processo?.entidades &&
     title === 'Encaminhar' &&
     processo?.nome?.includes('Gerência') &&
     processo?.assunto === 'Abertura de conta' &&
-    values?.acao &&
-    !values?.acao?.estado_final_label?.includes('Atendimento');
+    !values?.acao?.label?.includes('Atendimento');
 
   useEffect(() => {
     if (processo) {
@@ -132,15 +146,36 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
   const onSubmit = async () => {
     try {
       let haveAnexos = false;
-      const formData = {
-        modo: values?.acao?.modo,
-        noperacao: values.noperacao,
-        observacao: values.observacao,
-        transicaoID: values?.acao?.id,
-        perfilID: cc?.perfil_id,
-        estado_finalID: values?.acao?.estado_final_id,
-        perfilIDAfeto: values?.perfilIDAfeto?.id || '',
-      };
+      const formData = [];
+      if (inParalelo) {
+        values?.destinos_par?.forEach((row) => {
+          const destino = destinosParalelo?.find((item) => item?.label === row);
+          if (destino) {
+            formData?.push({
+              perfilIDAfeto: '',
+              modo: destino?.modo,
+              perfilID: cc?.perfil_id,
+              transicaoID: destino?.id,
+              noperacao: values.noperacao,
+              observacao: values.observacao,
+              estado_finalID: destino?.estado_final_id,
+            });
+          }
+        });
+      } else {
+        formData?.push({
+          perfilID: cc?.perfil_id,
+          modo: values?.acao?.modo,
+          noperacao: values.noperacao,
+          observacao: values.observacao,
+          transicaoID: values?.acao?.id,
+          estado_finalID: values?.acao?.estado_final_id,
+          perfilIDAfeto:
+            values?.perfil?.id ||
+            (values?.acao?.label?.includes('Atendimento') && podeSerAtribuido && criador?.perfil_id) ||
+            '',
+        });
+      }
       const anexos = new FormData();
       if (values?.anexos?.length > 0) {
         haveAnexos = true;
@@ -150,13 +185,14 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
           anexos.append('anexos', listaanexo[i]);
         }
       }
+
       dispatch(
         createItem('encaminhar', JSON.stringify(formData), {
           mail,
           anexos,
           haveAnexos,
           id: processo.id,
-          mensagem: 'realizada',
+          msg: 'realizada',
         })
       );
     } catch (error) {
@@ -184,11 +220,20 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
     setValue('anexos', filteredItems);
   };
 
+  const setValueForm = (fild, newValue) => {
+    setValue('perfil', null);
+    setValue('acao', fild === 'acao' ? newValue : null);
+    setValue('destinos_par', fild === 'destinos_par' ? newValue : []);
+  };
+
   const podeAtribuir =
-    ((processo?.nome?.includes('Gerência') && values?.acao?.estado_final_label?.includes('Atendimento')) ||
+    ((processo?.nome?.includes('Gerência') && values?.acao?.label?.includes('Atendimento')) ||
       (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento') ||
       processo?.nome === 'Diário') &&
     colaboradoresList?.length > 0;
+
+  const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+  const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
@@ -196,29 +241,58 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <Controller
-                name="acao"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    options={destinos}
-                    onChange={(event, newValue) => {
-                      field.onChange(newValue);
-                      setValue('ispendente', false);
-                      setValue('perfilIDAfeto', null);
-                    }}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    getOptionLabel={(option) => `${option?.modo} para ${option?.estado_final_label}`}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Ação" error={!!error} helperText={error?.message} />
-                    )}
-                  />
-                )}
-              />
-            </Grid>
+            {destinosParalelo?.length > 0 && destinosSingulares?.length > 0 && (
+              <Grid item xs={12} sx={{ mt: -2 }}>
+                <FormControlLabel
+                  control={<Switch checked={inParalelo} />}
+                  label="Envio em paralelo"
+                  onChange={(event, newValue) => {
+                    setInParalelo(newValue);
+                    setValueForm();
+                  }}
+                  sx={{ width: 1, justifyContent: 'center' }}
+                />
+              </Grid>
+            )}
+            {inParalelo ? (
+              <Grid item xs={12}>
+                <RHFAutocomplete
+                  multiple
+                  freeSolo
+                  label="Destinos"
+                  name="destinos_par"
+                  disableCloseOnSelect
+                  options={destinosParalelo.map((option) => option.label)}
+                  onChange={(event, newValue) => setValueForm('destinos_par', newValue)}
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                      <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginLeft: -8 }} checked={selected} />
+                      {option}
+                    </li>
+                  )}
+                />
+              </Grid>
+            ) : (
+              <Grid item xs={12}>
+                <Controller
+                  name="acao"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <Autocomplete
+                      {...field}
+                      fullWidth
+                      options={destinosSingulares}
+                      onChange={(event, newValue) => setValueForm('acao', newValue)}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                      getOptionLabel={(option) => option?.label}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Ação" error={!!error} helperText={error?.message} />
+                      )}
+                    />
+                  )}
+                />
+              </Grid>
+            )}
             {aberturaSemEntidadeGerencia ? (
               <Grid item xs={12}>
                 <Typography>
@@ -234,7 +308,7 @@ export function IntervencaoForm({ title, onCancel, destinos, processo, isOpenMod
                 {podeAtribuir && (
                   <Grid item xs={12}>
                     <RHFAutocompleteObject
-                      name="perfilIDAfeto"
+                      name="perfil"
                       label="Colaborador"
                       options={applySort(colaboradoresList, getComparator('asc', 'label'))}
                     />
@@ -301,10 +375,13 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
   }, [error]);
 
   const deveInformarNConta = () => {
-    if (processo?.is_interno && processo?.assunto !== 'Encerramento de conta' && processo?.modelo !== 'Paralelo') {
+    if (
+      processo?.is_interno &&
+      processo?.assunto !== 'Encerramento de conta' &&
+      (!processo?.limpo || processo?.assunto === 'Receção de faturas / Pagamento de fornecedor')
+    ) {
       let i = 0;
       while (i < meusAmbientes?.length) {
-        // const iHaveThisState = meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id);
         if (meusAmbientes[i]?.id === processo?.estado_atual_id && meusAmbientes[i]?.is_final) {
           return true;
         }
@@ -321,9 +398,7 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
         .typeError('Introduza o nº de conta do titular')
         .positive('O nº de conta não pode ser negativo')
         .required('Introduza o nº de conta do titular'),
-    data_entrada: Yup.date()
-      .typeError('Data de entrada não pode ficar vazio')
-      .required('Data de entrada não pode ficar vazio'),
+    data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -365,17 +440,19 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
         observacao: values?.observacao,
         data_entrada: format(values.data_entrada, 'yyyy-MM-dd'),
       };
-      let haveAnexos = false;
-      const formDataAnexos = new FormData();
+      let haveA = false;
+      const anexos = new FormData();
       if (values?.anexos?.length > 0) {
-        haveAnexos = true;
-        formDataAnexos.append('perfilID', cc?.perfil_id);
+        haveA = true;
+        anexos.append('perfilID', cc?.perfil_id);
         const listaanexo = values.anexos;
         for (let i = 0; i < listaanexo.length; i += 1) {
-          formDataAnexos.append('anexos', listaanexo[i]);
+          anexos.append('anexos', listaanexo[i]);
         }
       }
-      dispatch(arquivarProcesso(JSON.stringify(formData), processo.id, haveAnexos, formDataAnexos, mail));
+      dispatch(
+        createItem('arquivar', JSON.stringify(formData), { mail, haveA, anexos, id: processo.id, msg: 'arquivado' })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -507,11 +584,11 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
       const dados = {
         fluxoID,
         perfilID: null,
+        perfilIDCC: cc?.perfil_id,
         estadoID: values?.estadoID?.id,
         observacao: values?.observacao,
-        perfilIDCC: cc?.perfil_id,
       };
-      dispatch(desarquivarProcesso(JSON.stringify(dados), processoID, mail));
+      dispatch(updateItem('desarquivar', JSON.stringify(dados), { id: processoID, mail, msg: 'desarquivado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -588,9 +665,9 @@ export function FinalizarForm({ open, onCancel, processo }) {
   const defaultValues = useMemo(
     () => ({
       cativos: [],
+      perfil_id: cc?.perfil_id,
       fluxoID: processo?.fluxo_id,
       estado_id: processo?.estado_atual_id,
-      perfil_id: cc?.perfil_id,
     }),
     [processo, cc]
   );
@@ -612,7 +689,7 @@ export function FinalizarForm({ open, onCancel, processo }) {
         enqueueSnackbar('Por favor selecionar as contas a serem cativadas', { variant: 'error' });
       } else {
         values.cativos = selecionados.map((row) => row?.id);
-        dispatch(finalizarProcesso(JSON.stringify(values), processo?.id, mail));
+        dispatch(updateItem('finalizar', JSON.stringify(values), { id: processo?.id, mail, msg: 'finalizado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -622,13 +699,11 @@ export function FinalizarForm({ open, onCancel, processo }) {
   const handleToggle = (value) => () => {
     const currentIndex = selecionados.indexOf(value);
     const novaLista = [...selecionados];
-
     if (currentIndex === -1) {
       novaLista.push(value);
     } else {
       novaLista.splice(currentIndex, 1);
     }
-
     setSelecionados(novaLista);
   };
 
@@ -677,9 +752,11 @@ export function FinalizarForm({ open, onCancel, processo }) {
             <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
             </LoadingButton>
-            <LoadingButton type="submit" variant="soft" loading={isSaving}>
-              Finalizar
-            </LoadingButton>
+            {selecionados?.length > 0 && (
+              <LoadingButton type="submit" variant="soft" loading={isSaving}>
+                Finalizar
+              </LoadingButton>
+            )}
           </DialogActions>
         </FormProvider>
       </DialogContent>
@@ -728,8 +805,8 @@ export function ParecerForm({ open, onCancel, processoId }) {
       anexos: [],
       parecerID: selectedItem?.id || '',
       parecer: selectedItem?.parecer || null,
-      descricao: selectedItem?.descricao || '',
       validado: selectedItem?.validado || false,
+      descricao: selectedItem?.parecer_obs || '',
       perfilID: selectedItem?.parecer_perfil_id || cc?.perfil_id,
     }),
     [selectedItem, cc?.perfil_id]
@@ -760,7 +837,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
           formData.append('anexos', listaanexo[i]);
         }
       }
-      dispatch(updateItem('parecer', formData, { mail, id: selectedItem.id, processoId, mensagem: 'parecer enviado' }));
+      dispatch(updateItem('parecer', formData, { mail, id: selectedItem.id, processoId, msg: 'parecer enviado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -801,15 +878,15 @@ export function ParecerForm({ open, onCancel, processoId }) {
       deleteItem('anexoParecer', {
         mail,
         id: idAnexo,
-        parecerId: selectedItem?.id,
-        mensagem: 'anexo parecer eliminado',
         perfilId: cc?.perfil_id,
+        parecerId: selectedItem?.id,
+        msg: 'anexo parecer eliminado',
       })
     );
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>Parecer - {selectedItem?.nome}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -822,7 +899,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <RHFTextField name="descricao" multiline minRows={5} maxRows={8} label="Descrição" />
+              <RHFTextField name="descricao" multiline minRows={5} maxRows={10} label="Descrição" />
             </Grid>
             <Grid item xs={12}>
               <RHFUploadMultiFile
@@ -906,7 +983,7 @@ export function Resgatar({ fluxiId, estadoId, processoId }) {
 
   const handleResgatar = () => {
     const formData = { estado_id: estadoId, fluxoID: fluxiId, perfil_id: cc?.perfil_id };
-    dispatch(resgatarProcesso(JSON.stringify(formData), processoId, mail));
+    dispatch(updateItem('resgatar', JSON.stringify(formData), { id: processoId, mail, msg: 'resgatado' }));
     onClose();
   };
 
@@ -943,7 +1020,14 @@ export function Cancelar({ fluxiId, estadoId, processoId }) {
 
   const handleCancelar = () => {
     const formData = { estadoID: estadoId, fluxoID: fluxiId, perfilID: cc?.perfil_id };
-    dispatch(cancelarProcesso(JSON.stringify(formData), { mail, id: processoId, perfilId: cc?.perfil_id }));
+    dispatch(
+      updateItem('cancelar', JSON.stringify(formData), {
+        mail,
+        id: processoId,
+        msg: 'cancelado',
+        perfilId: cc?.perfil_id,
+      })
+    );
     onClose();
   };
 
@@ -963,6 +1047,7 @@ export function Cancelar({ fluxiId, estadoId, processoId }) {
         color="error"
         title="Cancelar"
         desc="cancelar o envio deste processo para parecer"
+        descSec="ATENÇÃO: Esta ação é irreversível e eliminará os dados dos parceres enviados neste seguimento."
       />
     </>
   );
@@ -981,8 +1066,8 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { error, done, isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, cc } = useSelector((state) => state.intranet);
+  const { error, done, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'atribuido') {
@@ -990,6 +1075,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
       onClose();
     } else if (done === 'atribuicao eliminada') {
       enqueueSnackbar('Atribuição eliminada com sucesso', { variant: 'success' });
+      onClose1();
       onClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1003,12 +1089,10 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    perfilIDAfeto: Yup.mixed()
-      .nullable('Colaborador não pode ficar vazio')
-      .required('Colaborador não pode ficar vazio'),
+    perfil: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),
   });
   const defaultValues = useMemo(
-    () => ({ perfilIDAfeto: perfilId ? colaboradoresList?.find((row) => row?.id === perfilId) : null }),
+    () => ({ perfil: perfilId ? colaboradoresList?.find((row) => row?.id === perfilId) : null }),
     [colaboradoresList, perfilId]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -1022,7 +1106,15 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(atribuirProcesso(mail, processoID, values?.perfilIDAfeto?.id, cc?.perfil_id, 'atribuido'));
+      dispatch(
+        updateItem('atribuir', '', {
+          mail,
+          processoID,
+          msg: 'atribuido',
+          perfilID: cc?.perfil_id,
+          perfilIDAfeto: values?.perfil?.id,
+        })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -1030,7 +1122,15 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(atribuirProcesso(mail, processoID, '', cc?.perfil_id, 'atribuicao eliminada'));
+      dispatch(
+        updateItem('atribuir', '', {
+          mail,
+          processoID,
+          perfilIDAfeto: '',
+          perfilID: cc?.perfil_id,
+          msg: 'atribuicao eliminada',
+        })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar esta atribução', { variant: 'error' });
     }
@@ -1051,7 +1151,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
             <Grid container spacing={3} sx={{ mt: 0 }}>
               <Grid item xs={12}>
                 <RHFAutocompleteObject
-                  name="perfilIDAfeto"
+                  name="perfil"
                   label="Colaborador"
                   options={applySort(colaboradoresList, getComparator('asc', 'label'))}
                 />
@@ -1060,11 +1160,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
             <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
               {perfilId && (
                 <>
-                  <Tooltip title="Eliminar atribuição" arrow>
-                    <Fab color="error" size="small" variant="soft" onClick={onOpen1}>
-                      <SvgIconStyle src="/assets/icons/trash.svg" />
-                    </Fab>
-                  </Tooltip>
+                  <DeleteItem handleDelete={onOpen1} />
                   <DialogConfirmar
                     open={open1}
                     onClose={onClose1}

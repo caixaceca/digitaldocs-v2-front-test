@@ -1,38 +1,26 @@
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
-import { Link as RouterLink, useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import {
-  Fab,
-  Card,
-  Stack,
-  Table,
-  Button,
-  Tooltip,
-  TableRow,
-  TableBody,
-  TableCell,
-  Typography,
-  TableContainer,
-} from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import { Card, Stack, Table, Button, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { fToNow, ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados, parametrosPesquisa } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
+import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
@@ -45,12 +33,10 @@ TableProcessos.propTypes = { from: PropTypes.string };
 export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [segmento, setSegmento] = useState(null);
-  const [filterSearch, setFilterSearch] = useSearchParams();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const [filterSearch, setFilterSearch] = useSearchParams();
   const { isLoading, meuAmbiente, meusAmbientes, meuFluxo, processos } = useSelector((state) => state.digitaldocs);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
-  const [colaborador, setColaborador] = useState(cc?.perfil?.displayName);
   const title =
     (from === 'tarefas' && 'Lista de tarefas') ||
     (from === 'finalizados' && 'Finalizados') ||
@@ -81,6 +67,8 @@ export default function TableProcessos({ from }) {
 
   useEffect(() => {
     if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
+      dispatch(resetItem('processo'));
+      dispatch(resetItem('processos'));
       setPage(0);
       dispatch(
         getAll(from, {
@@ -99,18 +87,8 @@ export default function TableProcessos({ from }) {
     setPage(0);
   };
 
-  const handleFilterSegmento = (event) => {
-    setSegmento(event);
-    setPage(0);
-  };
-
-  const handleFilterColaborador = (event) => {
-    setColaborador(event);
-    setPage(0);
-  };
-
   const handleViewRow = (id) => {
-    navigate({ pathname: `${PATH_DIGITALDOCS.processos.root}/${id}`, search: createSearchParams({ from }).toString() });
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=${from}${parametrosPesquisa(filterSearch)}`);
   };
 
   const podeAdicionar = () => {
@@ -133,14 +111,7 @@ export default function TableProcessos({ from }) {
     newList.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
   });
 
-  const dataFiltered = applySortFilter({
-    from,
-    newList,
-    segmento,
-    colaborador,
-    filterSearch,
-    comparator: getComparator(order, orderBy),
-  });
+  const dataFiltered = applySortFilter({ from, newList, filterSearch, comparator: getComparator(order, orderBy) });
   const isNotFound = !dataFiltered.length;
 
   const TABLE_HEAD = [
@@ -186,13 +157,9 @@ export default function TableProcessos({ from }) {
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
           origem={from}
-          segmento={segmento}
-          colaborador={colaborador}
           filterSearch={filterSearch}
           onFilterSearch={handleFilterSearch}
           colaboradoresList={colaboradoresList}
-          onFilterSegmento={handleFilterSegmento}
-          onFilterColaborador={handleFilterColaborador}
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -258,11 +225,7 @@ export default function TableProcessos({ from }) {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <Tooltip title="DETALHES" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                            <SvgIconStyle src="/assets/icons/view.svg" />
-                          </Fab>
-                        </Tooltip>
+                        <ViewItem handleView={() => handleViewRow(row?.id)} />
                       </TableCell>
                     </TableRow>
                   ))
@@ -294,9 +257,11 @@ export default function TableProcessos({ from }) {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newList, comparator, filterSearch, segmento, colaborador, from }) {
+function applySortFilter({ newList, comparator, filterSearch, from }) {
   const stabilizedThis = newList.map((el, index) => [el, index]);
   const text = filterSearch.get('filter');
+  const segmento = filterSearch.get('segmento');
+  const colaborador = filterSearch.get('colaborador');
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -319,14 +284,14 @@ function applySortFilter({ newList, comparator, filterSearch, segmento, colabora
   if (text) {
     newList = newList.filter(
       (row) =>
-        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.assunto && row?.assunto.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.nome && row?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.motivo && row?.motivo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
+        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(text)) !== -1) ||
+        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(text)) !== -1) ||
+        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(text)) !== -1) ||
+        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(text)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(text)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(text)) !== -1) ||
+        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(text)) !== -1) ||
+        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(text)) !== -1)
     );
   }
 

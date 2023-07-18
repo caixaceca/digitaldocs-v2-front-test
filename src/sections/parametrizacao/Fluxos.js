@@ -1,23 +1,22 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Card, Stack, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, openModal, closeModal, getItem } from '../../redux/slices/digitaldocs';
+import { getAll, closeModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { Checked, AddItem, UpdateItem, ViewItem } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -30,6 +29,8 @@ const TABLE_HEAD = [
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'modelo', label: 'Modelo', align: 'left' },
   { id: 'is_interno', label: 'Interno', align: 'center' },
+  { id: 'is_credito', label: 'Crédito', align: 'center' },
+  { id: 'is_ativo', label: 'Ativo', align: 'center' },
   { id: 'empty' },
 ];
 
@@ -68,14 +69,6 @@ export default function Fluxos() {
     setPage(0);
   };
 
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
-  const handleUpdate = (id) => {
-    dispatch(getItem('fluxo', { id, mail, from: 'fluxos', perfilId: cc?.perfil_id }));
-  };
-
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -94,9 +87,7 @@ export default function Fluxos() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111']}>
-            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -113,32 +104,28 @@ export default function Fluxos() {
                 <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
                 <TableBody>
                   {isLoading && isNotFound ? (
-                    <SkeletonTable column={4} row={10} />
+                    <SkeletonTable column={6} row={10} />
                   ) : (
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow hover key={row.id}>
                         <TableCell>{row.assunto}</TableCell>
                         <TableCell>{row.modelo}</TableCell>
                         <TableCell align="center">
-                          {row.is_interno ? (
-                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
-                          ) : (
-                            <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
-                          )}
+                          <Checked check={row.is_interno} />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Checked check={row.is_credito} />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Checked check={row.is_ativo} />
                         </TableCell>
                         <TableCell align="center" width={125}>
-                          <RoleBasedGuard roles={['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111']}>
-                            <Tooltip title="EDITAR" arrow>
-                              <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row.id)}>
-                                <SvgIconStyle src="/assets/icons/editar.svg" />
-                              </Fab>
-                            </Tooltip>{' '}
-                          </RoleBasedGuard>
-                          <Tooltip title="DETALHES" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row.id)}>
-                              <SvgIconStyle src="/assets/icons/view.svg" />
-                            </Fab>
-                          </Tooltip>
+                          <Stack direction="row" spacing={1}>
+                            <RoleBasedGuard roles={['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111']}>
+                              <UpdateItem item="fluxo" id={row?.id} />
+                            </RoleBasedGuard>
+                            <ViewItem handleView={() => handleViewRow(row?.id)} />
+                          </Stack>
                         </TableCell>
                       </TableRow>
                     ))
@@ -154,13 +141,13 @@ export default function Fluxos() {
 
           {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
+              page={page}
               dense={dense}
+              rowsPerPage={rowsPerPage}
+              onChangePage={onChangePage}
+              count={dataFiltered.length}
               onChangeDense={onChangeDense}
               onChangeRowsPerPage={onChangeRowsPerPage}
-              onChangePage={onChangePage}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              count={dataFiltered.length}
             />
           )}
         </Card>
@@ -187,9 +174,9 @@ function applySortFilter({ fluxos, comparator, filterSearch }) {
 
   if (filter) {
     fluxos = fluxos.filter(
-      (_row) =>
-        (_row?.assunto && _row?.assunto.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1) ||
-        (_row?.modelo && _row?.modelo.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1)
+      (row) =>
+        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.modelo && normalizeText(row?.modelo).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

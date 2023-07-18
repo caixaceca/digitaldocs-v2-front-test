@@ -6,10 +6,7 @@ import { Switch, FormControlLabel } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-RHFSwitch.propTypes = {
-  name: PropTypes.string,
-  onChange: PropTypes.func,
-};
+RHFSwitch.propTypes = { name: PropTypes.string, onChange: PropTypes.func };
 
 export default function RHFSwitch({ name, onChange, ...other }) {
   const { control } = useFormContext();
@@ -23,6 +20,7 @@ export default function RHFSwitch({ name, onChange, ...other }) {
           render={({ field }) => <Switch {...field} onChange={onChange} checked={field.value} />}
         />
       }
+      sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center' }}
       {...other}
     />
   ) : (
@@ -30,6 +28,7 @@ export default function RHFSwitch({ name, onChange, ...other }) {
       control={
         <Controller name={name} control={control} render={({ field }) => <Switch {...field} checked={field.value} />} />
       }
+      sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center' }}
       {...other}
     />
   );

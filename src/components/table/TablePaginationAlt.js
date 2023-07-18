@@ -32,8 +32,8 @@ export default function TablePaginationAlt({
         showFirstButton
         rowsPerPage={rowsPerPage}
         onPageChange={onChangePage}
+        rowsPerPageOptions={[10, 25, 50, 100]}
         onRowsPerPageChange={onChangeRowsPerPage}
-        rowsPerPageOptions={[10, 25, 50, 100, { value: count, label: 'Todos' }]}
       />
 
       <FormControlLabel

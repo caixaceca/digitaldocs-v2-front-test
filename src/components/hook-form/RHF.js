@@ -7,6 +7,28 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 // ----------------------------------------------------------------------
 
+RHFAutocomplete.propTypes = { name: PropTypes.string, label: PropTypes.string };
+
+export default function RHFAutocomplete({ name, label, ...other }) {
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <Autocomplete
+          {...field}
+          renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
+          {...other}
+        />
+      )}
+    />
+  );
+}
+
+// ----------------------------------------------------------------------
+
 RHFAutocompleteSimple.propTypes = {
   name: PropTypes.string,
   label: PropTypes.string,
@@ -14,7 +36,7 @@ RHFAutocompleteSimple.propTypes = {
   multiple: PropTypes.bool,
 };
 
-export default function RHFAutocompleteSimple({ name, options, label, multiple = false }) {
+export function RHFAutocompleteSimple({ name, options, label, multiple = false, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -31,6 +53,7 @@ export default function RHFAutocompleteSimple({ name, options, label, multiple =
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
         />
       )}
+      {...other}
     />
   );
 }

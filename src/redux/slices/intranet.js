@@ -5,6 +5,7 @@ import { loginRequest } from '../../config';
 import { callMsGraph } from '../../graph';
 // utils
 import { BASEURL } from '../../utils/axios';
+import { errorMsg } from '../../utils/normalizeText';
 
 // ----------------------------------------------------------------------
 
@@ -17,10 +18,10 @@ const initialState = {
   mail: '',
   perfil: {},
   msalProfile: {},
+  cc: null,
   frase: null,
   ajuda: null,
   accessToken: null,
-  cc: null,
   uos: [],
   links: [],
   perfis: [],
@@ -256,15 +257,7 @@ export function getFromIntranet(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -298,20 +291,11 @@ export function createItem(item, dados, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.mensagem));
+      dispatch(slice.actions.done(params?.msg));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            error?.error ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }

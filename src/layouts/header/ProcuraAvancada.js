@@ -84,25 +84,42 @@ export default function ProcuraAvancada() {
 
   const handleSearch = () => {
     if (avancada) {
+      const params = { avancada };
+      if (conta) {
+        params.conta = conta;
+      }
+      if (entidade) {
+        params.entidade = entidade;
+      }
+      if (cliente) {
+        params.cliente = cliente;
+      }
+      if (nentrada) {
+        params.nentrada = nentrada;
+      }
+      if (noperacao) {
+        params.noperacao = noperacao;
+      }
+      if (uo?.id) {
+        params.uoId = uo?.id;
+      }
+      if (colaborador?.id) {
+        params.perfilId = colaborador?.id;
+      }
+      if (data[0]) {
+        params.datai = format(data[0], 'yyyy-MM-dd');
+      }
+      if (data[1]) {
+        params.dataf = format(data[1], 'yyyy-MM-dd');
+      }
       navigate({
         pathname: PATH_DIGITALDOCS.processos.procurar,
-        search: createSearchParams({
-          avancada,
-          conta,
-          cliente,
-          entidade,
-          nentrada,
-          noperacao,
-          uoId: uo?.id || '',
-          perfilId: colaborador?.id || '',
-          datai: data[0] ? format(data[0], 'yyyy-MM-dd') : '',
-          dataf: data[1] ? format(data[1], 'yyyy-MM-dd') : '',
-        }).toString(),
+        search: createSearchParams(params).toString(),
       });
     } else {
       navigate({
         pathname: PATH_DIGITALDOCS.processos.procurar,
-        search: createSearchParams({ chave: searchQuery, avancada }).toString(),
+        search: createSearchParams({ avancada, chave: searchQuery }).toString(),
       });
     }
     onClose();
@@ -145,9 +162,9 @@ export default function ProcuraAvancada() {
       </Button>
 
       <Dialog
+        fullWidth
         open={open}
         onClose={onClose}
-        fullWidth
         maxWidth={avancada ? 'md' : 'sm'}
         sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
       >

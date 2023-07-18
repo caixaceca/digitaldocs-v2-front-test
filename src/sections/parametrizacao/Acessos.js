@@ -17,6 +17,7 @@ import {
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 // utils
 import { BASEURL } from '../../utils/axios';
+import { normalizeText } from '../../utils/normalizeText';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -199,8 +200,8 @@ function applySortFilter({ colaboradoresByName, comparator, filterSearch }) {
   if (filter && filter !== null) {
     colaboradoresByName = colaboradoresByName.filter(
       (row) =>
-        (row?.nome && row?.nome.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1) ||
-        (row?.perfil?.mail && row?.perfil?.mail.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1)
+        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.perfil?.mail && normalizeText(row?.perfil?.mail).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

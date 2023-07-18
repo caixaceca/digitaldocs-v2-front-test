@@ -10,18 +10,11 @@ import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import { Fab, Grid, Card, Stack, Tooltip, Dialog, Container, CardContent } from '@mui/material';
 // utils
+import { parametrosPesquisa } from '../utils/normalizeText';
 import { temNomeacao, isResponsavelUo } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import {
-  getAll,
-  getItem,
-  resetItem,
-  closeModal,
-  selectItem,
-  aceitarProcesso,
-  pedirAcessoProcesso,
-} from '../redux/slices/digitaldocs';
+import { getAll, getItem, resetItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -43,9 +36,9 @@ import {
   NotaProcesso,
   DetalhesProcesso,
   HistoricoPrisoes,
-  HistoricoProcesso,
+  HistoricoTransicao,
   HistoricoPrisoesAnt,
-  HistoricoProcessoAnt,
+  HistoricoTransicaoAnt,
 } from '../sections/processo';
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
 import { DesarquivarForm, ParecerForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/IntervencaoForm';
@@ -58,7 +51,7 @@ export default function Processo() {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [from] = useSearchParams();
+  const [params] = useSearchParams();
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
@@ -75,50 +68,36 @@ export default function Processo() {
     colaboradoresEstado,
     isOpenModalDesariquivar,
   } = useSelector((state) => state.digitaldocs);
-  const estadoId = processo?.estado_atual_id;
   const perfilId = cc?.perfil_id;
-  const fromArquivo = from?.get?.('from') === 'arquivo';
-  const fromProcurar = from?.get?.('from') === 'procurar';
-  const fromEntradas = from?.get?.('from') === 'entradas';
-  const fromPorConcluir = from?.get?.('from') === 'porconcluir';
-  const fromTrabalhados = from?.get?.('from') === 'trabalhados';
+  const estadoId = processo?.estado_atual_id;
+  const fromArquivo = params?.get?.('from') === 'arquivo';
+  const fromProcurar = params?.get?.('from') === 'procurar';
+  const fromEntradas = params?.get?.('from') === 'entradas';
+  const fromPorConcluir = params?.get?.('from') === 'porconcluir';
+  const fromTrabalhados = params?.get?.('from') === 'trabalhados';
   const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
   const uo = uos?.find((row) => row?.id === processo?.uoIdEstadoAtual);
+  const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
   const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
   const hasPareceres = processo?.pareceres && processo?.pareceres?.length > 0;
   const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
-  const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
   const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
+  const isPS =
+    processo?.assunto === 'Diário' ||
+    processo?.assunto === 'Produtos e Serviços' ||
+    processo?.assunto === 'Receção de Cartões - DOP';
+
+  const parametros = `${params?.get?.('from') ? `?tab=${params?.get?.('from')}` : '?tab=tarefas'}${parametrosPesquisa(
+    params
+  )}`;
 
   const linkNavigate =
-    (fromProcurar &&
-      from?.get('avancada') === 'false' &&
-      `${PATH_DIGITALDOCS.processos.procurar}?avancada=false&chave=${from?.get?.('chave')}`) ||
-    (fromProcurar &&
-      from?.get('avancada') === 'true' &&
-      `${PATH_DIGITALDOCS.processos.procurar}?avancada=true&conta=${from?.get?.('conta')}&cliente=${from?.get?.(
-        'cliente'
-      )}&entidade=${from?.get?.('entidade')}&nentrada=${from?.get?.('nentrada')}&noperacao=${from?.get?.(
-        'noperacao'
-      )}&uoId=${from?.get?.('uoId')}&perfilId=${from?.get?.('perfilId')}&datai=${from?.get?.(
-        'datai'
-      )}&dataf=${from?.get?.('dataf')}`) ||
-    (fromProcurar &&
-      from?.get('avancada') === 'true' &&
-      `${PATH_DIGITALDOCS.processos.procurar}?avancada=true&chave=${from?.get?.('chave')}`) ||
-    (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}?tab=arquivos`) ||
-    (fromTrabalhados && `${PATH_DIGITALDOCS.controle.lista}?tab=trabalhados`) ||
-    (fromPorConcluir &&
-      `${PATH_DIGITALDOCS.controle.lista}?tab=porconcluir&estado=${from?.get?.('estado')}&assunto=${from?.get?.(
-        'assunto'
-      )}&colaborador=${from?.get?.('colaborador')}&filterSearch=${from?.get?.('filterSearch')}`) ||
-    (fromEntradas &&
-      `${PATH_DIGITALDOCS.controle.lista}?tab=entradas&datai=${from?.get?.('datai')}&dataf=${from?.get?.(
-        'dataf'
-      )}&estado=${from?.get?.('estado')}&assunto=${from?.get?.('assunto')}&colaborador=${from?.get?.(
-        'colaborador'
-      )}&filterSearch=${from?.get?.('filterSearch')}`) ||
-    `${PATH_DIGITALDOCS.processos.lista}?tab=${from?.get?.('from') || 'tarefas'}`;
+    (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}${parametros}`) ||
+    (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}${parametros}`) ||
+    (fromTrabalhados && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
+    (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
+    (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
+    `${PATH_DIGITALDOCS.processos.lista}${parametros}`;
 
   const colaboradoresList = [];
   colaboradoresEstado?.forEach((row) => {
@@ -142,9 +121,9 @@ export default function Processo() {
   };
 
   const handlePrevNext = (next) => {
-    if (mail && perfilId && processo?.nentrada && estadoId) {
+    if (mail && perfilId && processo?.id && estadoId) {
       dispatch(
-        getItem('prevnext', { mail, perfilId, estadoId, nentrada: processo?.nentrada, next, estado: processo?.nome })
+        getItem('prevnext', { mail, perfilId, estadoId, processoId: processo?.id, next, estado: processo?.nome })
       );
     } else {
       navigate(linkNavigate);
@@ -159,7 +138,6 @@ export default function Processo() {
       handlePrevNext(true);
     } else if (done === 'realizada') {
       enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
-      dispatch(resetItem('processo'));
       handlePrevNext(true);
     } else if (done === 'resgatado') {
       enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
@@ -175,6 +153,7 @@ export default function Processo() {
       enqueueSnackbar('Pedido enviado com sucesso', { variant: 'success' });
     } else if (done === 'desarquivado') {
       enqueueSnackbar('Processo desarquivado com sucesso', { variant: 'success' });
+      handleClose();
       navigate(linkNavigate);
     } else if (done === 'processo libertado') {
       enqueueSnackbar('Processo libertado com sucesso', { variant: 'success' });
@@ -207,6 +186,7 @@ export default function Processo() {
 
   useEffect(() => {
     if (mail && id && perfilId) {
+      dispatch(resetItem('processo'));
       dispatch(getItem('processo', { id, mail, perfilId }));
     }
   }, [dispatch, perfilId, mail, id]);
@@ -234,7 +214,9 @@ export default function Processo() {
 
   const handleAceitar = () => {
     const formData = { fluxoID: processo?.fluxo_id, perfilID: perfilId, estadoID: estadoId };
-    dispatch(aceitarProcesso(JSON.stringify(formData), { processoId: processo?.id, perfilId, mail }));
+    dispatch(
+      updateItem('aceitar', JSON.stringify(formData), { processoId: processo?.id, perfilId, mail, msg: 'aceitado' })
+    );
   };
 
   const podeAceitarAtribuir = () => {
@@ -289,7 +271,7 @@ export default function Processo() {
   };
 
   const handlePedirAcesso = () => {
-    dispatch(pedirAcessoProcesso(perfilId, processo?.id, mail));
+    dispatch(updateItem('pedir acesso', '', { perfilId, id: processo?.id, mail, msg: 'solicitado' }));
   };
 
   const handleDesarquivar = () => {
@@ -318,8 +300,8 @@ export default function Processo() {
                 (fromTrabalhados && 'Trabalhados') ||
                 (fromPorConcluir && 'Por concluir') ||
                 (fromProcurar && 'Pesquisa') ||
-                (from?.get?.('from') &&
-                  from?.get?.('from')?.charAt(0)?.toUpperCase() + from?.get?.('from')?.slice(1)) ||
+                (params?.get?.('from') &&
+                  params?.get?.('from')?.charAt(0)?.toUpperCase() + params?.get?.('from')?.slice(1)) ||
                 'Processos',
               href: linkNavigate,
             },
@@ -456,8 +438,14 @@ export default function Processo() {
                 {(hasHistorico || hasHPrisoes || hasPareceres) && (
                   <Grid item xs={12} sx={{ mt: { sm: -1 } }}>
                     <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
-                      {hasPareceres && <Pareceres pareceres={processo?.pareceres} processoId={processo?.id} />}
-                      {hasHistorico && <HistoricoProcesso historico={processo?.htransicoes} />}
+                      {hasPareceres && (
+                        <Pareceres
+                          processoId={processo?.id}
+                          assunto={processo?.titular}
+                          pareceres={processo?.pareceres}
+                        />
+                      )}
+                      {hasHistorico && <HistoricoTransicao historico={processo?.htransicoes} />}
                       {hasHPrisoes && <HistoricoPrisoes historico={processo?.hprisoes} />}
                     </Stack>
                   </Grid>
@@ -465,8 +453,8 @@ export default function Processo() {
                 <Grid item xs={12} lg={hasAnexos && 5}>
                   <Card sx={{ height: 1 }}>
                     <CardContent id="card_detail">
-                      {processo?.nota && <NotaProcesso nota={processo.nota} />}
-                      <DetalhesProcesso processo={processo} />
+                      {!isPS && processo?.nota && <NotaProcesso nota={processo.nota} />}
+                      <DetalhesProcesso processo={processo} isPS={isPS} />
                     </CardContent>
                   </Card>
                 </Grid>
@@ -483,7 +471,7 @@ export default function Processo() {
                   <>
                     {hasHistorico && (
                       <Grid item xs={12} lg={hasHPrisoes && 6}>
-                        <HistoricoProcessoAnt historico={processo?.htransicoes} />
+                        <HistoricoTransicaoAnt historico={processo?.htransicoes} />
                       </Grid>
                     )}
                     {hasHPrisoes && (

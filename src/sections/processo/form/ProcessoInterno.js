@@ -30,10 +30,15 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
+  const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
   const { meuAmbiente, processoId, motivosPendencias, isSaving, done, error } = useSelector(
     (state) => state.digitaldocs
   );
   const perfilId = cc?.perfil_id;
+  const podeAtribuir =
+    !fluxo?.assunto?.includes('Cartão') &&
+    !fluxo?.assunto?.includes('Extrato') &&
+    !fluxo?.assunto?.includes('Declarações');
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado || false);
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
   const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
@@ -58,7 +63,17 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
 
   const formSchema = Yup.object().shape({
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    periodicidade: agendado && Yup.mixed().required('Seleciona a periodicidade'),
+    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     noperacao: selectedProcesso?.noperacao && Yup.string().required('Nº de operação não pode ficar vazio'),
+    titular: fluxo?.assunto === 'Produtos e Serviços' && Yup.string().required('Descriçãao não pode ficar vazio'),
+    data_entrada:
+      fluxo?.modelo !== 'Paralelo' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de entrada não pode ficar vazio'),
+    data_inicio:
+      agendado && Yup.date().typeError('Introduza uma data válida').required('Data de início não pode ficar vazio'),
+    data_arquivamento:
+      agendado && Yup.date().typeError('Introduza uma data válida').required('Data de término não pode ficar vazio'),
     diadomes:
       agendado &&
       Yup.number()
@@ -66,26 +81,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         .max(31, 'Dia do mês não pode ser maior que 31')
         .typeError('Introduza um número')
         .required('Valor não pode ficar vazio'),
-    periodicidade: agendado && Yup.mixed().nullable('Seleciona a periodicidade').required('Seleciona a periodicidade'),
-    data_entrada:
-      fluxo?.modelo !== 'Paralelo' &&
-      Yup.date().typeError('Data de entrada não pode ficar vazio').required('Data não pode ficar vazio'),
-    data_inicio:
-      agendado &&
-      Yup.date().typeError('Data de início não pode ficar vazio').required('Data de início não pode ficar vazio'),
-    data_arquivamento:
-      agendado &&
-      Yup.date().typeError('Data de término não pode ficar vazio').required('Data de término não pode ficar vazio'),
     conta:
-      fluxo?.assunto !== 'Abertura de conta' &&
+      !fluxo?.limpo &&
       fluxo?.assunto !== 'OPE DARH' &&
-      fluxo?.modelo !== 'Paralelo' &&
-      Yup.number().typeError('Introduza um nº de conta válido').required('Nº de conta não pode ficar vazio'),
-    mpendencia:
-      pendente &&
-      Yup.mixed()
-        .nullable('Motivo de pendência não pode ficar vazio')
-        .required('Motivo de pendência não pode ficar vazio'),
+      fluxo?.assunto !== 'Abertura de conta' &&
+      Yup.number().typeError('Introduza um nº de conta válido'),
   });
 
   const _entidades = useMemo(
@@ -111,10 +111,10 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       agendado: selectedProcesso?.agendado || false,
       ispendente: selectedProcesso?.ispendente || false,
       periodicidade: selectedProcesso?.periodicidade || null,
-      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
-      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
       balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
+      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
+      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
@@ -157,7 +157,12 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.conta) {
           formData.append('conta', values.conta);
         }
-        if (values.titular) {
+        if (isPSC) {
+          formData.append(
+            'titular',
+            `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
+          );
+        } else if (values.titular) {
           formData.append('titular', values.titular);
         }
         if (values.cliente) {
@@ -210,8 +215,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
             mail,
             perfilId,
             id: selectedProcesso?.id,
-            ispendente: values.ispendente,
-            mensagem: 'processo atualizado',
+            msg: 'processo atualizado',
+            isPendente: values.ispendente,
+            atribuir: values.ispendente && podeAtribuir,
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );
@@ -235,7 +241,12 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.cliente) {
           formData.append('cliente', values.cliente);
         }
-        if (values.titular) {
+        if (isPSC) {
+          formData.append(
+            'titular',
+            `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
+          );
+        } else if (values.titular) {
           formData.append('titular', values.titular);
         }
         if (values.ispendente) {
@@ -272,8 +283,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
             perfilId,
             fluxoId: fluxo?.id,
             estadoId: meuAmbiente?.id,
-            ispendente: values.ispendente,
-            mensagem: 'processo adicionado',
+            msg: 'processo adicionado',
+            isPendente: values.ispendente,
+            atribuir: values.ispendente && podeAtribuir,
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );

@@ -34,6 +34,10 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
     (state) => state.digitaldocs
   );
   const perfilId = cc?.perfil_id;
+  const podeAtribuir =
+    !fluxo?.assunto?.includes('Cartão') &&
+    !fluxo?.assunto?.includes('Extrato') &&
+    !fluxo?.assunto?.includes('Declarações');
   const [operacao, setOperacao] = useState(selectedProcesso?.operacao || '');
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
   const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
@@ -58,17 +62,13 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
+    origem_id: Yup.mixed().required('Origem não pode ficar vazio'),
     referencia: Yup.string().required('Referência não pode ficar vazio'),
     canal: Yup.string().required('Canal de entrada não pode ficar vazio'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio'),
     valor: operacao === 'Cativo/Penhora' && Yup.string().required('Indique o valor'),
-    origem_id: Yup.mixed().nullable('Origem não pode ficar vazio').required('Origem não pode ficar vazio'),
-    data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio').required('Data não pode ficar vazio'),
-    mpendencia:
-      pendente &&
-      Yup.mixed()
-        .nullable('Motivo de pendência não pode ficar vazio')
-        .required('Motivo de pendência não pode ficar vazio'),
+    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
   });
 
   const _entidades = useMemo(
@@ -199,8 +199,9 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
             mail,
             perfilId,
             id: selectedProcesso?.id,
-            ispendente: values.ispendente,
-            mensagem: 'processo atualizado',
+            msg: 'processo atualizado',
+            isPendente: values.ispendente,
+            atribuir: values.ispendente && podeAtribuir,
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );
@@ -271,8 +272,9 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
             perfilId,
             fluxoId: fluxo?.id,
             estadoId: meuAmbiente?.id,
-            ispendente: values.ispendente,
-            mensagem: 'processo adicionado',
+            msg: 'processo adicionado',
+            isPendente: values.ispendente,
+            atribuir: values.ispendente && podeAtribuir,
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Page, View, Text, Image, Document } from '@react-pdf/renderer';
 // utils
+import { add } from 'date-fns';
 import { ptDate } from '../../utils/formatTime';
 //
 import styles from './Style';
@@ -10,6 +11,7 @@ import styles from './Style';
 ParecerExport.propTypes = { dados: PropTypes.object };
 
 export default function ParecerExport({ dados }) {
+  const data = dados?.parecer?.validado ? dados?.parecer?.data_parecer : new Date();
   return (
     <>
       <Document>
@@ -17,33 +19,7 @@ export default function ParecerExport({ dados }) {
           {/* Cabeçalho */}
           <View style={[styles.header]} fixed>
             <View style={[styles.gridContainer]}>
-              <View style={[styles.bodyHeader]}>
-                <Text>
-                  Nome: <Text style={[styles.caption]}>{dados?.nome}</Text>
-                </Text>
-                <Text>
-                  Parecer: <Text style={[styles.caption]}>{dados?.parecer}</Text>
-                </Text>
-                <Text>
-                  Unidade orgânica: <Text style={[styles.caption]}>{dados?.estado}</Text>
-                </Text>
-                <Text>
-                  Data parecer:{' '}
-                  <Text style={[styles.caption]}>
-                    {dados?.data && ptDate(dados?.data)}{' '}
-                    {new Date(dados?.data_limite) < new Date(dados?.data) && (
-                      <>
-                        (<Text style={[styles.captionError]}>Atrasado</Text>
-                        <Text style={[styles.captionSecondary]}>
-                          {' '}
-                          - Data limite {dados?.data_limite && ptDate(dados?.data_limite)}
-                        </Text>
-                        )
-                      </>
-                    )}
-                  </Text>
-                </Text>
-              </View>
+              <View style={[styles.bodyHeader]}>{}</View>
               <View style={[styles.headerLogo]}>
                 <Image
                   src="/assets/Caixa_Logo_Branco_Transparente.png"
@@ -59,12 +35,50 @@ export default function ParecerExport({ dados }) {
 
           {/* Body */}
           <View style={[styles.body]}>
-            <Text style={[styles.title]}>Parecer</Text>
-            <View>
-              {dados?.descricao?.split('\r\n')?.map((row, index) => (
+            <Text style={[styles.title]}>Minuta do parecer</Text>
+            <Text>
+              Nome: <Text style={[styles.caption]}>{dados?.nome}</Text>
+            </Text>
+            <Text>
+              Parecer: <Text style={[styles.caption]}>{dados?.parecer?.parecer}</Text>
+            </Text>
+            <Text>
+              Unidade orgânica: <Text style={[styles.caption]}>{dados?.parecer?.nome}</Text>
+            </Text>
+            <Text>
+              Data parecer:{' '}
+              <Text style={[styles.caption]}>
+                {ptDate(data)}{' '}
+                {add(new Date(dados?.parecer?.data_limite), { days: 1 }) < new Date(data) && (
+                  <>
+                    (<Text style={[styles.captionError]}>Atrasado</Text>
+                    <Text style={[styles.captionSecondary]}>
+                      {' '}
+                      - Data limite {dados?.parecer?.data_limite && ptDate(dados?.parecer?.data_limite)}
+                    </Text>
+                    )
+                  </>
+                )}
+              </Text>
+            </Text>
+            <Text style={[styles.mt15]}>
+              Assunto: <Text style={[styles.caption]}>{dados?.assunto}</Text>
+            </Text>
+            <View style={[styles.mt15]}>
+              {dados?.parecer?.parecer_obs?.split('\r\n')?.map((row, index) => (
                 <Text key={`desc_${index}`}>{row}</Text>
               ))}
             </View>
+            {dados?.parecer?.anexos?.filter((item) => item?.is_ativo)?.length > 0 && (
+              <View style={[styles.mt15]}>
+                <Text style={[styles.caption]}>Anexos:</Text>
+                {dados?.parecer?.anexos
+                  ?.filter((item) => item?.is_ativo)
+                  .map((row) => (
+                    <Text key={row?.nome}> - {row?.nome}</Text>
+                  ))}
+              </View>
+            )}
           </View>
 
           {/* Rodapé */}

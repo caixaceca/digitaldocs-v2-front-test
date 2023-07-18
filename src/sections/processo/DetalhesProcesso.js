@@ -39,26 +39,27 @@ import { dis } from '../../_mock';
 
 // ----------------------------------------------------------------------
 
-DetalhesProcesso.propTypes = { processo: PropTypes.object };
+DetalhesProcesso.propTypes = { processo: PropTypes.object, isPS: PropTypes.bool };
 
-export default function DetalhesProcesso({ processo }) {
+export default function DetalhesProcesso({ processo, isPS }) {
+  const _entidades = entidadesParse(processo?.entidades);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const { motivosPendencias, origem } = useSelector((state) => state.digitaldocs);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
-  const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
   const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);
-  const _entidades = entidadesParse(processo?.entidades);
-  const isOrigemProcesso = origem?.id === processo.origem_id;
-  const situacao = processo?.credito?.situacao_final_mes || '';
   const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Doc. primário';
   const docSLabel = dis?.find((row) => row.id === processo.tipodocids)?.label || 'Doc. secundário';
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
+  const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
+  const credito = processo?.credito || null;
+  const situacao = credito?.situacao_final_mes || '';
+  const isOrigemProcesso = origem?.id === processo.origem_id;
+
   const pareceresNaoValidados = () => {
     let pareceres = '';
-    processo?.pareceres?.forEach((row, index) => {
-      if (!row?.validado) {
-        pareceres += processo?.pareceres?.length - 1 === index ? row?.nome : `${row?.nome} / `;
-      }
+    const pnv = processo?.pareceres?.filter((item) => !item?.validado);
+    pnv?.forEach((row, index) => {
+      pareceres += pnv?.length - 1 === index ? row?.nome : `${row?.nome} / `;
       return pareceres;
     });
     return pareceres;
@@ -87,7 +88,9 @@ export default function DetalhesProcesso({ processo }) {
           {processo?.assunto && <TextItem title="Assunto:" text={processo.assunto} />}
           {processo?.criado_em && <TextItem title="Criado em:" text={ptDateTime(processo.criado_em)} />}
           {criador?.perfil?.displayName && <TextItem title="Criado por:" text={criador?.perfil?.displayName} />}
-          {processo?.data_entrada && <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />}
+          {processo?.data_entrada && !isPS && (
+            <TextItem title="Data de entrada:" text={ptDate(processo.data_entrada)} />
+          )}
           {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
           {(processo?.nome || processo?.in_paralelo_mode) && (
             <Stack direction="row" alignItems="center" justifyContent="left" spacing={1} sx={{ py: 0.75 }}>
@@ -163,7 +166,7 @@ export default function DetalhesProcesso({ processo }) {
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
-          {processo.titular && <TextItem title="Titular:" text={processo.titular} />}
+          {processo.titular && <TextItem text={processo.titular} title={isPS ? 'Descrição:' : 'Titular:'} />}
           {processo?.docidp && <TextItem title={`${docPLabel}:`} text={processo.docidp} />}
           {processo?.docids && <TextItem title={`${docSLabel}:`} text={processo.docids} />}
           {_entidades && (
@@ -270,7 +273,7 @@ export default function DetalhesProcesso({ processo }) {
           )}
         </List>
       )}
-      {processo.is_credito && processo?.credito && (
+      {processo.is_credito && credito && (
         <List>
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Info. crédito</Typography>
@@ -291,45 +294,40 @@ export default function DetalhesProcesso({ processo }) {
               </Label>
             </Stack>
           )}
-          {processo?.credito?.nproposta && <TextItem title="Nº de proposta:" text={processo?.credito?.nproposta} />}
-          {processo?.credito?.segmento && <TextItem title="Segmento:" text={processo?.credito?.segmento} />}
-          {processo?.credito?.linha?.linha && (
-            <TextItem title="Linha de crédito:" text={processo?.credito?.linha?.linha} />
+          {credito?.nproposta && <TextItem title="Nº de proposta:" text={credito?.nproposta} />}
+          {credito?.segmento && <TextItem title="Segmento:" text={credito?.segmento} />}
+          {credito?.linha?.linha && <TextItem title="Linha de crédito:" text={credito?.linha?.linha} />}
+          {credito?.montantes && <TextItem title="Montante solicitado:" text={fCurrency(credito?.montantes)} />}
+          {credito?.setor_atividade && <TextItem title="Setor de atividade:" text={credito?.setor_atividade} />}
+          {credito?.finalidade && <TextItem title="Finalidade:" text={credito?.finalidade} />}
+          {credito?.montante_aprovado && (
+            <TextItem title="Montante aprovado:" text={fCurrency(credito?.montante_aprovado)} />
           )}
-          {processo?.credito?.montantes && (
-            <TextItem title="Montante solicitado:" text={fCurrency(processo?.credito?.montantes)} />
+          {credito?.data_aprovacao && <TextItem title="Data de aprovação:" text={ptDate(credito?.data_aprovacao)} />}
+          {credito?.montante_contratado && (
+            <TextItem title="Montante contratado:" text={fCurrency(credito?.montante_contratado)} />
           )}
-          {processo?.credito?.setor_atividade && (
-            <TextItem title="Setor de atividade:" text={processo?.credito?.setor_atividade} />
+          {credito?.data_contratacao && (
+            <TextItem title="Data de contratação:" text={ptDate(credito?.data_contratacao)} />
           )}
-          {processo?.credito?.finalidade && <TextItem title="Finalidade:" text={processo?.credito?.finalidade} />}
-          {processo?.credito?.montante_aprovado && (
-            <TextItem title="Montante aprovado:" text={fCurrency(processo?.credito?.montante_aprovado)} />
+          {credito?.prazo_amortizacao && <TextItem title="Prazo de amortização:" text={credito?.prazo_amortizacao} />}
+          {credito?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(credito?.taxa_juro)} />}
+          {credito?.garantia && <TextItem title="Garantia:" text={credito?.garantia} />}
+          {credito?.escalao_decisao && <TextItem title="Escalão de decisão:" text={credito?.escalao_decisao} />}
+          {credito?.data_desistido && <TextItem title="Data de desistência:" text={ptDate(credito?.data_desistido)} />}
+          {credito?.data_indeferido && (
+            <TextItem title="Data de indeferimento:" text={ptDate(credito?.data_indeferido)} />
           )}
-          {processo?.credito?.data_aprovacao && (
-            <TextItem title="Data de aprovação:" text={ptDate(processo?.credito?.data_aprovacao)} />
-          )}
-          {processo?.credito?.montante_contratado && (
-            <TextItem title="Montante contratado:" text={fCurrency(processo?.credito?.montante_contratado)} />
-          )}
-          {processo?.credito?.data_contratacao && (
-            <TextItem title="Data de contratação:" text={ptDate(processo?.credito?.data_contratacao)} />
-          )}
-          {processo?.credito?.prazo_amortizacao && (
-            <TextItem title="Prazo de amortização:" text={processo?.credito?.prazo_amortizacao} />
-          )}
-          {processo?.credito?.taxa_juro && (
-            <TextItem title="Taxa de juro:" text={fPercent(processo?.credito?.taxa_juro)} />
-          )}
-          {processo?.credito?.garantia && <TextItem title="Garantia:" text={processo?.credito?.garantia} />}
-          {processo?.credito?.escalao_decisao && (
-            <TextItem title="Escalão de decisão:" text={processo?.credito?.escalao_decisao} />
-          )}
-          {processo?.credito?.data_desistido && (
-            <TextItem title="Data de desistência:" text={ptDate(processo?.credito?.data_desistido)} />
-          )}
-          {processo?.credito?.data_indeferido && (
-            <TextItem title="Data de indeferimento:" text={ptDate(processo?.credito?.data_indeferido)} />
+          {credito?.valor_divida && (
+            <Stack sx={{ py: 0.75 }}>
+              <Paper sx={{ p: 2, pb: 1, bgcolor: 'background.neutral', flexGrow: 1 }}>
+                <Label color="info" startIcon={<InfoOutlinedIcon />}>
+                  Entidade com crédito em dívida
+                </Label>
+                <TextItem title="Valor:" text={fCurrency(credito?.valor_divida)} />
+                {credito?.periodo && <TextItem title="Data:" text={ptDate(credito?.periodo)} />}
+              </Paper>
+            </Stack>
           )}
         </List>
       )}

@@ -11,4 +11,5 @@ export { default as RHFRadioGroup } from './RHFRadioGroup';
 //
 export { RHFDatePicker } from './RHF';
 export { RHFAutocompleteObject } from './RHF';
-export { default as RHFAutocompleteSimple } from './RHF';
+export { RHFAutocompleteSimple } from './RHF';
+export { default as RHFAutocomplete } from './RHF';

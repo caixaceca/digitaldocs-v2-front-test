@@ -5,6 +5,7 @@ import { styled, alpha } from '@mui/material/styles';
 import { Tab, Box, Card, Tabs, Badge, Container, Typography } from '@mui/material';
 // utils
 import selectTab from '../utils/selectTab';
+import { paramsObject } from '../utils/normalizeText';
 // routes
 import useSettings from '../hooks/useSettings';
 // redux
@@ -40,7 +41,12 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', filter: '' });
+  const [currentTab, setCurrentTab] = useSearchParams({
+    tab: 'tarefas',
+    filter: '',
+    segmento: '',
+    colaborador: cc?.perfil?.displayName,
+  });
   const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
@@ -52,7 +58,7 @@ export default function Processos() {
   }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, currentTab]);
 
   const handleChangeTab = (event, newValue) => {
-    setCurrentTab({ tab: newValue });
+    setCurrentTab({ tab: newValue, ...paramsObject(currentTab) });
   };
 
   const acessoAgendados = () => {
@@ -147,7 +153,7 @@ export default function Processos() {
 
   useEffect(() => {
     if (currentTab.get('tab') !== selectTab(VIEW_TABS, currentTab.get('tab'))) {
-      setCurrentTab({ tab: VIEW_TABS?.[0]?.value });
+      setCurrentTab({ tab: VIEW_TABS?.[0]?.value, ...paramsObject(currentTab) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [VIEW_TABS]);

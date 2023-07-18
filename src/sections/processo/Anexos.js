@@ -18,8 +18,9 @@ Anexos.propTypes = { anexos: PropTypes.array };
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
-  const [selectedAnexo, setSelectedAnexo] = useState(null);
+  const [url, setUrl] = useState('');
   const { mail } = useSelector((state) => state.intranet);
+  const [selectedAnexo, setSelectedAnexo] = useState(null);
   const { anexo, filePreview, previewType, isLoadingAnexo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = anexos?.filter((row) => row.is_ativo);
   const anexosInativos = anexos?.filter((row) => !row.is_ativo);
@@ -28,7 +29,6 @@ export default function Anexos({ anexos }) {
   const [selectedAnexoPreview, setSelectedAnexoPreview] = useState(
     (anexosAtivos?.[0]?.conteudo && isPdf) || (anexosAtivos?.[0]?.anexo && isImg) ? anexosAtivos?.[0] : null
   );
-  const [url, setUrl] = useState('');
 
   useEffect(() => {
     if (anexo?.ficheiro) {

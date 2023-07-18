@@ -2,32 +2,12 @@ import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 // @mui
-import {
-  Fab,
-  Card,
-  Table,
-  Button,
-  Tooltip,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableHead,
-  TableContainer,
-} from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Fab, Card, Table, Tooltip, TableRow, TableCell, TableBody, TableHead, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import {
-  getAll,
-  getItem,
-  openModal,
-  closeModal,
-  deleteItem,
-  selectAnexo,
-  closeModalAnexo,
-} from '../../redux/slices/digitaldocs';
+import { getAll, closeModal, deleteItem, selectAnexo, closeModalAnexo } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -36,6 +16,7 @@ import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { TableSearchNotFound } from '../../components/table';
 import DialogConfirmar from '../../components/DialogConfirmar';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -76,16 +57,6 @@ export default function AcessosPerfil() {
     }
   }, [dispatch, id, mail]);
 
-  const handleUpdate = (id) => {
-    if (id && cc?.perfil_id && mail) {
-      dispatch(getItem('acesso', { id, mail, from: 'acessos', perfilId: cc?.perfil_id }));
-    }
-  };
-
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
   const handleCloseModal = () => {
     dispatch(closeModal());
     dispatch(closeModalAnexo());
@@ -96,14 +67,7 @@ export default function AcessosPerfil() {
   };
 
   const confirmDelete = () => {
-    dispatch(
-      deleteItem('acesso', {
-        mail,
-        id: selectedAnexoId,
-        mensagem: 'acesso eliminado',
-        perfilId: cc?.perfil_id,
-      })
-    );
+    dispatch(deleteItem('acesso', { mail, id: selectedAnexoId, msg: 'acesso eliminado', perfilId: cc?.perfil_id }));
   };
 
   return (
@@ -117,9 +81,7 @@ export default function AcessosPerfil() {
         ]}
         action={
           <RoleBasedGuard roles={['acesso-110', 'Todo-110', 'Todo-111']}>
-            <Button variant="soft" onClick={handleAdd} startIcon={<AddCircleIcon />}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -144,10 +106,10 @@ export default function AcessosPerfil() {
                     acessos?.map((row) => (
                       <TableRow key={row?.id} hover>
                         <TableCell>
-                          {objetos.find((_row) => _row?.id?.toLocaleLowerCase() === row?.objeto?.toLocaleLowerCase())
+                          {objetos.find((item) => item?.id?.toLocaleLowerCase() === row?.objeto?.toLocaleLowerCase())
                             ?.label || row?.objeto}
                         </TableCell>
-                        <TableCell>{codacessos.find((_row) => _row.id === row.acesso)?.label || row.acesso}</TableCell>
+                        <TableCell>{codacessos.find((item) => item.id === row.acesso)?.label || row.acesso}</TableCell>
                         <TableCell>{row.datalimite ? ptDateTime(row.datalimite) : 'Acesso permanente'}</TableCell>
                         <TableCell align="center" width={50}>
                           {row.objeto === 'Processo' ? (
@@ -157,11 +119,7 @@ export default function AcessosPerfil() {
                               </Fab>
                             </Tooltip>
                           ) : (
-                            <Tooltip title="Editar" arrow>
-                              <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row?.id)}>
-                                <SvgIconStyle src="/assets/icons/editar.svg" />
-                              </Fab>
-                            </Tooltip>
+                            <UpdateItem item="acesso" id={row?.id} />
                           )}
                         </TableCell>
                       </TableRow>

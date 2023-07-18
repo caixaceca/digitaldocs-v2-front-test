@@ -4,21 +4,20 @@ import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Fab, Grid, Button, Tooltip, InputAdornment } from '@mui/material';
-// hooks
-import useResponsive from '../../../hooks/useResponsive';
 // components
 import SvgIconStyle from '../../../components/SvgIconStyle';
 import { RHFTextField, RHFDatePicker } from '../../../components/hook-form';
-// utils
 
 // ----------------------------------------------------------------------
 
-DadosCliente.propTypes = { isInterno: PropTypes.bool, assunto: PropTypes.string };
+DadosCliente.propTypes = { isInterno: PropTypes.bool, fluxo: PropTypes.object };
 
-export default function DadosCliente({ isInterno, assunto = '' }) {
-  const { control } = useFormContext();
-  const isXl = useResponsive('up', 'xl');
+export default function DadosCliente({ isInterno, fluxo = '' }) {
+  const { watch, control } = useFormContext();
+  const values = watch();
+  const isPS = fluxo?.assunto === 'Produtos e Serviços';
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
+  const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
 
   const handleAdd = () => {
     append({ numero: '' });
@@ -29,18 +28,15 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
   };
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={3} justifyContent="center">
       {isInterno ? (
         <>
-          {isXl && assunto !== 'Abertura de conta' && assunto !== 'OPE DARH' && (
-            <Grid item xs={12} xl={3}>
-              {' '}
+          {!isPS && (
+            <Grid item xs={12} sm={6} xl={3}>
+              <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
           )}
-          <Grid item xs={12} sm={6} xl={3}>
-            <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
-          </Grid>
-          {assunto === 'Abertura de conta' || assunto === 'OPE DARH' ? (
+          {fluxo?.assunto === 'Abertura de conta' || fluxo?.assunto === 'OPE DARH' ? (
             <>
               <Grid item xs={12} sm={6} xl={3}>
                 <Button
@@ -90,10 +86,22 @@ export default function DadosCliente({ isInterno, assunto = '' }) {
             </>
           ) : (
             <>
-              <Grid item xs={12} sm={6} xl={3}>
-                <RHFTextField name="conta" label="Nº de conta" InputProps={{ type: 'number' }} />
-              </Grid>
+              {!isPS && !isPSC && (
+                <Grid item xs={12} sm={6} xl={3}>
+                  <RHFTextField name="conta" label="Nº de conta" InputProps={{ type: 'number' }} />
+                </Grid>
+              )}
             </>
+          )}
+          {fluxo?.limpo && !isPSC && !isPS && (
+            <Grid item xs={12} xl={6}>
+              <RHFTextField name="titular" label="Titular" required={!values?.conta} />
+            </Grid>
+          )}
+          {isPS && (
+            <Grid item xs={12}>
+              <RHFTextField name="titular" label="Descrição" />
+            </Grid>
           )}
         </>
       ) : (

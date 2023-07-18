@@ -12,8 +12,8 @@ import { Box, Grid, DialogTitle, DialogContent, DialogActions } from '@mui/mater
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
+import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
-import { atribuirAcesso } from '../../redux/slices/digitaldocs';
 // components
 import { FormProvider, RHFAutocompleteObject } from '../../components/hook-form';
 
@@ -70,7 +70,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
   const onSubmit = async () => {
     try {
       values.perfilID = values?.perfilID?.id;
-      dispatch(atribuirAcesso(JSON.stringify(values), processoId, mail));
+      dispatch(updateItem('dar aceso', JSON.stringify(values), { id: processoId, mail, mensagem: 'Acesso atribuido' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

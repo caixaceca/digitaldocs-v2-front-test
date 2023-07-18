@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import { Fab, Card, Table, Tooltip, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
+import { Card, Table, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
+import { entidadesParse, noDados, parametrosPesquisa } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -15,11 +15,13 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
+import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+//
+import applySortFilter from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -39,13 +41,7 @@ const TABLE_HEAD = [
 export default function TablePorConcluir() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [filter, setFilter] = useSearchParams({
-    estado: '',
-    assunto: '',
-    colaborador: '',
-    tab: 'entradas',
-    filterSearch: '',
-  });
+  const [filter, setFilter] = useSearchParams({ tab: 'porconcluir' });
   const { porConcluir, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
@@ -79,19 +75,10 @@ export default function TablePorConcluir() {
   }, [filter]);
 
   const handleViewRow = (id) => {
-    navigate({
-      pathname: `${PATH_DIGITALDOCS.controle.root}/${id}`,
-      search: createSearchParams({
-        from: 'porconcluir',
-        estado: filter?.get('estado'),
-        assunto: filter?.get('assunto'),
-        colaborador: filter?.get('colaborador'),
-        filterSearch: filter?.get('filterSearch'),
-      }).toString(),
-    });
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=porconcluir${parametrosPesquisa(filter)}`);
   };
 
-  const newList = [];
+  const dados = [];
   const estadosList = [];
   const assuntosList = [];
   const colaboradoresList = [];
@@ -112,15 +99,15 @@ export default function TablePorConcluir() {
     if (!assuntosList.includes(row?.assunto)) {
       assuntosList.push(row?.assunto);
     }
-    newList.push({ ...row, colaborador: colaborador?.perfil?.displayName });
+    dados.push({ ...row, colaborador: colaborador?.perfil?.displayName });
   });
 
   const dataFiltered = applySortFilter({
-    newList,
+    dados,
+    filter: filter?.get('filter'),
     estado: filter?.get('estado'),
     assunto: filter?.get('assunto'),
     colaborador: filter?.get('colaborador'),
-    filterSearch: filter?.get('filterSearch'),
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
@@ -134,16 +121,14 @@ export default function TablePorConcluir() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {newList.length > 1 && (
-          <SearchToolbarEntradas
-            tab="porconcluir"
-            filter={filter}
-            setFilter={setFilter}
-            estadosList={estadosList}
-            assuntosList={assuntosList}
-            colaboradoresList={colaboradoresList}
-          />
-        )}
+        <SearchToolbarEntradas
+          tab="porconcluir"
+          filter={filter}
+          setFilter={setFilter}
+          estadosList={estadosList}
+          assuntosList={assuntosList}
+          colaboradoresList={colaboradoresList}
+        />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -175,11 +160,7 @@ export default function TablePorConcluir() {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <Tooltip title="DETALHES" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                            <SvgIconStyle src="/assets/icons/view.svg" />
-                          </Fab>
-                        </Tooltip>
+                        <ViewItem handleView={() => handleViewRow(row?.id)} />
                       </TableCell>
                     </TableRow>
                   ))
@@ -187,7 +168,7 @@ export default function TablePorConcluir() {
               </TableBody>
 
               {!isLoading && isNotFound && (
-                <TableSearchNotFound message="Não foi encontrado nenhuma entrada disponível..." />
+                <TableSearchNotFound message="Não foi encontrado nenhum processo por concluir disponível..." />
               )}
             </Table>
           </TableContainer>
@@ -207,45 +188,4 @@ export default function TablePorConcluir() {
       </Card>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ newList, comparator, filterSearch, colaborador, assunto, estado }) {
-  const stabilizedThis = newList.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  newList = stabilizedThis.map((el) => el[0]);
-
-  if (colaborador) {
-    newList = newList.filter((row) => row?.colaborador === colaborador);
-  }
-  if (estado && estado !== 'Pendente' && estado !== 'Excepto Pendente') {
-    newList = newList.filter((row) => row?.nome === estado);
-  }
-  if (estado === 'Pendente') {
-    newList = newList.filter((row) => row?.motivo);
-  }
-  if (estado === 'Excepto Pendente') {
-    newList = newList.filter((row) => !row?.motivo);
-  }
-  if (assunto) {
-    newList = newList.filter((row) => row?.assunto === assunto);
-  }
-  if (filterSearch) {
-    newList = newList.filter(
-      (row) =>
-        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.conta && row?.conta.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.titular && row?.titular.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1) ||
-        (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(filterSearch.toLowerCase()) !== -1)
-    );
-  }
-
-  return newList;
 }

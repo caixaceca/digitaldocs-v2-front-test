@@ -68,7 +68,7 @@ export function DenunciaForm({ open, onCancel }) {
       if (values.comprovativo instanceof File) {
         formData.append('comprovativo', values.comprovativo);
       }
-      dispatch(createItem('denuncia', formData, { mail, mensagem: 'denuncia' }));
+      dispatch(createItem('denuncia', formData, { mail, msg: 'denuncia' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

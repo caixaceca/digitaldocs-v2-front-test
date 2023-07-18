@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { Grid, Card, TextField, Typography, CardContent, Autocomplete, InputAdornment } from '@mui/material';
+import { Grid, Card, TextField, CardContent, Autocomplete, InputAdornment } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
@@ -10,14 +10,13 @@ import { useSelector } from '../../../redux/store';
 // components
 import {
   RHFTextField,
-  RHFSwitch,
   RHFDatePicker,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
 //
-import ObsNovosAnexos from './ObsNovosAnexos';
 import AnexosExistentes from './AnexosExistentes';
+import { Pendencia, ObsNovosAnexos } from './Outros';
 // _mock
 import { segmentos, escaloes, situacoes } from '../../../_mock';
 
@@ -34,7 +33,7 @@ export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, se
   const { control, watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
-  const { linhas, motivosPendencias } = useSelector((state) => state.digitaldocs);
+  const { linhas } = useSelector((state) => state.digitaldocs);
 
   return (
     <Grid container spacing={3}>
@@ -196,47 +195,7 @@ export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, se
           </Grid>
         </>
       )}
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <RHFSwitch
-                  name="ispendente"
-                  labelPlacement="start"
-                  onChange={(event, value) => {
-                    setValue('ispendente', value);
-                    setPendente(value);
-                  }}
-                  label={
-                    <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                      Pendente
-                    </Typography>
-                  }
-                  sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
-                />
-              </Grid>
-              {values.ispendente && (
-                <>
-                  <Grid item xs={12} sm={4}>
-                    <RHFAutocompleteObject
-                      name="mpendencia"
-                      label="Motivo"
-                      options={applySort(
-                        motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
-                        getComparator('asc', 'motivo')
-                      )}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={8}>
-                    <RHFTextField name="mobs" label="Observação" />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
+      <Pendencia setPendente={setPendente} />
       <Grid item xs={12}>
         <Card>
           <CardContent>

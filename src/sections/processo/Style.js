@@ -37,14 +37,7 @@ const styles = StyleSheet.create({
 
   /// BODY
   body: { padding: '0mm 51mm 0mm 30mm', textAlign: 'justify', color: '#333' },
-  title: {
-    fontSize: 13,
-    fontWeight: 700,
-    marginTop: '5mm',
-    textAlign: 'center',
-    marginBottom: '5mm',
-    textTransform: 'uppercase',
-  },
+  title: { fontSize: 13, fontWeight: 700, textAlign: 'center', marginBottom: 10 },
   alignLeft: { textAlign: 'left' },
   alignRight: { textAlign: 'right' },
   alignCenter: { textAlign: 'center' },

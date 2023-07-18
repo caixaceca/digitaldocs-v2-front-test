@@ -1,32 +1,20 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
 // @mui
-import {
-  Fab,
-  Card,
-  Stack,
-  Table,
-  Divider,
-  Tooltip,
-  TableRow,
-  TableBody,
-  TableCell,
-  Typography,
-  TableContainer,
-} from '@mui/material';
+import { Card, Stack, Table, Divider, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
+import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, getArquivos } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
+import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar2 } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -71,7 +59,7 @@ export default function Arquivos() {
 
   useEffect(() => {
     if (mail && cc?.perfil_id) {
-      dispatch(getArquivos('arquivados', cc?.perfil_id, mail));
+      dispatch(getAll('arquivados', { mail, perfilId: cc?.perfil_id }));
       dispatch(getAll('indicadores arquivos', { mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, cc?.perfil_id, mail]);
@@ -81,9 +69,9 @@ export default function Arquivos() {
     setPage(0);
   };
 
-  const handleViewRow = (processo) => {
+  const handleViewRow = (id) => {
     navigate({
-      pathname: `${PATH_DIGITALDOCS.arquivo.root}/${processo?.id}`,
+      pathname: `${PATH_DIGITALDOCS.arquivo.root}/${id}`,
       search: createSearchParams({ from: 'arquivo' }).toString(),
     });
   };
@@ -149,11 +137,7 @@ export default function Arquivos() {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <Tooltip title="DETALHES" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row)}>
-                            <SvgIconStyle src="/assets/icons/view.svg" />
-                          </Fab>
-                        </Tooltip>
+                        <ViewItem handleView={() => handleViewRow(row?.id)} />
                       </TableCell>
                     </TableRow>
                   ))
@@ -199,10 +183,10 @@ function applySortFilter({ arquivos, comparator, filterSearch }) {
 
   if (text) {
     arquivos = arquivos.filter(
-      (item) =>
-        (item?.referencia && item?.referencia.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (item?.titular && item?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (item?.entidades && item?.entidades.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
+      (row) =>
+        (row?.referencia && normalizeText(row?.referencia).indexOf(normalizeText(text)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(text)) !== -1) ||
+        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(text)) !== -1)
     );
   }
 

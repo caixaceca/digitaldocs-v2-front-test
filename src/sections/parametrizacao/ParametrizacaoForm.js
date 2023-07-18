@@ -11,6 +11,7 @@ import {
   Box,
   Fab,
   Grid,
+  Alert,
   Stack,
   Button,
   Dialog,
@@ -40,6 +41,7 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
+import { DeleteItem } from '../../components/Actions';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
 // _mock
@@ -87,7 +89,9 @@ export function FluxoForm({ isOpenModal, onCancel }) {
     () => ({
       perfilID: cc?.perfil_id,
       modelo: selectedItem?.modelo || '',
+      limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
+      is_ativo: selectedItem?.is_ativo || true,
       observacao: selectedItem?.observacao || '',
       is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
@@ -112,11 +116,9 @@ export function FluxoForm({ isOpenModal, onCancel }) {
   const onSubmit = async () => {
     try {
       if (selectedItem) {
-        dispatch(
-          updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Fluxo atualizado' })
-        );
+        dispatch(updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Fluxo atualizado' }));
       } else {
-        dispatch(createItem('fluxo', JSON.stringify(values), { mail, mensagem: 'Fluxo atualizado' }));
+        dispatch(createItem('fluxo', JSON.stringify(values), { mail, msg: 'Fluxo atualizado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -125,14 +127,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(
-        deleteItem('fluxo', {
-          mail,
-          id: selectedItem.id,
-          mensagem: 'Fluxo eliminado',
-          perfilId: cc?.perfil_id,
-        })
-      );
+      dispatch(deleteItem('fluxo', { mail, id: selectedItem.id, msg: 'Fluxo eliminado', perfilId: cc?.perfil_id }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -150,29 +145,17 @@ export function FluxoForm({ isOpenModal, onCancel }) {
             <Grid item xs={12} sm={6}>
               <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
             </Grid>
-            <Grid item xs={6} sm={3}>
-              <RHFSwitch
-                name="is_interno"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Interno
-                  </Typography>
-                }
-                sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
-              />
+            <Grid item xs={12} sm={6}>
+              <RHFSwitch name="is_interno" labelPlacement="start" label="Interno" />
             </Grid>
-            <Grid item xs={6} sm={3}>
-              <RHFSwitch
-                name="is_credito"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Crédito
-                  </Typography>
-                }
-                sx={{ mt: { sm: 1 }, width: 1, justifyContent: 'center' }}
-              />
+            <Grid item xs={4}>
+              <RHFSwitch name="is_credito" labelPlacement="start" label="Crédito" />
+            </Grid>
+            <Grid item xs={4}>
+              <RHFSwitch name="limpo" labelPlacement="start" label="Limpo" />
+            </Grid>
+            <Grid item xs={4}>
+              <RHFSwitch name="is_ativo" labelPlacement="start" label="Ativo" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
@@ -181,11 +164,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar fluxo" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -285,12 +264,10 @@ export function EstadoForm({ isOpenModal, onCancel }) {
     try {
       if (selectedItem) {
         values.uo_id = values?.uo_id?.id;
-        dispatch(
-          updateItem('estado', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Estado atualizado' })
-        );
+        dispatch(updateItem('estado', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' }));
       } else {
         values.uo_id = values?.uo_id?.id;
-        dispatch(createItem('estado', JSON.stringify(values), { mail, mensagem: 'Estado adicionado' }));
+        dispatch(createItem('estado', JSON.stringify(values), { mail, msg: 'Estado adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -299,14 +276,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(
-        deleteItem('estado', {
-          mail,
-          id: selectedItem.id,
-          perfilId: cc?.perfil_id,
-          mensagem: 'Estado eliminado',
-        })
-      );
+      dispatch(deleteItem('estado', { mail, id: selectedItem.id, perfilId: cc?.perfil_id, msg: 'Estado eliminado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -332,40 +302,13 @@ export function EstadoForm({ isOpenModal, onCancel }) {
               />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch
-                name="is_inicial"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Inicial
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
+              <RHFSwitch name="is_inicial" labelPlacement="start" label="Inicial" />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch
-                name="is_final"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Final
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
+              <RHFSwitch name="is_final" labelPlacement="start" label="Final" />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch
-                name="is_decisao"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Decisão
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
+              <RHFSwitch name="is_decisao" labelPlacement="start" label="Decisão" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
@@ -374,11 +317,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar estado" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -465,13 +404,11 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
       if (isEdit) {
         values.objeto = values.objeto.id;
         values.acesso = values.acesso.id;
-        dispatch(
-          updateItem('acesso', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Acesso atualizado' })
-        );
+        dispatch(updateItem('acesso', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Acesso atualizado' }));
       } else {
         values.objeto = values.objeto.id;
         values.acesso = values.acesso.id;
-        dispatch(createItem('acesso', JSON.stringify(values), { mail, mensagem: 'Acesso atribuido' }));
+        dispatch(createItem('acesso', JSON.stringify(values), { mail, msg: 'Acesso atribuido' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -480,14 +417,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(
-        deleteItem('acesso', {
-          mail,
-          id: selectedItem.id,
-          mensagem: 'Acesso eliminado',
-          perfilId: cc?.perfil_id,
-        })
-      );
+      dispatch(deleteItem('acesso', { mail, id: selectedItem.id, msg: 'Acesso eliminado', perfilId: cc?.perfil_id }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -523,11 +453,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar acesso" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -607,13 +533,11 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
             mail,
             perfilId,
             id: selectedItem.id,
-            mensagem: 'Motivo atualizado',
+            msg: 'Motivo atualizado',
           })
         );
       } else {
-        dispatch(
-          createItem('motivo pendencia', JSON.stringify(values), { mail, perfilId, mensagem: 'Motivo adicionado' })
-        );
+        dispatch(createItem('motivo pendencia', JSON.stringify(values), { mail, perfilId, msg: 'Motivo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -622,7 +546,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem.id, mensagem: 'Motivo eliminado' }));
+      dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem.id, msg: 'Motivo eliminado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -644,11 +568,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar motivo" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -741,11 +661,9 @@ export function OrigemForm({ isOpenModal, onCancel }) {
   const onSubmit = async () => {
     try {
       if (isEdit) {
-        dispatch(
-          updateItem('origem', JSON.stringify(values), { mail, id: selectedItem.id, mensagem: 'Origem atualizada' })
-        );
+        dispatch(updateItem('origem', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Origem atualizada' }));
       } else {
-        dispatch(createItem('origem', JSON.stringify(values), { mail, mensagem: 'Origem adicionada' }));
+        dispatch(createItem('origem', JSON.stringify(values), { mail, msg: 'Origem adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -754,14 +672,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(
-        deleteItem('origem', {
-          mail,
-          id: selectedItem.id,
-          mensagem: 'Origem eliminada',
-          perfilId: cc?.perfil_id,
-        })
-      );
+      dispatch(deleteItem('origem', { mail, id: selectedItem.id, msg: 'Origem eliminada', perfilId: cc?.perfil_id }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -816,11 +727,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar origem" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -895,14 +802,10 @@ export function LinhaForm({ isOpenModal, onCancel }) {
     try {
       if (isEdit) {
         dispatch(
-          updateItem('linha', JSON.stringify(values), {
-            mail,
-            id: selectedItem.id,
-            mensagem: 'Linha de crédito atualizada',
-          })
+          updateItem('linha', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Linha de crédito atualizada' })
         );
       } else {
-        dispatch(createItem('linha', JSON.stringify(values), { mail, mensagem: 'Linha de crédito adicionada' }));
+        dispatch(createItem('linha', JSON.stringify(values), { mail, msg: 'Linha de crédito adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -914,9 +817,9 @@ export function LinhaForm({ isOpenModal, onCancel }) {
       dispatch(
         deleteItem('linha', {
           mail,
-          linhaID: selectedItem.id,
-          mensagem: 'Linha de crédito eliminada',
           perfilID: cc?.perfil_id,
+          linhaID: selectedItem.id,
+          msg: 'Linha de crédito eliminada',
         })
       );
     } catch (error) {
@@ -940,11 +843,7 @@ export function LinhaForm({ isOpenModal, onCancel }) {
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -1014,7 +913,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
       perfilIDCC: cc?.perfil_id,
       to_alert: selectedItem?.to_alert || false,
       fluxo_id: selectedItem?.fluxo_id || fluxoId,
-      prazoemdias: selectedItem?.prazoemdias || '',
+      prazoemdias: selectedItem?.prazoemdias || 0,
       hasopnumero: selectedItem?.hasopnumero || false,
       is_paralelo: selectedItem?.is_paralelo || false,
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
@@ -1045,16 +944,12 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
         values.estado_final_id = values?.estado_final_id?.id;
         values.estado_inicial_id = values?.estado_inicial_id?.id;
         dispatch(
-          updateItem('transicao', JSON.stringify(values), {
-            mail,
-            id: selectedItem.id,
-            mensagem: 'Transição atualizada',
-          })
+          updateItem('transicao', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Transição atualizada' })
         );
       } else {
         values.estado_final_id = values?.estado_final_id?.id;
         values.estado_inicial_id = values?.estado_inicial_id?.id;
-        dispatch(createItem('transicao', JSON.stringify(values), { mail, mensagem: 'Transição adicionada' }));
+        dispatch(createItem('transicao', JSON.stringify(values), { mail, msg: 'Transição adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -1064,12 +959,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   const handleDelete = async () => {
     try {
       dispatch(
-        deleteItem('transicao', {
-          mail,
-          id: selectedItem.id,
-          mensagem: 'Transição eliminada',
-          perfilId: cc?.perfil_id,
-        })
+        deleteItem('transicao', { mail, id: selectedItem.id, msg: 'Transição eliminada', perfilId: cc?.perfil_id })
       );
       onClose();
     } catch (error) {
@@ -1108,74 +998,25 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch
-                name="is_after_devolucao"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Depois de devolução
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
+              <RHFSwitch name="is_after_devolucao" labelPlacement="start" label="Depois de devolução" />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <RHFSwitch name="to_alert" labelPlacement="start" label="Notificar" />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <RHFSwitch name="is_paralelo" labelPlacement="start" label="Paralelo" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch
-                name="to_alert"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Notificar
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
+              <RHFSwitch name="hasopnumero" labelPlacement="start" label="Indicar nº de operação" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch
-                name="hasopnumero"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Indicar nº de operação
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch
-                name="arqhasopnumero"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Nº de operação no arquivo
-                  </Typography>
-                }
-                sx={{ justifyContent: 'center' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch
-                name="is_paralelo"
-                labelPlacement="start"
-                label={
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-                    Paralelo
-                  </Typography>
-                }
-                sx={{ width: 1, justifyContent: 'center' }}
-              />
+              <RHFSwitch name="arqhasopnumero" labelPlacement="start" label="Nº de operação no arquivo" />
             </Grid>
           </Grid>
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
             {isEdit && (
               <>
-                <Tooltip title="Eliminar fluxo" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -1209,11 +1050,11 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { estados, done, error, isSaving, selectedMeuEstado } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedMeuEstado;
+  const { estados, done, error, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
+  const isEdit = !!selectedItem;
 
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
-  const estado = estadosList.find((row) => row.id === selectedMeuEstado?.estado_id) || null;
+  const estado = estadosList.find((row) => row.id === selectedItem?.estado_id) || null;
 
   useEffect(() => {
     if (done) {
@@ -1241,10 +1082,10 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
       estado_id: estado,
       perfil_id: Number(perfilId),
       perfil_id_cc: cc?.perfil?.id,
-      data_limite: selectedMeuEstado?.data_limite ? new Date(selectedMeuEstado?.data_limite) : null,
-      data_inicial: selectedMeuEstado?.data_inicial ? new Date(selectedMeuEstado?.data_inicial) : null,
+      data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
+      data_inicial: selectedItem?.data_inicial ? new Date(selectedItem?.data_inicial) : null,
     }),
-    [selectedMeuEstado, cc?.perfil?.id, estado, perfilId]
+    [selectedItem, cc?.perfil?.id, estado, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -1252,29 +1093,25 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedMeuEstado) {
+    if (isEdit && selectedItem) {
       reset(defaultValues);
     }
     if (!isEdit) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedMeuEstado, isOpenModal]);
+  }, [isEdit, selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
       if (isEdit) {
         values.estado_id = values?.estado_id?.id;
         dispatch(
-          updateItem('meuEstado', JSON.stringify(values), {
-            mail,
-            id: selectedMeuEstado.id,
-            mensagem: 'Estado atualizado',
-          })
+          updateItem('estadoPerfil', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' })
         );
       } else {
         values.estado_id = values?.estado_id?.id;
-        dispatch(createItem('meuEstado', JSON.stringify(values), { mail, mensagem: 'Estado adicionado' }));
+        dispatch(createItem('estadoPerfil', JSON.stringify(values), { mail, msg: 'Estado adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -1284,12 +1121,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const handleDelete = async () => {
     try {
       dispatch(
-        deleteItem('meuEstado', {
-          mail,
-          id: selectedMeuEstado.id,
-          mensagem: 'Estado eliminado',
-          perfilId: cc?.perfil_id,
-        })
+        deleteItem('estadoPerfil', { mail, id: selectedItem.id, msg: 'Estado eliminado', perfilId: cc?.perfil_id })
       );
       onClose();
     } catch (error) {
@@ -1299,7 +1131,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitle>{selectedMeuEstado ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
+      <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -1317,8 +1149,8 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
                 render={({ field, fieldState: { error } }) => (
                   <DateTimePicker
                     fullWidth
-                    label="Data de início"
                     value={field.value}
+                    label="Data de início"
                     onChange={(newValue) => field.onChange(newValue)}
                     slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
@@ -1332,23 +1164,28 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
                 render={({ field, fieldState: { error } }) => (
                   <DateTimePicker
                     fullWidth
-                    label="Data de término"
+                    disableFuture
                     value={field.value}
+                    label="Data de término"
                     onChange={(newValue) => field.onChange(newValue)}
                     slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
                   />
                 )}
               />
             </Grid>
+            {isEdit && (
+              <Grid item xs={12}>
+                <Alert severity="info">
+                  <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
+                  <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
+                </Alert>
+              </Grid>
+            )}
           </Grid>
           <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
+            {isEdit && mail?.toLowerCase() === 'ivandro.evora@caixa.cv' && (
               <>
-                <Tooltip title="Eliminar estado" arrow>
-                  <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-                    <SvgIconStyle src="/assets/icons/trash.svg" />
-                  </Fab>
-                </Tooltip>
+                <DeleteItem handleDelete={onOpen} />
                 <DialogConfirmar
                   open={open}
                   onClose={onClose}
@@ -1426,7 +1263,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
           data_limite: row?.data_limite,
         });
       });
-      dispatch(createItem('perfisEstado', JSON.stringify(formData), { mail, mensagem: 'Perfis adicionados' }));
+      dispatch(createItem('perfisEstado', JSON.stringify(formData), { mail, msg: 'Perfis adicionados' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

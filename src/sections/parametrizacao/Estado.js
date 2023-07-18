@@ -1,8 +1,8 @@
 import { useSearchParams } from 'react-router-dom';
 // @mui
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -10,6 +10,7 @@ import { useSelector } from '../../redux/store';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
+import { Checked } from '../../components/Actions';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
@@ -96,18 +97,10 @@ export default function Estado() {
                       <TableRow hover key={key}>
                         <TableCell>{row.nome}</TableCell>
                         <TableCell align="center">
-                          {row.is_inicial ? (
-                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
-                          ) : (
-                            <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
-                          )}
+                          <Checked check={row.is_inicial} />
                         </TableCell>
                         <TableCell align="center">
-                          {row.is_final ? (
-                            <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main' }} />
-                          ) : (
-                            <CloseOutlinedIcon sx={{ color: 'focus.main' }} />
-                          )}
+                          <Checked check={row.is_final} />
                         </TableCell>
                       </TableRow>
                     );
@@ -154,7 +147,7 @@ function applySortFilter({ estadosByFluxo, comparator, filterSearch }) {
 
   if (filter) {
     estadosByFluxo = estadosByFluxo.filter(
-      (item) => item?.nome && item?.nome.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1
+      (row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1
     );
   }
 

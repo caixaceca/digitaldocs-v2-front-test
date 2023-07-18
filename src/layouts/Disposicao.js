@@ -87,7 +87,7 @@ function DisposicaoDialog() {
   const handleChange = (event) => {
     const values = { disposicao: event.target.value };
     const formData = JSON.stringify(values);
-    dispatch(createItem('disposicao', formData, { mail, mensagem: 'disposicao' }));
+    dispatch(createItem('disposicao', formData, { mail, msg: 'disposicao' }));
   };
 
   const handleClose = () => {

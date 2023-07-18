@@ -1,17 +1,18 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, openModal, closeModal, getItem } from '../../redux/slices/digitaldocs';
+import { getAll, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -66,14 +67,6 @@ export default function Origens() {
     setPage(0);
   };
 
-  const handleUpdate = (id) => {
-    dispatch(getItem('origem', { id, mail, from: 'origens', perfilId: cc?.perfil_id }));
-  };
-
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -88,9 +81,7 @@ export default function Origens() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['origem-110', 'origem-111', 'Todo-110', 'Todo-111']}>
-            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -123,11 +114,7 @@ export default function Origens() {
                           <TableCell>{row.telefone}</TableCell>
                           <TableCell align="center" width={50}>
                             <RoleBasedGuard roles={['origem-110', 'origem-111', 'Todo-110', 'Todo-111']}>
-                              <Tooltip title="Editar" arrow>
-                                <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row.id)}>
-                                  <SvgIconStyle src="/assets/icons/editar.svg" />
-                                </Fab>
-                              </Tooltip>
+                              <UpdateItem item="origem" id={row?.id} />
                             </RoleBasedGuard>
                           </TableCell>
                         </TableRow>
@@ -145,13 +132,13 @@ export default function Origens() {
 
           {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
-              dense={dense}
-              onChangeDense={onChangeDense}
-              onChangeRowsPerPage={onChangeRowsPerPage}
-              onChangePage={onChangePage}
               page={page}
+              dense={dense}
               rowsPerPage={rowsPerPage}
               count={dataFiltered.length}
+              onChangePage={onChangePage}
+              onChangeDense={onChangeDense}
+              onChangeRowsPerPage={onChangeRowsPerPage}
             />
           )}
         </Card>
@@ -179,13 +166,13 @@ function applySortFilter({ origens, comparator, filterSearch }) {
   if (text) {
     origens = origens.filter(
       (item) =>
-        item?.designacao.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.seguimento.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.tipo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.ilha.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.cidade.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.email.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1 ||
-        item?.telefone.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1
+        (item?.designacao && normalizeText(item?.designacao).indexOf(normalizeText(text)) !== -1) ||
+        (item?.seguimento && normalizeText(item?.seguimento).indexOf(normalizeText(text)) !== -1) ||
+        (item?.tipo && normalizeText(item?.tipo).indexOf(normalizeText(text)) !== -1) ||
+        (item?.ilha && normalizeText(item?.ilha).indexOf(normalizeText(text)) !== -1) ||
+        (item?.cidade && normalizeText(item?.cidade).indexOf(normalizeText(text)) !== -1) ||
+        (item?.email && normalizeText(item?.email).indexOf(normalizeText(text)) !== -1) ||
+        (item?.telefone && normalizeText(item?.telefone).indexOf(normalizeText(text)) !== -1)
     );
   }
 

@@ -1,20 +1,21 @@
 import { useSearchParams } from 'react-router-dom';
 // @mui
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
+import { closeModal } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-import { openModal, closeModal, getItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { Checked, AddItem, UpdateItem } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -28,6 +29,8 @@ const TABLE_HEAD = [
   { id: 'estado_final', label: 'Estado de destino', align: 'left' },
   { id: 'modo', label: 'Modo', align: 'left' },
   { id: 'prazoemdias', label: 'Prazo', align: 'center' },
+  { id: 'is_after_devolucao', label: 'Depois devolução', align: 'center' },
+  { id: 'is_paralelo', label: 'Paralelo', align: 'center' },
   { id: '' },
 ];
 
@@ -35,7 +38,6 @@ const TABLE_HEAD = [
 
 export default function Transicao() {
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
   const { fluxo, estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
   const transicoes = [];
   fluxo?.transicoes?.forEach((row) => {
@@ -67,14 +69,6 @@ export default function Transicao() {
     setPage(0);
   };
 
-  const handleUpdate = (id) => {
-    dispatch(getItem('tansicao', { id, mail, from: 'transicoes', perfilId: cc?.perfil_id }));
-  };
-
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -93,9 +87,7 @@ export default function Transicao() {
         ]}
         action={
           <RoleBasedGuard roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}>
-            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -108,30 +100,29 @@ export default function Transicao() {
               <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={4} row={10} />
+                  <SkeletonTable column={7} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const key = row.id;
-                    return (
-                      <TableRow hover key={key}>
-                        <TableCell>{row.estado_inicial}</TableCell>
-                        <TableCell>{row.estado_final}</TableCell>
-                        <TableCell>{row.modo}</TableCell>
-                        <TableCell align="center">
-                          {row.prazoemdias > 1 ? `${row.prazoemdias} dias` : `${row.prazoemdias} dia`}
-                        </TableCell>
-                        <TableCell align="center" width={50}>
-                          <RoleBasedGuard hasContent roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}>
-                            <Tooltip title="Editar" arrow>
-                              <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row.id)}>
-                                <SvgIconStyle src="/assets/icons/editar.svg" />
-                              </Fab>
-                            </Tooltip>
-                          </RoleBasedGuard>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow hover key={row.id}>
+                      <TableCell>{row.estado_inicial}</TableCell>
+                      <TableCell>{row.estado_final}</TableCell>
+                      <TableCell>{row.modo}</TableCell>
+                      <TableCell align="center">
+                        {row.prazoemdias > 1 ? `${row.prazoemdias} dias` : `${row.prazoemdias} dia`}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Checked check={row.is_after_devolucao} />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Checked check={row.is_paralelo} />
+                      </TableCell>
+                      <TableCell align="center" width={50}>
+                        <RoleBasedGuard hasContent roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}>
+                          <UpdateItem item="transicao" id={row?.id} />
+                        </RoleBasedGuard>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
 
@@ -144,13 +135,13 @@ export default function Transicao() {
 
         {!isNotFound && dataFiltered.length > 10 && (
           <TablePaginationAlt
+            page={page}
             dense={dense}
+            rowsPerPage={rowsPerPage}
+            onChangePage={onChangePage}
+            count={dataFiltered.length}
             onChangeDense={onChangeDense}
             onChangeRowsPerPage={onChangeRowsPerPage}
-            onChangePage={onChangePage}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            count={dataFiltered.length}
           />
         )}
       </Card>
@@ -177,8 +168,8 @@ function applySortFilter({ transicoes, comparator, filterSearch }) {
   if (filter) {
     transicoes = transicoes.filter(
       (item) =>
-        (item.estado_inicial && item?.estado_inicial.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1) ||
-        (item.estado_final && item?.estado_final.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1)
+        (item.estado_inicial && normalizeText(item?.estado_inicial).indexOf(normalizeText(filter)) !== -1) ||
+        (item.estado_final && normalizeText(item?.estado_final).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

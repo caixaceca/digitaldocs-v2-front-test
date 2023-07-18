@@ -64,7 +64,7 @@ export function FormSugestao({ open, onCancel }) {
       if (values.imagem instanceof File) {
         formData.append('imagem', values.imagem);
       }
-      dispatch(createItem('sugestao', formData, { mail, mensagem: 'sugestao' }));
+      dispatch(createItem('sugestao', formData, { mail, msg: 'sugestao' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

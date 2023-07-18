@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
-
 // utils
 import { BASEURLDD } from '../../utils/axios';
+import { errorMsg } from '../../utils/normalizeText';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +37,6 @@ const initialState = {
   estadoFilter: null,
   selectedAnexoId: null,
   selectedParecer: null,
-  selectedMeuEstado: null,
   indicadoresArquivo: null,
   fluxos: [],
   linhas: [],
@@ -53,24 +52,19 @@ const initialState = {
   fileSystem: [],
   transicoes: [],
   meusFluxos: [],
-  meusEstados: [],
   meusacessos: [],
-  trabalhados: [],
   porConcluir: [],
   indicadores: [],
+  trabalhados: [],
+  estadosPerfil: [],
   visualizacoes: [],
   meusAmbientes: [],
   meusProcessos: [],
   pedidosAcesso: [],
-  trabalhadosUo: [],
-  entradasCredito: [],
   motivosPendencias: [],
-  creditosAprovados: [],
-  creditosDesistidos: [],
-  creditosIndeferidos: [],
   colaboradoresEstado: [],
-  creditosContratados: [],
   destinosDesarquivamento: [],
+  estatisticaCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
 };
 
 const slice = createSlice({
@@ -145,11 +139,7 @@ const slice = createSlice({
           state.trabalhados = [];
           break;
         case 'estatisticaCredito':
-          state.entradasCredito = [];
-          state.creditosAprovados = [];
-          state.creditosDesistidos = [];
-          state.creditosIndeferidos = [];
-          state.creditosContratados = [];
+          state.estatisticaCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
           break;
 
         default:
@@ -173,8 +163,8 @@ const slice = createSlice({
       state.indicadores = action.payload;
     },
 
-    getEntradaCreditosSuccess(state, action) {
-      state.entradasCredito = action.payload;
+    getEstatisticaCreditoSuccess(state, action) {
+      state.estatisticaCredito = action.payload;
     },
 
     getCreditosAprovadosSuccess(state, action) {
@@ -193,16 +183,12 @@ const slice = createSlice({
       state.creditosContratados = action.payload;
     },
 
-    getTrabalhadosSuccess(state, action) {
-      state.trabalhados = action.payload;
-    },
-
-    getTrabalhadosUoSuccess(state, action) {
-      state.trabalhadosUo = action.payload;
-    },
-
     getArquivosSuccess(state, action) {
       state.arquivos = action.payload;
+    },
+
+    getTrabalhadosSuccess(state, action) {
+      state.trabalhados = action.payload;
     },
 
     getPedidosAcessoSuccess(state, action) {
@@ -221,8 +207,8 @@ const slice = createSlice({
       state.fluxos = action.payload;
     },
 
-    getMeusEstadosSuccess(state, action) {
-      state.meusEstados = action.payload;
+    getEstadosPerfilSuccess(state, action) {
+      state.estadosPerfil = action.payload;
     },
 
     getProcessoSuccess(state, action) {
@@ -276,24 +262,8 @@ const slice = createSlice({
       state.colaboradoresEstado = action.payload?.perfis;
     },
 
-    getSelectMeuEstadoSuccess(state, action) {
-      const index = state.meusEstados.find((row) => row.id === action.payload.id);
-      if (index) {
-        state.isOpenModal = true;
-        state.selectedMeuEstado = index;
-      }
-    },
-
     getOrigemSuccess(state, action) {
       state.origem = action.payload;
-    },
-
-    getTransicoesSuccess(state, action) {
-      state.transicoes = action.payload;
-    },
-
-    getTransicaoSuccess(state, action) {
-      state.transicao = action.payload;
     },
 
     getFluxoSuccess(state, action) {
@@ -457,43 +427,36 @@ const slice = createSlice({
     },
 
     deleteEstadoSuccess(state, action) {
-      state.isOpenModal = false;
       state.estados = state.estados.filter((row) => row.id !== action.payload.id);
     },
 
     deleteFluxoSuccess(state, action) {
-      state.isOpenModal = false;
-      state.fluxos = state.fluxos.filter((row) => row.id !== action.payload.id);
+      const index = state.fluxos.findIndex((row) => row.id === action.payload.id);
+      state.fluxos[index].is_ativo = false;
     },
 
     deleteTransicaoSuccess(state, action) {
-      state.isOpenModal = false;
       state.fluxo.transicoes = state.fluxo.transicoes.filter((row) => row.id !== action.payload);
     },
 
     deleteOrigemSuccess(state, action) {
-      state.isOpenModal = false;
       state.origens = state.origens.filter((row) => row.id !== action.payload.id);
     },
 
     deleteLinhaSuccess(state, action) {
-      state.isOpenModal = false;
       state.linhas = state.linhas.filter((row) => row.id !== action.payload.id);
     },
 
     deleteMotivoPendenciaSuccess(state, action) {
-      state.isOpenModal = false;
       state.motivosPendencias = state.motivosPendencias.filter((row) => row.id !== action.payload.id);
     },
 
     deleteAcessosSuccess(state, action) {
-      state.isOpenModal = false;
       state.acessos = state.acessos.filter((row) => row.id !== action.payload.id);
     },
 
-    deleteMeuEstadoSuccess(state, action) {
-      state.isOpenModal = false;
-      state.meusEstados = state.meusEstados.filter((row) => row.id !== action.payload.id);
+    deleteEstadoPerfilSuccess(state, action) {
+      state.estadosPerfil = state.estadosPerfil.filter((row) => row.id !== action.payload.id);
     },
 
     deletePerfilFromEstadoSuccess(state, action) {
@@ -511,11 +474,10 @@ const slice = createSlice({
     },
 
     desarquivarProcessoSuccess(state) {
-      state.isOpenModal = false;
       state.destinosDesarquivamento = [];
     },
 
-    getDeleteAnexoProcessoSuccess(state, action) {
+    deleteAnexoProcessoSuccess(state, action) {
       const index = state.processo.anexos.findIndex((row) => row.id === action.payload);
       state.processo.anexos[index].is_ativo = false;
       state.isOpenModalAnexo = false;
@@ -539,7 +501,6 @@ const slice = createSlice({
       state.isOpenModalDesariquivar = false;
       state.estado = null;
       state.selectedItem = null;
-      state.selectedMeuEstado = null;
       state.destinosDesarquivamento = [];
     },
 
@@ -601,7 +562,6 @@ export const {
   closeModalAnexo,
   setEstadoFilter,
   changeMeuAmbiente,
-  getSelectMeuEstadoSuccess,
 } = slice.actions;
 
 // ----------------------------------------------------------------------
@@ -628,8 +588,6 @@ export function getAll(item, params) {
           break;
         }
         case 'tarefas': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
             const response = await axios.get(
               `${BASEURLDD}/v1/processos/minhastarefas/all/${params?.perfilId}`,
@@ -651,54 +609,7 @@ export function getAll(item, params) {
           }
           break;
         }
-        case 'devolvidosEquipa': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
-          if (params?.estadoId === -1) {
-            const response = await axios.get(`${BASEURLDD}/v1/processos/devolucoes/all/${params?.perfilId}`, options);
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else if (params?.fluxoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/devolucoes/estado/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/devolucoes/${params?.fluxoId}/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          }
-          break;
-        }
-        case 'devolvidosPessoal': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
-          if (params?.estadoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/devolucoespessoais/all/${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else if (params?.fluxoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/devolucoespessoais/estado/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/devolucoespessoais/${params?.fluxoId}/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          }
-          break;
-        }
         case 'finalizados': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
             const response = await axios.get(
               `${BASEURLDD}/v1/processos/meusfinalizados/all/${params?.perfilId}`,
@@ -720,16 +631,7 @@ export function getAll(item, params) {
           }
           break;
         }
-        case 'arquivados': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
-          const response = await axios.get(`${BASEURLDD}/v1/arquivos/${params?.perfilId}`, options);
-          dispatch(slice.actions.getArquivosSuccess(response.data));
-          break;
-        }
         case 'executados': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
             const response = await axios.get(
               `${BASEURLDD}/v1/processos/meusexecutados/all/${params?.perfilId}`,
@@ -752,8 +654,6 @@ export function getAll(item, params) {
           break;
         }
         case 'agendados': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
             const response = await axios.get(
               `${BASEURLDD}/v1/processos/meusagendados/all/${params?.perfilId}`,
@@ -776,8 +676,6 @@ export function getAll(item, params) {
           break;
         }
         case 'pendentes': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           if (params?.estadoId === -1) {
             const response = await axios.get(`${BASEURLDD}/v1/processos/pendencias/${params?.perfilId}`, options);
             dispatch(slice.actions.getProcessosSuccess(response.data));
@@ -797,8 +695,6 @@ export function getAll(item, params) {
           break;
         }
         case 'atribuidos': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/minhastarefas/afetos/${params?.perfilId}`,
             options
@@ -807,8 +703,6 @@ export function getAll(item, params) {
           break;
         }
         case 'retidos': {
-          dispatch(slice.actions.resetItem('processo'));
-          dispatch(slice.actions.resetItem('processos'));
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/minhastarefas/retidoseq/${params?.perfilId}`,
             options
@@ -859,17 +753,12 @@ export function getAll(item, params) {
           dispatch(slice.actions.getMeusProcessosSuccess(response.data));
           break;
         }
-        case 'indicadores arquivos': {
-          const response = await axios.get(`${BASEURLDD}/v1/indicadores/arquivo/mini/${params?.perfilId}`, options);
-          dispatch(slice.actions.getIndicadoresArquivoSuccess(response.data));
-          break;
-        }
-        case 'meusEstados': {
+        case 'estadosPerfil': {
           const response = await axios.get(
             `${BASEURLDD}/v1/estados/asscc/byperfilid/${params?.estadoId}/${params?.perfilId}`,
             options
           );
-          dispatch(slice.actions.getMeusEstadosSuccess(response.data));
+          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
           break;
         }
         case 'pesquisa': {
@@ -946,29 +835,9 @@ export function getAll(item, params) {
           dispatch(slice.actions.getPorConcluirSuccess(response.data.objeto));
           break;
         }
-        case 'trabalhadosUo': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
-            options
-          );
-          dispatch(slice.actions.getTrabalhadosUoSuccess(response.data.objeto));
-          break;
-        }
         case 'trabalhados': {
           dispatch(slice.actions.resetItem('processo'));
-          if (params?.perfilId) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/entradas/meustrabalhados/${params?.perfilId}?qdia=${params?.data}`,
-              options
-            );
-            dispatch(slice.actions.getTrabalhadosSuccess(response.data.objeto));
-          } else if (params?.estadoId) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/entradas/trabalhados/estado/${params?.estadoId}?qdia=${params?.data}`,
-              options
-            );
-            dispatch(slice.actions.getTrabalhadosSuccess(response.data.objeto));
-          } else if (params?.uoId) {
+          if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
               options
@@ -982,21 +851,28 @@ export function getAll(item, params) {
           dispatch(slice.actions.getLinhasSuccess(response.data.objeto));
           break;
         }
+        case 'arquivados': {
+          const response = await axios.get(`${BASEURLDD}/v1/arquivos/${params?.perfilId}`, options);
+          dispatch(slice.actions.getArquivosSuccess(response.data));
+          break;
+        }
+        case 'pedidosAcesso': {
+          const response = await axios.get(`${BASEURLDD}/v1/arquivos/pedidos/${params?.perfilId}`, options);
+          dispatch(slice.actions.getPedidosAcessoSuccess(response.data));
+          break;
+        }
+        case 'indicadores arquivos': {
+          const response = await axios.get(`${BASEURLDD}/v1/indicadores/arquivo/mini/${params?.perfilId}`, options);
+          dispatch(slice.actions.getIndicadoresArquivoSuccess(response.data));
+          break;
+        }
 
         default:
           break;
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1125,31 +1001,35 @@ export function getIndicadores(item, params) {
         }
         case 'estatisticaCredito': {
           dispatch(slice.actions.resetItem('estatisticaCredito'));
-          const response = await axios.get(
+          const entrada = await axios.get(
             `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=entrada&ano=${params?.ano}&mes=${params?.mes}`,
             options
           );
-          dispatch(slice.actions.getEntradaCreditosSuccess(response.data));
           const aprovado = await axios.get(
             `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=aprovado&ano=${params?.ano}&mes=${params?.mes}`,
             options
           );
-          dispatch(slice.actions.getCreditosAprovadosSuccess(aprovado.data));
           const contratado = await axios.get(
             `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=contratado&ano=${params?.ano}&mes=${params?.mes}`,
             options
           );
-          dispatch(slice.actions.getCreditosContratadosSuccess(contratado.data));
           const indeferido = await axios.get(
             `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=indeferido&ano=${params?.ano}&mes=${params?.mes}`,
             options
           );
-          dispatch(slice.actions.getCreditosIndeferidosSuccess(indeferido.data));
           const desistido = await axios.get(
             `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}&fase=desistido&ano=${params?.ano}&mes=${params?.mes}`,
             options
           );
-          dispatch(slice.actions.getCreditosDesistidosSuccess(desistido.data));
+          dispatch(
+            slice.actions.getEstatisticaCreditoSuccess({
+              entrada: entrada?.data || [],
+              aprovado: aprovado?.data || [],
+              contratado: contratado?.data || [],
+              indeferido: indeferido?.data || [],
+              desistido: desistido?.data || [],
+            })
+          );
           break;
         }
 
@@ -1158,15 +1038,7 @@ export function getIndicadores(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1183,7 +1055,7 @@ export function getItem(item, params) {
       switch (item) {
         case 'fluxo': {
           const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'fluxos') {
+          if (params?.from === 'listagem') {
             dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getFluxoSuccess(response.data));
@@ -1199,17 +1071,17 @@ export function getItem(item, params) {
           break;
         }
         case 'prevnext': {
+          dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/processos/prev/next/${params?.perfilId}/${params?.estadoId}/${params?.nentrada}?next=${params?.next}`,
+            `${BASEURLDD}/v1/processos/prev/next/${params?.perfilId}/${params?.estadoId}/${params?.processoId}?next=${params?.next}`,
             options
           );
-          dispatch(slice.actions.resetItem('processo'));
           dispatch(slice.actions.getProcessoSuccess(response.data));
           break;
         }
         case 'estado': {
           const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'estados') {
+          if (params?.from === 'listagem') {
             dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getEstadoSuccess(response.data));
@@ -1221,36 +1093,23 @@ export function getItem(item, params) {
           dispatch(slice.actions.getColaboradoresEstadoSuccess(response.data));
           break;
         }
-        case 'meuEstado': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.estadoId}/${params?.perfilId}`, options);
-          if (params?.from === 'meusEstados') {
-            dispatch(slice.actions.getSelectMeuEstadoSuccess(response.data));
-          } else {
-            dispatch(slice.actions.getMeuEstadoSuccess(response.data));
-          }
-          break;
-        }
         case 'origem': {
           const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'origens') {
+          if (params?.from === 'listagem') {
             dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getOrigemSuccess(response.data));
           }
           break;
         }
-        case 'tansicao': {
+        case 'transicao': {
           const response = await axios.get(`${BASEURLDD}/v1/transicoes/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'transicoes') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getTransicaoSuccess(response.data));
-          }
+          dispatch(slice.actions.selectItem(response.data));
           break;
         }
         case 'acesso': {
           const response = await axios.get(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
-          if (params?.from === 'acessos') {
+          if (params?.from === 'listagem') {
             dispatch(slice.actions.selectItem(response.data));
           } else {
             dispatch(slice.actions.getAcessoSuccess(response.data));
@@ -1269,15 +1128,7 @@ export function getItem(item, params) {
       if (item === 'prevnext') {
         dispatch(slice.actions.hasError(`Sem mais processos disponíveis no estado ${params?.estado}`));
       } else {
-        dispatch(
-          slice.actions.hasError(
-            error.response?.data?.error ||
-              error.response?.data?.errop ||
-              error.response?.data ||
-              error?.message ||
-              'Ocorreu um erro...'
-          )
-        );
+        dispatch(slice.actions.hasError(errorMsg(error)));
       }
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
@@ -1315,57 +1166,7 @@ export function getAnexo(item, anexo, type, mail) {
           break;
       }
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function getArquivos(item, perfilId, mail) {
-  return async (dispatch) => {
-    try {
-      const options = { headers: { cc: mail } };
-      switch (item) {
-        case 'arquivados': {
-          const response = await axios.get(`${BASEURLDD}/v1/arquivos/${perfilId}`, options);
-          dispatch(slice.actions.getArquivosSuccess(response.data));
-          break;
-        }
-        case 'pedidosAcesso': {
-          const response = await axios.get(`${BASEURLDD}/v1/arquivos/pedidos/${perfilId}`, options);
-          dispatch(slice.actions.getPedidosAcessoSuccess(response.data));
-          break;
-        }
-        case 'indicadores arquivos': {
-          const response = await axios.get(`${BASEURLDD}/v1/indicadores/arquivo/mini/${perfilId}`, options);
-          dispatch(slice.actions.getIndicadoresArquivoSuccess(response.data));
-          break;
-        }
-
-        default:
-          break;
-      }
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1404,10 +1205,17 @@ export function createItem(item, dados, params) {
         }
         case 'processo interno': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/interno`, dados, options1);
-          if (params?.ispendente) {
+          if (params?.isPendente) {
             await axios.patch(
               `${BASEURLDD}/v1/processos/abandonar/${response?.data?.processo?.id}`,
               JSON.stringify(params?.abandonar),
+              options
+            );
+          }
+          if (params?.atribuir) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/afetar/${response?.data?.processo?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
+              '',
               options
             );
           }
@@ -1416,10 +1224,17 @@ export function createItem(item, dados, params) {
         }
         case 'processo externo': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/externo`, dados, options1);
-          if (params?.ispendente) {
+          if (params?.isPendente) {
             await axios.patch(
               `${BASEURLDD}/v1/processos/abandonar/${response?.data?.processo?.id}`,
               JSON.stringify(params?.abandonar),
+              options
+            );
+          }
+          if (params?.atribuir) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/afetar/${response?.data?.processo?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
+              '',
               options
             );
           }
@@ -1441,7 +1256,7 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.createAcessoSuccess(response.data));
           break;
         }
-        case 'meuEstado': {
+        case 'estadoPerfil': {
           await axios.post(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
           const response = await axios.get(
             `${BASEURLDD}/v1/estados/asscc/byperfilid/${JSON.parse(dados)?.perfil_id}/${
@@ -1449,7 +1264,7 @@ export function createItem(item, dados, params) {
             }`,
             options
           );
-          dispatch(slice.actions.getMeusEstadosSuccess(response.data));
+          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
           break;
         }
         case 'perfisEstado': {
@@ -1468,24 +1283,26 @@ export function createItem(item, dados, params) {
           await axios.post(`${BASEURLDD}/v1/processos/encaminhar/${params?.id}`, dados, options);
           break;
         }
+        case 'pedir acesso': {
+          await axios.post(`${BASEURLDD}/v1/arquivos/pedir/acesso/${params?.perfilId}/${params?.id}`, '', options);
+          break;
+        }
+        case 'arquivar': {
+          if (params?.haveA) {
+            await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${params?.id}`, params?.anexos, options1);
+          }
+          await axios.patch(`${BASEURLDD}/v1/processos/arquivar/${params?.id}`, dados, options);
+          break;
+        }
 
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.mensagem));
+      dispatch(slice.actions.done(params?.msg));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            error?.error ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1541,7 +1358,7 @@ export function updateItem(item, dados, params) {
           dispatch(slice.actions.updateAcessoSuccess(response.data));
           break;
         }
-        case 'meuEstado': {
+        case 'estadoPerfil': {
           await axios.put(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
           const response = await axios.get(
             `${BASEURLDD}/v1/estados/asscc/byperfilid/${JSON.parse(dados)?.perfil_id}/${
@@ -1549,17 +1366,19 @@ export function updateItem(item, dados, params) {
             }`,
             options
           );
-          dispatch(slice.actions.getMeusEstadosSuccess(response.data));
+          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
           break;
         }
         case 'processo': {
           await axios.put(`${BASEURLDD}/v1/processos/ei/pro/${params?.id}/${params?.perfilId}`, dados, options1);
-          if (params?.ispendente) {
+          if (params?.isPendente) {
             await axios.patch(
               `${BASEURLDD}/v1/processos/abandonar/${params?.id}`,
               JSON.stringify(params?.abandonar),
               options
             );
+          }
+          if (params?.atribuir) {
             await axios.patch(
               `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
               '',
@@ -1578,24 +1397,60 @@ export function updateItem(item, dados, params) {
           dispatch(slice.actions.patchParecerSuccess({ id: params?.id, dados: response.data }));
           break;
         }
+        case 'aceitar': {
+          await axios.patch(`${BASEURLDD}/v1/processos/aceitar/${params?.processoId}`, dados, options);
+          dispatch(slice.actions.getAceitarSuccess(params));
+          break;
+        }
+        case 'dar aceso': {
+          await axios.post(`${BASEURLDD}/v1/arquivos/dar/acesso/${params?.id}`, dados, options);
+          break;
+        }
+        case 'atribuir': {
+          await axios.patch(
+            `${BASEURLDD}/v1/processos/afetar/${params?.processoID}?perfilID=${params?.perfilID}&perfilIDAfeto=${params?.perfilIDAfeto}`,
+            '',
+            options
+          );
+          dispatch(slice.actions.getAtribuirSuccess(params?.perfilIDAfeto));
+          break;
+        }
+        case 'cancelar': {
+          await axios.patch(`${BASEURLDD}/v1/processos/cancelar/${params?.id}`, dados, options);
+          const response = await axios.get(
+            `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoSuccess(response.data));
+          break;
+        }
+        case 'resgatar': {
+          const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${params?.id}`, dados, options);
+          dispatch(slice.actions.getProcessoSuccess(response.data));
+          break;
+        }
+        case 'finalizar': {
+          await axios.patch(`${BASEURLDD}/v1/processos/finalizar/${params?.id}`, dados, options);
+          break;
+        }
+        case 'abandonar': {
+          await axios.patch(`${BASEURLDD}/v1/processos/abandonar/${params?.id}`, dados, options);
+          break;
+        }
+        case 'desarquivar': {
+          await axios.patch(`${BASEURLDD}/v1/processos/desarquivar/${params?.id}`, dados, options);
+          dispatch(slice.actions.desarquivarProcessoSuccess());
+          break;
+        }
 
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.mensagem));
+      dispatch(slice.actions.done(params?.msg));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            error?.error ||
-            'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -1649,9 +1504,9 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteAcessosSuccess({ id: params?.id }));
           break;
         }
-        case 'meuEstado': {
+        case 'estadoPerfil': {
           await axios.delete(`${BASEURLDD}/v1/estados/asscc/perfil/${params?.perfilId}?peID=${params?.id}`, options);
-          dispatch(slice.actions.deleteMeuEstadoSuccess({ id: params?.id }));
+          dispatch(slice.actions.deleteEstadoPerfilSuccess({ id: params?.id }));
           break;
         }
         case 'perfil from estado': {
@@ -1667,346 +1522,23 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteAnexoParecerSuccess({ id: params?.id, parecerId: params?.parecerId }));
           break;
         }
-
-        default:
-          break;
-      }
-      dispatch(slice.actions.done(params?.mensagem));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function arquivarProcesso(dados, processoId, haveAnexos, anexos, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      const options1 = { headers: { 'content-type': 'multipart/form-data', cc: mail } };
-      if (haveAnexos) {
-        await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${processoId}`, anexos, options1);
-      }
-      await axios.patch(`${BASEURLDD}/v1/processos/arquivar/${processoId}`, dados, options);
-      dispatch(slice.actions.done('arquivado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function desarquivarProcesso(dados, id, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.patch(`${BASEURLDD}/v1/processos/desarquivar/${id}`, dados, options);
-      dispatch(slice.actions.desarquivarProcessoSuccess());
-      dispatch(slice.actions.done('desarquivado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function atribuirAcesso(dados, id, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.post(`${BASEURLDD}/v1/arquivos/dar/acesso/${id}`, dados, options);
-      dispatch(slice.actions.done('Acesso atribuido'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function deleteAnexo(item, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { cc: params?.mail } };
-      switch (item) {
         case 'anexo processo': {
           await axios.delete(
             `${BASEURLDD}/v1/processos/remover/anexos/${params?.perfilId}/${params?.processoId}/${params?.id}`,
             options
           );
-          dispatch(slice.actions.getDeleteAnexoProcessoSuccess(params?.id));
+          dispatch(slice.actions.deleteAnexoProcessoSuccess(params?.id));
           break;
         }
+
         default:
           break;
       }
-
-      dispatch(slice.actions.done(params?.mensagem));
+      dispatch(slice.actions.done(params?.msg));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetDone());
     } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error.response?.data?.error ||
-            error.response?.data?.errop ||
-            error.response?.data ||
-            error?.message ||
-            'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function createAssociacaoEstadoPerfil(dados, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = {
-        headers: {
-          'content-type': 'application/json',
-          cc: mail,
-        },
-      };
-      await axios.post(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
-    } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function deleteAssociacaoEstadoPerfil(estadoId, perfilId, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { cc: mail } };
-      await axios.delete(`${BASEURLDD}/v1/estados/asscc/perfil/${estadoId}/${perfilId}`, options);
-    } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function aceitarProcesso(dados, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
-      await axios.patch(`${BASEURLDD}/v1/processos/aceitar/${params?.processoId}`, dados, options);
-      dispatch(slice.actions.getAceitarSuccess(params));
-      dispatch(slice.actions.done('aceitado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error[0]?.msg || error?.response?.data?.detail || error.response?.data?.errop || 'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function pedirAcessoProcesso(perfilId, processoId, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.post(`${BASEURLDD}/v1/arquivos/pedir/acesso/${perfilId}/${processoId}`, '', options);
-      dispatch(slice.actions.done('solicitado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function abandonarProcesso(dados, processoId, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.patch(`${BASEURLDD}/v1/processos/abandonar/${processoId}`, JSON.stringify(dados), options);
-      dispatch(slice.actions.done('abandonado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function finalizarProcesso(dados, processoId, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.patch(`${BASEURLDD}/v1/processos/finalizar/${processoId}`, dados, options);
-      dispatch(slice.actions.done('finalizado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(slice.actions.hasError(error[0]?.msg || error?.response?.data?.detail || 'Ocorreu um erro...'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function resgatarProcesso(dados, id, mail) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${id}`, dados, options);
-      dispatch(slice.actions.getProcessoSuccess(response.data));
-      dispatch(slice.actions.done('resgatado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error[0]?.msg || error?.response?.data?.detail || error.response?.data || 'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function cancelarProcesso(dados, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
-      await axios.patch(`${BASEURLDD}/v1/processos/cancelar/${params?.id}`, dados, options);
-      const response = await axios.get(
-        `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
-        options
-      );
-      dispatch(slice.actions.getProcessoSuccess(response.data));
-      dispatch(slice.actions.done('cancelado'));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error[0]?.msg || error?.response?.data?.detail || error.response?.data || 'Ocorreu um erro...'
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function atribuirProcesso(mail, processoID, perfilIDAfeto, perfilID, mensagem) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: mail } };
-      await axios.patch(
-        `${BASEURLDD}/v1/processos/afetar/${processoID}?perfilID=${perfilID}&perfilIDAfeto=${perfilIDAfeto}`,
-        '',
-        options
-      );
-      dispatch(slice.actions.getAtribuirSuccess(perfilIDAfeto));
-      dispatch(slice.actions.done(mensagem));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
-    } catch (error) {
-      dispatch(
-        slice.actions.hasError(
-          error[0]?.msg || error?.response?.data?.detail || error.response?.data || 'Ocorreu um erro...'
-        )
-      );
+      dispatch(slice.actions.hasError(errorMsg(error)));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }

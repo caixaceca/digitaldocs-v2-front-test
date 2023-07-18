@@ -12,14 +12,16 @@ DialogConfirmar.propTypes = {
   color: PropTypes.string,
   onClose: PropTypes.func,
   handleOk: PropTypes.func,
+  descSec: PropTypes.string,
   isLoading: PropTypes.bool,
 };
 
-export default function DialogConfirmar({ isLoading, open, title, desc, color = 'error', onClose, handleOk }) {
+export default function DialogConfirmar({ isLoading, open, title, desc, descSec, color = 'error', onClose, handleOk }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
+        {descSec && <DialogContentText sx={{ mb: 3 }}>{descSec}</DialogContentText>}
         <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>
       </DialogContent>
       <DialogActions>

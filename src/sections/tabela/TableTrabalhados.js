@@ -1,52 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import {
-  Fab,
-  Card,
-  Stack,
-  Table,
-  Divider,
-  Tooltip,
-  TableRow,
-  TableBody,
-  TableCell,
-  TextField,
-  Typography,
-  TableContainer,
-} from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Card, Table, Stack, Divider, TableBody, TableContainer } from '@mui/material';
 // utils
 import { format } from 'date-fns';
-import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
+import { parametrosPesquisa } from '../../utils/normalizeText';
+import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
+import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarTrabalhados } from '../../components/SearchToolbar';
+import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // sections
 import ArquivoAnalytic from '../arquivo/ArquivoAnalytic';
+//
+import { UoData, RowItem } from './Dados';
+import applySortFilter from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'nentrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
-  { id: 'entidades', label: 'Conta/Cliente/Entidade', align: 'left' },
+  { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
-  { id: 'trabalhado_em', label: 'Trabalhado em', align: 'center' },
-  { id: 'empty', width: 50 },
+  { id: 'trabalhado_em', label: 'Criado', align: 'left', width: 50 },
+  { id: '', width: 50 },
 ];
 
 // ----------------------------------------------------------------------
@@ -54,25 +42,15 @@ const TABLE_HEAD = [
 export default function TableTrabalhados() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [data, setData] = useState(new Date());
-  const [filterSearch, setFilterSearch] = useSearchParams();
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { trabalhados, trabalhadosUo, isLoading } = useSelector((state) => state.digitaldocs);
-  const [ambiente, setAmbiente] = useState(null);
-  const [colaborador, setColaborador] = useState(
-    cc
-      ? {
-          id: cc?.perfil_id,
-          label: cc?.perfil?.displayName,
-          uoId: cc?.uo_id,
-        }
-      : null
-  );
-  const total = trabalhadosUo?.length || 0;
-  const subtotal = trabalhados?.length || 0;
+  const [filter, setFilter] = useSearchParams();
+  const [data, setData] = useState(filter?.get('data') || format(new Date(), 'yyyy-MM-dd'));
+  const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
+  const { trabalhados, meusAmbientes, isAdmin, isLoading } = useSelector((state) => state.digitaldocs);
+  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
-  const uoId = ambiente?.uoId || colaborador?.uoId || cc?.uo_id;
-  const uo = uos?.find((row) => row?.id === uoId);
+  const [uo, setUo] = useState(
+    filter?.get('uoId') ? uosList?.find((row) => row?.id?.toString() === filter?.get('uoId')?.toString()) : null
+  );
 
   const {
     page,
@@ -86,62 +64,75 @@ export default function TableTrabalhados() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrderBy: 'trabalhado_em',
+    defaultOrder: 'desc',
+    defaultOrderBy: 'nentrada',
     defaultRowsPerPage: fromAgencia ? 100 : 25,
     defaultDense: cc?.id === 362,
-    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
   });
 
   useEffect(() => {
-    if (cc?.perfil_id) {
-      setColaborador({
-        id: cc?.perfil_id,
-        label: cc?.perfil?.displayName,
-        uoId: cc?.uo_id,
-      });
+    if (cc?.uo?.id && uosList) {
+      setUo(uosList?.find((row) => row?.id === cc?.uo?.id));
     }
-  }, [dispatch, cc]);
+  }, [cc?.uo?.id, uosList]);
 
   useEffect(() => {
-    dispatch(resetItem('trabalhados'));
-    if (mail && data && (ambiente?.id || colaborador?.id || uoId)) {
-      dispatch(
-        getAll('trabalhados', {
-          mail,
-          uoId,
-          estadoId: ambiente?.id,
-          perfilId: colaborador?.id,
-          data: format(data, 'yyyy-MM-dd'),
-        })
-      );
+    if (mail && data && uo?.id) {
+      dispatch(getAll('trabalhados', { mail, uoId: uo?.id, data }));
     }
-  }, [dispatch, colaborador?.id, ambiente?.id, uoId, data, mail]);
+  }, [dispatch, uo?.id, data, mail]);
 
   useEffect(() => {
-    dispatch(resetItem('trabalhados'));
-    if (mail && data && uoId) {
-      dispatch(getAll('trabalhadosUo', { mail, uoId, data: format(data, 'yyyy-MM-dd') }));
-    }
-  }, [dispatch, uoId, data, mail]);
-
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
     setPage(0);
-  };
-
-  const handleFilterAmbiente = (event) => {
-    setAmbiente(event);
-  };
-
-  const handleFilterColaborador = (event) => {
-    setColaborador(event);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleViewRow = (id) => {
-    navigate({ pathname: `${PATH_DIGITALDOCS.controle.root}/${id}`, search: 'trabalhados' });
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=trabalhados${parametrosPesquisa(filter)}`);
   };
 
-  const dataFiltered = applySortFilter({ trabalhados, comparator: getComparator(order, orderBy), filterSearch });
+  const dados = [];
+  const estadosList = [];
+  const assuntosList = [];
+  const colaboradoresList = [];
+  trabalhados?.forEach((row) => {
+    const colaborador = colaboradores?.find((colab) => Number(colab.perfil_id) === Number(row?.perfil_id));
+    if (colaborador && !colaboradoresList?.some((item) => item.id === colaborador.id)) {
+      colaboradoresList.push(colaborador);
+    }
+    if (!estadosList.includes(row?.nome)) {
+      estadosList.push(row?.nome);
+    }
+    if (row?.nome === 'Arquivo' && !estadosList.includes('Excepto Arquivo')) {
+      estadosList.push('Excepto Arquivo');
+    }
+    if (!assuntosList.includes(row?.assunto)) {
+      assuntosList.push(row?.assunto);
+    }
+    dados.push({ ...row, colaborador: colaborador?.perfil?.displayName });
+  });
+
+  const totalUo = dados?.length || 0;
+  const totalAssunto = filter?.get('assunto')
+    ? dados?.filter((row) => row?.assunto === filter?.get('assunto'))?.length
+    : 0;
+  const totalColab =
+    (filter?.get('colaborador') &&
+      filter?.get('assunto') &&
+      dados?.filter(
+        (row) => row?.perfil_id === filter?.get('colaborador') && row?.colaborador === filter?.get('assunto')
+      )?.length) ||
+    (filter?.get('colaborador') && dados?.filter((row) => row?.colaborador === filter?.get('colaborador'))?.length) ||
+    0;
+
+  const dataFiltered = applySortFilter({
+    dados,
+    filter: filter?.get('filter'),
+    estado: filter?.get('estado'),
+    assunto: filter?.get('assunto'),
+    colaborador: filter?.get('colaborador'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -150,17 +141,19 @@ export default function TableTrabalhados() {
         heading="Processos trabalhados"
         links={[{ name: '' }]}
         action={
-          <DatePicker
-            label="Data"
-            value={data}
-            onChange={(_data) => setData(_data)}
-            renderInput={(params) => <TextField {...params} />}
-            slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
+          <UoData
+            uo={uo}
+            setUo={setUo}
+            filter={filter}
+            dataSingle={data}
+            setData={setData}
+            uosList={uosList}
+            setFilter={setFilter}
           />
         }
         sx={{ color: 'text.secondary', px: 1 }}
       />
-      {total !== 0 && subtotal !== 0 && (
+      {(uo?.label || filter?.get('colaborador') || filter?.get('assunto')) && totalUo > 0 && (
         <Card sx={{ mb: 3 }}>
           <Scrollbar>
             <Stack
@@ -169,41 +162,41 @@ export default function TableTrabalhados() {
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
             >
               <ArquivoAnalytic
-                title={uo ? uo?.label : cc?.uo?.label}
-                total={uoId ? total : subtotal}
-                icon="/assets/icons/navbar/process.svg"
+                title={`Total: ${uo?.label ? uo?.label : ''}`}
+                total={totalUo}
+                icon="/assets/icons/navbar/dashboard.svg"
                 color="success.main"
               />
-              {colaborador?.label && (
+              {filter?.get('assunto') && (
                 <ArquivoAnalytic
-                  title={colaborador?.label}
-                  total={subtotal}
-                  percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+                  total={totalAssunto}
+                  title={filter?.get('assunto')}
+                  percent={totalAssunto === 0 || totalUo === 0 ? 0 : (totalAssunto * 100) / totalUo}
                 />
               )}
-              {ambiente?.label && (
+              {filter?.get('colaborador') && (
                 <ArquivoAnalytic
-                  title={ambiente?.label}
-                  total={subtotal}
-                  percent={subtotal === 0 || total === 0 ? 0 : (subtotal * 100) / total}
+                  total={totalColab}
+                  title={filter?.get('colaborador')}
+                  percent={totalColab === 0 || totalUo === 0 ? 0 : (totalColab * 100) / totalUo}
                 />
               )}
             </Stack>
           </Scrollbar>
         </Card>
       )}
+
       <Card sx={{ p: 1 }}>
-        {trabalhados.length > 1 && (
-          <SearchToolbarTrabalhados
-            tab="trabalhados"
-            ambiente={ambiente}
-            colaborador={colaborador}
-            filterSearch={filterSearch}
-            onFilterSearch={handleFilterSearch}
-            onFilterAmbiente={handleFilterAmbiente}
-            onFilterColaborador={handleFilterColaborador}
-          />
-        )}
+        <SearchToolbarEntradas
+          tab="trabalhados"
+          filter={filter}
+          setFilter={setFilter}
+          estadosList={estadosList}
+          assuntosList={assuntosList}
+          colaboradoresList={ColaboradoresAcesso(colaboradoresList, cc, isAdmin, meusAmbientes)?.map(
+            (row) => row?.label
+          )}
+        />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -212,32 +205,14 @@ export default function TableTrabalhados() {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={7} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow hover key={row.referencia}>
-                      <TableCell>{row.nentrada}</TableCell>
-                      <TableCell>{row.titular || noDados()}</TableCell>
-                      <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
-                      <TableCell>{row?.assunto}</TableCell>
-                      <TableCell>{row?.nome}</TableCell>
-                      <TableCell align="center" sx={{ width: 10 }}>
-                        <Typography noWrap variant="body2">
-                          {row?.trabalhado_em && ptDateTime(row.trabalhado_em)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title="DETALHES" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={() => handleViewRow(row?.id)}>
-                            <SvgIconStyle src="/assets/icons/view.svg" />
-                          </Fab>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index) => <RowItem row={row} key={`${row.id}_${index}`} handleViewRow={handleViewRow} />)
                 )}
               </TableBody>
 
               {!isLoading && isNotFound && (
-                <TableSearchNotFound message="Não foi encontrado nenhuma entrada disponível..." />
+                <TableSearchNotFound message="Não foi encontrado nenhum processo trabalhado disponível..." />
               )}
             </Table>
           </TableContainer>
@@ -248,8 +223,8 @@ export default function TableTrabalhados() {
             page={page}
             dense={dense}
             rowsPerPage={rowsPerPage}
-            onChangePage={onChangePage}
             count={dataFiltered.length}
+            onChangePage={onChangePage}
             onChangeDense={onChangeDense}
             onChangeRowsPerPage={onChangeRowsPerPage}
           />
@@ -257,34 +232,4 @@ export default function TableTrabalhados() {
       </Card>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ trabalhados, comparator, filterSearch }) {
-  const stabilizedThis = trabalhados.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  trabalhados = stabilizedThis.map((el) => el[0]);
-
-  if (text) {
-    trabalhados = trabalhados.filter(
-      (row) =>
-        (row?.nentrada && row?.nentrada.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.assunto && row?.assunto.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.nome && row?.nome.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.conta && row?.conta.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.cliente && row?.cliente.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.titular && row?.titular.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.entidades && row?.entidades.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
-    );
-  }
-
-  return trabalhados;
 }

@@ -5,14 +5,13 @@ import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import {
   Tab,
-  Fab,
   Box,
   Tabs,
   Card,
   Grid,
   Stack,
   Table,
-  Tooltip,
+  Button,
   TableRow,
   TableCell,
   TextField,
@@ -32,17 +31,21 @@ import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturn
 // utils
 import { format, add } from 'date-fns';
 import { bgGradient } from '../../utils/cssStyles';
+import { getFileThumb } from '../../utils/getFileFormat';
 import { ptDate, fMonthYear } from '../../utils/formatTime';
-import { fCurrency, fPercent } from '../../utils/formatNumber';
 import { getComparator, applySort } from '../../hooks/useTable';
+import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/digitaldocs';
 // components
-import Image from '../../components/Image';
 import Scrollbar from '../../components/Scrollbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
+
+// ----------------------------------------------------------------------
+
+const headStyle = { border: 'none', typography: 'h6' };
 
 // ----------------------------------------------------------------------
 
@@ -148,6 +151,22 @@ export default function EstatisticaCredito() {
               onChange={(newValue) => setData(newValue)}
               slotProps={{ textField: { fullWidth: true, size: 'small' } }}
             />
+            {currentTab !== 'resumo' && (
+              <Stack>
+                <ReactHTMLTableToExcel
+                  id="table-xls-button-tipo"
+                  table="tabel-estatistica-credito"
+                  className="MuiButtonBase-root-MuiButton-root"
+                  sheet={`${currentTab}`}
+                  filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
+                  buttonText={
+                    <Button variant="soft" startIcon={getFileThumb('file.xlsx')}>
+                      Exportar
+                    </Button>
+                  }
+                />
+              </Stack>
+            )}
           </Stack>
         }
         links={[{ name: '' }]}
@@ -180,71 +199,43 @@ export default function EstatisticaCredito() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Totais() {
-  const {
-    isLoading,
-    entradasCredito,
-    creditosAprovados,
-    creditosContratados,
-    creditosDesistidos,
-    creditosIndeferidos,
-  } = useSelector((state) => state.digitaldocs);
+  const { isLoading, estatisticaCredito } = useSelector((state) => state.digitaldocs);
   // Entradas
-  const totalEntrada = sumBy(
-    entradasCredito?.filter((row) => row?.linha !== 'Garantia Bancária'),
-    'montantes'
-  );
-  const entradaEmp = sumDados(entradasCredito, 'Empresa', 'montantes', '');
-  const entradaPart = sumDados(entradasCredito, 'Particular', 'montantes', '');
-  const entradaPi = sumDados(entradasCredito, 'Produtor Individual', 'montantes', '');
-  const entradaEp = sumDados(entradasCredito, 'Entidade Pública', 'montantes', '');
-  const entradaGb = sumDados(entradasCredito, '', 'montantes', 'gb');
+  const totalEntrada = sumBy(estatisticaCredito?.entrada, 'montantes');
+  const entradaEmp = sumDados(estatisticaCredito?.entrada, 'Empresa', 'montantes');
+  const entradaPart = sumDados(estatisticaCredito?.entrada, 'Particular', 'montantes');
+  const entradaPi = sumDados(estatisticaCredito?.entrada, 'Produtor Individual', 'montantes');
+  const entradaEp = sumDados(estatisticaCredito?.entrada, 'Entidade Pública', 'montantes');
 
   // Aprovados
-  const totalAprovado = sumBy(
-    creditosAprovados?.filter((row) => row?.linha !== 'Garantia Bancária'),
-    'montante_aprovado'
-  );
-  const aprovadoEmp = sumDados(creditosAprovados, 'Empresa', 'montante_aprovado', '');
-  const aprovadoPart = sumDados(creditosAprovados, 'Particular', 'montante_aprovado', '');
-  const aprovadoPi = sumDados(creditosAprovados, 'Produtor Individual', 'montante_aprovado', '');
-  const aprovadoEp = sumDados(creditosAprovados, 'Entidade Pública', 'montante_aprovado', '');
-  const aprovadoGb = sumDados(creditosAprovados, '', 'montante_aprovado', 'gb');
+  const totalAprovado = sumBy(estatisticaCredito?.aprovado, 'montante_aprovado');
+  const aprovadoEmp = sumDados(estatisticaCredito?.aprovado, 'Empresa', 'montante_aprovado');
+  const aprovadoPart = sumDados(estatisticaCredito?.aprovado, 'Particular', 'montante_aprovado');
+  const aprovadoPi = sumDados(estatisticaCredito?.aprovado, 'Produtor Individual', 'montante_aprovado');
+  const aprovadoEp = sumDados(estatisticaCredito?.aprovado, 'Entidade Pública', 'montante_aprovado');
 
   // Contratados
-  const totalContratado = sumBy(
-    creditosContratados?.filter((row) => row?.linha !== 'Garantia Bancária'),
-    'montante_contratado'
-  );
-  const contratadoEmp = sumDados(creditosContratados, 'Empresa', 'montante_contratado', '');
-  const contratadoPart = sumDados(creditosContratados, 'Particular', 'montante_contratado', '');
-  const contratadoPi = sumDados(creditosContratados, 'Produtor Individual', 'montante_contratado', '');
-  const contratadoEp = sumDados(creditosContratados, 'Entidade Pública', 'montante_contratado', '');
-  const contratadoGb = sumDados(creditosContratados, '', 'montante_contratado', 'gb');
+  const totalContratado = sumBy(estatisticaCredito?.contratado, 'montante_contratado');
+  const contratadoEmp = sumDados(estatisticaCredito?.contratado, 'Empresa', 'montante_contratado');
+  const contratadoPart = sumDados(estatisticaCredito?.contratado, 'Particular', 'montante_contratado');
+  const contratadoPi = sumDados(estatisticaCredito?.contratado, 'Produtor Individual', 'montante_contratado');
+  const contratadoEp = sumDados(estatisticaCredito?.contratado, 'Entidade Pública', 'montante_contratado');
 
   // Indeferido/Desistido
   const totalID =
-    sumBy(
-      creditosIndeferidos?.filter((row) => row?.linha !== 'Garantia Bancária'),
-      'montantes'
-    ) +
-    sumBy(
-      creditosDesistidos?.filter((row) => row?.linha !== 'Garantia Bancária'),
-      'montantes'
-    );
+    sumBy(estatisticaCredito?.indeferido, 'montantes') + sumBy(estatisticaCredito?.desistido, 'montantes');
   const idEmp =
-    sumDados(creditosIndeferidos, 'Empresa', 'montantes', '') +
-    sumDados(creditosDesistidos, 'Empresa', 'montantes', '');
+    sumDados(estatisticaCredito?.indeferido, 'Empresa', 'montantes') +
+    sumDados(estatisticaCredito?.desistido, 'Empresa', 'montantes');
   const idPart =
-    sumDados(creditosIndeferidos, 'Particular', 'montantes', '') +
-    sumDados(creditosDesistidos, 'Particular', 'montantes', '');
+    sumDados(estatisticaCredito?.indeferido, 'Particular', 'montantes') +
+    sumDados(estatisticaCredito?.desistido, 'Particular', 'montantes');
   const idPi =
-    sumDados(creditosIndeferidos, 'Produtor Individual', 'montantes', '') +
-    sumDados(creditosDesistidos, 'Produtor Individual', 'montantes', '');
+    sumDados(estatisticaCredito?.indeferido, 'Produtor Individual', 'montantes') +
+    sumDados(estatisticaCredito?.desistido, 'Produtor Individual', 'montantes');
   const idEp =
-    sumDados(creditosIndeferidos, 'Entidade Pública', 'montantes', '') +
-    sumDados(creditosDesistidos, 'Entidade Pública', 'montantes', '');
-  const idGb =
-    sumDados(creditosIndeferidos, '', 'montantes', 'gb') + sumDados(creditosDesistidos, '', 'montantes', 'gb');
+    sumDados(estatisticaCredito?.indeferido, 'Entidade Pública', 'montantes') +
+    sumDados(estatisticaCredito?.desistido, 'Entidade Pública', 'montantes');
 
   return (
     <Grid container spacing={3}>
@@ -299,10 +290,6 @@ export function Totais() {
                     total={{ totalEntrada, totalAprovado, totalContratado, totalID }}
                     dados={{ entrada: entradaEp, aprovado: aprovadoEp, contratado: contratadoEp, id: idEp }}
                   />
-                  <TableRowResumo
-                    label="Garantia Bancária"
-                    dados={{ entrada: entradaGb, aprovado: aprovadoGb, contratado: contratadoGb, id: idGb }}
-                  />
                 </TableBody>
               </Table>
             </Card>
@@ -318,25 +305,22 @@ export function Totais() {
 TableEstatistica.propTypes = { from: PropTypes.string, uo: PropTypes.string, data: PropTypes.string };
 
 export function TableEstatistica({ from, uo, data }) {
-  const {
-    isLoading,
-    entradasCredito,
-    creditosAprovados,
-    creditosDesistidos,
-    creditosContratados,
-    creditosIndeferidos,
-  } = useSelector((state) => state.digitaldocs);
+  const { isLoading, estatisticaCredito } = useSelector((state) => state.digitaldocs);
   const total =
     ((from === 'entrada' || from === 'desistido' || from === 'indeferido') && 'montantes') ||
     (from === 'aprovado' && 'montante_aprovado') ||
     (from === 'contratado' && 'montante_contratado');
   const dados = filterDados(
-    (from === 'entrada' && entradasCredito) ||
-      (from === 'aprovado' && creditosAprovados) ||
-      (from === 'desistido' && creditosDesistidos) ||
-      (from === 'contratado' && creditosContratados) ||
-      (from === 'indeferido' && creditosIndeferidos)
+    (from === 'entrada' && estatisticaCredito?.entrada) ||
+      (from === 'aprovado' && estatisticaCredito?.aprovado) ||
+      (from === 'desistido' && estatisticaCredito?.desistido) ||
+      (from === 'contratado' && estatisticaCredito?.contratado) ||
+      (from === 'indeferido' && estatisticaCredito?.indeferido)
   );
+
+  // console.log(estatisticaCredito);
+
+  // const dados = [];
 
   return (
     <Card sx={{ p: 1 }}>
@@ -344,55 +328,52 @@ export function TableEstatistica({ from, uo, data }) {
         <TableContainer sx={{ minWidth: 1200, position: 'relative', overflow: 'hidden', mb: 1 }}>
           <Table size="small" id="tabel-estatistica-credito">
             <TableHead>
-              <TableRow>
-                <TableCell colSpan={2} align="right" sx={{ border: 'none' }}>
-                  <Typography variant="h6">Unidade orgânica </Typography>
-                  <Typography variant="h6">Mês/Ano</Typography>
-                  <Typography variant="h6">Total {from} </Typography>
+              <TableRow hover>
+                <TableCell colSpan={2} align="right" sx={{ ...headStyle, borderBottomLeftRadius: '0px !important' }}>
+                  Unidade orgânica
                 </TableCell>
                 <TableCell
                   align="left"
-                  sx={{ border: 'none' }}
+                  sx={{ ...headStyle, borderBottomRightRadius: '0px !important', color: 'text.primary' }}
                   colSpan={(from === 'entrada' && 7) || (from === 'contratado' && 11) || 6}
                 >
-                  <Stack direction="row" justifyContent="space-between" aligItems="center" spacing={3}>
-                    <Stack>
-                      <Typography variant="h6" sx={{ color: 'text.primary' }}>
-                        {uo}
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: 'text.primary' }}>
-                        {data}
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: 'text.primary' }}>
-                        {fCurrency(
-                          sumBy(dados?.empresaInvestimento, total) +
-                            sumBy(dados?.empresaConstrucao, total) +
-                            sumBy(dados?.empresaTesouraria, total) +
-                            sumBy(dados?.particularHabitacao, total) +
-                            sumBy(dados?.particularCrediCaixa, total) +
-                            sumBy(dados?.particularOutros, total) +
-                            sumBy(dados?.piTesouraria, total) +
-                            sumBy(dados?.piInvestimento, total) +
-                            sumBy(dados?.piMicrocredito, total) +
-                            sumBy(dados?.entidadesPublicas, total)
-                        )}
-                      </Typography>
-                    </Stack>
-                    <ReactHTMLTableToExcel
-                      id="table-xls-button-tipo"
-                      table="tabel-estatistica-credito"
-                      className="MuiButtonBase-root-MuiButton-root"
-                      sheet={`Estatística de Crédito - ${from}`}
-                      filename={`Estatística de Crédito - ${from}`}
-                      buttonText={
-                        <Tooltip arrow title="EXPORTAR">
-                          <Fab color="success" size="small" variant="soft">
-                            <Image src="/assets/icons/file_format/format_excel.svg" />
-                          </Fab>
-                        </Tooltip>
-                      }
-                    />
-                  </Stack>
+                  {uo}
+                </TableCell>
+              </TableRow>
+              <TableRow hover>
+                <TableCell colSpan={2} align="right" sx={{ ...headStyle, borderRadius: '0px !important' }}>
+                  Mês/Ano
+                </TableCell>
+                <TableCell
+                  align="left"
+                  sx={{ ...headStyle, borderRadius: '0px !important', color: 'text.primary' }}
+                  colSpan={(from === 'entrada' && 7) || (from === 'contratado' && 11) || 6}
+                >
+                  {data}
+                </TableCell>
+              </TableRow>
+              <TableRow hover>
+                <TableCell colSpan={2} align="right" sx={{ ...headStyle, borderTopLeftRadius: '0px !important' }}>
+                  Total {from}
+                </TableCell>
+                <TableCell
+                  align="left"
+                  sx={{ ...headStyle, borderTopRightRadius: '0px !important', color: 'text.primary' }}
+                  colSpan={(from === 'entrada' && 7) || (from === 'contratado' && 11) || 6}
+                >
+                  {fNumber(
+                    sumBy(dados?.empresaInvestimento, total) +
+                      sumBy(dados?.empresaConstrucao, total) +
+                      sumBy(dados?.empresaTesouraria, total) +
+                      sumBy(dados?.particularHabitacao, total) +
+                      sumBy(dados?.particularCrediCaixa, total) +
+                      sumBy(dados?.particularOutros, total) +
+                      sumBy(dados?.piTesouraria, total) +
+                      sumBy(dados?.piInvestimento, total) +
+                      sumBy(dados?.piMicrocredito, total) +
+                      sumBy(dados?.entidadesPublicas, total) +
+                      sumBy(dados?.garantiaBancaria, total)
+                  )}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -414,14 +395,9 @@ export function TableEstatistica({ from, uo, data }) {
                     (from === 'contratado' && 'contratação')}
                 </TableCell>
                 <TableCell>Sector de atividade</TableCell>
-                {(from === 'entrada' || from === 'aprovado' || from === 'indeferido' || from === 'desistido') && (
-                  <TableCell>Montante solicitado</TableCell>
-                )}
                 {(from === 'entrada' || from === 'indeferido' || from === 'desistido') && (
                   <TableCell>Finalidade</TableCell>
                 )}
-                {(from === 'aprovado' || from === 'contratado') && <TableCell>Montante aprovado</TableCell>}
-                {from === 'contratado' && <TableCell>Montante contratado</TableCell>}
                 {(from === 'entrada' || from === 'aprovado') && <TableCell>Situação</TableCell>}
                 {from === 'entrada' && <TableCell>Nº proposta</TableCell>}
                 {from === 'contratado' && (
@@ -437,11 +413,18 @@ export function TableEstatistica({ from, uo, data }) {
                 {(from === 'indeferido' || from === 'desistido') && (
                   <TableCell>Data de {from === 'indeferido' ? 'indeferimento' : 'desistência'}</TableCell>
                 )}
+                {(from === 'entrada' || from === 'aprovado' || from === 'indeferido' || from === 'desistido') && (
+                  <TableCell align="right">Montante solicitado</TableCell>
+                )}
+                {(from === 'aprovado' || from === 'contratado') && (
+                  <TableCell align="right">Montante aprovado</TableCell>
+                )}
+                {from === 'contratado' && <TableCell align="right">Montante contratado</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
               {isLoading ? (
-                <SkeletonTable column={9} row={10} />
+                <SkeletonTable column={(from === 'entrada' && 9) || (from === 'contratado' && 13) || 8} row={10} />
               ) : (
                 <>
                   {/* EMPESAS */}
@@ -596,7 +579,7 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
 SegmentoStd.propTypes = { from: PropTypes.string, segmento: PropTypes.string, dados: PropTypes.array };
 
 function SegmentoStd({ from, segmento, dados }) {
-  const lenght = dados?.length;
+  const lenght = dados?.length || 0;
   return (
     <>
       <FirstRowSegmento from={from} segmento={segmento} dados={dados?.[0]} lenght={lenght + 2} noLinha={lenght === 0} />
@@ -635,34 +618,37 @@ function TableRowTotal({ total, total1 = 0, nivel, lenght = 1, from }) {
     <>
       {nivel !== 1 && lenght !== 0 && (
         <TableRow>
-          <TableCell colSpan={20}> </TableCell>
+          <TableCell colSpan={(from === 'entrada' && 8) || (from === 'contratado' && 12) || 7}> </TableCell>
         </TableRow>
       )}
       <TableRow sx={{ backgroundColor: (nivel === 1 && 'background.neutral') || 'success.light' }}>
-        <TableCell colSpan={(nivel === 1 && 3) || 4}> </TableCell>
-        {(from === 'entrada' || from === 'desistido' || from === 'indeferido') && (
-          <TableCell colSpan={4}>
+        {from === 'entrada' && <TableCellTotal total={total} col={7} nivel={nivel} />}
+        {(from === 'desistido' || from === 'indeferido') && <TableCellTotal total={total} col={6} nivel={nivel} />}
+        {from === 'aprovado' && <TableCellTotal total={total} col={5} nivel={nivel} />}
+        {from === 'contratado' && <TableCellTotal total={total} col={10} nivel={nivel} />}
+        {(from === 'aprovado' || from === 'contratado') && (
+          <TableCell align="right">
             <Typography variant={(nivel === 1 && 'subtitle2') || 'subtitle1'} noWrap>
-              {fCurrency(total)}
+              {fNumber(total1)}
             </Typography>
           </TableCell>
         )}
-        {(from === 'aprovado' || from === 'contratado') && (
-          <>
-            <TableCell>
-              <Typography variant={(nivel === 1 && 'subtitle2') || 'subtitle1'} noWrap>
-                {fCurrency(total)}
-              </Typography>
-            </TableCell>
-            <TableCell colSpan={from === 'contratado' ? 7 : 2}>
-              <Typography variant={(nivel === 1 && 'subtitle2') || 'subtitle1'} noWrap>
-                {fCurrency(total1)}
-              </Typography>
-            </TableCell>
-          </>
-        )}
       </TableRow>
     </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+TableCellTotal.propTypes = { total: PropTypes.number, nivel: PropTypes.number, col: PropTypes.number };
+
+function TableCellTotal({ total, nivel, col }) {
+  return (
+    <TableCell align="right" colSpan={(nivel === 1 && col) || col + 1}>
+      <Typography variant={(nivel === 1 && 'subtitle2') || 'subtitle1'} noWrap>
+        {fNumber(total)}
+      </Typography>
+    </TableCell>
   );
 }
 
@@ -728,27 +714,6 @@ function DadosCell({ dados, from }) {
       {from === 'aprovado' && <TableCell>{dados?.data_aprovacao && ptDate(dados?.data_aprovacao)}</TableCell>}
       {from === 'contratado' && <TableCell>{dados?.data_contratacao && ptDate(dados?.data_contratacao)}</TableCell>}
       <TableCell>{dados?.setor_atividade}</TableCell>
-      {from !== 'contratado' && (
-        <TableCell>
-          <Typography variant="body2" noWrap>
-            {dados?.montantes && fCurrency(dados?.montantes)}
-          </Typography>
-        </TableCell>
-      )}
-      {(from === 'aprovado' || from === 'contratado') && (
-        <TableCell>
-          <Typography variant="body2" noWrap>
-            {dados?.montante_aprovado && fCurrency(dados?.montante_aprovado)}
-          </Typography>
-        </TableCell>
-      )}
-      {from === 'contratado' && (
-        <TableCell>
-          <Typography variant="body2" noWrap>
-            {dados?.montante_contratado && fCurrency(dados?.montante_contratado)}
-          </Typography>
-        </TableCell>
-      )}
       {from !== 'aprovado' && <TableCell>{dados?.finalidade}</TableCell>}
       {(from === 'entrada' || from === 'aprovado') && <TableCell>{dados?.situacao_final_mes}</TableCell>}
       {from === 'entrada' && <TableCell>{dados?.nproposta}</TableCell>}
@@ -763,6 +728,27 @@ function DadosCell({ dados, from }) {
       )}
       {from === 'indeferido' && <TableCell>{dados?.data_indeferido && ptDate(dados?.data_indeferido)}</TableCell>}
       {from === 'desistido' && <TableCell>{dados?.data_desistido && ptDate(dados?.data_desistido)}</TableCell>}
+      {from !== 'contratado' && (
+        <TableCell align="right">
+          <Typography variant="body2" noWrap>
+            {dados?.montantes && fNumber(dados?.montantes)}
+          </Typography>
+        </TableCell>
+      )}
+      {(from === 'aprovado' || from === 'contratado') && (
+        <TableCell align="right">
+          <Typography variant="body2" noWrap>
+            {dados?.montante_aprovado && fNumber(dados?.montante_aprovado)}
+          </Typography>
+        </TableCell>
+      )}
+      {from === 'contratado' && (
+        <TableCell align="right">
+          <Typography variant="body2" noWrap>
+            {dados?.montante_contratado && fNumber(dados?.montante_contratado)}
+          </Typography>
+        </TableCell>
+      )}
     </>
   );
 }
@@ -832,35 +818,27 @@ function TableRowResumo({ dados, label, total }) {
       </TableCell>
       <TableCell align="right">{fCurrency(dados?.entrada)}</TableCell>
       <TableCell align="right" width={10}>
-        {label !== 'Garantia Bancária' && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {fPercent((dados?.entrada * 100) / total?.totalEntrada)}
-          </Typography>
-        )}
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {fPercent((dados?.entrada * 100) / total?.totalEntrada)}
+        </Typography>
       </TableCell>
       <TableCell align="right">{fCurrency(dados?.aprovado)}</TableCell>
       <TableCell align="right" width={10}>
-        {label !== 'Garantia Bancária' && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {fPercent((dados?.aprovado * 100) / total?.totalAprovado)}
-          </Typography>
-        )}
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {fPercent((dados?.aprovado * 100) / total?.totalAprovado)}
+        </Typography>
       </TableCell>
       <TableCell align="right">{fCurrency(dados?.contratado)}</TableCell>
       <TableCell align="right" width={10}>
-        {label !== 'Garantia Bancária' && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {fPercent((dados?.contratado * 100) / total?.totalContratado)}
-          </Typography>
-        )}
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {fPercent((dados?.contratado * 100) / total?.totalContratado)}
+        </Typography>
       </TableCell>
       <TableCell align="right">{fCurrency(dados?.id)}</TableCell>
       <TableCell align="right" width={10}>
-        {label !== 'Garantia Bancária' && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {fPercent((dados?.id * 100) / total?.totalID)}
-          </Typography>
-        )}
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {fPercent((dados?.id * 100) / total?.totalID)}
+        </Typography>
       </TableCell>
     </TableRow>
   );
@@ -907,14 +885,9 @@ function filterDados(dados) {
 
 // ----------------------------------------------------------------------
 
-function sumDados(dados, segmento, column, gb) {
-  return gb
-    ? sumBy(
-        dados?.filter((row) => row?.linha === 'Garantia Bancária'),
-        column
-      )
-    : sumBy(
-        dados?.filter((row) => row?.segmento === segmento && row?.linha !== 'Garantia Bancária'),
-        column
-      );
+function sumDados(dados, segmento, column) {
+  return sumBy(
+    dados?.filter((row) => row?.segmento === segmento),
+    column
+  );
 }

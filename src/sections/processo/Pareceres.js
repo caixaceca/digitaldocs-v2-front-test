@@ -52,9 +52,9 @@ import { ParecerForm } from './IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
-Pareceres.propTypes = { pareceres: PropTypes.array, processoId: PropTypes.number };
+Pareceres.propTypes = { pareceres: PropTypes.array, processoId: PropTypes.number, assunto: PropTypes.string };
 
-export default function Pareceres({ pareceres, processoId }) {
+export default function Pareceres({ pareceres, processoId, assunto }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
@@ -110,11 +110,9 @@ export default function Pareceres({ pareceres, processoId }) {
     formData.append('validado', true);
     formData.append('parecerID', selectedParecer.id);
     formData.append('parecer', selectedParecer.parecer);
-    formData.append('descricao', selectedParecer.descricao);
+    formData.append('descricao', selectedParecer.parecer_obs);
     formData.append('perfilID', cc?.perfil_id);
-    dispatch(
-      updateItem('parecer', formData, { mail, id: selectedParecer.id, processoId, mensagem: 'parecer validado' })
-    );
+    dispatch(updateItem('parecer', formData, { mail, id: selectedParecer.id, processoId, msg: 'parecer validado' }));
   };
 
   const podeDarParecer = (estadoId) => {
@@ -231,37 +229,6 @@ export default function Pareceres({ pareceres, processoId }) {
                                 desc="validar este parecer"
                                 handleOk={handleConfirmValidar}
                               />
-                              <Dialog fullScreen open={isOpenParecer}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-                                  <DialogTitle sx={{ pb: 2 }}>Validação de parecer</DialogTitle>
-                                  <Stack sx={{ pr: 1 }}>
-                                    <Tooltip title="Fechar">
-                                      <IconButton color="inherit" onClick={handleCloseValidar}>
-                                        <CloseIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Stack>
-                                </Stack>
-                                <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
-                                  <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
-                                    <ParecerExport
-                                      dados={{
-                                        data: new Date(),
-                                        estado: selectedParecer?.nome,
-                                        parecer: selectedParecer?.parecer,
-                                        descricao: selectedParecer?.descricao,
-                                        data_limite: selectedParecer?.data_limite,
-                                        nome: cc?.perfil?.displayName,
-                                      }}
-                                    />
-                                  </PDFViewer>
-                                </Box>
-                                <DialogActions sx={{ justifyContent: 'center', p: '12px !important' }}>
-                                  <Button variant="contained" size="large" onClick={onOpen1}>
-                                    VALIDAR
-                                  </Button>
-                                </DialogActions>
-                              </Dialog>
                               <Tooltip title="EDITAR" arrow>
                                 <Fab size="small" variant="soft" color="warning" onClick={() => handleEditar(row)}>
                                   <SvgIconStyle src="/assets/icons/editar.svg" />
@@ -270,8 +237,10 @@ export default function Pareceres({ pareceres, processoId }) {
                             </Stack>
                           )}
                         </Stack>
-                        {row?.descricao && (
-                          <Typography sx={{ my: 2, mx: 0.5 }}>{newLineText(row.descricao)}</Typography>
+                        {row?.parecer_obs && (
+                          <Typography sx={{ my: 2, mx: 0.5, textAlign: 'justify' }}>
+                            {newLineText(row.parecer_obs)}
+                          </Typography>
                         )}
                         {row?.validado && (
                           <>
@@ -280,54 +249,28 @@ export default function Pareceres({ pareceres, processoId }) {
                               size="small"
                               color="inherit"
                               onClick={() => handleValidar(row)}
-                              startIcon={getFileThumb('Minuta parecer.pdf')}
+                              startIcon={getFileThumb('Minuta do parecer.pdf')}
                               sx={{ justifyContent: 'left', textAlign: 'left', py: 2.25 }}
                             >
-                              Minuta parecer
+                              Minuta do parecer.pdf
                             </Button>
-                            <Dialog fullScreen open={isOpenParecer}>
-                              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-                                <DialogTitle sx={{ pb: 2 }}>Minuta parecer</DialogTitle>
-                                <Stack sx={{ pr: 1 }}>
-                                  <Tooltip title="Fechar">
-                                    <IconButton color="inherit" onClick={handleCloseValidar}>
-                                      <CloseIcon />
-                                    </IconButton>
-                                  </Tooltip>
-                                </Stack>
-                              </Stack>
-                              <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
-                                <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
-                                  <ParecerExport
-                                    dados={{
-                                      estado: selectedParecer?.nome,
-                                      parecer: selectedParecer?.parecer,
-                                      nome: criador?.perfil?.displayName,
-                                      data: selectedParecer?.data_parecer,
-                                      descricao: selectedParecer?.descricao,
-                                      data_limite: selectedParecer?.data_limite,
-                                    }}
-                                  />
-                                </PDFViewer>
-                              </Box>
-                            </Dialog>
                           </>
                         )}
                         {row?.anexos
                           ?.filter((item) => item?.is_ativo)
                           .map(
-                            (_row) =>
-                              _row?.nome && (
+                            (anexo) =>
+                              anexo?.nome && (
                                 <Button
                                   fullWidth
                                   size="small"
                                   color="inherit"
-                                  key={_row?.anexo}
-                                  onClick={() => handleAnexo(_row)}
-                                  startIcon={getFileThumb(_row.nome)}
+                                  key={anexo?.anexo}
+                                  onClick={() => handleAnexo(anexo)}
+                                  startIcon={getFileThumb(anexo.nome)}
                                   sx={{ justifyContent: 'left', textAlign: 'left', py: 2.25 }}
                                 >
-                                  {_row?.nome}
+                                  {anexo?.nome}
                                 </Button>
                               )
                           )}
@@ -338,16 +281,14 @@ export default function Pareceres({ pareceres, processoId }) {
                           Ainda não foi adicionado o parecer...
                         </Typography>
                         {podeDarParecer(row?.estado_id) && !row?.validado && (
-                          <Tooltip title="EDITAR" arrow>
-                            <Button
-                              variant="soft"
-                              color="success"
-                              onClick={() => handleEditar(row)}
-                              startIcon={<AddCircleIcon />}
-                            >
-                              Adicionar
-                            </Button>
-                          </Tooltip>
+                          <Button
+                            variant="soft"
+                            color="success"
+                            startIcon={<AddCircleIcon />}
+                            onClick={() => handleEditar(row)}
+                          >
+                            Adicionar
+                          </Button>
                         )}
                       </Stack>
                     )}
@@ -358,6 +299,40 @@ export default function Pareceres({ pareceres, processoId }) {
           </Stack>
         </Scrollbar>
         <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processoId} />
+
+        <Dialog fullScreen open={isOpenParecer}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
+            <DialogTitle sx={{ pb: 2 }}>Minuta do parecer</DialogTitle>
+            <Stack sx={{ pr: 1 }}>
+              <Tooltip title="Fechar">
+                <IconButton color="inherit" onClick={handleCloseValidar}>
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+          <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
+            <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
+              <ParecerExport
+                dados={{
+                  assunto,
+                  parecer: selectedParecer,
+                  nome: selectedParecer?.validado
+                    ? colaboradores?.find((_row) => _row?.perfil?.id === selectedParecer?.parecer_perfil_id)?.perfil
+                        ?.displayName
+                    : cc?.perfil?.displayName,
+                }}
+              />
+            </PDFViewer>
+          </Box>
+          {!selectedParecer?.validado && (
+            <DialogActions sx={{ justifyContent: 'center', p: '12px !important' }}>
+              <Button variant="contained" size="large" onClick={onOpen1}>
+                VALIDAR
+              </Button>
+            </DialogActions>
+          )}
+        </Dialog>
       </Drawer>
     </>
   );

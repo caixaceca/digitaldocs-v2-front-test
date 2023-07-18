@@ -1,17 +1,18 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Fab, Card, Table, Button, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+// utils
+import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, selectItem, openModal, closeModal } from '../../redux/slices/digitaldocs';
+import { getAll, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -60,14 +61,6 @@ export default function MotivosPendencias() {
     setPage(0);
   };
 
-  const handleAdd = () => {
-    dispatch(openModal());
-  };
-
-  const handleUpdate = (item) => {
-    dispatch(selectItem(item));
-  };
-
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -82,9 +75,7 @@ export default function MotivosPendencias() {
         links={[{ name: '' }]}
         action={
           <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-            <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-              Adicionar
-            </Button>
+            <AddItem />
           </RoleBasedGuard>
         }
         sx={{ color: 'text.secondary', px: 1 }}
@@ -111,11 +102,7 @@ export default function MotivosPendencias() {
                           <TableCell>{row.obs}</TableCell>
                           <TableCell align="center" width={50}>
                             <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-                              <Tooltip title="Editar" arrow>
-                                <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdate(row)}>
-                                  <SvgIconStyle src="/assets/icons/editar.svg" />
-                                </Fab>
-                              </Tooltip>
+                              <UpdateItem dados={row} />
                             </RoleBasedGuard>
                           </TableCell>
                         </TableRow>
@@ -166,8 +153,8 @@ function applySortFilter({ motivosPendencias, comparator, filterSearch }) {
   if (text) {
     motivosPendencias = motivosPendencias.filter(
       (row) =>
-        (row?.motivo && row?.motivo.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1) ||
-        (row?.obs && row?.obs.toString().toLowerCase().indexOf(text.toLowerCase()) !== -1)
+        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(text)) !== -1) ||
+        (row?.obs && normalizeText(row?.obs).indexOf(normalizeText(text)) !== -1)
     );
   }
 
