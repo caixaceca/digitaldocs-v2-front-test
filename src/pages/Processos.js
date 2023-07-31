@@ -41,12 +41,7 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const [currentTab, setCurrentTab] = useSearchParams({
-    tab: 'tarefas',
-    filter: '',
-    segmento: '',
-    colaborador: cc?.perfil?.displayName,
-  });
+  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', colaborador: cc?.perfil?.displayName });
   const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {

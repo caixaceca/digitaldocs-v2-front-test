@@ -52,8 +52,10 @@ export function errorMsg(error) {
     error.response?.data?.errop ||
     error?.error?.[0]?.message ||
     error?.error?.[1]?.message ||
+    error.response?.data?.mensagem ||
+    error.response?.mensagem ||
     error.response?.data ||
-    error?.message ||
+    error?.mensagem ||
     error?.message ||
     error?.error ||
     'Ocorreu um erro...'
@@ -83,6 +85,8 @@ export function parametrosPesquisa(params) {
     params?.get?.('segmento') ? `&segmento=${params?.get?.('segmento')}` : ''
   }${params?.get?.('filter') ? `&filter=${params?.get?.('filter')}` : ''}`;
 }
+
+// ----------------------------------------------------------------------
 
 export function paramsObject(params) {
   const paramsFind = {};

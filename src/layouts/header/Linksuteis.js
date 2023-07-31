@@ -42,10 +42,11 @@ export default function Linksuteis() {
           color={open ? 'primary' : 'default'}
           onClick={handleOpen}
           sx={{
-            padding: 0,
+            p: 0,
+            color: '#fff',
             width: { xs: 30, sm: 40 },
             height: { xs: 30, sm: 40 },
-            color: '#fff',
+            transform: 'rotate(-45deg)',
             ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
           }}
         >

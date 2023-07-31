@@ -1,8 +1,9 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 // @mui
 import SearchIcon from '@mui/icons-material/Search';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import { Box, Stack, Tooltip, TextField, IconButton, Autocomplete, InputAdornment } from '@mui/material';
+import { Stack, Tooltip, TextField, IconButton, Autocomplete, InputAdornment } from '@mui/material';
 // utils
 import { paramsObject } from '../utils/normalizeText';
 // redux
@@ -15,26 +16,20 @@ import Ambiente from '../sections/Ambiente';
 
 // ----------------------------------------------------------------------
 
-SearchToolbar.propTypes = { filterSearch: PropTypes.string, onFilterSearch: PropTypes.func, tab: PropTypes.string };
+SearchToolbar.propTypes = { tab: PropTypes.string, filter: PropTypes.object, setFilter: PropTypes.func };
 
-export function SearchToolbar({ filterSearch, onFilterSearch, tab }) {
+export function SearchToolbar({ tab, filter, setFilter }) {
   const handleResetFilter = () => {
-    onFilterSearch({ tab, filter: '' });
+    setFilter({ tab, filter: '' });
   };
+
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
       <TextField
         fullWidth
-        value={filterSearch.get('filter') || ''}
-        onChange={(event) => {
-          const filter = event.target.value;
-          if (filter) {
-            onFilterSearch({ tab, filter });
-          } else {
-            onFilterSearch({ tab, filter: '' });
-          }
-        }}
         placeholder="Procurar..."
+        value={filter?.get('filter') || ''}
+        onChange={(event) => setFilter({ tab, filter: event.target.value || '' })}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -44,7 +39,7 @@ export function SearchToolbar({ filterSearch, onFilterSearch, tab }) {
         }}
       />
 
-      {filterSearch?.get('filter') && (
+      {filter?.get('filter') && (
         <Tooltip title="Limpar" arrow>
           <IconButton color="inherit" onClick={() => handleResetFilter()}>
             <ClearAllIcon />
@@ -155,45 +150,14 @@ export function SearchToolbarProcura({
 
 // ----------------------------------------------------------------------
 
-SearchToolbar2.propTypes = { origem: PropTypes.string, filterSearch: PropTypes.string, onFilterSearch: PropTypes.func };
-
-export function SearchToolbar2({ filterSearch, origem, onFilterSearch }) {
-  return (
-    <Box sx={{ pb: 1 }}>
-      <TextField
-        fullWidth
-        value={filterSearch.get('filter') || ''}
-        onChange={(event) => {
-          const filter = event.target.value;
-          if (filter) {
-            onFilterSearch({ tab: origem, filter });
-          } else {
-            onFilterSearch({ tab: origem, filter: '' });
-          }
-        }}
-        placeholder="Procurar..."
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: 'text.disabled' }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-    </Box>
-  );
-}
-
-// ----------------------------------------------------------------------
-
 SearchToolbarProcessos.propTypes = {
-  origem: PropTypes.string,
-  filterSearch: PropTypes.object,
-  onFilterSearch: PropTypes.func,
+  tab: PropTypes.string,
+  filter: PropTypes.object,
+  setFilter: PropTypes.func,
   colaboradoresList: PropTypes.array,
 };
 
-export function SearchToolbarProcessos({ origem, filterSearch, onFilterSearch, colaboradoresList }) {
+export function SearchToolbarProcessos({ tab, filter, setFilter, colaboradoresList }) {
   const { cc } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos } = useSelector((state) => state.digitaldocs);
   return (
@@ -203,7 +167,7 @@ export function SearchToolbarProcessos({ origem, filterSearch, onFilterSearch, c
         colaboradoresList?.length > 0 ||
         cc?.uo?.tipo !== 'Agências') && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {(meusAmbientes?.length > 1 || meusFluxos?.length > 1) && origem !== 'retidos' && origem !== 'atribuidos' && (
+          {(meusAmbientes?.length > 1 || meusFluxos?.length > 1) && tab !== 'retidos' && tab !== 'atribuidos' && (
             <>
               {meusAmbientes?.length > 1 && <Ambiente />}
               {meusFluxos?.length > 1 && <Fluxo />}
@@ -214,49 +178,28 @@ export function SearchToolbarProcessos({ origem, filterSearch, onFilterSearch, c
               fullWidth
               options={colaboradoresList}
               sx={{ width: { md: 150, xl: 200 } }}
-              value={filterSearch.get('colaborador')}
-              onChange={(event, newValue) => {
-                onFilterSearch({
-                  tab: origem,
-                  segmento: filterSearch.get('segmento') || '',
-                  colaborador: newValue || '',
-                  filter: filterSearch.get('filter') || '',
-                });
-              }}
+              value={filter.get('colaborador') || null}
+              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), colaborador: newValue || '' })}
               renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
             />
           )}
-          {/* {cc?.uo?.tipo !== 'Agências' && ( */}
-          <Autocomplete
-            fullWidth
-            value={filterSearch.get('segmento')}
-            sx={{ width: { md: 150, xl: 200 } }}
-            options={['Particulares', 'Empresas']}
-            onChange={(event, newValue) =>
-              onFilterSearch({
-                tab: origem,
-                segmento: newValue || '',
-                colaborador: filterSearch.get('colaborador') || '',
-                filter: filterSearch.get('filter') || '',
-              })
-            }
-            renderInput={(params) => <TextField {...params} label="Segmento" margin="none" />}
-          />
-          {/* )} */}
+          {cc?.uo?.tipo !== 'Agências' && (
+            <Autocomplete
+              fullWidth
+              value={filter.get('segmento') || null}
+              sx={{ width: { md: 150, xl: 200 } }}
+              options={['Particulares', 'Empresas']}
+              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), segmento: newValue || '' })}
+              renderInput={(params) => <TextField {...params} label="Segmento" margin="none" />}
+            />
+          )}
         </Stack>
       )}
       <TextField
         fullWidth
-        value={filterSearch.get('filter') || ''}
-        onChange={(event) => {
-          onFilterSearch({
-            tab: origem,
-            segmento: filterSearch.get('segmento') || '',
-            colaborador: filterSearch.get('colaborador') || '',
-            filter: event?.target?.value || '',
-          });
-        }}
         placeholder="Procurar..."
+        value={filter.get('filter') || ''}
+        onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), filter: newValue || '' })}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -284,7 +227,12 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
   const isFiltered =
     filter?.get('filter') || filter?.get('assunto') || filter?.get('colaborador') || filter?.get('estado');
   const handleResetFilter = () => {
-    setFilter({ tab, datai: filter?.get('datai'), dataf: filter?.get('dataf') });
+    setFilter({
+      tab,
+      data: filter?.get('data') || format(new Date(), 'yyyy-MM-dd'),
+      datai: filter?.get('datai') || format(new Date(), 'yyyy-MM-dd'),
+      dataf: filter?.get('dataf') || format(new Date(), 'yyyy-MM-dd'),
+    });
   };
 
   return (
@@ -351,10 +299,7 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
 
 // ----------------------------------------------------------------------
 
-TableToolbarPerfilEstados.propTypes = {
-  filterSearch: PropTypes.object,
-  onFilterSearch: PropTypes.func,
-};
+TableToolbarPerfilEstados.propTypes = { filterSearch: PropTypes.object, onFilterSearch: PropTypes.func };
 
 export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch }) {
   const { uos } = useSelector((state) => state.intranet);

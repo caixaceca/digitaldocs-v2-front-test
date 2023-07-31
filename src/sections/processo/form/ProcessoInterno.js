@@ -11,6 +11,7 @@ import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';
+import { podeSerAtribuido } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
@@ -35,10 +36,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     (state) => state.digitaldocs
   );
   const perfilId = cc?.perfil_id;
-  const podeAtribuir =
-    !fluxo?.assunto?.includes('Cartão') &&
-    !fluxo?.assunto?.includes('Extrato') &&
-    !fluxo?.assunto?.includes('Declarações');
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado || false);
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
   const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
@@ -66,7 +63,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     periodicidade: agendado && Yup.mixed().required('Seleciona a periodicidade'),
     mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     noperacao: selectedProcesso?.noperacao && Yup.string().required('Nº de operação não pode ficar vazio'),
-    titular: fluxo?.assunto === 'Produtos e Serviços' && Yup.string().required('Descriçãao não pode ficar vazio'),
+    titular:
+      (fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário') &&
+      Yup.string().required('Descriçãao não pode ficar vazio'),
     data_entrada:
       fluxo?.modelo !== 'Paralelo' &&
       Yup.date().typeError('Introduza uma data válida').required('Data de entrada não pode ficar vazio'),
@@ -83,7 +82,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         .required('Valor não pode ficar vazio'),
     conta:
       !fluxo?.limpo &&
-      fluxo?.assunto !== 'OPE DARH' &&
       fluxo?.assunto !== 'Abertura de conta' &&
       Yup.number().typeError('Introduza um nº de conta válido'),
   });
@@ -91,7 +89,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const _entidades = useMemo(
     () =>
       (selectedProcesso?.entidades && selectedProcesso?.entidades?.split(';')?.map((row) => ({ numero: row }))) ||
-      ((fluxo?.assunto === 'Abertura de conta' || fluxo?.assunto === 'OPE DARH') && [{ numero: '' }]) ||
+      (fluxo?.assunto === 'Abertura de conta' && [{ numero: '' }]) ||
       [],
     [selectedProcesso?.entidades, fluxo?.assunto]
   );
@@ -222,7 +220,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
             id: selectedProcesso?.id,
             msg: 'processo atualizado',
             isPendente: values.ispendente,
-            atribuir: values.ispendente && podeAtribuir,
+            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );
@@ -295,7 +293,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
             estadoId: meuAmbiente?.id,
             msg: 'processo adicionado',
             isPendente: values.ispendente,
-            atribuir: values.ispendente && podeAtribuir,
+            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );

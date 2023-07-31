@@ -1,29 +1,47 @@
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
-import { styled } from '@mui/material/styles';
+import {
+  Box,
+  Fab,
+  Stack,
+  AppBar,
+  Dialog,
+  Toolbar,
+  Tooltip,
+  IconButton,
+  DialogTitle,
+  DialogContent,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Box, Fab, Stack, AppBar, Dialog, Toolbar, Tooltip } from '@mui/material';
+import { alpha, styled } from '@mui/material/styles';
+import OutlinedFlagIcon from '@mui/icons-material/OutlinedFlag';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import { format } from 'date-fns';
 import cssStyles from '../../utils/cssStyles';
+// redux
+import { useSelector } from '../../redux/store';
 // hooks
-import useToggle from '../../hooks/useToggle';
 import useOffSetTop from '../../hooks/useOffSetTop';
 import useResponsive from '../../hooks/useResponsive';
+import useToggle, { useToggle1, useToggle2, useToggle3 } from '../../hooks/useToggle';
 // config
 import { HEADER, NAVBAR } from '../../config';
 // components
-import Ajuda from './Ajuda';
-import Denuncia from './Denuncia';
-import Linksuteis from './Linksuteis';
 import Logo from '../../components/Logo';
-import Notificacoes from './Notificacoes';
-import AccountPopover from './AccountPopover';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
+// sections
+import Ajuda from '../../sections/home/Ajuda';
 import { FormSugestao } from '../../sections/sobre/FormSugestao';
+import { ValidarDocForm, DenunciaForm } from '../../sections/home/HomeForm';
 //
+import Linksuteis from './Linksuteis';
+import Notificacoes from './Notificacoes';
+import AccountPopover from './AccountPopover';
 import ProcuraAvancada from './ProcuraAvancada';
 
 // ----------------------------------------------------------------------
@@ -71,6 +89,10 @@ DashboardHeader.propTypes = {
 export default function DashboardHeader({ onOpenSidebar, isCollapse = false, verticalLayout = false }) {
   const isDesktop = useResponsive('up', 'lg');
   const { toggle: open, onOpen, onClose } = useToggle();
+  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
+  const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
+  const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
 
   return (
@@ -90,10 +112,51 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>
+            {(isAdmin || meusAmbientes?.find((row) => row?.nome?.includes('Atendimento'))) && (
+              <>
+                <IconButtonHead
+                  open={open1}
+                  onOpen={onOpen1}
+                  title="Validação de documento"
+                  icon={<BadgeOutlinedIcon sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }} />}
+                />
+                <ValidarDocForm open={open1} onCancel={onClose1} />
+              </>
+            )}
+
             <Linksuteis />
             <Notificacoes />
-            <Denuncia />
-            <Ajuda />
+
+            <IconButtonHead
+              open={open2}
+              onOpen={onOpen2}
+              title="Denúncia"
+              icon={<OutlinedFlagIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />}
+            />
+            <DenunciaForm open={open2} onCancel={onClose2} />
+
+            <IconButtonHead
+              open={open3}
+              title="Ajuda"
+              onOpen={onOpen3}
+              icon={<HelpOutlineOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />}
+            />
+            <Dialog open={open3} onClose={onClose3} fullWidth maxWidth="lg">
+              <DialogTitle>
+                <Box display="flex" alignItems="center">
+                  <Box flexGrow={1}>Ajuda</Box>
+                  <Box>
+                    <IconButton onClick={onClose3}>
+                      <CloseOutlinedIcon sx={{ width: 20 }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </DialogTitle>
+              <DialogContent>
+                <Ajuda />
+              </DialogContent>
+            </Dialog>
+
             <AccountPopover />
           </Stack>
         </Toolbar>
@@ -105,10 +168,10 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
             p: 0.25,
             left: -70,
             bottom: 10,
+            borderRadius: '50%',
             position: 'absolute',
             color: 'common.white',
             bgcolor: 'success.main',
-            borderRadius: '50%',
             boxShadow: (theme) => theme.customShadows.z8,
           }}
         >
@@ -129,5 +192,37 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
         <FormSugestao open={open} onCancel={onClose} />
       </Dialog>
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+IconButtonHead.propTypes = {
+  open: PropTypes.bool,
+  icon: PropTypes.node,
+  onOpen: PropTypes.func,
+  title: PropTypes.string,
+};
+
+function IconButtonHead({ open, title, icon, onOpen, ...sx }) {
+  return (
+    <Tooltip arrow title={title}>
+      <IconButtonAnimate
+        color={open ? 'primary' : 'default'}
+        onClick={onOpen}
+        sx={{
+          p: 0,
+          color: '#fff',
+          width: { xs: 30, sm: 40 },
+          height: { xs: 30, sm: 40 },
+          ...(open && {
+            bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity),
+          }),
+        }}
+        {...sx}
+      >
+        {icon}
+      </IconButtonAnimate>
+    </Tooltip>
   );
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 // @mui
 import { Card, Stack, Container, TextField, Skeleton, Typography, Autocomplete, CardContent } from '@mui/material';
+// utils
+import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, getAll } from '../redux/slices/digitaldocs';
@@ -66,7 +68,14 @@ export default function NovoEditarProcesso() {
               ? [
                   { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
                   { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
-                  { name: processo?.referencia || id, href: `${PATH_DIGITALDOCS.processos.root}/${id}` },
+                  {
+                    name: processo
+                      ? `${processo?.nentrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                          processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
+                        }`
+                      : id,
+                    href: `${PATH_DIGITALDOCS.processos.root}/${id}`,
+                  },
                   { name: 'Editar' },
                 ]
               : [

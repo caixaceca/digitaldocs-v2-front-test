@@ -9,6 +9,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Box,
   Fab,
+  Card,
   List,
   Grid,
   Stack,
@@ -44,15 +45,17 @@ import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBacku
 // utils
 import { format, add } from 'date-fns';
 import { getFileThumb } from '../../utils/getFileFormat';
+import { podeSerAtribuido } from '../../utils/validarAcesso';
 import { fNumber, fCurrency } from '../../utils/formatNumber';
 // redux
-import { createItem, updateItem, deleteItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
+import { createItem, updateItem, deleteItem, closeModal } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
 // components
 import {
+  RHFSwitch,
   FormProvider,
   RHFTextField,
   RHFDatePicker,
@@ -79,13 +82,10 @@ IntervencaoForm.propTypes = {
 export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const [pendente, setPendente] = useState(false);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { error, isSaving, processo } = useSelector((state) => state.digitaldocs);
+  const { error, isSaving, processo, motivosPendencias } = useSelector((state) => state.digitaldocs);
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
-  const podeSerAtribuido =
-    !processo?.assunto?.includes('Cartão') &&
-    !processo?.assunto?.includes('Extrato') &&
-    !processo?.assunto?.includes('Declarações');
 
   const destinosSingulares = [];
   const destinosParalelo = [];
@@ -107,17 +107,22 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
 
   const formSchema = Yup.object().shape({
     destinos_par: inParalelo && Yup.array().min(1, 'Escolhe os destinos'),
+    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
     acao: !inParalelo && Yup.mixed().nullable('Ação não pode ficar vazio').required('Escolhe uma ação'),
   });
 
   const defaultValues = useMemo(
     () => ({
+      mobs: '',
       anexos: [],
       perfil: null,
+      pender: false,
       noperacao: '',
       observacao: '',
       destinos_par: [],
+      mpendencia: null,
+      pendenteLevantamento: false,
       acao: destinos?.length === 1 ? destinos?.[0] : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -171,8 +176,11 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           transicaoID: values?.acao?.id,
           estado_finalID: values?.acao?.estado_final_id,
           perfilIDAfeto:
+            (values?.pender && '') ||
             values?.perfil?.id ||
-            (values?.acao?.label?.includes('Atendimento') && podeSerAtribuido && criador?.perfil_id) ||
+            (values?.acao?.label?.includes('Atendimento') &&
+              podeSerAtribuido(processo?.assunto) &&
+              criador?.perfil_id) ||
             '',
         });
       }
@@ -185,6 +193,21 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           anexos.append('anexos', listaanexo[i]);
         }
       }
+      let formPendencia = null;
+      if (values?.pendenteLevantamento) {
+        formPendencia = {
+          pender: true,
+          mobs: 'Para levantamento do pedido',
+          mpendencia: motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id,
+        };
+      } else if (values?.pender) {
+        formPendencia = { pender: values?.pender, mpendencia: values?.mpendencia?.id, mobs: values?.mobs };
+      }
+      const formAceitar = {
+        perfilID: cc?.perfil_id,
+        fluxoID: processo?.fluxo_id,
+        estadoID: values?.acao?.estado_final_id,
+      };
 
       dispatch(
         createItem('encaminhar', JSON.stringify(formData), {
@@ -193,6 +216,16 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           haveAnexos,
           id: processo.id,
           msg: 'realizada',
+          perfilId: cc?.perfil_id,
+          aceitar: JSON.stringify(formAceitar),
+          pendencia: JSON.stringify(formPendencia),
+          pender: (values?.pendenteLevantamento || values?.pender) && formPendencia?.mpendencia,
+          atribuir:
+            values?.perfil?.id ||
+            (values?.acao?.label?.includes('Atendimento') &&
+              podeSerAtribuido(processo?.assunto) &&
+              criador?.perfil_id) ||
+            '',
         })
       );
     } catch (error) {
@@ -227,10 +260,15 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   };
 
   const podeAtribuir =
-    ((processo?.nome?.includes('Gerência') && values?.acao?.label?.includes('Atendimento')) ||
+    (((processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
+      values?.acao?.label?.includes('Atendimento')) ||
       (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento') ||
       processo?.nome === 'Diário') &&
     colaboradoresList?.length > 0;
+
+  const podeColocarPendente =
+    (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
+    values?.acao?.label?.includes('Atendimento');
 
   const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
   const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -282,7 +320,11 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                       {...field}
                       fullWidth
                       options={destinosSingulares}
-                      onChange={(event, newValue) => setValueForm('acao', newValue)}
+                      onChange={(event, newValue) => {
+                        setPendente(false);
+                        setValue('pender', false);
+                        setValueForm('acao', newValue);
+                      }}
                       isOptionEqualToValue={(option, value) => option?.id === value?.id}
                       getOptionLabel={(option) => option?.label}
                       renderInput={(params) => (
@@ -330,10 +372,70 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                     onRemoveAll={handleRemoveAll}
                   />
                 </Grid>
+                {(podeColocarPendente && !podeSerAtribuido(processo?.assunto) && title === 'Encaminhar' && (
+                  <Grid item xs={12}>
+                    <Card sx={{ p: 0.5, pb: 1 }}>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <RHFSwitch
+                            labelPlacement="start"
+                            name="pendenteLevantamento"
+                            label="Pendente de levantamento"
+                            onChange={(event, value) => {
+                              setPendente(false);
+                              setValue('mobs', '');
+                              setValue('pender', false);
+                              setValue('mpendencia', null);
+                              setValue('pendenteLevantamento', value);
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Card>
+                  </Grid>
+                )) ||
+                  (podeColocarPendente && podeSerAtribuido(processo?.assunto) && (
+                    <Grid item xs={12}>
+                      <Card sx={{ p: values.pender ? 1.5 : 0.5 }}>
+                        <Grid container spacing={3}>
+                          <Grid item xs={values.pender ? 4 : 12}>
+                            <RHFSwitch
+                              name="pender"
+                              label="Pendente"
+                              labelPlacement="start"
+                              onChange={(event, value) => {
+                                setPendente(value);
+                                setValue('mobs', '');
+                                setValue('pender', value);
+                                setValue('mpendencia', null);
+                              }}
+                            />
+                          </Grid>
+                          {values.pender && (
+                            <>
+                              <Grid item xs={8}>
+                                <RHFAutocompleteObject
+                                  label="Motivo"
+                                  name="mpendencia"
+                                  options={applySort(
+                                    motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
+                                    getComparator('asc', 'label')
+                                  )}
+                                />
+                              </Grid>
+                              <Grid item xs={12}>
+                                <RHFTextField name="mobs" label="Observação pendência" />
+                              </Grid>
+                            </>
+                          )}
+                        </Grid>
+                      </Card>
+                    </Grid>
+                  ))}
               </>
             )}
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+          <DialogActions sx={{ pb: '0px !important', px: '0px !important' }}>
             <Box sx={{ flexGrow: 1 }} />
             <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
@@ -357,7 +459,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
 ArquivarForm.propTypes = {
   open: PropTypes.bool,
   onCancel: PropTypes.func,
-  arquivoAg: PropTypes.bool,
+  arquivoAg: PropTypes.array,
   processo: PropTypes.object,
 };
 
@@ -394,10 +496,7 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
   const formSchema = Yup.object().shape({
     conta:
       deveInformarNConta() &&
-      Yup.number()
-        .typeError('Introduza o nº de conta do titular')
-        .positive('O nº de conta não pode ser negativo')
-        .required('Introduza o nº de conta do titular'),
+      Yup.number().typeError('Introduza o nº de conta do titular').positive('Introduza um nº de conta válido'),
     data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio'),
   });
 
@@ -640,14 +739,14 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-FinalizarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processo: PropTypes.object };
+FinalizarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 
-export function FinalizarForm({ open, onCancel, processo }) {
+export function FinalizarForm({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
-  const { error, isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, cc } = useSelector((state) => state.intranet);
+  const { error, isSaving, processo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (open) {
@@ -709,7 +808,7 @@ export function FinalizarForm({ open, onCancel, processo }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Finalizar</DialogTitle>
+      <DialogTitle>Seleciona as contas a serem cativadas</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <TableContainer sx={{ minWidth: 500, mt: 2, position: 'relative', overflow: 'hidden' }}>
@@ -722,28 +821,36 @@ export function FinalizarForm({ open, onCancel, processo }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {processo?.contasEleitosCativo?.map((row) => {
-                  const labelId = `checkbox-list-label-${row}`;
-                  return (
-                    <TableRow hover key={labelId} onClick={handleToggle(row)}>
-                      <TableCell>
-                        <Checkbox
-                          edge="start"
-                          tabIndex={-1}
-                          disableRipple
-                          sx={{ mt: -0.5 }}
-                          checked={selecionados.indexOf(row) !== -1}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
-                        {row?.conta}
-                      </TableCell>
-                      <TableCell align="right">
-                        {fNumber(row?.saldo)} {row?.moeda}
-                      </TableCell>
-                      <TableCell align="right">{fCurrency(row?.saldocve)}</TableCell>
-                    </TableRow>
-                  );
-                })}
+                {!processo?.contasEleitosCativo ? (
+                  <TableRow hover>
+                    <TableCell colSpan={3} sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                      Não foi encontrado nenhuma conta disponível para cativo...
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  processo?.contasEleitosCativo?.map((row) => {
+                    const labelId = `checkbox-list-label-${row}`;
+                    return (
+                      <TableRow hover key={labelId} onClick={handleToggle(row)}>
+                        <TableCell>
+                          <Checkbox
+                            edge="start"
+                            tabIndex={-1}
+                            disableRipple
+                            sx={{ mt: -0.5 }}
+                            checked={selecionados.indexOf(row) !== -1}
+                            inputProps={{ 'aria-labelledby': labelId }}
+                          />
+                          {row?.conta}
+                        </TableCell>
+                        <TableCell align="right">
+                          {fNumber(row?.saldo)} {row?.moeda}
+                        </TableCell>
+                        <TableCell align="right">{fCurrency(row?.saldocve)}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -1183,5 +1290,117 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+ColocarPendente.propTypes = { from: PropTypes.string };
+
+export function ColocarPendente({ from }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { selectedItem, motivosPendencias, isOpenModal, error, done, isSaving } = useSelector(
+    (state) => state.digitaldocs
+  );
+  const pendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedItem?.mpendencia)) || null;
+
+  const handleCloseModal = () => {
+    dispatch(closeModal());
+  };
+
+  useEffect(() => {
+    if (done === 'processo pendente') {
+      enqueueSnackbar('Processo adicionado a listagem de pendentes', { variant: 'success' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  const formSchema = Yup.object().shape({
+    mpendencia: Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
+  });
+  const defaultValues = useMemo(
+    () => ({
+      mobs: selectedItem?.mobs || '',
+      mpendencia: pendencia ? { id: pendencia?.id, label: pendencia?.motivo } : null,
+    }),
+    [selectedItem, pendencia]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal]);
+
+  const onSubmit = async () => {
+    try {
+      dispatch(
+        updateItem(
+          'pendencia',
+          JSON.stringify({ pender: true, mpendencia: values?.mpendencia?.id, mobs: values?.mobs }),
+          {
+            mail,
+            from,
+            id: selectedItem?.id,
+            perfilId: cc?.perfil_id,
+            aceitar: !selectedItem?.is_lock,
+            atribuir: podeSerAtribuido(selectedItem?.assunto),
+            formDataAceitar: JSON.stringify({
+              perfilID: cc?.perfil_id,
+              fluxoID: selectedItem?.fluxo_id,
+              estadoID: selectedItem?.estado_atual_id,
+            }),
+            msg: 'processo pendente',
+          }
+        )
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
+      <DialogTitle>Processo pendente</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12}>
+              <RHFAutocompleteObject
+                label="Motivo"
+                name="mpendencia"
+                options={applySort(
+                  motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
+                  getComparator('asc', 'label')
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="mobs" label="Observação" />
+            </Grid>
+          </Grid>
+          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+            <Box sx={{ flexGrow: 1 }} />
+            <LoadingButton variant="outlined" color="inherit" onClick={handleCloseModal}>
+              Cancelar
+            </LoadingButton>
+            <LoadingButton type="submit" variant="soft" color="success" loading={isSaving}>
+              Guardar
+            </LoadingButton>
+          </DialogActions>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
   );
 }

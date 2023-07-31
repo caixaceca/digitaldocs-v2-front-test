@@ -39,12 +39,16 @@ import { dis } from '../../_mock';
 
 // ----------------------------------------------------------------------
 
-DetalhesProcesso.propTypes = { processo: PropTypes.object, isPS: PropTypes.bool };
+const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral' };
 
-export default function DetalhesProcesso({ processo, isPS }) {
-  const _entidades = entidadesParse(processo?.entidades);
+// ----------------------------------------------------------------------
+
+DetalhesProcesso.propTypes = { isPS: PropTypes.bool };
+
+export default function DetalhesProcesso({ isPS }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const { motivosPendencias, origem } = useSelector((state) => state.digitaldocs);
+  const { processo, motivosPendencias, origem } = useSelector((state) => state.digitaldocs);
+  const _entidades = entidadesParse(processo?.entidades);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);
   const docPLabel = dis?.find((row) => row.id === processo.tipodocidp)?.label || 'Doc. primário';
@@ -53,7 +57,6 @@ export default function DetalhesProcesso({ processo, isPS }) {
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
   const credito = processo?.credito || null;
   const situacao = credito?.situacao_final_mes || '';
-  const isOrigemProcesso = origem?.id === processo.origem_id;
 
   const pareceresNaoValidados = () => {
     let pareceres = '';
@@ -93,7 +96,7 @@ export default function DetalhesProcesso({ processo, isPS }) {
           )}
           {processo?.referencia && <TextItem title="Referência:" text={processo.referencia} />}
           {(processo?.nome || processo?.in_paralelo_mode) && (
-            <Stack direction="row" alignItems="center" justifyContent="left" spacing={1} sx={{ py: 0.75 }}>
+            <Stack spacing={1} direction="row" alignItems="center" justifyContent="left" sx={{ ...itemStyle }}>
               <Typography sx={{ color: 'text.secondary' }}>Estado atual:</Typography>
               <Typography sx={{ fontWeight: 900, color: 'success.main' }}>
                 {processo?.in_paralelo_mode ? (
@@ -126,31 +129,27 @@ export default function DetalhesProcesso({ processo, isPS }) {
             </Stack>
           )}
           {processo?.obs && (
-            <Stack sx={{ py: 0.75 }}>
-              <Paper sx={{ p: 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
-                  <Typography>{newLineText(processo.obs)}</Typography>
-                </Stack>
-              </Paper>
-            </Stack>
+            <Paper sx={{ py: 0.75, px: 1, bgcolor: 'background.neutral', flexGrow: 1 }}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography sx={{ color: 'text.secondary' }}>Obs:</Typography>
+                <Typography>{newLineText(processo.obs)}</Typography>
+              </Stack>
+            </Paper>
           )}
           {(processo.ispendente || motivo || processo.mobs) && (
-            <Stack sx={{ py: 0.75 }}>
-              <Paper sx={{ p: 2, pb: 1, bgcolor: 'background.neutral', flexGrow: 1 }}>
-                {processo.ispendente ? (
-                  <Label color="warning" startIcon={<InfoOutlinedIcon />}>
-                    Processo pendente
-                  </Label>
-                ) : (
-                  <Label color="default" startIcon={<InfoOutlinedIcon />}>
-                    Este processo esteve pendente
-                  </Label>
-                )}
-                {motivo && <TextItem title="Motivo:" text={motivo?.motivo} />}
-                {processo.mobs && <TextItem title="Obs:" text={processo.mobs} />}
-              </Paper>
-            </Stack>
+            <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
+              {processo.ispendente ? (
+                <Label color="warning" startIcon={<InfoOutlinedIcon />}>
+                  Processo pendente
+                </Label>
+              ) : (
+                <Label color="default" startIcon={<InfoOutlinedIcon />}>
+                  Este processo esteve pendente
+                </Label>
+              )}
+              {motivo && <TextItem title="Motivo:" text={motivo?.motivo} sx={{ mt: 1, p: 0 }} />}
+              {processo.mobs && <TextItem title="Obs:" text={processo.mobs} sx={{ pt: 0.5, px: 0 }} />}
+            </Paper>
           )}
         </List>
       )}
@@ -182,81 +181,55 @@ export default function DetalhesProcesso({ processo, isPS }) {
           )}
         </List>
       )}
-      {(processo.operacao || processo?.noperacao) && (
+      {(!processo?.is_interno || processo?.noperacao) && (
         <List>
           <ListItem disableGutters divider>
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
-          {processo.noperacao && <TextItem title="Nº de operação:" text={processo.noperacao} />}
-          {processo.operacao && <TextItem title="Descrição:" text={processo.operacao} />}
-          {(processo.origem || processo?.telefone || processo?.email) && (
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+          {processo?.noperacao && <TextItem title="Nº de operação:" text={processo.noperacao} />}
+          {processo?.operacao && <TextItem title="Descrição:" text={processo.operacao} />}
+          {origem && origem?.id === processo.origem_id && (
+            <Stack spacing={1} direction="row" alignItems="center" sx={{ ...itemStyle }}>
               <Typography sx={{ color: 'text.secondary' }}>Origem:</Typography>
-              <Stack spacing={0.5}>
-                <Typography>{processo?.designacao}</Typography>
-                {isOrigemProcesso && origem?.seguimento && (
-                  <Typography>{processo?.seguimento || origem?.seguimento}</Typography>
-                )}
-                {isOrigemProcesso && (origem?.tipo || origem?.codigo) && (
+              <Stack spacing={0.75}>
+                {origem?.designacao && <Typography>{origem.designacao}</Typography>}
+                {origem?.seguimento && <Typography>{origem.seguimento}</Typography>}
+                {(origem?.tipo || origem?.codigo) && (
                   <Stack
                     spacing={1}
                     direction="row"
                     alignItems="center"
                     divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
                   >
-                    {origem?.tipo && (
-                      <Typography variant="body2">
-                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                          Tipo:
-                        </Typography>
-                        &nbsp;{origem?.tipo}
-                      </Typography>
-                    )}
-                    {origem?.codigo && (
-                      <Typography variant="body2">
-                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                          Código:
-                        </Typography>
-                        &nbsp;{origem?.codigo}
-                      </Typography>
-                    )}
+                    {origem?.tipo && <SubItem value={origem.tipo} label="Tipo:" />}
+                    {origem?.codigo && <SubItem value={origem.codigo} label="Código:" />}
                   </Stack>
                 )}
-                {(processo?.telefone || processo?.email) && (
+                {(origem?.telefone || origem?.email) && (
                   <Stack
                     spacing={1}
                     direction="row"
                     alignItems="center"
                     divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
                   >
-                    {processo?.telefone && (
-                      <Typography variant="body2">
-                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                          Tel:
-                        </Typography>
-                        &nbsp;{processo.telefone}
-                      </Typography>
-                    )}
-                    {processo?.email && (
-                      <Typography variant="body2">
-                        <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
-                          Email:
-                        </Typography>
-                        &nbsp;{processo.email}
-                      </Typography>
-                    )}
+                    {origem?.telefone && <SubItem value={origem.telefone} label="Telfone:" />}
+                    {origem?.email && <SubItem value={origem.email} label="Email:" />}
                   </Stack>
                 )}
               </Stack>
             </Stack>
           )}
-          {processo.valor > 0 && <ValorItem title="Valor para cativo:" valor={processo.valor} />}
-          {processo.saldoca > 0 && (
-            <ValorItem
-              title={processo.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
-              valor={processo.saldoca}
-              contas={processo.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
-            />
+          {processo?.operacao === 'Cativo/Penhora' && (
+            <>
+              {processo?.valor > 0 && <ValorItem title="Valor para cativo:" valor={processo.valor} />}
+              {processo?.saldoca > 0 && (
+                <ValorItem
+                  title={processo?.situacao === 'X' ? 'Valor cativado:' : 'Saldo disponível p/ cativo:'}
+                  valor={processo.saldoca}
+                  contas={processo?.situacao === 'X' ? processo?.contasCativado : processo?.contasEleitosCativo}
+                />
+              )}
+            </>
           )}
         </List>
       )}
@@ -279,7 +252,7 @@ export default function DetalhesProcesso({ processo, isPS }) {
             <Typography variant="subtitle1">Info. crédito</Typography>
           </ListItem>
           {situacao && (
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ ...itemStyle }}>
               <Typography sx={{ color: 'text.secondary' }}>Situação:</Typography>
               <Label
                 color={
@@ -319,15 +292,13 @@ export default function DetalhesProcesso({ processo, isPS }) {
             <TextItem title="Data de indeferimento:" text={ptDate(credito?.data_indeferido)} />
           )}
           {credito?.valor_divida && (
-            <Stack sx={{ py: 0.75 }}>
-              <Paper sx={{ p: 2, pb: 1, bgcolor: 'background.neutral', flexGrow: 1 }}>
-                <Label color="info" startIcon={<InfoOutlinedIcon />}>
-                  Entidade com crédito em dívida
-                </Label>
-                <TextItem title="Valor:" text={fCurrency(credito?.valor_divida)} />
-                {credito?.periodo && <TextItem title="Data:" text={ptDate(credito?.periodo)} />}
-              </Paper>
-            </Stack>
+            <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
+              <Label color="info" startIcon={<InfoOutlinedIcon />}>
+                Entidade com crédito em dívida
+              </Label>
+              <TextItem title="Valor:" text={fCurrency(credito?.valor_divida)} />
+              {credito?.periodo && <TextItem title="Data:" text={ptDate(credito?.periodo)} />}
+            </Paper>
           )}
         </List>
       )}
@@ -339,12 +310,27 @@ export default function DetalhesProcesso({ processo, isPS }) {
 
 TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string };
 
-function TextItem({ title, text }) {
+function TextItem({ title, text, ...sx }) {
   return (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+    <Stack spacing={1} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
       <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
       <Typography>{text}</Typography>
     </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SubItem.propTypes = { value: PropTypes.string, label: PropTypes.string };
+
+function SubItem({ value, label }) {
+  return (
+    <Typography variant="body2">
+      <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+        {label}
+      </Typography>
+      &nbsp;{value}
+    </Typography>
   );
 }
 
@@ -355,7 +341,7 @@ ValorItem.propTypes = { title: PropTypes.string, valor: PropTypes.number, contas
 function ValorItem({ title, valor, contas }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
-    <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
+    <Stack spacing={1} direction="row" alignItems="center" justifyContent="left" sx={{ ...itemStyle }}>
       <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
       <Typography>
         {fCurrency(valor)}
@@ -365,11 +351,13 @@ function ValorItem({ title, valor, contas }) {
       </Typography>
       {title === 'Saldo disponível p/ cativo:' && contas?.length > 0 && (
         <>
-          <Tooltip title="DETALHES" arrow>
-            <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
-              <InfoOutlinedIcon sx={{ width: 20 }} />
-            </Fab>
-          </Tooltip>
+          <Stack>
+            <Tooltip title="DETALHES" arrow>
+              <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
+                <InfoOutlinedIcon sx={{ width: 20 }} />
+              </Fab>
+            </Tooltip>
+          </Stack>
           <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
@@ -413,11 +401,13 @@ function ValorItem({ title, valor, contas }) {
       )}
       {title === 'Valor cativado:' && contas?.length > 0 && (
         <>
-          <Tooltip title="DETALHES" arrow>
-            <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
-              <InfoOutlinedIcon sx={{ width: 20 }} />
-            </Fab>
-          </Tooltip>
+          <Stack>
+            <Tooltip title="DETALHES" arrow>
+              <Fab color="inherit" size="small" variant="soft" onClick={onOpen} sx={{ width: 30, height: 30 }}>
+                <InfoOutlinedIcon sx={{ width: 20 }} />
+              </Fab>
+            </Tooltip>
+          </Stack>
           <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
             <DialogTitle>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>

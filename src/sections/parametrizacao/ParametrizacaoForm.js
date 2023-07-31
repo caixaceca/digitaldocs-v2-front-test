@@ -191,6 +191,110 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+ClonarFluxoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+
+export function ClonarFluxoForm({ isOpenModal, onCancel }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { done, error, isSaving, fluxoId, selectedParecer } = useSelector((state) => state.digitaldocs);
+
+  useEffect(() => {
+    if (done === 'fluxo clonado') {
+      onCancel();
+      navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${fluxoId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error, { variant: 'error' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  const formSchema = Yup.object().shape({
+    modelo: Yup.string().required('Modelo não pode ficar vazio'),
+    assunto: Yup.string().required('Assunto não pode ficar vazio'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      perfilID: cc?.perfil_id,
+      modelo: selectedParecer?.modelo || '',
+      limpo: selectedParecer?.limpo || false,
+      assunto: selectedParecer?.assunto || '',
+      is_ativo: selectedParecer?.is_ativo || true,
+      observacao: selectedParecer?.observacao || '',
+      is_interno: selectedParecer?.is_interno || false,
+      is_credito: selectedParecer?.is_credito || false,
+    }),
+    [selectedParecer, cc?.perfil_id]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    if (selectedParecer) {
+      reset(defaultValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedParecer]);
+
+  const onSubmit = async () => {
+    try {
+      if (selectedParecer) {
+        dispatch(
+          createItem('clonar fluxo', JSON.stringify(values), {
+            mail,
+            msg: 'fluxo clonado',
+            perfilId: cc?.perfil_id,
+            transicoes: selectedParecer?.transicoes,
+          })
+        );
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>Clonar fluxo</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: -1 }}>
+            <Grid item xs={12}>
+              <Alert severity="info">
+                Ao clonar este fluxo, será criado uma cópia deste, replicando o seu conteúdo e as transições associadas
+                para um novo fluxo. Pondendo, posteriormente, editar o conteúdo e as transições.
+              </Alert>
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="assunto" label="Assunto" />
+            </Grid>
+          </Grid>
+          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+            <Box sx={{ flexGrow: 1 }} />
+            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
+              Cancelar
+            </LoadingButton>
+            <LoadingButton type="submit" variant="contained" loading={isSaving}>
+              Clonar
+            </LoadingButton>
+          </DialogActions>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 EstadoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
 
 export function EstadoForm({ isOpenModal, onCancel }) {

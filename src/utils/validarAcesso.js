@@ -152,3 +152,71 @@ export function UosGerente(meusAmbientes) {
   });
   return uosGerente;
 }
+
+// ----------------------------------------------------------------------
+
+export const podeFinalizarNE = (meusAmbientes) => {
+  let i = 0;
+  while (i < meusAmbientes?.length) {
+    if (meusAmbientes[i]?.nome === 'DOP - Validação Notas Externas') {
+      return true;
+    }
+    i += 1;
+  }
+  return false;
+};
+
+// ----------------------------------------------------------------------
+
+export const podeFinalizarAgendados = (meusAmbientes) => {
+  let i = 0;
+  while (i < meusAmbientes?.length) {
+    if (meusAmbientes[i]?.nome === 'Autorização SWIFT') {
+      return true;
+    }
+    i += 1;
+  }
+  return false;
+};
+
+// ----------------------------------------------------------------------
+
+export const podeArquivar = (meusAmbientes, fromAgencia, iAmInGrpGerente, estadoAtualiID, arquivoAtendimento) => {
+  let i = 0;
+  while (i < meusAmbientes?.length) {
+    if (
+      ((meusAmbientes[i]?.is_inicial && fromAgencia && iAmInGrpGerente) ||
+        (meusAmbientes[i]?.is_inicial && fromAgencia && arquivoAtendimento) ||
+        (meusAmbientes[i]?.is_inicial && !fromAgencia) ||
+        meusAmbientes[i]?.is_final) &&
+      Number(meusAmbientes[i]?.id) === Number(estadoAtualiID)
+    ) {
+      return true;
+    }
+    i += 1;
+  }
+  return false;
+};
+
+// ----------------------------------------------------------------------
+
+export function podeSerAtribuido(assunto) {
+  return (
+    !assunto?.includes('Cartão') &&
+    !assunto?.includes('Extrato') &&
+    !assunto?.includes('Declarações') &&
+    !assunto?.includes('Cheques - Requisição')
+  );
+}
+
+// ----------------------------------------------------------------------
+
+export function arquivoAtendimento(assunto, encGer) {
+  return (
+    (assunto?.includes('Cartão') ||
+      assunto?.includes('Extrato') ||
+      assunto?.includes('Declarações') ||
+      assunto?.includes('Cheques - Requisição')) &&
+    !!encGer
+  );
+}

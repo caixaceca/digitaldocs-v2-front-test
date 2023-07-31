@@ -1,10 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
-import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import { Fab, Card, Stack, Table, Tooltip, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
-// utils
-import { normalizeText } from '../../utils/normalizeText';
+import { Card, Stack, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -18,12 +15,13 @@ import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { Checked, AddItem, UpdateItem } from '../../components/Actions';
+import { Checked, AddItem, UpdateItem, ViewItem } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 //
 import { EstadoForm } from './ParametrizacaoForm';
+import { applySortFilter } from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -39,6 +37,7 @@ const TABLE_HEAD = [
 export default function Estados() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [filter, setFilter] = useSearchParams('');
   const { mail, perfis, cc } = useSelector((state) => state.intranet);
   const { estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
@@ -56,8 +55,6 @@ export default function Estados() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
-  const [filterSearch, setFilterSearch] = useSearchParams('');
-
   useEffect(() => {
     if (mail && cc?.perfil_id) {
       dispatch(getAll('estados', { mail, perfilId: cc?.perfil_id }));
@@ -71,10 +68,10 @@ export default function Estados() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, cc?.perfil_id, mail]);
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleView = (id) => {
     navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/estado/${id}`);
@@ -84,7 +81,11 @@ export default function Estados() {
     dispatch(closeModal());
   };
 
-  const dataFiltered = applySortFilter({ estados, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    dados: estados,
+    filter: filter.get('filter'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -102,9 +103,7 @@ export default function Estados() {
 
       <RoleBasedGuard hasContent roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          {estados.length > 1 && (
-            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="estados" />
-          )}
+          {estados.length > 1 && <SearchToolbar filter={filter} setFilter={setFilter} tab="estados" />}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -127,11 +126,7 @@ export default function Estados() {
                           <TableCell align="right" width={130}>
                             <Stack direction="row" spacing={1} justifyContent="right">
                               {row.nome !== 'Arquivo' && <UpdateItem item="estado" id={row.id} />}
-                              <Tooltip title="Colaboradores associados" arrow>
-                                <Fab color="success" size="small" variant="soft" onClick={() => handleView(row?.id)}>
-                                  <SwapHorizOutlinedIcon sx={{ height: 28, width: 28 }} />
-                                </Fab>
-                              </Tooltip>
+                              <ViewItem estado handleView={() => handleView(row?.id)} />
                             </Stack>
                           </TableCell>
                         </TableRow>
@@ -164,25 +159,4 @@ export default function Estados() {
       </RoleBasedGuard>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ estados, comparator, filterSearch }) {
-  const stabilizedThis = estados.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  estados = stabilizedThis.map((el) => el[0]);
-
-  if (text) {
-    estados = estados.filter((row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(text)) !== -1);
-  }
-
-  return estados;
 }

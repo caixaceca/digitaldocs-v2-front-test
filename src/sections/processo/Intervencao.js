@@ -3,24 +3,27 @@ import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { Fab, Tooltip } from '@mui/material';
+// utils
+import { podeFinalizarNE, podeFinalizarAgendados, podeArquivar, arquivoAtendimento } from '../../utils/validarAcesso';
 // redux
-import { updateItem } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { updateItem, selectItem } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle, { useToggle1, useToggle2, useToggle3, useToggle4, useToggle5 } from '../../hooks/useToggle';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
+import { Pendente } from '../../components/Actions';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
 //
-import { IntervencaoForm, FinalizarForm, ArquivarForm } from './IntervencaoForm';
+import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente } from './IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
-Intervencao.propTypes = { processo: PropTypes.object, colaboradoresList: PropTypes.array };
+Intervencao.propTypes = { colaboradoresList: PropTypes.array };
 
-export default function Intervencao({ processo, colaboradoresList }) {
+export default function Intervencao({ colaboradoresList }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
@@ -29,7 +32,7 @@ export default function Intervencao({ processo, colaboradoresList }) {
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { isSaving, meusAmbientes, iAmInGrpGerente } = useSelector((state) => state.digitaldocs);
+  const { isSaving, meusAmbientes, iAmInGrpGerente, processo } = useSelector((state) => state.digitaldocs);
   const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências' || false;
   const perfilId = cc?.perfil_id;
 
@@ -76,42 +79,13 @@ export default function Intervencao({ processo, colaboradoresList }) {
     dispatch(updateItem('abandonar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'abandonado' }));
   };
 
-  const podeFinalizarNE = () => {
-    if (
-      processo?.situacao === 'E' &&
-      processo?.operacao === 'Cativo/Penhora' &&
-      processo?.nome === 'DOP - Validação Notas Externas'
-    ) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.is_final) {
-          return true;
-        }
-        i += 1;
-      }
-    }
-    return false;
-  };
-
-  const podeArquivar = () => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (
-        ((meusAmbientes[i]?.is_inicial && fromAgencia && iAmInGrpGerente) ||
-          (meusAmbientes[i]?.is_inicial && !fromAgencia) ||
-          meusAmbientes[i]?.is_final) &&
-        Number(meusAmbientes[i]?.id) === Number(processo?.estado_atual_id)
-      ) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
+  const handlePendente = (item) => {
+    dispatch(selectItem(item));
   };
 
   return (
     <>
-      {processo?.destinos?.length !== 0 && !processo.ispendente && (
+      {processo?.destinos?.length !== 0 && (
         <>
           {devolucoes?.length > 0 && (
             <>
@@ -151,8 +125,9 @@ export default function Intervencao({ processo, colaboradoresList }) {
 
       {processo?.agendado &&
         processo.situacao !== 'X' &&
+        processo?.nome === 'Autorização SWIFT' &&
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
-        processo?.nome === 'Autorização SWIFT' && (
+        podeFinalizarAgendados(meusAmbientes) && (
           <>
             <Tooltip title="FINALIZAR" arrow>
               <Fab color="success" size="small" variant="soft" onClick={onOpen4}>
@@ -171,16 +146,19 @@ export default function Intervencao({ processo, colaboradoresList }) {
           </>
         )}
 
-      {podeFinalizarNE() && (
-        <>
-          <Tooltip title="FINALIZAR" arrow>
-            <Fab color="success" size="small" variant="soft" onClick={onOpen5}>
-              <SvgIconStyle src="/assets/icons/stop.svg" />
-            </Fab>
-          </Tooltip>
-          <FinalizarForm open={open5} onCancel={onClose5} processo={processo} />
-        </>
-      )}
+      {processo?.situacao === 'E' &&
+        processo?.operacao === 'Cativo/Penhora' &&
+        processo?.nome === 'DOP - Validação Notas Externas' &&
+        podeFinalizarNE(meusAmbientes) && (
+          <>
+            <Tooltip title="FINALIZAR" arrow>
+              <Fab color="success" size="small" variant="soft" onClick={onOpen5}>
+                <SvgIconStyle src="/assets/icons/stop.svg" />
+              </Fab>
+            </Tooltip>
+            <FinalizarForm open={open5} onCancel={onClose5} />
+          </>
+        )}
 
       <Tooltip title="ABANDONAR" arrow>
         <Fab color="warning" size="small" variant="soft" onClick={onOpen2}>
@@ -196,6 +174,12 @@ export default function Intervencao({ processo, colaboradoresList }) {
         title="Abandonar"
         desc="abandonar este processo"
       />
+      {!processo?.ispendente && (
+        <>
+          <Pendente detail handleView={() => handlePendente(processo)} />
+          <ColocarPendente from="detalhes" />
+        </>
+      )}
 
       <Tooltip title="EDITAR" arrow>
         <Fab
@@ -209,7 +193,16 @@ export default function Intervencao({ processo, colaboradoresList }) {
         </Fab>
       </Tooltip>
 
-      {podeArquivar() && (
+      {podeArquivar(
+        meusAmbientes,
+        fromAgencia,
+        iAmInGrpGerente,
+        processo?.estado_atual_id,
+        arquivoAtendimento(
+          processo?.assunto,
+          processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.is_resgate
+        )
+      ) && (
         <>
           <Tooltip title="ARQUIVAR" arrow>
             <Fab color="error" size="small" variant="soft" onClick={onOpen1}>
@@ -227,6 +220,8 @@ export default function Intervencao({ processo, colaboradoresList }) {
     </>
   );
 }
+
+// ----------------------------------------------------------------------
 
 Libertar.propTypes = { perfilID: PropTypes.number, processoID: PropTypes.number };
 

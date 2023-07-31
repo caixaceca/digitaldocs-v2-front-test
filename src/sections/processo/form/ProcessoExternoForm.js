@@ -2,13 +2,14 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { Grid, Card, TextField, CardContent, Autocomplete, InputAdornment } from '@mui/material';
+import { Grid, Card, TextField, CardContent, Autocomplete } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // components
 import {
   RHFTextField,
   RHFDatePicker,
+  RHFNumberField,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
@@ -22,7 +23,7 @@ import { Pendencia, ObsNovosAnexos } from './Outros';
 const operacoes = [
   'Cativo/Penhora',
   'Pedido de Informação',
-  'Pedido de Levantamento de Cativo/Penhora',
+  'Cancelamento/Levantamento de Cativo/Penhora',
   'Pedido de Extrato Bancário',
   'Outras',
 ];
@@ -89,15 +90,11 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
               </Grid>
               {operacao === 'Cativo/Penhora' && (
                 <Grid item xs={12} sm={6} md={3}>
-                  <RHFTextField
+                  <RHFNumberField
                     name="valor"
                     label="Valor"
-                    placeholder="0.00"
-                    InputProps={{
-                      endAdornment: <InputAdornment position="end">CVE</InputAdornment>,
-                      inputProps: { max: 999999999999999 },
-                      type: 'number',
-                    }}
+                    tipo="moeda"
+                    inputProps={{ style: { textAlign: 'right' } }}
                   />
                 </Grid>
               )}

@@ -1,8 +1,7 @@
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
 import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
-// utils
-import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -16,6 +15,8 @@ import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbar } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+//
+import { applySortFilter } from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -30,7 +31,7 @@ const TABLE_HEAD = [
 export default function Estado() {
   const estadosId = [];
   const estadosByFluxo = [];
-  const [filterSearch, setFilterSearch] = useSearchParams();
+  const [filter, setFilter] = useSearchParams();
   const { fluxo, estados, isLoading } = useSelector((state) => state.digitaldocs);
 
   fluxo?.transicoes?.forEach((row) => {
@@ -61,12 +62,16 @@ export default function Estado() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'id' });
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
-  const dataFiltered = applySortFilter({ estadosByFluxo, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    dados: estadosByFluxo,
+    filter: filter.get('filter'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -82,7 +87,7 @@ export default function Estado() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {estadosByFluxo.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
+        {estadosByFluxo.length > 1 && <SearchToolbar filter={filter} setFilter={setFilter} />}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -129,27 +134,4 @@ export default function Estado() {
       </Card>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ estadosByFluxo, comparator, filterSearch }) {
-  const filter = filterSearch.get('filter');
-  const stabilizedThis = estadosByFluxo.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  estadosByFluxo = stabilizedThis.map((el) => el[0]);
-
-  if (filter) {
-    estadosByFluxo = estadosByFluxo.filter(
-      (row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1
-    );
-  }
-
-  return estadosByFluxo;
 }

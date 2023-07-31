@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
 import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
-// utils
-import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -20,6 +18,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 //
 import { OrigemForm } from './ParametrizacaoForm';
+import { applySortFilter } from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +36,7 @@ const TABLE_HEAD = [
 
 export default function Origens() {
   const dispatch = useDispatch();
+  const [filter, setFilter] = useSearchParams();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { origens, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
@@ -54,24 +54,26 @@ export default function Origens() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
 
-  const [filterSearch, setFilterSearch] = useSearchParams();
-
   useEffect(() => {
     if (mail && cc?.perfil_id) {
       dispatch(getAll('origens', { mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, cc?.perfil_id, mail]);
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
 
-  const dataFiltered = applySortFilter({ origens, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    dados: origens,
+    filter: filter.get('filter'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -89,9 +91,7 @@ export default function Origens() {
 
       <RoleBasedGuard hasContent roles={['origem-110', 'origem-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          {origens.length > 1 && (
-            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="origens" />
-          )}
+          {origens.length > 1 && <SearchToolbar filter={filter} setFilter={setFilter} tab="origens" />}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -147,34 +147,4 @@ export default function Origens() {
       </RoleBasedGuard>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ origens, comparator, filterSearch }) {
-  const stabilizedThis = origens.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  origens = stabilizedThis.map((el) => el[0]);
-
-  if (text) {
-    origens = origens.filter(
-      (item) =>
-        (item?.designacao && normalizeText(item?.designacao).indexOf(normalizeText(text)) !== -1) ||
-        (item?.seguimento && normalizeText(item?.seguimento).indexOf(normalizeText(text)) !== -1) ||
-        (item?.tipo && normalizeText(item?.tipo).indexOf(normalizeText(text)) !== -1) ||
-        (item?.ilha && normalizeText(item?.ilha).indexOf(normalizeText(text)) !== -1) ||
-        (item?.cidade && normalizeText(item?.cidade).indexOf(normalizeText(text)) !== -1) ||
-        (item?.email && normalizeText(item?.email).indexOf(normalizeText(text)) !== -1) ||
-        (item?.telefone && normalizeText(item?.telefone).indexOf(normalizeText(text)) !== -1)
-    );
-  }
-
-  return origens;
 }

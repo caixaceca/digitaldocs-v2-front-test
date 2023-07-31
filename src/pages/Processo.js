@@ -10,11 +10,12 @@ import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import { Fab, Grid, Card, Stack, Tooltip, Dialog, Container, CardContent } from '@mui/material';
 // utils
+import { fYear } from '../utils/formatTime';
 import { parametrosPesquisa } from '../utils/normalizeText';
 import { temNomeacao, isResponsavelUo } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getAll, getItem, resetItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
+import { getAll, getItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -84,6 +85,7 @@ export default function Processo() {
   const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
   const isPS =
     processo?.assunto === 'Diário' ||
+    processo?.assunto === 'Preçário' ||
     processo?.assunto === 'Produtos e Serviços' ||
     processo?.assunto === 'Receção de Cartões - DOP';
 
@@ -139,6 +141,8 @@ export default function Processo() {
     } else if (done === 'realizada') {
       enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
       handlePrevNext(true);
+    } else if (done === 'processo pendente') {
+      handlePrevNext(true);
     } else if (done === 'resgatado') {
       enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
     } else if (done === 'cancelado') {
@@ -186,7 +190,6 @@ export default function Processo() {
 
   useEffect(() => {
     if (mail && id && perfilId) {
-      dispatch(resetItem('processo'));
       dispatch(getItem('processo', { id, mail, perfilId }));
     }
   }, [dispatch, perfilId, mail, id]);
@@ -199,7 +202,10 @@ export default function Processo() {
 
   useEffect(() => {
     if (mail && perfilId) {
-      if (processo?.nome?.includes('Gerência') && idEstado('gerencia')?.id) {
+      if (
+        (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
+        idEstado('gerencia')?.id
+      ) {
         dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('gerencia')?.id }));
       } else if (processo?.nome === 'Devolução AN' && idEstado('devdop')?.id) {
         dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('devdop')?.id }));
@@ -290,7 +296,13 @@ export default function Processo() {
     <Page title="Processo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
-          heading={processo?.referencia || 'Detalhes do processo'}
+          heading={
+            processo
+              ? `${processo?.nentrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                  processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
+                }`
+              : 'Detalhes do processo'
+          }
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             {
@@ -305,7 +317,13 @@ export default function Processo() {
                 'Processos',
               href: linkNavigate,
             },
-            { name: processo?.referencia || 'Detalhes do processo' },
+            {
+              name: processo
+                ? `${processo?.nentrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                    processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
+                  }`
+                : 'Detalhes do processo',
+            },
           ]}
           action={
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 3, md: 4 }} alignItems="center">
@@ -412,7 +430,7 @@ export default function Processo() {
                         </>
                       )}
                       {processo?.is_lock && processo?.perfil_id === perfilId && (
-                        <Intervencao processo={processo} colaboradoresList={colaboradoresList} />
+                        <Intervencao colaboradoresList={colaboradoresList} />
                       )}
                       {processo?.is_lock && processo?.perfil_id !== perfilId && isResponsavel && processoPertence() && (
                         <Libertar processoID={processo?.id} perfilID={perfilId} />
@@ -454,7 +472,7 @@ export default function Processo() {
                   <Card sx={{ height: 1 }}>
                     <CardContent id="card_detail">
                       {!isPS && processo?.nota && <NotaProcesso nota={processo.nota} />}
-                      <DetalhesProcesso processo={processo} isPS={isPS} />
+                      <DetalhesProcesso isPS={isPS} />
                     </CardContent>
                   </Card>
                 </Grid>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 // @mui
 import { alpha, styled } from '@mui/material/styles';
 import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
@@ -66,9 +67,29 @@ export default function Indicadores() {
     }
   }, [dispatch, cc, mail]);
 
+  // const handleNotificationClick = () => {
+  //   if (Notification.permission === 'granted') {
+  //     const notification = new Notification('Título da Notificação', {
+  //       body: 'Corpo da notificação aqui',
+  //       icon: '/favicon/favicon.ico',
+  //     });
+
+  //     notification.onclick = () => {
+  //       window.location.href = 'http://localhost:3000';
+  //     };
+  //   } else if (Notification.permission !== 'denied') {
+  //     Notification.requestPermission().then((permission) => {
+  //       if (permission === 'granted') {
+  //         handleNotificationClick();
+  //       }
+  //     });
+  //   }
+  // };
+
   return (
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
+        {/* <Button onClick={handleNotificationClick}>Enviar Notificação</Button> */}
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
           <RootStyle>
             <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>

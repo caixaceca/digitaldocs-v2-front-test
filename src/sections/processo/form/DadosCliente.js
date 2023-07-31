@@ -15,7 +15,7 @@ DadosCliente.propTypes = { isInterno: PropTypes.bool, fluxo: PropTypes.object };
 export default function DadosCliente({ isInterno, fluxo = '' }) {
   const { watch, control } = useFormContext();
   const values = watch();
-  const isPS = fluxo?.assunto === 'Produtos e Serviços';
+  const isPS = fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário';
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
   const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
 
@@ -36,7 +36,7 @@ export default function DadosCliente({ isInterno, fluxo = '' }) {
               <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
           )}
-          {fluxo?.assunto === 'Abertura de conta' || fluxo?.assunto === 'OPE DARH' ? (
+          {fluxo?.assunto === 'Abertura de conta' ? (
             <>
               <Grid item xs={12} sm={6} xl={3}>
                 <Button

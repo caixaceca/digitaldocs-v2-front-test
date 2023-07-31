@@ -96,7 +96,6 @@ export function UoData({ entradas, uo, filter, dataSingle = '', dataRange = [], 
             setFilter({ tab: 'trabalhados', ...paramsObject(filter), data: format(newValue, 'yyyy-MM-dd') });
             setData(format(newValue, 'yyyy-MM-dd'));
           }}
-          renderInput={(params) => <TextField {...params} />}
           slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
         />
       )}

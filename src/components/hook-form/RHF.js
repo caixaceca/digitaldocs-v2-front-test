@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { TextField, Autocomplete } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TextField, Autocomplete, InputAdornment } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -101,6 +101,38 @@ export function RHFDatePicker({ name, label, ...other }) {
           value={field.value}
           onChange={(newValue) => field.onChange(newValue)}
           slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
+          {...other}
+        />
+      )}
+    />
+  );
+}
+
+// ----------------------------------------------------------------------
+
+RHFNumberField.propTypes = { name: PropTypes.string, tipo: PropTypes.string };
+
+export function RHFNumberField({ name, tipo, ...other }) {
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <TextField
+          {...field}
+          fullWidth
+          error={!!error}
+          helperText={error?.message}
+          InputProps={{
+            type: 'number',
+            endAdornment: (
+              <InputAdornment position="end">
+                {(tipo === 'percentagem' && '%') || (tipo === 'moeda' && 'CVE') || (tipo === 'prestacao' && 'meses')}
+              </InputAdornment>
+            ),
+          }}
           {...other}
         />
       )}

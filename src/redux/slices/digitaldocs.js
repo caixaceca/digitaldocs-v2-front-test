@@ -116,6 +116,7 @@ const slice = createSlice({
       switch (action.payload) {
         case 'processo':
           state.anexo = null;
+          state.origem = null;
           state.processo = null;
           state.filePreview = null;
           state.previewType = '';
@@ -424,6 +425,20 @@ const slice = createSlice({
       state.processoId = action.payload;
       state.previewType = '';
       state.filePreview = null;
+    },
+
+    processoPendenteSuccess(state, action) {
+      if (action.payload.from === 'tarefas') {
+        state.processos = state.processos.filter((row) => row.id !== action.payload.id);
+      }
+      state.isOpenModal = false;
+      state.selectedItem = null;
+    },
+
+    eliminarPendenciaSuccess(state) {
+      state.processo.ispendente = false;
+      state.isOpenModal = false;
+      state.selectedItem = null;
     },
 
     deleteEstadoSuccess(state, action) {
@@ -1057,12 +1072,16 @@ export function getItem(item, params) {
           const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
           if (params?.from === 'listagem') {
             dispatch(slice.actions.selectItem(response.data));
+          } else if (params?.from === 'clonagem') {
+            console.log('piu piu');
+            dispatch(slice.actions.selectParecer(response.data));
           } else {
             dispatch(slice.actions.getFluxoSuccess(response.data));
           }
           break;
         }
         case 'processo': {
+          dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
             options
@@ -1188,6 +1207,28 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.createFluxoSuccess(response.data));
           break;
         }
+        case 'clonar fluxo': {
+          const response = await axios.post(`${BASEURLDD}/v1/fluxos`, dados, options);
+          const transicoes = [];
+          params?.transicoes?.forEach((row) => {
+            transicoes.push({
+              modo: row?.modo,
+              to_alert: row?.to_alert,
+              fluxo_id: response?.data?.id,
+              perfilIDCC: params?.perfilId,
+              hasopnumero: row?.hasopnumero,
+              prazoemdias: row?.prazoemdias,
+              is_paralelo: row?.is_paralelo,
+              estado_final_id: row?.estado_final_id,
+              estado_inicial_id: row?.estado_inicial_id,
+              is_after_devolucao: row?.is_after_devolucao,
+              arqhasopnumero: row?.arqhasopnumero || false,
+            });
+          });
+          await axios.post(`${BASEURLDD}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
+          dispatch(slice.actions.createFluxoSuccess(response.data));
+          break;
+        }
         case 'estado': {
           const response = await axios.post(`${BASEURLDD}/v1/estados`, dados, options);
           dispatch(slice.actions.createEstadoSuccess(response.data));
@@ -1281,6 +1322,21 @@ export function createItem(item, dados, params) {
             await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${params?.id}`, params?.anexos, options1);
           }
           await axios.post(`${BASEURLDD}/v1/processos/encaminhar/${params?.id}`, dados, options);
+          if (params?.pender) {
+            await axios.patch(`${BASEURLDD}/v1/processos/aceitar/${params?.id}`, params?.aceitar, options);
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/pender?processoID=${params?.id}&perfilID=${params?.perfilId}`,
+              params?.pendencia,
+              options
+            );
+            if (params?.atribuir) {
+              await axios.patch(
+                `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.atribuir}`,
+                '',
+                options
+              );
+            }
+          }
           break;
         }
         case 'pedir acesso': {
@@ -1440,6 +1496,34 @@ export function updateItem(item, dados, params) {
         case 'desarquivar': {
           await axios.patch(`${BASEURLDD}/v1/processos/desarquivar/${params?.id}`, dados, options);
           dispatch(slice.actions.desarquivarProcessoSuccess());
+          break;
+        }
+        case 'pendencia': {
+          if (params?.aceitar) {
+            await axios.patch(`${BASEURLDD}/v1/processos/aceitar/${params?.id}`, params?.formDataAceitar, options);
+          }
+          await axios.patch(
+            `${BASEURLDD}/v1/processos/pender?processoID=${params?.id}&perfilID=${params?.perfilId}`,
+            dados,
+            options
+          );
+          if (params?.atribuir) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
+              '',
+              options
+            );
+          }
+          dispatch(slice.actions.processoPendenteSuccess(params));
+          break;
+        }
+        case 'eliminar pendencia': {
+          await axios.patch(
+            `${BASEURLDD}/v1/processos/pender?processoID=${params?.id}&perfilID=${params?.perfilId}`,
+            dados,
+            options
+          );
+          dispatch(slice.actions.eliminarPendenciaSuccess());
           break;
         }
 

@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
 import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
-// utils
-import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -19,6 +17,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 //
+import { applySortFilter } from './applySortFilter';
 import { MotivoPendenciaForm } from './ParametrizacaoForm';
 
 // ----------------------------------------------------------------------
@@ -33,7 +32,7 @@ const TABLE_HEAD = [
 
 export default function MotivosPendencias() {
   const dispatch = useDispatch();
-  const [filterSearch, setFilterSearch] = useSearchParams();
+  const [filter, setFilter] = useSearchParams();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { motivosPendencias, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
 
@@ -56,16 +55,20 @@ export default function MotivosPendencias() {
     }
   }, [dispatch, mail, cc?.perfil_id]);
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
 
-  const dataFiltered = applySortFilter({ motivosPendencias, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    dados: motivosPendencias,
+    filter: filter.get('filter'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -84,7 +87,7 @@ export default function MotivosPendencias() {
       <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
           {motivosPendencias.length > 1 && (
-            <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} tab="motivospendencias" />
+            <SearchToolbar filter={filter} setFilter={setFilter} tab="motivospendencias" />
           )}
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -135,28 +138,4 @@ export default function MotivosPendencias() {
       </RoleBasedGuard>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ motivosPendencias, comparator, filterSearch }) {
-  const stabilizedThis = motivosPendencias.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  motivosPendencias = stabilizedThis.map((el) => el[0]);
-
-  if (text) {
-    motivosPendencias = motivosPendencias.filter(
-      (row) =>
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(text)) !== -1) ||
-        (row?.obs && normalizeText(row?.obs).indexOf(normalizeText(text)) !== -1)
-    );
-  }
-
-  return motivosPendencias;
 }

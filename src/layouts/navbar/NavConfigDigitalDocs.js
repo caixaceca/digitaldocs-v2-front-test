@@ -66,8 +66,12 @@ const navConfig = [
   {
     subheader: 'Módulos',
     items: [
-      { title: 'Intranet', path: 'https://intranet.caixa.cv', icon: ICONS.home },
-      { title: 'Portal do colaborador', path: 'https://intranet.caixa.cv/portal/perfil', icon: ICONS.meu_perfil },
+      { title: 'Intranet - Teste', path: 'https://intraneteste.caixa.cv', icon: ICONS.home },
+      {
+        title: 'Portal do colaborador - Teste',
+        path: 'https://intraneteste.caixa.cv/portal/perfil',
+        icon: ICONS.meu_perfil,
+      },
     ],
   },
 ];

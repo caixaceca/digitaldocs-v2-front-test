@@ -2,7 +2,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
 import {
   Box,
-  Fab,
   Card,
   Stack,
   Table,
@@ -14,7 +13,6 @@ import {
   Typography,
   TableContainer,
 } from '@mui/material';
-import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 // utils
 import { BASEURL } from '../../utils/axios';
 import { normalizeText } from '../../utils/normalizeText';
@@ -27,9 +25,10 @@ import { useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
+import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -47,6 +46,7 @@ const TABLE_HEAD = [
 
 export default function Acessos() {
   const navigate = useNavigate();
+  const [filterSearch, setFilterSearch] = useSearchParams();
   const { isLoading } = useSelector((state) => state.digitaldocs);
   const { colaboradores } = useSelector((state) => state.intranet);
 
@@ -64,8 +64,6 @@ export default function Acessos() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
-  const [filterSearch, setFilterSearch] = useSearchParams();
-
   const handleFilterSearch = (event) => {
     setFilterSearch(event);
     setPage(0);
@@ -75,20 +73,16 @@ export default function Acessos() {
     navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${id}`);
   };
 
-  const colaboradoresByName = colaboradores.map((row) => ({
+  const colasByName = colaboradores.map((row) => ({
+    uo: row?.uo,
+    sexo: row.sexo,
+    perfil: row?.perfil,
+    foto_disk: row?.foto_disk,
     nome: row?.perfil?.displayName,
     unidade_organica: row?.uo?.label,
     nomeacao_funcao: row.nomeacao || row?.funcao,
-    sexo: row.sexo,
-    foto_disk: row?.foto_disk,
-    perfil: row?.perfil,
-    uo: row?.uo,
   }));
-  const dataFiltered = applySortFilter({
-    colaboradoresByName,
-    comparator: getComparator(order, orderBy),
-    filterSearch,
-  });
+  const dataFiltered = applySortFilter({ colasByName, comparator: getComparator(order, orderBy), filterSearch });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -100,7 +94,7 @@ export default function Acessos() {
         roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
       >
         <Card sx={{ p: 1 }}>
-          {colaboradoresByName.length > 1 && (
+          {colasByName.length > 1 && (
             <TableToolbarPerfilEstados filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
           )}
           <Scrollbar>
@@ -117,8 +111,8 @@ export default function Acessos() {
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Avatar
                               alt={row?.nome || row?.perfil?.mail}
-                              src={`${BASEURL}/colaborador/file/colaborador/${row?.foto_disk}`}
                               sx={{ boxShadow: (theme) => theme.customShadows.z8 }}
+                              src={row?.foto_disk && `${BASEURL}/colaborador/file/colaborador/${row?.foto_disk}`}
                             />
                             <Stack sx={{ ml: 2 }}>
                               <Typography variant="subtitle2" noWrap>
@@ -139,14 +133,7 @@ export default function Acessos() {
                         <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
                         <TableCell align="center" width={50}>
                           <Tooltip title="Gerir acessos" arrow>
-                            <Fab
-                              size="small"
-                              variant="soft"
-                              color="success"
-                              onClick={() => handleUpdate(row?.perfil?.id)}
-                            >
-                              <SwapHorizOutlinedIcon sx={{ height: 28, width: 28 }} />
-                            </Fab>
+                            <ViewItem swap handleView={() => handleUpdate(row?.perfil?.id)} />
                           </Tooltip>
                         </TableCell>
                       </TableRow>
@@ -163,13 +150,13 @@ export default function Acessos() {
 
           {!isNotFound && dataFiltered.length > 10 && (
             <TablePaginationAlt
+              page={page}
               dense={dense}
+              rowsPerPage={rowsPerPage}
+              onChangePage={onChangePage}
+              count={dataFiltered.length}
               onChangeDense={onChangeDense}
               onChangeRowsPerPage={onChangeRowsPerPage}
-              onChangePage={onChangePage}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              count={dataFiltered.length}
             />
           )}
         </Card>
@@ -180,10 +167,10 @@ export default function Acessos() {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ colaboradoresByName, comparator, filterSearch }) {
+function applySortFilter({ colasByName, comparator, filterSearch }) {
   const uo = filterSearch.get('uo') || 'Todos';
   const filter = filterSearch.get('filter') || '';
-  const stabilizedThis = colaboradoresByName.map((el, index) => [el, index]);
+  const stabilizedThis = colasByName.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -191,19 +178,19 @@ function applySortFilter({ colaboradoresByName, comparator, filterSearch }) {
     return a[1] - b[1];
   });
 
-  colaboradoresByName = stabilizedThis.map((el) => el[0]);
+  colasByName = stabilizedThis.map((el) => el[0]);
 
   if (uo !== 'Todos' && uo !== null) {
-    colaboradoresByName = colaboradoresByName.filter((row) => row?.uo?.label === uo);
+    colasByName = colasByName.filter((row) => row?.uo?.label === uo);
   }
 
   if (filter && filter !== null) {
-    colaboradoresByName = colaboradoresByName.filter(
+    colasByName = colasByName.filter(
       (row) =>
         (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
         (row?.perfil?.mail && normalizeText(row?.perfil?.mail).indexOf(normalizeText(filter)) !== -1)
     );
   }
 
-  return colaboradoresByName;
+  return colasByName;
 }

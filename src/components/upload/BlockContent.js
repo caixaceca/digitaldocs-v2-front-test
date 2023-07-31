@@ -14,7 +14,7 @@ export default function BlockContent() {
       direction={{ xs: 'column', md: 'row' }}
       sx={{ width: 1, textAlign: { xs: 'center', md: 'left' } }}
     >
-      <UploadIllustration sx={{ width: 150 }} />
+      <UploadIllustration sx={{ width: 140 }} />
 
       <Box sx={{ p: 3 }}>
         <Typography gutterBottom variant="h5">

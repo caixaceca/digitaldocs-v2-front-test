@@ -1,13 +1,16 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import { Grid, Button, Divider, Skeleton, Typography } from '@mui/material';
+import { Grid, Stack, Button, Divider, Typography } from '@mui/material';
 // utils
 import { getFileFormat, getFileThumb, b64toBlob } from '../../utils/getFileFormat';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAnexo, resetAnexo } from '../../redux/slices/digitaldocs';
+// components
+import { Loading } from '../../components/LoadingScreen';
 //
+import ModelosRespostas from './ModelosRespostas';
 import { PdfPreview, ImagemPreview } from './FilePreview';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -21,7 +24,7 @@ export default function Anexos({ anexos }) {
   const [url, setUrl] = useState('');
   const { mail } = useSelector((state) => state.intranet);
   const [selectedAnexo, setSelectedAnexo] = useState(null);
-  const { anexo, filePreview, previewType, isLoadingAnexo } = useSelector((state) => state.digitaldocs);
+  const { anexo, filePreview, previewType, isLoadingAnexo, processo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = anexos?.filter((row) => row.is_ativo);
   const anexosInativos = anexos?.filter((row) => !row.is_ativo);
   const isPdf = anexosAtivos?.[0]?.conteudo === 'application/pdf';
@@ -86,7 +89,10 @@ export default function Anexos({ anexos }) {
       </Grid>
       {isLoadingAnexo ? (
         <Grid item xs={12}>
-          <Skeleton variant="text" sx={{ height: 600, transform: 'scale(1)', mb: 1 }} />
+          <Stack direction="column" justifyContent="center" alignItems="center" sx={{ height: { xs: 400, lg: 600 } }}>
+            <Loading />
+            <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>
+          </Stack>
         </Grid>
       ) : (
         <>
@@ -120,7 +126,7 @@ export default function Anexos({ anexos }) {
                         disabled={row?.anexo === selectedAnexoPreview?.anexo}
                         sx={{ justifyContent: 'left', textAlign: 'left', mt: 1, py: 1 }}
                       >
-                        {row?.nome}
+                        {row?.nome} {row?.anexo === selectedAnexoPreview?.anexo && '(Em pré-vizualização)'}
                       </Button>
                     )
                 )}
@@ -145,12 +151,15 @@ export default function Anexos({ anexos }) {
                           disabled={row?.anexo === selectedAnexoPreview?.anexo}
                           sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: 0.5 }}
                         >
-                          {row?.nome}
+                          {row?.nome} {row?.anexo === selectedAnexoPreview?.anexo && '(Em pré-vizualização)'}
                         </Button>
                       )
                   )}
                 </Grid>
               </RoleBasedGuard>
+            )}
+            {!processo?.is_interno && processo?.nome?.includes('Notas Externas') && processo?.nome !== 'Arquivo' && (
+              <ModelosRespostas />
             )}
           </Grid>
         </Grid>

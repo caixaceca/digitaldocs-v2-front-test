@@ -136,12 +136,12 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
         sx={{ justifyContent: 'left' }}
         startIcon={<ChatOutlinedIcon sx={{ width: 20 }} />}
       >
-        Pareceres
+        Histórico de pareceres
       </Button>
 
       <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
-          <Typography variant="h6">Pareceres</Typography>
+          <Typography variant="h6">Histórico de pareceres</Typography>
           <IconButton onClick={onClose}>
             <CloseIcon sx={{ width: 20 }} />
           </IconButton>

@@ -1,9 +1,9 @@
+import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
 import { Card, Table, Stack, Divider, TableBody, TableContainer } from '@mui/material';
 // utils
-import { format } from 'date-fns';
 import { parametrosPesquisa } from '../../utils/normalizeText';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
 // hooks
@@ -33,7 +33,7 @@ const TABLE_HEAD = [
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
-  { id: 'trabalhado_em', label: 'Criado', align: 'left', width: 50 },
+  { id: 'trabalhado_em', label: 'Trabalhado', align: 'left', width: 50 },
   { id: '', width: 50 },
 ];
 
@@ -65,15 +65,16 @@ export default function TableTrabalhados() {
     onChangeRowsPerPage,
   } = useTable({
     defaultOrder: 'desc',
-    defaultOrderBy: 'nentrada',
+    defaultOrderBy: 'trabalhado_em',
     defaultRowsPerPage: fromAgencia ? 100 : 25,
     defaultDense: cc?.id === 362,
   });
 
   useEffect(() => {
-    if (cc?.uo?.id && uosList) {
+    if (cc?.uo?.id && uosList && !uo?.id) {
       setUo(uosList?.find((row) => row?.id === cc?.uo?.id));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cc?.uo?.id, uosList]);
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams, createSearchParams } from 'react-router-d
 import { Card, Stack, Table, Divider, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
-import { normalizeText, entidadesParse, noDados } from '../../utils/normalizeText';
+import { entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -16,10 +16,11 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import Scrollbar from '../../components/Scrollbar';
 import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { SearchToolbar2 } from '../../components/SearchToolbar';
+import { SearchToolbar } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-// sections
+//
 import ArquivoAnalytic from './ArquivoAnalytic';
+import { applySortFilter } from '../parametrizacao/applySortFilter';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -38,6 +39,7 @@ const TABLE_HEAD = [
 export default function Arquivos() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [filter, setFilter] = useSearchParams();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { arquivos, indicadoresArquivo, isLoading } = useSelector((state) => state.digitaldocs);
 
@@ -55,8 +57,6 @@ export default function Arquivos() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'data_last_transicao', defaultOrder: 'desc' });
 
-  const [filterSearch, setFilterSearch] = useSearchParams();
-
   useEffect(() => {
     if (mail && cc?.perfil_id) {
       dispatch(getAll('arquivados', { mail, perfilId: cc?.perfil_id }));
@@ -64,10 +64,10 @@ export default function Arquivos() {
     }
   }, [dispatch, cc?.perfil_id, mail]);
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleViewRow = (id) => {
     navigate({
@@ -76,7 +76,11 @@ export default function Arquivos() {
     });
   };
 
-  const dataFiltered = applySortFilter({ arquivos, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    dados: arquivos,
+    filter: filter.get('filter'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -113,9 +117,7 @@ export default function Arquivos() {
         </Scrollbar>
       </Card>
       <Card sx={{ p: 1 }}>
-        {arquivos.length > 1 && (
-          <SearchToolbar2 origem="arquivos" filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
-        )}
+        {arquivos.length > 1 && <SearchToolbar tab="arquivos" filter={filter} setFilter={setFilter} />}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -165,30 +167,4 @@ export default function Arquivos() {
       </Card>
     </RoleBasedGuard>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ arquivos, comparator, filterSearch }) {
-  const stabilizedThis = arquivos.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  arquivos = stabilizedThis.map((el) => el[0]);
-
-  if (text) {
-    arquivos = arquivos.filter(
-      (row) =>
-        (row?.referencia && normalizeText(row?.referencia).indexOf(normalizeText(text)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(text)) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(text)) !== -1)
-    );
-  }
-
-  return arquivos;
 }

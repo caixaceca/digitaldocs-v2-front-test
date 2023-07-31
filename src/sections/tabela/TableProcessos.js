@@ -14,17 +14,19 @@ import { normalizeText, entidadesParse, noDados, parametrosPesquisa } from '../.
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem } from '../../redux/slices/digitaldocs';
+import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
+import { ViewItem, Pendente } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+//
+import { ColocarPendente } from '../processo/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -33,8 +35,8 @@ TableProcessos.propTypes = { from: PropTypes.string };
 export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [filter, setFilter] = useSearchParams();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const [filterSearch, setFilterSearch] = useSearchParams();
   const { isLoading, meuAmbiente, meusAmbientes, meuFluxo, processos } = useSelector((state) => state.digitaldocs);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
   const title =
@@ -70,25 +72,22 @@ export default function TableProcessos({ from }) {
       dispatch(resetItem('processo'));
       dispatch(resetItem('processos'));
       setPage(0);
-      dispatch(
-        getAll(from, {
-          mail,
-          fluxoId: meuFluxo?.id,
-          estadoId: meuAmbiente?.id,
-          perfilId: cc?.perfil_id,
-        })
-      );
+      dispatch(getAll(from, { mail, fluxoId: meuFluxo?.id, estadoId: meuAmbiente?.id, perfilId: cc?.perfil_id }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, from, mail]);
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleViewRow = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=${from}${parametrosPesquisa(filterSearch)}`);
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=${from}${parametrosPesquisa(filter)}`);
+  };
+
+  const handlePendente = (item) => {
+    dispatch(selectItem(item));
   };
 
   const podeAdicionar = () => {
@@ -111,7 +110,7 @@ export default function TableProcessos({ from }) {
     newList.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
   });
 
-  const dataFiltered = applySortFilter({ from, newList, filterSearch, comparator: getComparator(order, orderBy) });
+  const dataFiltered = applySortFilter({ from, newList, filter, comparator: getComparator(order, orderBy) });
   const isNotFound = !dataFiltered.length;
 
   const TABLE_HEAD = [
@@ -156,9 +155,9 @@ export default function TableProcessos({ from }) {
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
-          origem={from}
-          filterSearch={filterSearch}
-          onFilterSearch={handleFilterSearch}
+          tab={from}
+          filter={filter}
+          setFilter={setFilter}
           colaboradoresList={colaboradoresList}
         />
         <Scrollbar>
@@ -225,7 +224,12 @@ export default function TableProcessos({ from }) {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <ViewItem handleView={() => handleViewRow(row?.id)} />
+                        <Stack direction="row" spacing={1} justifyContent="right">
+                          {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
+                            <Pendente handleView={() => handlePendente(row)} />
+                          )}
+                          <ViewItem handleView={() => handleViewRow(row?.id)} />
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))
@@ -251,17 +255,18 @@ export default function TableProcessos({ from }) {
           />
         )}
       </Card>
+      <ColocarPendente from="tarefas" />
     </>
   );
 }
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newList, comparator, filterSearch, from }) {
+function applySortFilter({ newList, comparator, filter, from }) {
   const stabilizedThis = newList.map((el, index) => [el, index]);
-  const text = filterSearch.get('filter');
-  const segmento = filterSearch.get('segmento');
-  const colaborador = filterSearch.get('colaborador');
+  const text = filter.get('filter');
+  const segmento = filter.get('segmento');
+  const colaborador = filter.get('colaborador');
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);

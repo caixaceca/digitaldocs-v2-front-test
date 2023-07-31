@@ -11,6 +11,7 @@ import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';
+import { podeSerAtribuido } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
@@ -34,10 +35,6 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     (state) => state.digitaldocs
   );
   const perfilId = cc?.perfil_id;
-  const podeAtribuir =
-    !fluxo?.assunto?.includes('Cartão') &&
-    !fluxo?.assunto?.includes('Extrato') &&
-    !fluxo?.assunto?.includes('Declarações');
   const credito = selectedProcesso?.credito || null;
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
   const [estado, setEstado] = useState(credito?.situacao_final_mes);
@@ -261,7 +258,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
             id: selectedProcesso?.id,
             msg: 'processo atualizado',
             isPendente: values.ispendente,
-            atribuir: values.ispendente && podeAtribuir,
+            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );
@@ -315,7 +312,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
             estadoId: meuAmbiente?.id,
             msg: 'processo adicionado',
             isPendente: values.ispendente,
-            atribuir: values.ispendente && podeAtribuir,
+            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
             abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );

@@ -1,8 +1,7 @@
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // @mui
 import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
-// utils
-import { normalizeText } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -20,6 +19,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 //
+import { applySortFilter } from './applySortFilter';
 import { TransicaoForm } from './ParametrizacaoForm';
 
 // ----------------------------------------------------------------------
@@ -38,6 +38,7 @@ const TABLE_HEAD = [
 
 export default function Transicao() {
   const dispatch = useDispatch();
+  const [filter, setFilter] = useSearchParams();
   const { fluxo, estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
   const transicoes = [];
   fluxo?.transicoes?.forEach((row) => {
@@ -62,18 +63,20 @@ export default function Transicao() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'id' });
 
-  const [filterSearch, setFilterSearch] = useSearchParams();
-
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
+  useEffect(() => {
     setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
 
-  const dataFiltered = applySortFilter({ transicoes, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({
+    dados: transicoes,
+    filter: filter.get('filter'),
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
 
   return (
@@ -93,7 +96,7 @@ export default function Transicao() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        {transicoes.length > 1 && <SearchToolbar filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />}
+        {transicoes.length > 1 && <SearchToolbar filter={filter} setFilter={setFilter} />}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -149,29 +152,4 @@ export default function Transicao() {
       <TransicaoForm onCancel={handleCloseModal} fluxoId={fluxo?.id} isOpenModal={isOpenModal} />
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ transicoes, comparator, filterSearch }) {
-  const filter = filterSearch.get('filter');
-  const stabilizedThis = transicoes.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  transicoes = stabilizedThis.map((el) => el[0]);
-
-  if (filter) {
-    transicoes = transicoes.filter(
-      (item) =>
-        (item.estado_inicial && normalizeText(item?.estado_inicial).indexOf(normalizeText(filter)) !== -1) ||
-        (item.estado_final && normalizeText(item?.estado_final).indexOf(normalizeText(filter)) !== -1)
-    );
-  }
-
-  return transicoes;
 }

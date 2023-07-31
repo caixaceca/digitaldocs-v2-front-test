@@ -4,7 +4,7 @@ import axios from 'axios';
 import { loginRequest } from '../../config';
 import { callMsGraph } from '../../graph';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { BASEURL, BASEURLSLIM } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
 
 // ----------------------------------------------------------------------
@@ -21,6 +21,7 @@ const initialState = {
   cc: null,
   frase: null,
   ajuda: null,
+  documento: null,
   accessToken: null,
   uos: [],
   links: [],
@@ -129,12 +130,20 @@ const slice = createSlice({
       state.accessToken = action.payload;
     },
 
+    getDocumentoSuccess(state, action) {
+      state.documento = action.payload;
+    },
+
     createDisposicaoSuccess(state) {
       state.isOpenDisposicao = false;
     },
 
     closeDisposicao(state) {
       state.isOpenDisposicao = false;
+    },
+
+    resetItem(state) {
+      state.documento = null;
     },
   },
 });
@@ -163,7 +172,7 @@ export function AzureIntranetHandShake(instance, accounts) {
           });
         });
     } catch (error) {
-      dispatch(slice.actions.hasError(error?.response?.data?.detail || 'Ocorreu um erro...'));
+      dispatch(slice.actions.errorMsg(error));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -178,7 +187,7 @@ export function AuthenticateColaborador(tokendeacesso, msalcolaborador) {
       const response = await axios.post(`${BASEURL}/perfil/msal`, msalcolaborador, options);
       dispatch(slice.actions.getProfileSuccess(response.data));
     } catch (error) {
-      dispatch(slice.actions.hasError(error?.response?.data?.detail || 'Ocorreu um erro...'));
+      dispatch(slice.actions.errorMsg(error));
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.resetError());
     }
@@ -189,6 +198,7 @@ export function AuthenticateColaborador(tokendeacesso, msalcolaborador) {
 
 export function getFromIntranet(item, params) {
   return async (dispatch) => {
+    dispatch(slice.actions.startLoading());
     try {
       const options = { headers: { 'Current-Colaborador': params?.mail } };
       switch (item) {
@@ -249,6 +259,15 @@ export function getFromIntranet(item, params) {
         case 'perfis': {
           const response = await axios.get(`${BASEURL}/perfil`, options);
           dispatch(slice.actions.getPerfisSuccess(response.data));
+          break;
+        }
+        case 'validar doc': {
+          dispatch(slice.actions.resetItem());
+          const response = await axios.get(
+            `${BASEURLSLIM}/api/v1/sniac/doc/info?documento=${params?.doc}&deCache=${params?.cache}`,
+            options
+          );
+          dispatch(slice.actions.getDocumentoSuccess(response.data));
           break;
         }
 

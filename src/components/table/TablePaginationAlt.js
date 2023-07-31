@@ -5,22 +5,22 @@ import { Box, Switch, TablePagination, FormControlLabel } from '@mui/material';
 
 TablePaginationAlt.propTypes = {
   dense: PropTypes.bool,
+  page: PropTypes.number,
+  count: PropTypes.number,
+  onChangePage: PropTypes.func,
+  rowsPerPage: PropTypes.number,
   onChangeDense: PropTypes.func,
   onChangeRowsPerPage: PropTypes.func,
-  onChangePage: PropTypes.func,
-  page: PropTypes.number,
-  rowsPerPage: PropTypes.number,
-  count: PropTypes.number,
 };
 
 export default function TablePaginationAlt({
+  page,
   dense,
+  count,
+  rowsPerPage,
+  onChangePage,
   onChangeDense,
   onChangeRowsPerPage,
-  onChangePage,
-  page,
-  rowsPerPage,
-  count,
 }) {
   return (
     <Box sx={{ position: 'relative' }}>
