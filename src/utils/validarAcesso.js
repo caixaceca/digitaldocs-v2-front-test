@@ -216,7 +216,8 @@ export function arquivoAtendimento(assunto, encGer) {
     (assunto?.includes('Cartão') ||
       assunto?.includes('Extrato') ||
       assunto?.includes('Declarações') ||
-      assunto?.includes('Cheques - Requisição')) &&
+      assunto?.includes('Cheques - Requisição') ||
+      assunto?.includes('Conta Caixa Ordenado')) &&
     !!encGer
   );
 }

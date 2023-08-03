@@ -13,7 +13,7 @@ import { useSelector } from '../redux/store';
 // components
 import Page from '../components/Page';
 // sections
-import { TableEntradas, TablePorConcluir, TableTrabalhados } from '../sections/tabela';
+import { TableEntradas, TablePorConcluir, TableTrabalhados, TableCartoes } from '../sections/tabela';
 
 // ----------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
-  const { meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const [currentTab, setCurrentTab] = useSearchParams({
     tab: 'entradas',
     uoId: cc?.uo?.id || '',
@@ -76,6 +76,9 @@ export default function Controle() {
   };
 
   const entradas = acessoEntradas() ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
+  const cartoes =
+    // isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
+    isAdmin ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }] : [];
 
   const VIEW_TABS = useMemo(
     () =>
@@ -83,9 +86,10 @@ export default function Controle() {
         ...entradas,
         { value: 'porconcluir', label: 'Por concluir', component: <TablePorConcluir /> },
         { value: 'trabalhados', label: 'Trabalhados', component: <TableTrabalhados /> },
+        ...cartoes,
       ] || [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [meusAmbientes, isAdmin, cc?.uo]
   );
 
   useEffect(() => {
@@ -93,7 +97,7 @@ export default function Controle() {
       setCurrentTab({ tab: VIEW_TABS?.[0]?.value, ...paramsObject(currentTab) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [VIEW_TABS]);
+  }, [VIEW_TABS, currentTab.get('tab')]);
 
   return (
     <Page title="Processos | DigitalDocs">

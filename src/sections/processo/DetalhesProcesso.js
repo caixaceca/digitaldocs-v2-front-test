@@ -15,13 +15,11 @@ import {
   TableBody,
   TableHead,
   Typography,
-  IconButton,
   DialogTitle,
   DialogContent,
   TableContainer,
 } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // utils
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { valorPorExtenso } from '../../utils/numeroPorExtenso';
@@ -33,6 +31,7 @@ import { useSelector } from '../../redux/store';
 import useToggle from '../../hooks/useToggle';
 // components
 import Label from '../../components/Label';
+import { Fechar } from '../../components/Actions';
 import Scrollbar from '../../components/Scrollbar';
 // _mock
 import { dis } from '../../_mock';
@@ -56,6 +55,7 @@ export default function DetalhesProcesso({ isPS }) {
   const motivo = motivosPendencias?.find((row) => row?.id?.toString() === processo?.mpendencia?.toString());
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
   const credito = processo?.credito || null;
+  const con = processo.con || null;
   const situacao = credito?.situacao_final_mes || '';
 
   const pareceresNaoValidados = () => {
@@ -302,6 +302,30 @@ export default function DetalhesProcesso({ isPS }) {
           )}
         </List>
       )}
+      {con && (
+        <List>
+          <ListItem disableGutters divider>
+            <Typography variant="subtitle1">Dados do depositante</Typography>
+          </ListItem>
+          {processo?.valor && <TextItem title="Valor:" text={fCurrency(processo?.valor)} />}
+          {con?.tipo_docid && con?.doc_id && <TextItem title={`${con.tipo_docid}:`} text={con?.doc_id} />}
+          {con?.nif && <TextItem title="NIF:" text={con?.nif} />}
+          {con?.nacionalidade && <TextItem title="Nacionalidade:" text={con?.nacionalidade} />}
+          {con?.estado_civil && <TextItem title="Estado civil:" text={con?.estado_civil} />}
+          {con.data_nascimento && <TextItem title="Data de nascimento:" text={ptDate(con.data_nascimento)} />}
+          {con?.profissao && <TextItem title="Profissão:" text={con?.profissao} />}
+          {con?.nome_mae && <TextItem title="Nome da mãe:" text={con?.nome_mae} />}
+          {con?.nome_pai && <TextItem title="Nome do pai:" text={con?.nome_pai} />}
+          {con?.morada && <TextItem title="Morada:" text={con?.morada} />}
+          {con?.local_trabalho && <TextItem title="Local de trabalho:" text={con?.local_trabalho} />}
+          {con?.contactos && <TextItem title="Contato(s):" text={con?.contactos} />}
+          {con?.emails && <TextItem title="Email(s):" text={con?.emails} />}
+          <TextItem title="Residente:" text={con?.residente ? 'SIM' : 'NÃO'} />
+          {con?.local_pais_nascimento && (
+            <TextItem title="Local e País de nascimento:" text={con?.local_pais_nascimento} />
+          )}
+        </List>
+      )}
     </Scrollbar>
   );
 }
@@ -362,11 +386,7 @@ function ValorItem({ title, valor, contas }) {
             <DialogTitle>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                 Contas eleitas para cativo
-                <Tooltip title="Fechar" arrow>
-                  <IconButton onClick={onClose}>
-                    <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
-                  </IconButton>
-                </Tooltip>
+                <Fechar onCancel={onClose} />
               </Stack>
             </DialogTitle>
             <DialogContent>
@@ -412,11 +432,7 @@ function ValorItem({ title, valor, contas }) {
             <DialogTitle>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                 Contas cativadas
-                <Tooltip title="Fechar" arrow>
-                  <IconButton onClick={onClose}>
-                    <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
-                  </IconButton>
-                </Tooltip>
+                <Fechar onCancel={onClose} />
               </Stack>
             </DialogTitle>
             <DialogContent>

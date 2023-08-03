@@ -274,7 +274,7 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth
-          value={filter?.get('filter')}
+          value={filter?.get('filter') || ''}
           onChange={(event) => setFilter({ tab, ...paramsObject(filter), filter: event.target.value || '' })}
           placeholder="Procurar..."
           InputProps={{
@@ -286,6 +286,48 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
           }}
         />
         {isFiltered && (
+          <Tooltip title="Remover filtros" arrow>
+            <IconButton color="inherit" onClick={() => handleResetFilter()}>
+              <ClearAllIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SearchToolbarCartoes.propTypes = { filter: PropTypes.object, setFilter: PropTypes.func };
+
+export function SearchToolbarCartoes({ filter, setFilter }) {
+  const handleResetFilter = () => {
+    setFilter({
+      tab: 'cartoes',
+      data: filter?.get('data') || format(new Date(), 'yyyy-MM-dd'),
+      datai: filter?.get('datai') || format(new Date(), 'yyyy-MM-dd'),
+      dataf: filter?.get('dataf') || format(new Date(), 'yyyy-MM-dd'),
+    });
+  };
+
+  return (
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+      <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
+        <TextField
+          fullWidth
+          value={filter?.get('filter') || ''}
+          onChange={(event) => setFilter({ tab: 'cartoes', ...paramsObject(filter), filter: event.target.value || '' })}
+          placeholder="Procurar..."
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+        {filter?.get('filter') && (
           <Tooltip title="Remover filtros" arrow>
             <IconButton color="inherit" onClick={() => handleResetFilter()}>
               <ClearAllIcon />

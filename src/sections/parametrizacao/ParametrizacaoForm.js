@@ -91,6 +91,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
       modelo: selectedItem?.modelo || '',
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
+      is_con: selectedItem?.is_con || false,
       is_ativo: selectedItem?.is_ativo || true,
       observacao: selectedItem?.observacao || '',
       is_interno: selectedItem?.is_interno || false,
@@ -145,17 +146,20 @@ export function FluxoForm({ isOpenModal, onCancel }) {
             <Grid item xs={12} sm={6}>
               <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={6} sm={3}>
               <RHFSwitch name="is_interno" labelPlacement="start" label="Interno" />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6} sm={3}>
+              <RHFSwitch name="is_ativo" labelPlacement="start" label="Ativo" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <RHFSwitch name="is_con" labelPlacement="start" label="Com. Operação Numerário" />
+            </Grid>
+            <Grid item xs={6} sm={3}>
               <RHFSwitch name="is_credito" labelPlacement="start" label="Crédito" />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6} sm={3}>
               <RHFSwitch name="limpo" labelPlacement="start" label="Limpo" />
-            </Grid>
-            <Grid item xs={4}>
-              <RHFSwitch name="is_ativo" labelPlacement="start" label="Ativo" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />

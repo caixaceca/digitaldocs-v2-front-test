@@ -10,9 +10,9 @@ import { RHFTextField, RHFDatePicker } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-DadosCliente.propTypes = { isInterno: PropTypes.bool, fluxo: PropTypes.object };
+DadosCliente.propTypes = { isInterno: PropTypes.bool, noperacao: PropTypes.string, fluxo: PropTypes.object };
 
-export default function DadosCliente({ isInterno, fluxo = '' }) {
+export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }) {
   const { watch, control } = useFormContext();
   const values = watch();
   const isPS = fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário';
@@ -101,6 +101,11 @@ export default function DadosCliente({ isInterno, fluxo = '' }) {
           {isPS && (
             <Grid item xs={12}>
               <RHFTextField name="titular" label="Descrição" />
+            </Grid>
+          )}
+          {(noperacao || fluxo?.is_con) && (
+            <Grid item xs={12} sm={6} xl={3}>
+              <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
             </Grid>
           )}
         </>

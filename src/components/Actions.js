@@ -1,18 +1,18 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Fab, Button, Tooltip } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import { Fab, Button, Stack, Tooltip, IconButton } from '@mui/material';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { openModal, selectItem, getItem } from '../../redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '../redux/store';
+import { openModal, selectItem, getItem } from '../redux/slices/digitaldocs';
 //
-import SvgIconStyle from '../SvgIconStyle';
+import SvgIconStyle from './SvgIconStyle';
 
 const wh = { width: 36, height: 36 };
 
@@ -147,5 +147,21 @@ export function Pendente({ detail = false, handleView }) {
         <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />
       </Fab>
     </Tooltip>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Fechar.propTypes = { onCancel: PropTypes.func };
+
+export function Fechar({ onCancel }) {
+  return (
+    <Stack>
+      <Tooltip title="Fechar" arrow>
+        <IconButton onClick={onCancel} sx={{ width: 28, height: 28 }}>
+          <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
+        </IconButton>
+      </Tooltip>
+    </Stack>
   );
 }

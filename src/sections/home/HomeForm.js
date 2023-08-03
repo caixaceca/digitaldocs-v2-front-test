@@ -31,8 +31,9 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import { ptDateTime } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { createItem, getFromIntranet } from '../../redux/slices/intranet';
+import { createItem, getFromIntranet, resetItem } from '../../redux/slices/intranet';
 // components
+import { Fechar } from '../../components/Actions';
 import { Loading } from '../../components/LoadingScreen';
 import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
 
@@ -159,7 +160,7 @@ export function ValidarDocForm({ open, onCancel }) {
   const formSchema = Yup.object().shape({ documento: Yup.string().required('Introduza o nº do documento') });
   const defaultValues = useMemo(() => ({ documento: '', cache: true }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
+  const { watch, reset, handleSubmit } = methods;
   const values = watch();
 
   const onSubmit = async () => {
@@ -170,18 +171,17 @@ export function ValidarDocForm({ open, onCancel }) {
     }
   };
 
+  const limparDados = () => {
+    reset(defaultValues);
+    dispatch(resetItem());
+  };
+
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           Validação de documento
-          <Stack>
-            <Tooltip title="Fechar" arrow>
-              <IconButton onClick={onCancel}>
-                <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <Fechar onCancel={onCancel} />
         </Stack>
       </DialogTitle>
       <DialogContent sx={{ mt: 1 }}>
@@ -198,11 +198,18 @@ export function ValidarDocForm({ open, onCancel }) {
                   name="documento"
                   label="Documento"
                   InputProps={{
-                    endAdornment: (
+                    endAdornment: values?.documento && (
                       <InputAdornment position="end">
-                        <Fab size="small" type="submit" variant="soft" loading={isLoading}>
-                          <SearchIcon />
-                        </Fab>
+                        <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
+                          <Tooltip title="Limpar" arrow>
+                            <IconButton onClick={limparDados} sx={{ width: 24, height: 24 }}>
+                              <CloseOutlinedIcon sx={{ width: 18, opacity: 0.5 }} />
+                            </IconButton>
+                          </Tooltip>
+                          <Fab size="small" type="submit" variant="soft" loading={isLoading}>
+                            <SearchIcon />
+                          </Fab>
+                        </Stack>
                       </InputAdornment>
                     ),
                   }}
@@ -250,7 +257,16 @@ export function ValidarDocForm({ open, onCancel }) {
                         {documento?.DATA_NASC && (
                           <TableRowItem title="Data de nascimento" desc={documento?.DATA_NASC} />
                         )}
-                        {documento?.SEXO && <TableRowItem title="Sexo" desc={documento?.SEXO} />}
+                        {documento?.SEXO && (
+                          <TableRowItem
+                            title="Sexo"
+                            desc={
+                              (documento?.SEXO === 'F' && 'FEMININO') ||
+                              (documento?.SEXO === 'M' && 'MASCULINO') ||
+                              documento?.SEXO
+                            }
+                          />
+                        )}
                         {documento?.NIF && <TableRowItem title="NIF" desc={documento?.NIF} />}
                         {documento?.FREGUESIA_ID && (
                           <TableRowItem title="ID Freguêsia" desc={documento?.FREGUESIA_ID} />

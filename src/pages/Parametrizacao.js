@@ -134,7 +134,7 @@ export default function Parametrizacao() {
       setCurrentTab({ tab: VIEW_TABS?.[0]?.value });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [VIEW_TABS]);
+  }, [VIEW_TABS, currentTab.get('tab')]);
 
   return (
     <Page title="Parametrização | DigitalDocs">
@@ -169,7 +169,7 @@ export default function Parametrizacao() {
         </Card>
 
         {VIEW_TABS.map((tab) => {
-          const isMatched = tab.value === currentTab.get('tab');
+          const isMatched = tab?.value === currentTab?.get('tab');
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
         })}
       </Container>

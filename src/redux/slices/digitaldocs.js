@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
@@ -38,12 +39,45 @@ const initialState = {
   selectedAnexoId: null,
   selectedParecer: null,
   indicadoresArquivo: null,
-  fluxos: [],
   linhas: [],
   versoes: [],
   estados: [],
   origens: [],
   acessos: [],
+  cartoes: [
+    // {
+    //   id: 1,
+    //   data_emissao: '2023-07-15',
+    //   balcao_entrega: 1,
+    //   balcao_domicilio: 2,
+    //   numero_cartao: 3654156815441239,
+    //   numero_cliente: 39297672,
+    //   nome_cliente: 'Ivandro Fortes Évora',
+    //   tipo_cartao: 'BURKAN',
+    //   confirmacao_dop: false,
+    //   data_confirmacao_dop: null,
+    //   confirmado_por_dop: null,
+    //   confirmacao_agencia: false,
+    //   data_confirmacao_agencia: null,
+    //   confirmado_por_agencia: null,
+    // },
+    // {
+    //   id: 2,
+    //   data_emissao: '2023-07-15',
+    //   balcao_entrega: 1,
+    //   balcao_domicilio: 25,
+    //   numero_cartao: 3568745922568791,
+    //   numero_cliente: 2899846,
+    //   nome_cliente: 'Cibel Freire Silva',
+    //   tipo_cartao: 'VISA PRÉ-PAGO',
+    //   confirmacao_dop: true,
+    //   data_confirmacao_dop: '2023-07-16',
+    //   confirmado_por_dop: 2,
+    //   confirmacao_agencia: false,
+    //   data_confirmacao_agencia: null,
+    //   confirmado_por_agencia: null,
+    // },
+  ],
   pesquisa: [],
   arquivos: [],
   entradas: [],
@@ -433,6 +467,13 @@ const slice = createSlice({
       }
       state.isOpenModal = false;
       state.selectedItem = null;
+    },
+
+    confirmarCartaoDopSuccess(state, action) {
+      const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
+      state.cartoes[index].confirmacao_dop = true;
+      state.cartoes[index].confirmado_por_dop = action.payload.perfilId;
+      state.cartoes[index].data_confirmacao_dop = format(new Date(), 'yyyy-MM-dd');
     },
 
     eliminarPendenciaSuccess(state) {
@@ -1524,6 +1565,14 @@ export function updateItem(item, dados, params) {
             options
           );
           dispatch(slice.actions.eliminarPendenciaSuccess());
+          break;
+        }
+        case 'conf. cartao dop': {
+          // await axios.delete(
+          //   `${BASEURLDD}/v1/processos/remover/anexos/${params?.perfilId}/${params?.processoId}/${params?.id}`,
+          //   options
+          // );
+          dispatch(slice.actions.confirmarCartaoDopSuccess({ id: params?.id, perfilId: params?.perfilId }));
           break;
         }
 

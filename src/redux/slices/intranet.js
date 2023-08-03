@@ -152,7 +152,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { closeDisposicao } = slice.actions;
+export const { closeDisposicao, resetItem } = slice.actions;
 
 // ----------------------------------------------------------------------
 

@@ -44,13 +44,13 @@ export default function Linksuteis() {
           sx={{
             p: 0,
             color: '#fff',
-            width: { xs: 30, sm: 40 },
-            height: { xs: 30, sm: 40 },
+            width: { xs: 28, sm: 40 },
+            height: { xs: 28, sm: 40 },
             transform: 'rotate(-45deg)',
             ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
           }}
         >
-          <LinkOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />
+          <LinkOutlinedIcon sx={{ width: { xs: 22, sm: 30 }, height: { xs: 22, sm: 30 } }} />
         </IconButtonAnimate>
       </Tooltip>
 

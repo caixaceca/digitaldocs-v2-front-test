@@ -65,8 +65,8 @@ export default function Notificacoes() {
           sx={{
             p: 0,
             color: '#fff',
-            width: { xs: 30, sm: 40 },
-            height: { xs: 30, sm: 40 },
+            width: { xs: 28, sm: 40 },
+            height: { xs: 28, sm: 40 },
             ...(open && {
               bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity),
             }),
