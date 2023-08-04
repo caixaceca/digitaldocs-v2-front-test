@@ -60,7 +60,7 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { anexoParecer, meusAmbientes, isOpenModal, selectedParecer, isOpenParecer, done, isSaving } = useSelector(
+  const { anexoParecer, meusAmbientes, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
     (state) => state.digitaldocs
   );
 
@@ -108,11 +108,11 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
   const handleConfirmValidar = () => {
     const formData = new FormData();
     formData.append('validado', true);
-    formData.append('parecerID', selectedParecer.id);
-    formData.append('parecer', selectedParecer.parecer);
-    formData.append('descricao', selectedParecer.parecer_obs);
+    formData.append('parecerID', itemSelected.id);
+    formData.append('parecer', itemSelected.parecer);
+    formData.append('descricao', itemSelected.parecer_obs);
     formData.append('perfilID', cc?.perfil_id);
-    dispatch(updateItem('parecer', formData, { mail, id: selectedParecer.id, processoId, msg: 'parecer validado' }));
+    dispatch(updateItem('parecer', formData, { mail, id: itemSelected.id, processoId, msg: 'parecer validado' }));
   };
 
   const podeDarParecer = (estadoId) => {
@@ -168,7 +168,7 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
                   >
                     <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                       <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography variant="subtitle1">{row?.nome}</Typography>
+                        <Typography variant="subtitle1">{row?.nome?.replace(' - P/S/P', '')}</Typography>
                         {row?.parecer && (
                           <Label
                             variant="ghost"
@@ -316,16 +316,16 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
               <ParecerExport
                 dados={{
                   assunto,
-                  parecer: selectedParecer,
-                  nome: selectedParecer?.validado
-                    ? colaboradores?.find((_row) => _row?.perfil?.id === selectedParecer?.parecer_perfil_id)?.perfil
+                  parecer: itemSelected,
+                  nome: itemSelected?.validado
+                    ? colaboradores?.find((_row) => _row?.perfil?.id === itemSelected?.parecer_perfil_id)?.perfil
                         ?.displayName
                     : cc?.perfil?.displayName,
                 }}
               />
             </PDFViewer>
           </Box>
-          {!selectedParecer?.validado && (
+          {!itemSelected?.validado && (
             <DialogActions sx={{ justifyContent: 'center', p: '12px !important' }}>
               <Button variant="contained" size="large" onClick={onOpen1}>
                 VALIDAR

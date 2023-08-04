@@ -75,7 +75,7 @@ export default function ParecerExport({ dados }) {
                 {dados?.parecer?.anexos
                   ?.filter((item) => item?.is_ativo)
                   .map((row) => (
-                    <Text key={row?.nome}> - {row?.nome}</Text>
+                    <Text key={row?.nome}> - {row?.nome?.replace(' - P/S/P', '')}</Text>
                   ))}
               </View>
             )}

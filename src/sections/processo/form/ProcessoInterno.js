@@ -68,6 +68,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     titular:
       (fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário') &&
       Yup.string().required('Descriçãao não pode ficar vazio'),
+    email:
+      fluxo?.assunto === 'Banca Virtual - Adesão' &&
+      Yup.string().email('Introduza um email válido').required('Introduza o email'),
     data_entrada:
       fluxo?.modelo !== 'Paralelo' &&
       Yup.date().typeError('Introduza uma data válida').required('Data de entrada não pode ficar vazio'),
@@ -78,10 +81,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     diadomes:
       agendado &&
       Yup.number()
-        .typeError('Introduza um número')
+        .typeError('Introduza o dia da execução')
         .min(1, 'Dia do mês não pode ser menor que 1')
-        .max(31, 'Dia do mês não pode ser maior que 31')
-        .required('Valor não pode ficar vazio'),
+        .max(31, 'Dia do mês não pode ser maior que 31'),
     conta:
       !fluxo?.limpo &&
       fluxo?.assunto !== 'Abertura de conta' &&
@@ -112,6 +114,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       obs: selectedProcesso?.obs || '',
       mobs: selectedProcesso?.mobs || '',
       conta: selectedProcesso?.conta || '',
+      email: selectedProcesso?.email || '',
       titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       diadomes: selectedProcesso?.diadomes || '',
@@ -181,6 +184,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         // optional
         if (values.obs) {
           formData.append('obs', values.obs);
+        }
+        if (values.email) {
+          formData.append('email', values.email);
         }
         if (isPSC) {
           formData.append(
@@ -321,6 +327,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         // optional
         if (values.obs) {
           formData.append('obs', values.obs);
+        }
+        if (values.email) {
+          formData.append('email', values.email);
         }
         if (fluxo?.assunto === 'Abertura de conta') {
           formData.append('conta', '');

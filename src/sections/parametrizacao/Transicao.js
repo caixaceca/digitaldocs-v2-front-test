@@ -73,7 +73,7 @@ export default function Transicao() {
   };
 
   const dataFiltered = applySortFilter({
-    dados: transicoes,
+    dados: transicoes.filter((option) => option?.modo !== 'desarquivamento'),
     filter: filter.get('filter'),
     comparator: getComparator(order, orderBy),
   });

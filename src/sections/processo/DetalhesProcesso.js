@@ -62,7 +62,8 @@ export default function DetalhesProcesso({ isPS }) {
     let pareceres = '';
     const pnv = processo?.pareceres?.filter((item) => !item?.validado);
     pnv?.forEach((row, index) => {
-      pareceres += pnv?.length - 1 === index ? row?.nome : `${row?.nome} / `;
+      pareceres +=
+        pnv?.length - 1 === index ? row?.nome?.replace(' - P/S/P', '') : `${row?.nome?.replace(' - P/S/P', '')} / `;
       return pareceres;
     });
     return pareceres;
@@ -154,6 +155,7 @@ export default function DetalhesProcesso({ isPS }) {
         </List>
       )}
       {(processo?.titular ||
+        processo?.email ||
         processo?.docidp ||
         processo?.docids ||
         processo?.bi_cni ||
@@ -166,13 +168,14 @@ export default function DetalhesProcesso({ isPS }) {
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
           {processo.titular && <TextItem text={processo.titular} title={isPS ? 'Descrição:' : 'Titular:'} />}
-          {processo?.docidp && <TextItem title={`${docPLabel}:`} text={processo.docidp} />}
-          {processo?.docids && <TextItem title={`${docSLabel}:`} text={processo.docids} />}
+          {processo.email && <TextItem title="Email:" text={processo.email} />}
+          {processo?.docidp && <TextItem title={`${docPLabel}:`} text={processo.docidp?.toString()} />}
+          {processo?.docids && <TextItem title={`${docSLabel}:`} text={processo.docids?.toString()} />}
           {_entidades && (
             <TextItem title={_entidades?.includes('/') ? 'Nº de entidade(s)' : 'Nº de entidade:'} text={_entidades} />
           )}
-          {processo.cliente && <TextItem title="Nº de cliente:" text={processo.cliente} />}
-          {processo.conta && <TextItem title="Nº de conta:" text={processo.conta} />}
+          {processo.cliente && <TextItem title="Nº de cliente:" text={processo.cliente?.toString()} />}
+          {processo.conta && <TextItem title="Nº de conta:" text={processo.conta?.toString()} />}
           {processo.segcliente && !processo?.is_credito && (
             <TextItem
               title="Segmento:"

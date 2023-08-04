@@ -75,7 +75,8 @@ export default function Controle() {
     return false;
   };
 
-  const entradas = acessoEntradas() ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
+  const entradas =
+    acessoEntradas() || isAdmin ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
   const cartoes =
     // isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
     isAdmin ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }] : [];

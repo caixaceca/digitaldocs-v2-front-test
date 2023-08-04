@@ -325,7 +325,7 @@ export function TableEstatistica({ from, uo, data }) {
   return (
     <Card sx={{ p: 1 }}>
       <Scrollbar>
-        <TableContainer sx={{ minWidth: 1200, position: 'relative', overflow: 'hidden', mb: 1 }}>
+        <TableContainer sx={{ minWidth: 1000, position: 'relative', overflow: 'hidden', mb: 1 }}>
           <Table size="small" id="tabel-estatistica-credito">
             <TableHead>
               <TableRow hover>
@@ -614,6 +614,11 @@ TableRowTotal.propTypes = {
 };
 
 function TableRowTotal({ total, total1 = 0, nivel, lenght = 1, from }) {
+  const cell =
+    (from === 'entrada' && 6) ||
+    (from === 'aprovado' && 4) ||
+    (from === 'contratado' && 9) ||
+    ((from === 'desistido' || from === 'indeferido') && 5);
   return (
     <>
       {nivel !== 1 && lenght !== 0 && (
@@ -622,15 +627,16 @@ function TableRowTotal({ total, total1 = 0, nivel, lenght = 1, from }) {
         </TableRow>
       )}
       <TableRow sx={{ backgroundColor: (nivel === 1 && 'background.neutral') || 'success.light' }}>
-        {from === 'entrada' && <TableCellTotal total={total} col={7} nivel={nivel} />}
-        {(from === 'desistido' || from === 'indeferido') && <TableCellTotal total={total} col={6} nivel={nivel} />}
-        {from === 'aprovado' && <TableCellTotal total={total} col={5} nivel={nivel} />}
-        {from === 'contratado' && <TableCellTotal total={total} col={10} nivel={nivel} />}
+        <TableCell colSpan={nivel === 1 ? cell : cell + 1}>{}</TableCell>
+        <TableCell align="right" sx={{ typography: (nivel === 1 && 'subtitle2') || 'subtitle1', whiteSpace: 'nowrap' }}>
+          {fNumber(total)}
+        </TableCell>
         {(from === 'aprovado' || from === 'contratado') && (
-          <TableCell align="right">
-            <Typography variant={(nivel === 1 && 'subtitle2') || 'subtitle1'} noWrap>
-              {fNumber(total1)}
-            </Typography>
+          <TableCell
+            align="right"
+            sx={{ typography: (nivel === 1 && 'subtitle2') || 'subtitle1', whiteSpace: 'nowrap' }}
+          >
+            {fNumber(total1)}
           </TableCell>
         )}
       </TableRow>
@@ -640,37 +646,26 @@ function TableRowTotal({ total, total1 = 0, nivel, lenght = 1, from }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TableCellTotal.propTypes = { total: PropTypes.number, nivel: PropTypes.number, col: PropTypes.number };
-
-function TableCellTotal({ total, nivel, col }) {
-  return (
-    <TableCell align="right" colSpan={(nivel === 1 && col) || col + 1}>
-      <Typography variant={(nivel === 1 && 'subtitle2') || 'subtitle1'} noWrap>
-        {fNumber(total)}
-      </Typography>
-    </TableCell>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
 FirstRowSegmento.propTypes = {
+  from: PropTypes.string,
   dados: PropTypes.object,
   linha: PropTypes.string,
   lenght: PropTypes.number,
   lenght1: PropTypes.number,
   segmento: PropTypes.string,
-  noLinha: PropTypes.bool,
-  from: PropTypes.string,
 };
 
-function FirstRowSegmento({ segmento, linha, dados, lenght, from, lenght1, noLinha = false }) {
+function FirstRowSegmento({ segmento, linha, dados, lenght, from, lenght1 }) {
   return (
     <TableRow hover>
       <TableCell rowSpan={lenght} sx={{ pl: '12px !important' }}>
         <Typography variant="subtitle2">{segmento}</Typography>
       </TableCell>
-      {!noLinha && (
+      {segmento === 'Entidades Públicas' || segmento === 'Garantias Bancárias' ? (
+        <TableCell rowSpan={lenght - 1} sx={{ pl: '12px !important' }}>
+          {}
+        </TableCell>
+      ) : (
         <TableCell rowSpan={lenght1 > 0 ? lenght1 + 1 : 2} sx={{ pl: '12px !important' }}>
           <Typography variant="subtitle2">{linha}</Typography>
         </TableCell>

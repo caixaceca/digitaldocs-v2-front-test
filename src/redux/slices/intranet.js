@@ -158,7 +158,6 @@ export const { closeDisposicao, resetItem } = slice.actions;
 
 export function AzureIntranetHandShake(instance, accounts) {
   return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
     try {
       instance
         .acquireTokenSilent({
@@ -172,24 +171,19 @@ export function AzureIntranetHandShake(instance, accounts) {
           });
         });
     } catch (error) {
-      dispatch(slice.actions.errorMsg(error));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      console.log(error);
     }
   };
 }
 
 export function AuthenticateColaborador(tokendeacesso, msalcolaborador) {
   return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
     try {
       const options = { headers: { Authorization: tokendeacesso }, withCredentials: true };
       const response = await axios.post(`${BASEURL}/perfil/msal`, msalcolaborador, options);
       dispatch(slice.actions.getProfileSuccess(response.data));
     } catch (error) {
-      dispatch(slice.actions.errorMsg(error));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      console.log(error);
     }
   };
 }

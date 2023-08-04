@@ -61,7 +61,7 @@ export default function Processo() {
     done,
     error,
     processo,
-    isLoading,
+    isLoadingP,
     isOpenModal,
     meusacessos,
     meusAmbientes,
@@ -201,7 +201,7 @@ export default function Processo() {
   }, [dispatch, perfilId, mail, processo?.origem_id]);
 
   useEffect(() => {
-    if (mail && perfilId) {
+    if (mail && perfilId && processo?.nome) {
       if (
         (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
         idEstado('gerencia')?.id
@@ -443,7 +443,7 @@ export default function Processo() {
           }
           sx={{ color: 'text.secondary' }}
         />
-        {isLoading ? (
+        {isLoadingP ? (
           <SkeletonProcesso />
         ) : (
           <Grid container spacing={3}>

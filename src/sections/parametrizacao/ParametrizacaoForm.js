@@ -202,7 +202,7 @@ export function ClonarFluxoForm({ isOpenModal, onCancel }) {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, fluxoId, selectedParecer } = useSelector((state) => state.digitaldocs);
+  const { done, error, isSaving, fluxoId, itemSelected } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'fluxo clonado') {
@@ -227,15 +227,16 @@ export function ClonarFluxoForm({ isOpenModal, onCancel }) {
   const defaultValues = useMemo(
     () => ({
       perfilID: cc?.perfil_id,
-      modelo: selectedParecer?.modelo || '',
-      limpo: selectedParecer?.limpo || false,
-      assunto: selectedParecer?.assunto || '',
-      is_ativo: selectedParecer?.is_ativo || true,
-      observacao: selectedParecer?.observacao || '',
-      is_interno: selectedParecer?.is_interno || false,
-      is_credito: selectedParecer?.is_credito || false,
+      is_con: itemSelected?.is_con,
+      modelo: itemSelected?.modelo || '',
+      limpo: itemSelected?.limpo || false,
+      assunto: itemSelected?.assunto || '',
+      is_ativo: itemSelected?.is_ativo || true,
+      observacao: itemSelected?.observacao || '',
+      is_interno: itemSelected?.is_interno || false,
+      is_credito: itemSelected?.is_credito || false,
     }),
-    [selectedParecer, cc?.perfil_id]
+    [itemSelected, cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -243,21 +244,21 @@ export function ClonarFluxoForm({ isOpenModal, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (selectedParecer) {
+    if (itemSelected) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedParecer]);
+  }, [itemSelected]);
 
   const onSubmit = async () => {
     try {
-      if (selectedParecer) {
+      if (itemSelected) {
         dispatch(
           createItem('clonar fluxo', JSON.stringify(values), {
             mail,
             msg: 'fluxo clonado',
             perfilId: cc?.perfil_id,
-            transicoes: selectedParecer?.transicoes,
+            transicoes: itemSelected?.transicoes?.filter((option) => option?.modo !== 'desarquivamento'),
           })
         );
       }

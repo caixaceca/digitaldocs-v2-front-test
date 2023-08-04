@@ -103,6 +103,11 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
               <RHFTextField name="titular" label="Descrição" />
             </Grid>
           )}
+          {fluxo?.assunto === 'Banca Virtual - Adesão' && (
+            <Grid item xs={12} xl={6}>
+              <RHFTextField name="email" label="Email" />
+            </Grid>
+          )}
           {(noperacao || fluxo?.is_con) && (
             <Grid item xs={12} sm={6} xl={3}>
               <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />

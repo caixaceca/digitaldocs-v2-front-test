@@ -11,6 +11,7 @@ import { getItem, getAll } from '../redux/slices/digitaldocs';
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
 import useSettings from '../hooks/useSettings';
+import { getComparator, applySort } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
@@ -31,7 +32,7 @@ export default function NovoEditarProcesso() {
   const isEdit = pathname.includes('edit');
   const [fluxo, setFluxo] = useState(null);
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente, isLoading } = useSelector(
+  const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente, isLoadingP } = useSelector(
     (state) => state.digitaldocs
   );
   const perfilId = cc?.perfil_id;
@@ -103,7 +104,10 @@ export default function NovoEditarProcesso() {
                     value={fluxo}
                     getOptionLabel={(option) => option?.assunto}
                     onChange={(event, newValue) => setFluxo(newValue)}
-                    options={meusFluxos.filter((option) => option?.id > 0)}
+                    options={applySort(
+                      meusFluxos.filter((option) => option?.id > 0),
+                      getComparator('asc', 'assunto')
+                    )}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
@@ -112,7 +116,7 @@ export default function NovoEditarProcesso() {
                 </Stack>
               </CardContent>
             </Card>
-            {isLoading ? (
+            {isLoadingP ? (
               <Card sx={{ mb: 3 }}>
                 <CardContent>
                   <Skeleton sx={{ height: 150, transform: 'scale(1)', mb: 3 }} />

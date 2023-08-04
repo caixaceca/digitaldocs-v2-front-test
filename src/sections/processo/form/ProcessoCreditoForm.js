@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { Grid, Card, TextField, CardContent, Autocomplete, InputAdornment } from '@mui/material';
+import { Grid, Card, TextField, CardContent, Autocomplete } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
@@ -11,6 +11,7 @@ import { useSelector } from '../../../redux/store';
 import {
   RHFTextField,
   RHFDatePicker,
+  RHFNumberField,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
@@ -45,15 +46,11 @@ export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, se
                 <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFTextField
+                <RHFNumberField
+                  tipo="moeda"
                   name="montante_solicitado"
                   label="Montante solicitado"
-                  placeholder="0.00"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">CVE</InputAdornment>,
-                    inputProps: { max: 999999999999999 },
-                    type: 'number',
-                  }}
+                  inputProps={{ style: { textAlign: 'right' } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
@@ -134,15 +131,11 @@ export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, se
                           <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                          <RHFTextField
+                          <RHFNumberField
+                            tipo="moeda"
                             name="montante_aprovado"
                             label="Montante aprovado"
-                            placeholder="0.00"
-                            InputProps={{
-                              endAdornment: <InputAdornment position="end">CVE</InputAdornment>,
-                              inputProps: { max: 999999999999999 },
-                              type: 'number',
-                            }}
+                            inputProps={{ style: { textAlign: 'right' } }}
                           />
                         </Grid>
                       </Grid>
@@ -155,29 +148,22 @@ export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, se
                           <RHFDatePicker name="data_contratacao" label="Data de contratação" disableFuture />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                          <RHFTextField
+                          <RHFNumberField
+                            tipo="moeda"
                             name="montante_contratado"
                             label="Montante contratado"
-                            placeholder="0.00"
-                            InputProps={{
-                              endAdornment: <InputAdornment position="end">CVE</InputAdornment>,
-                              inputProps: { max: 999999999999999 },
-                              type: 'number',
-                            }}
+                            inputProps={{ style: { textAlign: 'right' } }}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
                           <RHFTextField name="prazo_amortizacao" label="Prazo de amortização" />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                          <RHFTextField
+                          <RHFNumberField
+                            tipo="percentagem"
                             name="taxa_juro"
                             label="Taxa de juro"
-                            placeholder="0.00"
-                            InputProps={{
-                              endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                              type: 'number',
-                            }}
+                            inputProps={{ style: { textAlign: 'right' } }}
                           />
                         </Grid>
                         <Grid item xs={12} sm={3}>

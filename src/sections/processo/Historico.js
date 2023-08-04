@@ -225,7 +225,10 @@ function Transicao({ row, addConector }) {
   const estadoDestino = () => {
     let destinos = '';
     row?.transicoes?.forEach((item, index) => {
-      destinos += row?.transicoes?.length - 1 === index ? item?.nomef : `${item?.nomef} / `;
+      destinos +=
+        row?.transicoes?.length - 1 === index
+          ? item?.nomef?.replace(' - P/S/P', '')
+          : `${item?.nomef?.replace(' - P/S/P', '')} / `;
       return destinos;
     });
     return destinos;

@@ -17,6 +17,7 @@ const initialState = {
   isAdmin: false,
   isSaving: false,
   isLoading: false,
+  isLoadingP: false,
   isOpenModal: false,
   isOpenParecer: false,
   isLoadingAnexo: false,
@@ -36,8 +37,8 @@ const initialState = {
   selectedItem: null,
   anexoParecer: null,
   estadoFilter: null,
+  itemSelected: null,
   selectedAnexoId: null,
-  selectedParecer: null,
   indicadoresArquivo: null,
   linhas: [],
   versoes: [],
@@ -107,6 +108,10 @@ const slice = createSlice({
   reducers: {
     startLoading(state) {
       state.isLoading = true;
+    },
+
+    startLoadingP(state) {
+      state.isLoadingP = true;
     },
 
     startSaving(state) {
@@ -249,6 +254,7 @@ const slice = createSlice({
     getProcessoSuccess(state, action) {
       state.processoId = '';
       state.processo = action.payload;
+      state.isLoadingP = false;
     },
 
     getAceitarSuccess(state, action) {
@@ -581,7 +587,7 @@ const slice = createSlice({
     },
 
     selectParecer(state, action) {
-      state.selectedParecer = action.payload;
+      state.itemSelected = action.payload;
       state.isOpenParecer = true;
     },
 
@@ -591,7 +597,7 @@ const slice = createSlice({
 
     closeParecer(state) {
       state.isOpenParecer = false;
-      state.selectedParecer = null;
+      state.itemSelected = null;
     },
 
     resetAnexo(state) {
@@ -1122,6 +1128,7 @@ export function getItem(item, params) {
           break;
         }
         case 'processo': {
+          dispatch(slice.actions.startLoadingP());
           dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
@@ -1131,6 +1138,7 @@ export function getItem(item, params) {
           break;
         }
         case 'prevnext': {
+          dispatch(slice.actions.startLoadingP());
           dispatch(slice.actions.resetItem('processo'));
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/prev/next/${params?.perfilId}/${params?.estadoId}/${params?.processoId}?next=${params?.next}`,
@@ -1514,6 +1522,7 @@ export function updateItem(item, dados, params) {
         }
         case 'cancelar': {
           await axios.patch(`${BASEURLDD}/v1/processos/cancelar/${params?.id}`, dados, options);
+          dispatch(slice.actions.startLoadingP());
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
             options
@@ -1522,6 +1531,7 @@ export function updateItem(item, dados, params) {
           break;
         }
         case 'resgatar': {
+          dispatch(slice.actions.startLoadingP());
           const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${params?.id}`, dados, options);
           dispatch(slice.actions.getProcessoSuccess(response.data));
           break;
