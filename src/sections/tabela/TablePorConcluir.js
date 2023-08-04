@@ -146,8 +146,8 @@ export default function TablePorConcluir() {
                       <TableCell>
                         <Typography variant="body2">{row?.nome}</Typography>
                         {row?.motivo && (
-                          <Label variant="ghost" color="warning" sx={{ mt: 1 }}>
-                            {row?.motivo}
+                          <Label variant="ghost" color="warning" sx={{ mt: 0.5 }}>
+                            PENDENTE: {row?.motivo}
                           </Label>
                         )}
                       </TableCell>

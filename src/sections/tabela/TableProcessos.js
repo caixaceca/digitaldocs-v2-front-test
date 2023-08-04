@@ -195,7 +195,7 @@ export default function TableProcessos({ from }) {
                           <>
                             <Typography variant="body2">{row?.motivo}</Typography>
                             {row?.nome && (
-                              <Label variant="ghost" color="default" sx={{ mt: 1 }}>
+                              <Label variant="ghost" color="default" sx={{ mt: 0.5 }}>
                                 {row?.nome}
                               </Label>
                             )}
