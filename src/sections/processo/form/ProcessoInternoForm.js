@@ -4,31 +4,22 @@ import { useFormContext } from 'react-hook-form';
 // @mui
 import { Grid, Card, CardContent } from '@mui/material';
 // components
-import {
-  RHFSwitch,
-  RHFTextField,
-  RHFDatePicker,
-  RHFNumberField,
-  RHFAutocompleteSimple,
-} from '../../../components/hook-form';
+import { RHFSwitch, RHFTextField, RHFDatePicker, RHFAutocompleteSimple } from '../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
 import AnexosExistentes from './AnexosExistentes';
 import { Pendencia, ObsNovosAnexos } from './Outros';
-// _mock
-import { dis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
 ProcessoInternoForm.propTypes = {
   fluxo: PropTypes.object,
-  setProprio: PropTypes.func,
   setAgendado: PropTypes.func,
   setPendente: PropTypes.func,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setPendente, setProprio, fluxo }) {
+export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setPendente, fluxo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
@@ -87,79 +78,35 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
         <Grid item xs={12}>
           <Card>
             <CardContent>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <RHFSwitch
-                    name="proprio"
-                    labelPlacement="start"
-                    onChange={(event, value) => {
-                      setValue('proprio', value);
-                      setProprio(value);
-                    }}
-                    label="Depositante é o próprio beneficiário"
-                  />
+              <Grid container spacing={3} justifyContent="center">
+                <Grid item xs={12} sm={6}>
+                  <RHFSwitch name="titular_ordenador" labelPlacement="start" label="Depositante é o próprio titular" />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <RHFNumberField
-                    name="valor"
-                    label="Valor"
-                    tipo="moeda"
-                    inputProps={{ style: { textAlign: 'right' } }}
-                  />
-                </Grid>
-                {!values.proprio && (
+                {!values?.titular_ordenador && (
                   <>
-                    <Grid item xs={12} sm={6} xl={3}>
-                      <RHFAutocompleteSimple
-                        name="tipo_docid"
-                        label="Documento de identificação"
-                        options={dis?.map((row) => row?.label)}
-                      />
+                    <Grid item xs={12} sm={6}>
+                      <RHFSwitch name="residente" labelPlacement="start" label="Residente" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFTextField name="doc_id" label="Nº do documento" />
+                      <RHFTextField name="profissao" label="Profissão" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFTextField name="nif" label="NIF" />
+                      <RHFTextField name="local_trabalho" label="Local de trabalho" />
+                    </Grid>
+                    <Grid item xs={12} xl={6}>
+                      <RHFTextField name="morada" label="Morada" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFTextField name="nacionalidade" label="Nacionalidade" />
+                      <RHFTextField name="telefone" label="Telefone" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFTextField name="telemovel" label="Telemóvel" />
+                    </Grid>
+                    <Grid item xs={12} xl={6}>
+                      <RHFTextField name="emails" label="Email(s)" />
                     </Grid>
                   </>
                 )}
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFTextField name="estado_civil" label="Estado civil" />
-                </Grid>
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFTextField name="profissao" label="Profissão" />
-                </Grid>
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFDatePicker name="data_nascimento" label="Data de nascimento" />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <RHFTextField name="nome_mae" label="Nome do mãe" />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <RHFTextField name="nome_pai" label="Nome da pai" />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <RHFTextField name="morada" label="Morada" />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <RHFTextField name="local_trabalho" label="Local de trabalho" />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <RHFTextField name="contactos" label="Contato(s)" />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <RHFTextField name="emails" label="Email(s)" />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <RHFSwitch name="residente" labelPlacement="start" label="Residente" />
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <RHFTextField name="local_pais_nascimento" label="Local e País de nascimento" />
-                </Grid>
               </Grid>
             </CardContent>
           </Card>

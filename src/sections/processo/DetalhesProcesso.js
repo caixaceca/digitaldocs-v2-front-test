@@ -82,7 +82,7 @@ export default function DetalhesProcesso({ isPS }) {
         processo?.data_entrada ||
         processo.ispendente) && (
         <List>
-          <ListItem disableGutters divider secondaryAction="">
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
           {processo?.nentrada && <TextItem title="Nº de entrada:" text={processo.nentrada} />}
@@ -164,7 +164,7 @@ export default function DetalhesProcesso({ isPS }) {
         processo?.conta ||
         processo?.segcliente) && (
         <List>
-          <ListItem disableGutters divider>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
           {processo.titular && <TextItem text={processo.titular} title={isPS ? 'Descrição:' : 'Titular:'} />}
@@ -186,7 +186,7 @@ export default function DetalhesProcesso({ isPS }) {
       )}
       {(!processo?.is_interno || processo?.noperacao) && (
         <List>
-          <ListItem disableGutters divider>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
           {processo?.noperacao && <TextItem title="Nº de operação:" text={processo.noperacao} />}
@@ -238,7 +238,7 @@ export default function DetalhesProcesso({ isPS }) {
       )}
       {processo.agendado && (
         <List>
-          <ListItem disableGutters divider>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Agendamento</Typography>
           </ListItem>
           {processo.periodicidade && <TextItem title="Periodicidade:" text={processo.periodicidade} />}
@@ -251,7 +251,7 @@ export default function DetalhesProcesso({ isPS }) {
       )}
       {processo.is_credito && credito && (
         <List>
-          <ListItem disableGutters divider>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Info. crédito</Typography>
           </ListItem>
           {situacao && (
@@ -307,26 +307,17 @@ export default function DetalhesProcesso({ isPS }) {
       )}
       {con && (
         <List>
-          <ListItem disableGutters divider>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Dados do depositante</Typography>
           </ListItem>
-          {processo?.valor && <TextItem title="Valor:" text={fCurrency(processo?.valor)} />}
-          {con?.tipo_docid && con?.doc_id && <TextItem title={`${con.tipo_docid}:`} text={con?.doc_id} />}
-          {con?.nif && <TextItem title="NIF:" text={con?.nif} />}
-          {con?.nacionalidade && <TextItem title="Nacionalidade:" text={con?.nacionalidade} />}
-          {con?.estado_civil && <TextItem title="Estado civil:" text={con?.estado_civil} />}
-          {con.data_nascimento && <TextItem title="Data de nascimento:" text={ptDate(con.data_nascimento)} />}
+          <TextItem title="Depositante é o próprio titular:" text={con?.titular_ordenador === 'f' ? 'NÃO' : 'SIM'} />
+          {con?.telefone && <TextItem title="Telefone:" text={con?.telefone} />}
+          {con?.telemovel && <TextItem title="Telemóvel:" text={con?.telemovel} />}
+          {con?.emails && <TextItem title="Email(s):" text={con?.emails} />}
           {con?.profissao && <TextItem title="Profissão:" text={con?.profissao} />}
-          {con?.nome_mae && <TextItem title="Nome da mãe:" text={con?.nome_mae} />}
-          {con?.nome_pai && <TextItem title="Nome do pai:" text={con?.nome_pai} />}
+          {con?.titular_ordenador === 'f' && <TextItem title="Residente:" text={con?.residente ? 'SIM' : 'NÃO'} />}
           {con?.morada && <TextItem title="Morada:" text={con?.morada} />}
           {con?.local_trabalho && <TextItem title="Local de trabalho:" text={con?.local_trabalho} />}
-          {con?.contactos && <TextItem title="Contato(s):" text={con?.contactos} />}
-          {con?.emails && <TextItem title="Email(s):" text={con?.emails} />}
-          <TextItem title="Residente:" text={con?.residente ? 'SIM' : 'NÃO'} />
-          {con?.local_pais_nascimento && (
-            <TextItem title="Local e País de nascimento:" text={con?.local_pais_nascimento} />
-          )}
         </List>
       )}
     </Scrollbar>

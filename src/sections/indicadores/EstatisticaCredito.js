@@ -47,8 +47,6 @@ import { BarChart, SkeletonTable } from '../../components/skeleton';
 
 const headStyle = { border: 'none', typography: 'h6' };
 
-// ----------------------------------------------------------------------
-
 const TabsWrapperStyle = styled('div')(({ theme }) => ({
   zIndex: 9,
   bottom: 0,
@@ -151,22 +149,20 @@ export default function EstatisticaCredito() {
               onChange={(newValue) => setData(newValue)}
               slotProps={{ textField: { fullWidth: true, size: 'small' } }}
             />
-            {currentTab !== 'resumo' && (
-              <Stack>
-                <ReactHTMLTableToExcel
-                  id="table-xls-button-tipo"
-                  table="tabel-estatistica-credito"
-                  className="MuiButtonBase-root-MuiButton-root"
-                  sheet={`${currentTab}`}
-                  filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
-                  buttonText={
-                    <Button variant="soft" startIcon={getFileThumb('file.xlsx')}>
-                      Exportar
-                    </Button>
-                  }
-                />
-              </Stack>
-            )}
+            <Stack>
+              <ReactHTMLTableToExcel
+                id="table-xls-button-tipo"
+                table="tabel-estatistica-credito"
+                className="MuiButtonBase-root-MuiButton-root"
+                sheet={`${currentTab}`}
+                filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
+                buttonText={
+                  <Button variant="soft" startIcon={getFileThumb('file.xlsx')}>
+                    Exportar
+                  </Button>
+                }
+              />
+            </Stack>
           </Stack>
         }
         links={[{ name: '' }]}
@@ -200,42 +196,23 @@ export default function EstatisticaCredito() {
 
 export function Totais() {
   const { isLoading, estatisticaCredito } = useSelector((state) => state.digitaldocs);
-  // Entradas
-  const totalEntrada = sumBy(estatisticaCredito?.entrada, 'montantes');
-  const entradaEmp = sumDados(estatisticaCredito?.entrada, 'Empresa', 'montantes');
-  const entradaPart = sumDados(estatisticaCredito?.entrada, 'Particular', 'montantes');
-  const entradaPi = sumDados(estatisticaCredito?.entrada, 'Produtor Individual', 'montantes');
-  const entradaEp = sumDados(estatisticaCredito?.entrada, 'Entidade Pública', 'montantes');
 
-  // Aprovados
-  const totalAprovado = sumBy(estatisticaCredito?.aprovado, 'montante_aprovado');
-  const aprovadoEmp = sumDados(estatisticaCredito?.aprovado, 'Empresa', 'montante_aprovado');
-  const aprovadoPart = sumDados(estatisticaCredito?.aprovado, 'Particular', 'montante_aprovado');
-  const aprovadoPi = sumDados(estatisticaCredito?.aprovado, 'Produtor Individual', 'montante_aprovado');
-  const aprovadoEp = sumDados(estatisticaCredito?.aprovado, 'Entidade Pública', 'montante_aprovado');
-
-  // Contratados
-  const totalContratado = sumBy(estatisticaCredito?.contratado, 'montante_contratado');
-  const contratadoEmp = sumDados(estatisticaCredito?.contratado, 'Empresa', 'montante_contratado');
-  const contratadoPart = sumDados(estatisticaCredito?.contratado, 'Particular', 'montante_contratado');
-  const contratadoPi = sumDados(estatisticaCredito?.contratado, 'Produtor Individual', 'montante_contratado');
-  const contratadoEp = sumDados(estatisticaCredito?.contratado, 'Entidade Pública', 'montante_contratado');
-
-  // Indeferido/Desistido
-  const totalID =
-    sumBy(estatisticaCredito?.indeferido, 'montantes') + sumBy(estatisticaCredito?.desistido, 'montantes');
-  const idEmp =
-    sumDados(estatisticaCredito?.indeferido, 'Empresa', 'montantes') +
-    sumDados(estatisticaCredito?.desistido, 'Empresa', 'montantes');
-  const idPart =
-    sumDados(estatisticaCredito?.indeferido, 'Particular', 'montantes') +
-    sumDados(estatisticaCredito?.desistido, 'Particular', 'montantes');
-  const idPi =
-    sumDados(estatisticaCredito?.indeferido, 'Produtor Individual', 'montantes') +
-    sumDados(estatisticaCredito?.desistido, 'Produtor Individual', 'montantes');
-  const idEp =
-    sumDados(estatisticaCredito?.indeferido, 'Entidade Pública', 'montantes') +
-    sumDados(estatisticaCredito?.desistido, 'Entidade Pública', 'montantes');
+  // Particular
+  const empConst = dadosResumo(estatisticaCredito, 'Empresa', 'Construção', false);
+  const empTeso = dadosResumo(estatisticaCredito, 'Empresa', 'Tesouraria', false);
+  const empInvest = dadosResumo(estatisticaCredito, 'Empresa', 'Investimento', false);
+  // Particular
+  const partHabit = dadosResumo(estatisticaCredito, 'Particular', 'Habitação', false);
+  const partCredi = dadosResumo(estatisticaCredito, 'Particular', 'CrediCaixa', false);
+  const partOutros = dadosResumo(estatisticaCredito, 'Particular', 'Outros', false);
+  // Particular
+  const piTeso = dadosResumo(estatisticaCredito, 'Produtor Individual', 'Tesouraria', false);
+  const piInvest = dadosResumo(estatisticaCredito, 'Produtor Individual', 'Investimento', false);
+  const piMicro = dadosResumo(estatisticaCredito, 'Produtor Individual', 'Micro-Crédito', false);
+  // Entidades Públicas
+  const entPub = dadosResumo(estatisticaCredito, 'Entidade Pública', '', true);
+  // Garantias Bancárias
+  const garantias = dadosResumo(estatisticaCredito, '', 'Garantia Bancária', true);
 
   return (
     <Grid container spacing={3}>
@@ -249,49 +226,159 @@ export function Totais() {
         </Grid>
       ) : (
         <>
-          <CardResumo label="Entrada" total={totalEntrada} />
-          <CardResumo label="Aprovado" total={totalAprovado} />
-          <CardResumo label="Contratado" total={totalContratado} />
-          <CardResumo label="Indeferido/Desistido" total={totalID} />
+          <CardResumo
+            label="Entrada"
+            qtd={estatisticaCredito?.entrada?.length}
+            total={sumBy(estatisticaCredito?.entrada, 'montantes')}
+          />
+          <CardResumo
+            label="Aprovado"
+            qtd={estatisticaCredito?.aprovado?.length}
+            total={sumBy(estatisticaCredito?.aprovado, 'montante_aprovado')}
+          />
+          <CardResumo
+            label="Contratado"
+            qtd={estatisticaCredito?.contratado?.length}
+            total={sumBy(estatisticaCredito?.contratado, 'montante_contratado')}
+          />
+          <CardResumo
+            label="Indeferido/Desistido"
+            qtd={estatisticaCredito?.indeferido?.length + estatisticaCredito?.desistido?.length}
+            total={
+              sumBy(estatisticaCredito?.indeferido, 'montantes') + sumBy(estatisticaCredito?.desistido, 'montantes')
+            }
+          />
           <Grid item xs={12}>
             <Card sx={{ p: 1 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell> </TableCell>
-                    <TableCell align="right">Entrada</TableCell>
-                    <TableCell align="right"> </TableCell>
-                    <TableCell align="right">Aprovado</TableCell>
-                    <TableCell align="right"> </TableCell>
-                    <TableCell align="right">Contratado</TableCell>
-                    <TableCell align="right"> </TableCell>
-                    <TableCell align="right">Indeferido/Desistido</TableCell>
-                    <TableCell align="right"> </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRowResumo
-                    label="Empresa"
-                    total={{ totalEntrada, totalAprovado, totalContratado, totalID }}
-                    dados={{ entrada: entradaEmp, aprovado: aprovadoEmp, contratado: contratadoEmp, id: idEmp }}
-                  />
-                  <TableRowResumo
-                    label="Particular"
-                    total={{ totalEntrada, totalAprovado, totalContratado, totalID }}
-                    dados={{ entrada: entradaPart, aprovado: aprovadoPart, contratado: contratadoPart, id: idPart }}
-                  />
-                  <TableRowResumo
-                    label="Produtor Individual"
-                    total={{ totalEntrada, totalAprovado, totalContratado, totalID }}
-                    dados={{ entrada: entradaPi, aprovado: aprovadoPi, contratado: contratadoPi, id: idPi }}
-                  />
-                  <TableRowResumo
-                    label="Entidade Pública"
-                    total={{ totalEntrada, totalAprovado, totalContratado, totalID }}
-                    dados={{ entrada: entradaEp, aprovado: aprovadoEp, contratado: contratadoEp, id: idEp }}
-                  />
-                </TableBody>
-              </Table>
+              <Scrollbar>
+                <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
+                  <Table size="small" id="tabel-estatistica-credito">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell rowSpan={2}>Segmento</TableCell>
+                        <TableCell rowSpan={2}>Natureza do crédito</TableCell>
+                        <TableCell colSpan={2} align="center">
+                          Entradas
+                        </TableCell>
+                        <TableCell colSpan={2} align="center">
+                          Aprovados
+                        </TableCell>
+                        <TableCell colSpan={2} align="center">
+                          Contratados
+                        </TableCell>
+                        <TableCell colSpan={2} align="center" sx={{ borderBottomRightRadius: '0px !important' }}>
+                          Indeferidos/Desistidos
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell
+                          align="right"
+                          sx={{ borderTopLeftRadius: '0px !important', borderBottomLeftRadius: '0px !important' }}
+                        >
+                          Qtd
+                        </TableCell>
+                        <TableCell align="right">Valor</TableCell>
+                        <TableCell align="right">Qtd</TableCell>
+                        <TableCell align="right">Valor</TableCell>
+                        <TableCell align="right">Qtd</TableCell>
+                        <TableCell align="right">Valor</TableCell>
+                        <TableCell align="right">Qtd</TableCell>
+                        <TableCell align="right" sx={{ borderTopRightRadius: '0px !important' }}>
+                          Valor
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {/* Empresa */}
+                      <TableRow hover>
+                        <TableCell rowSpan={3} sx={{ fontWeight: 900 }}>
+                          Empresa
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 900 }}>Construção</TableCell>
+                        <TableRowTotais dados={empConst} />
+                      </TableRow>
+                      <TableRow hover>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Tesouraria</TableCell>
+                        <TableRowTotais dados={empTeso} />
+                      </TableRow>
+                      <TableRow hover>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Investimento</TableCell>
+                        <TableRowTotais dados={empInvest} />
+                      </TableRow>
+                      {/* Particular */}
+                      <TableRow hover>
+                        <TableCell rowSpan={3} sx={{ fontWeight: 900 }}>
+                          Particular
+                        </TableCell>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Habitação</TableCell>
+                        <TableRowTotais dados={partHabit} />
+                      </TableRow>
+                      <TableRow hover>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>CrediCaixa</TableCell>
+                        <TableRowTotais dados={partCredi} />
+                      </TableRow>
+                      <TableRow hover>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Outros</TableCell>
+                        <TableRowTotais dados={partOutros} />
+                      </TableRow>
+                      {/* Produtor Individual  */}
+                      <TableRow hover>
+                        <TableCell rowSpan={3} sx={{ fontWeight: 900 }}>
+                          Produtor Individual
+                        </TableCell>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Tesouraria</TableCell>
+                        <TableRowTotais dados={piTeso} />
+                      </TableRow>
+                      <TableRow hover>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Investimento</TableCell>
+                        <TableRowTotais dados={piInvest} />
+                      </TableRow>
+                      <TableRow hover>
+                        <TableCell sx={{ pl: '12px !important', fontWeight: 900 }}>Microcrédito</TableCell>
+                        <TableRowTotais dados={piMicro} />
+                      </TableRow>
+                      {/* Entidades Públicas  */}
+                      <TableRow hover>
+                        <TableCell sx={{ fontWeight: 900 }}>Entidades Públicas</TableCell>
+                        <TableCell> </TableCell>
+                        <TableRowTotais dados={entPub} />
+                      </TableRow>
+                      {/* Garantias Bancárias  */}
+                      <TableRow hover>
+                        <TableCell sx={{ fontWeight: 900 }}>Garantias Bancárias</TableCell>
+                        <TableCell> </TableCell>
+                        <TableRowTotais dados={garantias} />
+                      </TableRow>
+                    </TableBody>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell colSpan={2} align="right">
+                          TOTAL ACUMULADO
+                        </TableCell>
+                        <TableCell align="right">{fNumber(estatisticaCredito?.entrada?.length)}</TableCell>
+                        <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.entrada, 'montantes'))}</TableCell>
+                        <TableCell align="right">{fNumber(estatisticaCredito?.aprovado?.length)}</TableCell>
+                        <TableCell align="right">
+                          {fNumber(sumBy(estatisticaCredito?.aprovado, 'montante_aprovado'))}
+                        </TableCell>
+                        <TableCell align="right">{fNumber(estatisticaCredito?.contratado?.length)}</TableCell>
+                        <TableCell align="right">
+                          {fNumber(sumBy(estatisticaCredito?.contratado, 'montante_contratado'))}
+                        </TableCell>
+                        <TableCell align="right">
+                          {fNumber(estatisticaCredito?.indeferido?.length + estatisticaCredito?.desistido?.length)}
+                        </TableCell>
+                        <TableCell align="right">
+                          {fNumber(
+                            sumBy(estatisticaCredito?.indeferido, 'montantes') +
+                              sumBy(estatisticaCredito?.desistido, 'montantes')
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                  </Table>
+                </TableContainer>
+              </Scrollbar>
             </Card>
           </Grid>
         </>
@@ -317,10 +404,6 @@ export function TableEstatistica({ from, uo, data }) {
       (from === 'contratado' && estatisticaCredito?.contratado) ||
       (from === 'indeferido' && estatisticaCredito?.indeferido)
   );
-
-  // console.log(estatisticaCredito);
-
-  // const dados = [];
 
   return (
     <Card sx={{ p: 1 }}>
@@ -750,9 +833,9 @@ function DadosCell({ dados, from }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-CardResumo.propTypes = { total: PropTypes.number, label: PropTypes.string };
+CardResumo.propTypes = { qtd: PropTypes.number, total: PropTypes.number, label: PropTypes.string };
 
-function CardResumo({ total, label }) {
+function CardResumo({ total, label, qtd }) {
   const theme = useTheme();
   const color =
     (label === 'Entrada' && 'focus') ||
@@ -791,6 +874,9 @@ function CardResumo({ total, label }) {
                 <DoDisturbIcon sx={{ width: 30, height: 30 }} />
               )}
           </IconWrapperStyle>
+          <Typography variant="body2">
+            <b>{fNumber(qtd)}</b> processo{qtd > 1 ? 's' : ''}
+          </Typography>
           <Typography variant="h4">{fCurrency(total)}</Typography>
           <Typography variant="subtitle1" sx={{ opacity: 0.64 }}>
             {label}
@@ -803,39 +889,20 @@ function CardResumo({ total, label }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TableRowResumo.propTypes = { total: PropTypes.object, label: PropTypes.string, dados: PropTypes.object };
+TableRowTotais.propTypes = { dados: PropTypes.object };
 
-function TableRowResumo({ dados, label, total }) {
+function TableRowTotais({ dados }) {
   return (
-    <TableRow hover>
-      <TableCell>
-        <Typography variant="subtitle2">{label}</Typography>
-      </TableCell>
-      <TableCell align="right">{fCurrency(dados?.entrada)}</TableCell>
-      <TableCell align="right" width={10}>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {fPercent((dados?.entrada * 100) / total?.totalEntrada)}
-        </Typography>
-      </TableCell>
-      <TableCell align="right">{fCurrency(dados?.aprovado)}</TableCell>
-      <TableCell align="right" width={10}>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {fPercent((dados?.aprovado * 100) / total?.totalAprovado)}
-        </Typography>
-      </TableCell>
-      <TableCell align="right">{fCurrency(dados?.contratado)}</TableCell>
-      <TableCell align="right" width={10}>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {fPercent((dados?.contratado * 100) / total?.totalContratado)}
-        </Typography>
-      </TableCell>
-      <TableCell align="right">{fCurrency(dados?.id)}</TableCell>
-      <TableCell align="right" width={10}>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {fPercent((dados?.id * 100) / total?.totalID)}
-        </Typography>
-      </TableCell>
-    </TableRow>
+    <>
+      <TableCell align="right">{fNumber(dados?.qtdEnt)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.valorEnt)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.qtdAp)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.valorAp)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.qtdCont)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.valorCont)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.qtdId)}</TableCell>
+      <TableCell align="right">{fNumber(dados?.valorId)}</TableCell>
+    </>
   );
 }
 
@@ -880,9 +947,31 @@ function filterDados(dados) {
 
 // ----------------------------------------------------------------------
 
-function sumDados(dados, segmento, column) {
-  return sumBy(
-    dados?.filter((row) => row?.segmento === segmento),
-    column
-  );
+function dadosResumo(dados, segmento, linha, std) {
+  const entradas = std
+    ? dados?.entrada?.filter((row) => row?.segmento === segmento || row?.linha === linha)
+    : dados?.entrada?.filter((row) => row?.segmento === segmento && row?.linha === linha);
+  const aprovados = std
+    ? dados?.aprovado?.filter((row) => row?.segmento === segmento || row?.linha === linha)
+    : dados?.aprovado?.filter((row) => row?.segmento === segmento && row?.linha === linha);
+  const contratados = std
+    ? dados?.contratado?.filter((row) => row?.segmento === segmento || row?.linha === linha)
+    : dados?.contratado?.filter((row) => row?.segmento === segmento && row?.linha === linha);
+  const indeferidos = std
+    ? dados?.indeferido?.filter((row) => row?.segmento === segmento || row?.linha === linha)
+    : dados?.indeferido?.filter((row) => row?.segmento === segmento && row?.linha === linha);
+  const desistidos = std
+    ? dados?.desistido?.filter((row) => row?.segmento === segmento || row?.linha === linha)
+    : dados?.desistido?.filter((row) => row?.segmento === segmento && row?.linha === linha);
+
+  return {
+    qtdEnt: entradas?.length,
+    valorEnt: sumBy(entradas, 'montantes'),
+    qtdAp: aprovados?.length,
+    valorAp: sumBy(aprovados, 'montante_aprovado'),
+    qtdCont: contratados?.length,
+    valorCont: sumBy(contratados, 'montante_contratado'),
+    qtdId: indeferidos?.length + desistidos?.length,
+    valorId: sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'),
+  };
 }

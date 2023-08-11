@@ -83,6 +83,17 @@ export default function Intervencao({ colaboradoresList }) {
     dispatch(selectItem(item));
   };
 
+  const caixaPrincipal = (meusAmbientes) => {
+    let i = 0;
+    while (i < meusAmbientes?.length) {
+      if (meusAmbientes[i]?.nome?.includes('Caixa Principal')) {
+        return true;
+      }
+      i += 1;
+    }
+    return false;
+  };
+
   return (
     <>
       {processo?.destinos?.length !== 0 && (
@@ -196,7 +207,7 @@ export default function Intervencao({ colaboradoresList }) {
       {podeArquivar(
         meusAmbientes,
         fromAgencia,
-        iAmInGrpGerente,
+        iAmInGrpGerente || caixaPrincipal(meusAmbientes),
         processo?.estado_atual_id,
         arquivoAtendimento(
           processo?.assunto,

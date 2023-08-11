@@ -38,7 +38,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado);
   const [pendente, setPendente] = useState(selectedProcesso?.ispendente);
-  const [proprio, setProprio] = useState(!selectedProcesso?.con?.doc_id);
   const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
 
   useEffect(() => {
@@ -88,14 +87,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       !fluxo?.limpo &&
       fluxo?.assunto !== 'Abertura de conta' &&
       Yup.number().typeError('Introduza um nº de conta válido'),
-    tipo_docid: fluxo?.is_con && !proprio && Yup.mixed().required('Tipo de documento não pode ficar vazio'),
-    doc_id: fluxo?.is_con && !proprio && Yup.string().required('Nº de doc. de indentificação não pode ficar vazio'),
-    valor:
-      fluxo?.is_con &&
-      Yup.number()
-        .typeError('Introduza o valor')
-        .positive('O valor não pode ser negativo')
-        .min(1000000, 'O valor deve ser superior a 1 000 000'),
   });
 
   const _entidades = useMemo(
@@ -131,25 +122,14 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       // CON
-      valor: selectedProcesso?.valor || '',
-      nif: selectedProcesso?.con?.nif || '',
-      doc_id: selectedProcesso?.con?.doc_id || '',
       morada: selectedProcesso?.con?.morada || '',
       emails: selectedProcesso?.con?.emails || '',
-      nome_pai: selectedProcesso?.con?.nome_pai || '',
-      nome_mae: selectedProcesso?.con?.nome_mae || '',
-      contactos: selectedProcesso?.con?.contactos || '',
+      telefone: selectedProcesso?.con?.telefone || '',
+      telemovel: selectedProcesso?.con?.telemovel || '',
       profissao: selectedProcesso?.con?.profissao || '',
-      proprio: !selectedProcesso?.con?.doc_id || false,
       residente: selectedProcesso?.con?.residente || true,
-      tipo_docid: selectedProcesso?.con?.tipo_docid || null,
-      estado_civil: selectedProcesso?.con?.estado_civil || '',
-      nacionalidade: selectedProcesso?.con?.nacionalidade || '',
       local_trabalho: selectedProcesso?.con?.local_trabalho || '',
-      local_pais_nascimento: selectedProcesso?.con?.local_pais_nascimento || '',
-      data_nascimento: selectedProcesso?.con?.data_nascimento
-        ? add(new Date(selectedProcesso?.con?.data_nascimento), { hours: 2 })
-        : null,
+      titular_ordenador: selectedProcesso?.con?.titular_ordenador !== 'f',
     }),
     [selectedProcesso, fluxo?.id, mpendencia, meuAmbiente, cc, _entidades]
   );
@@ -246,56 +226,27 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         }
         // CON
         if (fluxo?.is_con) {
-          formData.append('valor', values.valor);
-          formData.append('residente', values.residente);
-          if (!values.proprio) {
-            if (values.nif) {
-              formData.append('nif', values.nif);
+          formData.append('titular_ordenador', values.titular_ordenador);
+          if (!values.titular_ordenador) {
+            formData.append('residente', values.residente);
+            if (values.morada) {
+              formData.append('morada', values.morada);
             }
-            if (values.doc_id) {
-              formData.append('doc_id', values.doc_id);
+            if (values.emails) {
+              formData.append('emails', values.emails);
             }
-            if (values.tipo_docid) {
-              formData.append('tipo_docid', values.tipo_docid);
+            if (values.telefone) {
+              formData.append('telefone', values.telefone);
             }
-            if (values.nacionalidade) {
-              formData.append('nacionalidade', values.nacionalidade);
+            if (values.telemovel) {
+              formData.append('telemovel', values.telemovel);
             }
-          } else {
-            formData.append('nif', '');
-            formData.append('doc_id', '');
-            formData.append('tipo_docid', '');
-            formData.append('nacionalidade', '');
-          }
-          if (values.morada) {
-            formData.append('morada', values.morada);
-          }
-          if (values.emails) {
-            formData.append('emails', values.emails);
-          }
-          if (values.nome_pai) {
-            formData.append('nome_pai', values.nome_pai);
-          }
-          if (values.nome_mae) {
-            formData.append('nome_mae', values.nome_mae);
-          }
-          if (values.contactos) {
-            formData.append('contactos', values.contactos);
-          }
-          if (values.profissao) {
-            formData.append('profissao', values.profissao);
-          }
-          if (values.estado_civil) {
-            formData.append('estado_civil', values.estado_civil);
-          }
-          if (values.local_trabalho) {
-            formData.append('local_trabalho', values.local_trabalho);
-          }
-          if (values.local_pais_nascimento) {
-            formData.append('local_pais_nascimento', values.local_pais_nascimento);
-          }
-          if (values.data_nascimento) {
-            formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
+            if (values.profissao) {
+              formData.append('profissao', values.profissao);
+            }
+            if (values.local_trabalho) {
+              formData.append('local_trabalho', values.local_trabalho);
+            }
           }
         }
         if (values?.anexos?.length > 0) {
@@ -330,6 +281,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         }
         if (values.email) {
           formData.append('email', values.email);
+        }
+        if (values.noperacao) {
+          formData.append('noperacao', values.noperacao);
         }
         if (fluxo?.assunto === 'Abertura de conta') {
           formData.append('conta', '');
@@ -374,51 +328,27 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         }
         // CON
         if (fluxo?.is_con) {
-          formData.append('valor', values.valor);
-          formData.append('residente', values.residente);
-          if (!values.proprio) {
-            if (values.nif) {
-              formData.append('nif', values.nif);
+          formData.append('titular_ordenador', values.titular_ordenador);
+          if (!values.titular_ordenador) {
+            formData.append('residente', values.residente);
+            if (values.morada) {
+              formData.append('morada', values.morada);
             }
-            if (values.doc_id) {
-              formData.append('doc_id', values.doc_id);
+            if (values.emails) {
+              formData.append('emails', values.emails);
             }
-            if (values.tipo_docid) {
-              formData.append('tipo_docid', values.tipo_docid);
+            if (values.telefone) {
+              formData.append('telefone', values.telefone);
             }
-            if (values.nacionalidade) {
-              formData.append('nacionalidade', values.nacionalidade);
+            if (values.telemovel) {
+              formData.append('telemovel', values.telemovel);
             }
-          }
-          if (values.morada) {
-            formData.append('morada', values.morada);
-          }
-          if (values.emails) {
-            formData.append('emails', values.emails);
-          }
-          if (values.nome_pai) {
-            formData.append('nome_pai', values.nome_pai);
-          }
-          if (values.nome_mae) {
-            formData.append('nome_mae', values.nome_mae);
-          }
-          if (values.contactos) {
-            formData.append('contactos', values.contactos);
-          }
-          if (values.profissao) {
-            formData.append('profissao', values.profissao);
-          }
-          if (values.estado_civil) {
-            formData.append('estado_civil', values.estado_civil);
-          }
-          if (values.local_trabalho) {
-            formData.append('local_trabalho', values.local_trabalho);
-          }
-          if (values.local_pais_nascimento) {
-            formData.append('local_pais_nascimento', values.local_pais_nascimento);
-          }
-          if (values.data_nascimento) {
-            formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
+            if (values.profissao) {
+              formData.append('profissao', values.profissao);
+            }
+            if (values.local_trabalho) {
+              formData.append('local_trabalho', values.local_trabalho);
+            }
           }
         }
         if (values.anexos) {
@@ -451,7 +381,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         <Grid item xs={12}>
           <ProcessoInternoForm
             fluxo={fluxo}
-            setProprio={setProprio}
             setAgendado={setAgendado}
             setPendente={setPendente}
             selectedProcesso={selectedProcesso}
