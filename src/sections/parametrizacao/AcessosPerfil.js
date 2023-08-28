@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 // @mui
-import { Fab, Card, Table, Tooltip, TableRow, TableCell, TableBody, TableHead, TableContainer } from '@mui/material';
+import { Card, Table, TableRow, TableCell, TableBody, TableHead, TableContainer } from '@mui/material';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // redux
@@ -12,7 +12,6 @@ import { getAll, closeModal, deleteItem, selectAnexo, closeModalAnexo } from '..
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { TableSearchNotFound } from '../../components/table';
 import DialogConfirmar from '../../components/DialogConfirmar';
