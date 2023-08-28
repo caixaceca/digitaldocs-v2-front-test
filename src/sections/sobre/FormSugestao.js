@@ -6,12 +6,12 @@ import { useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import { LoadingButton } from '@mui/lab';
-import { Box, Grid, DialogTitle, DialogActions, DialogContent } from '@mui/material';
+import { Grid, DialogTitle, DialogContent } from '@mui/material';
 // redux
 import { createItem } from '../../redux/slices/intranet';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
+import { DialogButons } from '../../components/Actions';
 import { FormProvider, RHFTextField, RHFUploadSingleFile } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -22,7 +22,7 @@ export function FormSugestao({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { done, error, isLoading } = useSelector((state) => state.intranet);
+  const { done, error, isSaving } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (done === 'sugestao') {
@@ -96,15 +96,7 @@ export function FormSugestao({ open, onCancel }) {
               <RHFUploadSingleFile name="imagem" onDrop={handleDropSingle} />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isLoading}>
-              Enviar
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </>

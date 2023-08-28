@@ -2,20 +2,7 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 // @mui
-import {
-  Fab,
-  List,
-  Dialog,
-  Button,
-  ListItem,
-  Typography,
-  DialogTitle,
-  ListItemIcon,
-  ListItemText,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-} from '@mui/material';
+import { Fab, List, ListItem, Typography, ListItemIcon, ListItemText } from '@mui/material';
 // utils
 import { getFileThumb } from '../../../utils/getFileFormat';
 // redux
@@ -23,6 +10,7 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import { selectAnexo, closeModalAnexo, deleteItem } from '../../../redux/slices/digitaldocs';
 // components
 import SvgIconStyle from '../../../components/SvgIconStyle';
+import DialogConfirmar from '../../../components/DialogConfirmar';
 
 // ----------------------------------------------------------------------
 
@@ -34,7 +22,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
   const anexosAtivos = anexos?.filter((row) => row.is_ativo);
   const { mail, cc } = useSelector((state) => state.intranet);
   const [selectedAnexoID, setSelectedAnexoID] = useState(null);
-  const { done, error, isOpenModalAnexo } = useSelector((state) => state.digitaldocs);
+  const { done, error, isOpenModalAnexo, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'anexo eliminado') {
@@ -96,22 +84,13 @@ export default function AnexosExistentes({ anexos, processoId }) {
         )}
       </List>
 
-      <Dialog open={isOpenModalAnexo} onClose={handleCloseModal} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ mb: 3 }}>Eliminar anexo</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Tens a certeza de que pretendes eliminar este anexo?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button color="inherit" onClick={handleCloseModal}>
-            Cancelar
-          </Button>
-          <Button color="error" variant="outlined" onClick={() => handleDelete(selectedAnexoID)} autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DialogConfirmar
+        isSaving={isSaving}
+        open={isOpenModalAnexo}
+        onClose={handleCloseModal}
+        desc="eliminar este anexo"
+        handleOk={() => handleDelete(selectedAnexoID)}
+      />
     </>
   );
 }

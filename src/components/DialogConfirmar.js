@@ -13,13 +13,13 @@ DialogConfirmar.propTypes = {
   onClose: PropTypes.func,
   handleOk: PropTypes.func,
   descSec: PropTypes.string,
-  isLoading: PropTypes.bool,
+  isSaving: PropTypes.bool,
 };
 
-export default function DialogConfirmar({ isLoading, open, title, desc, descSec, color = 'error', onClose, handleOk }) {
+export default function DialogConfirmar({ isSaving, open, title = '', desc, descSec, color, onClose, handleOk }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{title || 'Eliminar'}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
         {descSec && <DialogContentText sx={{ mb: 3 }}>{descSec}</DialogContentText>}
         <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>
@@ -28,7 +28,7 @@ export default function DialogConfirmar({ isLoading, open, title, desc, descSec,
         <Button color="inherit" onClick={onClose}>
           Cancelar
         </Button>
-        <LoadingButton color={color} variant="soft" onClick={handleOk} autoFocus loading={isLoading}>
+        <LoadingButton color={color || 'error'} variant="soft" onClick={handleOk} autoFocus loading={isSaving}>
           OK
         </LoadingButton>
       </DialogActions>

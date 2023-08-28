@@ -111,7 +111,7 @@ export default function Processo() {
 
   const idEstado = (item) => {
     if (item === 'devdop') {
-      return processo?.destinos?.find((row) => row?.modo === 'Seguimento');
+      return processo?.destinos?.find((row) => row?.modo === 'Seguimento' && !row?.nome?.includes('Atendimento'));
     }
     if (item === 'gerencia') {
       return processo?.destinos?.find((row) => row?.nome?.includes('Atendimento'));
@@ -328,7 +328,7 @@ export default function Processo() {
           action={
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 3, md: 4 }} alignItems="center">
               {processo && (
-                <Stack spacing={1} direction={{ xs: 'row' }}>
+                <Stack spacing={0.5} direction={{ xs: 'row' }}>
                   {estadoAtual && (
                     <>
                       <Tooltip title={`ANTERIOR (${estadoAtual?.nome})`} arrow>

@@ -124,7 +124,7 @@ export default function Fluxos() {
                           <Checked check={row.is_ativo} />
                         </TableCell>
                         <TableCell align="center" width={10}>
-                          <Stack direction="row" spacing={1}>
+                          <Stack direction="row" spacing={0.75}>
                             <RoleBasedGuard roles={['fluxo-110', 'fluxo-111', 'Todo-110', 'Todo-111']}>
                               <UpdateItem item="fluxo" id={row?.id} />
                               <CloneItem item="fluxo" id={row?.id} />

@@ -64,7 +64,7 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
-import { DeleteItem } from '../../components/Actions';
+import { DialogButons } from '../../components/Actions';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
 
@@ -178,7 +178,8 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           perfilIDAfeto:
             (values?.pender && '') ||
             values?.perfil?.id ||
-            (values?.acao?.label?.includes('Atendimento') &&
+            (title === 'Devolver' &&
+              values?.acao?.label?.includes('Atendimento') &&
               podeSerAtribuido(processo?.assunto) &&
               criador?.perfil_id) ||
             '',
@@ -259,16 +260,16 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
     setValue('destinos_par', fild === 'destinos_par' ? newValue : []);
   };
 
+  const segAt = values?.acao?.label?.includes('Atendimento');
+  const onGerencia = processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal');
+
   const podeAtribuir =
-    (((processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
-      values?.acao?.label?.includes('Atendimento')) ||
-      (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento') ||
+    ((onGerencia && segAt) ||
+      (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento' && !segAt) ||
       processo?.nome === 'Diário') &&
     colaboradoresList?.length > 0;
 
-  const podeColocarPendente =
-    (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
-    values?.acao?.label?.includes('Atendimento');
+  const podeColocarPendente = onGerencia && segAt;
 
   const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
   const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -1054,19 +1055,11 @@ export function ParecerForm({ open, onCancel, processoId }) {
               )}
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="soft" loading={isSaving}>
-              Enviar
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
         <DialogConfirmar
           open={open1}
-          isLoading={isSaving}
+          isSaving={isSaving}
           onClose={handleCloseEliminar}
           handleOk={handleConfirmeEliminar}
           color="error"
@@ -1105,7 +1098,7 @@ export function Resgatar({ fluxiId, estadoId, processoId }) {
       <DialogConfirmar
         open={open}
         onClose={onClose}
-        isLoading={isSaving}
+        isSaving={isSaving}
         handleOk={handleResgatar}
         color="warning"
         title="Resgatar"
@@ -1149,7 +1142,7 @@ export function Cancelar({ fluxiId, estadoId, processoId }) {
       <DialogConfirmar
         open={open}
         onClose={onClose}
-        isLoading={isSaving}
+        isSaving={isSaving}
         handleOk={handleCancelar}
         color="error"
         title="Cancelar"
@@ -1172,7 +1165,6 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { error, done, isSaving } = useSelector((state) => state.digitaldocs);
 
@@ -1182,7 +1174,6 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
       onClose();
     } else if (done === 'atribuicao eliminada') {
       enqueueSnackbar('Atribuição eliminada com sucesso', { variant: 'success' });
-      onClose1();
       onClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1264,28 +1255,13 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
                 />
               </Grid>
             </Grid>
-            <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-              {perfilId && (
-                <>
-                  <DeleteItem handleDelete={onOpen1} />
-                  <DialogConfirmar
-                    open={open1}
-                    onClose={onClose1}
-                    isLoading={isSaving}
-                    handleOk={handleDelete}
-                    title="Eliminar atribuição"
-                    desc="eliminar esta atribuição"
-                  />
-                </>
-              )}
-              <Box sx={{ flexGrow: 1 }} />
-              <LoadingButton variant="outlined" color="inherit" onClick={onClose}>
-                Cancelar
-              </LoadingButton>
-              <LoadingButton type="submit" variant="soft" color="info" loading={isSaving}>
-                Atribuir
-              </LoadingButton>
-            </DialogActions>
+            <DialogButons
+              label="Atribuir"
+              isSaving={isSaving}
+              onCancel={onClose}
+              handleDelete={handleDelete}
+              desc={perfilId && 'eliminar esta atribuição'}
+            />
           </FormProvider>
         </DialogContent>
       </Dialog>
@@ -1330,6 +1306,7 @@ export function ColocarPendente({ from }) {
   const defaultValues = useMemo(
     () => ({
       mobs: selectedItem?.mobs || '',
+      atribuir: podeSerAtribuido(selectedItem?.assunto),
       mpendencia: pendencia ? { id: pendencia?.id, label: pendencia?.motivo } : null,
     }),
     [selectedItem, pendencia]
@@ -1354,8 +1331,8 @@ export function ColocarPendente({ from }) {
             from,
             id: selectedItem?.id,
             perfilId: cc?.perfil_id,
+            atribuir: values?.atribuir,
             aceitar: !selectedItem?.is_lock,
-            atribuir: podeSerAtribuido(selectedItem?.assunto),
             formDataAceitar: JSON.stringify({
               perfilID: cc?.perfil_id,
               fluxoID: selectedItem?.fluxo_id,
@@ -1389,16 +1366,13 @@ export function ColocarPendente({ from }) {
             <Grid item xs={12}>
               <RHFTextField name="mobs" label="Observação" />
             </Grid>
+            {podeSerAtribuido(selectedItem?.assunto) && Number(cc?.uo?.balcao) === 8 && (
+              <Grid item xs={12}>
+                <RHFSwitch name="atribuir" labelPlacement="start" label="Atribuir" />
+              </Grid>
+            )}
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={handleCloseModal}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="soft" color="success" loading={isSaving}>
-              Guardar
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons edit isSaving={isSaving} onCancel={handleCloseModal} />
         </FormProvider>
       </DialogContent>
     </Dialog>

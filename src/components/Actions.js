@@ -1,18 +1,22 @@
 import PropTypes from 'prop-types';
 // @mui
+import { LoadingButton } from '@mui/lab';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import { Fab, Button, Stack, Tooltip, IconButton } from '@mui/material';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import { Box, Fab, Button, Stack, Tooltip, IconButton, DialogActions } from '@mui/material';
+// hooks
+import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
 import { openModal, selectItem, getItem } from '../redux/slices/digitaldocs';
 //
 import SvgIconStyle from './SvgIconStyle';
+import DialogConfirmar from './DialogConfirmar';
 
 const wh = { width: 36, height: 36 };
 
@@ -106,12 +110,12 @@ export function CloneItem({ item, id }) {
 
 // ----------------------------------------------------------------------
 
-DeleteItem.propTypes = { handleDelete: PropTypes.func };
+DeleteItem.propTypes = { handleClick: PropTypes.func };
 
-export function DeleteItem({ handleDelete }) {
+export function DeleteItem({ handleClick }) {
   return (
     <Tooltip title="Eliminar" arrow>
-      <Fab color="error" size="small" variant="soft" onClick={handleDelete} sx={{ ...wh }}>
+      <Fab color="error" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
         <SvgIconStyle src="/assets/icons/trash.svg" />
       </Fab>
     </Tooltip>
@@ -163,5 +167,37 @@ export function Fechar({ onCancel }) {
         </IconButton>
       </Tooltip>
     </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DialogButons.propTypes = {
+  edit: PropTypes.bool,
+  isSaving: PropTypes.bool,
+  onCancel: PropTypes.func,
+  handleDelete: PropTypes.func,
+  desc: PropTypes.string,
+  label: PropTypes.string,
+};
+
+export function DialogButons({ edit = false, isSaving, desc = '', label = '', onCancel, handleDelete }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+      {desc && (
+        <>
+          <DeleteItem handleClick={onOpen} />
+          <DialogConfirmar desc={desc} open={open} onClose={onClose} isSaving={isSaving} handleOk={handleDelete} />
+        </>
+      )}
+      <Box sx={{ flexGrow: 1 }} />
+      <Button variant="outlined" color="inherit" onClick={onCancel}>
+        Cancelar
+      </Button>
+      <LoadingButton type="submit" variant="contained" loading={isSaving}>
+        {(label && label) || (edit && 'Guardar') || 'Adicionar'}
+      </LoadingButton>
+    </DialogActions>
   );
 }

@@ -148,7 +148,7 @@ export default function Intervencao({ colaboradoresList }) {
             <DialogConfirmar
               open={open4}
               onClose={onClose4}
-              isLoading={isSaving}
+              isSaving={isSaving}
               handleOk={handleFinalizar}
               color="success"
               title="Finalizar"
@@ -179,7 +179,7 @@ export default function Intervencao({ colaboradoresList }) {
       <DialogConfirmar
         open={open2}
         onClose={onClose2}
-        isLoading={isSaving}
+        isSaving={isSaving}
         handleOk={handleAbandonar}
         color="warning"
         title="Abandonar"
@@ -263,7 +263,7 @@ export function Libertar({ perfilID, processoID }) {
       <DialogConfirmar
         open={open}
         onClose={onClose}
-        isLoading={isSaving}
+        isSaving={isSaving}
         handleOk={handleAbandonar}
         color="warning"
         title="Libertar"

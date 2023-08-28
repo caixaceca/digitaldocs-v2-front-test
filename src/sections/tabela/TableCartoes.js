@@ -29,7 +29,6 @@ import { UoData } from './Dados';
 const TABLE_HEAD = [
   { id: 'data_emissao', label: 'Data emissão', align: 'left' },
   { id: 'entrega', label: 'Balcão entrega', align: 'left' },
-  { id: 'domicilio', label: 'Balcão domicílio', align: 'left' },
   { id: 'numero_cliente', label: 'Nº cliente', align: 'left' },
   { id: 'nome_cliente', label: 'Nome cliente', align: 'left' },
   { id: 'numero_cartao', label: 'Nº cartão', align: 'left' },
@@ -153,13 +152,12 @@ export default function TableCartoes() {
               <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={9} row={10} />
+                  <SkeletonTable column={8} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow key={`${row.id}_${index}`} hover>
                       <TableCell>{row.data_emissao}</TableCell>
                       <TableCell>{row?.entrega}</TableCell>
-                      <TableCell>{row?.domicilio}</TableCell>
                       <TableCell>{row?.numero_cliente}</TableCell>
                       <TableCell>{row?.nome_cliente}</TableCell>
                       <TableCell>{row?.numero_cartao}</TableCell>
@@ -268,7 +266,6 @@ function applySortFilter({ dados, comparator, filter }) {
       (row) =>
         (row?.data_emissao && normalizeText(row?.data_emissao).indexOf(normalizeText(filter)) !== -1) ||
         (row?.entrega && normalizeText(row?.entrega).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.domicilio && normalizeText(row?.domicilio).indexOf(normalizeText(filter)) !== -1) ||
         (row?.numero_cliente && normalizeText(row?.numero_cliente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.nome_cliente && normalizeText(row?.nome_cliente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.numero_cartao && normalizeText(row?.numero_cartao).indexOf(normalizeText(filter)) !== -1) ||

@@ -112,26 +112,23 @@ export default function Estados() {
                   {isLoading && isNotFound ? (
                     <SkeletonTable column={4} row={10} />
                   ) : (
-                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                      const key = row.id;
-                      return (
-                        <TableRow hover key={key}>
-                          <TableCell>{row.nome}</TableCell>
-                          <TableCell align="center">
-                            <Checked check={row.is_inicial} />
-                          </TableCell>
-                          <TableCell align="center">
-                            <Checked check={row.is_final} />
-                          </TableCell>
-                          <TableCell align="right" width={130}>
-                            <Stack direction="row" spacing={1} justifyContent="right">
-                              {row.nome !== 'Arquivo' && <UpdateItem item="estado" id={row.id} />}
-                              <ViewItem estado handleView={() => handleView(row?.id)} />
-                            </Stack>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
+                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                      <TableRow hover key={row.id}>
+                        <TableCell>{row.nome}</TableCell>
+                        <TableCell align="center">
+                          <Checked check={row.is_inicial} />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Checked check={row.is_final} />
+                        </TableCell>
+                        <TableCell align="right" width={10}>
+                          <Stack direction="row" spacing={0.75} justifyContent="right">
+                            {row.nome !== 'Arquivo' && <UpdateItem item="estado" id={row.id} />}
+                            <ViewItem estado handleView={() => handleView(row?.id)} />
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
 

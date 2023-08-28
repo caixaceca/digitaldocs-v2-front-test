@@ -1361,13 +1361,21 @@ export function Filtrar({
                 <DatePicker
                   value={datai}
                   label="Data inicial"
-                  onChange={(newValue) => setDatai(newValue)}
+                  onChange={(newValue) => {
+                    if (newValue && newValue?.toString() !== 'Invalid Date') {
+                      setDatai(newValue);
+                    }
+                  }}
                   slotProps={{ textField: { fullWidth: true } }}
                 />
                 <DatePicker
                   value={dataf}
                   label="Data final"
-                  onChange={(newValue) => setDataf(newValue)}
+                  onChange={(newValue) => {
+                    if (newValue && newValue?.toString() !== 'Invalid Date') {
+                      setDataf(newValue);
+                    }
+                  }}
                   slotProps={{ textField: { fullWidth: true } }}
                 />
               </Stack>
@@ -1405,7 +1413,7 @@ function CardInfo({ title, label, total, duracao }) {
   return (
     <Card
       sx={{
-        pb: 1,
+        p: 1,
         height: 1,
         textAlign: 'center',
         pt: { xs: 2, md: label ? 2 : 4 },
@@ -1533,16 +1541,14 @@ function ButtonExport() {
       filename="Indicadore"
       sheet="Indicadore"
       buttonText={
-        <Tooltip arrow title="EXPORTAR">
-          <Button
-            size="small"
-            variant="soft"
-            color="inherit"
-            startIcon={<Image src="/assets/icons/file_format/format_excel.svg" sx={{ height: 20 }} />}
-          >
-            Exportar
-          </Button>
-        </Tooltip>
+        <Button
+          size="small"
+          variant="soft"
+          color="inherit"
+          startIcon={<Image src="/assets/icons/file_format/format_excel.svg" sx={{ height: 20 }} />}
+        >
+          Exportar
+        </Button>
       }
     />
   );

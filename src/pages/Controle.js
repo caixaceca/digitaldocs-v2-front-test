@@ -5,6 +5,7 @@ import { styled, alpha } from '@mui/material/styles';
 import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
 // utils
 import selectTab from '../utils/selectTab';
+import { emailIpf } from '../utils/validarAcesso';
 import { paramsObject } from '../utils/normalizeText';
 // routes
 import useSettings from '../hooks/useSettings';
@@ -38,7 +39,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 export default function Controle() {
   const { themeStretch } = useSettings();
-  const { cc } = useSelector((state) => state.intranet);
+  const { mail, cc } = useSelector((state) => state.intranet);
   const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const [currentTab, setCurrentTab] = useSearchParams({
     tab: 'entradas',
@@ -79,7 +80,7 @@ export default function Controle() {
     acessoEntradas() || isAdmin ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
   const cartoes =
     // isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
-    isAdmin ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }] : [];
+    emailIpf(mail) ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }] : [];
 
   const VIEW_TABS = useMemo(
     () =>

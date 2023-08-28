@@ -224,7 +224,7 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
                                 open={open1}
                                 color="success"
                                 onClose={onClose1}
-                                isLoading={isSaving}
+                                isSaving={isSaving}
                                 title="Validar parecer"
                                 desc="validar este parecer"
                                 handleOk={handleConfirmValidar}

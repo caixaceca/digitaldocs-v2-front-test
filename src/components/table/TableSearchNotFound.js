@@ -16,7 +16,7 @@ export default function TableSearchNotFound({ message }) {
           colSpan={11}
           sx={{ py: 7, typography: 'body2', fontStyle: 'italic', color: 'text.secondary', border: 'none !important' }}
         >
-          <DocIllustration sx={{ height: 200, mb: { xs: 4, sm: 7 } }} />
+          <DocIllustration sx={{ height: 220, mb: { xs: 4, sm: 7 } }} />
           {message}
         </TableCell>
       </TableRow>

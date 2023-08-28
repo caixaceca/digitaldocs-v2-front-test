@@ -22,6 +22,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import { format } from 'date-fns';
 import cssStyles from '../../utils/cssStyles';
+import { emailIpf } from '../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -41,7 +42,6 @@ import { ValidarDocForm, DenunciaForm } from '../../sections/home/HomeForm';
 //
 import Linksuteis from './Linksuteis';
 import Notificacoes from './Notificacoes';
-import AccountPopover from './AccountPopover';
 import ProcuraAvancada from './ProcuraAvancada';
 
 // ----------------------------------------------------------------------
@@ -92,7 +92,8 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
-  const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { mail } = useSelector((state) => state.intranet);
+  // const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
 
   return (
@@ -112,7 +113,8 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>
-            {(isAdmin || meusAmbientes?.find((row) => row?.nome?.includes('Atendimento'))) && (
+            {/* {(isAdmin || meusAmbientes?.find((row) => row?.nome?.includes('Atendimento'))) && ( */}
+            {emailIpf(mail) && (
               <>
                 <IconButtonHead
                   open={open1}
@@ -156,8 +158,6 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
                 <Ajuda />
               </DialogContent>
             </Dialog>
-
-            <AccountPopover />
           </Stack>
         </Toolbar>
       </RootStyle>

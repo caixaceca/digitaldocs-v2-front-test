@@ -8,7 +8,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 // @mui
 import {
-  Box,
   Fab,
   Grid,
   Alert,
@@ -18,17 +17,16 @@ import {
   Tooltip,
   Typography,
   DialogTitle,
-  DialogActions,
   DialogContent,
   InputAdornment,
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+// utils
+import { emailIpf } from '../../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
-import useToggle from '../../hooks/useToggle';
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
@@ -41,9 +39,8 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
-import { DeleteItem } from '../../components/Actions';
+import { DialogButons } from '../../components/Actions';
 import SvgIconStyle from '../../components/SvgIconStyle';
-import DialogConfirmar from '../../components/DialogConfirmar';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
 
@@ -55,7 +52,6 @@ export function FluxoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { done, error, isSaving, fluxoId, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
@@ -165,28 +161,13 @@ export function FluxoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar fluxo"
-                  desc="eliminar este fluxo"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar este fluxo'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -283,15 +264,7 @@ export function ClonarFluxoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="assunto" label="Assunto" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              Clonar
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons label="Clonar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -306,7 +279,6 @@ export function EstadoForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { done, error, isSaving, estadoId, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
@@ -344,9 +316,9 @@ export function EstadoForm({ isOpenModal, onCancel }) {
   const defaultValues = useMemo(
     () => ({
       uo_id: uoSelect,
+      perfilID: cc?.perfil_id,
       nome: selectedItem?.nome || '',
       email: selectedItem?.email || '',
-      perfilID: cc?.perfil_id,
       is_final: selectedItem?.is_final || false,
       observacao: selectedItem?.observacao || '',
       is_decisao: selectedItem?.is_decisao || false,
@@ -371,11 +343,10 @@ export function EstadoForm({ isOpenModal, onCancel }) {
 
   const onSubmit = async () => {
     try {
+      values.uo_id = values?.uo_id?.id;
       if (selectedItem) {
-        values.uo_id = values?.uo_id?.id;
         dispatch(updateItem('estado', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' }));
       } else {
-        values.uo_id = values?.uo_id?.id;
         dispatch(createItem('estado', JSON.stringify(values), { mail, msg: 'Estado adicionado' }));
       }
     } catch (error) {
@@ -423,28 +394,13 @@ export function EstadoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar estado"
-                  desc="eliminar este estado"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar este estado'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -458,7 +414,6 @@ AcessoForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number, i
 export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { done, error, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
@@ -510,13 +465,11 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
 
   const onSubmit = async () => {
     try {
+      values.objeto = values.objeto.id;
+      values.acesso = values.acesso.id;
       if (isEdit) {
-        values.objeto = values.objeto.id;
-        values.acesso = values.acesso.id;
         dispatch(updateItem('acesso', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Acesso atualizado' }));
       } else {
-        values.objeto = values.objeto.id;
-        values.acesso = values.acesso.id;
         dispatch(createItem('acesso', JSON.stringify(values), { mail, msg: 'Acesso atribuido' }));
       }
     } catch (error) {
@@ -559,28 +512,13 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
               />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar acesso"
-                  desc="eliminar este acesso"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar este acesso'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -594,7 +532,6 @@ MotivoPendenciaForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTyp
 export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
@@ -674,28 +611,13 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
               <RHFTextField name="obs" label="Observação" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar motivo"
-                  desc="eliminar este motivo"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar este motivo'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -709,7 +631,6 @@ OrigemForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func }
 export function OrigemForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const [findConcelhos, setFindConcelhos] = useState([]);
   const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
@@ -739,12 +660,12 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
+      perfilID: cc?.perfil_id,
       tipo: selectedItem?.tipo || '',
       ilha: selectedItem?.ilha || '',
       email: selectedItem?.email || '',
       cidade: selectedItem?.cidade || '',
       codigo: selectedItem?.codigo || '',
-      perfilID: cc?.perfil_id,
       telefone: selectedItem?.telefone || '',
       seguimento: selectedItem?.seguimento || '',
       observacao: selectedItem?.observacao || '',
@@ -833,28 +754,13 @@ export function OrigemForm({ isOpenModal, onCancel }) {
               <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar origem"
-                  desc="eliminar esta origem"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar esta origem'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -868,7 +774,6 @@ LinhaForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
 export function LinhaForm({ isOpenModal, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
@@ -949,28 +854,13 @@ export function LinhaForm({ isOpenModal, onCancel }) {
               <RHFTextField name="descricao" multiline minRows={2} maxRows={4} label="Descrição" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar linha de crédito"
-                  desc="eliminar esta linha de crédito"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar esta linha de crédito'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -984,7 +874,6 @@ TransicaoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.fun
 export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, estados, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
@@ -1049,15 +938,13 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
 
   const onSubmit = async () => {
     try {
+      values.estado_final_id = values?.estado_final_id?.id;
+      values.estado_inicial_id = values?.estado_inicial_id?.id;
       if (selectedItem) {
-        values.estado_final_id = values?.estado_final_id?.id;
-        values.estado_inicial_id = values?.estado_inicial_id?.id;
         dispatch(
           updateItem('transicao', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Transição atualizada' })
         );
       } else {
-        values.estado_final_id = values?.estado_final_id?.id;
-        values.estado_inicial_id = values?.estado_inicial_id?.id;
         dispatch(createItem('transicao', JSON.stringify(values), { mail, msg: 'Transição adicionada' }));
       }
     } catch (error) {
@@ -1070,7 +957,6 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
       dispatch(
         deleteItem('transicao', { mail, id: selectedItem.id, msg: 'Transição eliminada', perfilId: cc?.perfil_id })
       );
-      onClose();
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -1101,8 +987,8 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFTextField
-                name="prazoemdias"
                 label="Prazo"
+                name="prazoemdias"
                 InputProps={{ endAdornment: <InputAdornment position="end">dias</InputAdornment>, type: 'number' }}
               />
             </Grid>
@@ -1122,28 +1008,13 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
               <RHFSwitch name="arqhasopnumero" labelPlacement="start" label="Nº de operação no arquivo" />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar transição"
-                  desc="eliminar esta transição"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && 'eliminar esta transição'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -1157,7 +1028,6 @@ EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.nu
 export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { estados, done, error, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
@@ -1180,11 +1050,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const formSchema = Yup.object().shape({
-    estado_id: Yup.mixed()
-      .nullable('Estado orgânica não pode ficar vazio')
-      .required('Estado orgânica não pode ficar vazio'),
-  });
+  const formSchema = Yup.object().shape({ estado_id: Yup.mixed().required('Estado orgânica não pode ficar vazio') });
 
   const defaultValues = useMemo(
     () => ({
@@ -1213,13 +1079,12 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
 
   const onSubmit = async () => {
     try {
+      values.estado_id = values?.estado_id?.id;
       if (isEdit) {
-        values.estado_id = values?.estado_id?.id;
         dispatch(
           updateItem('estadoPerfil', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' })
         );
       } else {
-        values.estado_id = values?.estado_id?.id;
         dispatch(createItem('estadoPerfil', JSON.stringify(values), { mail, msg: 'Estado adicionado' }));
       }
     } catch (error) {
@@ -1232,7 +1097,6 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
       dispatch(
         deleteItem('estadoPerfil', { mail, id: selectedItem.id, msg: 'Estado eliminado', perfilId: cc?.perfil_id })
       );
-      onClose();
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -1273,7 +1137,6 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
                 render={({ field, fieldState: { error } }) => (
                   <DateTimePicker
                     fullWidth
-                    disableFuture
                     value={field.value}
                     label="Data de término"
                     onChange={(newValue) => field.onChange(newValue)}
@@ -1291,28 +1154,13 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
               </Grid>
             )}
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            {isEdit && mail?.toLowerCase() === 'ivandro.evora@caixa.cv' && (
-              <>
-                <DeleteItem handleDelete={onOpen} />
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isLoading={isSaving}
-                  handleOk={handleDelete}
-                  title="Eliminar estado"
-                  desc="eliminar este estado"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              {!isEdit ? 'Adicionar' : 'Guardar'}
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons
+            edit={isEdit && emailIpf(mail)}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit && emailIpf(mail) && 'eliminar esta transição'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -1345,13 +1193,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  const defaultValues = useMemo(
-    () => ({
-      perfis: [{ perfil: null, data_limite: null, data_inicial: null }],
-    }),
-    []
-  );
-
+  const defaultValues = useMemo(() => ({ perfis: [{ perfil: null, data_limite: null, data_inicial: null }] }), []);
   const methods = useForm({ defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
@@ -1455,15 +1297,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
               </Grid>
             )}
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important' }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              Adicionar
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -1476,12 +1310,7 @@ function applyFilter(colaboradores, perfisSelect) {
   perfisSelect?.forEach((row) => {
     colaboradores = colaboradores.filter((colab) => colab?.perfil_id !== row?.perfil?.id);
   });
-
-  const perfisFiltered = colaboradores?.map((row) => ({
-    id: row?.perfil_id,
-    label: row?.perfil?.displayName,
-  }));
-
+  const perfisFiltered = colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
   return perfisFiltered;
 }
 
@@ -1489,6 +1318,5 @@ function applyFilter1(colaboradores, perfisSelect) {
   perfisSelect?.forEach((row) => {
     colaboradores = colaboradores.filter((colab) => colab?.perfil_id !== row?.perfil_id);
   });
-
   return colaboradores;
 }

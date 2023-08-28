@@ -16,8 +16,8 @@ import SvgIconStyle from '../../components/SvgIconStyle';
 import { SkeletonTable } from '../../components/skeleton';
 import { TableSearchNotFound } from '../../components/table';
 import DialogConfirmar from '../../components/DialogConfirmar';
-import { AddItem, UpdateItem } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { AddItem, UpdateItem, DeleteItem } from '../../components/Actions';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 //
@@ -113,11 +113,7 @@ export default function AcessosPerfil() {
                         <TableCell>{row.datalimite ? ptDateTime(row.datalimite) : 'Acesso permanente'}</TableCell>
                         <TableCell align="center" width={50}>
                           {row.objeto === 'Processo' ? (
-                            <Tooltip title="Eliminar" arrow>
-                              <Fab color="error" size="small" variant="soft" onClick={() => handleDelete(row?.id)}>
-                                <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 22, height: 22 }} />
-                              </Fab>
-                            </Tooltip>
+                            <DeleteItem handleClick={() => handleDelete(row?.id)} />
                           ) : (
                             <UpdateItem item="acesso" id={row?.id} />
                           )}
@@ -138,7 +134,7 @@ export default function AcessosPerfil() {
         <AcessoForm isOpenModal={isOpenModal} onCancel={handleCloseModal} perfilId={id} />
 
         <DialogConfirmar
-          isLoading={isSaving}
+          isSaving={isSaving}
           open={isOpenModalAnexo}
           handleOk={confirmDelete}
           onClose={handleCloseModal}

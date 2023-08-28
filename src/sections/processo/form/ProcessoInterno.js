@@ -129,7 +129,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       profissao: selectedProcesso?.con?.profissao || '',
       residente: selectedProcesso?.con?.residente || true,
       local_trabalho: selectedProcesso?.con?.local_trabalho || '',
-      titular_ordenador: selectedProcesso?.con?.titular_ordenador !== 'f',
+      titular_ordenador: !!selectedProcesso?.con?.titular_ordenador,
     }),
     [selectedProcesso, fluxo?.id, mpendencia, meuAmbiente, cc, _entidades]
   );

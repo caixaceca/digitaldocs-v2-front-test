@@ -8,7 +8,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import {
   Fab,
-  Box,
   Grid,
   Stack,
   Table,
@@ -20,11 +19,9 @@ import {
   TableHead,
   IconButton,
   DialogTitle,
-  DialogActions,
   DialogContent,
   InputAdornment,
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // utils
@@ -33,8 +30,8 @@ import { ptDateTime } from '../../utils/formatTime';
 import { useDispatch, useSelector } from '../../redux/store';
 import { createItem, getFromIntranet, resetItem } from '../../redux/slices/intranet';
 // components
-import { Fechar } from '../../components/Actions';
 import { Loading } from '../../components/LoadingScreen';
+import { Fechar, DialogButons } from '../../components/Actions';
 import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -44,7 +41,7 @@ DenunciaForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 export function DenunciaForm({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, done, error, isLoading } = useSelector((state) => state.intranet);
+  const { mail, done, error, isSaving } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (done === 'denuncia') {
@@ -126,15 +123,7 @@ export function DenunciaForm({ open, onCancel }) {
               <RHFUploadSingleFile name="comprovativo" onDrop={handleDropSingle} />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isLoading}>
-              Enviar
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>

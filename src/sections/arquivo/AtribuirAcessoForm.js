@@ -6,15 +6,15 @@ import { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import { LoadingButton } from '@mui/lab';
+import { Grid, DialogTitle, DialogContent } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Box, Grid, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
 // components
+import { DialogButons } from '../../components/Actions';
 import { FormProvider, RHFAutocompleteObject } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -104,15 +104,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
               />
             </Grid>
           </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="contained" loading={isSaving}>
-              Atribuir
-            </LoadingButton>
-          </DialogActions>
+          <DialogButons label="Atribuir" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </>

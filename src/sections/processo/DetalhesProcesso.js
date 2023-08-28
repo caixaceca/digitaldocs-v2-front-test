@@ -310,12 +310,12 @@ export default function DetalhesProcesso({ isPS }) {
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Dados do depositante</Typography>
           </ListItem>
-          <TextItem title="Depositante é o próprio titular:" text={con?.titular_ordenador === 'f' ? 'NÃO' : 'SIM'} />
+          <TextItem title="Depositante é o próprio titular:" text={con?.titular_ordenador ? 'SIM' : 'NÃO'} />
           {con?.telefone && <TextItem title="Telefone:" text={con?.telefone} />}
           {con?.telemovel && <TextItem title="Telemóvel:" text={con?.telemovel} />}
           {con?.emails && <TextItem title="Email(s):" text={con?.emails} />}
           {con?.profissao && <TextItem title="Profissão:" text={con?.profissao} />}
-          {con?.titular_ordenador === 'f' && <TextItem title="Residente:" text={con?.residente ? 'SIM' : 'NÃO'} />}
+          {con?.residente && <TextItem title="Residente:" text={con?.residente ? 'SIM' : 'NÃO'} />}
           {con?.morada && <TextItem title="Morada:" text={con?.morada} />}
           {con?.local_trabalho && <TextItem title="Local de trabalho:" text={con?.local_trabalho} />}
         </List>

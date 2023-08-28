@@ -64,6 +64,12 @@ export function nomeacaoBySexo(nomeacao, sexo) {
 
 // ----------------------------------------------------------------------
 
+export function emailIpf(mail) {
+  return mail?.split('')?.reverse()?.join('')?.toLowerCase() === 'vc.axiac@arove.ordnavi';
+}
+
+// ----------------------------------------------------------------------
+
 export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
   let colaboradoresList = [];
   if (isAdmin || cc?.nomeacao === 'Administrador Executivo') {

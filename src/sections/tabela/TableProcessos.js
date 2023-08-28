@@ -224,7 +224,7 @@ export default function TableProcessos({ from }) {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <Stack direction="row" spacing={1} justifyContent="right">
+                        <Stack direction="row" spacing={0.75} justifyContent="right">
                           {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
                             <Pendente handleView={() => handlePendente(row)} />
                           )}
