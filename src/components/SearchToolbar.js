@@ -199,7 +199,7 @@ export function SearchToolbarProcessos({ tab, filter, setFilter, colaboradoresLi
         fullWidth
         placeholder="Procurar..."
         value={filter.get('filter') || ''}
-        onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), filter: newValue || '' })}
+        onChange={(event) => setFilter({ tab, ...paramsObject(filter), filter: event.target.value || '' })}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
