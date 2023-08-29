@@ -60,7 +60,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     finalidade: Yup.string().required('Finalidade não pode ficar vazio'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     setor_atividade: Yup.string().required('Setor de atividade não pode ficar vazio'),
-    situacao_final_mes: isEdit && Yup.string().required('Situação não pode ficar vazio'),
+    situacao_final_mes: isEdit && Yup.mixed().required('Situação não pode ficar vazio'),
     cliente: estado === 'Contratado' && Yup.number().typeError('Introduza o nº de cliente'),
     taxa_juro: estado === 'Contratado' && Yup.number().typeError('Introduza a taxa de juro'),
     garantia: estado === 'Contratado' && Yup.string().required('Garantia não pode ficar vazio'),
@@ -86,19 +86,15 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     montante_aprovado:
       (estado === 'Aprovado' || estado === 'Contratado') && Yup.number().typeError('Introduza o montante aprovado'),
   });
-  const _entidades = useMemo(
-    () => selectedProcesso?.entidades?.split(';')?.map((row) => ({ numero: row })) || [],
-    [selectedProcesso?.entidades]
-  );
 
   const defaultValues = useMemo(
     () => ({
+      conta: '',
       anexos: [],
+      entidades: [],
       fluxo_id: fluxo?.id,
-      entidades: _entidades,
       obs: selectedProcesso?.obs || '',
       mobs: selectedProcesso?.mobs || '',
-      conta: selectedProcesso?.conta || '',
       titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       agendado: selectedProcesso?.agendado || false,
@@ -126,7 +122,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       data_indeferido: credito?.data_indeferido ? add(new Date(credito?.data_indeferido), { hours: 2 }) : null,
       data_contratacao: credito?.data_contratacao ? add(new Date(credito?.data_contratacao), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, credito, _entidades, meuAmbiente, cc]
+    [selectedProcesso, fluxo?.id, credito, meuAmbiente, cc]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, reset, handleSubmit } = methods;
@@ -169,7 +165,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       if (values?.numero_proposta) {
         formData.append('numero_proposta', values.numero_proposta);
       }
-      if (values?.entidades?.length !== 0) {
+      if (values?.entidades?.length > 0) {
         formData.append(
           'entidades',
           values.entidades.map((row) => row?.numero)
