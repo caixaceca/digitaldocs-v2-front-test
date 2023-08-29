@@ -1297,39 +1297,11 @@ export function createItem(item, dados, params) {
         }
         case 'processo interno': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/interno`, dados, options1);
-          if (params?.isPendente) {
-            await axios.patch(
-              `${BASEURLDD}/v1/processos/abandonar/${response?.data?.processo?.id}`,
-              JSON.stringify(params?.abandonar),
-              options
-            );
-          }
-          if (params?.atribuir) {
-            await axios.patch(
-              `${BASEURLDD}/v1/processos/afetar/${response?.data?.processo?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
-              '',
-              options
-            );
-          }
           dispatch(slice.actions.createProcessoSuccess(response?.data?.processo?.id));
           break;
         }
         case 'processo externo': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/externo`, dados, options1);
-          if (params?.isPendente) {
-            await axios.patch(
-              `${BASEURLDD}/v1/processos/abandonar/${response?.data?.processo?.id}`,
-              JSON.stringify(params?.abandonar),
-              options
-            );
-          }
-          if (params?.atribuir) {
-            await axios.patch(
-              `${BASEURLDD}/v1/processos/afetar/${response?.data?.processo?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
-              '',
-              options
-            );
-          }
           dispatch(slice.actions.createProcessoSuccess(response?.data?.processo?.id));
           break;
         }

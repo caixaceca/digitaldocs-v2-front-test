@@ -16,8 +16,8 @@ import {
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
 //
+import { ObsNovosAnexos } from './Outros';
 import AnexosExistentes from './AnexosExistentes';
-import { Pendencia, ObsNovosAnexos } from './Outros';
 // _mock
 import { segmentos, escaloes, situacoes } from '../../../_mock';
 
@@ -26,11 +26,10 @@ import { segmentos, escaloes, situacoes } from '../../../_mock';
 ProcessoCreditoForm.propTypes = {
   isEdit: PropTypes.bool,
   setEstado: PropTypes.func,
-  setPendente: PropTypes.func,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, selectedProcesso }) {
+export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcesso }) {
   const { control, watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
@@ -181,7 +180,7 @@ export default function ProcessoCreditoForm({ isEdit, setPendente, setEstado, se
           </Grid>
         </>
       )}
-      <Pendencia setPendente={setPendente} />
+
       <Grid item xs={12}>
         <Card>
           <CardContent>

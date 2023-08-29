@@ -143,19 +143,19 @@ export function FluxoForm({ isOpenModal, onCancel }) {
               <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_interno" labelPlacement="start" label="Interno" />
+              <RHFSwitch name="is_interno"  label="Interno" />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_ativo" labelPlacement="start" label="Ativo" />
+              <RHFSwitch name="is_ativo"  label="Ativo" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="is_con" labelPlacement="start" label="Com. Operação Numerário" />
+              <RHFSwitch name="is_con"  label="Com. Operação Numerário" />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_credito" labelPlacement="start" label="Crédito" />
+              <RHFSwitch name="is_credito"  label="Crédito" />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="limpo" labelPlacement="start" label="Limpo" />
+              <RHFSwitch name="limpo"  label="Limpo" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
@@ -382,13 +382,13 @@ export function EstadoForm({ isOpenModal, onCancel }) {
               />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch name="is_inicial" labelPlacement="start" label="Inicial" />
+              <RHFSwitch name="is_inicial"  label="Inicial" />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch name="is_final" labelPlacement="start" label="Final" />
+              <RHFSwitch name="is_final"  label="Final" />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch name="is_decisao" labelPlacement="start" label="Decisão" />
+              <RHFSwitch name="is_decisao"  label="Decisão" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
@@ -993,19 +993,19 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="is_after_devolucao" labelPlacement="start" label="Depois de devolução" />
+              <RHFSwitch name="is_after_devolucao"  label="Depois de devolução" />
             </Grid>
             <Grid item xs={12} sm={3}>
-              <RHFSwitch name="to_alert" labelPlacement="start" label="Notificar" />
+              <RHFSwitch name="to_alert"  label="Notificar" />
             </Grid>
             <Grid item xs={12} sm={3}>
-              <RHFSwitch name="is_paralelo" labelPlacement="start" label="Paralelo" />
+              <RHFSwitch name="is_paralelo"  label="Paralelo" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="hasopnumero" labelPlacement="start" label="Indicar nº de operação" />
+              <RHFSwitch name="hasopnumero"  label="Indicar nº de operação" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="arqhasopnumero" labelPlacement="start" label="Nº de operação no arquivo" />
+              <RHFSwitch name="arqhasopnumero"  label="Nº de operação no arquivo" />
             </Grid>
           </Grid>
           <DialogButons

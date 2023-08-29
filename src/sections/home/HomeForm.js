@@ -179,7 +179,7 @@ export function ValidarDocForm({ open, onCancel }) {
             <Grid item xs={12}>
               <Stack direction="row" spacing={1}>
                 <Stack sx={{ px: 1.5 }}>
-                  <RHFSwitch name="cache" labelPlacement="start" label="Cache" />
+                  <RHFSwitch name="cache" label="Cache" />
                 </Stack>
 
                 <RHFTextField

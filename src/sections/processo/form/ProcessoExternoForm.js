@@ -15,30 +15,19 @@ import {
 } from '../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
+import { ObsNovosAnexos } from './Outros';
 import AnexosExistentes from './AnexosExistentes';
-import { Pendencia, ObsNovosAnexos } from './Outros';
-
-// ----------------------------------------------------------------------
-
-const operacoes = [
-  'Cativo/Penhora',
-  'Pedido de Informação',
-  'Cancelamento/Levantamento de Cativo/Penhora',
-  'Pedido de Extrato Bancário',
-  'Outras',
-];
 
 // ----------------------------------------------------------------------
 
 ProcessoExternoForm.propTypes = {
   operacao: PropTypes.string,
   setOperacao: PropTypes.func,
-  setPendente: PropTypes.func,
   origensList: PropTypes.array,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoExternoForm({ operacao, setOperacao, setPendente, selectedProcesso, origensList }) {
+export default function ProcessoExternoForm({ operacao, setOperacao, selectedProcesso, origensList }) {
   const { control, setValue } = useFormContext();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
 
@@ -79,7 +68,13 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
                         setValue('operacao', value);
                         setOperacao(value);
                       }}
-                      options={operacoes}
+                      options={[
+                        'Cativo/Penhora',
+                        'Pedido de Informação',
+                        'Cancelamento/Levantamento de Cativo/Penhora',
+                        'Pedido de Extrato Bancário',
+                        'Outras',
+                      ]}
                       getOptionLabel={(option) => option}
                       renderInput={(params) => (
                         <TextField {...params} label="Operação" error={!!error} helperText={error?.message} />
@@ -110,8 +105,6 @@ export default function ProcessoExternoForm({ operacao, setOperacao, setPendente
           </CardContent>
         </Card>
       </Grid>
-
-      <Pendencia setPendente={setPendente} />
 
       <Grid item xs={12}>
         <Card>

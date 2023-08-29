@@ -20,6 +20,7 @@ export default function RHFSwitch({ name, onChange, ...other }) {
           render={({ field }) => <Switch {...field} onChange={onChange} checked={field.value} />}
         />
       }
+      labelPlacement="start"
       sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center' }}
       {...other}
     />
@@ -28,6 +29,7 @@ export default function RHFSwitch({ name, onChange, ...other }) {
       control={
         <Controller name={name} control={control} render={({ field }) => <Switch {...field} checked={field.value} />} />
       }
+      labelPlacement="start"
       sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center' }}
       {...other}
     />

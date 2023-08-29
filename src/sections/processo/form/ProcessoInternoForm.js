@@ -7,19 +7,19 @@ import { Grid, Card, CardContent } from '@mui/material';
 import { RHFSwitch, RHFTextField, RHFDatePicker, RHFAutocompleteSimple } from '../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
+import { ObsNovosAnexos } from './Outros';
 import AnexosExistentes from './AnexosExistentes';
-import { Pendencia, ObsNovosAnexos } from './Outros';
 
 // ----------------------------------------------------------------------
 
 ProcessoInternoForm.propTypes = {
   fluxo: PropTypes.object,
+  setTitular: PropTypes.func,
   setAgendado: PropTypes.func,
-  setPendente: PropTypes.func,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setPendente, fluxo }) {
+export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setTitular, fluxo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
@@ -41,7 +41,6 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                 <Grid item xs={12}>
                   <RHFSwitch
                     name="agendado"
-                    labelPlacement="start"
                     onChange={(event, value) => {
                       setValue('agendado', value);
                       setAgendado(value);
@@ -80,12 +79,19 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
             <CardContent>
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} sm={6}>
-                  <RHFSwitch name="titular_ordenador" labelPlacement="start" label="Depositante é o próprio titular" />
+                  <RHFSwitch
+                    name="titular_ordenador"
+                    onChange={(event, value) => {
+                      setValue('titular_ordenador', value);
+                      setTitular(value);
+                    }}
+                    label="Depositante é o próprio titular"
+                  />
                 </Grid>
                 {!values?.titular_ordenador && (
                   <>
                     <Grid item xs={12} sm={6}>
-                      <RHFSwitch name="residente" labelPlacement="start" label="Residente" />
+                      <RHFSwitch name="residente" label="Residente" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
                       <RHFTextField name="profissao" label="Profissão" />
@@ -112,8 +118,6 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
           </Card>
         </Grid>
       )}
-
-      <Pendencia setPendente={setPendente} />
 
       <Grid item xs={12}>
         <Card>

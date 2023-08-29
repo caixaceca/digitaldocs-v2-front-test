@@ -96,9 +96,7 @@ export default function Processo() {
   const linkNavigate =
     (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}${parametros}`) ||
     (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}${parametros}`) ||
-    (fromTrabalhados && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
-    (fromPorConcluir && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
-    (fromEntradas && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
+    ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
     `${PATH_DIGITALDOCS.processos.lista}${parametros}`;
 
   const colaboradoresList = [];

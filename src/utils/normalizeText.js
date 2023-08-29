@@ -96,9 +96,6 @@ export function paramsObject(params) {
   if (params.get('colaborador')) {
     paramsFind.colaborador = params.get('colaborador');
   }
-  if (params.get('filter')) {
-    paramsFind.filter = params.get('filter');
-  }
   if (params.get('uoId')) {
     paramsFind.uoId = params.get('uoId');
   }
@@ -107,9 +104,6 @@ export function paramsObject(params) {
   }
   if (params.get('assunto')) {
     paramsFind.assunto = params.get('assunto');
-  }
-  if (params.get('colaborador')) {
-    paramsFind.colaborador = params.get('colaborador');
   }
   if (params.get('datai')) {
     paramsFind.datai = params.get('datai');

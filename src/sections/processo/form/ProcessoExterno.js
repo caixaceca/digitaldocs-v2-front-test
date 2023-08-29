@@ -11,7 +11,6 @@ import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';
-import { podeSerAtribuido } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
@@ -31,14 +30,10 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { meuAmbiente, processoId, origens, motivosPendencias, done, error, isSaving } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { meuAmbiente, processoId, origens, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const [operacao, setOperacao] = useState(selectedProcesso?.operacao || '');
-  const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
   const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
-  const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -64,7 +59,6 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
     canal: Yup.string().required('Canal de entrada não pode ficar vazio'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio'),
-    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     operacao: meuAmbiente?.nome?.includes('DOP') && Yup.string().required('Operação não pode ficar vazio'),
     valor:
       operacao === 'Cativo/Penhora' &&
@@ -92,18 +86,16 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       cliente: selectedProcesso?.cliente || '',
       operacao: selectedProcesso?.operacao || null,
       referencia: selectedProcesso?.referencia || '',
-      ispendente: selectedProcesso?.ispendente || false,
+      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
+      balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
-      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
-      mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
+      data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       origem_id: selectedProcesso?.origem_id
         ? origensList?.find((row) => row.id === selectedProcesso?.origem_id)
         : null,
-      balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
-      data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, mpendencia, meuAmbiente, origensList, _entidades, cc]
+    [selectedProcesso, fluxo?.id, meuAmbiente, origensList, _entidades, cc]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -122,162 +114,64 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
 
   const onSubmit = async () => {
     try {
+      const formData = new FormData();
+      // required
+      formData.append('agendado', false);
+      formData.append('is_interno ', false);
+      formData.append('canal', values.canal);
+      formData.append('balcao', values.balcao);
+      formData.append('modelo', fluxo?.modelo);
+      formData.append('fluxo_id', values.fluxo_id);
+      formData.append('referencia', values.referencia);
+      formData.append('origem_id', values?.origem_id?.id);
+      formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
+      // optional
+      if (values.obs) {
+        formData.append('obs', values.obs);
+      }
+      if (values.conta) {
+        formData.append('conta', values.conta);
+      }
+      if (values.valor) {
+        formData.append('valor', values.valor);
+      }
+      if (values.docidp) {
+        formData.append('docidp', values.docidp);
+      }
+      if (values.docids) {
+        formData.append('docids', values.docids);
+      }
+      if (values.cliente) {
+        formData.append('cliente', values.cliente);
+      }
+      if (values.titular) {
+        formData.append('titular', values.titular);
+      }
+      if (values.operacao) {
+        formData.append('operacao', values.operacao);
+      }
+      if (values?.entidades?.length !== 0) {
+        formData.append(
+          'entidades',
+          values.entidades.map((row) => row?.numero)
+        );
+      }
+      if (values?.anexos?.length > 0) {
+        for (let i = 0; i < values.anexos.length; i += 1) {
+          formData.append('anexos', values.anexos[i]);
+        }
+      }
+
       if (selectedProcesso) {
-        const formData = new FormData();
-        // required
-        formData.append('agendado', false);
-        formData.append('balcao', values.balcao);
-        formData.append('modelo', fluxo?.modelo);
-        formData.append('fluxo_id', values.fluxo_id);
         formData.append('uo_perfil_id ', cc?.uo?.id);
-        formData.append('is_interno ', selectedProcesso?.is_interno);
-        formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
-        // optional
-        if (values.obs) {
-          formData.append('obs', values.obs);
-        }
-        if (values.conta) {
-          formData.append('conta', values.conta);
-        }
-        if (values.docidp) {
-          formData.append('docidp', values.docidp);
-        }
-        if (values.docids) {
-          formData.append('docids', values.docids);
-        }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
-        }
-        if (values.titular) {
-          formData.append('titular', values.titular);
-        }
-        if (values?.entidades?.length !== 0) {
-          formData.append(
-            'entidades',
-            values.entidades.map((row) => row?.numero)
-          );
-        }
-        if (values.referencia) {
-          formData.append('referencia', values.referencia);
-        }
-        if (values.origem_id) {
-          formData.append('origem_id', values?.origem_id?.id);
-        }
-        if (values.canal) {
-          formData.append('canal', values.canal);
-        }
-        if (values.valor) {
-          formData.append('valor', values.valor);
-        }
-        if (values.operacao) {
-          formData.append('operacao', values.operacao);
-        }
-        if (values.ispendente) {
-          formData.append('ispendente', true);
-          if (values.mpendencia) {
-            formData.append('mpendencia', values.mpendencia.id);
-          }
-          if (values.mobs) {
-            formData.append('mobs', values.mobs);
-          }
-        } else {
-          formData.append('ispendente', false);
-          if (selectedProcesso.mpendencia) {
-            formData.append('mpendencia', selectedProcesso.mpendencia);
-          }
-          if (selectedProcesso.mobs) {
-            formData.append('mobs', selectedProcesso.mobs);
-          }
-        }
-        if (values?.anexos?.length > 0) {
-          for (let i = 0; i < values.anexos.length; i += 1) {
-            formData.append('anexos', values.anexos[i]);
-          }
-        }
         dispatch(
-          updateItem('processo', formData, {
-            mail,
-            perfilId,
-            id: selectedProcesso?.id,
-            msg: 'processo atualizado',
-            isPendente: values.ispendente,
-            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
-            abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
-          })
+          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'processo atualizado' })
         );
       } else {
-        const formData = new FormData();
-        // required
-        formData.append('balcao', values.balcao);
-        formData.append('modelo', fluxo?.modelo);
-        formData.append('fluxo_id', values.fluxo_id);
         formData.append('perfil_id', values.perfil_id);
-        formData.append('referencia', values.referencia);
-        formData.append('origem_id', values?.origem_id?.id);
         formData.append('uo_origem_id', values.uo_origem_id);
         formData.append('estado_atual_id', values.estado_atual_id);
-        formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
-        // optional
-        if (values.obs) {
-          formData.append('obs', values.obs);
-        }
-        if (values.canal) {
-          formData.append('canal', values.canal);
-        }
-        if (values.valor) {
-          formData.append('valor', values.valor);
-        }
-        if (values.conta) {
-          formData.append('conta', values.conta);
-        }
-        if (values.docidp) {
-          formData.append('docidp', values.docidp);
-        }
-        if (values.docids) {
-          formData.append('docids', values.docids);
-        }
-        if (values.titular) {
-          formData.append('titular', values.titular);
-        }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
-        }
-        if (values?.entidades?.length !== 0) {
-          formData.append(
-            'entidades',
-            values.entidades.map((row) => row?.numero)
-          );
-        }
-        if (values.operacao) {
-          formData.append('operacao', values.operacao);
-        }
-        if (values.ispendente) {
-          formData.append('ispendente', values.ispendente);
-          if (values.mpendencia) {
-            formData.append('mpendencia', values.mpendencia.id);
-          }
-          if (values.mobs) {
-            formData.append('mobs', values.mobs);
-          }
-        }
-        if (values.anexos) {
-          const listaanexo = values.anexos;
-          for (let i = 0; i < listaanexo.length; i += 1) {
-            formData.append('anexos', listaanexo[i]);
-          }
-        }
-        dispatch(
-          createItem('processo externo', formData, {
-            mail,
-            perfilId,
-            fluxoId: fluxo?.id,
-            estadoId: meuAmbiente?.id,
-            msg: 'processo adicionado',
-            isPendente: values.ispendente,
-            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
-            abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
-          })
-        );
+        dispatch(createItem('processo externo', formData, { mail, perfilId, msg: 'processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -291,7 +185,6 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
           <ProcessoExternoForm
             operacao={operacao}
             setOperacao={setOperacao}
-            setPendente={setPendente}
             origensList={origensList}
             selectedProcesso={selectedProcesso}
           />

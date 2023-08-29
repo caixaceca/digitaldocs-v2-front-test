@@ -11,7 +11,6 @@ import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';
-import { podeSerAtribuido } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
@@ -31,14 +30,10 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { meuAmbiente, processoId, motivosPendencias, linhas, isSaving, done, error } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { meuAmbiente, processoId, linhas, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const credito = selectedProcesso?.credito || null;
-  const [pendente, setPendente] = useState(selectedProcesso?.ispendente || false);
   const [estado, setEstado] = useState(credito?.situacao_final_mes);
-  const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -68,7 +63,6 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     situacao_final_mes: isEdit && Yup.string().required('Situação não pode ficar vazio'),
     cliente: estado === 'Contratado' && Yup.number().typeError('Introduza o nº de cliente'),
     taxa_juro: estado === 'Contratado' && Yup.number().typeError('Introduza a taxa de juro'),
-    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     garantia: estado === 'Contratado' && Yup.string().required('Garantia não pode ficar vazio'),
     montante_contratado: estado === 'Contratado' && Yup.number().typeError('Introduza o montante contratado'),
     data_entrada: Yup.date().typeError('Introduza uma data válida').required('Data de entrada não pode ficar vazio'),
@@ -108,12 +102,10 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       agendado: selectedProcesso?.agendado || false,
-      ispendente: selectedProcesso?.ispendente || false,
       perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
       balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
-      mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       // info credito
       segmento: credito?.segmento || null,
@@ -134,7 +126,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       data_indeferido: credito?.data_indeferido ? add(new Date(credito?.data_indeferido), { hours: 2 }) : null,
       data_contratacao: credito?.data_contratacao ? add(new Date(credito?.data_contratacao), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, credito, mpendencia, _entidades, meuAmbiente, cc]
+    [selectedProcesso, fluxo?.id, credito, _entidades, meuAmbiente, cc]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, reset, handleSubmit } = methods;
@@ -152,24 +144,52 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
 
   const onSubmit = async () => {
     try {
+      const formData = new FormData();
+      // required
+      formData.append('modelo', fluxo?.modelo);
+      formData.append('balcao', values.balcao);
+      formData.append('titular', values.titular);
+      formData.append('fluxo_id', values.fluxo_id);
+      formData.append('segmento', values.segmento);
+      formData.append('finalidade', values.finalidade);
+      formData.append('linha_id', values?.linha_id?.id);
+      formData.append('setor_atividade', values.setor_atividade);
+      formData.append('montante_solicitado', values.montante_solicitado);
+      formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
+      // optional
+      if (values.obs) {
+        formData.append('obs', values.obs);
+      }
+      if (values.conta) {
+        formData.append('conta', values.conta);
+      }
+      if (values.cliente) {
+        formData.append('cliente', values.cliente);
+      }
+      if (values?.numero_proposta) {
+        formData.append('numero_proposta', values.numero_proposta);
+      }
+      if (values?.entidades?.length !== 0) {
+        formData.append(
+          'entidades',
+          values.entidades.map((row) => row?.numero)
+        );
+      }
+      if (values?.anexos?.length > 0) {
+        for (let i = 0; i < values.anexos.length; i += 1) {
+          formData.append('anexos', values.anexos[i]);
+        }
+      }
+
       if (selectedProcesso) {
-        const formData = new FormData();
-        // required
+        formData.append('diadomes', '');
         formData.append('agendado', false);
-        formData.append('balcao', values.balcao);
-        formData.append('modelo', fluxo?.modelo);
-        formData.append('titular', values.titular);
-        formData.append('fluxo_id', values.fluxo_id);
-        formData.append('segmento', values.segmento);
+        formData.append('periodicidade', '');
+        formData.append('data_inicio', null);
+        formData.append('data_arquivamento', null);
         formData.append('uo_perfil_id ', cc?.uo?.id);
-        formData.append('finalidade', values.finalidade);
-        formData.append('linha_id', values?.linha_id?.id);
-        formData.append('setor_atividade', values.setor_atividade);
         formData.append('is_interno ', selectedProcesso?.is_interno);
         formData.append('situacao_final_mes', values.situacao_final_mes);
-        formData.append('montante_solicitado', values.montante_solicitado);
-        formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
-        // optional
         if (
           values.situacao_final_mes === 'Aprovado' ||
           values.situacao_final_mes === 'Contratado' ||
@@ -206,116 +226,15 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
           formData.append('data_contratacao', '');
           formData.append('montante_contratado', '');
         }
-        if (values.obs) {
-          formData.append('obs', values.obs);
-        }
-        if (values.conta) {
-          formData.append('conta', values.conta);
-        }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
-        }
-        if (values?.numero_proposta) {
-          formData.append('numero_proposta', values.numero_proposta);
-        }
-        formData.append('ispendente', values.ispendente);
-        if (values.ispendente) {
-          formData.append('ispendente', true);
-          if (values.mpendencia) {
-            formData.append('mpendencia', values.mpendencia.id);
-          }
-          if (values.mobs) {
-            formData.append('mobs', values.mobs);
-          }
-        } else {
-          formData.append('ispendente', false);
-          if (selectedProcesso.mpendencia) {
-            formData.append('mpendencia', selectedProcesso.mpendencia);
-          }
-          if (selectedProcesso.mobs) {
-            formData.append('mobs', selectedProcesso.mobs);
-          }
-        }
-        if (values?.entidades?.length !== 0) {
-          formData.append(
-            'entidades',
-            values.entidades.map((row) => row?.numero)
-          );
-        }
-        formData.append('diadomes', '');
-        formData.append('periodicidade', '');
-        formData.append('data_inicio', null);
-        formData.append('data_arquivamento', null);
-        if (values?.anexos?.length > 0) {
-          for (let i = 0; i < values.anexos.length; i += 1) {
-            formData.append('anexos', values.anexos[i]);
-          }
-        }
         dispatch(
-          updateItem('processo', formData, {
-            mail,
-            perfilId,
-            id: selectedProcesso?.id,
-            msg: 'processo atualizado',
-            isPendente: values.ispendente,
-            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
-            abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
-          })
+          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'processo atualizado' })
         );
       } else {
-        const formData = new FormData();
-        // required
-        formData.append('modelo', fluxo?.modelo);
-        formData.append('balcao', values.balcao);
-        formData.append('titular', values.titular);
-        formData.append('segmento', values.segmento);
-        formData.append('fluxo_id', values.fluxo_id);
         formData.append('perfil_id', values.perfil_id);
-        formData.append('finalidade', values.finalidade);
-        formData.append('linha_id', values?.linha_id?.id);
         formData.append('situacao_final_mes', 'Em análise');
         formData.append('uo_origem_id', values.uo_origem_id);
-        formData.append('setor_atividade', values.setor_atividade);
         formData.append('estado_atual_id', values.estado_atual_id);
-        formData.append('montante_solicitado', values.montante_solicitado);
-        formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
-        // optional
-        if (values.obs) {
-          formData.append('obs', values.obs);
-        }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
-        }
-        if (values?.numero_proposta) {
-          formData.append('numero_proposta', values.numero_proposta);
-        }
-        if (values.ispendente) {
-          formData.append('ispendente', true);
-          if (values.mpendencia) {
-            formData.append('mpendencia', values.mpendencia.id);
-          }
-          if (values.mobs) {
-            formData.append('mobs', values.mobs);
-          }
-        }
-        if (values.anexos) {
-          const listaanexo = values.anexos;
-          for (let i = 0; i < listaanexo.length; i += 1) {
-            formData.append('anexos', listaanexo[i]);
-          }
-        }
-        dispatch(
-          createItem('processo interno', formData, {
-            mail,
-            perfilId,
-            fluxoId: fluxo?.id,
-            estadoId: meuAmbiente?.id,
-            msg: 'processo adicionado',
-            isPendente: values.ispendente,
-            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
-            abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
-          })
-        );
+        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -326,12 +245,7 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <ProcessoCreditoForm
-            isEdit={isEdit}
-            setEstado={setEstado}
-            setPendente={setPendente}
-            selectedProcesso={selectedProcesso}
-          />
+          <ProcessoCreditoForm isEdit={isEdit} setEstado={setEstado} selectedProcesso={selectedProcesso} />
         </Grid>
 
         <Grid item xs={12} textAlign="center">

@@ -11,7 +11,6 @@ import { Grid } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';
-import { podeSerAtribuido } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
@@ -32,13 +31,10 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
   const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
-  const { meuAmbiente, processoId, motivosPendencias, isSaving, done, error } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { meuAmbiente, processoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado);
-  const [pendente, setPendente] = useState(selectedProcesso?.ispendente);
-  const mpendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedProcesso?.mpendencia)) || null;
+  const [titular, setTitular] = useState(selectedProcesso?.con?.titular_ordenador);
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -59,9 +55,12 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     periodicidade: agendado && Yup.mixed().required('Seleciona a periodicidade'),
-    mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
+    anexos: fluxo?.is_con && !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    morada: fluxo?.is_con && !titular && Yup.string().required('Morada não pode ficar vazio'),
+    // telefone: fluxo?.is_con && !titular && Yup.string().required('Telefone não pode ficar vazio'),
+    profissao: fluxo?.is_con && !titular && Yup.string().required('Profissão não pode ficar vazio'),
+    local_trabalho: fluxo?.is_con && !titular && Yup.string().required('Local de trabalho não pode ficar vazio'),
     noperacao:
       (selectedProcesso?.noperacao || fluxo?.is_con) && Yup.string().required('Nº de operação não pode ficar vazio'),
     titular:
@@ -89,19 +88,19 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       Yup.number().typeError('Introduza um nº de conta válido'),
   });
 
-  const _entidades = useMemo(
+  const entidades = useMemo(
     () =>
       (selectedProcesso?.entidades && selectedProcesso?.entidades?.split(';')?.map((row) => ({ numero: row }))) ||
-      (fluxo?.assunto === 'Abertura de conta' && [{ numero: '' }]) ||
+      (!selectedProcesso && fluxo?.assunto === 'Abertura de conta' && [{ numero: '' }]) ||
       [],
-    [selectedProcesso?.entidades, fluxo?.assunto]
+    [fluxo?.assunto, selectedProcesso]
   );
 
   const defaultValues = useMemo(
     () => ({
+      entidades,
       anexos: [],
       fluxo_id: fluxo?.id,
-      entidades: _entidades,
       obs: selectedProcesso?.obs || '',
       mobs: selectedProcesso?.mobs || '',
       conta: selectedProcesso?.conta || '',
@@ -111,13 +110,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       diadomes: selectedProcesso?.diadomes || '',
       noperacao: selectedProcesso?.noperacao || '',
       agendado: selectedProcesso?.agendado || false,
-      ispendente: selectedProcesso?.ispendente || false,
       periodicidade: selectedProcesso?.periodicidade || null,
       perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
       balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
       uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
       estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
-      mpendencia: mpendencia ? { id: mpendencia?.id, label: mpendencia?.motivo } : null,
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
@@ -129,9 +126,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       profissao: selectedProcesso?.con?.profissao || '',
       residente: selectedProcesso?.con?.residente || true,
       local_trabalho: selectedProcesso?.con?.local_trabalho || '',
-      titular_ordenador: !!selectedProcesso?.con?.titular_ordenador,
+      titular_ordenador: selectedProcesso ? selectedProcesso?.con?.titular_ordenador : true,
     }),
-    [selectedProcesso, fluxo?.id, mpendencia, meuAmbiente, cc, _entidades]
+    [selectedProcesso, fluxo?.id, meuAmbiente, cc, entidades]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -150,225 +147,106 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
 
   const onSubmit = async () => {
     try {
+      const formData = new FormData();
+      // required
+      formData.append('modelo', fluxo?.modelo);
+      formData.append('balcao', values.balcao);
+      formData.append('fluxo_id', values.fluxo_id);
+      formData.append('agendado', values.agendado);
+      formData.append('data_entrada', format(values.data_entrada ? values.data_entrada : new Date(), 'yyyy-MM-dd'));
+      if (values.agendado) {
+        formData.append('diadomes', values.diadomes);
+        formData.append('periodicidade', values.periodicidade);
+        formData.append('data_inicio', format(values.data_inicio, 'yyyy-MM-dd'));
+        formData.append('data_arquivamento', format(values.data_arquivamento, 'yyyy-MM-dd'));
+      } else {
+        formData.append('diadomes', '');
+        formData.append('periodicidade', '');
+        formData.append('data_inicio', null);
+        formData.append('data_arquivamento', null);
+      }
+      // optional
+      if (values.obs) {
+        formData.append('obs', values.obs);
+      }
+      if (isPSC) {
+        formData.append(
+          'titular',
+          `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
+        );
+      } else if (values.titular) {
+        formData.append('titular', values.titular);
+      }
+      if (fluxo?.assunto === 'Abertura de conta') {
+        formData.append('conta', '');
+        formData.append('cliente', '');
+      } else {
+        if (values.conta) {
+          formData.append('conta', values.conta);
+        }
+        if (values.cliente) {
+          formData.append('cliente', values.cliente);
+        }
+      }
+      if (values.email) {
+        formData.append('email', values.email);
+      }
+      if (values.noperacao) {
+        formData.append('noperacao', values.noperacao);
+      }
+      if (values?.entidades?.length !== 0) {
+        formData.append(
+          'entidades',
+          values.entidades.map((row) => row?.numero)
+        );
+      }
+      // CON
+      if (fluxo?.is_con) {
+        formData.append('titular_ordenador', values.titular_ordenador);
+        if (!values.titular_ordenador) {
+          formData.append('residente', values.residente);
+          if (values.morada) {
+            formData.append('morada', values.morada);
+          }
+          if (values.emails) {
+            formData.append('emails', values.emails);
+          }
+          if (values.telefone) {
+            formData.append('telefone', values.telefone);
+          }
+          if (values.telemovel) {
+            formData.append('telemovel', values.telemovel);
+          }
+          if (values.profissao) {
+            formData.append('profissao', values.profissao);
+          }
+          if (values.local_trabalho) {
+            formData.append('local_trabalho', values.local_trabalho);
+          }
+        }
+      }
+      if (values?.anexos?.length > 0) {
+        for (let i = 0; i < values.anexos.length; i += 1) {
+          formData.append('anexos', values.anexos[i]);
+        }
+      }
+
       if (selectedProcesso) {
-        const formData = new FormData();
-        // required
-        formData.append('modelo', fluxo?.modelo);
-        formData.append('balcao', values.balcao);
-        formData.append('fluxo_id', values.fluxo_id);
-        formData.append('agendado', values.agendado);
         formData.append('uo_perfil_id ', cc?.uo?.id);
-        formData.append('ispendente', values.ispendente);
         formData.append('is_interno ', selectedProcesso?.is_interno);
-        formData.append('data_entrada', format(values.data_entrada ? values.data_entrada : new Date(), 'yyyy-MM-dd'));
-        // optional
-        if (values.obs) {
-          formData.append('obs', values.obs);
-        }
-        if (values.email) {
-          formData.append('email', values.email);
-        }
-        if (isPSC) {
-          formData.append(
-            'titular',
-            `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
-          );
-        } else if (values.titular) {
-          formData.append('titular', values.titular);
-        }
-        if (fluxo?.assunto === 'Abertura de conta') {
-          formData.append('conta', '');
-          formData.append('cliente', '');
-        } else {
-          if (values.conta) {
-            formData.append('conta', values.conta);
-          }
-          if (values.cliente) {
-            formData.append('cliente', values.cliente);
-          }
-        }
-        if (values.noperacao) {
-          formData.append('noperacao', values.noperacao);
-        }
-        if (values.ispendente) {
-          formData.append('ispendente', true);
-          if (values.mpendencia) {
-            formData.append('mpendencia', values.mpendencia.id);
-          }
-          if (values.mobs) {
-            formData.append('mobs', values.mobs);
-          }
-        } else {
-          formData.append('ispendente', false);
-          if (selectedProcesso.mpendencia) {
-            formData.append('mpendencia', selectedProcesso.mpendencia);
-          }
-          if (selectedProcesso.mobs) {
-            formData.append('mobs', selectedProcesso.mobs);
-          }
-        }
-        if (values?.entidades?.length !== 0) {
-          formData.append(
-            'entidades',
-            values.entidades.map((row) => row?.numero)
-          );
-        }
-        if (values.agendado) {
-          formData.append('diadomes', values.diadomes);
-          formData.append('periodicidade', values.periodicidade);
-          formData.append('data_inicio', format(values.data_inicio, 'yyyy-MM-dd'));
-          formData.append('data_arquivamento', format(values.data_arquivamento, 'yyyy-MM-dd'));
-        } else {
-          formData.append('diadomes', '');
-          formData.append('periodicidade', '');
-          formData.append('data_inicio', null);
-          formData.append('data_arquivamento', null);
-        }
-        // CON
-        if (fluxo?.is_con) {
-          formData.append('titular_ordenador', values.titular_ordenador);
-          if (!values.titular_ordenador) {
-            formData.append('residente', values.residente);
-            if (values.morada) {
-              formData.append('morada', values.morada);
-            }
-            if (values.emails) {
-              formData.append('emails', values.emails);
-            }
-            if (values.telefone) {
-              formData.append('telefone', values.telefone);
-            }
-            if (values.telemovel) {
-              formData.append('telemovel', values.telemovel);
-            }
-            if (values.profissao) {
-              formData.append('profissao', values.profissao);
-            }
-            if (values.local_trabalho) {
-              formData.append('local_trabalho', values.local_trabalho);
-            }
-          }
-        }
-        if (values?.anexos?.length > 0) {
-          for (let i = 0; i < values.anexos.length; i += 1) {
-            formData.append('anexos', values.anexos[i]);
-          }
-        }
         dispatch(
           updateItem('processo', formData, {
             mail,
             perfilId,
             id: selectedProcesso?.id,
             msg: 'processo atualizado',
-            isPendente: values.ispendente,
-            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
-            abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
           })
         );
       } else {
-        const formData = new FormData();
-        // required
-        formData.append('modelo', fluxo?.modelo);
-        formData.append('balcao', values.balcao);
-        formData.append('fluxo_id', values.fluxo_id);
         formData.append('perfil_id', values.perfil_id);
         formData.append('uo_origem_id', values.uo_origem_id);
         formData.append('estado_atual_id', values.estado_atual_id);
-        formData.append('data_entrada', format(values.data_entrada ? values.data_entrada : new Date(), 'yyyy-MM-dd'));
-        // optional
-        if (values.obs) {
-          formData.append('obs', values.obs);
-        }
-        if (values.email) {
-          formData.append('email', values.email);
-        }
-        if (values.noperacao) {
-          formData.append('noperacao', values.noperacao);
-        }
-        if (fluxo?.assunto === 'Abertura de conta') {
-          formData.append('conta', '');
-          formData.append('cliente', '');
-        } else {
-          if (values.conta) {
-            formData.append('conta', values.conta);
-          }
-          if (values.cliente) {
-            formData.append('cliente', values.cliente);
-          }
-        }
-        if (isPSC) {
-          formData.append(
-            'titular',
-            `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
-          );
-        } else if (values.titular) {
-          formData.append('titular', values.titular);
-        }
-        if (values.ispendente) {
-          formData.append('ispendente', true);
-          if (values.mpendencia) {
-            formData.append('mpendencia', values.mpendencia.id);
-          }
-          if (values.mobs) {
-            formData.append('mobs', values.mobs);
-          }
-        }
-        if (values.agendado) {
-          formData.append('agendado', values.agendado);
-          formData.append('diadomes', values.diadomes);
-          formData.append('periodicidade', values.periodicidade);
-          formData.append('data_inicio', format(values.data_inicio, 'yyyy-MM-dd'));
-          formData.append('data_arquivamento', format(values.data_arquivamento, 'yyyy-MM-dd'));
-        }
-        if (values?.entidades?.length !== 0) {
-          formData.append(
-            'entidades',
-            values.entidades.map((row) => row?.numero)
-          );
-        }
-        // CON
-        if (fluxo?.is_con) {
-          formData.append('titular_ordenador', values.titular_ordenador);
-          if (!values.titular_ordenador) {
-            formData.append('residente', values.residente);
-            if (values.morada) {
-              formData.append('morada', values.morada);
-            }
-            if (values.emails) {
-              formData.append('emails', values.emails);
-            }
-            if (values.telefone) {
-              formData.append('telefone', values.telefone);
-            }
-            if (values.telemovel) {
-              formData.append('telemovel', values.telemovel);
-            }
-            if (values.profissao) {
-              formData.append('profissao', values.profissao);
-            }
-            if (values.local_trabalho) {
-              formData.append('local_trabalho', values.local_trabalho);
-            }
-          }
-        }
-        if (values.anexos) {
-          const listaanexo = values.anexos;
-          for (let i = 0; i < listaanexo.length; i += 1) {
-            formData.append('anexos', listaanexo[i]);
-          }
-        }
-        dispatch(
-          createItem('processo interno', formData, {
-            mail,
-            perfilId,
-            fluxoId: fluxo?.id,
-            estadoId: meuAmbiente?.id,
-            msg: 'processo adicionado',
-            isPendente: values.ispendente,
-            atribuir: values.ispendente && podeSerAtribuido(fluxo?.assunto),
-            abandonar: { perfilID: perfilId, fluxoID: values?.fluxo_id, estadoID: values?.estado_atual_id },
-          })
-        );
+        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -381,8 +259,8 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         <Grid item xs={12}>
           <ProcessoInternoForm
             fluxo={fluxo}
+            setTitular={setTitular}
             setAgendado={setAgendado}
-            setPendente={setPendente}
             selectedProcesso={selectedProcesso}
           />
         </Grid>

@@ -379,7 +379,6 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                       <Grid container spacing={3}>
                         <Grid item xs={12}>
                           <RHFSwitch
-                            labelPlacement="start"
                             name="pendenteLevantamento"
                             label="Pendente de levantamento"
                             onChange={(event, value) => {
@@ -403,7 +402,6 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                             <RHFSwitch
                               name="pender"
                               label="Pendente"
-                              labelPlacement="start"
                               onChange={(event, value) => {
                                 setPendente(value);
                                 setValue('mobs', '');
@@ -1366,11 +1364,12 @@ export function ColocarPendente({ from }) {
             <Grid item xs={12}>
               <RHFTextField name="mobs" label="Observação" />
             </Grid>
-            {podeSerAtribuido(selectedItem?.assunto) && Number(cc?.uo?.balcao) === 8 && (
-              <Grid item xs={12}>
-                <RHFSwitch name="atribuir" labelPlacement="start" label="Atribuir" />
-              </Grid>
-            )}
+            {podeSerAtribuido(selectedItem?.assunto) &&
+              (Number(cc?.id) === 553 || Number(cc?.id) === 721 || Number(cc?.id) === 2) && (
+                <Grid item xs={12}>
+                  <RHFSwitch name="atribuir" label="Atribuir" />
+                </Grid>
+              )}
           </Grid>
           <DialogButons edit isSaving={isSaving} onCancel={handleCloseModal} />
         </FormProvider>
