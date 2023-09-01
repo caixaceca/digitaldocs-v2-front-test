@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 //
-import { loginRequest } from '../../config';
 import { callMsGraph } from '../../graph';
+import { loginRequest } from '../../config';
 // utils
 import { BASEURL, BASEURLSLIM } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
@@ -171,7 +171,7 @@ export function AzureIntranetHandShake(instance, accounts) {
           });
         });
     } catch (error) {
-      console.log(error);
+      console.log(errorMsg(error));
     }
   };
 }
@@ -183,7 +183,7 @@ export function AuthenticateColaborador(tokendeacesso, msalcolaborador) {
       const response = await axios.post(`${BASEURL}/perfil/msal`, msalcolaborador, options);
       dispatch(slice.actions.getProfileSuccess(response.data));
     } catch (error) {
-      console.log(error);
+      console.log(errorMsg(error));
     }
   };
 }

@@ -17,9 +17,7 @@ const TextMaxLine = forwardRef(
       display: '-webkit-box',
       WebkitLineClamp: line,
       WebkitBoxOrient: 'vertical',
-      ...(persistent && {
-        height: lineHeight * line,
-      }),
+      ...(persistent && { height: lineHeight * line }),
       ...sx,
     };
 

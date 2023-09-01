@@ -170,7 +170,7 @@ export function ValidarDocForm({ open, onCancel }) {
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           Validação de documento
-          <Fechar onCancel={onCancel} />
+          <Fechar handleClick={onCancel} />
         </Stack>
       </DialogTitle>
       <DialogContent sx={{ mt: 1 }}>

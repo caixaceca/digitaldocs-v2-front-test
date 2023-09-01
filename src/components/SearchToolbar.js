@@ -11,8 +11,7 @@ import { useSelector } from '../redux/store';
 // hooks
 import { getComparator, applySort } from '../hooks/useTable';
 // sections
-import Fluxo from '../sections/Fluxo';
-import Ambiente from '../sections/Ambiente';
+import { Ambiente, Fluxo } from '../sections/AmbienteFluxo';
 
 // ----------------------------------------------------------------------
 

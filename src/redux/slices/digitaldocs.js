@@ -1122,7 +1122,6 @@ export function getItem(item, params) {
           if (params?.from === 'listagem') {
             dispatch(slice.actions.selectItem(response.data));
           } else if (params?.from === 'clonagem') {
-            console.log('piu piu');
             dispatch(slice.actions.selectParecer(response.data));
           } else {
             dispatch(slice.actions.getFluxoSuccess(response.data));

@@ -187,7 +187,7 @@ export default function Intervencao({ colaboradoresList }) {
       />
       {!processo?.ispendente && (
         <>
-          <Pendente detail handleView={() => handlePendente(processo)} />
+          <Pendente detail handleClick={() => handlePendente(processo)} />
           <ColocarPendente from="detalhes" />
         </>
       )}

@@ -160,7 +160,7 @@ export default function EstatisticaCredito() {
                   disableFuture
                   views={['month', 'year']}
                   onChange={(newValue) => setData(newValue)}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 170 } } }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 180 } } }}
                 />
               )}
               {((uo?.label !== 'Caixa' && uo?.label !== 'DCN' && uo?.label !== 'DCS') || currentTab === 'Resumo') && (
@@ -876,19 +876,12 @@ function CardResumo({ total, label, qtd }) {
     'error';
   return (
     <Grid item xs={12} sm={6} lg={3}>
-      <Card
-        sx={{
-          boxShadow: 0,
-
-          color: theme.palette[color].darker,
-          bgcolor: theme.palette[color].lighter,
-        }}
-      >
+      <Card sx={{ boxShadow: 0, color: theme.palette[color].darker, bgcolor: theme.palette[color].lighter }}>
         <CardContent sx={{ textAlign: 'center' }}>
           <Stack
             sx={{
-              width: 64,
-              height: 64,
+              width: 60,
+              height: 60,
               margin: 'auto',
               borderRadius: '50%',
               alignItems: 'center',
@@ -910,7 +903,7 @@ function CardResumo({ total, label, qtd }) {
           <Typography variant="body2" sx={{ mt: 2 }}>
             <b>{fNumber(qtd)}</b> processo{qtd > 1 ? 's' : ''}
           </Typography>
-          <Typography variant="h4">{fCurrency(total)}</Typography>
+          <Typography variant="h5">{fCurrency(total)}</Typography>
           <Typography variant="subtitle1" sx={{ opacity: 0.64 }}>
             {label}
           </Typography>
@@ -942,7 +935,6 @@ function TableRowTotais({ dados }) {
 // ----------------------------------------------------------------------
 
 function filterDados(dados) {
-  // console.log(dados);
   // Empresas
   const empresaConstrucao = dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Construção');
   const empresaTesouraria = dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Tesouraria');

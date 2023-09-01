@@ -124,7 +124,7 @@ export default function Estados() {
                         <TableCell align="right" width={10}>
                           <Stack direction="row" spacing={0.75} justifyContent="right">
                             {row.nome !== 'Arquivo' && <UpdateItem item="estado" id={row.id} />}
-                            <ViewItem estado handleView={() => handleView(row?.id)} />
+                            <ViewItem estado handleClick={() => handleView(row?.id)} />
                           </Stack>
                         </TableCell>
                       </TableRow>

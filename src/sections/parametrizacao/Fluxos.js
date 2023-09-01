@@ -129,7 +129,7 @@ export default function Fluxos() {
                               <UpdateItem item="fluxo" id={row?.id} />
                               <CloneItem item="fluxo" id={row?.id} />
                             </RoleBasedGuard>
-                            <ViewItem handleView={() => handleViewRow(row?.id)} />
+                            <ViewItem handleClick={() => handleViewRow(row?.id)} />
                           </Stack>
                         </TableCell>
                       </TableRow>

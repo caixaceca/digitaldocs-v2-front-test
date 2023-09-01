@@ -64,8 +64,8 @@ export function nomeacaoBySexo(nomeacao, sexo) {
 
 // ----------------------------------------------------------------------
 
-export function emailIpf(mail) {
-  return mail?.split('')?.reverse()?.join('')?.toLowerCase() === 'vc.axiac@arove.ordnavi';
+export function emailCheck(mail, check) {
+  return mail?.split('')?.reverse()?.join('')?.toLowerCase() === check;
 }
 
 // ----------------------------------------------------------------------

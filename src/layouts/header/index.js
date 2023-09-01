@@ -22,7 +22,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import { format } from 'date-fns';
 import cssStyles from '../../utils/cssStyles';
-import { emailIpf } from '../../utils/validarAcesso';
+import { emailCheck } from '../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -114,7 +114,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>
             {/* {(isAdmin || meusAmbientes?.find((row) => row?.nome?.includes('Atendimento'))) && ( */}
-            {emailIpf(mail) && (
+            {emailCheck(mail, 'vc.axiac@arove.ordnavi') && (
               <>
                 <IconButtonHead
                   open={open1}

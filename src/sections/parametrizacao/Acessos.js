@@ -133,7 +133,7 @@ export default function Acessos() {
                         <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
                         <TableCell align="center" width={50}>
                           <Tooltip title="Gerir acessos" arrow>
-                            <ViewItem swap handleView={() => handleUpdate(row?.perfil?.id)} />
+                            <ViewItem swap handleClick={() => handleUpdate(row?.perfil?.id)} />
                           </Tooltip>
                         </TableCell>
                       </TableRow>

@@ -17,7 +17,7 @@ import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
-import Ambiente from '../sections/Ambiente';
+import { Ambiente } from '../sections/AmbienteFluxo';
 import { ProcessoInterno, ProcessoExterno, ProcessoCredito } from '../sections/processo/form';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';

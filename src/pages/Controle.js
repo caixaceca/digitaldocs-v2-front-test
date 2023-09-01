@@ -5,7 +5,7 @@ import { styled, alpha } from '@mui/material/styles';
 import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
 // utils
 import selectTab from '../utils/selectTab';
-import { emailIpf } from '../utils/validarAcesso';
+import { emailCheck } from '../utils/validarAcesso';
 import { paramsObject } from '../utils/normalizeText';
 // routes
 import useSettings from '../hooks/useSettings';
@@ -80,7 +80,9 @@ export default function Controle() {
     acessoEntradas() || isAdmin ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
   const cartoes =
     // isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
-    emailIpf(mail) ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }] : [];
+    emailCheck(mail, 'vc.axiac@arove.ordnavi')
+      ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
+      : [];
 
   const VIEW_TABS = useMemo(
     () =>

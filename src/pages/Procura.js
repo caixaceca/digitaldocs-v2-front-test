@@ -300,7 +300,7 @@ export default function Procura() {
                           )}
                         </TableCell>
                         <TableCell align="center" width={50}>
-                          <ViewItem handleView={() => handleViewRow(row?.id)} />
+                          <ViewItem handleClick={() => handleViewRow(row?.id)} />
                         </TableCell>
                       </TableRow>
                     ))

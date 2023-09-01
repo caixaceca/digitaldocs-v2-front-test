@@ -1,26 +1,17 @@
 // @mui
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Radio,
-  Stack,
-  Tooltip,
-  RadioGroup,
-  IconButton,
-  DialogTitle,
-  DialogContent,
-  FormControlLabel,
-} from '@mui/material';
 import { styled } from '@mui/material/styles';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import SentimentNeutralOutlinedIcon from '@mui/icons-material/SentimentNeutralOutlined';
 import SentimentSatisfiedOutlinedIcon from '@mui/icons-material/SentimentSatisfiedOutlined';
 import SentimentDissatisfiedOutlinedIcon from '@mui/icons-material/SentimentDissatisfiedOutlined';
 import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVerySatisfiedOutlined';
+import { Radio, Stack, Tooltip, RadioGroup, DialogTitle, DialogContent, FormControlLabel } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { createItem, closeDisposicao } from '../redux/slices/intranet';
 // components
+import { Fechar } from '../components/Actions';
 import DialogAnimate from '../components/animate/DialogAnimate';
 // sections
 import FraseContent from '../sections/home/FraseContent';
@@ -99,9 +90,7 @@ function DisposicaoDialog() {
       <DialogTitle>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           Como te sentes hoje?
-          <IconButton size="small" onClick={handleClose}>
-            <CloseOutlinedIcon sx={{ width: 18, opacity: 0.75 }} />
-          </IconButton>
+          <Fechar handleClick={handleClose} />
         </Stack>
       </DialogTitle>
       <DialogContent sx={{ mt: 3 }}>

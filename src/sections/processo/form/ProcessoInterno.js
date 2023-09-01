@@ -124,8 +124,8 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       telefone: selectedProcesso?.con?.telefone || '',
       telemovel: selectedProcesso?.con?.telemovel || '',
       profissao: selectedProcesso?.con?.profissao || '',
-      residente: selectedProcesso?.con?.residente || true,
       local_trabalho: selectedProcesso?.con?.local_trabalho || '',
+      residente: selectedProcesso?.con ? selectedProcesso?.con?.residente : true,
       titular_ordenador: selectedProcesso ? selectedProcesso?.con?.titular_ordenador : true,
     }),
     [selectedProcesso, fluxo?.id, meuAmbiente, cc, entidades]

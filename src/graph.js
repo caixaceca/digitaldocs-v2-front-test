@@ -11,10 +11,7 @@ export async function callMsGraph(accessToken) {
 
   headers.append('Authorization', bearer);
 
-  const options = {
-    method: 'GET',
-    headers
-  };
+  const options = { method: 'GET', headers };
 
   return fetch(graphConfig.graphMeEndpoint, options)
     .then((response) => response.json())

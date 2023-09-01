@@ -45,8 +45,8 @@ import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBacku
 // utils
 import { format, add } from 'date-fns';
 import { getFileThumb } from '../../utils/getFileFormat';
-import { podeSerAtribuido } from '../../utils/validarAcesso';
 import { fNumber, fCurrency } from '../../utils/formatNumber';
+import { podeSerAtribuido, emailCheck } from '../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem, closeModal } from '../../redux/slices/digitaldocs';
@@ -1365,7 +1365,9 @@ export function ColocarPendente({ from }) {
               <RHFTextField name="mobs" label="Observação" />
             </Grid>
             {podeSerAtribuido(selectedItem?.assunto) &&
-              (Number(cc?.id) === 553 || Number(cc?.id) === 721 || Number(cc?.id) === 2) && (
+              (emailCheck(mail, 'vc.axiac@semog.acinom') ||
+                emailCheck(mail, 'vc.axiac@asor.airam') ||
+                emailCheck(mail, 'vc.axiac@arove.ordnavi')) && (
                 <Grid item xs={12}>
                   <RHFSwitch name="atribuir" label="Atribuir" />
                 </Grid>

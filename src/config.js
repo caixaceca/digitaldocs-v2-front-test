@@ -1,6 +1,5 @@
-import { LogLevel } from '@azure/msal-browser';
 // @mui
-import { enUS, frFR, ptPT } from '@mui/material/locale';
+import { ptPT } from '@mui/material/locale';
 
 // ----------------------------------------------------------------------
 
@@ -13,31 +12,7 @@ export const msalConfig = {
     redirectUri: 'https://ddocsteste.caixa.cv/processos/lista',
   },
   cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false },
-  system: {
-    loggerOptions: {
-      loggerCallback: (level, message, containsPii) => {
-        if (containsPii) {
-          return;
-        }
-        switch (level) {
-          case LogLevel.Error:
-            console.error(message);
-            return;
-          case LogLevel.Info:
-            console.info(message);
-            return;
-          case LogLevel.Verbose:
-            console.debug(message);
-            return;
-          case LogLevel.Warning:
-            console.warn(message);
-            return;
-          default:
-            console.info(message);
-        }
-      },
-    },
-  },
+  system: { loggerOptions: {} },
 };
 
 export const loginRequest = {
@@ -50,12 +25,6 @@ export const graphConfig = { graphMeEndpoint: 'https://graph.microsoft.com/v1.0/
 // ----------------------------------------------------------------------
 
 export const HOST_API = process.env.REACT_APP_HOST_API_KEY || '';
-
-export const MAPBOX_API =
-  'pk.eyJ1IjoiaXZhbmRyb2V2b3JhIiwiYSI6ImNrejlxZnN2MzA0NWsyd2xybDc2dHdmMDMifQ.YQN8sr2IRJzOw5FfRWNlaA';
-
-// LAYOUT
-// ----------------------------------------------------------------------
 
 export const HEADER = {
   MOBILE_HEIGHT: 64,
@@ -76,8 +45,6 @@ export const NAVBAR = {
 
 export const ICON = { NAVBAR_ITEM: 22, NAVBAR_ITEM_HORIZONTAL: 20 };
 
-// SETTINGS
-
 // ----------------------------------------------------------------------
 
 export const defaultSettings = {
@@ -89,14 +56,7 @@ export const defaultSettings = {
   themeStretch: false,
 };
 
-// MULTI LANGUAGES
-
 // ----------------------------------------------------------------------
 
-export const allLangs = [
-  { label: 'Português', value: 'pt', systemValue: ptPT, icon: '/assets/icons/flags/ic_flag_pt.svg' },
-  { label: 'English', value: 'en', systemValue: enUS, icon: '/assets/icons/flags/ic_flag_en.svg' },
-  { label: 'French', value: 'fr', systemValue: frFR, icon: '/assets/icons/flags/ic_flag_fr.svg' },
-];
-
-export const defaultLang = allLangs[0]; // Português
+export const allLangs = [{ label: 'Português', value: 'pt', systemValue: ptPT }];
+export const defaultLang = { label: 'Português', value: 'pt', systemValue: ptPT };

@@ -71,12 +71,12 @@ export function UpdateItem({ item = '', id = 0, dados = null }) {
 
 // ----------------------------------------------------------------------
 
-ViewItem.propTypes = { swap: PropTypes.bool, estado: PropTypes.bool, handleView: PropTypes.func };
+ViewItem.propTypes = { swap: PropTypes.bool, estado: PropTypes.bool, handleClick: PropTypes.func };
 
-export function ViewItem({ swap = false, estado = false, handleView }) {
+export function ViewItem({ swap = false, estado = false, handleClick }) {
   return (
     <Tooltip title={(estado && 'Colaboradores') || (swap && 'Estados & Acessos') || 'DETALHES'} arrow>
-      <Fab color="success" size="small" variant="soft" onClick={handleView} sx={{ ...wh }}>
+      <Fab color="success" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
         {(swap && <SwapHorizOutlinedIcon />) || (estado && <GroupOutlinedIcon />) || (
           <SvgIconStyle src="/assets/icons/view.svg" />
         )}
@@ -136,16 +136,16 @@ export function Checked({ check }) {
 
 // ----------------------------------------------------------------------
 
-Pendente.propTypes = { detail: PropTypes.bool, handleView: PropTypes.func };
+Pendente.propTypes = { detail: PropTypes.bool, handleClick: PropTypes.func };
 
-export function Pendente({ detail = false, handleView }) {
+export function Pendente({ detail = false, handleClick }) {
   return (
     <Tooltip title="PENDENTE" arrow>
       <Fab
         color="inherit"
         size="small"
         variant="soft"
-        onClick={handleView}
+        onClick={handleClick}
         sx={{ width: detail ? 40 : 36, height: detail ? 40 : 36 }}
       >
         <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />
@@ -156,13 +156,13 @@ export function Pendente({ detail = false, handleView }) {
 
 // ----------------------------------------------------------------------
 
-Fechar.propTypes = { onCancel: PropTypes.func };
+Fechar.propTypes = { handleClick: PropTypes.func };
 
-export function Fechar({ onCancel }) {
+export function Fechar({ handleClick }) {
   return (
     <Stack>
       <Tooltip title="Fechar" arrow>
-        <IconButton onClick={onCancel} sx={{ width: 28, height: 28 }}>
+        <IconButton onClick={handleClick} sx={{ width: 28, height: 28 }}>
           <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
         </IconButton>
       </Tooltip>

@@ -412,11 +412,12 @@ export function Criacao({ vista }) {
                         title={row?.label}
                         total={row?.valor}
                         label={
-                          row?.label !== 'Total' && row?.label !== 'Média' ? (
-                            <>{vista === 'anual' ? fYear(row?.desc) : vista === 'mensal' && fMonthYear(row?.desc)}</>
-                          ) : (
-                            row?.desc
-                          )
+                          (row?.label !== 'Total' && row?.label !== 'Média' && vista === 'anual' && fYear(row?.desc)) ||
+                          (row?.label !== 'Total' &&
+                            row?.label !== 'Média' &&
+                            vista === 'mensal' &&
+                            fMonthYear(row?.desc)) ||
+                          row?.desc
                         }
                       />
                     </Grid>

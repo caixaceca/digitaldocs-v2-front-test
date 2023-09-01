@@ -226,9 +226,9 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center">
                         <Stack direction="row" spacing={0.75} justifyContent="right">
                           {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
-                            <Pendente handleView={() => handlePendente(row)} />
+                            <Pendente handleClick={() => handlePendente(row)} />
                           )}
-                          <ViewItem handleView={() => handleViewRow(row?.id)} />
+                          <ViewItem handleClick={() => handleViewRow(row?.id)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

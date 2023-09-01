@@ -23,7 +23,7 @@ import {
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // utils
-import { emailIpf } from '../../utils/validarAcesso';
+import { emailCheck } from '../../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -88,10 +88,10 @@ export function FluxoForm({ isOpenModal, onCancel }) {
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
       is_con: selectedItem?.is_con || false,
-      is_ativo: selectedItem?.is_ativo || true,
       observacao: selectedItem?.observacao || '',
       is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
+      is_ativo: selectedItem ? selectedItem?.is_ativo : true,
     }),
     [selectedItem, cc?.perfil_id]
   );
@@ -143,19 +143,19 @@ export function FluxoForm({ isOpenModal, onCancel }) {
               <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_interno"  label="Interno" />
+              <RHFSwitch name="is_interno" label="Interno" />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_ativo"  label="Ativo" />
+              <RHFSwitch name="is_ativo" label="Ativo" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="is_con"  label="Com. Operação Numerário" />
+              <RHFSwitch name="is_con" label="Com. Operação Numerário" />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_credito"  label="Crédito" />
+              <RHFSwitch name="is_credito" label="Crédito" />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <RHFSwitch name="limpo"  label="Limpo" />
+              <RHFSwitch name="limpo" label="Limpo" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
@@ -382,13 +382,13 @@ export function EstadoForm({ isOpenModal, onCancel }) {
               />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch name="is_inicial"  label="Inicial" />
+              <RHFSwitch name="is_inicial" label="Inicial" />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch name="is_final"  label="Final" />
+              <RHFSwitch name="is_final" label="Final" />
             </Grid>
             <Grid item xs={4}>
-              <RHFSwitch name="is_decisao"  label="Decisão" />
+              <RHFSwitch name="is_decisao" label="Decisão" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
@@ -993,19 +993,19 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="is_after_devolucao"  label="Depois de devolução" />
+              <RHFSwitch name="is_after_devolucao" label="Depois de devolução" />
             </Grid>
             <Grid item xs={12} sm={3}>
-              <RHFSwitch name="to_alert"  label="Notificar" />
+              <RHFSwitch name="to_alert" label="Notificar" />
             </Grid>
             <Grid item xs={12} sm={3}>
-              <RHFSwitch name="is_paralelo"  label="Paralelo" />
+              <RHFSwitch name="is_paralelo" label="Paralelo" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="hasopnumero"  label="Indicar nº de operação" />
+              <RHFSwitch name="hasopnumero" label="Indicar nº de operação" />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFSwitch name="arqhasopnumero"  label="Nº de operação no arquivo" />
+              <RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />
             </Grid>
           </Grid>
           <DialogButons
@@ -1155,11 +1155,11 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
             )}
           </Grid>
           <DialogButons
-            edit={isEdit && emailIpf(mail)}
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && emailIpf(mail) && 'eliminar esta transição'}
+            edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
+            desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') && 'eliminar esta transição'}
           />
         </FormProvider>
       </DialogContent>

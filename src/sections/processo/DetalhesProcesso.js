@@ -380,7 +380,7 @@ function ValorItem({ title, valor, contas }) {
             <DialogTitle>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                 Contas eleitas para cativo
-                <Fechar onCancel={onClose} />
+                <Fechar handleClick={onClose} />
               </Stack>
             </DialogTitle>
             <DialogContent>
@@ -426,7 +426,7 @@ function ValorItem({ title, valor, contas }) {
             <DialogTitle>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                 Contas cativadas
-                <Fechar onCancel={onClose} />
+                <Fechar handleClick={onClose} />
               </Stack>
             </DialogTitle>
             <DialogContent>

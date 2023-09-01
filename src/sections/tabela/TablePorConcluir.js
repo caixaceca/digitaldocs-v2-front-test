@@ -160,7 +160,7 @@ export default function TablePorConcluir() {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <ViewItem handleView={() => handleViewRow(row?.id)} />
+                        <ViewItem handleClick={() => handleViewRow(row?.id)} />
                       </TableCell>
                     </TableRow>
                   ))
