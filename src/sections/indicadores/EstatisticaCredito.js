@@ -689,10 +689,16 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
 SegmentoStd.propTypes = { from: PropTypes.string, segmento: PropTypes.string, dados: PropTypes.array };
 
 function SegmentoStd({ from, segmento, dados }) {
-  const lenght = dados?.length || 1;
+  const lenght = dados?.length;
   return (
     <>
-      <FirstRowSegmento from={from} segmento={segmento} dados={dados?.[0]} lenght={lenght + 1} />
+      <FirstRowSegmento
+        from={from}
+        dados={dados?.[0]}
+        segmento={segmento}
+        total={lenght === 0}
+        lenght={lenght > 0 ? lenght + 1 : 1}
+      />
       {lenght > 1 &&
         dados.map(
           (row, index) =>
@@ -703,12 +709,14 @@ function SegmentoStd({ from, segmento, dados }) {
               </TableRow>
             )
         )}
-      <TableRowTotal
-        nivel={2}
-        from={from}
-        total={sumBy(dados, from === 'contratado' ? 'montante_aprovado' : 'montantes')}
-        total1={sumBy(dados, from === 'contratado' ? 'montante_contratado' : 'montante_aprovado')}
-      />
+      {lenght > 0 && (
+        <TableRowTotal
+          nivel={2}
+          from={from}
+          total={sumBy(dados, from === 'contratado' ? 'montante_aprovado' : 'montantes')}
+          total1={sumBy(dados, from === 'contratado' ? 'montante_contratado' : 'montante_aprovado')}
+        />
+      )}
     </>
   );
 }
@@ -716,14 +724,15 @@ function SegmentoStd({ from, segmento, dados }) {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 TableRowTotal.propTypes = {
-  total: PropTypes.number,
-  total1: PropTypes.number,
-  nivel: PropTypes.number,
-  from: PropTypes.string,
   empty: PropTypes.bool,
+  from: PropTypes.string,
+  neutral: PropTypes.bool,
+  total: PropTypes.number,
+  nivel: PropTypes.number,
+  total1: PropTypes.number,
 };
 
-function TableRowTotal({ total, total1 = 0, nivel, from, empty = false }) {
+function TableRowTotal({ total, total1 = 0, nivel, from, neutral, empty = false }) {
   const cell =
     (from === 'entrada' && 7) ||
     (from === 'aprovado' && 5) ||
@@ -731,12 +740,14 @@ function TableRowTotal({ total, total1 = 0, nivel, from, empty = false }) {
     ((from === 'desistido' || from === 'indeferido') && 6);
   return empty ? (
     <>
-      <TableCell colSpan={nivel === 1 ? cell : cell + 1}>{}</TableCell>
-      <TableCell align="right" sx={{ typography: 'subtitle2' }}>
+      <TableCell colSpan={nivel === 1 ? cell : cell + 1} sx={{ backgroundColor: neutral && 'background.neutral' }}>
+        {}
+      </TableCell>
+      <TableCell align="right" sx={{ typography: 'subtitle2', backgroundColor: neutral && 'background.neutral' }}>
         {nivel === 1 ? fNumber(0) : <b>{fNumber(0)}</b>}
       </TableCell>
       {(from === 'aprovado' || from === 'contratado') && (
-        <TableCell align="right" sx={{ typography: 'subtitle2' }}>
+        <TableCell align="right" sx={{ typography: 'subtitle2', backgroundColor: neutral && 'background.neutral' }}>
           {nivel === 1 ? fNumber(0) : <b>{fNumber(0)}</b>}
         </TableCell>
       )}
@@ -759,6 +770,7 @@ function TableRowTotal({ total, total1 = 0, nivel, from, empty = false }) {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 FirstRowSegmento.propTypes = {
+  total: PropTypes.bool,
   from: PropTypes.string,
   dados: PropTypes.object,
   linha: PropTypes.string,
@@ -767,20 +779,20 @@ FirstRowSegmento.propTypes = {
   segmento: PropTypes.string,
 };
 
-function FirstRowSegmento({ segmento, linha, dados, lenght, from, lenght1 }) {
+function FirstRowSegmento({ segmento, linha, dados, total = false, lenght, from, lenght1 }) {
   return (
     <TableRow hover sx={{ ...borderStyle }}>
       <TableCell rowSpan={lenght} sx={{ ...frSegmentoStyle, backgroundColor: 'background.neutral' }}>
         <b>{segmento}</b>
       </TableCell>
       {segmento === 'Entidades Públicas' || segmento === 'Garantias Bancárias' ? (
-        <TableCell> </TableCell>
+        <TableCell sx={{ backgroundColor: total && 'background.neutral' }}> </TableCell>
       ) : (
         <TableCell rowSpan={lenght1 > 1 ? lenght1 + 1 : 1} sx={{ ...frSegmentoStyle }}>
           <b>{linha}</b>
         </TableCell>
       )}
-      <DadosCell dados={dados} from={from} />
+      <DadosCell dados={dados} from={from} total={total} />
     </TableRow>
   );
 }
@@ -807,9 +819,14 @@ function FirstRowLinha({ linha, dados, lenght, from }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DadosCell.propTypes = { dados: PropTypes.object, from: PropTypes.string, index: PropTypes.number };
+DadosCell.propTypes = {
+  dados: PropTypes.object,
+  from: PropTypes.string,
+  index: PropTypes.number,
+  total: PropTypes.bool,
+};
 
-function DadosCell({ dados, from, index = 1 }) {
+function DadosCell({ dados, from, index = 1, total }) {
   return dados ? (
     <>
       <TableCell align="right" sx={{ pl: '12px !important' }}>
@@ -859,7 +876,7 @@ function DadosCell({ dados, from, index = 1 }) {
       )}
     </>
   ) : (
-    <TableRowTotal nivel={1} from={from} empty />
+    <TableRowTotal nivel={1} from={from} empty neutral={total} />
   );
 }
 
