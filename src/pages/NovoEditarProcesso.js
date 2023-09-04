@@ -37,8 +37,6 @@ export default function NovoEditarProcesso() {
   );
   const perfilId = cc?.perfil_id;
 
-  console.log(meuAmbiente);
-
   useEffect(() => {
     if (mail && id && perfilId) {
       dispatch(getItem('processo', { id, mail, perfilId }));
