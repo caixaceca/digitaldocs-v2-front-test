@@ -37,6 +37,8 @@ export default function NovoEditarProcesso() {
   );
   const perfilId = cc?.perfil_id;
 
+  console.log(meuAmbiente);
+
   useEffect(() => {
     if (mail && id && perfilId) {
       dispatch(getItem('processo', { id, mail, perfilId }));
@@ -116,7 +118,7 @@ export default function NovoEditarProcesso() {
                 </Stack>
               </CardContent>
             </Card>
-            {isLoadingP ? (
+            {isEdit && isLoadingP ? (
               <Card sx={{ mb: 3 }}>
                 <CardContent>
                   <Skeleton sx={{ height: 150, transform: 'scale(1)', mb: 3 }} />

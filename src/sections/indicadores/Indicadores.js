@@ -1541,11 +1541,10 @@ function ButtonExport() {
       table="table-to-xls-tipo"
       filename="Indicadore"
       sheet="Indicadore"
-      buttonText={
+      children={
         <Button
           size="small"
           variant="soft"
-          color="inherit"
           startIcon={<Image src="/assets/icons/file_format/format_excel.svg" sx={{ height: 20 }} />}
         >
           Exportar

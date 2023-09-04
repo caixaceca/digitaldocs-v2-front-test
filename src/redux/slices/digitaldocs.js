@@ -104,6 +104,7 @@ const slice = createSlice({
     resetError(state) {
       state.isSaving = false;
       state.isLoading = false;
+      state.isLoadingP = false;
       state.error = '';
     },
 
@@ -117,6 +118,7 @@ const slice = createSlice({
       state.done = '';
       state.isSaving = false;
       state.isLoading = false;
+      state.isLoadingP = false;
     },
 
     resetItem(state, action) {

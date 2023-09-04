@@ -171,8 +171,8 @@ export default function EstatisticaCredito() {
                     className="MuiButtonBase-root-MuiButton-root"
                     sheet={`${currentTab}`}
                     filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
-                    buttonText={
-                      <Button variant="soft" startIcon={getFileThumb('file.xlsx')}>
+                    children={
+                      <Button variant="contained" startIcon={getFileThumb('file.xlsx')}>
                         Exportar
                       </Button>
                     }
