@@ -30,6 +30,21 @@ export const dis = [
   { id: '501', label: 'NIF - Empresa' },
 ];
 
+export const tiposDoc = [
+  'BI - Nacional',
+  'BI - Militar CV',
+  'BI - POP CV',
+  'BI - Cidadão Estrangeiro',
+  'Cédula Pessoal',
+  'Certidão de Nascimento',
+  'CNI',
+  'NIF',
+  'Passaporte - Estrangeiro',
+  'Passaporte - Nacional',
+];
+
+export const estadosCivil = ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Separado(a)', 'Viúvo(a)', 'União de facto'];
+
 export const _concelhos = [
   { regiao: 'Norte', ilha: 'Santo Antão', concelho: 'Ribeira Grande' },
   { regiao: 'Norte', ilha: 'Santo Antão', concelho: 'Paul' },

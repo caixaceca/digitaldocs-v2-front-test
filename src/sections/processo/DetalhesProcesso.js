@@ -70,7 +70,7 @@ export default function DetalhesProcesso({ isPS }) {
   };
 
   return (
-    <Scrollbar sx={{ mt: -2 }}>
+    <Scrollbar sx={{ mt: -2, mb: -1 }}>
       {(uo ||
         criador ||
         processo?.obs ||
@@ -190,6 +190,7 @@ export default function DetalhesProcesso({ isPS }) {
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
           {processo?.noperacao && <TextItem title="Nº de operação:" text={processo.noperacao} />}
+          {con && <TextItem title="Titular da conta beneficiária é residente:" text={con?.residente ? 'SIM' : 'NÃO'} />}
           {processo?.operacao && <TextItem title="Descrição:" text={processo.operacao} />}
           {origem && origem?.id === processo.origem_id && (
             <Stack spacing={1} direction="row" alignItems="center" sx={{ ...itemStyle }}>
@@ -308,16 +309,31 @@ export default function DetalhesProcesso({ isPS }) {
       {con && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-            <Typography variant="subtitle1">Dados do depositante</Typography>
+            <Typography variant="subtitle1">Dados do ordenante</Typography>
           </ListItem>
           <TextItem title="Depositante é o próprio titular:" text={con?.titular_ordenador ? 'SIM' : 'NÃO'} />
+          {con?.titular_ordenador && con?.ordenador && <TextItem title="Nome:" text={con?.ordenador} />}
+          {con?.titular_ordenador && con?.tipo_docid && (
+            <TextItem title="Tipo doc. identificação:" text={con?.tipo_docid} />
+          )}
+          {con?.titular_ordenador && con?.docid && <TextItem title="Nº doc. identificação:" text={con?.docid} />}
+          {con?.titular_ordenador && con?.nif && <TextItem title="NIF:" text={con?.nif} />}
+          {con?.pai && <TextItem title="Nome do Pai:" text={con?.pai} />}
+          {con?.mae && <TextItem title="Nome da Mãe:" text={con?.mae} />}
+          {con?.estado_civil && <TextItem title="Estado civil:" text={con?.estado_civil} />}
+          {con?.data_nascimento && <TextItem title="Data nascimento:" text={ptDate(con?.data_nascimento)} />}
+          {con?.nacionalidade && <TextItem title="Nacionalidade:" text={con?.nacionalidade} />}
+          {con?.local_pais_nascimento && (
+            <TextItem title="Local e País de nascimento:" text={con?.local_pais_nascimento} />
+          )}
+          {con?.morada && <TextItem title="Morada:" text={con?.morada} />}
+          {con?.profissao && <TextItem title="Profissão:" text={con?.profissao} />}
+          {con?.local_trabalho && <TextItem title="Local de trabalho:" text={con?.local_trabalho} />}
           {con?.telefone && <TextItem title="Telefone:" text={con?.telefone} />}
           {con?.telemovel && <TextItem title="Telemóvel:" text={con?.telemovel} />}
           {con?.emails && <TextItem title="Email(s):" text={con?.emails} />}
-          {con?.profissao && <TextItem title="Profissão:" text={con?.profissao} />}
-          {con?.residente && <TextItem title="Residente:" text={con?.residente ? 'SIM' : 'NÃO'} />}
-          {con?.morada && <TextItem title="Morada:" text={con?.morada} />}
-          {con?.local_trabalho && <TextItem title="Local de trabalho:" text={con?.local_trabalho} />}
+          {con?.origem_fundo && <TextItem title="Origem do fundo:" text={newLineText(con?.origem_fundo)} />}
+          {con?.finalidade && <TextItem title="Finalidade do fundo:" text={newLineText(con?.finalidade)} />}
         </List>
       )}
     </Scrollbar>

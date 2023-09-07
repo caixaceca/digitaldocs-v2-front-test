@@ -469,7 +469,9 @@ export default function Processo() {
                 <Grid item xs={12} lg={hasAnexos && 5}>
                   <Card sx={{ height: 1 }}>
                     <CardContent id="card_detail">
-                      {!isPS && processo?.nota && <NotaProcesso nota={processo.nota} />}
+                      {!isPS && processo?.nota && (
+                        <NotaProcesso nota={processo?.nota} segmento={processo?.segcliente} />
+                      )}
                       <DetalhesProcesso isPS={isPS} />
                     </CardContent>
                   </Card>
