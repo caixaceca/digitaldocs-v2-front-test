@@ -26,6 +26,7 @@ const initialState = {
   uos: [],
   links: [],
   perfis: [],
+  myGroups: [],
   perguntas: [],
   myAplicacoes: [],
   notificacoes: [],
@@ -124,6 +125,7 @@ const slice = createSlice({
 
     getProfileSuccess(state, action) {
       state.perfil = action.payload;
+      state.myGroups = action.payload?.grupos;
     },
 
     getAccessTokenSuccess(state, action) {
@@ -258,7 +260,7 @@ export function getFromIntranet(item, params) {
         case 'validar doc': {
           dispatch(slice.actions.resetItem());
           const response = await axios.get(
-            `${BASEURLSLIM}/api/v1/sniac/doc/info?documento=${params?.doc}&deCache=${params?.cache}`,
+            `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`,
             options
           );
           dispatch(slice.actions.getDocumentoSuccess(response.data));

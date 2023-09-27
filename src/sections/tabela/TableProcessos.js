@@ -4,8 +4,6 @@ import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-d
 // @mui
 import CircleIcon from '@mui/icons-material/Circle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import { Card, Stack, Table, Button, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
 import { fToNow, ptDateTime } from '../../utils/formatTime';
@@ -18,12 +16,11 @@ import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
-import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
-import { ViewItem, Pendente } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
+import { ViewItem, Pendente, CriadoEmPor } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { ColocarPendente } from '../processo/IntervencaoForm';
@@ -191,16 +188,7 @@ export default function TableProcessos({ from }) {
                       <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
                       <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
                       <TableCell>
-                        {from === 'pendentes' && (
-                          <>
-                            <Typography variant="body2">{row?.motivo}</Typography>
-                            {row?.nome && (
-                              <Label variant="ghost" color="default" sx={{ mt: 0.5 }}>
-                                {row?.nome}
-                              </Label>
-                            )}
-                          </>
-                        )}
+                        {from === 'pendentes' && <Typography variant="body2">{row?.motivo}</Typography>}
                         {from === 'tarefas' && row.nome && row?.nome}
                         {from === 'tarefas' && !row.nome && meuAmbiente.nome}
                         {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
@@ -208,18 +196,11 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.data_last_transicao && (
                           <>
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <CalendarTodayIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="caption" noWrap>
-                                {ptDateTime(row.data_last_transicao)}
-                              </Typography>
-                            </Stack>
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography variant="caption" noWrap>
-                                {fToNow(row.data_last_transicao)?.replace('aproximadamente', 'aprox.')}
-                              </Typography>
-                            </Stack>
+                            <CriadoEmPor tipo="date" value={ptDateTime(row.data_last_transicao)} />
+                            <CriadoEmPor
+                              tipo="time"
+                              value={fToNow(row.data_last_transicao)?.replace('aproximadamente', 'aprox.')}
+                            />
                           </>
                         )}
                       </TableCell>

@@ -22,7 +22,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import { format } from 'date-fns';
 import cssStyles from '../../utils/cssStyles';
-import { emailCheck } from '../../utils/validarAcesso';
+import { validarAcesso } from '../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -81,8 +81,8 @@ const RootStyle = styled(AppBar, {
 // ----------------------------------------------------------------------
 
 DashboardHeader.propTypes = {
-  onOpenSidebar: PropTypes.func,
   isCollapse: PropTypes.bool,
+  onOpenSidebar: PropTypes.func,
   verticalLayout: PropTypes.bool,
 };
 
@@ -92,9 +92,9 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
-  const { mail } = useSelector((state) => state.intranet);
-  // const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { myGroups } = useSelector((state) => state.intranet);
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
+  const acessoValidarDoc = validarAcesso('Admin', myGroups) || validarAcesso('pdex', myGroups);
 
   return (
     <>
@@ -113,8 +113,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>
-            {/* {(isAdmin || meusAmbientes?.find((row) => row?.nome?.includes('Atendimento'))) && ( */}
-            {emailCheck(mail, 'vc.axiac@arove.ordnavi') && (
+            {acessoValidarDoc && (
               <>
                 <IconButtonHead
                   open={open1}

@@ -47,7 +47,7 @@ export default function TableEntradas() {
   ]);
   const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
   const { entradas, meusAmbientes, isAdmin, isLoading } = useSelector((state) => state.digitaldocs);
-  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes);
+  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id');
   const perfilId = cc?.perfil_id;
   const fromAgencia = cc?.uo?.tipo === 'Agências';
   const [uo, setUo] = useState(

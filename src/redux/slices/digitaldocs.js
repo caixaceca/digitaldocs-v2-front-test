@@ -151,6 +151,9 @@ const slice = createSlice({
         case 'estatisticaCredito':
           state.estatisticaCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
           break;
+        case 'cartoes':
+          state.cartoes = [];
+          break;
 
         default:
           break;
@@ -233,6 +236,10 @@ const slice = createSlice({
 
     getIndicadoresArquivoSuccess(state, action) {
       state.indicadoresArquivo = action.payload;
+    },
+
+    getCartoesSuccess(state, action) {
+      state.cartoes = action.payload;
     },
 
     getFluxosSuccess(state, action) {
@@ -366,6 +373,10 @@ const slice = createSlice({
       state.acesso = action.payload;
     },
 
+    getCartaoSuccess(state, action) {
+      state.selectedItem = action.payload;
+    },
+
     getAnexoSuccess(state, action) {
       state.isLoadingAnexo = false;
       state.anexo = action.payload;
@@ -474,10 +485,9 @@ const slice = createSlice({
       state.cartoes[index].data_confirmacao_dop = format(new Date(), 'yyyy-MM-dd');
     },
 
-    eliminarPendenciaSuccess(state) {
-      state.processo.ispendente = false;
-      state.isOpenModal = false;
-      state.selectedItem = null;
+    alterarBalcaopSuccess(state, action) {
+      const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
+      state.cartoes[index].balcao_entrega = action.payload.balcao;
     },
 
     deleteEstadoSuccess(state, action) {
@@ -550,6 +560,10 @@ const slice = createSlice({
       state.isOpenModal = true;
     },
 
+    openDetalhes(state) {
+      state.isOpenModalDesariquivar = true;
+    },
+
     closeModal(state) {
       state.isOpenModal = false;
       state.isOpenModalDesariquivar = false;
@@ -610,6 +624,7 @@ export const {
   selectItem,
   resetAnexo,
   selectAnexo,
+  openDetalhes,
   closeParecer,
   selectParecer,
   changeMeuFluxo,
@@ -920,6 +935,24 @@ export function getAll(item, params) {
           dispatch(slice.actions.getIndicadoresArquivoSuccess(response.data));
           break;
         }
+        case 'Emissão': {
+          dispatch(slice.actions.resetItem('cartoes'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}&data_final=${params?.dataFim}`,
+            options
+          );
+          dispatch(slice.actions.getCartoesSuccess(response.data));
+          break;
+        }
+        case 'Receção': {
+          dispatch(slice.actions.resetItem('cartoes'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}&data_final=${params?.dataFim}`,
+            options
+          );
+          dispatch(slice.actions.getCartoesSuccess(response.data));
+          break;
+        }
 
         default:
           break;
@@ -1185,6 +1218,11 @@ export function getItem(item, params) {
           } else {
             dispatch(slice.actions.getAcessoSuccess(response.data));
           }
+          break;
+        }
+        case 'cartao': {
+          const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
+          dispatch(slice.actions.getCartaoSuccess(response.data));
           break;
         }
 
@@ -1505,6 +1543,16 @@ export function updateItem(item, dados, params) {
           dispatch(slice.actions.getProcessoSuccess(response.data));
           break;
         }
+        case 'fechar': {
+          await axios.patch(`${BASEURLDD}/v1/processos/parecer/fechar/${params?.id}`, dados, options);
+          dispatch(slice.actions.startLoadingP());
+          const response = await axios.get(
+            `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoSuccess(response.data));
+          break;
+        }
         case 'resgatar': {
           dispatch(slice.actions.startLoadingP());
           const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${params?.id}`, dados, options);
@@ -1543,21 +1591,25 @@ export function updateItem(item, dados, params) {
           dispatch(slice.actions.processoPendenteSuccess(params));
           break;
         }
-        case 'eliminar pendencia': {
-          await axios.patch(
-            `${BASEURLDD}/v1/processos/pender?processoID=${params?.id}&perfilID=${params?.perfilId}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.eliminarPendenciaSuccess());
+        case 'alterar balcao': {
+          await axios.patch(`${BASEURLDD}/v1/cartoes/alterar/balcao/entrega/${params?.id}`, dados, options);
+          dispatch(slice.actions.alterarBalcaopSuccess({ id: params?.id, balcao: params?.balcao }));
           break;
         }
-        case 'conf. cartao dop': {
-          // await axios.delete(
-          //   `${BASEURLDD}/v1/processos/remover/anexos/${params?.perfilId}/${params?.processoId}/${params?.id}`,
-          //   options
-          // );
-          dispatch(slice.actions.confirmarCartaoDopSuccess({ id: params?.id, perfilId: params?.perfilId }));
+        case 'confirmar emissao multiplo': {
+          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/emissoes`, dados, options);
+          break;
+        }
+        case 'confirmar emissao por data': {
+          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/todas/emissoes`, dados, options);
+          break;
+        }
+        case 'confirmar rececao multiplo': {
+          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`, dados, options);
+          break;
+        }
+        case 'confirmar rececao por data': {
+          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`, dados, options);
           break;
         }
 

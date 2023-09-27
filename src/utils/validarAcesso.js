@@ -3,6 +3,16 @@ import { getComparator, applySort } from '../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
+export function validarAcesso(grupo, grupos) {
+  let itIs = false;
+  grupos?.forEach((row) => {
+    if (row?.grupo?.label === grupo) {
+      itIs = true;
+    }
+  });
+  return itIs;
+}
+
 export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (
@@ -101,7 +111,7 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export function UosAcesso(uos, cc, isAdmin, meusAmbientes) {
+export function UosAcesso(uos, cc, isAdmin, meusAmbientes, key) {
   let uosList = [];
   if (isAdmin || cc?.nomeacao === 'Administrador Executivo') {
     uosList = uos;
@@ -117,7 +127,7 @@ export function UosAcesso(uos, cc, isAdmin, meusAmbientes) {
     uosList = uos?.filter((uo) => uo?.id === cc?.uo_id);
   }
   return applySort(
-    uosList?.map((row) => ({ id: row?.id, label: row?.label })),
+    uosList?.map((row) => ({ id: key === 'balcao' ? row?.balcao : row?.id, label: row?.label })),
     getComparator('asc', 'label')
   );
 }

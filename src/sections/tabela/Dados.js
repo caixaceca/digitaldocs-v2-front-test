@@ -3,22 +3,22 @@ import PropTypes from 'prop-types';
 import TodayIcon from '@mui/icons-material/Today';
 import { DateRangePicker } from '@mui/x-date-pickers-pro';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
-import { Fab, Stack, Tooltip, TableRow, TableCell, TextField, Autocomplete, Typography } from '@mui/material';
+import { Fab, Stack, Tooltip, TableRow, TableCell, TextField, Autocomplete } from '@mui/material';
 // utils
 import { add, format } from 'date-fns';
 import { ptDateTime } from '../../utils/formatTime';
 import { entidadesParse, paramsObject, noDados } from '../../utils/normalizeText';
 // components
-import { ViewItem } from '../../components/Actions';
+import { ViewItem, CriadoEmPor } from '../../components/Actions';
 
 // ----------------------------------------------------------------------
 
 UoData.propTypes = {
-  entradas: PropTypes.bool,
   uo: PropTypes.object,
+  fase: PropTypes.string,
+  cartoes: PropTypes.bool,
+  entradas: PropTypes.bool,
   filter: PropTypes.object,
   dataSingle: PropTypes.string,
   dataRange: PropTypes.array,
@@ -28,36 +28,57 @@ UoData.propTypes = {
   uosList: PropTypes.array,
 };
 
-export function UoData({ entradas, uo, filter, dataSingle = '', dataRange = [], setUo, setData, setFilter, uosList }) {
+export function UoData({
+  uo,
+  setUo,
+  filter,
+  setData,
+  uosList,
+  fase = '',
+  setFilter,
+  dataRange = [],
+  dataSingle = '',
+  cartoes = false,
+  entradas = false,
+}) {
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
-      {uosList?.length > 1 && (
-        <Autocomplete
-          fullWidth
-          value={uo}
-          size="small"
-          disableClearable
-          options={uosList}
-          onChange={(event, newValue) => {
-            setFilter({ tab: entradas ? 'entradas' : 'trabalhados', ...paramsObject(filter), uoId: newValue.id });
-            setUo(newValue);
-          }}
-          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          renderInput={(params) => (
-            <TextField {...params} label="Agência/U.O" margin="none" sx={{ width: { md: 200 } }} />
-          )}
-        />
+    <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
+      {uosList?.length > 1 && (!cartoes || (cartoes && fase === 'Receção')) && (
+        <Stack>
+          <Autocomplete
+            fullWidth
+            value={uo}
+            size="small"
+            disableClearable
+            options={uosList}
+            onChange={(event, newValue) => {
+              if (!cartoes) {
+                setFilter({ tab: filter?.get('tab'), ...paramsObject(filter), uoId: newValue.id });
+              }
+              setUo(newValue);
+            }}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={cartoes ? 'Balcão' : 'Agência/U.O'}
+                margin="none"
+                sx={{ width: { md: 200 } }}
+              />
+            )}
+          />
+        </Stack>
       )}
-      {entradas ? (
+      {entradas || cartoes ? (
         <>
           <DateRangePicker
             disableFuture
             slots={{ field: SingleInputDateRangeField }}
             value={[add(new Date(dataRange[0]), { hours: 2 }), add(new Date(dataRange[1]), { hours: 2 })]}
-            slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 240 } } }}
+            slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 220 } } }}
             onChange={(newValue) => {
               setFilter({
-                tab: entradas ? 'entradas' : 'trabalhados',
+                tab: filter?.get('tab'),
                 ...paramsObject(filter),
                 datai: format(newValue?.[0], 'yyyy-MM-dd'),
                 dataf: format(newValue?.[1], 'yyyy-MM-dd'),
@@ -74,7 +95,7 @@ export function UoData({ entradas, uo, filter, dataSingle = '', dataRange = [], 
                   variant="soft"
                   onClick={() => {
                     setFilter({
-                      tab: 'entradas',
+                      tab: filter?.get('tab'),
                       ...paramsObject(filter),
                       datai: format(new Date(), 'yyyy-MM-dd'),
                       dataf: format(new Date(), 'yyyy-MM-dd'),
@@ -93,7 +114,7 @@ export function UoData({ entradas, uo, filter, dataSingle = '', dataRange = [], 
           label="Data"
           value={add(new Date(dataSingle), { hours: 2 })}
           onChange={(newValue) => {
-            setFilter({ tab: 'trabalhados', ...paramsObject(filter), data: format(newValue, 'yyyy-MM-dd') });
+            setFilter({ tab: filter?.get('tab'), ...paramsObject(filter), data: format(newValue, 'yyyy-MM-dd') });
             setData(format(newValue, 'yyyy-MM-dd'));
           }}
           slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
@@ -117,21 +138,9 @@ export function RowItem({ row, handleViewRow }) {
       <TableCell>{row?.nome}</TableCell>
       <TableCell>
         {(row?.criado_em || row?.trabalhado_em) && (
-          <Stack direction="row" spacing={0.5} alignItems="center">
-            <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-            <Typography noWrap variant="body2">
-              {ptDateTime(row.criado_em || row?.trabalhado_em)}
-            </Typography>
-          </Stack>
+          <CriadoEmPor tipo="date" value={ptDateTime(row.criado_em || row?.trabalhado_em)} />
         )}
-        {row?.colaborador && (
-          <Stack direction="row" spacing={0.5} alignItems="center">
-            <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-            <Typography noWrap variant="body2">
-              {row.colaborador}
-            </Typography>
-          </Stack>
-        )}
+        {row?.colaborador && <CriadoEmPor tipo="user" value={row.colaborador} />}
       </TableCell>
       <TableCell align="center">
         <ViewItem handleClick={() => handleViewRow(row?.id)} />

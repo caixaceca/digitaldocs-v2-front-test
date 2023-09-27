@@ -145,6 +145,8 @@ export default function Processo() {
       enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
     } else if (done === 'cancelado') {
       enqueueSnackbar('Envio cancelado com sucesso', { variant: 'success' });
+    } else if (done === 'fechado') {
+      enqueueSnackbar('Pareceres fechado com sucesso', { variant: 'success' });
     } else if (done === 'finalizado') {
       enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
       handlePrevNext(true);
@@ -371,7 +373,7 @@ export default function Processo() {
                           <AtribuirAcessoForm open={open} onCancel={onClose} processoId={processo?.id} />
                         </Dialog>
                       </RoleBasedGuard>
-                      {!fromArquivo && meusacessos.includes('arquivo-110') && meusacessos.includes('arquivo-111') && (
+                      {!fromArquivo && !meusacessos.includes('arquivo-110') && !meusacessos.includes('arquivo-111') && (
                         <Tooltip title="PEDIR ACESSO" arrow>
                           <Fab color="success" size="small" variant="soft" onClick={handlePedirAcesso}>
                             <TaskAltOutlinedIcon />
@@ -382,11 +384,19 @@ export default function Processo() {
                   ) : (
                     <>
                       {processo?.in_paralelo_mode && processoPertence() && (
-                        <Cancelar
-                          processoId={processo?.id}
-                          fluxiId={processo?.fluxo_id}
-                          estadoId={processo?.estado_atual_id}
-                        />
+                        <>
+                          <Cancelar
+                            processoId={processo?.id}
+                            fluxoId={processo?.fluxo_id}
+                            estadoId={processo?.estado_atual_id}
+                          />
+                          <Cancelar
+                            cancelar
+                            processoId={processo?.id}
+                            fluxoId={processo?.fluxo_id}
+                            estadoId={processo?.estado_atual_id}
+                          />
+                        </>
                       )}
                       {!processo?.is_lock && !processo?.in_paralelo_mode && (
                         <>
@@ -411,7 +421,7 @@ export default function Processo() {
                           {podeResgatar() && (
                             <Resgatar
                               processoId={processo?.id}
-                              fluxiId={processo?.fluxo_id}
+                              fluxoId={processo?.fluxo_id}
                               estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
                             />
                           )}

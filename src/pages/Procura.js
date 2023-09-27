@@ -13,9 +13,6 @@ import {
   Typography,
   TableContainer,
 } from '@mui/material';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
 import { ptDateTime, ptDate } from '../utils/formatTime';
 import { normalizeText, entidadesParse, noDados, parametrosPesquisa } from '../utils/normalizeText';
@@ -32,8 +29,8 @@ import { PATH_DIGITALDOCS } from '../routes/paths';
 import Page from '../components/Page';
 import Panel from '../components/Panel';
 import Scrollbar from '../components/Scrollbar';
-import { ViewItem } from '../components/Actions';
 import { SkeletonTable } from '../components/skeleton';
+import { ViewItem, CriadoEmPor } from '../components/Actions';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
@@ -274,30 +271,14 @@ export default function Procura() {
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
                         <TableCell>{row.estado}</TableCell>
                         <TableCell sx={{ width: 10 }}>
-                          {row?.criado_em && (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography noWrap variant="body2">
-                                {ptDateTime(row.criado_em)}
-                              </Typography>
-                            </Stack>
-                          )}
+                          {row?.criado_em && <CriadoEmPor tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.uo && (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography noWrap variant="body2">
-                                {row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
-                              </Typography>
-                            </Stack>
+                            <CriadoEmPor
+                              tipo="company"
+                              value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
+                            />
                           )}
-                          {row?.colaborador && (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />
-                              <Typography noWrap variant="body2">
-                                {row.colaborador}
-                              </Typography>
-                            </Stack>
-                          )}
+                          {row?.colaborador && <CriadoEmPor tipo="user" value={row.colaborador} />}
                         </TableCell>
                         <TableCell align="center" width={50}>
                           <ViewItem handleClick={() => handleViewRow(row?.id)} />

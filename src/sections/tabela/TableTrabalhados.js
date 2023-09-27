@@ -46,7 +46,7 @@ export default function TableTrabalhados() {
   const [data, setData] = useState(filter?.get('data') || format(new Date(), 'yyyy-MM-dd'));
   const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
   const { trabalhados, meusAmbientes, isAdmin, isLoading } = useSelector((state) => state.digitaldocs);
-  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes);
+  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id');
   const fromAgencia = cc?.uo?.tipo === 'Agências';
   const [uo, setUo] = useState(
     filter?.get('uoId') ? uosList?.find((row) => row?.id?.toString() === filter?.get('uoId')?.toString()) : null

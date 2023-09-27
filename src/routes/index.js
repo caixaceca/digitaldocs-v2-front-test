@@ -34,7 +34,7 @@ export default function Router() {
   }, [dispatch, instance, accounts, msalProfile]);
 
   useEffect(() => {
-    if (accessToken && msalProfile) {
+    if (accessToken && msalProfile?.mail) {
       dispatch(AuthenticateColaborador(accessToken, msalProfile));
     }
   }, [dispatch, accessToken, msalProfile]);

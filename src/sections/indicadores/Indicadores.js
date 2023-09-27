@@ -1104,7 +1104,7 @@ export function Filtrar({
   const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
   const { fluxos, isAdmin, meusAmbientes, estadoFilter, estados } = useSelector((state) => state.digitaldocs);
   const [uo, setUo] = useState(cc?.uo ? { id: cc?.uo?.id, label: cc?.uo?.label } : null);
-  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes);
+  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id');
   const estadosList = EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes);
   const colaboradoresList =
     uo?.id && tab !== 'execucao'

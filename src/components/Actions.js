@@ -3,12 +3,17 @@ import PropTypes from 'prop-types';
 import { LoadingButton } from '@mui/lab';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import { Box, Fab, Button, Stack, Tooltip, IconButton, DialogActions } from '@mui/material';
+import { Box, Fab, Button, Stack, Tooltip, IconButton, Typography, DialogActions } from '@mui/material';
 // hooks
 import useToggle from '../hooks/useToggle';
 // redux
@@ -30,9 +35,11 @@ export function AddItem() {
   };
 
   return (
-    <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-      Adicionar
-    </Button>
+    <Stack>
+      <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
+        Adicionar
+      </Button>
+    </Stack>
   );
 }
 
@@ -124,13 +131,13 @@ export function DeleteItem({ handleClick }) {
 
 // ----------------------------------------------------------------------
 
-Checked.propTypes = { check: PropTypes.bool };
+Checked.propTypes = { check: PropTypes.bool, color: PropTypes.string };
 
-export function Checked({ check }) {
+export function Checked({ check, color = '' }) {
   return check ? (
-    <CheckCircleOutlineOutlinedIcon sx={{ color: 'success.main', width: 20 }} />
+    <CheckCircleOutlineOutlinedIcon sx={{ color: color || 'success.main', width: 20 }} />
   ) : (
-    <CloseOutlinedIcon sx={{ color: 'focus.main', width: 20 }} />
+    <CloseOutlinedIcon sx={{ color: color || 'focus.main', width: 20 }} />
   );
 }
 
@@ -199,5 +206,24 @@ export function DialogButons({ edit = false, isSaving, desc = '', label = '', on
         {(label && label) || (edit && 'Guardar') || 'Adicionar'}
       </LoadingButton>
     </DialogActions>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+CriadoEmPor.propTypes = { tipo: PropTypes.string, value: PropTypes.string };
+
+export function CriadoEmPor({ tipo = '', value = '' }) {
+  return (
+    <Stack direction="row" spacing={0.5} alignItems="center">
+      {(tipo === 'note' && <CommentOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
+        (tipo === 'date' && <CalendarTodayIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
+        (tipo === 'time' && <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
+        (tipo === 'company' && <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
+        (tipo === 'user' && <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />)}
+      <Typography noWrap variant="body2">
+        {value}
+      </Typography>
+    </Stack>
   );
 }

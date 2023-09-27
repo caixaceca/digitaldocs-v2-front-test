@@ -298,9 +298,15 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
 
 // ----------------------------------------------------------------------
 
-SearchToolbarCartoes.propTypes = { filter: PropTypes.object, setFilter: PropTypes.func };
+SearchToolbarCartoes.propTypes = {
+  balcoes: PropTypes.array,
+  filter: PropTypes.object,
+  setFilter: PropTypes.func,
+  balcaoEntrega: PropTypes.string,
+  setBalcaoEntrega: PropTypes.func,
+};
 
-export function SearchToolbarCartoes({ filter, setFilter }) {
+export function SearchToolbarCartoes({ filter, setFilter, balcaoEntrega, setBalcaoEntrega, balcoes }) {
   const handleResetFilter = () => {
     setFilter({
       tab: 'cartoes',
@@ -311,7 +317,17 @@ export function SearchToolbarCartoes({ filter, setFilter }) {
   };
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+    <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+      {balcoes?.length > 1 && (
+        <Autocomplete
+          fullWidth
+          value={balcaoEntrega}
+          options={balcoes?.sort()}
+          sx={{ width: { sm: 180, xl: 230 } }}
+          onChange={(event, newValue) => setBalcaoEntrega(newValue)}
+          renderInput={(params) => <TextField {...params} label="Balcão entrega" margin="none" />}
+        />
+      )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth

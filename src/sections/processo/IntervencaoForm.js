@@ -36,10 +36,11 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import CloseIcon from '@mui/icons-material/Close';
+import BlockIcon from '@mui/icons-material/Block';
 import CircleIcon from '@mui/icons-material/Circle';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // utils
@@ -1071,16 +1072,16 @@ export function ParecerForm({ open, onCancel, processoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Resgatar.propTypes = { fluxiId: PropTypes.number, estadoId: PropTypes.number, processoId: PropTypes.number };
+Resgatar.propTypes = { fluxoId: PropTypes.number, estadoId: PropTypes.number, processoId: PropTypes.number };
 
-export function Resgatar({ fluxiId, estadoId, processoId }) {
+export function Resgatar({ fluxoId, estadoId, processoId }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, cc } = useSelector((state) => state.intranet);
 
   const handleResgatar = () => {
-    const formData = { estado_id: estadoId, fluxoID: fluxiId, perfil_id: cc?.perfil_id };
+    const formData = { estado_id: estadoId, fluxoID: fluxoId, perfil_id: cc?.perfil_id };
     dispatch(updateItem('resgatar', JSON.stringify(formData), { id: processoId, mail, msg: 'resgatado' }));
     onClose();
   };
@@ -1108,22 +1109,57 @@ export function Resgatar({ fluxiId, estadoId, processoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Cancelar.propTypes = { fluxiId: PropTypes.number, estadoId: PropTypes.number, processoId: PropTypes.number };
+Cancelar.propTypes = {
+  cancelar: PropTypes.bool,
+  fluxoId: PropTypes.number,
+  estadoId: PropTypes.number,
+  processoId: PropTypes.number,
+};
 
-export function Cancelar({ fluxiId, estadoId, processoId }) {
+export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, cc } = useSelector((state) => state.intranet);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+
+  const defaultValues = useMemo(
+    () => ({ descricao: '', perfilID: cc?.perfil?.id, estado_colaborador_id: estadoId }),
+    [cc?.perfil?.id, estadoId]
+  );
+  const methods = useForm({ defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const onSubmit = async () => {
+    try {
+      if (cc?.perfil?.id && estadoId) {
+        dispatch(
+          updateItem('fechar', JSON.stringify(values), {
+            mail,
+            id: processoId,
+            perfilId: cc?.perfil_id,
+            msg: cancelar ? 'cancelado' : 'fechado',
+          })
+        );
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
 
   const handleCancelar = () => {
-    const formData = { estadoID: estadoId, fluxoID: fluxiId, perfilID: cc?.perfil_id };
     dispatch(
-      updateItem('cancelar', JSON.stringify(formData), {
+      updateItem('cancelar', JSON.stringify({ estadoID: estadoId, fluxoID: fluxoId, perfilID: cc?.perfil_id }), {
         mail,
         id: processoId,
-        msg: 'cancelado',
         perfilId: cc?.perfil_id,
+        msg: cancelar ? 'cancelado' : 'fechado',
       })
     );
     onClose();
@@ -1131,22 +1167,46 @@ export function Cancelar({ fluxiId, estadoId, processoId }) {
 
   return (
     <>
-      <Tooltip title="CANCELAR" arrow>
-        <Fab color="error" size="small" variant="soft" onClick={onOpen}>
-          <CancelOutlinedIcon />
+      <Tooltip title={cancelar ? 'CANCELAR' : 'FECHAR'} arrow>
+        <Fab color={cancelar ? 'error' : 'warning'} size="small" variant="soft" onClick={onOpen}>
+          {cancelar ? <BlockIcon /> : <CloseIcon />}
         </Fab>
       </Tooltip>
 
-      <DialogConfirmar
-        open={open}
-        onClose={onClose}
-        isSaving={isSaving}
-        handleOk={handleCancelar}
-        color="error"
-        title="Cancelar"
-        desc="cancelar o envio deste processo para parecer"
-        descSec="ATENÇÃO: Esta ação é irreversível e eliminará os dados dos parceres enviados neste seguimento."
-      />
+      {cancelar ? (
+        <DialogConfirmar
+          open={open}
+          onClose={onClose}
+          isSaving={isSaving}
+          handleOk={handleCancelar}
+          color="error"
+          title="Cancelar"
+          desc="cancelar o envio deste processo para parecer"
+          descSec="ATENÇÃO: Esta ação é irreversível e eliminará os dados dos parceres enviados neste seguimento."
+        />
+      ) : (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+          <DialogTitle>Fechar</DialogTitle>
+          <DialogContent>
+            <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={3} sx={{ mt: 0 }}>
+                <Grid item xs={12}>
+                  <RHFTextField name="descricao" multiline minRows={4} maxRows={6} label="Observação" />
+                </Grid>
+              </Grid>
+              <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+                <Box sx={{ flexGrow: 1 }} />
+                <LoadingButton variant="outlined" color="inherit" onClick={onClose}>
+                  Cancelar
+                </LoadingButton>
+                <LoadingButton type="submit" variant="soft" color="warning" loading={isSaving}>
+                  Fechar
+                </LoadingButton>
+              </DialogActions>
+            </FormProvider>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

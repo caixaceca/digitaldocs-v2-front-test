@@ -185,9 +185,9 @@ export default function ModelosRespostas() {
         : [];
 
     const doc = new Document({
-      creator: 'Intranet | DigitalDocs',
+      creator: 'Intranet - Caixa Económica de Cabo Verde',
       description:
-        'Modelo de resposta gerados automaticamente na Intranet | Digitaldocs para Processos Judiciais e Fiscais',
+        'Modelo de resposta gerados automaticamente na Intranet da Caixa Económica de Cabo Verde para Processos Judiciais e Fiscais',
       title: `Modelo de resposta - ${processo?.id}`,
       styles: {
         default: { document: { run: { font: { name: 'Neo Sans Std' }, size: '11pt' } } },

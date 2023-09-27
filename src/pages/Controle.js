@@ -104,7 +104,7 @@ export default function Controle() {
   }, [VIEW_TABS, currentTab.get('tab')]);
 
   return (
-    <Page title="Processos | DigitalDocs">
+    <Page title="Controle | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
           <RootStyle>
