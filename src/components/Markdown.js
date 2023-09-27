@@ -1,4 +1,6 @@
 import ReactMarkdown from 'react-markdown';
+// markdown plugins
+import rehypeRaw from 'rehype-raw';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Link, Typography, Divider } from '@mui/material';
@@ -78,7 +80,7 @@ const MarkdownStyle = styled('div')(({ theme }) => {
 export default function Markdown({ ...other }) {
   return (
     <MarkdownStyle>
-      <ReactMarkdown  components={components} {...other} />
+      <ReactMarkdown rehypePlugins={[rehypeRaw]} components={components} {...other} />
     </MarkdownStyle>
   );
 }

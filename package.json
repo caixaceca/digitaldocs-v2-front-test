@@ -95,6 +95,7 @@
     "react-snowfall": "^1.2.1",
     "redux": "^4.2.1",
     "redux-persist": "^6.0.0",
+    "rehype-raw": "^7.0.0",
     "simplebar-react": "^3.2.4",
     "stream-browserify": "^3.0.0",
     "stylis": "^4.3.0",
