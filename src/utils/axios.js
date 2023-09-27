@@ -15,15 +15,15 @@ export default axiosInstance;
 
 /// ---------------------------- LOCAL ----------------------------
 
-export const BASEURL = 'http://172.17.61.163:5000';
-export const BASEURLDD = 'http://172.17.61.163:9900';
-export const BASEURLSLIM = 'http://172.17.61.163:8090';
+// export const BASEURL = 'http://172.17.61.163:5000';
+// export const BASEURLDD = 'http://172.17.61.163:9900';
+// export const BASEURLSLIM = 'http://172.17.61.163:8090';
 
 /// ---------------------------- TESTE ----------------------------
 
-// export const BASEURL = 'https://intraneteste.caixa.cv:5000';
-// export const BASEURLDD = 'https://ddocsteste.caixa.cv:9900';
-// export const BASEURLSLIM = 'https://intraneteste.caixa.cv:8090';
+export const BASEURL = 'https://intraneteste.caixa.cv:5000';
+export const BASEURLDD = 'https://ddocsteste.caixa.cv:9900';
+export const BASEURLSLIM = 'https://intraneteste.caixa.cv:8090';
 
 /// --------------------------- PRODUÇÃo --------------------------
 

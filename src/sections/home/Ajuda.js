@@ -122,7 +122,7 @@ export default function Ajuda() {
                             </Stack>
                           </AccordionSummary>
                           <AccordionDetails sx={{ typography: 'body2' }}>
-                            <Markdown children={item.resposta} />
+                            <Markdown  own children={item.resposta} />
                           </AccordionDetails>
                         </Accordion>
                       ))}
