@@ -15,15 +15,14 @@ import MyAvatar from '../../components/MyAvatar';
 const RootStyle = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  padding: theme.spacing(2, 1.5),
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  backgroundColor: theme.palette.grey[500_12],
-  transition: theme.transitions.create('opacity', { duration: theme.transitions.duration.shorter }),
-  border: `1px solid ${theme.palette.grey[500_8]}`,
-  '&:hover': { backgroundColor: theme.palette.grey[500_32], border: '1px solid rgba(90,170,40,.5)' },
   marginLeft: '-10px',
   marginRight: '-10px',
-  boxShadow: theme.customShadows.z4,
+  padding: theme.spacing(2, 1.5),
+  boxShadow: theme.customShadows.z8,
+  backgroundColor: theme.palette.grey[500_12],
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  '&:hover': { backgroundColor: theme.palette.grey[500_32] },
+  transition: theme.transitions.create('opacity', { duration: theme.transitions.duration.shorter }),
 }));
 
 // ----------------------------------------------------------------------
