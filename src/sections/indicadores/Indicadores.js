@@ -15,7 +15,6 @@ import {
   Paper,
   Drawer,
   Dialog,
-  Avatar,
   Button,
   Tooltip,
   Divider,
@@ -44,7 +43,7 @@ import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 // utils
 import { format, add } from 'date-fns';
-import { BASEURL } from '../../utils/axios';
+import { getFile } from '../../utils/getFile';
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import { fMShortYear, fYear, fMonthYear, ptDate } from '../../utils/formatTime';
 import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
@@ -57,6 +56,7 @@ import { getIndicadores, resetItem, setEstadoFilter } from '../../redux/slices/d
 // components
 import Panel from '../../components/Panel';
 import Image from '../../components/Image';
+import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import Chart, { useChart } from '../../components/chart';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -540,9 +540,9 @@ export function EntradasTrabalhados() {
                                     />
                                     {colaborador1 && (
                                       <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                        <Avatar
+                                        <MyAvatar
                                           alt={colaborador1?.label}
-                                          src={`${BASEURL}/colaborador/file/colaborador/${colaborador1?.foto}`}
+                                          src={getFile('colaborador', colaborador1?.foto)}
                                           sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
                                         />
                                       </Stack>
@@ -561,9 +561,9 @@ export function EntradasTrabalhados() {
                                     />
                                     {colaborador2 && (
                                       <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                        <Avatar
+                                        <MyAvatar
                                           alt={colaborador2?.label}
-                                          src={`${BASEURL}/colaborador/file/colaborador/${colaborador2?.foto}`}
+                                          src={getFile('colaborador', colaborador2?.foto)}
                                           sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
                                         />
                                       </Stack>
@@ -1462,9 +1462,9 @@ function ColaboradorCard({ colaboradorDados, total, assuntos }) {
           justifyContent="center"
           sx={{ p: 2, mb: 2, width: 1, borderRadius: 1, backgroundColor: 'background.neutral' }}
         >
-          <Avatar
+          <MyAvatar
             alt={colaborador?.perfil?.displayName}
-            src={`${BASEURL}/colaborador/file/colaborador/${colaborador?.foto_disk}`}
+            src={getFile('colaborador', colaborador?.foto_disk)}
             sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
           />
           <Stack>

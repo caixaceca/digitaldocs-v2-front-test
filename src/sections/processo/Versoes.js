@@ -6,7 +6,6 @@ import {
   Box,
   Stack,
   Drawer,
-  Avatar,
   Divider,
   Tooltip,
   Accordion,
@@ -19,7 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import HistoryIcon from '@mui/icons-material/History';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { getFile } from '../../utils/getFile';
 import { fDateTime } from '../../utils/formatTime';
 // hooks
 import useToggle from '../../hooks/useToggle';
@@ -27,6 +26,7 @@ import useToggle from '../../hooks/useToggle';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll } from '../../redux/slices/digitaldocs';
 // components
+import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import { SearchNotFound } from '../../components/table';
 //
@@ -113,9 +113,9 @@ export default function Versoes({ processoId }) {
                   </AccordionSummary>
                   <AccordionDetails>
                     <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5}>
-                      <Avatar
-                        alt={colaborador?.perfil?.displayName || colaborador?.perfil?.mail}
-                        src={`${BASEURL}/colaborador/file/colaborador/${colaborador?.foto_disk}`}
+                      <MyAvatar
+                        alt={colaborador?.perfil?.displayName}
+                        src={getFile('colaborador', colaborador?.foto_disk)}
                       />
                       <Box>
                         <Typography variant="body1">{colaborador?.perfil?.displayName}</Typography>

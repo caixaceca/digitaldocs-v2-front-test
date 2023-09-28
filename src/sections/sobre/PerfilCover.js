@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types';
 // @mui
 import { alpha, styled } from '@mui/material/styles';
-import { Box, Badge, Typography, Skeleton, Avatar } from '@mui/material';
+import { Box, Badge, Typography, Skeleton } from '@mui/material';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { getFile } from '../../utils/getFile';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
+// components
+import MyAvatar from '../../components/MyAvatar';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ export default function PerfilCover({ perfilColaborador }) {
             badgeContent=" "
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
-            <Avatar
+            <MyAvatar
               sx={{
                 mx: 'auto',
                 borderWidth: 2,
@@ -58,14 +60,11 @@ export default function PerfilCover({ perfilColaborador }) {
                 width: { xs: 80, md: 128 },
                 height: { xs: 80, md: 128 },
               }}
-              src={
-                perfilColaborador?.foto_disk &&
-                `${BASEURL}/colaborador/file/colaborador/${perfilColaborador?.foto_disk}`
-              }
+              src={getFile('colaborador', perfilColaborador?.foto_disk)}
             />
           </StyledBadge>
         ) : (
-          <Avatar
+          <MyAvatar
             sx={{
               mx: 'auto',
               borderWidth: 2,

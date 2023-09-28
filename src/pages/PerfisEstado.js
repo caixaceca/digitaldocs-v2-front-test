@@ -8,7 +8,6 @@ import {
   Stack,
   Table,
   Button,
-  Avatar,
   TableRow,
   TableBody,
   TableCell,
@@ -18,7 +17,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
-import { BASEURL } from '../utils/axios';
+import { getFile } from '../utils/getFile';
 import { ptDateTime } from '../utils/formatTime';
 import { normalizeText } from '../utils/normalizeText';
 import { nomeacaoBySexo } from '../utils/validarAcesso';
@@ -33,6 +32,7 @@ import useSettings from '../hooks/useSettings';
 import useTable, { getComparator, applySort } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
+import MyAvatar from '../components/MyAvatar';
 import Scrollbar from '../components/Scrollbar';
 import { SkeletonTable } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
@@ -170,10 +170,7 @@ export default function PerfisEstado() {
                         <TableRow key={row?.id} hover>
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Avatar
-                                alt={row?.perfil?.displayName || row?.perfil?.mail}
-                                src={`${BASEURL}/colaborador/file/colaborador/${row?.foto_disk}`}
-                              />
+                              <MyAvatar alt={row?.perfil?.displayName} src={getFile('colaborador', row?.foto_disk)} />
                               <Stack sx={{ ml: 2 }}>
                                 <Typography variant="subtitle2" noWrap>
                                   {row?.perfil?.displayName}

@@ -373,7 +373,7 @@ export default function Processo() {
                           <AtribuirAcessoForm open={open} onCancel={onClose} processoId={processo?.id} />
                         </Dialog>
                       </RoleBasedGuard>
-                      {!fromArquivo && !meusacessos.includes('arquivo-110') && !meusacessos.includes('arquivo-111') && (
+                      {!meusacessos.includes('arquivo-110') && !meusacessos.includes('arquivo-111') && (
                         <Tooltip title="PEDIR ACESSO" arrow>
                           <Fab color="success" size="small" variant="soft" onClick={handlePedirAcesso}>
                             <TaskAltOutlinedIcon />

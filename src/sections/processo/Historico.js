@@ -9,7 +9,6 @@ import {
   Paper,
   Table,
   Button,
-  Avatar,
   Drawer,
   Divider,
   Collapse,
@@ -32,7 +31,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { getFile } from '../../utils/getFile';
 import { newLineText } from '../../utils/normalizeText';
 import { ptDateTime, fDistance, fToNow } from '../../utils/formatTime';
 // hooks
@@ -41,6 +40,7 @@ import useToggle from '../../hooks/useToggle';
 import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
+import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import SvgIconStyle from '../../components/SvgIconStyle';
 
@@ -282,10 +282,7 @@ function Transicao({ row, addConector }) {
           </Paper>
           <Stack sx={{ p: 2 }}>
             <Stack direction="row" justifyContent="left" alignItems="center" spacing={1.5}>
-              <Avatar
-                alt={criador?.perfil?.displayName || criador?.perfil?.displayName}
-                src={`${BASEURL}/colaborador/file/colaborador/${criador?.foto_disk}`}
-              />
+              <MyAvatar alt={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
               <Box>
                 <Typography variant="body2" noWrap>
                   {criador?.perfil?.displayName} ({criador?.uo?.label})
@@ -334,12 +331,9 @@ function Retencao({ historico }) {
               <TableRow key={item?.preso_em} hover>
                 <TableCell>
                   <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Avatar
-                      alt={colaborador?.perfil?.displayName || colaborador?.perfil?.displayName}
-                      src={
-                        colaborador?.foto_disk && `${BASEURL}/colaborador/file/colaborador/${colaborador?.foto_disk}`
-                      }
-                      sx={{ boxShadow: (theme) => theme.customShadows.z8 }}
+                    <MyAvatar
+                      alt={colaborador?.perfil?.displayName}
+                      src={getFile('colaborador', colaborador?.foto_disk)}
                     />
                     <Box>
                       <Typography variant="subtitle2" noWrap>

@@ -5,7 +5,6 @@ import {
   Card,
   Stack,
   Table,
-  Avatar,
   Tooltip,
   TableRow,
   TableBody,
@@ -14,7 +13,7 @@ import {
   TableContainer,
 } from '@mui/material';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { getFile } from '../../utils/getFile';
 import { normalizeText } from '../../utils/normalizeText';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
 // hooks
@@ -24,6 +23,7 @@ import { useSelector } from '../../redux/store';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
+import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import { ViewItem } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
@@ -109,11 +109,7 @@ export default function Acessos() {
                       <TableRow key={row?.id} hover>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Avatar
-                              alt={row?.nome || row?.perfil?.mail}
-                              sx={{ boxShadow: (theme) => theme.customShadows.z8 }}
-                              src={row?.foto_disk && `${BASEURL}/colaborador/file/colaborador/${row?.foto_disk}`}
-                            />
+                            <MyAvatar alt={row?.nome} src={getFile('colaborador', row?.foto_disk)} />
                             <Stack sx={{ ml: 2 }}>
                               <Typography variant="subtitle2" noWrap>
                                 {row?.nome}

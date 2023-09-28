@@ -1,22 +1,20 @@
-import { useMsal } from '@azure/msal-react';
-// redux
-import { useSelector } from '../redux/store';
-// components
-import Avatar from './Avatar';
-// utils
-import { BASEURL } from '../utils/axios';
+import PropTypes from 'prop-types';
+import { forwardRef } from 'react';
+// @mui
+import { Avatar } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-export default function MyAvatar({ ...other }) {
-  const { accounts } = useMsal();
-  const { cc } = useSelector((state) => state.intranet);
-
-  return (
-    <Avatar
-      src={cc?.foto_disk && `${BASEURL}/colaborador/file/colaborador/${cc?.foto_disk}`}
-      alt={accounts[0]?.name}
-      {...other}
-    />
+const CustomAvatar = forwardRef(({ name, ...other }, ref) => {
+  const renderContent = (
+    <Avatar ref={ref} {...other}>
+      {name?.charAt(0)?.toUpperCase()}
+    </Avatar>
   );
-}
+
+  return renderContent;
+});
+
+export default CustomAvatar;
+
+CustomAvatar.propTypes = { sx: PropTypes.object, name: PropTypes.string };

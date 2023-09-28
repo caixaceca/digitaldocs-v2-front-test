@@ -5,7 +5,6 @@ import {
   Box,
   Fab,
   Stack,
-  Avatar,
   Drawer,
   Divider,
   Tooltip,
@@ -19,7 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { getFile } from '../../utils/getFile';
 import { fDateTime } from '../../utils/formatTime';
 // hooks
 import useToggle from '../../hooks/useToggle';
@@ -27,6 +26,7 @@ import useToggle from '../../hooks/useToggle';
 import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
+import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import { SearchNotFoundSmall } from '../../components/table';
 
@@ -87,9 +87,9 @@ export default function Views({ processoId }) {
                       sx={{ flexGrow: 1, pr: 2 }}
                     >
                       <Stack direction="row" alignItems="center" spacing={1.5}>
-                        <Avatar
-                          alt={colaborador?.perfil?.displayName || colaborador?.perfil?.mail}
-                          src={`${BASEURL}/colaborador/file/colaborador/${colaborador?.foto_disk}`}
+                        <MyAvatar
+                          alt={colaborador?.perfil?.displayName}
+                          src={getFile('colaborador', colaborador?.foto_disk)}
                         />
                         <Box>
                           <Typography variant="body1">{colaborador?.perfil?.displayName}</Typography>
