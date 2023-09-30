@@ -65,7 +65,9 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     taxa_juro: estado === 'Contratado' && Yup.number().typeError('Introduza a taxa de juro'),
     garantia: estado === 'Contratado' && Yup.string().required('Garantia não pode ficar vazio'),
     montante_contratado: estado === 'Contratado' && Yup.number().typeError('Introduza o montante contratado'),
-    data_entrada: Yup.date().typeError('Introduza uma data válida').required('Data de entrada não pode ficar vazio'),
+    data_entrada: Yup.date()
+      .typeError('Introduza a data de entrada do processo na agência')
+      .required('Introduza a data de entrada do processo na agência'),
     data_desistido:
       estado === 'Desistido' &&
       Yup.date().typeError('Introduza uma data válida').required('Data de desistência não pode ficar vazio'),

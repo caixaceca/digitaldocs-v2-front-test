@@ -58,7 +58,9 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
     referencia: Yup.string().required('Referência não pode ficar vazio'),
     canal: Yup.string().required('Canal de entrada não pode ficar vazio'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
-    data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio'),
+    data_entrada: Yup.date()
+      .typeError('Data de entrada não pode ficar vazio')
+      .required('Introduza a data de entrada do processo na agência'),
     operacao: meuAmbiente?.nome?.includes('DOP') && Yup.string().required('Operação não pode ficar vazio'),
     valor:
       operacao === 'Cativo/Penhora' &&

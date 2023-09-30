@@ -55,12 +55,15 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   }, [error]);
 
   const formSchema = Yup.object().shape({
-    data_inicio: agendado && Yup.date().typeError('Introduza a data de início'),
-    data_arquivamento: agendado && Yup.date().typeError('Introduza a data final'),
+    anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     periodicidade: agendado && Yup.mixed().required('Seleciona a periodicidade'),
-    anexos: fluxo?.is_con && !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    data_arquivamento: agendado && Yup.date().typeError('Introduza a data final').required('Introduza a data final'),
+    data_inicio: agendado && Yup.date().typeError('Introduza a data de início').required('Introduza a data de início'),
     data_entrada:
-      fluxo?.modelo !== 'Paralelo' && Yup.date().typeError('Introduza a data de entrada do processo na agência'),
+      fluxo?.modelo !== 'Paralelo' &&
+      Yup.date()
+        .typeError('Introduza a data de entrada do processo na agência')
+        .required('Introduza a data de entrada do processo na agência'),
     noperacao:
       (selectedProcesso?.noperacao || fluxo?.is_con) && Yup.string().required('Nº de operação não pode ficar vazio'),
     titular:
@@ -84,7 +87,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     pai: fluxo?.is_con && Yup.string().required('Nome do Pai não pode ficar vazio'),
     estado_civil: fluxo?.is_con && Yup.string().required('Seleciona o estado civil'),
     nif: fluxo?.is_con && !titular && Yup.string().required('NIF não pode ficar vazio'),
-    data_nascimento: fluxo?.is_con && Yup.date().typeError('Introduza a data de nascimento'),
     nacionalidade: fluxo?.is_con && Yup.string().required('Nacionalidade não pode ficar vazio'),
     origem_fundo: fluxo?.is_con && Yup.string().required('Origem do fundo não pode ficar vazio'),
     finalidade_fundo: fluxo?.is_con && Yup.string().required('Finalidade do fundo não pode ficar vazio'),
@@ -92,6 +94,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     local_pais_nascimento: fluxo?.is_con && Yup.string().required('Local e País de nascimento não pode ficar vazio'),
     docid: fluxo?.is_con && !titular && Yup.string().required('Nº do documento de identificaação não pode ficar vazio'),
     tipo_docid: fluxo?.is_con && !titular && Yup.mixed().required('Tipo de doc. de identificação não pode ficar vazio'),
+    data_nascimento:
+      fluxo?.is_con &&
+      Yup.date().typeError('Introduza a data de nascimento').required('Introduza a data de nascimento'),
   });
 
   const entidades = useMemo(
@@ -152,9 +157,14 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, reset, handleSubmit } = methods;
+  const {
+    watch,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = methods;
   const values = watch();
-
+  console.log(errors);
   useEffect(() => {
     if (isEdit && selectedProcesso) {
       reset(defaultValues);
