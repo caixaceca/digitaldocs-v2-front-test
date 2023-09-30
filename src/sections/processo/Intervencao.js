@@ -33,7 +33,15 @@ export default function Intervencao({ colaboradoresList }) {
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { isSaving, meusAmbientes, iAmInGrpGerente, processo } = useSelector((state) => state.digitaldocs);
-  const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências' || false;
+  const fromAgencia =
+    (processo?.assunto === 'Abertura de conta' &&
+      uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências') ||
+    false;
+  const valCompAberturaEmp =
+    processo?.assunto === 'Abertura de conta' &&
+    processo?.htransicoes?.find((row) => row?.nome?.includes('Compliance') && row?.modo === 'Seguimento');
+  const aberturaEmpSemValCompliance =
+    processo.segcliente === 'E' && processo?.nome?.includes('Gerência') && !valCompAberturaEmp;
   const perfilId = cc?.perfil_id;
 
   const devolucoes = [];
@@ -44,14 +52,19 @@ export default function Intervencao({ colaboradoresList }) {
       destinosFora.push(row?.nome);
     }
     if (row.modo === 'Seguimento') {
-      seguimentos.push({
+      const seguimento = {
         modo: row.modo,
         id: row.transicao_id,
         estado_final_id: row.id,
         paralelo: row?.is_paralelo,
         hasopnumero: row.hasopnumero,
         label: row?.is_paralelo ? row?.nome : `${row?.modo} para ${row?.nome}`,
-      });
+      };
+      if (aberturaEmpSemValCompliance && row?.nome?.includes('Compliance')) {
+        seguimentos?.push(seguimento);
+      } else if (!aberturaEmpSemValCompliance) {
+        seguimentos?.push(seguimento);
+      }
     } else {
       devolucoes.push({
         modo: row.modo,
@@ -224,7 +237,12 @@ export default function Intervencao({ colaboradoresList }) {
             open={open1}
             processo={processo}
             onCancel={onClose1}
-            arquivoAg={fromAgencia && iAmInGrpGerente && destinosFora?.length > 0 ? destinosFora : []}
+            arquivoAg={
+              (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Atendimento')) &&
+              destinosFora?.length > 0
+                ? destinosFora
+                : []
+            }
           />
         </>
       )}

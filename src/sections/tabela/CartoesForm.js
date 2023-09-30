@@ -298,7 +298,7 @@ export function Detalhes({ closeModal }) {
     <Dialog open={isOpenModalDesariquivar} onClose={closeModal} fullWidth maxWidth="sm">
       <DialogTitle sx={{ mb: 0.5 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-          Detalhes da do cartão
+          Detalhes do cartão
           <Fechar handleClick={closeModal} />
         </Stack>
       </DialogTitle>
