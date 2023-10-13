@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { Fab, Tooltip } from '@mui/material';
 // utils
-import { podeFinalizarNE, podeFinalizarAgendados, podeArquivar, arquivoAtendimento } from '../../utils/validarAcesso';
+import { podeArquivar, caixaPrincipal, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { updateItem, selectItem } from '../../redux/slices/digitaldocs';
@@ -33,15 +33,12 @@ export default function Intervencao({ colaboradoresList }) {
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { isSaving, meusAmbientes, iAmInGrpGerente, processo } = useSelector((state) => state.digitaldocs);
-  const fromAgencia =
-    (processo?.assunto === 'Abertura de conta' &&
-      uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências') ||
-    false;
-  const valCompAberturaEmp =
-    processo?.assunto === 'Abertura de conta' &&
-    processo?.htransicoes?.find((row) => row?.nome?.includes('Compliance') && row?.modo === 'Seguimento');
+  const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências';
   const aberturaEmpSemValCompliance =
-    processo.segcliente === 'E' && processo?.nome?.includes('Gerência') && !valCompAberturaEmp;
+    processo.segcliente === 'E' &&
+    processo?.nome?.includes('Gerência') &&
+    processo?.assunto === 'Abertura de conta' &&
+    !processo?.htransicoes?.find((row) => row?.nome?.includes('Compliance') && row?.modo === 'Seguimento');
   const perfilId = cc?.perfil_id;
 
   const devolucoes = [];
@@ -96,17 +93,6 @@ export default function Intervencao({ colaboradoresList }) {
     dispatch(selectItem(item));
   };
 
-  const caixaPrincipal = (meusAmbientes) => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.nome?.includes('Caixa Principal')) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
-
   return (
     <>
       {processo?.destinos?.length !== 0 && (
@@ -151,7 +137,7 @@ export default function Intervencao({ colaboradoresList }) {
         processo.situacao !== 'X' &&
         processo?.nome === 'Autorização SWIFT' &&
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
-        podeFinalizarAgendados(meusAmbientes) && (
+        pertencoAoEstado(meusAmbientes, 'Autorização SWIFT') && (
           <>
             <Tooltip title="FINALIZAR" arrow>
               <Fab color="success" size="small" variant="soft" onClick={onOpen4}>
@@ -173,7 +159,7 @@ export default function Intervencao({ colaboradoresList }) {
       {processo?.situacao === 'E' &&
         processo?.operacao === 'Cativo/Penhora' &&
         processo?.nome === 'DOP - Validação Notas Externas' &&
-        podeFinalizarNE(meusAmbientes) && (
+        pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') && (
           <>
             <Tooltip title="FINALIZAR" arrow>
               <Fab color="success" size="small" variant="soft" onClick={onOpen5}>

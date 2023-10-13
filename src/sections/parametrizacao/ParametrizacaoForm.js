@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -24,8 +23,6 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // utils
 import { emailCheck } from '../../utils/validarAcesso';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -46,47 +43,26 @@ import { codacessos, objetos, _concelhos } from '../../_mock';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-FluxoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+FluxoForm.propTypes = { onCancel: PropTypes.func };
 
-export function FluxoForm({ isOpenModal, onCancel }) {
+export function FluxoForm({ onCancel }) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, fluxoId, selectedItem } = useSelector((state) => state.digitaldocs);
+  const { isSaving, isOpenModal, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
 
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      if (done === 'Fluxo eliminado') {
-        onCancel();
-      } else {
-        onCancel();
-        navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${fluxoId}`);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-
   const formSchema = Yup.object().shape({
-    modelo: Yup.string().required('Modelo não pode ficar vazio'),
+    modelo: Yup.mixed().required('Modelo não pode ficar vazio'),
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
       perfilID: cc?.perfil_id,
-      modelo: selectedItem?.modelo || '',
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
+      modelo: selectedItem?.modelo || null,
       is_con: selectedItem?.is_con || false,
       observacao: selectedItem?.observacao || '',
       is_interno: selectedItem?.is_interno || false,
@@ -101,19 +77,14 @@ export function FluxoForm({ isOpenModal, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem]);
+  }, [isOpenModal, selectedItem]);
 
   const onSubmit = async () => {
     try {
       if (selectedItem) {
-        dispatch(updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Fluxo atualizado' }));
+        dispatch(updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem?.id, msg: 'Fluxo atualizado' }));
       } else {
         dispatch(createItem('fluxo', JSON.stringify(values), { mail, msg: 'Fluxo atualizado' }));
       }
@@ -124,7 +95,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(deleteItem('fluxo', { mail, id: selectedItem.id, msg: 'Fluxo eliminado', perfilId: cc?.perfil_id }));
+      dispatch(deleteItem('fluxo', { mail, id: selectedItem?.id, msg: 'Fluxo eliminado', perfilId: cc?.perfil_id }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -132,7 +103,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -166,7 +137,7 @@ export function FluxoForm({ isOpenModal, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar este fluxo'}
+            desc={isEdit ? 'eliminar este fluxo' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -176,29 +147,13 @@ export function FluxoForm({ isOpenModal, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ClonarFluxoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+ClonarFluxoForm.propTypes = { onCancel: PropTypes.func };
 
-export function ClonarFluxoForm({ isOpenModal, onCancel }) {
+export function ClonarFluxoForm({ onCancel }) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, fluxoId, itemSelected } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (done === 'fluxo clonado') {
-      onCancel();
-      navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${fluxoId}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const { isSaving, itemSelected, isOpenParecer } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
     modelo: Yup.string().required('Modelo não pode ficar vazio'),
@@ -249,7 +204,7 @@ export function ClonarFluxoForm({ isOpenModal, onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open={isOpenParecer} onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>Clonar fluxo</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -273,35 +228,14 @@ export function ClonarFluxoForm({ isOpenModal, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+EstadoForm.propTypes = { onCancel: PropTypes.func };
 
-export function EstadoForm({ isOpenModal, onCancel }) {
+export function EstadoForm({ onCancel }) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, estadoId, selectedItem } = useSelector((state) => state.digitaldocs);
+  const { isOpenModal, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      if (done === 'Estado eliminado') {
-        onCancel();
-      } else {
-        onCancel();
-        navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/estado/${estadoId}`);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const uosList = uos.map((row) => ({ id: row?.id, label: row?.label }));
   const uoSelect = uosList?.find((row) => row.id === selectedItem?.uo_id) || null;
@@ -332,14 +266,9 @@ export function EstadoForm({ isOpenModal, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -356,7 +285,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(deleteItem('estado', { mail, id: selectedItem.id, perfilId: cc?.perfil_id, msg: 'Estado eliminado' }));
+      dispatch(deleteItem('estado', { mail, id: selectedItem?.id, perfilId: cc?.perfil_id, msg: 'Estado eliminado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -364,7 +293,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -375,11 +304,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
               <RHFTextField name="email" label="Email" />
             </Grid>
             <Grid item xs={12}>
-              <RHFAutocompleteObject
-                name="uo_id"
-                label="Unidade orgânica"
-                options={applySort(uosList, getComparator('asc', 'label'))}
-              />
+              <RHFAutocompleteObject name="uo_id" label="Unidade orgânica" options={uosList} />
             </Grid>
             <Grid item xs={4}>
               <RHFSwitch name="is_inicial" label="Inicial" />
@@ -399,7 +324,7 @@ export function EstadoForm({ isOpenModal, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar este estado'}
+            desc={isEdit ? 'eliminar este estado' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -415,23 +340,8 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
+  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     objeto: Yup.mixed().nullable('Objeto pode ficar vazio').required('Objeto pode ficar vazio'),
@@ -454,14 +364,9 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -517,7 +422,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar este acesso'}
+            desc={isEdit ? 'eliminar este acesso' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -527,30 +432,15 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-MotivoPendenciaForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+MotivoPendenciaForm.propTypes = { onCancel: PropTypes.func };
 
-export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
+export function MotivoPendenciaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const isEdit = !!selectedItem;
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({ motivo: Yup.string().required('Motivo não pode ficar vazio') });
   const defaultValues = useMemo(
@@ -562,14 +452,9 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [isOpenModal, selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -578,7 +463,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
           updateItem('motivo pendencia', JSON.stringify(values), {
             mail,
             perfilId,
-            id: selectedItem.id,
+            id: selectedItem?.id,
             msg: 'Motivo atualizado',
           })
         );
@@ -592,7 +477,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
 
   const handleDelete = async () => {
     try {
-      dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem.id, msg: 'Motivo eliminado' }));
+      dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem?.id, msg: 'Motivo eliminado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
@@ -600,7 +485,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -616,7 +501,7 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar este motivo'}
+            desc={isEdit ? 'eliminar este motivo' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -626,46 +511,31 @@ export function MotivoPendenciaForm({ isOpenModal, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-OrigemForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+OrigemForm.propTypes = { onCancel: PropTypes.func };
 
-export function OrigemForm({ isOpenModal, onCancel }) {
+export function OrigemForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [findConcelhos, setFindConcelhos] = useState([]);
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
 
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-
   const formSchema = Yup.object().shape({
-    tipo: Yup.string().required('Tipo não pode ficar vazio'),
-    ilha: Yup.string().required('Ilha não pode ficar vazio'),
-    cidade: Yup.string().required('Concelho não pode ficar vazio'),
+    tipo: Yup.mixed().required('Tipo não pode ficar vazio'),
+    ilha: Yup.mixed().required('Ilha não pode ficar vazio'),
+    cidade: Yup.mixed().required('Concelho não pode ficar vazio'),
     designacao: Yup.string().required('Designação não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
       perfilID: cc?.perfil_id,
-      tipo: selectedItem?.tipo || '',
-      ilha: selectedItem?.ilha || '',
       email: selectedItem?.email || '',
-      cidade: selectedItem?.cidade || '',
+      tipo: selectedItem?.tipo || null,
+      ilha: selectedItem?.ilha || null,
       codigo: selectedItem?.codigo || '',
+      cidade: selectedItem?.cidade || null,
       telefone: selectedItem?.telefone || '',
       seguimento: selectedItem?.seguimento || '',
       observacao: selectedItem?.observacao || '',
@@ -679,14 +549,9 @@ export function OrigemForm({ isOpenModal, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [isOpenModal, selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -714,7 +579,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -759,7 +624,7 @@ export function OrigemForm({ isOpenModal, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar esta origem'}
+            desc={isEdit ? 'eliminar esta origem' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -769,29 +634,14 @@ export function OrigemForm({ isOpenModal, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-LinhaForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func };
+LinhaForm.propTypes = { onCancel: PropTypes.func };
 
-export function LinhaForm({ isOpenModal, onCancel }) {
+export function LinhaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({ linha: Yup.string().required('Linha não pode ficar vazio') });
   const defaultValues = useMemo(
@@ -803,14 +653,9 @@ export function LinhaForm({ isOpenModal, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -843,7 +688,7 @@ export function LinhaForm({ isOpenModal, onCancel }) {
 
   return (
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -859,7 +704,7 @@ export function LinhaForm({ isOpenModal, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar esta linha de crédito'}
+            desc={isEdit ? 'eliminar esta linha de crédito' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -927,14 +772,9 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -1013,7 +853,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
             isSaving={isSaving}
             onCancel={onCancel}
             handleDelete={handleDelete}
-            desc={isEdit && 'eliminar esta transição'}
+            desc={isEdit ? 'eliminar esta transição' : ''}
           />
         </FormProvider>
       </DialogContent>
@@ -1023,32 +863,17 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number, isOpenModal: PropTypes.bool };
+EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number };
 
-export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
+export function EstadosPerfilForm({ perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { estados, done, error, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
+  const { estados, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
 
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
   const estado = estadosList.find((row) => row.id === selectedItem?.estado_id) || null;
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({ estado_id: Yup.mixed().required('Estado orgânica não pode ficar vazio') });
 
@@ -1068,14 +893,9 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, selectedItem, isOpenModal]);
+  }, [selectedItem, isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -1159,7 +979,7 @@ export function EstadosPerfilForm({ isOpenModal, perfilId, onCancel }) {
             onCancel={onCancel}
             handleDelete={handleDelete}
             edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
-            desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') && 'eliminar esta transição'}
+            desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') ? 'eliminar esta transição' : ''}
           />
         </FormProvider>
       </DialogContent>

@@ -205,6 +205,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
       } else if (values?.pender) {
         formPendencia = { pender: values?.pender, mpendencia: values?.mpendencia?.id, mobs: values?.mobs };
       }
+
       const formAceitar = {
         perfilID: cc?.perfil_id,
         fluxoID: processo?.fluxo_id,
@@ -351,11 +352,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
               <>
                 {podeAtribuir && (
                   <Grid item xs={12}>
-                    <RHFAutocompleteObject
-                      name="perfil"
-                      label="Colaborador"
-                      options={applySort(colaboradoresList, getComparator('asc', 'label'))}
-                    />
+                    <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
                   </Grid>
                 )}
                 {values?.acao?.hasopnumero && (

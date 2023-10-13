@@ -103,10 +103,7 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
   } else {
     colaboradoresList = colaboradores?.filter((colaborador) => colaborador?.id === cc?.id);
   }
-  return applySort(
-    colaboradoresList?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName, uoId: row?.uo_id })),
-    getComparator('asc', 'label')
-  );
+  return colaboradoresList?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName, uoId: row?.uo_id }));
 }
 
 // ----------------------------------------------------------------------
@@ -126,10 +123,7 @@ export function UosAcesso(uos, cc, isAdmin, meusAmbientes, key) {
   } else {
     uosList = uos?.filter((uo) => uo?.id === cc?.uo_id);
   }
-  return applySort(
-    uosList?.map((row) => ({ id: key === 'balcao' ? row?.balcao : row?.id, label: row?.label })),
-    getComparator('asc', 'label')
-  );
+  return uosList?.map((row) => ({ id: key === 'balcao' ? row?.balcao : row?.id, label: row?.label }));
 }
 
 // ----------------------------------------------------------------------
@@ -171,32 +165,6 @@ export function UosGerente(meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export const podeFinalizarNE = (meusAmbientes) => {
-  let i = 0;
-  while (i < meusAmbientes?.length) {
-    if (meusAmbientes[i]?.nome === 'DOP - Validação Notas Externas') {
-      return true;
-    }
-    i += 1;
-  }
-  return false;
-};
-
-// ----------------------------------------------------------------------
-
-export const podeFinalizarAgendados = (meusAmbientes) => {
-  let i = 0;
-  while (i < meusAmbientes?.length) {
-    if (meusAmbientes[i]?.nome === 'Autorização SWIFT') {
-      return true;
-    }
-    i += 1;
-  }
-  return false;
-};
-
-// ----------------------------------------------------------------------
-
 export const podeArquivar = (meusAmbientes, fromAgencia, iAmInGrpGerente, estadoAtualiID, arquivoAtendimento) => {
   let i = 0;
   while (i < meusAmbientes?.length) {
@@ -234,6 +202,50 @@ export function arquivoAtendimento(assunto, encGer) {
       assunto?.includes('Declarações') ||
       assunto?.includes('Cheques - Requisição') ||
       assunto?.includes('Conta Caixa Ordenado')) &&
-    !!encGer
+    encGer
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function caixaPrincipal(meusAmbientes) {
+  let i = 0;
+  while (i < meusAmbientes?.length) {
+    if (meusAmbientes[i]?.nome?.includes('Caixa Principal')) {
+      return true;
+    }
+    i += 1;
+  }
+  return false;
+}
+
+// ----------------------------------------------------------------------
+
+export function estadoInicial(meusAmbientes) {
+  return !!meusAmbientes?.find((row) => row?.is_inicial);
+}
+
+// ----------------------------------------------------------------------
+
+export function processoMePertence(meusAmbientes, estadoId) {
+  return !!meusAmbientes?.find((row) => row?.id === estadoId);
+}
+
+// ----------------------------------------------------------------------
+
+export function pertencoAoEstado(meusAmbientes, estado) {
+  return !!meusAmbientes?.find((row) => row?.nome === estado);
+}
+
+// ----------------------------------------------------------------------
+
+export function podeDarParecer(meusAmbientes, pareceres) {
+  let parecer = false;
+  pareceres?.forEach((element) => {
+    if (meusAmbientes.some((row) => row.id === element?.estado_id) && !element?.validado) {
+      parecer = element;
+    }
+    return parecer;
+  });
+  return parecer;
 }

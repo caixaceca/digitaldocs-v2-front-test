@@ -43,6 +43,14 @@ export const tiposDoc = [
   'Passaporte - Nacional',
 ];
 
+export const estadosCivis = [
+  { id: 'S', label: 'Solteiro(a)' },
+  { id: 'C', label: 'Casado(a)' },
+  { id: 'D', label: 'Divorciado(a)' },
+  { id: 'V', label: 'Viúvo(a)' },
+  { id: 'U', label: 'União de facto' },
+];
+
 export const estadosCivil = ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Separado(a)', 'Viúvo(a)', 'União de facto'];
 
 export const _concelhos = [

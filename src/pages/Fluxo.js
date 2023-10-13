@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
-import { styled, alpha } from '@mui/material/styles';
-import { Tab, Box, Grid, Card, Tabs, Container, Typography } from '@mui/material';
+import { Box, Grid, Container } from '@mui/material';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, getAll, resetItem } from '../redux/slices/digitaldocs';
@@ -10,30 +9,11 @@ import { getItem, getAll, resetItem } from '../redux/slices/digitaldocs';
 import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
+import TabsWrapper from '../components/TabsWrapper';
 import SvgIconStyle from '../components/SvgIconStyle';
 import { SearchNotFound404 } from '../components/table';
 // sections
-import Estado from '../sections/parametrizacao/Estado';
-import Transicao from '../sections/parametrizacao/Transicao';
-
-// ----------------------------------------------------------------------
-
-const TabsWrapperStyle = styled('div')(({ theme }) => ({
-  zIndex: 9,
-  bottom: 0,
-  width: '100%',
-  display: 'flex',
-  position: 'absolute',
-  [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
-  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
-  backgroundColor: theme.palette.background.paper,
-}));
-
-const RootStyle = styled('div')(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  backgroundColor: alpha(theme.palette.primary.main, 1),
-}));
+import TableEstado from '../sections/parametrizacao/TableEstado';
 
 // ----------------------------------------------------------------------
 
@@ -41,9 +21,9 @@ export default function Fluxo() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState('transicoes');
   const { mail, cc } = useSelector((state) => state.intranet);
   const { fluxo, estados } = useSelector((state) => state.digitaldocs);
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Transições');
 
   useEffect(() => {
     if (mail && id && cc?.perfil_id) {
@@ -61,54 +41,37 @@ export default function Fluxo() {
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);
+    localStorage.setItem('tabEstado', newValue);
   };
 
-  const PROFILE_TABS = [
+  const tabsList = [
     {
-      value: 'transicoes',
-      label: 'Transições',
+      value: 'Transições',
+      component: <TableEstado tab="transicoes" />,
       icon: <SvgIconStyle src="/assets/icons/navbar/transition.svg" sx={{ width: 17 }} />,
-      component: <Transicao />,
     },
     {
-      value: 'estados',
-      label: 'Estados',
+      value: 'Estados',
+      component: <TableEstado tab="estados" />,
       icon: <SvgIconStyle src="/assets/icons/navbar/state.svg" sx={{ width: 18 }} />,
-      component: <Estado />,
     },
   ];
 
   return (
     <Page title="Fluxo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-          <RootStyle>
-            <Box sx={{ px: 2, py: 1.25, color: 'common.white', textAlign: { md: 'left' } }}>
-              <Typography variant="h5">{fluxo?.assunto || 'Detalhes do fluxo'}</Typography>
-            </Box>
-          </RootStyle>
-
-          <TabsWrapperStyle>
-            <Tabs
-              value={currentTab}
-              scrollButtons="auto"
-              variant="scrollable"
-              allowScrollButtonsMobile
-              onChange={handleChangeTab}
-            >
-              {PROFILE_TABS.map((tab) => (
-                <Tab disableRipple key={tab.value} value={tab.value} icon={tab.icon} label={tab.label} />
-              ))}
-            </Tabs>
-          </TabsWrapperStyle>
-        </Card>
-
+        <TabsWrapper
+          tabsList={tabsList}
+          currentTab={currentTab}
+          changeTab={handleChangeTab}
+          title={fluxo?.assunto || 'Detalhes do fluxo'}
+        />
         {!fluxo ? (
           <Grid item xs={12}>
             <SearchNotFound404 message="Fluxo não encontrado..." />
           </Grid>
         ) : (
-          PROFILE_TABS.map((tab) => {
+          tabsList.map((tab) => {
             const isMatched = tab.value === currentTab;
             return isMatched && <Box key={tab.value}>{tab.component}</Box>;
           })

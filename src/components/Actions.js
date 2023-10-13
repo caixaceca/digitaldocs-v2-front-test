@@ -27,16 +27,18 @@ const wh = { width: 36, height: 36 };
 
 // ----------------------------------------------------------------------
 
-export function AddItem() {
+AddItem.propTypes = { handleAdd: PropTypes.func };
+
+export function AddItem({ handleAdd = null }) {
   const dispatch = useDispatch();
 
-  const handleAdd = () => {
+  const handleOpenModal = () => {
     dispatch(openModal());
   };
 
   return (
     <Stack>
-      <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
+      <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd || handleOpenModal}>
         Adicionar
       </Button>
     </Stack>

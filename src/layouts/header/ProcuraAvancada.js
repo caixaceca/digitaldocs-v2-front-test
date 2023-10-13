@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, createSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import {
   Grid,
@@ -21,132 +21,105 @@ import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDa
 // utils
 import { add, format } from 'date-fns';
 // redux
-import { useSelector } from '../../redux/store';
+import { getAll } from '../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../redux/store';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useToggle from '../../hooks/useToggle';
-import { getComparator, applySort } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
 export default function ProcuraAvancada() {
   const navigate = useNavigate();
-  const [parametros] = useSearchParams();
+  const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const [conta, setConta] = useState(parametros?.get('conta') || '');
-  const [cliente, setCliente] = useState(parametros?.get('cliente') || '');
-  const [entidade, setEntidade] = useState(parametros?.get('entidade') || '');
-  const [nentrada, setNentrada] = useState(parametros?.get('nentrada') || '');
-  const [noperacao, setNoperacao] = useState(parametros?.get('noperacao') || '');
-  const [searchQuery, setSearchQuery] = useState(parametros?.get('chave') || '');
-  const [avancada, setAvancada] = useState(parametros?.get('avancada') === 'true');
-  const { uos, colaboradores, cc } = useSelector((state) => state.intranet);
+  const [conta, setConta] = useState(localStorage.getItem('conta'));
+  const [search, setSearch] = useState(localStorage.getItem('search'));
+  const [cliente, setCliente] = useState(localStorage.getItem('cliente'));
+  const [entidade, setEntidade] = useState(localStorage.getItem('entidade'));
+  const [nentrada, setNentrada] = useState(localStorage.getItem('nentrada'));
+  const [noperacao, setNoperacao] = useState(localStorage.getItem('noperacao'));
+  const [avancada, setAvancada] = useState(localStorage.getItem('tipoPesquisa') === 'avancada');
+  const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
   const [data, setData] = useState([
-    parametros?.get('datai') ? add(new Date(parametros?.get('datai')), { hours: 2 }) : null,
-    parametros?.get('dataf') ? add(new Date(parametros?.get('dataf')), { hours: 2 }) : null,
+    localStorage.getItem('dataISearch') ? add(new Date(localStorage.getItem('dataISearch')), { hours: 2 }) : null,
+    localStorage.getItem('dataFSearch') ? add(new Date(localStorage.getItem('dataFSearch')), { hours: 2 }) : null,
   ]);
+  const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, label: row?.label })) || [], [uos]);
+  const colaboradoresList = useMemo(
+    () => colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName })) || [],
+    [colaboradores]
+  );
   const [colaborador, setColaborador] = useState(
-    parametros?.get('perfilId')
-      ? {
-          id: Number(parametros?.get('perfilId')),
-          label: colaboradores?.find((row) => row?.perfil_id === Number(parametros?.get('perfilId')))?.perfil
-            ?.displayName,
-        }
-      : null
+    colaboradoresList?.find((row) => row?.id === Number(localStorage.getItem('colaboradorSearch'))) || null
   );
   const [uo, setUo] = useState(
-    (parametros?.get('uoId') && {
-      id: Number(parametros?.get('uoId')),
-      label: uos?.find((row) => row?.id === Number(parametros?.get('uoId')))?.label,
-    }) ||
-      (cc?.uo && { id: cc?.uo?.id, label: cc?.uo?.label }) ||
+    uosList?.find((row) => row?.id === Number(localStorage.getItem('uoSearch'))) ||
+      uosList?.find((row) => row?.id === cc?.uo?.id) ||
       null
   );
 
   useEffect(() => {
-    if (parametros?.get('perfilId')) {
-      setColaborador({
-        id: Number(parametros?.get('perfilId')),
-        label: colaboradores?.find((row) => row?.perfil_id === Number(parametros?.get('perfilId')))?.perfil
-          ?.displayName,
-      });
-    }
-    if (parametros?.get('uoId')) {
-      setUo({
-        id: Number(parametros?.get('uoId')),
-        label: uos?.find((row) => row?.id === Number(parametros?.get('uoId')))?.label,
-      });
-    } else if (cc?.uo) {
-      setUo({ id: cc?.uo?.id, label: cc?.uo?.label });
-    }
-  }, [colaboradores, uos, cc?.uo, parametros]);
+    setUo(
+      uosList?.find((row) => row?.id === Number(localStorage.getItem('uoSearch'))) ||
+        uosList?.find((row) => row?.id === cc?.uo?.id) ||
+        null
+    );
+  }, [uosList, cc?.uo]);
+
+  useEffect(() => {
+    setColaborador(
+      colaboradoresList?.find((row) => row?.id === Number(localStorage.getItem('colaboradorSearch'))) || null
+    );
+  }, [colaboradoresList]);
 
   const handleSearch = () => {
-    if (avancada) {
-      const params = { avancada };
-      if (conta) {
-        params.conta = conta;
+    if (mail && cc?.perfil_id) {
+      if (localStorage.getItem('tipoPesquisa') === 'avancada') {
+        dispatch(
+          getAll('pesquisa avancada', {
+            mail,
+            perfilID: cc?.perfil_id,
+            conta: localStorage.getItem('conta'),
+            uoID: localStorage.getItem('uoSearch'),
+            cliente: localStorage.getItem('cliente'),
+            datai: localStorage.getItem('dataISearch'),
+            dataf: localStorage.getItem('dataISearch'),
+            entidade: localStorage.getItem('entidade'),
+            nentrada: localStorage.getItem('nentrada'),
+            noperacao: localStorage.getItem('noperacao'),
+            perfilDono: localStorage.getItem('colaboradorSearch'),
+          })
+        );
+      } else if (cc?.uo_id) {
+        dispatch(
+          getAll('pesquisa v2', {
+            mail,
+            uoID: cc?.uo_id,
+            perfilId: cc?.perfil_id,
+            chave: localStorage.getItem('search'),
+          })
+        );
       }
-      if (entidade) {
-        params.entidade = entidade;
-      }
-      if (cliente) {
-        params.cliente = cliente;
-      }
-      if (nentrada) {
-        params.nentrada = nentrada;
-      }
-      if (noperacao) {
-        params.noperacao = noperacao;
-      }
-      if (uo?.id) {
-        params.uoId = uo?.id;
-      }
-      if (colaborador?.id) {
-        params.perfilId = colaborador?.id;
-      }
-      if (data[0]) {
-        params.datai = format(data[0], 'yyyy-MM-dd');
-      }
-      if (data[1]) {
-        params.dataf = format(data[1], 'yyyy-MM-dd');
-      }
-      navigate({
-        pathname: PATH_DIGITALDOCS.processos.procurar,
-        search: createSearchParams(params).toString(),
-      });
-    } else {
-      navigate({
-        pathname: PATH_DIGITALDOCS.processos.procurar,
-        search: createSearchParams({ avancada, chave: searchQuery }).toString(),
-      });
     }
+    navigate(PATH_DIGITALDOCS.processos.procurar);
     onClose();
   };
 
   const handleKeyUp = (event) => {
-    if (event.key === 'Enter' && searchQuery.length > 0) {
-      navigate({
-        pathname: PATH_DIGITALDOCS.processos.procurar,
-        search: createSearchParams({ chave: searchQuery, avancada }).toString(),
-      });
+    if (event.key === 'Enter' && search && cc?.uo_id) {
+      dispatch(
+        getAll('pesquisa v2', {
+          mail,
+          uoID: cc?.uo_id,
+          perfilId: cc?.perfil_id,
+          chave: localStorage.getItem('search'),
+        })
+      );
+      navigate(PATH_DIGITALDOCS.processos.procurar);
       onClose();
     }
-  };
-
-  const handleCancelar = () => {
-    setConta('');
-    setCliente('');
-    setEntidade('');
-    setNentrada('');
-    setNoperacao('');
-    setAvancada(false);
-    setSearchQuery('');
-    setColaborador(null);
-    setData([null, null]);
-    setUo(cc?.uo ? { id: cc?.uo?.id, label: cc?.uo?.label } : null);
-    onClose();
   };
 
   return (
@@ -178,7 +151,10 @@ export default function ProcuraAvancada() {
                     value={conta}
                     label="Nº de conta"
                     InputProps={{ type: 'number' }}
-                    onChange={(event) => setConta(event.target.value)}
+                    onChange={(event) => {
+                      setConta(event.target.value);
+                      localStorage.setItem('conta', event.target.value);
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -187,7 +163,10 @@ export default function ProcuraAvancada() {
                     value={cliente}
                     label="Nº de cliente"
                     InputProps={{ type: 'number' }}
-                    onChange={(event) => setCliente(event.target.value)}
+                    onChange={(event) => {
+                      setCliente(event.target.value);
+                      localStorage.setItem('cliente', event.target.value);
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -196,7 +175,10 @@ export default function ProcuraAvancada() {
                     value={entidade}
                     label="Nº de entidade"
                     InputProps={{ type: 'number' }}
-                    onChange={(event) => setEntidade(event.target.value)}
+                    onChange={(event) => {
+                      setEntidade(event.target.value);
+                      localStorage.setItem('entidade', event.target.value);
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={3}>
@@ -205,7 +187,10 @@ export default function ProcuraAvancada() {
                     value={nentrada}
                     label="Nº de entrada"
                     InputProps={{ type: 'number' }}
-                    onChange={(event) => setNentrada(event.target.value)}
+                    onChange={(event) => {
+                      setNentrada(event.target.value);
+                      localStorage.setItem('nentrada', event.target.value);
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={3}>
@@ -214,7 +199,10 @@ export default function ProcuraAvancada() {
                     value={noperacao}
                     label="Nº de operação"
                     InputProps={{ type: 'number' }}
-                    onChange={(event) => setNoperacao(event.target.value)}
+                    onChange={(event) => {
+                      setNoperacao(event.target.value);
+                      localStorage.setItem('noperacao', event.target.value);
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -222,16 +210,26 @@ export default function ProcuraAvancada() {
                     disableFuture
                     value={[data[0], data[1]]}
                     slots={{ field: SingleInputDateRangeField }}
-                    onChange={(newValue) => setData([newValue?.[0], newValue?.[1]])}
-                    slotProps={{
-                      textField: {
-                        label: 'Data',
-                        fullWidth: true,
-                      },
+                    onChange={(newValue) => {
+                      setData([newValue?.[0], newValue?.[1]]);
+                      if (format(newValue[0])) {
+                        localStorage.setItem('dataISearch', format(newValue[0], 'yyyy-MM-dd'));
+                      }
+                      if (format(newValue[1])) {
+                        localStorage.setItem('dataFSearch', format(newValue[1], 'yyyy-MM-dd'));
+                      }
                     }}
+                    slotProps={{ textField: { label: 'Data', fullWidth: true } }}
                   />
                   {(data[0] || data[1]) && (
-                    <IconButton onClick={() => setData([null, null])} sx={{ mt: 1, position: 'absolute', right: 35 }}>
+                    <IconButton
+                      onClick={() => {
+                        setData([null, null]);
+                        localStorage.setItem('dataISearch', '');
+                        localStorage.setItem('dataFSearch', '');
+                      }}
+                      sx={{ mt: 1, position: 'absolute', right: 35 }}
+                    >
                       <CloseOutlinedIcon sx={{ width: 18 }} />
                     </IconButton>
                   )}
@@ -241,28 +239,28 @@ export default function ProcuraAvancada() {
                     fullWidth
                     value={uo}
                     disableClearable
+                    options={uosList}
                     getOptionLabel={(option) => option.label}
-                    onChange={(event, newValue) => setUo(newValue)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     renderInput={(params) => <TextField {...params} label="U.O origem" />}
-                    options={applySort(
-                      uos?.map((row) => ({ id: row?.id, label: row?.label })),
-                      getComparator('asc', 'label')
-                    )}
+                    onChange={(event, newValue) => {
+                      setUo(newValue);
+                      localStorage.setItem('uoSearch', newValue?.id || '');
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Autocomplete
                     fullWidth
                     value={colaborador}
+                    options={colaboradoresList}
                     getOptionLabel={(option) => option.label}
-                    onChange={(event, newValue) => setColaborador(newValue)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     renderInput={(params) => <TextField {...params} label="Criado por" />}
-                    options={applySort(
-                      colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName })),
-                      getComparator('asc', 'label')
-                    )}
+                    onChange={(event, newValue) => {
+                      setColaborador(newValue);
+                      localStorage.setItem('colaboradorSearch', newValue?.id || '');
+                    }}
                   />
                 </Grid>
               </>
@@ -271,9 +269,12 @@ export default function ProcuraAvancada() {
                 <TextField
                   fullWidth
                   autoFocus
-                  value={searchQuery}
+                  value={search}
                   onKeyUp={handleKeyUp}
-                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    localStorage.setItem('search', event.target.value);
+                  }}
                   placeholder="Introduza uma palavra/texto chave..."
                 />
               </Grid>
@@ -282,35 +283,34 @@ export default function ProcuraAvancada() {
               <Stack direction="row" justifyContent="center" sx={{ mt: 1 }}>
                 <FormControlLabel
                   label="Pesquisa avançada"
-                  control={<Switch checked={avancada} onChange={(event, value) => setAvancada(value)} />}
+                  control={
+                    <Switch
+                      checked={avancada}
+                      onChange={(event, value) => {
+                        setAvancada(value);
+                        localStorage.setItem('tipoPesquisa', value === true ? 'avancada' : 'global');
+                      }}
+                    />
+                  }
                 />
               </Stack>
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center' }}>
-          <Button variant="outlined" color="inherit" onClick={handleCancelar}>
+          <Button variant="outlined" color="inherit" onClick={onClose}>
             Cancelar
           </Button>
-          {!avancada && searchQuery && (
+          {(avancada && (
             <Button variant="contained" onClick={handleSearch}>
               Procurar
             </Button>
-          )}
-          {avancada &&
-            (conta ||
-              cliente ||
-              entidade ||
-              uo?.id ||
-              colaborador?.id ||
-              noperacao ||
-              nentrada ||
-              data[0] ||
-              data[1]) && (
+          )) ||
+            (search && (
               <Button variant="contained" onClick={handleSearch}>
                 Procurar
               </Button>
-            )}
+            ))}
         </DialogActions>
       </Dialog>
     </>

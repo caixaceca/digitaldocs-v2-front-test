@@ -1,38 +1,18 @@
-import { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 // @mui
-import { styled, alpha } from '@mui/material/styles';
-import { Tab, Box, Card, Tabs, Container, Typography } from '@mui/material';
+import { Box, Container } from '@mui/material';
 // utils
 import selectTab from '../utils/selectTab';
-import { paramsObject } from '../utils/normalizeText';
+import { estadoInicial } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';
 // redux
 import { useSelector } from '../redux/store';
 // components
 import Page from '../components/Page';
+import TabsWrapper from '../components/TabsWrapper';
 // sections
-import { TableEntradas, TablePorConcluir, TableTrabalhados, TableCartoes } from '../sections/tabela';
-
-// ----------------------------------------------------------------------
-
-const TabsWrapperStyle = styled('div')(({ theme }) => ({
-  zIndex: 9,
-  bottom: 0,
-  width: '100%',
-  display: 'flex',
-  position: 'absolute',
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
-  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
-}));
-
-const RootStyle = styled('div')(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  backgroundColor: alpha(theme.palette.primary.main, 1),
-}));
+import { TableCON, TableControle, TableCartoes } from '../sections/tabela';
 
 // ----------------------------------------------------------------------
 
@@ -40,94 +20,72 @@ export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
   const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useSearchParams({
-    tab: 'entradas',
-    uoId: cc?.uo?.id || '',
-    colaborador: cc?.perfil?.displayName || '',
-  });
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabControle') || 'trabalhados');
 
   useEffect(() => {
-    if (cc?.uo && !currentTab?.get('uoId')) {
-      setCurrentTab({ tab: 'trabalhados', ...paramsObject(currentTab), uoId: cc?.uo?.id });
+    if (cc?.uo?.id && !localStorage.getItem('uoSearch')) {
+      localStorage.setItem('uoSearch', cc?.uo?.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cc?.uo]);
+  }, [cc?.uo?.id]);
 
   useEffect(() => {
-    if (cc?.perfil?.displayName && !currentTab?.get('colaborador')) {
-      setCurrentTab({ tab: 'trabalhados', ...paramsObject(currentTab), colaborador: cc?.perfil?.displayName });
+    if (cc?.perfil?.displayName && !localStorage.getItem('colaboradorControle')) {
+      localStorage.setItem('colaboradorControle', cc?.perfil?.displayName);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cc?.perfil?.displayName]);
 
   const handleChangeTab = (event, newValue) => {
-    setCurrentTab({ tab: newValue, ...paramsObject(currentTab) });
+    setCurrentTab(newValue);
+    localStorage.setItem('tabControle', newValue);
   };
 
-  const acessoEntradas = () => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.is_inicial) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
+  const entradas = useMemo(
+    () =>
+      estadoInicial(meusAmbientes) || isAdmin
+        ? [{ value: 'entradas', label: 'Entradas', component: <TableControle from="entradas" /> }]
+        : [],
+    [isAdmin, meusAmbientes]
+  );
 
-  const entradas =
-    acessoEntradas() || isAdmin ? [{ value: 'entradas', label: 'Entradas', component: <TableEntradas /> }] : [];
-  const cartoes =
-    isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
-      ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
-      : [];
+  const cartoes = useMemo(
+    () =>
+      isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
+        ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
+        : [],
+    [cc?.uo?.label, cc?.uo?.tipo, isAdmin]
+  );
 
-  const VIEW_TABS = useMemo(
+  const con = useMemo(
+    () => (isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON /> }] : []),
+    [cc?.uo?.label, isAdmin]
+  );
+
+  const tabsList = useMemo(
     () =>
       [
         ...entradas,
-        { value: 'porconcluir', label: 'Por concluir', component: <TablePorConcluir /> },
-        { value: 'trabalhados', label: 'Trabalhados', component: <TableTrabalhados /> },
+        { value: 'trabalhados', label: 'Trabalhados', component: <TableControle from="trabalhados" /> },
+        { value: 'porconcluir', label: 'Por concluir', component: <TableControle from="porconcluir" /> },
         ...cartoes,
+        ...con,
       ] || [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [meusAmbientes, isAdmin, cc?.uo]
   );
 
   useEffect(() => {
-    if (currentTab.get('tab') !== selectTab(VIEW_TABS, currentTab.get('tab'))) {
-      setCurrentTab({ tab: VIEW_TABS?.[0]?.value, ...paramsObject(currentTab) });
+    if (currentTab !== selectTab(tabsList, currentTab)) {
+      setCurrentTab(tabsList?.[0]?.value);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [VIEW_TABS, currentTab.get('tab')]);
+  }, [tabsList, currentTab]);
 
   return (
     <Page title="Controle | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-          <RootStyle>
-            <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>
-              <Typography variant="h4">Controle</Typography>
-            </Box>
-          </RootStyle>
-
-          <TabsWrapperStyle>
-            <Tabs
-              value={currentTab.get('tab')}
-              scrollButtons="auto"
-              variant="scrollable"
-              allowScrollButtonsMobile
-              onChange={handleChangeTab}
-            >
-              {VIEW_TABS.map((tab) => (
-                <Tab disableRipple key={tab.value} value={tab.value} label={tab.label} sx={{ px: 0.5 }} />
-              ))}
-            </Tabs>
-          </TabsWrapperStyle>
-        </Card>
-
-        {VIEW_TABS.map((tab) => {
-          const isMatched = tab.value === currentTab.get('tab');
+        <TabsWrapper title="Controle" tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
+        {tabsList.map((tab) => {
+          const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
         })}
       </Container>

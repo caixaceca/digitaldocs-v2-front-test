@@ -4,24 +4,30 @@ import { useFormContext } from 'react-hook-form';
 // @mui
 import { Grid, Card, CardContent } from '@mui/material';
 // components
-import { RHFSwitch, RHFTextField, RHFDatePicker, RHFAutocompleteSimple } from '../../../components/hook-form';
+import {
+  RHFSwitch,
+  RHFTextField,
+  RHFDatePicker,
+  RHFAutocompleteSimple,
+  RHFAutocompleteObject,
+} from '../../../components/hook-form';
 //
 import DadosCliente from './DadosCliente';
 import { ObsNovosAnexos } from './Outros';
 import AnexosExistentes from './AnexosExistentes';
 // _mock
-import { tiposDoc, estadosCivil } from '../../../_mock';
+import { dis, estadosCivis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
 ProcessoInternoForm.propTypes = {
   fluxo: PropTypes.object,
-  setTitular: PropTypes.func,
+  setCliente: PropTypes.func,
   setAgendado: PropTypes.func,
   selectedProcesso: PropTypes.object,
 };
 
-export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setTitular, fluxo }) {
+export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setCliente, fluxo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
@@ -80,67 +86,87 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
           <Card>
             <CardContent>
               <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={values?.titular_ordenador ? 6 : 4}>
                   <RHFSwitch
                     name="titular_ordenador"
                     onChange={(event, value) => {
+                      setValue('is_cliente', value);
                       setValue('titular_ordenador', value);
-                      setTitular(value);
+                      setCliente(value);
                     }}
                     label="Depositante é o próprio titular"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {!values?.titular_ordenador && (
+                  <Grid item xs={12} sm={4}>
+                    <RHFSwitch
+                      name="is_cliente"
+                      label="Cliente da Caixa"
+                      onChange={(event, value) => {
+                        setValue('is_cliente', value);
+                        setCliente(value);
+                      }}
+                    />
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={values?.titular_ordenador ? 6 : 4}>
                   <RHFSwitch name="residente" label="Titular da conta beneficiária é residente" />
                 </Grid>
-                {!values?.titular_ordenador && (
+                {values?.is_cliente && (
+                  <Grid item xs={12}>
+                    <Grid container spacing={3} justifyContent="center">
+                      <Grid item xs={12} sm={6} xl={3}>
+                        <RHFTextField name="entidade_con" label="Nº da entidade" required={!selectedProcesso} />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                )}
+                {((!values?.titular_ordenador && !values?.is_cliente) || selectedProcesso) && (
                   <>
                     <Grid item xs={12} sm={6}>
                       <RHFTextField name="ordenador" label="Nome" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFAutocompleteSimple name="tipo_docid" label="Tipo doc. identificação" options={tiposDoc} />
+                      <RHFAutocompleteObject name="tipo_docid" label="Tipo doc. identificação" options={dis} />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFTextField name="docid" label="Nº do doc. identificação" />
+                      <RHFTextField name="docid" label="Nº doc. identificação" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFTextField name="nif" label="NIF" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFAutocompleteObject name="estado_civil" label="Estado civil" options={estadosCivis} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFDatePicker name="data_nascimento" label="Data de nascimento" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFTextField name="telefone" label="Telefone" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFTextField name="telemovel" label="Telemóvel" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={9}>
+                      <RHFTextField name="emails" label="Email(s)" />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <RHFTextField name="pai" label="Nome do Pai" />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <RHFTextField name="mae" label="Nome da Mãe" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} xl={3}>
+                      <RHFTextField name="nacionalidade" label="Nacionalidade" />
+                    </Grid>
+                    <Grid item xs={12} xl={3}>
+                      <RHFTextField name="local_pais_nascimento" label="Local/País de nascimento" />
+                    </Grid>
+                    <Grid item xs={12} xl={6}>
+                      <RHFTextField name="morada" label="Morada" />
                     </Grid>
                   </>
                 )}
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFAutocompleteSimple name="estado_civil" label="Estado civil" options={estadosCivil} />
-                </Grid>
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFDatePicker name="data_nascimento" label="Data de nascimento" />
-                </Grid>
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFTextField name="telefone" label="Telefone" />
-                </Grid>
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFTextField name="telemovel" label="Telemóvel" />
-                </Grid>
-                {!values?.titular_ordenador && (
-                  <Grid item xs={12} sm={6} xl={3}>
-                    <RHFTextField name="nif" label="NIF" />
-                  </Grid>
-                )}
-                <Grid item xs={12} sm={values?.titular_ordenador ? 12 : 6} xl={values?.titular_ordenador ? 12 : 9}>
-                  <RHFTextField name="emails" label="Email(s)" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <RHFTextField name="pai" label="Nome do Pai" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <RHFTextField name="mae" label="Nome da Mãe" />
-                </Grid>
-                <Grid item xs={12} sm={6} xl={3}>
-                  <RHFTextField name="nacionalidade" label="Nacionalidade" />
-                </Grid>
-                <Grid item xs={12} xl={3}>
-                  <RHFTextField name="local_pais_nascimento" label="Local e País de nascimento" />
-                </Grid>
-                <Grid item xs={12} xl={6}>
-                  <RHFTextField name="morada" label="Morada" />
-                </Grid>
                 <Grid item xs={12} sm={6}>
                   <RHFTextField name="profissao" label="Profissão" />
                 </Grid>

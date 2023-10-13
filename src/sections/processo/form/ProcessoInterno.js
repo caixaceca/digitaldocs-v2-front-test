@@ -20,6 +20,8 @@ import { PATH_DIGITALDOCS } from '../../../routes/paths';
 import { FormProvider } from '../../../components/hook-form';
 // sections
 import ProcessoInternoForm from './ProcessoInternoForm';
+// _mock
+import { dis, estadosCivis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
@@ -34,7 +36,8 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const { meuAmbiente, processoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado);
-  const [titular, setTitular] = useState(selectedProcesso?.con ? selectedProcesso?.con?.titular_ordenador : true);
+  const [cliente, setCliente] = useState(true);
+  const infoConReq = (fluxo?.is_con && !cliente && !isEdit) || (fluxo?.is_con && isEdit);
 
   useEffect(() => {
     if (done === 'processo adicionado') {
@@ -83,20 +86,21 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       fluxo?.assunto !== 'Abertura de conta' &&
       Yup.number().typeError('Introduza um nº de conta válido'),
     // CON
-    mae: fluxo?.is_con && Yup.string().required('Nome da Mãe não pode ficar vazio'),
-    pai: fluxo?.is_con && Yup.string().required('Nome do Pai não pode ficar vazio'),
-    estado_civil: fluxo?.is_con && Yup.string().required('Seleciona o estado civil'),
-    nif: fluxo?.is_con && !titular && Yup.string().required('NIF não pode ficar vazio'),
-    nacionalidade: fluxo?.is_con && Yup.string().required('Nacionalidade não pode ficar vazio'),
+    nif: infoConReq && Yup.string().required('NIF não pode ficar vazio'),
+    mae: infoConReq && Yup.string().required('Nome da Mãe não pode ficar vazio'),
+    pai: infoConReq && Yup.string().required('Nome do Pai não pode ficar vazio'),
+    estado_civil: infoConReq && Yup.mixed().required('Seleciona o estado civil'),
+    profissao: infoConReq && Yup.string().required('Profissão não pode ficar vazio'),
+    telefone: infoConReq && Yup.string().required('Nº do telefone não pode ficar vazio'),
+    ordenador: infoConReq && Yup.string().required('Nome do ordenador não pode ficar vazio'),
+    nacionalidade: infoConReq && Yup.string().required('Nacionalidade não pode ficar vazio'),
+    docid: infoConReq && Yup.string().required('Nº doc. identificaação não pode ficar vazio'),
     origem_fundo: fluxo?.is_con && Yup.string().required('Origem do fundo não pode ficar vazio'),
+    tipo_docid: infoConReq && Yup.mixed().required('Tipo doc. identificação não pode ficar vazio'),
     finalidade_fundo: fluxo?.is_con && Yup.string().required('Finalidade do fundo não pode ficar vazio'),
-    ordenador: fluxo?.is_con && !titular && Yup.string().required('Nome do ordenador não pode ficar vazio'),
-    local_pais_nascimento: fluxo?.is_con && Yup.string().required('Local e País de nascimento não pode ficar vazio'),
-    docid: fluxo?.is_con && !titular && Yup.string().required('Nº do documento de identificaação não pode ficar vazio'),
-    tipo_docid: fluxo?.is_con && !titular && Yup.mixed().required('Tipo de doc. de identificação não pode ficar vazio'),
+    local_pais_nascimento: infoConReq && Yup.string().required('Local/País de nascimento não pode ficar vazio'),
     data_nascimento:
-      fluxo?.is_con &&
-      Yup.date().typeError('Introduza a data de nascimento').required('Introduza a data de nascimento'),
+      infoConReq && Yup.date().typeError('Introduza a data de nascimento').required('Introduza a data de nascimento'),
   });
 
   const entidades = useMemo(
@@ -130,6 +134,8 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       // CON
+      entidade_con: '',
+      is_cliente: true,
       nif: selectedProcesso?.con?.nif || '',
       pai: selectedProcesso?.con?.pai || '',
       mae: selectedProcesso?.con?.mae || '',
@@ -140,15 +146,15 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       ordenador: selectedProcesso?.con?.ordenador || '',
       telemovel: selectedProcesso?.con?.telemovel || '',
       profissao: selectedProcesso?.con?.profissao || '',
-      tipo_docid: selectedProcesso?.con?.tipo_docid || null,
       origem_fundo: selectedProcesso?.con?.origem_fundo || '',
-      estado_civil: selectedProcesso?.con?.estado_civil || null,
       nacionalidade: selectedProcesso?.con?.nacionalidade || '',
       finalidade_fundo: selectedProcesso?.con?.finalidade || '',
       local_trabalho: selectedProcesso?.con?.local_trabalho || '',
       local_pais_nascimento: selectedProcesso?.con?.local_pais_nascimento || '',
       residente: selectedProcesso?.con ? selectedProcesso?.con?.residente : true,
+      tipo_docid: dis?.find((row) => row?.id === selectedProcesso?.con?.tipo_docid) || null,
       titular_ordenador: selectedProcesso ? selectedProcesso?.con?.titular_ordenador : true,
+      estado_civil: estadosCivis?.find((row) => row?.id === selectedProcesso?.con?.estado_civil) || null,
       data_nascimento: selectedProcesso?.con?.data_nascimento
         ? add(new Date(selectedProcesso?.con?.data_nascimento), { hours: 2 })
         : null,
@@ -157,14 +163,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const {
-    watch,
-    reset,
-    handleSubmit,
-    formState: { errors },
-  } = methods;
+  const { watch, reset, handleSubmit } = methods;
   const values = watch();
-  console.log(errors);
+
   useEffect(() => {
     if (isEdit && selectedProcesso) {
       reset(defaultValues);
@@ -232,26 +233,21 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       }
       // CON
       if (fluxo?.is_con) {
-        formData.append('pai', values.pai);
-        formData.append('mae', values.mae);
         formData.append('residente', values.residente);
         formData.append('origem_fundo', values.origem_fundo);
-        formData.append('estado_civil', values.estado_civil);
-        formData.append('nacionalidade', values.nacionalidade);
         formData.append('finalidade_fundo', values.finalidade_fundo);
         formData.append('titular_ordenador', values.titular_ordenador);
-        formData.append('local_pais_nascimento', values.local_pais_nascimento);
-        formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
-        if (values.titular_ordenador) {
-          formData.append('nif', '');
-          formData.append('docid', '');
-          formData.append('ordenador', '');
-          formData.append('tipo_docid', '');
-        } else {
+        if (values.nif) {
           formData.append('nif', values.nif);
+        }
+        if (values.pai) {
+          formData.append('pai', values.pai);
+        }
+        if (values.mae) {
+          formData.append('mae', values.mae);
+        }
+        if (values.docid) {
           formData.append('docid', values.docid);
-          formData.append('ordenador', values.ordenador);
-          formData.append('tipo_docid', values.tipo_docid);
         }
         if (values.morada) {
           formData.append('morada', values.morada);
@@ -265,11 +261,32 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.telemovel) {
           formData.append('telemovel', values.telemovel);
         }
+        if (values.ordenador) {
+          formData.append('ordenador', values.ordenador);
+        }
         if (values.profissao) {
           formData.append('profissao', values.profissao);
         }
+        if (values.tipo_docid?.id) {
+          formData.append('tipo_docid', values.tipo_docid?.id);
+        }
+        if (values?.is_cliente && values.entidade_con) {
+          formData.append('entidade_con', values.entidade_con);
+        }
+        if (values.nacionalidade) {
+          formData.append('nacionalidade', values.nacionalidade);
+        }
         if (values.local_trabalho) {
           formData.append('local_trabalho', values.local_trabalho);
+        }
+        if (values.estado_civil?.id) {
+          formData.append('estado_civil', values.estado_civil?.id);
+        }
+        if (values.local_pais_nascimento) {
+          formData.append('local_pais_nascimento', values.local_pais_nascimento);
+        }
+        if (values.data_nascimento) {
+          formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
         }
       }
       if (values?.anexos?.length > 0) {
@@ -306,7 +323,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         <Grid item xs={12}>
           <ProcessoInternoForm
             fluxo={fluxo}
-            setTitular={setTitular}
+            setCliente={setCliente}
             setAgendado={setAgendado}
             selectedProcesso={selectedProcesso}
           />

@@ -1,11 +1,10 @@
-import { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
 import { Tab, Box, Card, Tabs, Badge, Container, Typography } from '@mui/material';
 // utils
 import selectTab from '../utils/selectTab';
-import { paramsObject } from '../utils/normalizeText';
+import { pertencoAoEstado } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';
 // redux
@@ -41,8 +40,9 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'tarefas', colaborador: cc?.perfil?.displayName });
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabProcessos') || 'tarefas');
   const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
+  const tab = localStorage.getItem('tabProcessos');
 
   useEffect(() => {
     if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
@@ -50,66 +50,61 @@ export default function Processos() {
         getAll('meusprocessos', { mail, fluxoId: meuFluxo?.id, estadoId: meuAmbiente?.id, perfilId: cc?.perfil_id })
       );
     }
-  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, currentTab]);
+  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, tab]);
 
   const handleChangeTab = (event, newValue) => {
-    setCurrentTab({ tab: newValue, ...paramsObject(currentTab) });
+    setCurrentTab(newValue);
+    localStorage.setItem('tabProcessos', newValue);
   };
 
-  const acessoAgendados = () => {
-    let temAcesso = false;
-    meusAmbientes?.forEach((row) => {
-      if (row?.nome === 'Validação OPE' || row?.nome === 'Execução OPE') {
-        temAcesso = true;
-      }
-    });
-    return temAcesso;
-  };
+  const agendados = useMemo(
+    () =>
+      pertencoAoEstado(meusAmbientes, 'Validação OPE') || pertencoAoEstado(meusAmbientes, 'Execução OPE')
+        ? [
+            {
+              value: 'agendados',
+              label: 'Agendados',
+              num: meusProcessos?.totalagendado || 0,
+              component: <TableProcessos from="agendados" />,
+            },
+          ]
+        : [],
+    [meusAmbientes, meusProcessos?.totalagendado]
+  );
 
-  const acessoFinalizadosExecutados = () => {
-    let temAcesso = false;
-    meusAmbientes?.forEach((row) => {
-      if (row?.nome === 'DOP - Validação Notas Externas' || row?.nome === 'DOP - Execução Notas Externas') {
-        temAcesso = true;
-      }
-    });
-    return temAcesso;
-  };
+  const finalizados = useMemo(
+    () =>
+      (pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') ||
+        pertencoAoEstado(meusAmbientes, 'DOP - Execução Notas Externas')) &&
+      meusProcessos?.totalfinalizado > 0
+        ? [
+            {
+              value: 'finalizados',
+              label: 'Finalizados',
+              num: meusProcessos?.totalfinalizado || 0,
+              component: <TableProcessos from="finalizados" />,
+            },
+          ]
+        : [],
+    [meusAmbientes, meusProcessos?.totalfinalizado]
+  );
 
-  const agendados = acessoAgendados()
-    ? [
-        {
-          value: 'agendados',
-          label: 'Agendados',
-          num: meusProcessos?.totalagendado || 0,
-          component: <TableProcessos from="agendados" />,
-        },
-      ]
-    : [];
-
-  const finalizados =
-    acessoFinalizadosExecutados() && meusProcessos?.totalfinalizado > 0
-      ? [
-          {
-            value: 'finalizados',
-            label: 'Finalizados',
-            num: meusProcessos?.totalfinalizado || 0,
-            component: <TableProcessos from="finalizados" />,
-          },
-        ]
-      : [];
-
-  const executados =
-    acessoFinalizadosExecutados() && meusProcessos?.totalexecutado > 0
-      ? [
-          {
-            value: 'executados',
-            label: 'Executados',
-            num: meusProcessos?.totalexecutado || 0,
-            component: <TableProcessos from="executados" />,
-          },
-        ]
-      : [];
+  const executados = useMemo(
+    () =>
+      (pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') ||
+        pertencoAoEstado(meusAmbientes, 'DOP - Execução Notas Externas')) &&
+      meusProcessos?.totalexecutado > 0
+        ? [
+            {
+              value: 'executados',
+              label: 'Executados',
+              num: meusProcessos?.totalexecutado || 0,
+              component: <TableProcessos from="executados" />,
+            },
+          ]
+        : [],
+    [meusAmbientes, meusProcessos?.totalexecutado]
+  );
 
   const VIEW_TABS = useMemo(
     () =>
@@ -127,28 +122,27 @@ export default function Processos() {
           component: <TableProcessos from="retidos" />,
         },
         {
-          value: 'pendentes',
-          label: 'Pendentes',
-          num: meusProcessos?.totalpendencias || 0,
-          component: <TableProcessos from="pendentes" />,
-        },
-        {
           value: 'atribuidos',
           label: 'Atribuídos',
           num: meusProcessos?.totalafetosEQ || 0,
           component: <TableProcessos from="atribuidos" />,
         },
+        {
+          value: 'pendentes',
+          label: 'Pendentes',
+          num: meusProcessos?.totalpendencias || 0,
+          component: <TableProcessos from="pendentes" />,
+        },
         ...agendados,
         ...finalizados,
         ...executados,
       ] || [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [agendados, finalizados, executados]
+    [agendados, finalizados, executados, meusProcessos]
   );
 
   useEffect(() => {
-    if (currentTab.get('tab') !== selectTab(VIEW_TABS, currentTab.get('tab'))) {
-      setCurrentTab({ tab: VIEW_TABS?.[0]?.value, ...paramsObject(currentTab) });
+    if (currentTab !== selectTab(VIEW_TABS, currentTab)) {
+      setCurrentTab(VIEW_TABS?.[0]?.value);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [VIEW_TABS]);
@@ -165,7 +159,7 @@ export default function Processos() {
 
           <TabsWrapperStyle>
             <Tabs
-              value={currentTab.get('tab')}
+              value={currentTab}
               scrollButtons="auto"
               variant="scrollable"
               allowScrollButtonsMobile
@@ -189,13 +183,13 @@ export default function Processos() {
                       }
                       sx={{
                         ml: 0.5,
-                        mr: (tab.num < 100 && 3.5) || (tab.num < 1000 && 4.5) || 5.5,
                         '& .MuiBadge-badge': {
                           top: 10,
                           padding: '0 4px',
                           color: 'common.white',
                           right: (tab.num > 999 && -25) || (tab.num > 99 && -20) || -15,
                         },
+                        mr: (tab.num < 100 && 3.5) || (tab.num < 1000 && 4.5) || 5.5,
                       }}
                     >
                       {tab.label}
@@ -208,7 +202,7 @@ export default function Processos() {
         </Card>
 
         {VIEW_TABS.map((tab) => {
-          const isMatched = tab.value === currentTab.get('tab');
+          const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
         })}
       </Container>

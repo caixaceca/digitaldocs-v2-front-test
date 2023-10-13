@@ -1,25 +1,20 @@
-import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 // @mui
 import SearchIcon from '@mui/icons-material/Search';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { Stack, Tooltip, TextField, IconButton, Autocomplete, InputAdornment } from '@mui/material';
-// utils
-import { paramsObject } from '../utils/normalizeText';
 // redux
 import { useSelector } from '../redux/store';
-// hooks
-import { getComparator, applySort } from '../hooks/useTable';
 // sections
 import { Ambiente, Fluxo } from '../sections/AmbienteFluxo';
 
 // ----------------------------------------------------------------------
 
-SearchToolbar.propTypes = { tab: PropTypes.string, filter: PropTypes.object, setFilter: PropTypes.func };
+SearchToolbar.propTypes = { filter: PropTypes.object, setFilter: PropTypes.func };
 
-export function SearchToolbar({ tab, filter, setFilter }) {
+export function SearchToolbar({ filter, setFilter }) {
   const handleResetFilter = () => {
-    setFilter({ tab, filter: '' });
+    setFilter({ tab: filter?.get('tab'), filter: '' });
   };
 
   return (
@@ -28,7 +23,7 @@ export function SearchToolbar({ tab, filter, setFilter }) {
         fullWidth
         placeholder="Procurar..."
         value={filter?.get('filter') || ''}
-        onChange={(event) => setFilter({ tab, filter: event.target.value || '' })}
+        onChange={(event) => setFilter({ tab: filter?.get('tab'), filter: event.target.value || '' })}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -51,59 +46,129 @@ export function SearchToolbar({ tab, filter, setFilter }) {
 
 // ----------------------------------------------------------------------
 
+SearchToolbarSimple.propTypes = { filter: PropTypes.string, from: PropTypes.string, setFilter: PropTypes.func };
+
+export function SearchToolbarSimple({ filter, from = '', setFilter }) {
+  const resetFilter = () => {
+    setFilter('');
+    if (from === 'arquivo') {
+      localStorage.setItem('filterA', '');
+    } else if (from === 'con') {
+      localStorage.setItem('filterCon', '');
+    } else if (from === 'params') {
+      localStorage.setItem('filterParams', '');
+    } else if (from === 'estado') {
+      localStorage.setItem('filterEstado', '');
+    } else if (from === 'acesso') {
+      localStorage.setItem('filterAcesso', '');
+    }
+  };
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
+      <TextField
+        fullWidth
+        placeholder="Procurar..."
+        value={filter}
+        onChange={(event) => {
+          setFilter(event.target.value);
+          if (from === 'arquivo') {
+            localStorage.setItem('filterA', event.target.value || '');
+          } else if (from === 'con') {
+            localStorage.setItem('filterCon', event.target.value || '');
+          } else if (from === 'params') {
+            localStorage.setItem('filterParams', event.target.value || '');
+          } else if (from === 'estado') {
+            localStorage.setItem('filterEstado', event.target.value || '');
+          } else if (from === 'acesso') {
+            localStorage.setItem('filterAcesso', event.target.value || '');
+          }
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon sx={{ color: 'text.disabled' }} />
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      {filter && (
+        <Tooltip title="Limpar" arrow>
+          <IconButton color="inherit" onClick={() => resetFilter()}>
+            <ClearAllIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 SearchToolbarProcura.propTypes = {
+  uo: PropTypes.string,
+  setUo: PropTypes.func,
+  estado: PropTypes.string,
+  search: PropTypes.string,
+  assunto: PropTypes.string,
+  setSearch: PropTypes.func,
+  setEstado: PropTypes.func,
+  setAssunto: PropTypes.func,
   estadosList: PropTypes.array,
   assuntosList: PropTypes.array,
   uosorigemList: PropTypes.array,
-  filterUo: PropTypes.string,
-  filterEstado: PropTypes.string,
-  filterAssunto: PropTypes.string,
-  filterSearch: PropTypes.string,
-  onFilterUo: PropTypes.func,
-  onFilterSearch: PropTypes.func,
-  onFilterEstado: PropTypes.func,
-  onFilterAssunto: PropTypes.func,
 };
 
 export function SearchToolbarProcura({
-  uosorigemList,
+  uo,
+  setUo,
+  estado,
+  search,
+  assunto,
+  setSearch,
+  setEstado,
+  setAssunto,
   estadosList,
   assuntosList,
-  filterUo,
-  filterEstado,
-  filterAssunto,
-  filterSearch,
-  onFilterUo,
-  onFilterSearch,
-  onFilterEstado,
-  onFilterAssunto,
+  uosorigemList,
 }) {
-  const isFiltered = filterUo || filterSearch || filterAssunto || filterEstado;
+  const isFiltered = uo || search || assunto || estado;
   const handleResetFilter = () => {
-    onFilterUo(null);
-    onFilterSearch(null);
-    onFilterEstado(null);
-    onFilterAssunto(null);
+    setUo(null);
+    setSearch('');
+    setEstado(null);
+    setAssunto(null);
+    localStorage.setItem('uoFSearch', '');
+    localStorage.setItem('estadoSearch', '');
+    localStorage.setItem('filterSearch', '');
+    localStorage.setItem('assuntoSearch', '');
   };
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {(filterAssunto?.length > 1 || estadosList?.length > 1 || uosorigemList?.length > 1) && (
+      {(assuntosList?.length > 1 || estadosList?.length > 1 || uosorigemList?.length > 1) && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
           {assuntosList?.length > 1 && (
             <Autocomplete
               fullWidth
-              value={filterAssunto}
-              onChange={(event, newValue) => onFilterAssunto(newValue)}
+              value={assunto}
               options={assuntosList?.sort()}
               sx={{ width: { md: 180, xl: 250 } }}
               renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
+              onChange={(event, newValue) => {
+                setAssunto(newValue);
+                localStorage.setItem('assuntoSearch', newValue || '');
+              }}
             />
           )}
           {estadosList?.length > 1 && (
             <Autocomplete
               fullWidth
-              value={filterEstado}
-              onChange={(event, newValue) => onFilterEstado(newValue)}
+              value={estado}
+              onChange={(event, newValue) => {
+                setEstado(newValue);
+                localStorage.setItem('estadoSearch', newValue || '');
+              }}
               options={estadosList?.sort()}
               sx={{ width: { md: 180, xl: 250 } }}
               renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
@@ -112,8 +177,11 @@ export function SearchToolbarProcura({
           {uosorigemList?.length > 1 && (
             <Autocomplete
               fullWidth
-              value={filterUo}
-              onChange={(event, newValue) => onFilterUo(newValue)}
+              value={uo}
+              onChange={(event, newValue) => {
+                setUo(newValue);
+                localStorage.setItem('uoFSearch', newValue || '');
+              }}
               options={uosorigemList?.sort()}
               sx={{ width: { md: 180, xl: 250 } }}
               renderInput={(params) => <TextField {...params} label="U.O origem" margin="none" />}
@@ -124,8 +192,11 @@ export function SearchToolbarProcura({
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth
-          value={filterSearch || ''}
-          onChange={(event) => onFilterSearch(event.target.value)}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            localStorage.setItem('filterSearch', event.target.value);
+          }}
           placeholder="Procurar..."
           InputProps={{
             startAdornment: (
@@ -151,12 +222,25 @@ export function SearchToolbarProcura({
 
 SearchToolbarProcessos.propTypes = {
   tab: PropTypes.string,
-  filter: PropTypes.object,
+  filter: PropTypes.string,
   setFilter: PropTypes.func,
+  segmento: PropTypes.string,
+  setSegmento: PropTypes.func,
+  colaborador: PropTypes.string,
+  setColaborador: PropTypes.func,
   colaboradoresList: PropTypes.array,
 };
 
-export function SearchToolbarProcessos({ tab, filter, setFilter, colaboradoresList }) {
+export function SearchToolbarProcessos({
+  tab,
+  filter,
+  segmento,
+  setFilter,
+  colaborador,
+  setSegmento,
+  setColaborador,
+  colaboradoresList,
+}) {
   const { cc } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos } = useSelector((state) => state.digitaldocs);
   return (
@@ -175,38 +259,66 @@ export function SearchToolbarProcessos({ tab, filter, setFilter, colaboradoresLi
           {colaboradoresList?.length > 0 && (
             <Autocomplete
               fullWidth
+              value={colaborador}
               options={colaboradoresList}
-              sx={{ width: { md: 150, xl: 200 } }}
-              value={filter.get('colaborador') || null}
-              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), colaborador: newValue || '' })}
-              renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
+              sx={{ width: { md: 250, xl: 300 } }}
+              onChange={(event, newValue) => {
+                setColaborador(newValue);
+                localStorage.setItem('colaboradorP', newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Colaborador" />}
             />
           )}
           {cc?.uo?.tipo !== 'Agências' && (
             <Autocomplete
               fullWidth
-              value={filter.get('segmento') || null}
+              value={segmento}
               sx={{ width: { md: 150, xl: 200 } }}
               options={['Particulares', 'Empresas']}
-              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), segmento: newValue || '' })}
-              renderInput={(params) => <TextField {...params} label="Segmento" margin="none" />}
+              onChange={(event, newValue) => {
+                setSegmento(newValue);
+                localStorage.setItem('segmento', newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Segmento" />}
             />
           )}
         </Stack>
       )}
-      <TextField
-        fullWidth
-        placeholder="Procurar..."
-        value={filter.get('filter') || ''}
-        onChange={(event) => setFilter({ tab, ...paramsObject(filter), filter: event.target.value || '' })}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: 'text.disabled' }} />
-            </InputAdornment>
-          ),
-        }}
-      />
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
+        <TextField
+          fullWidth
+          placeholder="Procurar..."
+          value={filter}
+          onChange={(event) => {
+            setFilter(event.target.value);
+            localStorage.setItem('filterP', event.target.value || '');
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+        {(filter || segmento) && (
+          <Stack>
+            <Tooltip title="Remover filtros" arrow>
+              <IconButton
+                color="inherit"
+                onClick={() => {
+                  setFilter('');
+                  setSegmento('');
+                  localStorage.setItem('filterP', '');
+                  localStorage.setItem('segmento', '');
+                }}
+              >
+                <ClearAllIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        )}
+      </Stack>
     </Stack>
   );
 }
@@ -215,23 +327,42 @@ export function SearchToolbarProcessos({ tab, filter, setFilter, colaboradoresLi
 
 SearchToolbarEntradas.propTypes = {
   tab: PropTypes.string,
-  filter: PropTypes.object,
+  filter: PropTypes.string,
+  estado: PropTypes.string,
+  assunto: PropTypes.string,
   setFilter: PropTypes.func,
+  setEstado: PropTypes.func,
+  setAssunto: PropTypes.func,
   estadosList: PropTypes.array,
   assuntosList: PropTypes.array,
+  colaborador: PropTypes.string,
+  setColaborador: PropTypes.func,
   colaboradoresList: PropTypes.array,
 };
 
-export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, assuntosList, colaboradoresList }) {
-  const isFiltered =
-    filter?.get('filter') || filter?.get('assunto') || filter?.get('colaborador') || filter?.get('estado');
+export function SearchToolbarEntradas({
+  filter,
+  estado,
+  assunto,
+  setFilter,
+  setEstado,
+  setAssunto,
+  colaborador,
+  estadosList,
+  assuntosList,
+  setColaborador,
+  colaboradoresList,
+}) {
+  const isFiltered = filter || assunto || colaborador || estado;
   const handleResetFilter = () => {
-    setFilter({
-      tab,
-      data: filter?.get('data') || format(new Date(), 'yyyy-MM-dd'),
-      datai: filter?.get('datai') || format(new Date(), 'yyyy-MM-dd'),
-      dataf: filter?.get('dataf') || format(new Date(), 'yyyy-MM-dd'),
-    });
+    setFilter('');
+    setEstado('');
+    setAssunto('');
+    setColaborador('');
+    localStorage.setItem('filterC', '');
+    localStorage.setItem('estadoC', '');
+    localStorage.setItem('assuntoC', '');
+    localStorage.setItem('colaboradorC', '');
   };
 
   return (
@@ -241,30 +372,39 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
           {estadosList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={filter?.get('estado')}
+              value={estado}
               options={estadosList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), estado: newValue || '' })}
-              renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
+              onChange={(event, newValue) => {
+                setEstado(newValue);
+                localStorage.setItem('estadoC', newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Estado" />}
             />
           )}
           {assuntosList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={filter?.get('assunto')}
+              value={assunto}
               options={assuntosList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), assunto: newValue || '' })}
-              renderInput={(params) => <TextField {...params} label="Assunto" margin="none" />}
+              onChange={(event, newValue) => {
+                setAssunto(newValue);
+                localStorage.setItem('assuntoC', newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Assunto" />}
             />
           )}
           {colaboradoresList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={filter?.get('colaborador')}
+              value={colaborador}
               options={colaboradoresList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              onChange={(event, newValue) => setFilter({ tab, ...paramsObject(filter), colaborador: newValue || '' })}
+              onChange={(event, newValue) => {
+                setColaborador(newValue);
+                localStorage.setItem('colaboradorC', newValue || '');
+              }}
               renderInput={(params) => <TextField {...params} label="Colaborador" margin="none" />}
             />
           )}
@@ -273,8 +413,11 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth
-          value={filter?.get('filter') || ''}
-          onChange={(event) => setFilter({ tab, ...paramsObject(filter), filter: event.target.value || '' })}
+          value={filter}
+          onChange={(event) => {
+            setFilter(event.target.value);
+            localStorage.setItem('filterC', event.target.value || '');
+          }}
           placeholder="Procurar..."
           InputProps={{
             startAdornment: (
@@ -300,39 +443,74 @@ export function SearchToolbarEntradas({ tab, filter, setFilter, estadosList, ass
 
 SearchToolbarCartoes.propTypes = {
   balcoes: PropTypes.array,
-  filter: PropTypes.object,
+  filter: PropTypes.string,
   setFilter: PropTypes.func,
+  tiposCartao: PropTypes.array,
+  tipoCartao: PropTypes.string,
+  setTipoCartao: PropTypes.func,
   balcaoEntrega: PropTypes.string,
   setBalcaoEntrega: PropTypes.func,
 };
 
-export function SearchToolbarCartoes({ filter, setFilter, balcaoEntrega, setBalcaoEntrega, balcoes }) {
+export function SearchToolbarCartoes({
+  filter,
+  balcoes,
+  setFilter,
+  tipoCartao,
+  tiposCartao,
+  setTipoCartao,
+  balcaoEntrega,
+  setBalcaoEntrega,
+}) {
   const handleResetFilter = () => {
-    setFilter({
-      tab: 'cartoes',
-      data: filter?.get('data') || format(new Date(), 'yyyy-MM-dd'),
-      datai: filter?.get('datai') || format(new Date(), 'yyyy-MM-dd'),
-      dataf: filter?.get('dataf') || format(new Date(), 'yyyy-MM-dd'),
-    });
+    setFilter('');
+    setTipoCartao('');
+    setBalcaoEntrega('');
+    localStorage.setItem('balcaoE', '');
+    localStorage.setItem('tipoCartao', '');
+    localStorage.setItem('filterCartao', '');
   };
 
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {balcoes?.length > 1 && (
-        <Autocomplete
-          fullWidth
-          value={balcaoEntrega}
-          options={balcoes?.sort()}
-          sx={{ width: { sm: 180, xl: 230 } }}
-          onChange={(event, newValue) => setBalcaoEntrega(newValue)}
-          renderInput={(params) => <TextField {...params} label="Balcão entrega" margin="none" />}
-        />
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+      {(balcoes?.length > 1 || tiposCartao?.length > 1) && (
+        <Stack spacing={1} direction="row" alignItems="center">
+          {balcoes?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              options={balcoes?.sort()}
+              sx={{ width: { md: 230 } }}
+              value={balcaoEntrega || null}
+              onChange={(event, newValue) => {
+                setBalcaoEntrega(newValue);
+                localStorage.setItem('balcaoE', newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Balcão entrega" margin="none" />}
+            />
+          )}
+          {tiposCartao?.length > 1 && (
+            <Autocomplete
+              fullWidth
+              value={tipoCartao || null}
+              sx={{ width: { md: 230 } }}
+              options={tiposCartao?.sort()}
+              onChange={(event, newValue) => {
+                setTipoCartao(newValue);
+                localStorage.setItem('tipoCartao', newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Tipo de cartão" margin="none" />}
+            />
+          )}
+        </Stack>
       )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <TextField
           fullWidth
-          value={filter?.get('filter') || ''}
-          onChange={(event) => setFilter({ tab: 'cartoes', ...paramsObject(filter), filter: event.target.value || '' })}
+          value={filter}
+          onChange={(event) => {
+            setFilter(event.target.value);
+            localStorage.setItem('filterCartao', event.target.value || '');
+          }}
           placeholder="Procurar..."
           InputProps={{
             startAdornment: (
@@ -342,7 +520,7 @@ export function SearchToolbarCartoes({ filter, setFilter, balcaoEntrega, setBalc
             ),
           }}
         />
-        {filter?.get('filter') && (
+        {(filter || balcaoEntrega) && (
           <Tooltip title="Remover filtros" arrow>
             <IconButton color="inherit" onClick={() => handleResetFilter()}>
               <ClearAllIcon />
@@ -356,42 +534,44 @@ export function SearchToolbarCartoes({ filter, setFilter, balcaoEntrega, setBalc
 
 // ----------------------------------------------------------------------
 
-TableToolbarPerfilEstados.propTypes = { filterSearch: PropTypes.object, onFilterSearch: PropTypes.func };
+TableToolbarPerfilEstados.propTypes = {
+  uo: PropTypes.string,
+  setUo: PropTypes.func,
+  filter: PropTypes.string,
+  setFilter: PropTypes.func,
+};
 
-export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch }) {
+export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
   const { uos } = useSelector((state) => state.intranet);
-  const _uosList = ['Todos'];
-  applySort(uos, getComparator('asc', 'label'))?.forEach((_uo) => {
-    _uosList.push(_uo?.label);
-  });
-
-  const isFiltered =
-    (filterSearch.get('uo') && filterSearch.get('uo') !== 'Todos') ||
-    (filterSearch.get('filter') && filterSearch.get('filter') !== '');
 
   const handleResetFilter = () => {
-    onFilterSearch({ tab: 'acessos', uo: 'Todos', filter: '' });
+    setUo('');
+    setFilter('');
+    localStorage.setItem('uoParams', '');
+    localStorage.setItem('filterParams', '');
   };
 
   return (
     <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ pt: 0.5, pb: 1.5, px: 0 }}>
       <Autocomplete
         fullWidth
-        value={filterSearch.get('uo') || 'Todos'}
-        onChange={(event, value) => {
-          onFilterSearch({ tab: 'acessos', uo: value || 'Todos', filter: filterSearch.get('filter') || '' });
+        value={uo || null}
+        onChange={(event, newValue) => {
+          setUo(newValue);
+          localStorage.setItem('uoParams', newValue || '');
         }}
-        options={_uosList}
         getOptionLabel={(option) => option}
+        options={uos?.map((row) => row?.label)?.sort()}
         sx={{ maxWidth: { md: 250, sm: 200 }, minWidth: { md: 250, sm: 200 } }}
-        renderInput={(params) => <TextField {...params} label="Unidade orgânicas" margin="none" />}
+        renderInput={(params) => <TextField {...params} label="Unidade orgânica" />}
       />
       <Stack spacing={1} direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
         <TextField
           fullWidth
-          value={filterSearch.get('filter') || ''}
+          value={filter}
           onChange={(event) => {
-            onFilterSearch({ tab: 'acessos', uo: filterSearch.get('uo') || 'Todos', filter: event.target.value || '' });
+            setFilter(event.target.value);
+            localStorage.setItem('filterParams', event.target.value || '');
           }}
           placeholder="Procurar..."
           InputProps={{
@@ -402,7 +582,7 @@ export function TableToolbarPerfilEstados({ filterSearch, onFilterSearch }) {
             ),
           }}
         />
-        {isFiltered && (
+        {(filter || uo) && (
           <Tooltip title="Remover pesquiza" arrow>
             <IconButton color="inherit" onClick={() => handleResetFilter()}>
               <ClearAllIcon />

@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 // @mui
 import {
   Box,
@@ -19,7 +19,6 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { getFile } from '../utils/getFile';
 import { ptDateTime } from '../utils/formatTime';
-import { normalizeText } from '../utils/normalizeText';
 import { nomeacaoBySexo } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
@@ -29,16 +28,17 @@ import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
 import useToggle from '../hooks/useToggle';
 import useSettings from '../hooks/useSettings';
-import useTable, { getComparator, applySort } from '../hooks/useTable';
+import useTable, { getComparator } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
 import MyAvatar from '../components/MyAvatar';
 import Scrollbar from '../components/Scrollbar';
 import { SkeletonTable } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import { TableToolbarPerfilEstados } from '../components/SearchToolbar';
+import { SearchToolbarSimple } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
 // sections
+import { applySortFilter } from '../sections/parametrizacao/applySortFilter';
 import { PerfisEstadoForm } from '../sections/parametrizacao/ParametrizacaoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
@@ -60,10 +60,10 @@ export default function PerfisEstado() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
-  const [filterSearch, setFilterSearch] = useSearchParams();
   const { toggle: open, onOpen, onClose } = useToggle();
+  const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
   const { isLoading, estado, done } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
+  const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
 
   const {
     page,
@@ -86,10 +86,10 @@ export default function PerfisEstado() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
-  const _uosList = ['Todos'];
-  applySort(uos, getComparator('asc', 'label'))?.forEach((_uo) => {
-    _uosList.push(_uo?.label);
-  });
+  useEffect(() => {
+    setPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   useEffect(() => {
     if (mail && id && cc?.perfil_id) {
@@ -97,11 +97,6 @@ export default function PerfisEstado() {
     }
     return () => dispatch(resetItem('estado'));
   }, [dispatch, cc?.perfil_id, mail, id]);
-
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
-    setPage(0);
-  };
 
   const perfisAssociados = [];
   estado?.perfis?.forEach((row) => {
@@ -122,7 +117,7 @@ export default function PerfisEstado() {
     }
   });
 
-  const dataFiltered = applySortFilter({ perfisAssociados, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({ dados: perfisAssociados, comparator: getComparator(order, orderBy), filter });
   const isNotFound = !dataFiltered.length;
   const title = estado?.nome ? `${estado.nome} » Colaboradores associados` : 'Colaboradores associados';
 
@@ -133,7 +128,7 @@ export default function PerfisEstado() {
           heading={title}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-            { name: 'Parametrização', href: `${PATH_DIGITALDOCS.parametrizacao.tabs}?tab=estados&filter=` },
+            { name: 'Parametrização', href: `${PATH_DIGITALDOCS.parametrizacao.tabs}` },
             { name: title },
           ]}
           action={
@@ -151,13 +146,7 @@ export default function PerfisEstado() {
           roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
         >
           <Card sx={{ p: 1 }}>
-            {perfisAssociados.length > 1 && (
-              <TableToolbarPerfilEstados
-                options={_uosList}
-                filterSearch={filterSearch}
-                onFilterSearch={handleFilterSearch}
-              />
-            )}
+            <SearchToolbarSimple filter={filter} setFilter={setFilter} from="acesso" />
             <Scrollbar>
               <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
                 <Table size={dense ? 'small' : 'medium'}>
@@ -224,34 +213,4 @@ export default function PerfisEstado() {
       </Container>
     </Page>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ perfisAssociados, comparator, filterSearch }) {
-  const uo = filterSearch.get('uo') || 'Todos';
-  const filter = filterSearch.get('filter') || '';
-  const stabilizedThis = perfisAssociados.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  perfisAssociados = stabilizedThis.map((el) => el[0]);
-
-  if (uo !== 'Todos' && uo !== null) {
-    perfisAssociados = perfisAssociados.filter((row) => row?.uo?.label === uo);
-  }
-
-  if (filter && filter !== null) {
-    perfisAssociados = perfisAssociados.filter(
-      (row) =>
-        (row?.perfil?.displayName && normalizeText(row?.perfil?.displayName).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.perfil?.mail && normalizeText(row?.perfil?.mail).indexOf(normalizeText(filter)) !== -1)
-    );
-  }
-
-  return perfisAssociados;
 }

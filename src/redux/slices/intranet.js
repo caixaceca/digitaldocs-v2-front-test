@@ -4,8 +4,10 @@ import axios from 'axios';
 import { callMsGraph } from '../../graph';
 import { loginRequest } from '../../config';
 // utils
-import { BASEURL, BASEURLSLIM } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
+import { BASEURL, BASEURLSLIM } from '../../utils/axios';
+// hooks
+import { getComparator, applySort } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
@@ -95,7 +97,7 @@ const slice = createSlice({
     },
 
     getUosSuccess(state, action) {
-      state.uos = action.payload;
+      state.uos = applySort(action.payload, getComparator('asc', 'label'));
     },
 
     getAjudaSuccess(state, action) {
@@ -107,7 +109,10 @@ const slice = createSlice({
     },
 
     getColaboradoresSuccess(state, action) {
-      state.colaboradores = action.payload?.filter((row) => row?.is_active);
+      state.colaboradores = applySort(
+        action.payload?.filter((row) => row?.is_active)?.map((row) => ({ ...row, nome: row?.perfil?.displayName })),
+        getComparator('asc', 'label')
+      );
     },
 
     getCurrentColaboradorSuccess(state, action) {
@@ -130,6 +135,7 @@ const slice = createSlice({
 
     getAccessTokenSuccess(state, action) {
       state.accessToken = action.payload;
+      localStorage.setItem('accessToken', action.payload);
     },
 
     getDocumentoSuccess(state, action) {

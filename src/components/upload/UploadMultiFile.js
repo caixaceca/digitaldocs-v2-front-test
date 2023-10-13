@@ -62,7 +62,7 @@ export default function UploadMultiFile({
       >
         <input {...getInputProps()} />
 
-        <BlockContent />
+        <BlockContent multiple />
       </DropZoneStyle>
 
       {fileRejections.length > 0 && <RejectionFiles fileRejections={fileRejections} />}

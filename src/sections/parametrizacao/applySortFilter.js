@@ -22,6 +22,8 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.linha && normalizeText(row?.linha).indexOf(normalizeText(filter)) !== -1) ||
         (row?.descricao && normalizeText(row?.descricao).indexOf(normalizeText(filter)) !== -1) ||
         (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.acesso && normalizeText(row?.acesso).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.objeto && normalizeText(row?.objeto).indexOf(normalizeText(filter)) !== -1) ||
         (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.obs && normalizeText(row?.obs).indexOf(normalizeText(filter)) !== -1) ||
         (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1) ||

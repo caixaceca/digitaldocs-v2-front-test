@@ -1,76 +1,36 @@
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 // @mui
-import { styled, alpha } from '@mui/material/styles';
-import { Box, Tab, Tabs, Card, Container, Typography } from '@mui/material';
+import { Box, Container } from '@mui/material';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
+import TabsWrapper from '../components/TabsWrapper';
 // sections
-import Arquivos from '../sections/arquivo/Arquivos';
-import PedidosAcesso from '../sections/arquivo/PedidosAcesso';
-
-// ----------------------------------------------------------------------
-
-const TabsWrapperStyle = styled('div')(({ theme }) => ({
-  zIndex: 9,
-  bottom: 0,
-  width: '100%',
-  display: 'flex',
-  position: 'absolute',
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
-  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
-}));
-
-const RootStyle = styled('div')(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  backgroundColor: alpha(theme.palette.primary.main, 1),
-}));
+import TableArquivo from '../sections/arquivo/TableArquivo';
 
 // ----------------------------------------------------------------------
 
 export default function Arquivo() {
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'arquivos' });
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabArquivo') || 'arquivos');
 
   const handleChangeTab = (event, newValue) => {
-    setCurrentTab({ tab: newValue });
+    setCurrentTab(newValue);
+    localStorage.setItem('tabArquivo', newValue);
   };
 
-  const TABS = [
-    { value: 'arquivos', label: 'Arquivos', component: <Arquivos /> },
-    { value: 'pedidos', label: 'Pedidos', component: <PedidosAcesso /> },
+  const tabsList = [
+    { value: 'arquivos', label: 'Arquivos', component: <TableArquivo tab="arquivos" /> },
+    { value: 'pedidos', label: 'Pedidos', component: <TableArquivo tab="pedidos" /> },
   ];
 
   return (
     <Page title="Arquivo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-          <RootStyle>
-            <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>
-              <Typography variant="h4">Arquivo</Typography>
-            </Box>
-          </RootStyle>
-
-          <TabsWrapperStyle>
-            <Tabs
-              value={currentTab.get('tab')}
-              scrollButtons="auto"
-              variant="scrollable"
-              allowScrollButtonsMobile
-              onChange={handleChangeTab}
-            >
-              {TABS.map((tab) => (
-                <Tab disableRipple key={tab.value} value={tab.value} label={tab.label} sx={{ px: 0.5 }} />
-              ))}
-            </Tabs>
-          </TabsWrapperStyle>
-        </Card>
-
-        {TABS.map((tab) => {
-          const isMatched = tab.value === currentTab.get('tab');
+        <TabsWrapper title="Arquivo" tabsList={tabsList} changeTab={handleChangeTab} currentTab={currentTab} />
+        {tabsList.map((tab) => {
+          const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
         })}
       </Container>

@@ -3,7 +3,9 @@ import { useState } from 'react';
 // ----------------------------------------------------------------------
 
 export default function useTable(props) {
-  const [dense, setDense] = useState(props?.defaultDense || false);
+  const [dense, setDense] = useState(
+    (localStorage.getItem('dense') === 'true' && true) || props?.defaultDense || false
+  );
 
   const [orderBy, setOrderBy] = useState(props?.defaultOrderBy || 'id');
 
@@ -55,11 +57,13 @@ export default function useTable(props) {
 
   const onChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    localStorage.setItem('rowsPerPage', event.target.value);
     setPage(0);
   };
 
   const onChangeDense = (event) => {
     setDense(event.target.checked);
+    localStorage.setItem('dense', event.target.checked);
   };
 
   // filter

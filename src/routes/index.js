@@ -15,12 +15,11 @@ import { getFromIntranet, AzureIntranetHandShake, AuthenticateColaborador } from
 
 // ----------------------------------------------------------------------
 
-const Loadable = (Component) => (props) =>
-  (
-    <Suspense fallback={<LoadingScreen />}>
-      <Component {...props} />
-    </Suspense>
-  );
+const Loadable = (Component) => (props) => (
+  <Suspense fallback={<LoadingScreen />}>
+    <Component {...props} />
+  </Suspense>
+);
 
 export default function Router() {
   const dispatch = useDispatch();
@@ -49,10 +48,10 @@ export default function Router() {
       dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
       if (perfil?.id) {
         dispatch(getAll('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getAll('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getAll('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getAll('motivos pendencias', { mail: perfil?.mail, perfilId: perfil?.id }));
       }
       if (perfil?.colaborador?.id) {
         dispatch(getFromIntranet('colaborador', { id: perfil?.colaborador?.id, mail: perfil?.mail }));

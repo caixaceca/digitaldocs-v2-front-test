@@ -8,7 +8,7 @@ import { Fab, Stack, Tooltip, TableRow, TableCell, TextField, Autocomplete } fro
 // utils
 import { add, format } from 'date-fns';
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, paramsObject, noDados } from '../../utils/normalizeText';
+import { entidadesParse, noDados } from '../../utils/normalizeText';
 // components
 import { ViewItem, CriadoEmPor } from '../../components/Actions';
 
@@ -16,26 +16,24 @@ import { ViewItem, CriadoEmPor } from '../../components/Actions';
 
 UoData.propTypes = {
   uo: PropTypes.object,
+  setUo: PropTypes.func,
   fase: PropTypes.string,
+  setData: PropTypes.func,
   cartoes: PropTypes.bool,
   entradas: PropTypes.bool,
-  filter: PropTypes.object,
-  dataSingle: PropTypes.string,
-  dataRange: PropTypes.array,
-  setUo: PropTypes.func,
-  setData: PropTypes.func,
-  setFilter: PropTypes.func,
   uosList: PropTypes.array,
+  dataRange: PropTypes.array,
+  dataSingle: PropTypes.string,
+  setDataSingle: PropTypes.func,
 };
 
 export function UoData({
   uo,
   setUo,
-  filter,
   setData,
   uosList,
   fase = '',
-  setFilter,
+  setDataSingle,
   dataRange = [],
   dataSingle = '',
   cartoes = false,
@@ -52,54 +50,39 @@ export function UoData({
             disableClearable
             options={uosList}
             onChange={(event, newValue) => {
-              if (!cartoes) {
-                setFilter({ tab: filter?.get('tab'), ...paramsObject(filter), uoId: newValue.id });
-              }
               setUo(newValue);
+              localStorage.setItem('uoC', newValue?.id || '');
             }}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                label={cartoes ? 'Balcão' : 'Agência/U.O'}
-                margin="none"
-                sx={{ width: { md: 200 } }}
-              />
+              <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
             )}
           />
         </Stack>
       )}
       {entradas || cartoes ? (
-        <>
+        <Stack direction="row" alignItems="center" spacing={1}>
           <DateRangePicker
             disableFuture
             slots={{ field: SingleInputDateRangeField }}
             value={[add(new Date(dataRange[0]), { hours: 2 }), add(new Date(dataRange[1]), { hours: 2 })]}
             slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 220 } } }}
             onChange={(newValue) => {
-              setFilter({
-                tab: filter?.get('tab'),
-                ...paramsObject(filter),
-                datai: format(newValue?.[0], 'yyyy-MM-dd'),
-                dataf: format(newValue?.[1], 'yyyy-MM-dd'),
-              });
               setData([format(newValue?.[0], 'yyyy-MM-dd'), format(newValue?.[1], 'yyyy-MM-dd')]);
+              localStorage.setItem('dataIC', newValue?.[0] ? format(newValue?.[0], 'yyyy-MM-dd') : '');
+              localStorage.setItem('dataFC', newValue?.[1] ? format(newValue?.[1], 'yyyy-MM-dd') : '');
             }}
           />
           {(dataRange[0] !== format(new Date(), 'yyyy-MM-dd') || dataRange[1] !== format(new Date(), 'yyyy-MM-dd')) && (
             <Stack>
               <Tooltip title="Hoje" arrow>
                 <Fab
-                  color="inherit"
                   size="small"
                   variant="soft"
+                  color="inherit"
                   onClick={() => {
-                    setFilter({
-                      tab: filter?.get('tab'),
-                      ...paramsObject(filter),
-                      datai: format(new Date(), 'yyyy-MM-dd'),
-                      dataf: format(new Date(), 'yyyy-MM-dd'),
-                    });
+                    localStorage.setItem('dataIC', format(new Date(), 'yyyy-MM-dd'));
+                    localStorage.setItem('dataFC', format(new Date(), 'yyyy-MM-dd'));
                     setData([format(new Date(), 'yyyy-MM-dd'), format(new Date(), 'yyyy-MM-dd')]);
                   }}
                 >
@@ -108,14 +91,14 @@ export function UoData({
               </Tooltip>
             </Stack>
           )}
-        </>
+        </Stack>
       ) : (
         <DatePicker
           label="Data"
           value={add(new Date(dataSingle), { hours: 2 })}
           onChange={(newValue) => {
-            setFilter({ tab: filter?.get('tab'), ...paramsObject(filter), data: format(newValue, 'yyyy-MM-dd') });
-            setData(format(newValue, 'yyyy-MM-dd'));
+            setDataSingle(format(newValue, 'yyyy-MM-dd'));
+            localStorage.setItem('dataC', newValue ? format(newValue, 'yyyy-MM-dd') : '');
           }}
           slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
         />

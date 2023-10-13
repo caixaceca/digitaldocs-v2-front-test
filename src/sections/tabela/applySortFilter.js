@@ -40,3 +40,45 @@ export default function applySortFilter({ dados, comparator, filter, colaborador
 
   return dados;
 }
+
+// ----------------------------------------------------------------------
+
+export function dadosList(array, colaboradores, tab) {
+  const dados = [];
+  const estadosList = [];
+  const assuntosList = [];
+  const colaboradoresList = [];
+  array?.forEach((row) => {
+    let colaboradorNome = '';
+    if (tab === 'entradas' || tab === 'porconcluir') {
+      const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.dono));
+      if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
+        colaboradoresList.push(colaborador?.perfil?.displayName);
+      }
+      colaboradorNome = colaborador?.perfil?.displayName;
+    } else {
+      const colaborador = colaboradores?.find((colab) => Number(colab.perfil_id) === Number(row?.perfil_id));
+      if (colaborador && !colaboradoresList?.some((item) => item.id === colaborador.id)) {
+        colaboradoresList.push(colaborador);
+      }
+      colaboradorNome = colaborador?.perfil?.displayName;
+    }
+    if (!estadosList.includes(row?.nome)) {
+      estadosList.push(row?.nome);
+    }
+    if (row?.nome === 'Arquivo' && !estadosList.includes('Excepto Arquivo')) {
+      estadosList.push('Excepto Arquivo');
+    }
+    if (row?.motivo && !estadosList.includes('Pendente')) {
+      estadosList.push('Pendente');
+    }
+    if (row?.motivo && !estadosList.includes('Excepto Pendente')) {
+      estadosList.push('Excepto Pendente');
+    }
+    if (!assuntosList.includes(row?.assunto)) {
+      assuntosList.push(row?.assunto);
+    }
+    dados.push({ ...row, colaborador: colaboradorNome });
+  });
+  return { dados, estadosList, assuntosList, colaboradoresList };
+}

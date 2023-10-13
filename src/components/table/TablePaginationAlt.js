@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Box, Switch, TablePagination, FormControlLabel } from '@mui/material';
+import { Stack, Switch, TablePagination, FormControlLabel } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -23,24 +23,26 @@ export default function TablePaginationAlt({
   onChangeRowsPerPage,
 }) {
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Stack
+      spacing={1}
+      alignItems="center"
+      justifyContent="space-between"
+      direction={{ xs: 'column', md: 'row' }}
+      sx={{ px: 1, py: 0.5, borderTop: (theme) => `1px solid ${theme.palette.grey[500_32]}` }}
+    >
+      <FormControlLabel control={<Switch checked={dense} onChange={onChangeDense} />} label="Compacto" sx={{ pl: 1 }} />
       <TablePagination
         page={page}
         count={count}
-        component="div"
         showLastButton
         showFirstButton
+        component="div"
         rowsPerPage={rowsPerPage}
         onPageChange={onChangePage}
         rowsPerPageOptions={[10, 25, 50, 100]}
         onRowsPerPageChange={onChangeRowsPerPage}
+        sx={{ border: 'none', mt: '0px!important' }}
       />
-
-      <FormControlLabel
-        control={<Switch checked={dense} onChange={onChangeDense} />}
-        label="Compacto"
-        sx={{ px: 3, py: 1.5, top: 0, position: { md: 'absolute' } }}
-      />
-    </Box>
+    </Stack>
   );
 }

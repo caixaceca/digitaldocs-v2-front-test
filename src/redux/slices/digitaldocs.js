@@ -40,6 +40,7 @@ const initialState = {
   itemSelected: null,
   selectedAnexoId: null,
   indicadoresArquivo: null,
+  con: [],
   linhas: [],
   fluxos: [],
   versoes: [],
@@ -142,6 +143,9 @@ const slice = createSlice({
         case 'processos':
           state.processos = [];
           break;
+        case 'pesquisa':
+          state.pesquisa = [];
+          break;
         case 'indicadores':
           state.indicadores = [];
           break;
@@ -153,6 +157,9 @@ const slice = createSlice({
           break;
         case 'cartoes':
           state.cartoes = [];
+          break;
+        case 'con':
+          state.con = [];
           break;
 
         default:
@@ -239,7 +246,7 @@ const slice = createSlice({
     },
 
     getCartoesSuccess(state, action) {
-      state.cartoes = action.payload;
+      state.cartoes = action.payload?.map((row) => ({ ...row, numero: row?.numero?.substring(9, 15) }));
     },
 
     getFluxosSuccess(state, action) {
@@ -248,6 +255,10 @@ const slice = createSlice({
 
     getEstadosPerfilSuccess(state, action) {
       state.estadosPerfil = action.payload;
+    },
+
+    getConSuccess(state, action) {
+      state.con = action.payload;
     },
 
     getProcessoSuccess(state, action) {
@@ -637,7 +648,12 @@ export const {
 
 export function getAll(item, params) {
   return async (dispatch) => {
-    if (item !== 'visualizacoes' && item !== 'destinosDesarquivamento' && item !== 'versoes') {
+    if (
+      item !== 'versoes' &&
+      item !== 'visualizacoes' &&
+      item !== 'meusprocessos' &&
+      item !== 'destinosDesarquivamento'
+    ) {
       dispatch(slice.actions.startLoading());
     }
     try {
@@ -799,7 +815,7 @@ export function getAll(item, params) {
           dispatch(slice.actions.getOrigensSuccess(response.data));
           break;
         }
-        case 'motivos pendencias': {
+        case 'motivos': {
           const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${params?.perfilId}`, options);
           dispatch(slice.actions.getMotivosPendenciasSuccess(response.data.objeto));
           break;
@@ -832,6 +848,7 @@ export function getAll(item, params) {
         }
         case 'pesquisa': {
           dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('pesquisa'));
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/search/${params?.perfilId}?chave=${params?.chave}`,
             options
@@ -951,6 +968,15 @@ export function getAll(item, params) {
             options
           );
           dispatch(slice.actions.getCartoesSuccess(response.data));
+          break;
+        }
+        case 'con': {
+          dispatch(slice.actions.resetItem('con'));
+          const response = await axios.get(
+            `${BASEURLDD}/v1/indicadores/export/con?data_inicio=${params?.dataInicio}&data_final=${params?.dataFim}`,
+            options
+          );
+          dispatch(slice.actions.getConSuccess(response.data));
           break;
         }
 

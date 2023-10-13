@@ -1,4 +1,5 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Box, Tab, Tabs, Grid, Card, Container } from '@mui/material';
@@ -11,8 +12,7 @@ import Page from '../components/Page';
 import { SearchNotFound404 } from '../components/table';
 // sections
 import PerfilCover from '../sections/sobre/PerfilCover';
-import AcessosPerfil from '../sections/parametrizacao/AcessosPerfil';
-import EstadosPerfil from '../sections/parametrizacao/EstadosPerfil';
+import TableAcessos from '../sections/parametrizacao/TableAcessos';
 
 // ----------------------------------------------------------------------
 
@@ -33,16 +33,17 @@ export default function PerfilEstadosAcessos() {
   const { id } = useParams();
   const { themeStretch } = useSettings();
   const { colaboradores } = useSelector((state) => state.intranet);
-  const [currentTab, setCurrentTab] = useSearchParams({ tab: 'acessos' });
   const colaborador = colaboradores?.find((row) => Number(row?.perfil?.id) === Number(id));
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabAcesso') || 'Acessos');
 
   const handleChangeTab = (event, newValue) => {
-    setCurrentTab({ tab: newValue });
+    setCurrentTab(newValue);
+    localStorage.setItem('tabAcesso', newValue);
   };
 
   const TABS = [
-    { value: 'acessos', label: 'Acessos', component: <AcessosPerfil /> },
-    { value: 'estados', label: 'Estados ', component: <EstadosPerfil /> },
+    { value: 'Acessos', component: <TableAcessos tab="acessos" /> },
+    { value: 'Estados', component: <TableAcessos tab="estados" /> },
   ];
 
   return (
@@ -51,9 +52,9 @@ export default function PerfilEstadosAcessos() {
         <Card sx={{ mb: 3, height: 170, position: 'relative' }}>
           <PerfilCover perfilColaborador={colaborador} />
           <TabsWrapperStyle>
-            <Tabs value={currentTab.get('tab')} scrollButtons="auto" variant="scrollable" onChange={handleChangeTab}>
+            <Tabs value={currentTab} scrollButtons="auto" variant="scrollable" onChange={handleChangeTab}>
               {TABS.map((tab) => (
-                <Tab disableRipple key={tab.value} value={tab.value} label={tab.label} sx={{ px: 1 }} />
+                <Tab disableRipple key={tab?.value} value={tab?.value} label={tab?.value} sx={{ px: 0.5 }} />
               ))}
             </Tabs>
           </TabsWrapperStyle>
@@ -64,7 +65,7 @@ export default function PerfilEstadosAcessos() {
           </Grid>
         ) : (
           TABS.map((tab) => {
-            const isMatched = tab.value === currentTab.get('tab');
+            const isMatched = tab.value === currentTab;
             return isMatched && <Box key={tab.value}>{tab.component}</Box>;
           })
         )}

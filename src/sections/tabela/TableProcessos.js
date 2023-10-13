@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import CircleIcon from '@mui/icons-material/Circle';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Card, Stack, Table, Button, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
+import { Card, Stack, Table, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
 // utils
+import { estadoInicial } from '../../utils/validarAcesso';
 import { fToNow, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, entidadesParse, noDados, parametrosPesquisa } from '../../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -20,7 +20,7 @@ import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
-import { ViewItem, Pendente, CriadoEmPor } from '../../components/Actions';
+import { AddItem, ViewItem, Pendente, CriadoEmPor } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { ColocarPendente } from '../processo/IntervencaoForm';
@@ -32,8 +32,10 @@ TableProcessos.propTypes = { from: PropTypes.string };
 export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [filter, setFilter] = useSearchParams();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
+  const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
+  const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorP') || null);
   const { isLoading, meuAmbiente, meusAmbientes, meuFluxo, processos } = useSelector((state) => state.digitaldocs);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
   const title =
@@ -50,53 +52,41 @@ export default function TableProcessos({ from }) {
     page,
     dense,
     order,
+    onSort,
     orderBy,
     setPage,
     rowsPerPage,
-    onSort,
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
     defaultOrderBy: 'data_last_transicao',
-    defaultRowsPerPage: fromAgencia ? 100 : 25,
-    defaultDense: cc?.id === 362,
     defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
+    defaultRowsPerPage: localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25,
   });
 
   useEffect(() => {
     if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
+      setPage(0);
       dispatch(resetItem('processo'));
       dispatch(resetItem('processos'));
-      setPage(0);
       dispatch(getAll(from, { mail, fluxoId: meuFluxo?.id, estadoId: meuAmbiente?.id, perfilId: cc?.perfil_id }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, from, mail]);
 
-  useEffect(() => {
-    setPage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  const handleAdd = () => {
+    navigate(PATH_DIGITALDOCS.processos.novoProcesso);
+  };
 
-  const handleViewRow = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=${from}${parametrosPesquisa(filter)}`);
+  const handleView = (id) => {
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}`);
   };
 
   const handlePendente = (item) => {
     dispatch(selectItem(item));
   };
 
-  const podeAdicionar = () => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.is_inicial) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
   const newList = [];
   const colaboradoresList = [];
   processos?.forEach((row) => {
@@ -107,8 +97,20 @@ export default function TableProcessos({ from }) {
     newList.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
   });
 
-  const dataFiltered = applySortFilter({ from, newList, filter, comparator: getComparator(order, orderBy) });
+  const dataFiltered = applySortFilter({
+    from,
+    filter,
+    newList,
+    segmento,
+    colaborador,
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
+
+  useEffect(() => {
+    setPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, segmento, colaborador, meuAmbiente?.id, meuFluxo?.id]);
 
   const TABLE_HEAD = [
     { id: 'nentrada', label: 'Nº', align: 'left' },
@@ -136,25 +138,18 @@ export default function TableProcessos({ from }) {
       <HeaderBreadcrumbs
         heading={title}
         links={[{ name: '' }]}
-        action={
-          podeAdicionar() && (
-            <Button
-              variant="soft"
-              component={RouterLink}
-              startIcon={<AddCircleIcon />}
-              to={PATH_DIGITALDOCS.processos.novoProcesso}
-            >
-              Adicionar
-            </Button>
-          )
-        }
         sx={{ color: 'text.secondary', px: 1 }}
+        action={estadoInicial(meusAmbientes) && <AddItem button handleAdd={handleAdd} />}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
           tab={from}
           filter={filter}
+          segmento={segmento}
           setFilter={setFilter}
+          setSegmento={setSegmento}
+          colaborador={colaborador}
+          setColaborador={setColaborador}
           colaboradoresList={colaboradoresList}
         />
         <Scrollbar>
@@ -209,7 +204,7 @@ export default function TableProcessos({ from }) {
                           {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
                             <Pendente handleClick={() => handlePendente(row)} />
                           )}
-                          <ViewItem handleClick={() => handleViewRow(row?.id)} />
+                          <ViewItem handleClick={() => handleView(row?.id)} />
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -243,11 +238,8 @@ export default function TableProcessos({ from }) {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newList, comparator, filter, from }) {
+function applySortFilter({ newList, comparator, filter, segmento, colaborador, from }) {
   const stabilizedThis = newList.map((el, index) => [el, index]);
-  const text = filter.get('filter');
-  const segmento = filter.get('segmento');
-  const colaborador = filter.get('colaborador');
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -267,17 +259,17 @@ function applySortFilter({ newList, comparator, filter, from }) {
     newList = newList.filter((row) => row?.colaborador === colaborador);
   }
 
-  if (text) {
+  if (filter) {
     newList = newList.filter(
       (row) =>
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(text)) !== -1) ||
-        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(text)) !== -1) ||
-        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(text)) !== -1) ||
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(text)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(text)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(text)) !== -1) ||
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(text)) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(text)) !== -1)
+        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

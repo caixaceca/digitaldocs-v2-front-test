@@ -35,7 +35,7 @@ import {
   LinearProgress,
   FormControlLabel,
 } from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import ClearAllOutlinedIcon from '@mui/icons-material/ClearAllOutlined';
@@ -59,22 +59,12 @@ import Image from '../../components/Image';
 import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import Chart, { useChart } from '../../components/chart';
+import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
 import { TableHeadCustom, TableSearchNotFound, SearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
-
-const TabsWrapperStyle = styled('div')(({ theme }) => ({
-  zIndex: 9,
-  bottom: 0,
-  width: '100%',
-  display: 'flex',
-  position: 'absolute',
-  justifyContent: 'center',
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('md')]: { paddingRight: theme.spacing(3) },
-}));
 
 const TABLE_HEAD = [
   { id: 'assunto', label: 'Fluxo/Assunto', align: 'left' },
@@ -297,7 +287,7 @@ export function TotalProcessos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, firstAmbiente, estadoFilter]);
 
-  const VIEW_TABS = [
+  const tabsList = [
     { value: 'criacao', label: 'Criação', component: <Criacao vista={vista} /> },
     { value: 'entradas', label: 'Entradas', component: <EntradasTrabalhados /> },
     { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados /> },
@@ -315,7 +305,7 @@ export function TotalProcessos() {
   return (
     <>
       <HeaderBreadcrumbs
-        heading={`Total de processos - ${VIEW_TABS?.find((row) => row?.value === currentTab)?.label}`}
+        heading={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
         links={[{ name: '' }]}
         action={
           <Filtrar
@@ -332,22 +322,8 @@ export function TotalProcessos() {
         }
         sx={{ color: 'text.secondary', px: 1 }}
       />
-      <Card sx={{ mb: 3, height: 50, position: 'relative' }}>
-        <TabsWrapperStyle>
-          <Tabs
-            value={currentTab}
-            scrollButtons="auto"
-            variant="scrollable"
-            allowScrollButtonsMobile
-            onChange={handleChangeTab}
-          >
-            {VIEW_TABS.map((tab) => (
-              <Tab disableRipple key={tab.value} value={tab.value} label={tab.label} sx={{ px: 0.5 }} />
-            ))}
-          </Tabs>
-        </TabsWrapperStyle>
-      </Card>
-      {VIEW_TABS.map((tab) => {
+      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
+      {tabsList.map((tab) => {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;
       })}
@@ -1331,8 +1307,8 @@ export function Filtrar({
                 value={perfil}
                 label="Colaborador"
                 setValue={setPerfil}
+                options={colaboradoresList}
                 disableClearable={tab === 'execucao' && !estadoFilter && !fluxo}
-                options={applySort(colaboradoresList, getComparator('asc', 'label'))}
               />
             )}
             {haveEstado && (

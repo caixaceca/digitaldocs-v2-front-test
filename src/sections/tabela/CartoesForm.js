@@ -25,8 +25,6 @@ import {
 // utils
 import { format } from 'date-fns';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
@@ -63,12 +61,12 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
     () =>
       fase === 'Emissão'
         ? cartoes
-            ?.slice(0, 25)
             ?.filter((item) => !item?.emissao_validado)
+            ?.slice(0, 25)
             ?.map((row) => ({ idItem: row?.id, check: false, numero: row?.numero, nome: row?.nome, nota: '' }))
         : cartoes
-            ?.slice(0, 25)
             ?.filter((item) => !item?.rececao_validado)
+            ?.slice(0, 25)
             ?.map((row) => ({ idItem: row?.id, check: false, numero: row?.numero, nome: row?.nome, nota: '' })),
     [cartoes, fase]
   );
@@ -268,11 +266,7 @@ export function BalcaoEntregaForm({ open, onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFAutocompleteObject
-                name="balcao"
-                label="Balcão de entrega"
-                options={applySort(uosList, getComparator('asc', 'id'))}
-              />
+              <RHFAutocompleteObject name="balcao" label="Balcão de entrega" options={uosList} />
             </Grid>
           </Grid>
           <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
@@ -316,7 +310,7 @@ export function Detalhes({ closeModal }) {
                 <Typography variant="subtitle1">Dados</Typography>
               </ListItem>
               {selectedItem?.tipo && <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />}
-              {selectedItem?.numero && <TextItem title="Nº do cartão:" text={selectedItem.numero} />}
+              {selectedItem?.numero && <TextItem title="Nº do cartão:" text={selectedItem?.numero?.substring(9, 15)} />}
               {selectedItem?.data_emissao && (
                 <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
               )}
@@ -385,7 +379,7 @@ export function Detalhes({ closeModal }) {
                         <CriadoEmPor tipo="user" value={selectedItem?.rececao_validado_por} />
                       )}
                       {selectedItem?.rececao_validado_em && (
-                        <CriadoEmPor tipo="date" value={selectedItem?.rececao_validado_em} />
+                        <CriadoEmPor tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />
                       )}
                       {selectedItem?.nota_rececao && <CriadoEmPor tipo="note" value={selectedItem?.nota_rececao} />}
                     </Stack>

@@ -11,8 +11,7 @@ import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import { Fab, Grid, Card, Stack, Tooltip, Dialog, Container, CardContent } from '@mui/material';
 // utils
 import { fYear } from '../utils/formatTime';
-import { parametrosPesquisa } from '../utils/normalizeText';
-import { temNomeacao, isResponsavelUo } from '../utils/validarAcesso';
+import { temNomeacao, isResponsavelUo, processoMePertence, podeDarParecer } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getAll, getItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
@@ -89,15 +88,11 @@ export default function Processo() {
     processo?.assunto === 'Produtos e Serviços' ||
     processo?.assunto === 'Receção de Cartões - DOP';
 
-  const parametros = `${params?.get?.('from') ? `?tab=${params?.get?.('from')}` : '?tab=tarefas'}${parametrosPesquisa(
-    params
-  )}`;
-
   const linkNavigate =
-    (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}${parametros}`) ||
-    (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}${parametros}`) ||
-    ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}${parametros}`) ||
-    `${PATH_DIGITALDOCS.processos.lista}${parametros}`;
+    (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}`) ||
+    (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
+    ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
+    `${PATH_DIGITALDOCS.processos.lista}`;
 
   const colaboradoresList = [];
   colaboradoresEstado?.forEach((row) => {
@@ -225,57 +220,6 @@ export default function Processo() {
     );
   };
 
-  const podeAceitarAtribuir = () => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.id === processo?.estado_atual_id) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
-
-  const podeDarParecer = () => {
-    let parecer = false;
-    processo?.pareceres?.forEach((element) => {
-      const belongTome = meusAmbientes.some((row) => row.id === element?.estado_id);
-      if (belongTome && !element?.validado) {
-        parecer = element;
-      }
-      return parecer;
-    });
-    return parecer;
-  };
-
-  const podeResgatar = () => {
-    let i = 0;
-    if (
-      !processo.ispendente &&
-      processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id &&
-      perfilId === processo?.htransicoes?.[0]?.perfil_id
-    ) {
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.id === processo?.htransicoes?.[0]?.estado_inicial_id) {
-          return true;
-        }
-        i += 1;
-      }
-    }
-    return false;
-  };
-
-  const processoPertence = () => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.id === processo?.estado_atual_id) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
-
   const handlePedirAcesso = () => {
     dispatch(updateItem('pedir acesso', '', { perfilId, id: processo?.id, mail, msg: 'solicitado' }));
   };
@@ -289,7 +233,7 @@ export default function Processo() {
   };
 
   const handleParecer = () => {
-    dispatch(selectItem(podeDarParecer()));
+    dispatch(selectItem(podeDarParecer(meusAmbientes, processo?.pareceres)));
   };
 
   return (
@@ -383,7 +327,7 @@ export default function Processo() {
                     </>
                   ) : (
                     <>
-                      {processo?.in_paralelo_mode && processoPertence() && (
+                      {processo?.in_paralelo_mode && processoMePertence(meusAmbientes, processo?.estado_atual_id) && (
                         <>
                           <Cancelar
                             processoId={processo?.id}
@@ -400,16 +344,16 @@ export default function Processo() {
                       )}
                       {!processo?.is_lock && !processo?.in_paralelo_mode && (
                         <>
-                          {podeAceitarAtribuir() && (
+                          {processoMePertence(meusAmbientes, processo?.estado_atual_id) && (
                             <>
-                              {isResponsavel && !processo?.nome?.includes('Gerência') && (
+                              {isResponsavel && processo?.nome !== 'Diário' && processo?.nome !== 'Devolução AN' && (
                                 <AtribuirForm
                                   processoID={processo?.id}
                                   perfilId={processo?.perfil_id}
                                   colaboradoresList={colaboradoresList}
                                 />
                               )}
-                              {(processo?.perfil_id === perfilId || !processo?.perfil_id) && (
+                              {(!processo?.perfil_id || processo?.perfil_id === perfilId) && (
                                 <Tooltip title="ACEITAR" arrow>
                                   <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
                                     <LockPersonIcon />
@@ -418,19 +362,22 @@ export default function Processo() {
                               )}
                             </>
                           )}
-                          {podeResgatar() && (
-                            <Resgatar
-                              processoId={processo?.id}
-                              fluxoId={processo?.fluxo_id}
-                              estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
-                            />
-                          )}
+                          {!processo.ispendente &&
+                            processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id &&
+                            perfilId === processo?.htransicoes?.[0]?.perfil_id &&
+                            processoMePertence(meusAmbientes, processo?.htransicoes?.[0]?.estado_inicial_id) && (
+                              <Resgatar
+                                processoId={processo?.id}
+                                fluxoId={processo?.fluxo_id}
+                                estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
+                              />
+                            )}
                         </>
                       )}
-                      {podeDarParecer() && (
+                      {podeDarParecer(meusAmbientes, processo?.pareceres) && (
                         <>
                           <Tooltip title="PARECER" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={handleParecer}>
+                            <Fab color="success" size="small" variant="soft" onClick={() => handleParecer()}>
                               <ChatOutlinedIcon />
                             </Fab>
                           </Tooltip>
@@ -440,9 +387,12 @@ export default function Processo() {
                       {processo?.is_lock && processo?.perfil_id === perfilId && (
                         <Intervencao colaboradoresList={colaboradoresList} />
                       )}
-                      {processo?.is_lock && processo?.perfil_id !== perfilId && isResponsavel && processoPertence() && (
-                        <Libertar processoID={processo?.id} perfilID={perfilId} />
-                      )}
+                      {isResponsavel &&
+                        processo?.is_lock &&
+                        processo?.perfil_id !== perfilId &&
+                        processoMePertence(meusAmbientes, processo?.estado_atual_id) && (
+                          <Libertar processoID={processo?.id} perfilID={perfilId} />
+                        )}
                     </>
                   )}
                 </Stack>

@@ -4,9 +4,7 @@ import { useEffect, useState } from 'react';
 import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import {
-  Tab,
   Box,
-  Tabs,
   Card,
   Grid,
   Stack,
@@ -22,10 +20,10 @@ import {
   Autocomplete,
   TableContainer,
 } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import { DateRangePicker } from '@mui/x-date-pickers-pro';
 import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { styled, alpha, useTheme } from '@mui/material/styles';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturnedOutlined';
@@ -35,13 +33,13 @@ import { format, add } from 'date-fns';
 import { bgGradient } from '../../utils/cssStyles';
 import { getFileThumb } from '../../utils/getFileFormat';
 import { ptDate, fMonthYear } from '../../utils/formatTime';
-import { getComparator, applySort } from '../../hooks/useTable';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/digitaldocs';
 // components
 import { TableSearchNotFound } from '../../components/table';
+import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
 
@@ -52,15 +50,6 @@ const frResumoStyle = { pl: '12px !important', fontWeight: 900 };
 const frSegmentoStyle = { pl: '12px !important', typography: 'subtitle2' };
 const linhaStyle = { fontWeight: 900, backgroundColor: 'background.neutral' };
 const borderStyle = { borderTop: '4px solid transparent', borderColor: 'background.paper' };
-
-const TabsWrapperStyle = styled('div')(({ theme }) => ({
-  width: '100%',
-  display: 'flex',
-  position: 'absolute',
-  justifyContent: 'center',
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('md')]: { paddingRight: theme.spacing(3) },
-}));
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -81,7 +70,7 @@ export default function EstatisticaCredito() {
     }
   }, [cc]);
 
-  const VIEW_TABS = [
+  const tabsList = [
     { value: 'Resumo', component: <Totais /> },
     { value: 'Entradas', component: <TableEstatistica from="entrada" uo={uo?.label} data={fMonthYear(data)} /> },
     { value: 'Aprovados', component: <TableEstatistica from="aprovado" uo={uo?.label} data={fMonthYear(data)} /> },
@@ -136,10 +125,7 @@ export default function EstatisticaCredito() {
                 { id: -1, label: 'Caixa' },
                 { id: -2, label: 'DCN' },
                 { id: -3, label: 'DCS' },
-                ...applySort(
-                  uos?.filter((item) => item?.tipo === 'Agências')?.map((row) => ({ id: row?.id, label: row?.label })),
-                  getComparator('asc', 'label')
-                ),
+                ...uos?.filter((item) => item?.tipo === 'Agências')?.map((row) => ({ id: row?.id, label: row?.label })),
               ]}
               isOptionEqualToValue={(option, value) => option?.id === value?.id}
               renderInput={(params) => <TextField {...params} fullWidth label="Agência/U.O" />}
@@ -183,22 +169,8 @@ export default function EstatisticaCredito() {
           </Stack>
         }
       />
-      <Card sx={{ mb: 3, height: 50, position: 'relative' }}>
-        <TabsWrapperStyle>
-          <Tabs
-            value={currentTab}
-            scrollButtons="auto"
-            variant="scrollable"
-            allowScrollButtonsMobile
-            onChange={handleChangeTab}
-          >
-            {VIEW_TABS.map((tab) => (
-              <Tab disableRipple key={tab.value} value={tab.value} label={tab.value} sx={{ px: 0.5 }} />
-            ))}
-          </Tabs>
-        </TabsWrapperStyle>
-      </Card>
-      {VIEW_TABS.map((tab) => {
+      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
+      {tabsList.map((tab) => {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;
       })}

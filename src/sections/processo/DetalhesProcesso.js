@@ -34,7 +34,7 @@ import Label from '../../components/Label';
 import { Fechar } from '../../components/Actions';
 import Scrollbar from '../../components/Scrollbar';
 // _mock
-import { dis } from '../../_mock';
+import { dis, estadosCivis } from '../../_mock';
 
 // ----------------------------------------------------------------------
 
@@ -312,19 +312,27 @@ export default function DetalhesProcesso({ isPS }) {
             <Typography variant="subtitle1">Dados do ordenante</Typography>
           </ListItem>
           <TextItem title="Depositante é o próprio titular:" text={con?.titular_ordenador ? 'SIM' : 'NÃO'} />
-          {con?.titular_ordenador && con?.ordenador && <TextItem title="Nome:" text={con?.ordenador} />}
-          {con?.titular_ordenador && con?.tipo_docid && (
-            <TextItem title="Tipo doc. identificação:" text={con?.tipo_docid} />
+          {con?.ordenador && <TextItem title="Nome:" text={con?.ordenador} />}
+          {con?.tipo_docid && (
+            <TextItem
+              title="Tipo doc. identificação:"
+              text={dis?.find((row) => row.id === con?.tipo_docid)?.label || con?.tipo_docid}
+            />
           )}
-          {con?.titular_ordenador && con?.docid && <TextItem title="Nº doc. identificação:" text={con?.docid} />}
-          {con?.titular_ordenador && con?.nif && <TextItem title="NIF:" text={con?.nif} />}
+          {con?.docid && <TextItem title="Nº doc. identificação:" text={con?.docid} />}
+          {con?.nif && <TextItem title="NIF:" text={con?.nif} />}
           {con?.pai && <TextItem title="Nome do Pai:" text={con?.pai} />}
           {con?.mae && <TextItem title="Nome da Mãe:" text={con?.mae} />}
-          {con?.estado_civil && <TextItem title="Estado civil:" text={con?.estado_civil} />}
+          {con?.estado_civil && (
+            <TextItem
+              title="Estado civil:"
+              text={estadosCivis?.find((row) => row.id === con?.estado_civil)?.label || con?.estado_civil}
+            />
+          )}
           {con?.data_nascimento && <TextItem title="Data nascimento:" text={ptDate(con?.data_nascimento)} />}
           {con?.nacionalidade && <TextItem title="Nacionalidade:" text={con?.nacionalidade} />}
           {con?.local_pais_nascimento && (
-            <TextItem title="Local e País de nascimento:" text={con?.local_pais_nascimento} />
+            <TextItem title="Local/País de nascimento:" text={con?.local_pais_nascimento} />
           )}
           {con?.morada && <TextItem title="Morada:" text={con?.morada} />}
           {con?.profissao && <TextItem title="Profissão:" text={con?.profissao} />}

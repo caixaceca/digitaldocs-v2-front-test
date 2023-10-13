@@ -8,8 +8,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { Grid, DialogTitle, DialogContent } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
@@ -83,11 +81,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFAutocompleteObject
-                name="perfilID"
-                label="Colaborador"
-                options={applySort(colaboradoresList, getComparator('asc', 'label'))}
-              />
+              <RHFAutocompleteObject name="perfilID" label="Colaborador" options={colaboradoresList} />
             </Grid>
             <Grid item xs={12}>
               <Controller

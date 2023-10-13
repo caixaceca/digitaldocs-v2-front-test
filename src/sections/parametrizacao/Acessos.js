@@ -1,4 +1,5 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import {
   Box,
@@ -45,11 +46,6 @@ const TABLE_HEAD = [
 // ----------------------------------------------------------------------
 
 export default function Acessos() {
-  const navigate = useNavigate();
-  const [filterSearch, setFilterSearch] = useSearchParams();
-  const { isLoading } = useSelector((state) => state.digitaldocs);
-  const { colaboradores } = useSelector((state) => state.intranet);
-
   const {
     page,
     order,
@@ -64,10 +60,11 @@ export default function Acessos() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
-  const handleFilterSearch = (event) => {
-    setFilterSearch(event);
-    setPage(0);
-  };
+  const navigate = useNavigate();
+  const { isLoading } = useSelector((state) => state.digitaldocs);
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const [uo, setUo] = useState(localStorage.getItem('uoParams') || '');
+  const [filter, setFilter] = useState(localStorage.getItem('filterParams') || '');
 
   const handleUpdate = (id) => {
     navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${id}`);
@@ -82,8 +79,13 @@ export default function Acessos() {
     unidade_organica: row?.uo?.label,
     nomeacao_funcao: row.nomeacao || row?.funcao,
   }));
-  const dataFiltered = applySortFilter({ colasByName, comparator: getComparator(order, orderBy), filterSearch });
+  const dataFiltered = applySortFilter({ colasByName, comparator: getComparator(order, orderBy), filter, uo });
   const isNotFound = !dataFiltered.length;
+
+  useEffect(() => {
+    setPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, uo]);
 
   return (
     <>
@@ -94,9 +96,7 @@ export default function Acessos() {
         roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
       >
         <Card sx={{ p: 1 }}>
-          {colasByName.length > 1 && (
-            <TableToolbarPerfilEstados filterSearch={filterSearch} onFilterSearch={handleFilterSearch} />
-          )}
+          <TableToolbarPerfilEstados filter={filter} setFilter={setFilter} uo={uo} setUo={setUo} />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -163,9 +163,7 @@ export default function Acessos() {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ colasByName, comparator, filterSearch }) {
-  const uo = filterSearch.get('uo') || 'Todos';
-  const filter = filterSearch.get('filter') || '';
+function applySortFilter({ colasByName, comparator, filter, uo }) {
   const stabilizedThis = colasByName.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
@@ -176,15 +174,13 @@ function applySortFilter({ colasByName, comparator, filterSearch }) {
 
   colasByName = stabilizedThis.map((el) => el[0]);
 
-  if (uo !== 'Todos' && uo !== null) {
+  if (uo) {
     colasByName = colasByName.filter((row) => row?.uo?.label === uo);
   }
 
   if (filter && filter !== null) {
     colasByName = colasByName.filter(
-      (row) =>
-        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.perfil?.mail && normalizeText(row?.perfil?.mail).indexOf(normalizeText(filter)) !== -1)
+      (row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1
     );
   }
 

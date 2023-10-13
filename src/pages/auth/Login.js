@@ -77,7 +77,7 @@ export default function LoginPage() {
                 spacing={{ xs: 1, sm: 2 }}
               >
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  © {format(new Date(), 'Y')} Caixa Económica de Cabo Verde: developed by <b>IT CENTER</b>
+                  © {format(new Date(), 'Y')} Caixa Económica de Cabo Verde
                 </Typography>
                 <Typography variant="caption" sx={{ textAlign: 'right', color: 'text.secondary' }}>
                   <b>Versão 1.0</b>

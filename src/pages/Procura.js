@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import {
   Box,
@@ -15,12 +15,11 @@ import {
 } from '@mui/material';
 // utils
 import { ptDateTime, ptDate } from '../utils/formatTime';
-import { normalizeText, entidadesParse, noDados, parametrosPesquisa } from '../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados } from '../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../hooks/useTable';
 // redux
-import { getAll } from '../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../redux/store';
+import { useSelector } from '../redux/store';
 // hooks
 import useSettings from '../hooks/useSettings';
 // routes
@@ -51,15 +50,13 @@ const TABLE_HEAD = [
 
 export default function Procura() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [params] = useSearchParams();
-  const [filterUo, setFilterUo] = useState(null);
-  const [filterSearch, setFilterSearch] = useState('');
-  const [filterEstado, setFilterEstado] = useState(null);
-  const [filterAssunto, setFilterAssunto] = useState(null);
+  const [uo, setUo] = useState(localStorage.getItem('uoFSearch') || null);
+  const [search, setSearch] = useState(localStorage.getItem('filterSearch') || '');
+  const [estado, setEstado] = useState(localStorage.getItem('estadoSearch') || null);
+  const [assunto, setAssunto] = useState(localStorage.getItem('assuntoSearch') || null);
   const { pesquisa, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
+  const { colaboradores, cc, uos } = useSelector((state) => state.intranet);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
 
   const {
@@ -76,56 +73,17 @@ export default function Procura() {
     onChangeRowsPerPage,
   } = useTable({
     defaultOrderBy: 'noOrderDefault',
-    defaultRowsPerPage: fromAgencia ? 100 : 25,
-    defaultDense: cc?.id === 362,
     defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
+    defaultRowsPerPage: localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25,
   });
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && cc?.uo_id && params) {
-      if (params?.get('avancada') === 'false') {
-        dispatch(
-          getAll('pesquisa v2', { mail, uoID: cc?.uo_id, perfilId: cc?.perfil_id, chave: params?.get('chave') })
-        );
-      } else {
-        dispatch(
-          getAll('pesquisa avancada', {
-            mail,
-            perfilID: cc?.perfil_id,
-            uoID: params?.get('uoId'),
-            conta: params?.get('conta'),
-            datai: params?.get('datai'),
-            dataf: params?.get('dataf'),
-            cliente: params?.get('cliente'),
-            entidade: params?.get('entidade'),
-            nentrada: params?.get('nentrada'),
-            noperacao: params?.get('noperacao'),
-            perfilDono: params?.get('perfilId'),
-          })
-        );
-      }
-    }
-  }, [dispatch, params, cc?.perfil_id, cc?.uo_id, mail]);
-
-  const handleFilterUo = (value) => {
-    setFilterUo(value);
     setPage(0);
-  };
-  const handleFilterSearch = (value) => {
-    setFilterSearch(value);
-    setPage(0);
-  };
-  const handleFilterEstado = (value) => {
-    setFilterEstado(value);
-    setPage(0);
-  };
-  const handleFilterAssunto = (value) => {
-    setFilterAssunto(value);
-    setPage(0);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uo, search, assunto, estado]);
 
   const handleViewRow = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=procurar${parametrosPesquisa(params)}`);
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=procurar`);
   };
 
   const newPesquisa = [];
@@ -156,10 +114,10 @@ export default function Procura() {
   const dataFiltered = applySortFilter({
     newPesquisa,
     comparator: getComparator(order, orderBy),
-    filterUo,
-    filterSearch,
-    filterEstado,
-    filterAssunto,
+    uo,
+    search,
+    estado,
+    assunto,
   });
   const isNotFound = !dataFiltered.length;
 
@@ -170,63 +128,63 @@ export default function Procura() {
           heading={
             <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
               <Typography variant="h4">Resultado da procura [{pesquisa?.length || 0}]:</Typography>
-              {params?.get('avancada') === 'false' ? (
-                <Box component="span" sx={{ color: 'text.primary' }}>
-                  {params?.get('chave')}
-                </Box>
-              ) : (
+              {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-                  {params?.get('uoId') && (
+                  {localStorage.getItem('uoSearch') && (
                     <Panel label="Agência/U.O">
                       <Typography noWrap>
-                        {uos?.find((row) => row?.id?.toString() === params?.get('uoId')?.toString())?.label}
+                        {uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
                       </Typography>
                     </Panel>
                   )}
-                  {params?.get('perfilId') && (
+                  {localStorage.getItem('colaboradorSearch') && (
                     <Panel label="Criado por">
                       <Typography noWrap>
                         {
                           colaboradores?.find(
-                            (row) => row?.perfil_id?.toString() === params?.get('perfilId')?.toString()
+                            (row) => row?.perfil_id === Number(localStorage.getItem('colaboradorSearch'))
                           )?.perfil?.displayName
                         }
                       </Typography>
                     </Panel>
                   )}
-                  {params?.get('conta') && (
+                  {localStorage.getItem('conta') && (
                     <Panel label="Nº conta">
-                      <Typography noWrap>{params?.get('conta')}</Typography>
+                      <Typography noWrap>{localStorage.getItem('conta')}</Typography>
                     </Panel>
                   )}
-                  {params?.get('cliente') && (
+                  {localStorage.getItem('cliente') && (
                     <Panel label="Nº cliente">
-                      <Typography noWrap>{params?.get('cliente')}</Typography>
+                      <Typography noWrap>{localStorage.getItem('cliente')}</Typography>
                     </Panel>
                   )}
-                  {params?.get('entidade') && (
+                  {localStorage.getItem('entidade') && (
                     <Panel label="Nº entidade">
-                      <Typography noWrap>{params?.get('entidade')}</Typography>
+                      <Typography noWrap>{localStorage.getItem('entidade')}</Typography>
                     </Panel>
                   )}
-                  {params?.get('nentrada') && (
+                  {localStorage.getItem('nentrada') && (
                     <Panel label="Nº entrada">
-                      <Typography noWrap>{params?.get('nentrada')}</Typography>
+                      <Typography noWrap>{localStorage.getItem('nentrada')}</Typography>
                     </Panel>
                   )}
-                  {params?.get('noperacao') && (
+                  {localStorage.getItem('noperacao') && (
                     <Panel label="Nº operação">
-                      <Typography noWrap>{params?.get('noperacao')}</Typography>
+                      <Typography noWrap>{localStorage.getItem('noperacao')}</Typography>
                     </Panel>
                   )}
-                  {params?.get('datai') && params?.get('dataf') && (
+                  {localStorage.getItem('dataISearch') && localStorage.getItem('dataFSearch') && (
                     <Panel label="Data">
                       <Typography noWrap>
-                        {ptDate(params?.get('datai'))} - {ptDate(params?.get('dataf'))}
+                        {ptDate(localStorage.getItem('dataISearch'))} - {ptDate(localStorage.getItem('dataFSearch'))}
                       </Typography>
                     </Panel>
                   )}
                 </Stack>
+              ) : (
+                <Box component="span" sx={{ color: 'text.primary' }}>
+                  {localStorage.getItem('search')}
+                </Box>
               )}
             </Stack>
           }
@@ -242,17 +200,17 @@ export default function Procura() {
         <Card sx={{ p: 1 }}>
           {newPesquisa.length > 1 && (
             <SearchToolbarProcura
-              filterUo={filterUo}
+              uo={uo}
+              setUo={setUo}
+              search={search}
+              estado={estado}
+              assunto={assunto}
+              setSearch={setSearch}
+              setEstado={setEstado}
+              setAssunto={setAssunto}
+              uosorigemList={uosorigemList}
               estadosList={estadosList}
               assuntosList={assuntosList}
-              filterSearch={filterSearch}
-              filterEstado={filterEstado}
-              onFilterUo={handleFilterUo}
-              filterAssunto={filterAssunto}
-              uosorigemList={uosorigemList}
-              onFilterSearch={handleFilterSearch}
-              onFilterEstado={handleFilterEstado}
-              onFilterAssunto={handleFilterAssunto}
             />
           )}
           <Scrollbar>
@@ -314,7 +272,7 @@ export default function Procura() {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newPesquisa, comparator, filterUo, filterSearch, filterEstado, filterAssunto }) {
+function applySortFilter({ newPesquisa, comparator, uo, search, estado, assunto }) {
   const stabilizedThis = newPesquisa.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
@@ -324,24 +282,25 @@ function applySortFilter({ newPesquisa, comparator, filterUo, filterSearch, filt
   });
   newPesquisa = stabilizedThis.map((el) => el[0]);
 
-  if (filterAssunto) {
-    newPesquisa = newPesquisa.filter((row) => row?.assunto === filterAssunto);
+  if (assunto) {
+    newPesquisa = newPesquisa.filter((row) => row?.assunto === assunto);
   }
-  if (filterEstado) {
-    newPesquisa = newPesquisa.filter((row) => row?.estado === filterEstado);
+  if (estado) {
+    newPesquisa = newPesquisa.filter((row) => row?.estado === estado);
   }
-  if (filterUo) {
-    newPesquisa = newPesquisa.filter((row) => row?.uo === filterUo);
+  if (uo) {
+    newPesquisa = newPesquisa.filter((row) => row?.uo === uo);
   }
-  if (filterSearch) {
+  if (search) {
     newPesquisa = newPesquisa.filter(
       (row) =>
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filterSearch)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filterSearch)) !== -1) ||
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filterSearch)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filterSearch)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filterSearch)) !== -1) ||
-        (row?.noperacao && normalizeText(row?.noperacao).indexOf(normalizeText(filterSearch)) !== -1)
+        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(search)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
+        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(search)) !== -1) ||
+        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(search)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(search)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
+        (row?.noperacao && normalizeText(row?.noperacao).indexOf(normalizeText(search)) !== -1)
     );
   }
 

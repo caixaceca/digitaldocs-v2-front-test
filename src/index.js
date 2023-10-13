@@ -12,7 +12,7 @@ import './utils/highlight';
 import 'simplebar-react/dist/simplebar.min.css';
 
 // lightbox
-import 'react-image-lightbox/style.css';
+import 'react-18-image-lightbox/style.css';
 
 // editor
 import 'react-quill/dist/quill.snow.css';
