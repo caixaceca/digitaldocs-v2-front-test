@@ -165,7 +165,7 @@ export default function TableAcessos({ tab }) {
           <SearchToolbarSimple filter={filter} setFilter={setFilter} from="acesso" />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
-              <Table>
+              <Table size={dense ? 'small' : 'medium'}>
                 <TableHeadCustom
                   order={order}
                   onSort={onSort}
