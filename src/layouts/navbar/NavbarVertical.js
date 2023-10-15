@@ -18,7 +18,6 @@ import { NAVBAR } from '../../config';
 // components
 import Logo from '../../components/Logo';
 import Scrollbar from '../../components/Scrollbar';
-import { TextAnimate } from '../../components/animate';
 import { NavSectionVertical } from '../../components/nav-section';
 //
 import NavbarAcount from './NavbarAcount';
@@ -89,7 +88,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
                 component={RouterLink}
                 sx={{ color: (theme) => theme.palette.success.main, textDecoration: 'none', textAlign: 'center' }}
               >
-                <TextAnimate text="IntraNet - Teste" sx={{ typography: 'h5' }} />
+                <Typography variant='h5'>IntraNet - Teste</Typography>
                 <Typography variant="subtitle2" sx={{ mt: -0.5 }}>
                   DIGITALDOCS
                 </Typography>
