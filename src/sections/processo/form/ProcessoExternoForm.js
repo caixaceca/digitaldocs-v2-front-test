@@ -2,7 +2,11 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { Grid, Card, TextField, CardContent, Autocomplete } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import TextField from '@mui/material/TextField';
+import CardContent from '@mui/material/CardContent';
+import Autocomplete from '@mui/material/Autocomplete';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // components

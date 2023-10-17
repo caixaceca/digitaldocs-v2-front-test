@@ -1,20 +1,18 @@
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
-import {
-  Box,
-  Fab,
-  Stack,
-  AppBar,
-  Dialog,
-  Toolbar,
-  Tooltip,
-  IconButton,
-  DialogTitle,
-  DialogContent,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
+import Stack from '@mui/material/Stack';
+import AppBar from '@mui/material/AppBar';
+import Dialog from '@mui/material/Dialog';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
+import DialogTitle from '@mui/material/DialogTitle';
 import { alpha, styled } from '@mui/material/styles';
+import DialogContent from '@mui/material/DialogContent';
 import OutlinedFlagIcon from '@mui/icons-material/OutlinedFlag';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';

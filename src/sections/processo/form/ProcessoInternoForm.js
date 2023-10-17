@@ -2,7 +2,9 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext } from 'react-hook-form';
 // @mui
-import { Grid, Card, CardContent } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 // components
 import {
   RHFSwitch,

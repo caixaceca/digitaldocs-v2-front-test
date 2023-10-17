@@ -7,7 +7,7 @@ import { useMemo, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';

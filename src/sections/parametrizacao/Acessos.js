@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
-import {
-  Box,
-  Card,
-  Stack,
-  Table,
-  Tooltip,
-  TableRow,
-  TableBody,
-  TableCell,
-  Typography,
-  TableContainer,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Tooltip from '@mui/material/Tooltip';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 // utils
 import { getFile } from '../../utils/getFile';
 import { normalizeText } from '../../utils/normalizeText';

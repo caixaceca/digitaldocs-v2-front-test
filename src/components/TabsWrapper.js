@@ -1,7 +1,13 @@
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Card from '@mui/material/Card';
+import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
-import { Box, Tab, Tabs, Card, Typography } from '@mui/material';
+// utils
+import { setItemValue } from '../utils/normalizeText';
 
 // ----------------------------------------------------------------------
 
@@ -36,13 +42,14 @@ const TabsWrapperStyleSimple = styled('div')(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 TabsWrapper.propTypes = {
+  tab: PropTypes.string,
   title: PropTypes.string,
   changeTab: PropTypes.func,
   tabsList: PropTypes.array,
   currentTab: PropTypes.string,
 };
 
-export default function TabsWrapper({ title, tabsList, currentTab, changeTab }) {
+export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab }) {
   return (
     <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
       <RootStyle>
@@ -53,10 +60,10 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab }) 
       <TabsWrapperStyle>
         <Tabs
           value={currentTab}
-          onChange={changeTab}
           scrollButtons="auto"
           variant="scrollable"
           allowScrollButtonsMobile
+          onChange={(event, newValue) => setItemValue(newValue, changeTab, tab)}
         >
           {tabsList.map((tab) => (
             <Tab

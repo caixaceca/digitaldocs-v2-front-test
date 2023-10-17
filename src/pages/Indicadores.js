@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-
+import { useEffect, useState, useMemo } from 'react';
 // @mui
-import { Box, Container } from '@mui/material';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 // redux
+import { getAll } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
-import { getAll, resetItem } from '../redux/slices/digitaldocs';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
@@ -21,24 +21,26 @@ export default function Indicadores() {
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { meusacessos } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useState(meusacessos.includes('Todo-111') ? 'files' : 'total');
+  const [currentTab, setCurrentTab] = useState(
+    localStorage.getItem('tabIndicadores') || (meusacessos?.includes('Todo-111') && 'files') || 'total'
+  );
 
-  const handleChangeTab = (event, newValue) => {
-    dispatch(resetItem('indicadores'));
-    setCurrentTab(newValue);
-  };
+  const tabFiles = useMemo(
+    () =>
+      meusacessos?.includes('Todo-111') ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }] : [],
+    [meusacessos]
+  );
 
-  const tabFiles = meusacessos.includes('Todo-111')
-    ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }]
-    : [meusacessos];
-
-  const tabsList = [
-    ...tabFiles,
-    { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
-    { value: 'duracao', label: 'Duração', component: <Duracao /> },
-    { value: 'execucao', label: 'Tempo execução', component: <Execucao /> },
-    { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
-  ];
+  const tabsList = useMemo(
+    () => [
+      ...tabFiles,
+      { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
+      { value: 'duracao', label: 'Duração', component: <Duracao /> },
+      { value: 'execucao', label: 'Tempo execução', component: <Execucao /> },
+      { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
+    ],
+    [tabFiles]
+  );
 
   useEffect(() => {
     if (mail && cc?.perfil_id) {
@@ -71,7 +73,13 @@ export default function Indicadores() {
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         {/* <Button onClick={handleNotificationClick}>Enviar Notificação</Button> */}
-        <TabsWrapper title="Indicadores" tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
+        <TabsWrapper
+          title="Indicadores"
+          tab="tabIndicadores"
+          tabsList={tabsList}
+          currentTab={currentTab}
+          changeTab={setCurrentTab}
+        />
         {tabsList.map((tab) => {
           const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;

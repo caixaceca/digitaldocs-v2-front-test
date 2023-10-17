@@ -4,14 +4,14 @@ import { Navigate, useRoutes } from 'react-router-dom';
 import { useMsal } from '@azure/msal-react';
 // utils
 import { format } from 'date-fns';
+// redux
+import { getAll } from '../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../redux/store';
+import { getFromIntranet, AzureIntranetHandShake, AuthenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
 import LoadingScreen from '../components/LoadingScreen';
-// redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getAll } from '../redux/slices/digitaldocs';
-import { getFromIntranet, AzureIntranetHandShake, AuthenticateColaborador } from '../redux/slices/intranet';
 
 // ----------------------------------------------------------------------
 

@@ -1,7 +1,8 @@
 import { m } from 'framer-motion';
 // @mui
+import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
-import { Box, CircularProgress } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 //
 import Logo from './Logo';
 

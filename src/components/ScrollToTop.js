@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 // @mui
-import { Box, Fab, Stack, Typography } from '@mui/material';
+import Fab from '@mui/material/Fab';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 // ----------------------------------------------------------------------

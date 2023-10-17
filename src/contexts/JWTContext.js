@@ -117,12 +117,7 @@ function AuthProvider({ children }) {
 
     setSession(accessToken);
 
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        user,
-      },
-    });
+    dispatch({ type: 'LOGIN', payload: { user } });
   };
 
   const register = async (email, password, firstName, lastName) => {
@@ -136,12 +131,7 @@ function AuthProvider({ children }) {
 
     localStorage.setItem('accessToken', accessToken);
 
-    dispatch({
-      type: 'REGISTER',
-      payload: {
-        user,
-      },
-    });
+    dispatch({ type: 'REGISTER', payload: { user } });
   };
 
   const logout = async () => {

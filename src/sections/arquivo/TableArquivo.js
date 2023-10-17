@@ -2,7 +2,15 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
-import { Card, Stack, Table, Divider, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Divider from '@mui/material/Divider';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 import { entidadesParse, noDados } from '../../utils/normalizeText';
@@ -132,7 +140,7 @@ export default function TableArquivo({ tab }) {
         </Card>
       )}
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple tab="arquivos" filter={filter} from="arquivo" setFilter={setFilter} />
+        <SearchToolbarSimple item="filterA" filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

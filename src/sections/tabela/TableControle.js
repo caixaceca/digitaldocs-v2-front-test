@@ -1,13 +1,21 @@
+import { add, format } from 'date-fns';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
-import { Card, Table, Stack, Divider, TableRow, TableCell, TableBody, Typography, TableContainer } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Divider from '@mui/material/Divider';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 // utils
-import { format } from 'date-fns';
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
+import { dataValido, entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -74,11 +82,15 @@ export default function TableControle({ from }) {
   const [estado, setEstado] = useState(localStorage.getItem('estadoC') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoC') || null);
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorC') || null);
-  const [dataSingle, setDataSingle] = useState(localStorage.getItem('dataC') || format(new Date(), 'yyyy-MM-dd'));
-  const [data, setData] = useState([
-    localStorage.getItem('dataIC') || format(new Date(), 'yyyy-MM-dd'),
-    localStorage.getItem('dataFC') || format(new Date(), 'yyyy-MM-dd'),
-  ]);
+  const [data, setData] = useState(
+    localStorage.getItem('dataIC') ? add(new Date(localStorage.getItem('dataC')), { hours: 2 }) : new Date()
+  );
+  const [datai, setDatai] = useState(
+    localStorage.getItem('dataIC') ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 }) : new Date()
+  );
+  const [dataf, setDataf] = useState(
+    localStorage.getItem('dataFC') ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 }) : new Date()
+  );
   const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
   const { entradas, trabalhados, porConcluir, meusAmbientes, isAdmin, isLoading } = useSelector(
     (state) => state.digitaldocs
@@ -115,15 +127,23 @@ export default function TableControle({ from }) {
 
   useEffect(() => {
     if (mail && perfilId && uo?.id && from === 'entradas') {
-      dispatch(getAll(from, { mail, uoId: uo?.id, perfilId, dataInicio: data[0], dataFim: data[1] }));
+      dispatch(
+        getAll(from, {
+          mail,
+          perfilId,
+          uoId: uo?.id,
+          dataFim: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+          dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+        })
+      );
     }
-  }, [dispatch, perfilId, uo?.id, mail, data, from]);
+  }, [dispatch, perfilId, uo?.id, mail, datai, dataf, from]);
 
   useEffect(() => {
-    if (mail && dataSingle && uo?.id && from === 'trabalhados') {
-      dispatch(getAll(from, { mail, uoId: uo?.id, data: dataSingle }));
+    if (mail && data && uo?.id && from === 'trabalhados') {
+      dispatch(getAll(from, { mail, uoId: uo?.id, data: dataValido(data) ? format(data, 'yyyy-MM-dd') : '' }));
     }
-  }, [dispatch, uo?.id, dataSingle, from, mail]);
+  }, [dispatch, uo?.id, data, from, mail]);
 
   useEffect(() => {
     if (mail && cc?.perfil_id && from === 'porconcluir') {
@@ -153,7 +173,7 @@ export default function TableControle({ from }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, assunto, estado, colaborador, uo?.id, data]);
+  }, [filter, assunto, estado, colaborador, uo?.id, datai, dataf]);
 
   const totalUo = dados?.dados?.length || 0;
   const totalAssunto =
@@ -182,12 +202,14 @@ export default function TableControle({ from }) {
           from !== 'porconcluir' && (
             <UoData
               uo={uo}
+              data={data}
               setUo={setUo}
-              dataRange={data}
-              setData={setData}
+              datai={datai}
+              dataf={dataf}
               uosList={uosList}
-              dataSingle={dataSingle}
-              setDataSingle={setDataSingle}
+              setData={setData}
+              setDatai={setDatai}
+              setDataf={setDataf}
               entradas={from === 'entradas'}
             />
           )

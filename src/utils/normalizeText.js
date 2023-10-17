@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 // @mui
 import { Typography } from '@mui/material';
 
@@ -42,6 +43,28 @@ export function noDados() {
       Não identificado
     </Typography>
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function setItemValue(newValue, setItem, localS, id) {
+  setItem(newValue);
+  if (localS) {
+    localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
+  }
+}
+
+export function setDataUtil(newValue, setData, localSI, resetDate, localSIF) {
+  setData(newValue);
+  localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
+  if (resetDate) {
+    resetDate(dataValido(newValue) ? new Date() : null);
+    localStorage.setItem(localSIF, dataValido(newValue) ? format(new Date(), 'yyyy-MM-dd') : '');
+  }
+}
+
+export function dataValido(data) {
+  return !!(data && data?.toString() !== 'Invalid Date');
 }
 
 // ----------------------------------------------------------------------

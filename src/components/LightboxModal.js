@@ -2,8 +2,9 @@ import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Lightbox from 'react-18-image-lightbox';
 // @mui
+import Typography from '@mui/material/Typography';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { useTheme, alpha } from '@mui/material/styles';
-import { Typography, GlobalStyles } from '@mui/material';
 
 // ----------------------------------------------------------------------
 

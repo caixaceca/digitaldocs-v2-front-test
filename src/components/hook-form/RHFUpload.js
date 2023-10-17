@@ -2,15 +2,13 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { FormHelperText } from '@mui/material';
+import FormHelperText from '@mui/material/FormHelperText';
 // type
 import { UploadAvatar, UploadMultiFile, UploadSingleFile } from '../upload';
 
 // ----------------------------------------------------------------------
 
-RHFUploadAvatar.propTypes = {
-  name: PropTypes.string,
-};
+RHFUploadAvatar.propTypes = { name: PropTypes.string };
 
 export function RHFUploadAvatar({ name, ...other }) {
   const { control } = useFormContext();

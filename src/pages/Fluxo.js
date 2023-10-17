@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
-import { Box, Grid, Container } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Container from '@mui/material/Container';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, getAll, resetItem } from '../redux/slices/digitaldocs';
@@ -39,11 +41,6 @@ export default function Fluxo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, cc?.perfil_id, mail]);
 
-  const handleChangeTab = (event, newValue) => {
-    setCurrentTab(newValue);
-    localStorage.setItem('tabEstado', newValue);
-  };
-
   const tabsList = [
     {
       value: 'Transições',
@@ -61,9 +58,10 @@ export default function Fluxo() {
     <Page title="Fluxo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
+          tab="tabEstado"
           tabsList={tabsList}
           currentTab={currentTab}
-          changeTab={handleChangeTab}
+          changeTab={setCurrentTab}
           title={fluxo?.assunto || 'Detalhes do fluxo'}
         />
         {!fluxo ? (

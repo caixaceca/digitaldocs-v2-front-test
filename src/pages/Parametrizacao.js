@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 // @mui
-import { Box, Container } from '@mui/material';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import SchemaOutlinedIcon from '@mui/icons-material/SchemaOutlined';
 import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
 import ModeStandbyOutlinedIcon from '@mui/icons-material/ModeStandbyOutlined';
@@ -31,11 +32,6 @@ export default function Parametrizacao() {
   const acessoOrigens = isAdmin || meusacessos?.includes('origem-110') || meusacessos?.includes('origem-110');
   const acessoEstados = isAdmin || meusacessos?.includes('estado-110') || meusacessos?.includes('estado-110');
   const acessoAcessos = isAdmin || meusacessos?.includes('acesso-110') || meusacessos?.includes('acesso-110');
-
-  const handleChangeTab = (event, newValue) => {
-    setCurrentTab(newValue);
-    localStorage.setItem('tabParams', newValue);
-  };
 
   const acessos = useMemo(
     () => (acessoAcessos ? [{ value: 'Acessos', icon: <GroupAddOutlinedIcon />, component: <Acessos /> }] : []),
@@ -107,7 +103,13 @@ export default function Parametrizacao() {
   return (
     <Page title="Parametrização | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper tabsList={tabsList} title="Parametrização" currentTab={currentTab} changeTab={handleChangeTab} />
+        <TabsWrapper
+          tab="tabParams"
+          tabsList={tabsList}
+          title="Parametrização"
+          currentTab={currentTab}
+          changeTab={setCurrentTab}
+        />
         {tabsList.map((tab) => {
           const isMatched = tab?.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;

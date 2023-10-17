@@ -1,20 +1,18 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useState, useEffect } from 'react';
 // @mui
-import {
-  Box,
-  Card,
-  Grid,
-  Stack,
-  Dialog,
-  Button,
-  Skeleton,
-  Accordion,
-  CardHeader,
-  Typography,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import Skeleton from '@mui/material/Skeleton';
+import Accordion from '@mui/material/Accordion';
+import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { BASEURL } from '../../utils/axios';
@@ -122,7 +120,7 @@ export default function Ajuda() {
                             </Stack>
                           </AccordionSummary>
                           <AccordionDetails sx={{ typography: 'body2' }}>
-                            <Markdown  own children={item.resposta} />
+                            <Markdown own children={item.resposta} />
                           </AccordionDetails>
                         </Accordion>
                       ))}

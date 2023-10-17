@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import { Card, Table, TableRow, TableBody, TableCell, TableContainer } from '@mui/material';
+import Card from '@mui/material/Card';
+import Table from '@mui/material/Table';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -103,7 +108,7 @@ export default function TableEstado({ tab }) {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple filter={filter} setFilter={setFilter} from="estado" />
+        <SearchToolbarSimple item="filterEstado" filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

@@ -2,7 +2,11 @@ import PropTypes from 'prop-types';
 import { m } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 // @mui
-import { Card, Button, Container, Typography, CardContent } from '@mui/material';
+import Card from '@mui/material/Card';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import CardContent from '@mui/material/CardContent';
 // components
 import { MotionContainer, varBounce } from '../components/animate';
 // assets

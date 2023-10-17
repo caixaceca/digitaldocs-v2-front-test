@@ -1,6 +1,7 @@
 import { useState } from 'react';
 // @mui
-import { Box, Container } from '@mui/material';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
@@ -15,11 +16,6 @@ export default function Arquivo() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabArquivo') || 'arquivos');
 
-  const handleChangeTab = (event, newValue) => {
-    setCurrentTab(newValue);
-    localStorage.setItem('tabArquivo', newValue);
-  };
-
   const tabsList = [
     { value: 'arquivos', label: 'Arquivos', component: <TableArquivo tab="arquivos" /> },
     { value: 'pedidos', label: 'Pedidos', component: <TableArquivo tab="pedidos" /> },
@@ -28,7 +24,13 @@ export default function Arquivo() {
   return (
     <Page title="Arquivo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper title="Arquivo" tabsList={tabsList} changeTab={handleChangeTab} currentTab={currentTab} />
+        <TabsWrapper
+          title="Arquivo"
+          tab="tabArquivo"
+          tabsList={tabsList}
+          currentTab={currentTab}
+          changeTab={setCurrentTab}
+        />
         {tabsList.map((tab) => {
           const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;

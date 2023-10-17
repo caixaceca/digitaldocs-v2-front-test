@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 // @mui
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 // components
 import { RHFTextField, RHFUploadMultiFile } from '../../../components/hook-form';
 

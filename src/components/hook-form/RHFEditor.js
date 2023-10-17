@@ -2,15 +2,13 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import { FormHelperText } from '@mui/material';
+import FormHelperText from '@mui/material/FormHelperText';
 //
 import Editor from '../editor';
 
 // ----------------------------------------------------------------------
 
-RHFEditor.propTypes = {
-  name: PropTypes.string,
-};
+RHFEditor.propTypes = { name: PropTypes.string };
 
 export default function RHFEditor({ name, ...other }) {
   const { control } = useFormContext();

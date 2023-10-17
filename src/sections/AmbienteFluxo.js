@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 // @mui
-import { TextField, Autocomplete } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
 import { changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/digitaldocs';

@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types';
-// @mui
-import { Box, Stack, Typography, Link } from '@mui/material';
+// @muiimport Box from '@mui/material/Box';
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 //
 import Breadcrumbs from './Breadcrumbs';
 

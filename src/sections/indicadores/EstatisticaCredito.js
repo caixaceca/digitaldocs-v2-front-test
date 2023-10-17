@@ -1,39 +1,37 @@
 import { sumBy } from 'lodash';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
-import {
-  Box,
-  Card,
-  Grid,
-  Stack,
-  Table,
-  Button,
-  TableRow,
-  TableCell,
-  TextField,
-  TableBody,
-  TableHead,
-  Typography,
-  CardContent,
-  Autocomplete,
-  TableContainer,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TextField from '@mui/material/TextField';
+import TableHead from '@mui/material/TableHead';
+import Typography from '@mui/material/Typography';
+import CardContent from '@mui/material/CardContent';
+import Autocomplete from '@mui/material/Autocomplete';
 import { alpha, useTheme } from '@mui/material/styles';
-import { DateRangePicker } from '@mui/x-date-pickers-pro';
+import TableContainer from '@mui/material/TableContainer';
 import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturnedOutlined';
-import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
 // utils
 import { format, add } from 'date-fns';
 import { bgGradient } from '../../utils/cssStyles';
+import { UosAcesso } from '../../utils/validarAcesso';
 import { getFileThumb } from '../../utils/getFileFormat';
 import { ptDate, fMonthYear } from '../../utils/formatTime';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
+import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/digitaldocs';
@@ -55,20 +53,43 @@ const borderStyle = { borderTop: '4px solid transparent', borderColor: 'backgrou
 
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
-  const [uo, setUo] = useState(null);
-  const [data, setData] = useState(new Date());
-  const [dataRange, setDataRange] = useState([
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    new Date(),
-  ]);
-  const [currentTab, setCurrentTab] = useState('Resumo');
   const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { meusAmbientes, isAdmin } = useSelector((state) => state.digitaldocs);
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
+  const [data, setData] = useState(
+    localStorage.getItem('dataEst') ? add(new Date(localStorage.getItem('dataEst')), { hours: 2 }) : new Date()
+  );
+  const [datai, setDatai] = useState(
+    localStorage.getItem('dataIEst')
+      ? add(new Date(localStorage.getItem('dataIEst')), { hours: 2 })
+      : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  );
+  const [dataf, setDataf] = useState(
+    localStorage.getItem('dataFEst') ? add(new Date(localStorage.getItem('dataFEst')), { hours: 2 }) : new Date()
+  );
+  const uosList = useMemo(
+    () =>
+      UosAcesso(
+        uos?.filter((item) => item?.tipo === 'Agências'),
+        cc,
+        isAdmin,
+        meusAmbientes,
+        'id'
+      ),
+    [cc, isAdmin, meusAmbientes, uos]
+  );
   const perfilId = cc?.perfil_id;
+  const [uo, setUo] = useState(null);
+
   useEffect(() => {
-    if (cc) {
-      setUo({ id: cc?.uo?.id, label: cc?.uo?.label });
+    if (!uo && uosList && (localStorage.getItem('uoEst') || cc?.uo?.id)) {
+      setUo(
+        uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoEst'))) ||
+          uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
+          null
+      );
     }
-  }, [cc]);
+  }, [uosList, uo, cc?.uo?.id]);
 
   const tabsList = [
     { value: 'Resumo', component: <Totais /> },
@@ -80,7 +101,7 @@ export default function EstatisticaCredito() {
   ];
 
   const handleChangeTab = async (event, newValue) => {
-    setCurrentTab(newValue);
+    setItemValue(newValue, setCurrentTab, 'tabEst');
   };
 
   useEffect(() => {
@@ -92,18 +113,16 @@ export default function EstatisticaCredito() {
   }, [dispatch, currentTab, perfilId, data, uo, mail]);
 
   useEffect(() => {
-    const datai =
-      dataRange[0] && dataRange[0]?.toString() !== 'Invalid Date' ? format(dataRange[0], 'yyyy-MM-dd') : null;
-    const dataf =
-      dataRange[1] && dataRange[1]?.toString() !== 'Invalid Date' ? format(dataRange[1], 'yyyy-MM-dd') : null;
-    if (mail && uo?.id && datai && currentTab === 'Resumo') {
+    const dataI = dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '';
+    const dataF = dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '';
+    if (mail && uo?.id && dataI && currentTab === 'Resumo') {
       if (uo?.id === -1 || uo?.id === -2 || uo?.id === -3) {
-        dispatch(getIndicadores('resumoEstCredCaixa', { mail, uoID: uo?.label, datai, dataf }));
+        dispatch(getIndicadores('resumoEstCredCaixa', { mail, dataI, dataF }));
       } else {
-        dispatch(getIndicadores('resumoEstCredAg', { mail, uoID: uo?.id, datai, dataf }));
+        dispatch(getIndicadores('resumoEstCredAg', { mail, uoID: uo?.id, dataI, dataF }));
       }
     }
-  }, [dispatch, currentTab, dataRange, uo, mail]);
+  }, [dispatch, currentTab, datai, dataf, uo, mail]);
 
   return (
     <>
@@ -120,52 +139,56 @@ export default function EstatisticaCredito() {
               disableClearable
               sx={{ minWidth: 200 }}
               getOptionLabel={(option) => option?.label}
-              onChange={(event, newValue) => setUo(newValue)}
-              options={[
-                { id: -1, label: 'Caixa' },
-                { id: -2, label: 'DCN' },
-                { id: -3, label: 'DCS' },
-                ...uos?.filter((item) => item?.tipo === 'Agências')?.map((row) => ({ id: row?.id, label: row?.label })),
-              ]}
               isOptionEqualToValue={(option, value) => option?.id === value?.id}
               renderInput={(params) => <TextField {...params} fullWidth label="Agência/U.O" />}
+              options={[{ id: -1, label: 'Caixa' }, { id: -2, label: 'DCN' }, { id: -3, label: 'DCS' }, ...uosList]}
+              onChange={(event, newValue) => setItemValue(newValue, setUo, 'tuoEst')}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
               {currentTab === 'Resumo' ? (
-                <DateRangePicker
-                  disableFuture
-                  value={[dataRange[0], dataRange[1]]}
-                  slots={{ field: SingleInputDateRangeField }}
-                  onChange={(newValue) => setDataRange([newValue?.[0], newValue?.[1]])}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 220 } } }}
-                />
+                <>
+                  <DatePicker
+                    value={datai}
+                    label="Data inicial"
+                    slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
+                    onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIEst', setDataf, 'dataFEst')}
+                  />
+                  <DatePicker
+                    value={dataf}
+                    minDate={datai}
+                    disabled={!datai}
+                    label="Data final"
+                    slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
+                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFEst', '', '')}
+                  />
+                </>
               ) : (
                 <DatePicker
                   label="Data"
                   value={data}
                   disableFuture
                   views={['month', 'year']}
-                  onChange={(newValue) => setData(newValue)}
+                  onChange={(newValue) => setDataUtil(newValue, setData, 'dataEst', '', '')}
                   slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 180 } } }}
                 />
               )}
-              {((uo?.label !== 'Caixa' && uo?.label !== 'DCN' && uo?.label !== 'DCS') || currentTab === 'Resumo') && (
-                <Stack>
-                  <ReactHTMLTableToExcel
-                    id="table-xls-button-tipo"
-                    table="tabel-estatistica-credito"
-                    className="MuiButtonBase-root-MuiButton-root"
-                    sheet={`${currentTab}`}
-                    filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
-                    children={
-                      <Button variant="contained" startIcon={getFileThumb('file.xlsx')}>
-                        Exportar
-                      </Button>
-                    }
-                  />
-                </Stack>
-              )}
             </Stack>
+            {((uo?.label !== 'Caixa' && uo?.label !== 'DCN' && uo?.label !== 'DCS') || currentTab === 'Resumo') && (
+              <Stack>
+                <ReactHTMLTableToExcel
+                  id="table-xls-button-tipo"
+                  table="tabel-estatistica-credito"
+                  className="MuiButtonBase-root-MuiButton-root"
+                  sheet={`${currentTab}`}
+                  filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
+                  children={
+                    <Button variant="contained" startIcon={getFileThumb('file.xlsx')}>
+                      Exportar
+                    </Button>
+                  }
+                />
+              </Stack>
+            )}
           </Stack>
         }
       />

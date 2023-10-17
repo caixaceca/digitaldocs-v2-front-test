@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 // @mui
-import { Card, Stack, Container, TextField, Skeleton, Typography, Autocomplete, CardContent } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
+import TextField from '@mui/material/TextField';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
+import CardContent from '@mui/material/CardContent';
 // utils
 import { fYear } from '../utils/formatTime';
 // redux

@@ -2,19 +2,17 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // @mui
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import Badge from '@mui/material/Badge';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
-import {
-  Box,
-  List,
-  Badge,
-  Avatar,
-  Tooltip,
-  Divider,
-  Typography,
-  ListItemText,
-  ListItemAvatar,
-  ListItemButton,
-} from '@mui/material';
+import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 import DoneAllOutlinedIcon from '@mui/icons-material/DoneAllOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';

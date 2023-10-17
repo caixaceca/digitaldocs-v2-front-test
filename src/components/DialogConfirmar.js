@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types';
 // @mui
 import { LoadingButton } from '@mui/lab';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContentText from '@mui/material/DialogContentText';
 
 // ----------------------------------------------------------------------
 

@@ -2,8 +2,15 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import CircleIcon from '@mui/icons-material/Circle';
-import { Card, Stack, Table, TableRow, TableBody, TableCell, Typography, TableContainer } from '@mui/material';
+import TableContainer from '@mui/material/TableContainer';
 // utils
 import { estadoInicial } from '../../utils/validarAcesso';
 import { fToNow, ptDateTime } from '../../utils/formatTime';

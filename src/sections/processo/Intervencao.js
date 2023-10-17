@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
-import { Fab, Tooltip } from '@mui/material';
+import Fab from '@mui/material/Fab';
+import Tooltip from '@mui/material/Tooltip';
 // utils
 import { podeArquivar, caixaPrincipal, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
 // redux

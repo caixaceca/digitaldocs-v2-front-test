@@ -3,22 +3,20 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { PDFViewer } from '@react-pdf/renderer';
 // @mui
-import {
-  Box,
-  Fab,
-  Stack,
-  Paper,
-  Dialog,
-  Button,
-  Drawer,
-  Tooltip,
-  Divider,
-  IconButton,
-  Typography,
-  DialogTitle,
-  DialogActions,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
+import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import Drawer from '@mui/material/Drawer';
+import Dialog from '@mui/material/Dialog';
+import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
 import CloseIcon from '@mui/icons-material/Close';
+import DialogActions from '@mui/material/DialogActions';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';

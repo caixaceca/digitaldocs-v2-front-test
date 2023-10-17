@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Viewer } from '@react-pdf-viewer/core';
-// import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
 import { useTheme } from '@mui/material/styles';
@@ -28,7 +27,6 @@ export function PdfPreview({ url }) {
         localization={pt}
         theme={{ theme: theme.palette.mode }}
         plugins={[defaultLayoutPluginInstance]}
-        // defaultScale={SpecialZoomLevel.PageWidth}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 // components
 import { IconButtonAnimate } from '../../components/animate';
 

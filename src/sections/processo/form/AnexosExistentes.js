@@ -2,7 +2,12 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 // @mui
-import { Fab, List, ListItem, Typography, ListItemIcon, ListItemText } from '@mui/material';
+import Fab from '@mui/material/Fab';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Typography from '@mui/material/Typography';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 // utils
 import { getFileThumb } from '../../../utils/getFileFormat';
 // redux

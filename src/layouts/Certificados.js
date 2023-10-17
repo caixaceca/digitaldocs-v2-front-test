@@ -1,5 +1,5 @@
 // @mui
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 // redux
 import { useSelector } from '../redux/store';
 // components

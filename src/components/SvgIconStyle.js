@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+// @mui
+import Box from '@mui/material/Box';
 
 // ----------------------------------------------------------------------
 

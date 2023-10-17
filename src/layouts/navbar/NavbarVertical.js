@@ -2,8 +2,12 @@ import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { useLocation, NavLink as RouterLink } from 'react-router-dom';
 // @mui
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import Drawer from '@mui/material/Drawer';
+import Typography from '@mui/material/Typography';
 import { styled, useTheme } from '@mui/material/styles';
-import { Box, Stack, Avatar, Drawer, Typography } from '@mui/material';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 import useCollapseDrawer from '../../hooks/useCollapseDrawer';
@@ -88,7 +92,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
                 component={RouterLink}
                 sx={{ color: (theme) => theme.palette.success.main, textDecoration: 'none', textAlign: 'center' }}
               >
-                <Typography variant='h5'>IntraNet - Teste</Typography>
+                <Typography variant="h5">IntraNet - Teste</Typography>
                 <Typography variant="subtitle2" sx={{ mt: -0.5 }}>
                   DIGITALDOCS
                 </Typography>

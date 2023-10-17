@@ -1,7 +1,9 @@
 import { memo } from 'react';
 // @mui
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
-import { Container, Avatar, AppBar } from '@mui/material';
+import Container from '@mui/material/Container';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 // utils
 import { BASEURL } from '../../utils/axios';

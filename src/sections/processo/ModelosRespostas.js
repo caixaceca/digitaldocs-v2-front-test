@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
 import { Packer, Header, Footer, TextRun, Document, ImageRun, Paragraph, PageNumber, AlignmentType } from 'docx';
 // @mui
-import { Grid, Button, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 // utils
 import { fDate } from '../../utils/formatTime';
 import { fCurrency } from '../../utils/formatNumber';

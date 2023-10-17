@@ -1,21 +1,19 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import {
-  Fab,
-  Box,
-  Stack,
-  Drawer,
-  Divider,
-  Tooltip,
-  Accordion,
-  Typography,
-  IconButton,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+import Fab from '@mui/material/Fab';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Drawer from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
+import Accordion from '@mui/material/Accordion';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import HistoryIcon from '@mui/icons-material/History';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { getFile } from '../../utils/getFile';

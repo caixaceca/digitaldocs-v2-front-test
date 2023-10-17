@@ -1,4 +1,3 @@
-import { LicenseInfo } from '@mui/x-license-pro';
 // i18n
 import './locales/i18n';
 
@@ -54,10 +53,6 @@ import reportWebVitals from './reportWebVitals';
 
 const msalInstance = new PublicClientApplication(msalConfig);
 const root = ReactDOM.createRoot(document.getElementById('root'));
-
-LicenseInfo.setLicenseKey(
-  '61628ce74db2c1b62783a6d438593bc5Tz1NVUktRG9jLEU9MTY4MzQ0NzgyMTI4NCxTPXByZW1pdW0sTE09c3Vic2NyaXB0aW9uLEtWPTI='
-);
 
 root.render(
   <MsalProvider instance={msalInstance}>

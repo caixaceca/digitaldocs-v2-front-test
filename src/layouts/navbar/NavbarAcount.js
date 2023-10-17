@@ -2,7 +2,8 @@ import { useMsal } from '@azure/msal-react';
 import PropTypes from 'prop-types';
 // @mui
 import { styled } from '@mui/material/styles';
-import { Box, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 // utils
 import { getFile } from '../../utils/getFile';
 // redux

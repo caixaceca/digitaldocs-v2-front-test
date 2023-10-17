@@ -1,26 +1,24 @@
-import { format } from 'date-fns';
+import { add, format } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
-import {
-  Fab,
-  Card,
-  Stack,
-  Table,
-  Tooltip,
-  TableRow,
-  TextField,
-  TableBody,
-  TableCell,
-  Autocomplete,
-  TableContainer,
-} from '@mui/material';
+import Fab from '@mui/material/Fab';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Tooltip from '@mui/material/Tooltip';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import TableContainer from '@mui/material/TableContainer';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 // utils
 import { ptDate } from '../../utils/formatTime';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { normalizeText } from '../../utils/normalizeText';
+import { normalizeText, setItemValue, dataValido } from '../../utils/normalizeText';
 // hooks
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -65,10 +63,12 @@ export default function TableCartoes() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const [data, setData] = useState([
-    localStorage.getItem('dataIC') || format(new Date(), 'yyyy-MM-dd'),
-    localStorage.getItem('dataFC') || format(new Date(), 'yyyy-MM-dd'),
-  ]);
+  const [datai, setDatai] = useState(
+    localStorage.getItem('dataIC') ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 }) : new Date()
+  );
+  const [dataf, setDataf] = useState(
+    localStorage.getItem('dataFC') ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 }) : new Date()
+  );
   const { cartoes, meusAmbientes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
     (state) => state.digitaldocs
   );
@@ -102,8 +102,15 @@ export default function TableCartoes() {
       enqueueSnackbar('Receção dos cartões confirmada com sucesso', { variant: 'success' });
       onClose();
       onClose1();
-      if (mail && fase && data && ((fase === 'Receção' && uo?.id) || fase === 'Emissão')) {
-        dispatch(getAll(fase, { mail, uoId: uo?.id, dataInicio: data[0], dataFim: data[1] }));
+      if (mail && fase && datai && ((fase === 'Receção' && uo?.id) || fase === 'Emissão')) {
+        dispatch(
+          getAll(fase, {
+            mail,
+            uoId: uo?.id,
+            dataFim: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+            dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+          })
+        );
       }
     } else if (done === 'balcao alterado') {
       enqueueSnackbar('Balcão de entrega alterado com sucesso', { variant: 'success' });
@@ -129,22 +136,41 @@ export default function TableCartoes() {
   }, [uosList, cc?.uo?.balcao]);
 
   useEffect(() => {
-    if (!localStorage.getItem('fase')) {
+    if (!fase && !localStorage.getItem('fase')) {
       const uoSel = uos?.find((row) => Number(row?.balcao) === Number(uo?.id));
       setFase(uoSel?.tipo === 'Agências' ? 'Receção' : 'Emissão');
     }
-  }, [uo?.id, uos]);
+  }, [uo?.id, fase, uos]);
 
   useEffect(() => {
-    if (mail && fase && data && ((fase === 'Receção' && uo?.id) || fase === 'Emissão')) {
-      dispatch(getAll(fase, { mail, uoId: uo?.id, dataInicio: data[0], dataFim: data[1] }));
+    if (mail && fase && datai && fase === 'Emissão') {
+      dispatch(
+        getAll(fase, {
+          mail,
+          dataFim: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+          dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+        })
+      );
     }
-  }, [dispatch, uo?.id, data, fase, mail]);
+  }, [dispatch, datai, dataf, fase, mail]);
+
+  useEffect(() => {
+    if (mail && fase && datai && fase === 'Receção' && uo?.id) {
+      dispatch(
+        getAll(fase, {
+          mail,
+          uoId: uo?.id,
+          dataFim: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+          dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+        })
+      );
+    }
+  }, [dispatch, uo?.id, datai, dataf, fase, mail]);
 
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, fase, data, balcaoEntrega]);
+  }, [filter, fase, datai, dataf, balcaoEntrega]);
 
   const dados = [];
   const balcoes = [];
@@ -162,8 +188,6 @@ export default function TableCartoes() {
       tiposCartao.push(row?.tipo);
     }
   });
-
-  console.log('teste');
 
   const dataFiltered = applySortFilter({
     dados,
@@ -200,10 +224,12 @@ export default function TableCartoes() {
               cartoes
               fase={fase}
               setUo={setUo}
+              datai={datai}
+              dataf={dataf}
               filter={filter}
-              dataRange={data}
-              setData={setData}
               uosList={uosList}
+              setDatai={setDatai}
+              setDataf={setDataf}
               setFilter={setFilter}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
@@ -215,10 +241,7 @@ export default function TableCartoes() {
                     disableClearable
                     value={fase || null}
                     options={['Emissão', 'Receção']}
-                    onChange={(event, newValue) => {
-                      changeFase(newValue);
-                      localStorage.setItem('fase', newValue || '');
-                    }}
+                    onChange={(event, newValue) => setItemValue(newValue, changeFase, 'fase')}
                     renderInput={(params) => <TextField {...params} label="Fase" sx={{ width: 120 }} />}
                   />
                 </Stack>
@@ -251,7 +274,7 @@ export default function TableCartoes() {
           setFilter={setFilter}
           tipoCartao={tipoCartao}
           tiposCartao={tiposCartao}
-          seTipoCartao={setTipoCartao}
+          setTipoCartao={setTipoCartao}
           balcaoEntrega={balcaoEntrega}
           setBalcaoEntrega={setBalcaoEntrega}
         />

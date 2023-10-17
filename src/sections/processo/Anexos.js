@@ -1,7 +1,11 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import { Grid, Stack, Button, Divider, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 // utils
 import { getFileFormat, getFileThumb, b64toBlob } from '../../utils/getFileFormat';
 // redux

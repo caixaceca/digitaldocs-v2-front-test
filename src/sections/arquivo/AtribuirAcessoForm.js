@@ -6,7 +6,9 @@ import { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import { Grid, DialogTitle, DialogContent } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';

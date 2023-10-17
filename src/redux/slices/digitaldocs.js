@@ -4,6 +4,8 @@ import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
+// hooks
+import { getComparator, applySort } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
@@ -36,7 +38,6 @@ const initialState = {
   meuAmbiente: null,
   selectedItem: null,
   anexoParecer: null,
-  estadoFilter: null,
   itemSelected: null,
   selectedAnexoId: null,
   indicadoresArquivo: null,
@@ -142,6 +143,9 @@ const slice = createSlice({
           break;
         case 'processos':
           state.processos = [];
+          break;
+        case 'entradas':
+          state.entradas = [];
           break;
         case 'pesquisa':
           state.pesquisa = [];
@@ -250,7 +254,7 @@ const slice = createSlice({
     },
 
     getFluxosSuccess(state, action) {
-      state.fluxos = action.payload;
+      state.fluxos = applySort(action.payload, getComparator('asc', 'assunto'));
     },
 
     getEstadosPerfilSuccess(state, action) {
@@ -301,7 +305,7 @@ const slice = createSlice({
     },
 
     getEstadosSuccess(state, action) {
-      state.estados = action.payload;
+      state.estados = applySort(action.payload, getComparator('asc', 'nome'));
     },
 
     getEstadoSuccess(state, action) {
@@ -325,8 +329,6 @@ const slice = createSlice({
     getMeusAmbientesSuccess(state, action) {
       let grpGerente = false;
       state.meusAmbientes = action.payload;
-      const firstAmbiente = action.payload?.find((row) => row?.nome?.includes('Gerência') || row?.id > 0);
-      state.estadoFilter = firstAmbiente ? { id: firstAmbiente?.id, label: firstAmbiente?.nome } : null;
       action.payload?.forEach((row, index) => {
         if (row?.nome?.indexOf('Gerência') !== -1) {
           grpGerente = index;
@@ -608,10 +610,6 @@ const slice = createSlice({
       state.isOpenParecer = true;
     },
 
-    setEstadoFilter(state, action) {
-      state.estadoFilter = action.payload;
-    },
-
     closeParecer(state) {
       state.isOpenParecer = false;
       state.itemSelected = null;
@@ -640,7 +638,6 @@ export const {
   selectParecer,
   changeMeuFluxo,
   closeModalAnexo,
-  setEstadoFilter,
   changeMeuAmbiente,
 } = slice.actions;
 
@@ -908,8 +905,11 @@ export function getAll(item, params) {
         }
         case 'entradas': {
           dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('entradas'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${params?.perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`,
+            `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${params?.perfilId}?diai=${
+              params?.dataInicio
+            }${params?.dataFim ? `&diaf=${params?.dataFim}` : ''}`,
             options
           );
           dispatch(slice.actions.getEntradasSuccess(response.data.objeto));
@@ -955,7 +955,9 @@ export function getAll(item, params) {
         case 'Emissão': {
           dispatch(slice.actions.resetItem('cartoes'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}&data_final=${params?.dataFim}`,
+            `${BASEURLDD}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
+              params?.dataFim ? `&data_final=${params?.dataFim}` : ''
+            }`,
             options
           );
           dispatch(slice.actions.getCartoesSuccess(response.data));
@@ -964,7 +966,9 @@ export function getAll(item, params) {
         case 'Receção': {
           dispatch(slice.actions.resetItem('cartoes'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}&data_final=${params?.dataFim}`,
+            `${BASEURLDD}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
+              params?.dataFim ? `&data_final=${params?.dataFim}` : ''
+            }`,
             options
           );
           dispatch(slice.actions.getCartoesSuccess(response.data));
@@ -973,7 +977,9 @@ export function getAll(item, params) {
         case 'con': {
           dispatch(slice.actions.resetItem('con'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/export/con?data_inicio=${params?.dataInicio}&data_final=${params?.dataFim}`,
+            `${BASEURLDD}/v1/indicadores/export/con?data_inicio=${params?.dataInicio}${
+              params?.dataFim ? `&data_final=${params?.dataFim}` : ''
+            }`,
             options
           );
           dispatch(slice.actions.getConSuccess(response.data));
@@ -1007,65 +1013,75 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'criacao': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
-              params?.uo ? `&uoID=${params?.uo}` : ''
-            }${params?.perfil ? `&perfilID1=${params?.perfil}` : ''}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          if (params?.perfilId) {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
+                params?.uo ? `&uoID=${params?.uo}` : ''
+              }${params?.perfil ? `&perfilID1=${params?.perfil}` : ''}`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          }
           break;
         }
         case 'entradas': {
-          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-            params?.dataf ? `dataf=${params?.dataf}&` : ''
-          }`;
-          const response = await axios.get(
-            params?.datai || params?.dataf
-              ? `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}?${query.substr(0, query.length - 1)}`
-              : `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          if (params?.uo) {
+            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+              params?.dataf ? `dataf=${params?.dataf}&` : ''
+            }`;
+            const response = await axios.get(
+              params?.datai || params?.dataf
+                ? `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}?${query.substr(0, query.length - 1)}`
+                : `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          }
           break;
         }
         case 'trabalhados': {
-          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-            params?.dataf ? `dataf=${params?.dataf}&` : ''
-          }`;
-          const response = await axios.get(
-            params?.datai || params?.dataf
-              ? `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}?${query.substr(0, query.length - 1)}`
-              : `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          if (params?.estado) {
+            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+              params?.dataf ? `dataf=${params?.dataf}&` : ''
+            }`;
+            const response = await axios.get(
+              params?.datai || params?.dataf
+                ? `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}?${query.substr(0, query.length - 1)}`
+                : `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          }
           break;
         }
         case 'devolucoesInternas': {
-          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-            params?.dataf ? `dataf=${params?.dataf}&` : ''
-          }`;
-          const response = await axios.get(
-            params?.datai || params?.dataf
-              ? `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}?${query.substr(0, query.length - 1)}`
-              : `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          if (params?.estado) {
+            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+              params?.dataf ? `dataf=${params?.dataf}&` : ''
+            }`;
+            const response = await axios.get(
+              params?.datai || params?.dataf
+                ? `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}?${query.substr(0, query.length - 1)}`
+                : `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          }
           break;
         }
         case 'devolucoesExternas': {
-          const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-            params?.dataf ? `dataf=${params?.dataf}&` : ''
-          }`;
-          const response = await axios.get(
-            params?.datai || params?.dataf
-              ? `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}?${query.substr(0, query.length - 1)}`
-              : `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          if (params?.estado) {
+            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+              params?.dataf ? `dataf=${params?.dataf}&` : ''
+            }`;
+            const response = await axios.get(
+              params?.datai || params?.dataf
+                ? `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}?${query.substr(0, query.length - 1)}`
+                : `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          }
           break;
         }
         case 'volume': {
@@ -1090,14 +1106,16 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'execucao': {
-          const query = `${params?.estado ? `estadoIDFilter=${params?.estado}&` : ''}${
-            params?.fluxo ? `fluxoIDFilter=${params?.fluxo}&` : ''
-          }${params?.perfil ? `perfilIDFilter=${params?.perfil}&` : ''}`;
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query.substr(0, query.length - 1)}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          if (params?.estado || params?.perfil || params?.fluxo) {
+            const query = `${params?.estado ? `estadoIDFilter=${params?.estado}&` : ''}${
+              params?.fluxo ? `fluxoIDFilter=${params?.fluxo}&` : ''
+            }${params?.perfil ? `perfilIDFilter=${params?.perfil}&` : ''}`;
+            const response = await axios.get(
+              `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query.substr(0, query.length - 1)}`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          }
           break;
         }
         case 'duracao': {
@@ -1140,7 +1158,7 @@ export function getIndicadores(item, params) {
         case 'resumoEstCredCaixa': {
           dispatch(slice.actions.resetItem('estatisticaCredito'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo?data_inicio=${params?.datai}&data_final=${params?.dataf}`,
+            `${BASEURLDD}/v1/indicadores/resumo?data_inicio=${params?.dataI}&data_final=${params?.dataF}`,
             options
           );
           dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
@@ -1149,8 +1167,8 @@ export function getIndicadores(item, params) {
         case 'resumoEstCredAg': {
           dispatch(slice.actions.resetItem('estatisticaCredito'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}?data_inicio=${params?.datai}${
-              params?.dataf ? `&data_final=${params?.dataf}` : ''
+            `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}?data_inicio=${params?.dataI}${
+              params?.dataf ? `&data_final=${params?.dataF}` : ''
             }`,
             options
           );

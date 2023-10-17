@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
 import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
-import { DateRangePicker } from '@mui/x-date-pickers-pro';
-import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
-import { Card, Stack, Table, Button, TableRow, TableCell, TableBody, TableHead, TableContainer } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { format } from 'date-fns';
+import { add, format } from 'date-fns';
 import { getFileThumb } from '../../utils/getFileFormat';
-import { normalizeText } from '../../utils/normalizeText';
+import { normalizeText, dataValido, setDataUtil } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -43,7 +50,14 @@ export default function TableCON() {
   const { mail } = useSelector((state) => state.intranet);
   const { con, isLoading } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterCon') || '');
-  const [data, setData] = useState([new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()]);
+  const [datai, setDatai] = useState(
+    localStorage.getItem('dataICon')
+      ? add(new Date(localStorage.getItem('dataICon')), { hours: 2 })
+      : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  );
+  const [dataf, setDataf] = useState(
+    localStorage.getItem('dataFCon') ? add(new Date(localStorage.getItem('dataFCon')), { hours: 2 }) : new Date()
+  );
 
   const {
     page,
@@ -61,10 +75,14 @@ export default function TableCON() {
   useEffect(() => {
     if (mail) {
       dispatch(
-        getAll('con', { mail, dataInicio: format(data[0], 'yyyy-MM-dd'), dataFim: format(data[1], 'yyyy-MM-dd') })
+        getAll('con', {
+          mail,
+          dataFim: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+          dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+        })
       );
     }
-  }, [dispatch, mail, data]);
+  }, [dispatch, mail, datai, dataf]);
 
   useEffect(() => {
     setPage(0);
@@ -81,12 +99,19 @@ export default function TableCON() {
         links={[{ name: '' }]}
         action={
           <Stack direction="row" alignItems="center" spacing={1}>
-            <DateRangePicker
-              disableFuture
-              value={[data[0], data[1]]}
-              slots={{ field: SingleInputDateRangeField }}
-              onChange={(newValue) => setData([newValue?.[0], newValue?.[1]])}
-              slotProps={{ textField: { fullWidth: true, size: 'small', label: 'Data', sx: { minWidth: 220 } } }}
+            <DatePicker
+              value={datai}
+              label="Data inicial"
+              slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
+              onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataICon', setDataf, 'dataFCon')}
+            />
+            <DatePicker
+              value={dataf}
+              minDate={datai}
+              disabled={!datai}
+              label="Data final"
+              slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
+              onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFCon', '', '')}
             />
             {con?.length > 0 && (
               <Stack>
@@ -95,10 +120,9 @@ export default function TableCON() {
                   id="table-xls-button"
                   className="MuiButtonBase-root-MuiButton-root"
                   sheet="Comunicação Operação Numerário"
-                  filename={`Comunicação Operação Numerário ${format(data[0], 'yyyy-MM-dd')} - ${format(
-                    data[1],
-                    'yyyy-MM-dd'
-                  )}`}
+                  filename={`Comunicação Operação Numerário ${dataValido(datai) ? format(datai, 'yyyy-MM-dd') : ''} - ${
+                    dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : ''
+                  }`}
                   children={
                     <Button variant="soft" startIcon={getFileThumb('file.xlsx')}>
                       Exportar
@@ -112,7 +136,7 @@ export default function TableCON() {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple filter={filter} setFilter={setFilter} from="con" />
+        <SearchToolbarSimple item="filterCon" filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 // @mui
+import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
-import { Box } from '@mui/material';
 // hooks
 import useSettings from '../hooks/useSettings';
 import useResponsive from '../hooks/useResponsive';

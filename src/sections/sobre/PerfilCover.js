@@ -1,7 +1,10 @@
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
+import Badge from '@mui/material/Badge';
+import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
-import { Box, Badge, Typography, Skeleton } from '@mui/material';
 // utils
 import { getFile } from '../../utils/getFile';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';

@@ -3,7 +3,12 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
-import { Card, Table, TableRow, TableCell, TableBody, TableContainer } from '@mui/material';
+import Card from '@mui/material/Card';
+import Table from '@mui/material/Table';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 // hooks
@@ -162,7 +167,7 @@ export default function TableAcessos({ tab }) {
       />
       <RoleBasedGuard hasContent roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
         <Card sx={{ p: 1 }}>
-          <SearchToolbarSimple filter={filter} setFilter={setFilter} from="acesso" />
+          <SearchToolbarSimple item="filterAcesso" filter={filter} setFilter={setFilter} />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>

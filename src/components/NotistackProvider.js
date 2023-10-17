@@ -2,7 +2,8 @@ import { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { SnackbarProvider, MaterialDesignContent } from 'notistack';
 // @mui
-import { Box, Collapse } from '@mui/material';
+import Box from '@mui/material/Box';
+import Collapse from '@mui/material/Collapse';
 import InfoIcon from '@mui/icons-material/Info';
 import { alpha, styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';

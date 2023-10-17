@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Stack, Typography, CircularProgress } from '@mui/material';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 // utils
 import { fNumber, fPercent } from '../../utils/formatNumber';
 // components

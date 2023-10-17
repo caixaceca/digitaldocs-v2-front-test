@@ -1,44 +1,41 @@
 import { sumBy } from 'lodash';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
-import {
-  Box,
-  Tab,
-  Tabs,
-  Grid,
-  Card,
-  Radio,
-  Stack,
-  Table,
-  Paper,
-  Drawer,
-  Dialog,
-  Button,
-  Tooltip,
-  Divider,
-  TableRow,
-  TableCell,
-  TextField,
-  TableBody,
-  TableHead,
-  CardHeader,
-  RadioGroup,
-  Typography,
-  IconButton,
-  CardContent,
-  DialogTitle,
-  Autocomplete,
-  DialogContent,
-  TableContainer,
-  LinearProgress,
-  FormControlLabel,
-} from '@mui/material';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import Radio from '@mui/material/Radio';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Paper from '@mui/material/Paper';
+import Drawer from '@mui/material/Drawer';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
+import TableRow from '@mui/material/TableRow';
 import { useTheme } from '@mui/material/styles';
+import TableCell from '@mui/material/TableCell';
+import TextField from '@mui/material/TextField';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
+import CardHeader from '@mui/material/CardHeader';
+import RadioGroup from '@mui/material/RadioGroup';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Autocomplete from '@mui/material/Autocomplete';
+import DialogContent from '@mui/material/DialogContent';
+import TableContainer from '@mui/material/TableContainer';
+import LinearProgress from '@mui/material/LinearProgress';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import ClearAllOutlinedIcon from '@mui/icons-material/ClearAllOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 // utils
@@ -46,13 +43,14 @@ import { format, add } from 'date-fns';
 import { getFile } from '../../utils/getFile';
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import { fMShortYear, fYear, fMonthYear, ptDate } from '../../utils/formatTime';
+import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText';
 import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
 import { fNumber, fPercent, fNumber2, fData, converterSegundos } from '../../utils/formatNumber';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
-import { dispatch, useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores, resetItem, setEstadoFilter } from '../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getIndicadores } from '../../redux/slices/digitaldocs';
 // components
 import Panel from '../../components/Panel';
 import Image from '../../components/Image';
@@ -272,20 +270,9 @@ export function FileSystem() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function TotalProcessos() {
-  const [top, setTop] = useState('Todos');
-  const [vista, setVista] = useState('mensal');
-  const { cc } = useSelector((state) => state.intranet);
-  const [currentTab, setCurrentTab] = useState('criacao');
-  const [agrupamento, setAgrupamento] = useState('Unidade orgânica');
-  const { meusAmbientes, estadoFilter } = useSelector((state) => state.digitaldocs);
-  const [perfil, setPerfil] = useState(cc?.perfil ? { id: cc?.perfil?.id, label: cc?.perfil?.displayName } : null);
-  const firstAmbiente = meusAmbientes?.find((row) => row?.nome?.includes('Gerência') || row?.id > 0);
-  useEffect(() => {
-    if (!estadoFilter && firstAmbiente) {
-      dispatch(setEstadoFilter({ id: firstAmbiente?.id, label: firstAmbiente?.nome }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, firstAmbiente, estadoFilter]);
+  const [top, setTop] = useState(localStorage.getItem('top') || 'Todos');
+  const [vista, setVista] = useState(localStorage.getItem('vista') || 'mensal');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabTotal') || 'criacao');
 
   const tabsList = [
     { value: 'criacao', label: 'Criação', component: <Criacao vista={vista} /> },
@@ -293,34 +280,21 @@ export function TotalProcessos() {
     { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados /> },
     { value: 'devolucoesInternas', label: 'Devoluções internas', component: <DevolvidosTipos /> },
     { value: 'devolucoesExternas', label: 'Devoluções externas', component: <DevolvidosTipos /> },
-    { value: 'volume', label: 'Volume', component: <Volume agrupamento={agrupamento} topLabel={top} /> },
+    { value: 'volume', label: 'Volume', component: <Volume top={top} /> },
     { value: 'tipos', label: 'Fluxos/Assuntos', component: <DevolvidosTipos /> },
   ];
 
   const handleChangeTab = async (event, newValue) => {
-    dispatch(resetItem('indicadores'));
-    setCurrentTab(newValue);
+    setItemValue(newValue, setCurrentTab, 'tabTotal');
   };
 
   return (
     <>
       <HeaderBreadcrumbs
-        heading={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
+        action={<Filtrar top={top} vista={vista} setTop={setTop} tab={currentTab} setVista={setVista} />}
         links={[{ name: '' }]}
-        action={
-          <Filtrar
-            top={top}
-            vista={vista}
-            perfil={perfil}
-            setTop={setTop}
-            tab={currentTab}
-            setVista={setVista}
-            setPerfil={setPerfil}
-            agrupamento={agrupamento}
-            setAgrupamento={setAgrupamento}
-          />
-        }
         sx={{ color: 'text.secondary', px: 1 }}
+        heading={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
       />
       <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
       {tabsList.map((tab) => {
@@ -336,17 +310,21 @@ export function TotalProcessos() {
 Criacao.propTypes = { vista: PropTypes.string };
 
 export function Criacao({ vista }) {
-  const [currentTab, setCurrentTab] = useState('grafico');
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
   const isNotFound = !indicadores.length;
   const total = sumBy(indicadores, 'total');
-  const series = [{ name: 'Nº de processos', data: indicadores?.map((row) => row?.total) }];
+  const series = useMemo(
+    () => [{ name: 'Nº de processos', data: indicadores?.map((row) => row?.total) }],
+    [indicadores]
+  );
   const chartOptions = useChart({
     grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
     xaxis: {
-      categories: indicadores?.map((row) =>
-        vista === 'anual' ? fYear(row?.criado_em) : vista === 'mensal' && fMShortYear(row?.criado_em)
-      ),
+      categories:
+        vista === 'anual'
+          ? indicadores?.map((row) => row?.criado_em && fMShortYear(row?.criado_em))
+          : indicadores?.map((row) => row?.criado_em && fYear(row?.criado_em)),
     },
     yaxis: { labels: { formatter: (value) => fNumber(value) }, title: { text: 'Nº de processos' } },
     tooltip: { y: { formatter: (value) => fNumber(value) } },
@@ -388,18 +366,27 @@ export function Criacao({ vista }) {
                         title={row?.label}
                         total={row?.valor}
                         label={
-                          (row?.label !== 'Total' && row?.label !== 'Média' && vista === 'anual' && fYear(row?.desc)) ||
-                          (row?.label !== 'Total' &&
+                          (
+                            row?.desc &&
+                            row?.label !== 'Total' &&
+                            row?.label !== 'Média' &&
+                            vista === 'anual' &&
+                            fYear(row?.desc)
+                          )?.toString() ||
+                          (
+                            row?.desc &&
+                            row?.label !== 'Total' &&
                             row?.label !== 'Média' &&
                             vista === 'mensal' &&
-                            fMonthYear(row?.desc)) ||
-                          row?.desc
+                            fMonthYear(row?.desc)
+                          )?.toString() ||
+                          row?.desc?.toString()
                         }
                       />
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'grafico' ? (
+                    {currentTab === 'grafico' && series?.data?.length > 0 ? (
                       <Chart type="area" series={series} options={chartOptions} height={400} />
                     ) : (
                       <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
@@ -627,8 +614,8 @@ export function EntradasTrabalhados() {
 
 export function DevolvidosTipos() {
   const theme = useTheme();
-  const [currentTab, setCurrentTab] = useState('grafico');
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
   const isNotFound = !indicadores.length;
   const total = sumBy(indicadores, 'total');
   const labels = indicadores?.map((row) => row?.assunto);
@@ -649,10 +636,13 @@ export function DevolvidosTipos() {
     },
   ];
 
-  const series = [
-    { name: 'Quantidade', type: 'bar', data: quantidades },
-    { name: 'Percentagem', type: 'line', data: percentagem },
-  ];
+  const series = useMemo(
+    () => [
+      { name: 'Quantidade', type: 'bar', data: quantidades },
+      { name: 'Percentagem', type: 'line', data: percentagem },
+    ],
+    [percentagem, quantidades]
+  );
 
   const chartOptions = useChart({
     ...chartOptionsCommon(theme),
@@ -680,7 +670,7 @@ export function DevolvidosTipos() {
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'grafico' ? (
+                    {currentTab === 'grafico' && series?.[0]?.data?.length > 0 ? (
                       <Chart type="line" series={series} options={chartOptions} height={500} />
                     ) : (
                       <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
@@ -699,10 +689,13 @@ export function DevolvidosTipos() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Execucao() {
-  const [fluxo, setFluxo] = useState(null);
-  const { cc } = useSelector((state) => state.intranet);
-  const { isLoading, indicadores, estadoFilter } = useSelector((state) => state.digitaldocs);
-  const [perfil, setPerfil] = useState(cc?.perfil ? { id: cc?.perfil?.id, label: cc?.perfil?.displayName } : null);
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const { isLoading, indicadores, fluxos, estados } = useSelector((state) => state.digitaldocs);
+  const fluxo = fluxos?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic')));
+  const estado = estados?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic')));
+  const colaborador = colaboradores?.find(
+    (row) => Number(row?.perfil?.id) === Number(localStorage.getItem('colaboradorIndic'))
+  );
   const {
     page,
     order,
@@ -714,57 +707,58 @@ export function Execucao() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'assunto', defaultRowsPerPage: indicadores.length });
+  } = useTable({ defaultOrderBy: 'assunto' });
   const dataFiltered = applySortFilter({ indicadores, comparator: getComparator(order, orderBy) });
+  const totalTempo = sumBy(dataFiltered, 'tempo_execucao') / dataFiltered.length;
   const isNotFound = !dataFiltered.length;
 
   return (
     <>
       <HeaderBreadcrumbs
-        heading="Tempo de execução"
         links={[{ name: '' }]}
-        action={<Filtrar tab="execucao" fluxo={fluxo} perfil={perfil} setFluxo={setFluxo} setPerfil={setPerfil} />}
+        heading="Tempo de execução"
+        action={<Filtrar tab="execucao" />}
         sx={{ color: 'text.secondary', px: 1 }}
       />
 
       <Card sx={{ p: 1 }}>
         {dataFiltered.length > 0 && (
-          <Paper sx={{ p: 3, mt: 1, mb: dataFiltered.length > 1 && 2, bgcolor: 'background.neutral', flexGrow: 1 }}>
-            {perfil?.label ? (
+          <Paper sx={{ p: 2, mb: dataFiltered.length > 1 ? 1 : 0, bgcolor: 'background.neutral', flexGrow: 1 }}>
+            {colaborador ? (
               <Typography sx={{ textAlign: 'center' }}>
-                Em média {perfil?.sexo === 'Masculino' ? 'o' : 'a'}{' '}
+                Em média {colaborador?.sexo === 'Masculino' ? 'o ' : 'a '}
                 <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                  {perfil?.label}
+                  {colaborador?.perfil?.displayName}
                 </Typography>{' '}
                 passa{' '}
                 <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                  {converterSegundos(sumBy(dataFiltered, 'tempo_execucao') / dataFiltered.length)}
+                  {converterSegundos(totalTempo)}
                 </Typography>{' '}
                 trabalhando em um processo{' '}
-                {fluxo?.label && (
+                {fluxo && (
                   <>
                     de{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {fluxo?.label}
+                      {fluxo?.assunto}
                     </Typography>
                   </>
                 )}{' '}
-                {estadoFilter?.label && (
+                {estado && (
                   <>
                     no estado{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {estadoFilter?.label}
+                      {estado?.nome}
                     </Typography>
                   </>
                 )}
               </Typography>
             ) : (
               <>
-                {fluxo?.label ? (
+                {fluxo ? (
                   <Typography sx={{ textAlign: 'center' }}>
                     Em média um processo de{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {fluxo?.label}
+                      {fluxo?.assunto}
                     </Typography>{' '}
                     passa{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
@@ -788,11 +782,11 @@ export function Execucao() {
                       )}
                     </Typography>{' '}
                     sendo executado{' '}
-                    {estadoFilter?.label && (
+                    {estado && (
                       <>
                         no estado{' '}
                         <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                          {estadoFilter?.label}
+                          {estado?.nome}
                         </Typography>
                       </>
                     )}
@@ -801,11 +795,11 @@ export function Execucao() {
                   <Typography sx={{ textAlign: 'center' }}>
                     Em média um processo passa{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {converterSegundos(sumBy(dataFiltered, 'tempo_execucao') / dataFiltered.length)}
+                      {converterSegundos(totalTempo)}
                     </Typography>{' '}
                     sendo executado no estado{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {estadoFilter?.label}
+                      {estado?.nome}
                     </Typography>
                   </Typography>
                 )}
@@ -822,8 +816,8 @@ export function Execucao() {
                   {isLoading && isNotFound ? (
                     <SkeletonTable column={3} row={10} />
                   ) : (
-                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow hover key={row.id}>
+                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                      <TableRow hover key={`execucao_${index}`}>
                         <TableCell>{row.assunto}</TableCell>
                         <TableCell>{row.nome}</TableCell>
                         <TableCell>{converterSegundos(row.tempo_execucao)}</TableCell>
@@ -859,33 +853,34 @@ export function Execucao() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Duracao() {
-  const [fluxo, setFluxo] = useState(null);
-  const [currentTab, setCurrentTab] = useState('grafico');
-  const { cc, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
-  const [perfil, setPerfil] = useState(cc?.perfil ? { id: cc?.perfil?.id, label: cc?.perfil?.displayName } : null);
-  const duracaoByItem = [];
-  indicadores?.forEach((row) => {
-    const uo = uos?.find((uo) => uo.id === row?.uo_origem_id);
-    duracaoByItem.push({ dias: row?.dmedh / 24, label: uo?.label || row?.uo_origem_id });
-  });
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
+  const duracaoByItem = useMemo(() => duracaoP(indicadores, uos), [indicadores, uos]);
   const isNotFound = !duracaoByItem.length;
 
-  const resumo = [
-    { label: 'Média', valor: sumBy(duracaoByItem, 'dias') / duracaoByItem?.length, desc: '' },
-    {
-      label: 'Maior duração',
-      valor: Math.max(...duracaoByItem?.map((row) => row.dias)),
-      desc: duracaoByItem?.find((row) => row.dias === Math.max(...duracaoByItem?.map((row) => row.dias)))?.label,
-    },
-    {
-      label: 'Menor duração',
-      valor: Math.min(...duracaoByItem?.map((row) => row.dias)),
-      desc: duracaoByItem?.find((row) => row.dias === Math.min(...duracaoByItem?.map((row) => row.dias)))?.label,
-    },
-  ];
+  const resumo = useMemo(
+    () => [
+      { label: 'Média', valor: sumBy(duracaoByItem, 'dias') / duracaoByItem?.length, desc: '' },
+      {
+        label: 'Maior duração',
+        valor: Math.max(...duracaoByItem?.map((row) => row.dias)),
+        desc: duracaoByItem?.find((row) => row.dias === Math.max(...duracaoByItem?.map((row) => row.dias)))?.label,
+      },
+      {
+        label: 'Menor duração',
+        valor: Math.min(...duracaoByItem?.map((row) => row.dias)),
+        desc: duracaoByItem?.find((row) => row.dias === Math.min(...duracaoByItem?.map((row) => row.dias)))?.label,
+      },
+    ],
+    [duracaoByItem]
+  );
 
-  const seriesVolume = [{ name: 'Média em dias', data: duracaoByItem?.map((row) => row?.dias) }];
+  const series = useMemo(
+    () => [{ name: 'Média em dias', data: duracaoByItem?.map((row) => row?.dias) }],
+    [duracaoByItem]
+  );
+
   const chartOptions = useChart({
     grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
     plotOptions: { bar: { columnWidth: '25%' } },
@@ -901,7 +896,7 @@ export function Duracao() {
         heading="Média de duração dos processos"
         links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
-        action={<Filtrar tab="duracao" fluxo={fluxo} perfil={perfil} setFluxo={setFluxo} setPerfil={setPerfil} />}
+        action={<Filtrar tab="duracao" />}
       />
 
       <Card sx={{ p: 1 }}>
@@ -924,8 +919,8 @@ export function Duracao() {
                       </Grid>
                     ))}
                     <Grid item xs={12}>
-                      {currentTab === 'grafico' ? (
-                        <Chart type="bar" series={seriesVolume} options={chartOptions} height={500} />
+                      {currentTab === 'grafico' && series?.data?.length > 0 ? (
+                        <Chart type="bar" series={series} options={chartOptions} height={500} />
                       ) : (
                         <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
                       )}
@@ -943,12 +938,13 @@ export function Duracao() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Volume.propTypes = { agrupamento: PropTypes.string, topLabel: PropTypes.string };
+Volume.propTypes = { top: PropTypes.string };
 
-export function Volume({ agrupamento, topLabel }) {
+export function Volume({ top }) {
   const theme = useTheme();
-  const top = (topLabel === 'Top 5' && 5) || (topLabel === 'Top 10' && 10) || (topLabel === 'Top 20' && 20) || 'Todos';
-  const [currentTab, setCurrentTab] = useState('grafico');
+  const agrupamento = localStorage.getItem('agrupamento') || 'Unidade orgânica';
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
+  const topNumb = (top === 'Top 5' && 5) || (top === 'Top 10' && 10) || (top === 'Top 20' && 20) || 'Todos';
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
@@ -956,16 +952,16 @@ export function Volume({ agrupamento, topLabel }) {
   indicadores?.forEach((row, index) => {
     if (agrupamento === 'Unidade orgânica') {
       const uo = uos?.find((uo) => uo.id === row?.objeto_id);
-      if (top !== 'Todos' && index < top) {
+      if (topNumb !== 'Todos' && index < topNumb) {
         volumeByItem.push({ total: row?.total, label: uo?.label || row?.objeto_id });
-      } else if (top === 'Todos') {
+      } else if (topNumb === 'Todos') {
         volumeByItem.push({ total: row?.total, label: uo?.label || row?.objeto_id });
       }
     } else if (agrupamento === 'Colaborador') {
       const colaborador = colaboradores?.find((colaborador) => colaborador.perfil_id === row?.objeto_id);
-      if (top !== 'Todos' && index < top) {
+      if (topNumb !== 'Todos' && index < topNumb) {
         volumeByItem.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
-      } else if (top === 'Todos') {
+      } else if (topNumb === 'Todos') {
         volumeByItem.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
       }
     }
@@ -990,10 +986,13 @@ export function Volume({ agrupamento, topLabel }) {
     },
   ];
 
-  const series = [
-    { name: 'Nº de processos', type: 'bar', data: quantidades },
-    { name: 'Percentagem', type: 'line', data: percentagem },
-  ];
+  const series = useMemo(
+    () => [
+      { name: 'Nº de processos', type: 'bar', data: quantidades },
+      { name: 'Percentagem', type: 'line', data: percentagem },
+    ],
+    [percentagem, quantidades]
+  );
 
   const chartOptions = useChart({
     ...chartOptionsCommon(theme),
@@ -1021,7 +1020,7 @@ export function Volume({ agrupamento, topLabel }) {
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'grafico' ? (
+                    {currentTab === 'grafico' && series?.[0]?.data?.length > 0 ? (
                       <Chart type="line" series={series} options={chartOptions} height={500} />
                     ) : (
                       <TableExport
@@ -1048,56 +1047,76 @@ export function Volume({ agrupamento, topLabel }) {
 Filtrar.propTypes = {
   tab: PropTypes.string,
   top: PropTypes.string,
-  fluxo: PropTypes.object,
-  vista: PropTypes.string,
-  perfil: PropTypes.object,
-  agrupamento: PropTypes.string,
   setTop: PropTypes.func,
-  setFluxo: PropTypes.func,
+  vista: PropTypes.string,
   setVista: PropTypes.func,
-  setPerfil: PropTypes.func,
-  setAgrupamento: PropTypes.func,
 };
 
-export function Filtrar({
-  tab,
-  top,
-  fluxo,
-  vista,
-  perfil,
-  setTop,
-  setVista,
-  setFluxo,
-  setPerfil,
-  agrupamento,
-  setAgrupamento,
-}) {
+export function Filtrar({ tab, top, vista, setTop, setVista }) {
   const dispatch = useDispatch();
-  const [datai, setDatai] = useState(null);
-  const [dataf, setDataf] = useState(null);
+  const [uo, setUo] = useState(null);
+  const [fluxo, setFluxo] = useState(null);
+  const [perfil, setPerfil] = useState(null);
+  const [estado, setEstado] = useState(null);
   const { toggle: open, onOpen, onClose } = useToggle();
-  const [momento, setMomento] = useState('Criação no sistema');
+  const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
+  const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
+  const [datai, setDatai] = useState(
+    localStorage.getItem('dataIIndic') ? add(new Date(localStorage.getItem('dataIIndic')), { hours: 2 }) : null
+  );
+  const [dataf, setDataf] = useState(
+    localStorage.getItem('dataFIndic') ? add(new Date(localStorage.getItem('dataFIndic')), { hours: 2 }) : null
+  );
   const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
-  const { fluxos, isAdmin, meusAmbientes, estadoFilter, estados } = useSelector((state) => state.digitaldocs);
-  const [uo, setUo] = useState(cc?.uo ? { id: cc?.uo?.id, label: cc?.uo?.label } : null);
-  const uosList = UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id');
-  const estadosList = EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes);
-  const colaboradoresList =
-    uo?.id && tab !== 'execucao'
-      ? ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.filter((row) => row?.uoId === uo?.id)
-      : ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes);
-  const perfilId = cc?.perfil_id;
-  const firstAmbiente = meusAmbientes?.find((row) => row?.nome?.includes('Gerência') || row?.id > 0);
-  useEffect(() => {
-    if (cc) {
-      setUo({ id: cc?.uo?.id, label: cc?.uo?.label });
-      setPerfil({ id: cc?.perfil?.id, label: cc?.perfil?.displayName });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cc]);
+  const { fluxos, isAdmin, meusAmbientes, estados } = useSelector((state) => state.digitaldocs);
+
+  const perfilId = useMemo(() => cc?.perfil_id, [cc?.perfil_id]);
+  const estadosList = useMemo(
+    () => EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes),
+    [cc, estados, isAdmin, meusAmbientes, uos]
+  );
+  const colaboradoresList = useMemo(
+    () =>
+      uo?.id && tab !== 'execucao'
+        ? ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.filter((row) => row?.uoId === uo?.id)
+        : ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes),
+    [cc, colaboradores, isAdmin, meusAmbientes, tab, uo?.id]
+  );
+  const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
+  const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
 
   useEffect(() => {
-    if (mail && perfilId) {
+    if (uosList && (localStorage.getItem('uoIndic') || cc?.uo?.id)) {
+      setUo(
+        uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoIndic'))) ||
+          uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id))
+      );
+    }
+  }, [uosList, cc?.uo?.id]);
+
+  useEffect(() => {
+    if (colaboradoresList && (localStorage.getItem('colaboradorIndic') || perfilId)) {
+      setPerfil(
+        colaboradoresList?.find((row) => Number(row?.id) === Number(localStorage.getItem('colaboradorIndic'))) ||
+          colaboradoresList?.find((row) => Number(row?.id) === Number(perfilId))
+      );
+    }
+  }, [colaboradoresList, perfilId]);
+
+  useEffect(() => {
+    if (!fluxo && fluxosList && localStorage.getItem('fluxoIndic')) {
+      setFluxo(fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic'))));
+    }
+  }, [fluxosList, fluxo]);
+
+  useEffect(() => {
+    if (!estado && estadosList && localStorage.getItem('estadoIndic')) {
+      setEstado(estadosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic'))));
+    }
+  }, [estadosList, estado]);
+
+  useEffect(() => {
+    if (mail && perfilId && tab) {
       dispatch(
         getIndicadores(tab, {
           mail,
@@ -1106,54 +1125,15 @@ export function Filtrar({
           uo: uo?.id,
           fluxo: fluxo?.id,
           perfil: perfil?.id,
-          estado: estadoFilter?.id,
+          estado: estado?.id,
           momento: momento === 'Criação no sistema' ? 'c' : 'e',
+          datai: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+          dataf: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
           agrupamento: agrupamento === 'Colaborador' ? 'perfil' : 'uo',
-          datai: datai ? format(add(new Date(datai), { hours: 2 }), 'yyyy-MM-dd') : null,
-          dataf: dataf ? format(add(new Date(dataf), { hours: 2 }), 'yyyy-MM-dd') : null,
         })
       );
     }
-  }, [
-    dispatch,
-    tab,
-    mail,
-    vista,
-    datai,
-    dataf,
-    momento,
-    perfilId,
-    estadoFilter,
-    uo?.id,
-    fluxo?.id,
-    perfil?.id,
-    agrupamento,
-  ]);
-
-  const onResetFilter = () => {
-    if (datai && setDatai) setDatai(null);
-    if (dataf && setDataf) setDataf(null);
-    if (fluxo && setFluxo) setFluxo(null);
-    if (top !== 'Todos' && setTop) setTop('Todos');
-    if (vista !== 'mensal' && setVista) setVista('mensal');
-    if (momento !== 'Criação no sistema' && setMomento) setMomento('Criação no sistema');
-    if (agrupamento !== 'Unidade orgânica' && setAgrupamento) setAgrupamento('Unidade orgânica');
-    if (uo?.id !== cc?.uo?.id && setUo) setUo({ id: cc?.uo?.id, label: cc?.uo?.label });
-    if (perfil?.id !== cc?.perfil?.id && setPerfil) setPerfil({ id: cc?.perfil?.id, label: cc?.perfil?.displayName });
-    if (
-      firstAmbiente?.id &&
-      estadoFilter?.id !== firstAmbiente?.id &&
-      (tab === 'trabalhados' || tab === 'devolucoesInternas' || tab === 'devolucoesExternas')
-    ) {
-      dispatch(setEstadoFilter({ id: firstAmbiente?.id, label: firstAmbiente?.nome }));
-    } else if (estadoFilter?.id) {
-      dispatch(setEstadoFilter(null));
-    }
-  };
-
-  const handleSetEstado = (newValue) => {
-    dispatch(setEstadoFilter(newValue));
-  };
+  }, [dispatch, tab, mail, vista, datai, dataf, momento, perfilId, estado, uo?.id, fluxo?.id, perfil?.id, agrupamento]);
 
   const haveColaborador = tab === 'criacao' || tab === 'tipos' || tab === 'duracao' || tab === 'execucao';
   const haveEstado =
@@ -1205,9 +1185,9 @@ export function Filtrar({
             <Typography noWrap>{perfil?.label}</Typography>
           </Panel>
         )}
-        {haveEstado && estadoFilter?.label && (
+        {haveEstado && estado?.label && (
           <Panel label="Estado/Ambiente">
-            <Typography noWrap>{estadoFilter?.label}</Typography>
+            <Typography noWrap>{estado?.label}</Typography>
           </Panel>
         )}
         {(tab === 'duracao' || tab === 'execucao') && fluxo?.label && (
@@ -1250,7 +1230,10 @@ export function Filtrar({
             {tab === 'duracao' && (
               <Stack spacing={1}>
                 <Typography variant="subtitle2"> Momento </Typography>
-                <RadioGroup value={momento} onChange={(event, newValue) => setMomento(newValue)}>
+                <RadioGroup
+                  value={momento}
+                  onChange={(event, newValue) => setItemValue(newValue, setMomento, 'momento')}
+                >
                   {['Criação no sistema', 'Data de entrada'].map((row) => (
                     <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
                   ))}
@@ -1260,16 +1243,19 @@ export function Filtrar({
             {tab === 'volume' && (
               <>
                 <Stack spacing={0.5}>
-                  <Typography variant="subtitle2"> Agrupamento </Typography>
-                  <RadioGroup value={agrupamento} onChange={(event, newValue) => setAgrupamento(newValue)}>
+                  <Typography variant="subtitle2">Agrupamento</Typography>
+                  <RadioGroup
+                    value={agrupamento}
+                    onChange={(event, newValue) => setItemValue(newValue, setAgrupamento, 'agrupamento')}
+                  >
                     {['Unidade orgânica', 'Colaborador'].map((row) => (
                       <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
                     ))}
                   </RadioGroup>
                 </Stack>
                 <Stack spacing={0.5}>
-                  <Typography variant="subtitle2"> Top </Typography>
-                  <RadioGroup value={top} onChange={(event, newValue) => setTop(newValue)}>
+                  <Typography variant="subtitle2">Top</Typography>
+                  <RadioGroup value={top} onChange={(event, newValue) => setItemValue(newValue, setTop, 'top')}>
                     {['Todos', 'Top 5', 'Top 10', 'Top 20'].map((row) => (
                       <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
                     ))}
@@ -1279,8 +1265,8 @@ export function Filtrar({
             )}
             {tab === 'criacao' && (
               <Stack spacing={0.5}>
-                <Typography variant="subtitle2"> Vista </Typography>
-                <RadioGroup row value={vista} onChange={(event, newValue) => setVista(newValue)}>
+                <Typography variant="subtitle2">Vista</Typography>
+                <RadioGroup row value={vista} onChange={(event, newValue) => setItemValue(newValue, setVista, 'vista')}>
                   {['mensal', 'anual'].map((row) => (
                     <FormControlLabel
                       key={row}
@@ -1308,14 +1294,14 @@ export function Filtrar({
                 label="Colaborador"
                 setValue={setPerfil}
                 options={colaboradoresList}
-                disableClearable={tab === 'execucao' && !estadoFilter && !fluxo}
+                disableClearable={tab === 'execucao' && !estado && !fluxo}
               />
             )}
             {haveEstado && (
               <FilterAutocomplete
-                value={estadoFilter}
+                value={estado}
                 label="Estado/Ambiente"
-                setValue={handleSetEstado}
+                setValue={setEstado}
                 options={estadosList}
                 disableClearable={haveEstado && !perfil && !fluxo}
               />
@@ -1325,53 +1311,33 @@ export function Filtrar({
                 value={fluxo}
                 label="Fluxo/Assunto"
                 setValue={setFluxo}
-                disableClearable={tab === 'execucao' && !perfil && !estadoFilter}
-                options={applySort(
-                  fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })),
-                  getComparator('asc', 'label')
-                )}
+                disableClearable={tab === 'execucao' && !perfil && !estado}
+                options={fluxosList}
               />
             )}
             {havePeriodo && (
               <Stack spacing={1}>
-                <Typography variant="subtitle2"> Período </Typography>
+                <Typography variant="subtitle2">Período</Typography>
                 <DatePicker
+                  disableFuture
                   value={datai}
                   label="Data inicial"
-                  onChange={(newValue) => {
-                    if (newValue && newValue?.toString() !== 'Invalid Date') {
-                      setDatai(newValue);
-                    }
-                  }}
-                  slotProps={{ textField: { fullWidth: true } }}
+                  slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
+                  onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIIndic', setDataf, 'dataFIndic')}
                 />
                 <DatePicker
+                  disableFuture
                   value={dataf}
+                  minDate={datai}
+                  disabled={!datai}
                   label="Data final"
-                  onChange={(newValue) => {
-                    if (newValue && newValue?.toString() !== 'Invalid Date') {
-                      setDataf(newValue);
-                    }
-                  }}
-                  slotProps={{ textField: { fullWidth: true } }}
+                  slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
+                  onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFIndic', '', '')}
                 />
               </Stack>
             )}
           </Stack>
         </Scrollbar>
-
-        <Box sx={{ p: 2.5 }}>
-          <Button
-            fullWidth
-            type="submit"
-            color="inherit"
-            variant="outlined"
-            onClick={onResetFilter}
-            startIcon={<ClearAllOutlinedIcon />}
-          >
-            Limpar
-          </Button>
-        </Box>
       </Drawer>
     </>
   );
@@ -1490,6 +1456,12 @@ FilterAutocomplete.propTypes = {
 };
 
 function FilterAutocomplete({ label, value, options, setValue, ...other }) {
+  const localS =
+    (label === 'Unidade orgânica' && 'uoIndic') ||
+    (label === 'Fluxo/Assunto' && 'fluxoIndic') ||
+    (label === 'Estado/Ambiente' && 'estadoIndic') ||
+    (label === 'Colaborador' && 'colaboradorIndic') ||
+    '';
   return (
     <Stack spacing={1}>
       <Typography variant="subtitle2"> {label} </Typography>
@@ -1498,8 +1470,8 @@ function FilterAutocomplete({ label, value, options, setValue, ...other }) {
         value={value}
         options={options}
         getOptionLabel={(option) => option?.label}
-        onChange={(event, newValue) => setValue(newValue)}
         isOptionEqualToValue={(option, value) => option?.id === value?.id}
+        onChange={(event, newValue) => setItemValue(newValue, setValue, localS, true)}
         renderInput={(params) => <TextField {...params} placeholder="Selecionar..." />}
         {...other}
       />
@@ -1593,8 +1565,8 @@ function TabView({ currentTab, setCurrentTab }) {
       {currentTab === 'tabela' && <ButtonExport />}
       <Tabs
         value={currentTab}
-        onChange={(event, newValue) => setCurrentTab(newValue)}
         sx={{ width: 120, minHeight: '35px' }}
+        onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabView')}
       >
         {[
           { value: 'grafico', label: 'Gráfico' },
@@ -1681,4 +1653,14 @@ function indicadoresGroupBy(dados, item) {
   }, {});
 
   return dadosGrouped;
+}
+
+function duracaoP(indicadores, uos) {
+  const duracaoByItem = [];
+  indicadores?.forEach((row) => {
+    const uo = uos?.find((uo) => uo.id === row?.uo_origem_id);
+    duracaoByItem.push({ dias: row?.dmedh / 24, label: uo?.label || row?.uo_origem_id });
+  });
+
+  return duracaoByItem;
 }

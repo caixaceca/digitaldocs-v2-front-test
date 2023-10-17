@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Grid, Stack, Alert } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 
 // ----------------------------------------------------------------------
 

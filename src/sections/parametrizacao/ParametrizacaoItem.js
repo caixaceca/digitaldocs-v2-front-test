@@ -186,7 +186,7 @@ export default function ParametrizacaoItem({ item }) {
       />
 
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple filter={filter} setFilter={setFilter} from="params" />
+        <SearchToolbarSimple item="filterParams" filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

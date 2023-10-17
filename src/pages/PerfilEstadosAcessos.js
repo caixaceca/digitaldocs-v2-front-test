@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-import { Box, Tab, Tabs, Grid, Card, Container } from '@mui/material';
+import Container from '@mui/material/Container';
 // redux
 import { useSelector } from '../redux/store';
 // hooks

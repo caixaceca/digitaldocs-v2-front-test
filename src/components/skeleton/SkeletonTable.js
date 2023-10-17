@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
-import { TableRow, TableCell, Skeleton } from '@mui/material';
+import Skeleton from '@mui/material/Skeleton';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 
 // ----------------------------------------------------------------------
 

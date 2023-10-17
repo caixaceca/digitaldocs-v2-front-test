@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 // @mui
-import { Box, Container } from '@mui/material';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 // utils
 import selectTab from '../utils/selectTab';
 import { estadoInicial } from '../utils/validarAcesso';
@@ -33,11 +34,6 @@ export default function Controle() {
       localStorage.setItem('colaboradorControle', cc?.perfil?.displayName);
     }
   }, [cc?.perfil?.displayName]);
-
-  const handleChangeTab = (event, newValue) => {
-    setCurrentTab(newValue);
-    localStorage.setItem('tabControle', newValue);
-  };
 
   const entradas = useMemo(
     () =>
@@ -83,7 +79,13 @@ export default function Controle() {
   return (
     <Page title="Controle | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper title="Controle" tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
+        <TabsWrapper
+          title="Controle"
+          tab="tabControle"
+          tabsList={tabsList}
+          currentTab={currentTab}
+          changeTab={setCurrentTab}
+        />
         {tabsList.map((tab) => {
           const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
