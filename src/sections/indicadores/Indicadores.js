@@ -1323,7 +1323,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                   value={datai}
                   label="Data inicial"
                   slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                  onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIIndic', setDataf, 'dataFIndic')}
+                  onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIIndic', setDataf, 'dataFIndic', dataf)}
                 />
                 <DatePicker
                   disableFuture
@@ -1332,7 +1332,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                   disabled={!datai}
                   label="Data final"
                   slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                  onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFIndic', '', '')}
+                  onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFIndic', '', '', '')}
                 />
               </Stack>
             )}

@@ -185,7 +185,9 @@ export default function ProcuraAvancada() {
                     value={datai}
                     label="Data inicial"
                     slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataISearch', setDataf, 'dataFSearch')}
+                    onChange={(newValue) =>
+                      setDataUtil(newValue, setDatai, 'dataISearch', setDataf, 'dataFSearch', dataf)
+                    }
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -196,7 +198,7 @@ export default function ProcuraAvancada() {
                     disabled={!datai}
                     label="Data final"
                     slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFSearch', '', '')}
+                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFSearch', '', '', '')}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>

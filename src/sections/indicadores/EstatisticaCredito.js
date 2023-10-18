@@ -151,7 +151,7 @@ export default function EstatisticaCredito() {
                     value={datai}
                     label="Data inicial"
                     slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIEst', setDataf, 'dataFEst')}
+                    onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIEst', setDataf, 'dataFEst', dataf)}
                   />
                   <DatePicker
                     value={dataf}
@@ -159,7 +159,7 @@ export default function EstatisticaCredito() {
                     disabled={!datai}
                     label="Data final"
                     slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFEst', '', '')}
+                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFEst', '', '', '')}
                   />
                 </>
               ) : (
@@ -168,7 +168,7 @@ export default function EstatisticaCredito() {
                   value={data}
                   disableFuture
                   views={['month', 'year']}
-                  onChange={(newValue) => setDataUtil(newValue, setData, 'dataEst', '', '')}
+                  onChange={(newValue) => setDataUtil(newValue, setData, 'dataEst', '', '', '')}
                   slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 180 } } }}
                 />
               )}

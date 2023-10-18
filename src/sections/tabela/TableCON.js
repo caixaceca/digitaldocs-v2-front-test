@@ -103,7 +103,7 @@ export default function TableCON() {
               value={datai}
               label="Data inicial"
               slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-              onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataICon', setDataf, 'dataFCon')}
+              onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataICon', setDataf, 'dataFCon', dataf)}
             />
             <DatePicker
               value={dataf}
@@ -111,7 +111,7 @@ export default function TableCON() {
               disabled={!datai}
               label="Data final"
               slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-              onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFCon', '', '')}
+              onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFCon', '', '', '')}
             />
             {con?.length > 0 && (
               <Stack>

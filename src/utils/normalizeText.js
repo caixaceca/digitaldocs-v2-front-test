@@ -54,12 +54,21 @@ export function setItemValue(newValue, setItem, localS, id) {
   }
 }
 
-export function setDataUtil(newValue, setData, localSI, resetDate, localSIF) {
+export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, valueF) {
   setData(newValue);
-  localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
+  if (localSI) {
+    localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
+  }
   if (resetDate) {
-    resetDate(dataValido(newValue) ? new Date() : null);
-    localStorage.setItem(localSIF, dataValido(newValue) ? format(new Date(), 'yyyy-MM-dd') : '');
+    if (newValue && dataValido(newValue) && newValue > valueF) {
+      resetDate(new Date());
+      localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
+    } else if (!newValue) {
+      resetDate(null);
+      if (localSIF) {
+        localStorage.setItem(localSIF, '');
+      }
+    }
   }
 }
 

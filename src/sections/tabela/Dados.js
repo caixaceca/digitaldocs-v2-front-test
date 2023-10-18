@@ -68,7 +68,7 @@ export function UoData({
             value={datai}
             label="Data inicial"
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-            onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIC', setDataf, 'dataFC')}
+            onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIC', setDataf, 'dataFC', dataf)}
           />
           <DatePicker
             disableFuture
@@ -77,14 +77,14 @@ export function UoData({
             disabled={!datai}
             label="Data final"
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-            onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFC', '', '')}
+            onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFC', '', '', '')}
           />
         </Stack>
       ) : (
         <DatePicker
           label="Data"
           value={data}
-          onChange={(newValue) => setDataUtil(newValue, setData, 'dataC', '', '')}
+          onChange={(newValue) => setDataUtil(newValue, setData, 'dataC', '', '', '')}
           slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
         />
       )}
