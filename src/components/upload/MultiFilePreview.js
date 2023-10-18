@@ -1,9 +1,13 @@
 import PropTypes from 'prop-types';
 import { AnimatePresence } from 'framer-motion';
 // @mui
+import List from '@mui/material/List';
 import { alpha } from '@mui/material/styles';
+import ListItem from '@mui/material/ListItem';
+import IconButton from '@mui/material/IconButton';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import { List, IconButton, ListItemText, ListItemIcon, ListItem } from '@mui/material';
 // utils
 import { fData } from '../../utils/formatNumber';
 import getFileData from '../../utils/getFileData';

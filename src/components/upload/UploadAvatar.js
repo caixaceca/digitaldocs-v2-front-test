@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 // @mui
-import { Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
 //
 import Image from '../Image';

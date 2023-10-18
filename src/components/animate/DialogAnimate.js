@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 import { m, AnimatePresence } from 'framer-motion';
 // @mui
-import { Dialog, Box, Paper } from '@mui/material';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Dialog from '@mui/material/Dialog';
 //
 import { varFade } from './variants';
 

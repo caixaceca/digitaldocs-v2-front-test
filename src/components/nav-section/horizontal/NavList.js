@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // @mui
-import { Link } from '@mui/material';
+import Link from '@mui/material/Link';
 //
 import { PaperStyle } from './style';
 import NavItem from './NavItem';

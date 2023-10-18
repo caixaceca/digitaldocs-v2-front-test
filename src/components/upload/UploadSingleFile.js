@@ -2,8 +2,11 @@ import PropTypes from 'prop-types';
 import isString from 'lodash/isString';
 import { useDropzone } from 'react-dropzone';
 // @mui
+import Box from '@mui/material/Box';
+import ListItem from '@mui/material/ListItem';
 import { styled } from '@mui/material/styles';
-import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 // utils
 import { varFade } from '../animate';
 import { fData } from '../../utils/formatNumber';

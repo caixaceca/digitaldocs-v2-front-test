@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 import { DocIllustration } from '../../assets';
 
 // ----------------------------------------------------------------------
 
 SearchNotFoundSmall.propTypes = {
-  message: PropTypes.string.isRequired
+  message: PropTypes.string.isRequired,
 };
 
 export default function SearchNotFoundSmall({ message }) {

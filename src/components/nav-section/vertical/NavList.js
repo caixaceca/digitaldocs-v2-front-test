@@ -2,7 +2,10 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // @mui
-import { List, Collapse, Link } from '@mui/material';
+import List from '@mui/material/List';
+import Link from '@mui/material/Link';
+import Collapse from '@mui/material/Collapse';
+//
 import NavItem from './NavItem';
 import { getActive, isExternalLink } from '..';
 

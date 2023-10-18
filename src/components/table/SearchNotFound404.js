@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Card, Stack, Typography } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { DocIllustration404 } from '../../assets';
 
 // ----------------------------------------------------------------------

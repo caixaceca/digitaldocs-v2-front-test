@@ -1,5 +1,9 @@
 import PropTypes from 'prop-types';
-import { Stack, Switch, TablePagination, FormControlLabel } from '@mui/material';
+// @mui
+import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
+import TablePagination from '@mui/material/TablePagination';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ----------------------------------------------------------------------
 

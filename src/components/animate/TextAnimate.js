@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { m } from 'framer-motion';
 // @mui
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 //
 import { varFade } from './variants';
 

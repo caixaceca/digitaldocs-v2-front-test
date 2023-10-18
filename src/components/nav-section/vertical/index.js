@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 // @mui
-import { List, Box } from '@mui/material';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
 // hooks
 import useLocales from '../../../hooks/useLocales';
 //

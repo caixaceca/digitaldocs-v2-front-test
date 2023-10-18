@@ -1,6 +1,9 @@
 // @mui
 import { alpha, styled } from '@mui/material/styles';
-import { ListItemText, ListItemIcon, ListSubheader, ListItemButton } from '@mui/material';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ListSubheader from '@mui/material/ListSubheader';
+import ListItemButton from '@mui/material/ListItemButton';
 // utils
 // import cssStyles from '../../../utils/cssStyles';
 // config

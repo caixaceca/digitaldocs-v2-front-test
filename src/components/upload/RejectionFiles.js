@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 import { alpha } from '@mui/material/styles';
-import { Box, Paper, Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 // utils
 import { fData } from '../../utils/formatNumber';
 import getFileData from '../../utils/getFileData';

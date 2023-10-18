@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 // @mui
-import { CssBaseline } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
 import { alpha, ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 // hooks
 import useSettings from '../../hooks/useSettings';

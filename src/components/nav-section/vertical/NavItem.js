@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // hooks

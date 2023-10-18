@@ -1,7 +1,10 @@
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 // @mui
-import { Box, Tooltip, ListItemText, ListItemIcon } from '@mui/material';
+import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 // hooks
 import useLocales from '../../../hooks/useLocales';
 // guards

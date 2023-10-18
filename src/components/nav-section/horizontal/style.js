@@ -1,6 +1,7 @@
 // @mui
+import Popover from '@mui/material/Popover';
 import { alpha, styled } from '@mui/material/styles';
-import { Popover, ListItemButton } from '@mui/material';
+import ListItemButton from '@mui/material/ListItemButton';
 // utils
 import cssStyles from '../../../utils/cssStyles';
 // config
