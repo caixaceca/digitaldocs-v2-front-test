@@ -77,7 +77,6 @@ TableControle.propTypes = { from: PropTypes.string };
 export default function TableControle({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [uo, setUo] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem('filterC') || '');
   const [estado, setEstado] = useState(localStorage.getItem('estadoC') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoC') || null);
@@ -96,6 +95,11 @@ export default function TableControle({ from }) {
     (state) => state.digitaldocs
   );
   const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
+  const [uo, setUo] = useState(
+    uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC'))) ||
+      uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
+      null
+  );
   const perfilId = cc?.perfil_id;
   const fromAgencia = cc?.uo?.tipo === 'Agências';
 
@@ -117,13 +121,13 @@ export default function TableControle({ from }) {
   });
 
   useEffect(() => {
-    if (uosList && (localStorage.getItem('uoC') || cc?.uo?.id)) {
+    if (!uo && uosList && (localStorage.getItem('uoC') || cc?.uo?.id)) {
       setUo(
         uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC'))) ||
           uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id))
       );
     }
-  }, [uosList, cc?.uo?.id]);
+  }, [uosList, uo, cc?.uo?.id]);
 
   useEffect(() => {
     if (mail && perfilId && uo?.id && from === 'entradas') {

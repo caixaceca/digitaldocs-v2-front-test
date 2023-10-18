@@ -1054,10 +1054,6 @@ Filtrar.propTypes = {
 
 export function Filtrar({ tab, top, vista, setTop, setVista }) {
   const dispatch = useDispatch();
-  const [uo, setUo] = useState(null);
-  const [fluxo, setFluxo] = useState(null);
-  const [perfil, setPerfil] = useState(null);
-  const [estado, setEstado] = useState(null);
   const { toggle: open, onOpen, onClose } = useToggle();
   const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
   const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
@@ -1069,12 +1065,28 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
   );
   const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
   const { fluxos, isAdmin, meusAmbientes, estados } = useSelector((state) => state.digitaldocs);
-
   const perfilId = useMemo(() => cc?.perfil_id, [cc?.perfil_id]);
+
+  const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
+  const [fluxo, setFluxo] = useState(
+    fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic'))) || null
+  );
+
+  const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
+  const [uo, setUo] = useState(
+    uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoIndic'))) ||
+      uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
+      null
+  );
+
   const estadosList = useMemo(
     () => EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes),
     [cc, estados, isAdmin, meusAmbientes, uos]
   );
+  const [estado, setEstado] = useState(
+    estadosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic'))) || null
+  );
+
   const colaboradoresList = useMemo(
     () =>
       uo?.id && tab !== 'execucao'
@@ -1082,25 +1094,30 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
         : ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes),
     [cc, colaboradores, isAdmin, meusAmbientes, tab, uo?.id]
   );
-  const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
-  const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
+  const [perfil, setPerfil] = useState(
+    colaboradoresList?.find((row) => Number(row?.id) === Number(localStorage.getItem('colaboradorIndic'))) ||
+      colaboradoresList?.find((row) => Number(row?.id) === Number(perfilId)) ||
+      null
+  );
 
   useEffect(() => {
-    if (uosList && (localStorage.getItem('uoIndic') || cc?.uo?.id)) {
+    if (!uo && uosList && (localStorage.getItem('uoIndic') || cc?.uo?.id)) {
       setUo(
         uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoIndic'))) ||
           uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id))
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uosList, cc?.uo?.id]);
 
   useEffect(() => {
-    if (colaboradoresList && (localStorage.getItem('colaboradorIndic') || perfilId)) {
+    if (!perfil?.id && colaboradoresList && (localStorage.getItem('colaboradorIndic') || perfilId)) {
       setPerfil(
         colaboradoresList?.find((row) => Number(row?.id) === Number(localStorage.getItem('colaboradorIndic'))) ||
           colaboradoresList?.find((row) => Number(row?.id) === Number(perfilId))
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colaboradoresList, perfilId]);
 
   useEffect(() => {

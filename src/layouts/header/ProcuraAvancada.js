@@ -31,12 +31,12 @@ export default function ProcuraAvancada() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const [conta, setConta] = useState(localStorage.getItem('conta'));
-  const [search, setSearch] = useState(localStorage.getItem('search'));
-  const [cliente, setCliente] = useState(localStorage.getItem('cliente'));
-  const [entidade, setEntidade] = useState(localStorage.getItem('entidade'));
-  const [nentrada, setNentrada] = useState(localStorage.getItem('nentrada'));
-  const [noperacao, setNoperacao] = useState(localStorage.getItem('noperacao'));
+  const [conta, setConta] = useState(localStorage.getItem('conta') || '');
+  const [search, setSearch] = useState(localStorage.getItem('search') || '');
+  const [cliente, setCliente] = useState(localStorage.getItem('cliente') || '');
+  const [entidade, setEntidade] = useState(localStorage.getItem('entidade') || '');
+  const [nentrada, setNentrada] = useState(localStorage.getItem('nentrada') || '');
+  const [noperacao, setNoperacao] = useState(localStorage.getItem('noperacao') || '');
   const [avancada, setAvancada] = useState(localStorage.getItem('tipoPesquisa') === 'avancada');
   const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
   const [datai, setDatai] = useState(
@@ -75,7 +75,8 @@ export default function ProcuraAvancada() {
         colaboradoresList?.find((row) => row?.id === Number(localStorage.getItem('colaboradorSearch'))) || null
       );
     }
-  }, [colaborador, colaboradoresList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [colaboradoresList]);
 
   const handleSearch = () => {
     if (mail && cc?.perfil_id) {

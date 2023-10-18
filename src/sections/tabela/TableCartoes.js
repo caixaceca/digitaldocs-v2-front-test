@@ -127,16 +127,16 @@ export default function TableCartoes() {
   }, [error]);
 
   useEffect(() => {
-    if (uosList && (localStorage.getItem('uoC') || cc?.uo?.balcao)) {
+    if (fase === 'Receção' && !uo?.id && uosList && (localStorage.getItem('uoC') || cc?.uo?.balcao)) {
       setUo(
         uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoCartao'))) ||
           uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.balcao))
       );
     }
-  }, [uosList, cc?.uo?.balcao]);
+  }, [uosList, fase, uo, cc?.uo?.balcao]);
 
   useEffect(() => {
-    if (!fase && !localStorage.getItem('fase')) {
+    if (!fase) {
       const uoSel = uos?.find((row) => Number(row?.balcao) === Number(uo?.id));
       setFase(uoSel?.tipo === 'Agências' ? 'Receção' : 'Emissão');
     }
