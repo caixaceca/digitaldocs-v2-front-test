@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 // @mui
+import Tooltip from '@mui/material/Tooltip';
 import { alpha, styled } from '@mui/material/styles';
-import { Tooltip } from '@mui/material';
 // utils
 import cssStyles from '../../../utils/cssStyles';
 //

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Radio, FormControlLabel } from '@mui/material';
+import Radio from '@mui/material/Radio';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ----------------------------------------------------------------------
 

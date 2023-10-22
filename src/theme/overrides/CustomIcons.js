@@ -1,4 +1,5 @@
-import { SvgIcon } from '@mui/material';
+// @mui
+import SvgIcon from '@mui/material/SvgIcon';
 
 // ----------------------------------------------------------------------
 

@@ -1,9 +1,13 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { useState, useEffect } from 'react';
 // @mui
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import Backdrop from '@mui/material/Backdrop';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import { Stack, Divider, Backdrop, Typography, IconButton } from '@mui/material';
 // hooks
 import useSettings from '../../../hooks/useSettings';
 // utils

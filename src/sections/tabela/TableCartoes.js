@@ -343,18 +343,15 @@ export default function TableCartoes() {
 
 function applySortFilter({ dados, comparator, filter, tipoCartao, balcaoEntrega }) {
   const stabilizedThis = dados.map((el, index) => [el, index]);
-
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
   });
   dados = stabilizedThis.map((el) => el[0]);
-
   if (balcaoEntrega) {
     dados = dados.filter((row) => row?.entrega === balcaoEntrega);
   }
-
   if (tipoCartao) {
     dados = dados.filter((row) => row?.tipo === tipoCartao);
   }

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 // @mui
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 //
 import BackgroundIllustration from './illustration_background';

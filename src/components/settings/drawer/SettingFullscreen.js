@@ -1,6 +1,6 @@
 import { useState } from 'react';
 // @mui
-import { Button } from '@mui/material';
+import Button from '@mui/material/Button';
 import { alpha } from '@mui/material/styles';
 import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
 import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';

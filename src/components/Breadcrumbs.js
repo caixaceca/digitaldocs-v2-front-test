@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Breadcrumbs as MUIBreadcrumbs } from '@mui/material';
+import MUIBreadcrumbs from '@mui/material/Breadcrumbs';
 
 // ----------------------------------------------------------------------
 

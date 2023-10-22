@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 // @mui
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 // ----------------------------------------------------------------------
 

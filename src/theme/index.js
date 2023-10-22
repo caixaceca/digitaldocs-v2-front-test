@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 // @mui
-import { CssBaseline } from '@mui/material';
-import { createTheme, ThemeProvider as MUIThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import { ptPT } from '@mui/material/locale';
+import CssBaseline from '@mui/material/CssBaseline';
+import { createTheme, ThemeProvider as MUIThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 // hooks
 import useSettings from '../hooks/useSettings';
 //
@@ -15,9 +15,7 @@ import shadows, { customShadows } from './shadows';
 
 // ----------------------------------------------------------------------
 
-ThemeProvider.propTypes = {
-  children: PropTypes.node,
-};
+ThemeProvider.propTypes = { children: PropTypes.node };
 
 export default function ThemeProvider({ children }) {
   const { themeMode, themeDirection } = useSettings();

@@ -1,6 +1,7 @@
 // @mui
+import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
-import { CardActionArea, Stack } from '@mui/material';
+import CardActionArea from '@mui/material/CardActionArea';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 // hooks

@@ -282,9 +282,9 @@ export function Detalhes({ closeModal }) {
   const { uos } = useSelector((state) => state.intranet);
   const { selectedItem, isOpenModalDesariquivar, isLoading } = useSelector((state) => state.digitaldocs);
   const bEntrega = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_entrega));
+  const bEmissao = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_emissao));
   const bDomicilio = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_cliente));
   const bEntregaOriginal = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_entrega_original));
-  const bEmissao = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_emissao));
 
   return (
     <Dialog open={isOpenModalDesariquivar} onClose={closeModal} fullWidth maxWidth="sm">
