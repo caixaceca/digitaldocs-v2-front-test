@@ -19,8 +19,8 @@ DadosCliente.propTypes = { isInterno: PropTypes.bool, noperacao: PropTypes.strin
 export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }) {
   const { watch, control } = useFormContext();
   const values = watch();
-  const isPS = fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário';
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
+  const isPS = fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário';
   const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
 
   const handleAdd = () => {
@@ -60,7 +60,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                   <RHFTextField
                     required
                     name={`entidades[${index}].numero`}
-                    label="Nº de entidade"
+                    label={fields?.length < 2 ? 'Nº de entidade' : `Nº de entidade ${index + 1}`}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">

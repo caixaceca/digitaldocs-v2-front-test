@@ -88,7 +88,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
           <Card>
             <CardContent>
               <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} sm={values?.titular_ordenador ? 6 : 4}>
+                <Grid item xs={12} sm={values?.titular_ordenador || selectedProcesso ? 6 : 4}>
                   <RHFSwitch
                     name="titular_ordenador"
                     onChange={(event, value) => {
@@ -99,7 +99,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                     label="Depositante é o próprio titular"
                   />
                 </Grid>
-                {!values?.titular_ordenador && (
+                {!values?.titular_ordenador && !selectedProcesso && (
                   <Grid item xs={12} sm={4}>
                     <RHFSwitch
                       name="is_cliente"
@@ -111,10 +111,10 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                     />
                   </Grid>
                 )}
-                <Grid item xs={12} sm={values?.titular_ordenador ? 6 : 4}>
+                <Grid item xs={12} sm={values?.titular_ordenador || selectedProcesso ? 6 : 4}>
                   <RHFSwitch name="residente" label="Titular da conta beneficiária é residente" />
                 </Grid>
-                {values?.is_cliente && (
+                {(values?.is_cliente || selectedProcesso) && (
                   <Grid item xs={12}>
                     <Grid container spacing={3} justifyContent="center">
                       <Grid item xs={12} sm={6} xl={3}>

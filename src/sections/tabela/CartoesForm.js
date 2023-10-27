@@ -21,7 +21,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { format } from 'date-fns';
+import { format, sub } from 'date-fns';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
@@ -61,11 +61,25 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
         ? cartoes
             ?.filter((item) => !item?.emissao_validado)
             ?.slice(0, 25)
-            ?.map((row) => ({ idItem: row?.id, check: false, numero: row?.numero, nome: row?.nome, nota: '' }))
+            ?.map((row) => ({
+              idItem: row?.id,
+              check: false,
+              numero: row?.numero,
+              nome: row?.nome,
+              nota: '',
+              dataSisp: new Date(),
+            }))
         : cartoes
             ?.filter((item) => !item?.rececao_validado)
             ?.slice(0, 25)
-            ?.map((row) => ({ idItem: row?.id, check: false, numero: row?.numero, nome: row?.nome, nota: '' })),
+            ?.map((row) => ({
+              idItem: row?.id,
+              check: false,
+              numero: row?.numero,
+              nome: row?.nome,
+              nota: '',
+              dataSisp: new Date(),
+            })),
     [cartoes, fase]
   );
 
@@ -89,12 +103,14 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
         dispatch(
           updateItem(
             fase === 'Emissão' ? 'confirmar emissao multiplo' : 'confirmar rececao multiplo',
-            JSON.stringify(cartoesChecked?.map((row) => ({ id: row?.idItem, nota: row?.nota }))),
-            {
-              mail,
-              balcao,
-              msg: 'rececao confirmada',
-            }
+            JSON.stringify(
+              cartoesChecked?.map((row) => ({
+                id: row?.idItem,
+                nota: row?.nota,
+                data_rececao_sisp: fase === 'Emissão' ? row.dataSisp : '',
+              }))
+            ),
+            { mail, balcao, msg: 'rececao confirmada' }
           )
         );
       }
@@ -108,7 +124,7 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
       <DialogTitle sx={{ mb: 2 }}>Confirmar receção de cartões</DialogTitle>
       <DialogContent sx={{ p: 0 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <TableContainer sx={{ minWidth: 600, position: 'relative' }}>
+          <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
             <Table size={dense ? 'small' : 'medium'}>
               <TableBody>
                 {fields.map((item, index) => {
@@ -120,7 +136,7 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
                       </TableCell>
                       <TableCell>
                         <Stack>
-                          <Typography variant="body2">
+                          <Typography variant="subtitle1">
                             <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                               Nº cartão:&nbsp;
                             </Typography>
@@ -132,7 +148,15 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
                         </Stack>
                       </TableCell>
                       <TableCell width={'100%'}>
-                        <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
+                        <Stack direction="row" spacing={1}>
+                          <RHFDatePicker
+                            slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
+                            name={`cartoes[${index}].dataSisp`}
+                            label="Data de recessão"
+                            disableFuture
+                          />
+                          <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   );
@@ -164,8 +188,14 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
   const { mail } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
-  const formSchema = Yup.object().shape({ data: Yup.date().typeError('Data não pode ficar vazio') });
-  const defaultValues = useMemo(() => ({ data: new Date(), nota: '' }), []);
+  const formSchema = Yup.object().shape({
+    data: Yup.date().typeError('Introduza uma data válida').required('Data de emissão não pode ficar vazio'),
+    dataSisp: Yup.date().typeError('Introduza uma data válida').required('Data de receção não pode ficar vazio'),
+  });
+  const defaultValues = useMemo(
+    () => ({ data: sub(new Date(), { days: 1 }), balcao, dataSisp: new Date(), nota: '' }),
+    [balcao]
+  );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
   const values = watch();
@@ -180,7 +210,12 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
       dispatch(
         updateItem(
           fase === 'Emissão' ? 'confirmar emissao por data' : 'confirmar rececao por data',
-          JSON.stringify({ data_emissao: format(values.data, 'yyyy-MM-dd'), nota: values?.nota }),
+          JSON.stringify({
+            nota: values?.nota,
+            balcao: values?.balcao,
+            data_emissao: format(values.data, 'yyyy-MM-dd'),
+            data_rececao_sisp: fase === 'Emissão' ? values.dataSisp : null,
+          }),
           { mail, fase, balcao, msg: 'rececao confirmada' }
         )
       );
@@ -190,13 +225,18 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth={fase === 'Emissão' ? 'sm' : 'xs'}>
       <DialogTitle>Confirmar receção de cartões</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFDatePicker name="data" label="Data de emissão" disableFuture />
+            {fase === 'Emissão' && (
+              <Grid item xs={12} sm={6}>
+                <RHFDatePicker name="data" disableFuture label="Data de emissão" />
+              </Grid>
+            )}
+            <Grid item xs={12} sm={fase === 'Emissão' ? 6 : 12}>
+              <RHFDatePicker name="dataSisp" label="Data de recessão SISP" disableFuture />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="nota" label="Nota" />

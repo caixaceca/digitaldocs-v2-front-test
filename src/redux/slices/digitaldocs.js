@@ -855,6 +855,7 @@ export function getAll(item, params) {
         }
         case 'pesquisa v2': {
           dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('pesquisa'));
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/search/${params?.perfilId}?uoID=${params?.uoID}&chave=${params?.chave}`,
             options
@@ -864,6 +865,7 @@ export function getAll(item, params) {
         }
         case 'pesquisa avancada': {
           dispatch(slice.actions.resetItem('processo'));
+          dispatch(slice.actions.resetItem('pesquisa'));
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/search/interno/${params?.perfilID}?uoID=${params?.uoID}${
               params?.nentrada ? `&nentrada=${params?.nentrada}` : ''

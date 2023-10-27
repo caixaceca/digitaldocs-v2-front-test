@@ -31,11 +31,11 @@ export default function Anexos({ anexos }) {
   const { anexo, filePreview, previewType, isLoadingAnexo, processo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = anexos?.filter((row) => row.is_ativo);
   const anexosInativos = anexos?.filter((row) => !row.is_ativo);
-  const isPdf = anexosAtivos?.[0]?.conteudo === 'application/pdf';
-  const isImg = getFileFormat(anexosAtivos?.[0]?.anexo) === 'image';
-  const [selectedAnexoPreview, setSelectedAnexoPreview] = useState(
-    (anexosAtivos?.[0]?.conteudo && isPdf) || (anexosAtivos?.[0]?.anexo && isImg) ? anexosAtivos?.[0] : null
-  );
+  const canPreview =
+    anexosAtivos?.find((row) => row?.conteudo === 'application/pdf' || getFileFormat(row?.anexo) === 'image') || null;
+  const [selectedAnexoPreview, setSelectedAnexoPreview] = useState(canPreview || null);
+  const isPdf = canPreview?.conteudo === 'application/pdf';
+  const isImg = getFileFormat(canPreview?.anexo) === 'image';
 
   useEffect(() => {
     if (anexo?.ficheiro) {
@@ -51,19 +51,19 @@ export default function Anexos({ anexos }) {
   }, [anexo?.ficheiro]);
 
   const handleAnexo = (anexo) => {
-    const isPdf_ = anexo?.conteudo === 'application/pdf';
-    const isImg_ = getFileFormat(anexo?.anexo) === 'image';
+    const pdfFile = anexo?.conteudo === 'application/pdf';
+    const imgFile = getFileFormat(anexo?.anexo) === 'image';
 
-    if (isPdf_ || isImg_) {
+    if (pdfFile || imgFile) {
       setSelectedAnexoPreview(anexo);
     } else {
       setSelectedAnexo(anexo);
     }
     dispatch(
       getAnexo(
-        isPdf_ || isImg_ ? 'filepreview' : 'anotherone',
+        pdfFile || imgFile ? 'filepreview' : 'anotherone',
         anexo.anexo,
-        (isPdf_ && 'pdf') || (isImg_ && 'image') || '',
+        (pdfFile && 'pdf') || (imgFile && 'image') || '',
         mail
       )
     );
@@ -71,10 +71,10 @@ export default function Anexos({ anexos }) {
 
   useEffect(() => {
     if ((isPdf || isImg) && !filePreview?.ficheiro) {
-      dispatch(getAnexo('filepreview', anexosAtivos?.[0]?.anexo, (isPdf && 'pdf') || (isImg && 'image'), mail));
+      dispatch(getAnexo('filepreview', canPreview?.anexo, (isPdf && 'pdf') || (isImg && 'image'), mail));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, mail, anexosAtivos?.[0], filePreview?.ficheiro]);
+  }, [dispatch, mail, canPreview, filePreview?.ficheiro]);
 
   useEffect(() => {
     if (filePreview?.ficheiro) {

@@ -311,7 +311,7 @@ Criacao.propTypes = { vista: PropTypes.string };
 
 export function Criacao({ vista }) {
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const isNotFound = !indicadores.length;
   const total = sumBy(indicadores, 'total');
   const series = useMemo(
@@ -386,7 +386,7 @@ export function Criacao({ vista }) {
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'grafico' && series?.data?.length > 0 ? (
+                    {currentTab === 'Gráfico' && series?.data?.length > 0 ? (
                       <Chart type="area" series={series} options={chartOptions} height={400} />
                     ) : (
                       <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
@@ -615,7 +615,7 @@ export function EntradasTrabalhados() {
 export function DevolvidosTipos() {
   const theme = useTheme();
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const isNotFound = !indicadores.length;
   const total = sumBy(indicadores, 'total');
   const labels = indicadores?.map((row) => row?.assunto);
@@ -670,7 +670,7 @@ export function DevolvidosTipos() {
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'grafico' && series?.[0]?.data?.length > 0 ? (
+                    {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                       <Chart type="line" series={series} options={chartOptions} height={500} />
                     ) : (
                       <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
@@ -691,11 +691,16 @@ export function DevolvidosTipos() {
 export function Execucao() {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, indicadores, fluxos, estados } = useSelector((state) => state.digitaldocs);
-  const fluxo = fluxos?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic')));
-  const estado = estados?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic')));
-  const colaborador = colaboradores?.find(
-    (row) => Number(row?.perfil?.id) === Number(localStorage.getItem('colaboradorIndic'))
-  );
+  const fluxo = localStorage.getItem('fluxoIndic')
+    ? fluxos?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic')))
+    : '';
+  const estado = localStorage.getItem('estadoIndic')
+    ? estados?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic')))
+    : '';
+  const colaborador = localStorage.getItem('colaboradorIndic')
+    ? colaboradores?.find((row) => Number(row?.perfil?.id) === Number(localStorage.getItem('colaboradorIndic')))
+    : '';
+  console.log(localStorage.getItem('colaboradorIndic'));
   const {
     page,
     order,
@@ -763,22 +768,20 @@ export function Execucao() {
                     passa{' '}
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
                       {converterSegundos(
-                        sumBy(
+                        (sumBy(
                           dataFiltered?.filter(
                             (row) => !row?.nome?.includes('Atendimento') && !row?.nome?.includes('Gerência')
                           ),
                           'tempo_execucao'
-                        ) +
-                          sumBy(
+                        ) || 0) +
+                          ((sumBy(
                             dataFiltered?.filter((row) => row?.nome?.includes('Atendimento')),
                             'tempo_execucao'
-                          ) /
-                            dataFiltered?.filter((row) => row?.nome?.includes('Atendimento'))?.length +
-                          sumBy(
-                            dataFiltered?.filter((row) => row?.nome?.includes('Gerência')),
-                            'tempo_execucao'
-                          ) /
-                            dataFiltered?.filter((row) => row?.nome?.includes('Gerência'))?.length
+                          ) / dataFiltered?.filter((row) => row?.nome?.includes('Atendimento'))?.length || 0) +
+                            (sumBy(
+                              dataFiltered?.filter((row) => row?.nome?.includes('Gerência')),
+                              'tempo_execucao'
+                            ) / dataFiltered?.filter((row) => row?.nome?.includes('Gerência'))?.length || 0))
                       )}
                     </Typography>{' '}
                     sendo executado{' '}
@@ -797,10 +800,15 @@ export function Execucao() {
                     <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
                       {converterSegundos(totalTempo)}
                     </Typography>{' '}
-                    sendo executado no estado{' '}
-                    <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                      {estado?.nome}
-                    </Typography>
+                    sendo executado{' '}
+                    {estado && (
+                      <>
+                        no estado{' '}
+                        <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                          {estado?.nome}
+                        </Typography>
+                      </>
+                    )}
                   </Typography>
                 )}
               </>
@@ -855,7 +863,7 @@ export function Execucao() {
 export function Duracao() {
   const { uos } = useSelector((state) => state.intranet);
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const duracaoByItem = useMemo(() => duracaoP(indicadores, uos), [indicadores, uos]);
   const isNotFound = !duracaoByItem.length;
 
@@ -919,7 +927,7 @@ export function Duracao() {
                       </Grid>
                     ))}
                     <Grid item xs={12}>
-                      {currentTab === 'grafico' && series?.data?.length > 0 ? (
+                      {currentTab === 'Gráfico' && series?.data?.length > 0 ? (
                         <Chart type="bar" series={series} options={chartOptions} height={500} />
                       ) : (
                         <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
@@ -943,7 +951,7 @@ Volume.propTypes = { top: PropTypes.string };
 export function Volume({ top }) {
   const theme = useTheme();
   const agrupamento = localStorage.getItem('agrupamento') || 'Unidade orgânica';
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'grafico');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const topNumb = (top === 'Top 5' && 5) || (top === 'Top 10' && 10) || (top === 'Top 20' && 20) || 'Todos';
   const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
@@ -1020,7 +1028,7 @@ export function Volume({ top }) {
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'grafico' && series?.[0]?.data?.length > 0 ? (
+                    {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                       <Chart type="line" series={series} options={chartOptions} height={500} />
                     ) : (
                       <TableExport
@@ -1106,6 +1114,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
         uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoIndic'))) ||
           uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id))
       );
+      localStorage.setItem('uoIndic', localStorage.getItem('uoIndic') || cc?.uo?.id || '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uosList, cc?.uo?.id]);
@@ -1116,6 +1125,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
         colaboradoresList?.find((row) => Number(row?.id) === Number(localStorage.getItem('colaboradorIndic'))) ||
           colaboradoresList?.find((row) => Number(row?.id) === Number(perfilId))
       );
+      localStorage.setItem('colaboradorIndic', localStorage.getItem('colaboradorIndic') || perfilId || '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colaboradoresList, perfilId]);
@@ -1585,11 +1595,8 @@ function TabView({ currentTab, setCurrentTab }) {
         sx={{ width: 120, minHeight: '35px' }}
         onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabView')}
       >
-        {[
-          { value: 'grafico', label: 'Gráfico' },
-          { value: 'tabela', label: 'Tabela' },
-        ].map((tab) => (
-          <Tab key={tab.value} label={tab.label} value={tab.value} sx={{ mx: '5px !important', minHeight: '35px' }} />
+        {['Gráfico', 'Tabela'].map((tab) => (
+          <Tab key={tab} label={tab} value={tab} sx={{ mx: '5px !important', minHeight: '35px' }} />
         ))}
       </Tabs>
     </Stack>

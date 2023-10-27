@@ -96,7 +96,7 @@ export default function TableControle({ from }) {
   );
   const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
   const [uo, setUo] = useState(
-    uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC'))) ||
+    (localStorage.getItem('uoC') && uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC')))) ||
       uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
       null
   );
@@ -117,7 +117,10 @@ export default function TableControle({ from }) {
   } = useTable({
     defaultOrder: 'desc',
     defaultOrderBy: 'nentrada',
-    defaultRowsPerPage: localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25,
+    defaultRowsPerPage:
+      (localStorage.getItem('rowsPerPage') && Number(localStorage.getItem('rowsPerPage'))) ||
+      (fromAgencia && 100) ||
+      25,
   });
 
   useEffect(() => {
@@ -126,6 +129,7 @@ export default function TableControle({ from }) {
         uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC'))) ||
           uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id))
       );
+      localStorage.setItem('uoC', localStorage.getItem('uoC') || cc?.uo?.id || '');
     }
   }, [uosList, uo, cc?.uo?.id]);
 

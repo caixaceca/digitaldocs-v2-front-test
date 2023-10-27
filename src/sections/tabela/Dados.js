@@ -54,7 +54,7 @@ export function UoData({
             options={uosList}
             value={uo || null}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
-            onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoC', true)}
+            onChange={(event, newValue) => setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true)}
             renderInput={(params) => (
               <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
             )}

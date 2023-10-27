@@ -4,10 +4,10 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
-import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from '@mui/material/Autocomplete';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import InputAdornment from '@mui/material/InputAdornment';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 // utils
 import { setItemValue } from '../utils/normalizeText';
 // redux
@@ -22,27 +22,8 @@ SearchToolbarSimple.propTypes = { filter: PropTypes.string, item: PropTypes.stri
 export function SearchToolbarSimple({ filter, item = '', setFilter }) {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
-      <TextField
-        fullWidth
-        placeholder="Procurar..."
-        value={filter}
-        onChange={(event) => setItemValue(event.target.value, setFilter, item)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: 'text.disabled' }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      {filter && (
-        <Tooltip title="Limpar" arrow>
-          <IconButton color="inherit" onClick={() => setItemValue('', setFilter, item)}>
-            <ClearAllIcon />
-          </IconButton>
-        </Tooltip>
-      )}
+      <SearchField item={item} filter={filter} setFilter={setFilter} />
+      {filter && <RemoverFiltros removerFiltro={() => setItemValue('', setFilter, item)} />}
     </Stack>
   );
 }
@@ -113,35 +94,16 @@ export function SearchToolbarProcura({
         </Stack>
       )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
-        <TextField
-          fullWidth
-          value={search}
-          onChange={(event) => setItemValue(event.target.value, setSearch, 'filterSearch')}
-          placeholder="Procurar..."
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <SearchField item="filterSearch" filter={search} setFilter={setSearch} />
         {(uo || search || assunto || estado) && (
-          <Stack>
-            <Tooltip title="Remover filtros" arrow>
-              <IconButton
-                color="inherit"
-                onClick={() => {
-                  setItemValue('', setUo, 'uoFSearch');
-                  setItemValue('', setSearch, 'estadoSearch');
-                  setItemValue('', setEstado, 'filterSearch');
-                  setItemValue('', setAssunto, 'assuntoSearch');
-                }}
-              >
-                <ClearAllIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <RemoverFiltros
+            removerFiltro={() => {
+              setItemValue('', setUo, 'uoFSearch');
+              setItemValue('', setSearch, 'estadoSearch');
+              setItemValue('', setEstado, 'filterSearch');
+              setItemValue('', setAssunto, 'assuntoSearch');
+            }}
+          />
         )}
       </Stack>
     </Stack>
@@ -209,33 +171,14 @@ export function SearchToolbarProcessos({
         </Stack>
       )}
       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
-        <TextField
-          fullWidth
-          placeholder="Procurar..."
-          value={filter}
-          onChange={(event) => setItemValue(event.target.value, setFilter, 'filterP')}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <SearchField item="filterP" filter={filter} setFilter={setFilter} />
         {(filter || segmento) && (
-          <Stack>
-            <Tooltip title="Remover filtros" arrow>
-              <IconButton
-                color="inherit"
-                onClick={() => {
-                  setItemValue('', setFilter, 'filterP');
-                  setItemValue('', setSegmento, 'segmento');
-                }}
-              >
-                <ClearAllIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <RemoverFiltros
+            removerFiltro={() => {
+              setItemValue('', setFilter, 'filterP');
+              setItemValue('', setSegmento, 'segmento');
+            }}
+          />
         )}
       </Stack>
     </Stack>
@@ -309,35 +252,16 @@ export function SearchToolbarEntradas({
         </Stack>
       )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
-        <TextField
-          fullWidth
-          value={filter}
-          placeholder="Procurar..."
-          onChange={(event) => setItemValue(event.target.value, setFilter, 'filterC')}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <SearchField item="filterC" filter={filter} setFilter={setFilter} />
         {(filter || assunto || colaborador || estado) && (
-          <Stack>
-            <Tooltip title="Remover filtros" arrow>
-              <IconButton
-                color="inherit"
-                onClick={() => {
-                  setItemValue('', setFilter, 'filterC');
-                  setItemValue('', setEstado, 'estadoC');
-                  setItemValue('', setAssunto, 'assuntoC');
-                  setItemValue('', setColaborador, 'colaboradorC');
-                }}
-              >
-                <ClearAllIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <RemoverFiltros
+            removerFiltro={() => {
+              setItemValue('', setFilter, 'filterC');
+              setItemValue('', setEstado, 'estadoC');
+              setItemValue('', setAssunto, 'assuntoC');
+              setItemValue('', setColaborador, 'colaboradorC');
+            }}
+          />
         )}
       </Stack>
     </Stack>
@@ -394,34 +318,15 @@ export function SearchToolbarCartoes({
         </Stack>
       )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
-        <TextField
-          fullWidth
-          value={filter}
-          placeholder="Procurar..."
-          onChange={(event) => setItemValue(event.target.value, setFilter, 'filterCartao')}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <SearchField item="filterCartao" filter={filter} setFilter={setFilter} />
         {(filter || balcaoEntrega) && (
-          <Stack>
-            <Tooltip title="Remover filtros" arrow>
-              <IconButton
-                color="inherit"
-                onClick={() => {
-                  setItemValue('', setFilter, 'filterCartao');
-                  setItemValue('', setTipoCartao, 'tipoCartao');
-                  setItemValue('', setBalcaoEntrega, 'balcaoE');
-                }}
-              >
-                <ClearAllIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <RemoverFiltros
+            removerFiltro={() => {
+              setItemValue('', setFilter, 'filterCartao');
+              setItemValue('', setTipoCartao, 'tipoCartao');
+              setItemValue('', setBalcaoEntrega, 'balcaoE');
+            }}
+          />
         )}
       </Stack>
     </Stack>
@@ -452,19 +357,7 @@ export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
         renderInput={(params) => <TextField {...params} label="Unidade orgânica" />}
       />
       <Stack spacing={1} direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
-        <TextField
-          fullWidth
-          value={filter}
-          placeholder="Procurar..."
-          onChange={(event) => setItemValue(event.target.value, setFilter, 'filterParams')}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <SearchField item="filterParams" filter={filter} setFilter={setFilter} />
         {(filter || uo) && (
           <Tooltip title="Remover pesquiza" arrow>
             <IconButton
@@ -479,6 +372,42 @@ export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
           </Tooltip>
         )}
       </Stack>
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SearchField.propTypes = { item: PropTypes.string, filter: PropTypes.string, setFilter: PropTypes.func };
+
+function SearchField({ item, filter, setFilter }) {
+  return (
+    <TextField
+      fullWidth
+      value={filter}
+      placeholder="Procurar..."
+      onChange={(event) => setItemValue(event.target.value, setFilter, item)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchOutlinedIcon sx={{ color: 'text.disabled' }} />
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
+}
+
+RemoverFiltros.propTypes = { removerFiltro: PropTypes.func };
+
+function RemoverFiltros({ removerFiltro }) {
+  return (
+    <Stack>
+      <Tooltip title="Remover filtros" arrow>
+        <IconButton color="inherit" onClick={removerFiltro}>
+          <ClearAllIcon />
+        </IconButton>
+      </Tooltip>
     </Stack>
   );
 }

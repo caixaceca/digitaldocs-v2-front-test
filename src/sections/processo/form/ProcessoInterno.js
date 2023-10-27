@@ -270,7 +270,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         if (values.tipo_docid?.id) {
           formData.append('tipo_docid', values.tipo_docid?.id);
         }
-        if (values?.is_cliente && values.entidade_con) {
+        if (values.entidade_con) {
           formData.append('entidade_con', values.entidade_con);
         }
         if (values.nacionalidade) {

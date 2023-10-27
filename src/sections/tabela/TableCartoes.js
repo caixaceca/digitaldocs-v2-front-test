@@ -1,5 +1,5 @@
-import { add, format } from 'date-fns';
 import { useSnackbar } from 'notistack';
+import { add, sub, format } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Fab from '@mui/material/Fab';
@@ -24,7 +24,7 @@ import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, getItem, openDetalhes, closeModal, resetItem } from '../../redux/slices/digitaldocs';
+import { getAll, getItem, openDetalhes, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
@@ -64,10 +64,14 @@ export default function TableCartoes() {
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
   const [datai, setDatai] = useState(
-    localStorage.getItem('dataIC') ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 }) : new Date()
+    localStorage.getItem('dataIC')
+      ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 })
+      : sub(new Date(), { days: 1 })
   );
   const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFC') ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 }) : new Date()
+    localStorage.getItem('dataFC')
+      ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 })
+      : sub(new Date(), { days: 1 })
   );
   const { cartoes, meusAmbientes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
     (state) => state.digitaldocs
@@ -95,7 +99,10 @@ export default function TableCartoes() {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'data_emissao', defaultRowsPerPage: localStorage.getItem('rowsPerPage') || 25 });
+  } = useTable({
+    defaultOrderBy: 'data_emissao',
+    defaultRowsPerPage: (localStorage.getItem('rowsPerPage') && Number(localStorage.getItem('rowsPerPage'))) || 25,
+  });
 
   useEffect(() => {
     if (done === 'rececao confirmada') {
@@ -127,11 +134,13 @@ export default function TableCartoes() {
   }, [error]);
 
   useEffect(() => {
-    if (fase === 'Receção' && !uo?.id && uosList && (localStorage.getItem('uoC') || cc?.uo?.balcao)) {
+    if (fase === 'Receção' && !uo?.id && uosList && (localStorage.getItem('uoCartao') || cc?.uo?.balcao)) {
       setUo(
-        uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoCartao'))) ||
+        (localStorage.getItem('uoCartao') &&
+          uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoCartao')))) ||
           uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.balcao))
       );
+      localStorage.setItem('uoCartao', localStorage.getItem('uoIndic') || cc?.uo?.balcao || '');
     }
   }, [uosList, fase, uo, cc?.uo?.balcao]);
 
@@ -189,12 +198,15 @@ export default function TableCartoes() {
     }
   });
 
+  const balcSelect =
+    fase === 'Receção' && uo?.id ? uo?.id : dados?.find((row) => row?.entrega === balcaoEntrega)?.balcao_entrega;
+
   const dataFiltered = applySortFilter({
     dados,
     filter,
     tipoCartao,
-    balcaoEntrega,
     comparator: getComparator(order, orderBy),
+    balcao: fase === 'Emissão' ? balcaoEntrega : '',
   });
   const isNotFound = !dataFiltered.length;
 
@@ -209,7 +221,6 @@ export default function TableCartoes() {
 
   const changeFase = (newValue) => {
     setFase(newValue);
-    dispatch(resetItem('cartoes'));
   };
 
   return (
@@ -249,14 +260,16 @@ export default function TableCartoes() {
               {((fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
                 (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0)) && (
                 <Stack direction="row" spacing={1}>
+                  {balcSelect && (
+                    <Tooltip title="CONFIRMAR POR BALCÃO" arrow>
+                      <Fab size="small" color="success" onClick={onOpen1}>
+                        <DoneAllIcon />
+                      </Fab>
+                    </Tooltip>
+                  )}
                   <Tooltip title="CONFIRMAR MÚLTIPLO" arrow>
-                    <Fab size="small" variant="soft" color="success" onClick={onOpen}>
+                    <Fab size="small" color="success" onClick={onOpen}>
                       <ChecklistOutlinedIcon />
-                    </Fab>
-                  </Tooltip>
-                  <Tooltip title="CONFIRMAR POR DATA" arrow>
-                    <Fab size="small" variant="soft" color="success" onClick={onOpen1}>
-                      <DoneAllIcon />
                     </Fab>
                   </Tooltip>
                 </Stack>
@@ -333,7 +346,7 @@ export default function TableCartoes() {
 
       <Detalhes closeModal={handleCloseModal} />
       <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
-      <ConfirmarPorDataForm balcao={uo?.id} open={open1} fase={fase} c onCancel={onClose1} />
+      <ConfirmarPorDataForm balcao={balcSelect} open={open1} fase={fase} c onCancel={onClose1} />
       <ValidarForm balcao={uo?.id} open={open} dense={dense} fase={fase} cartoes={dataFiltered} onCancel={onClose} />
     </>
   );
@@ -341,7 +354,7 @@ export default function TableCartoes() {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ dados, comparator, filter, tipoCartao, balcaoEntrega }) {
+function applySortFilter({ dados, comparator, filter, tipoCartao, balcao }) {
   const stabilizedThis = dados.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -349,8 +362,8 @@ function applySortFilter({ dados, comparator, filter, tipoCartao, balcaoEntrega 
     return a[1] - b[1];
   });
   dados = stabilizedThis.map((el) => el[0]);
-  if (balcaoEntrega) {
-    dados = dados.filter((row) => row?.entrega === balcaoEntrega);
+  if (balcao) {
+    dados = dados.filter((row) => row?.entrega === balcao);
   }
   if (tipoCartao) {
     dados = dados.filter((row) => row?.tipo === tipoCartao);

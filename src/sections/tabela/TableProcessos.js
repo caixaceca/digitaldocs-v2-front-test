@@ -69,7 +69,10 @@ export default function TableProcessos({ from }) {
   } = useTable({
     defaultOrderBy: 'data_last_transicao',
     defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
-    defaultRowsPerPage: localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25,
+    defaultRowsPerPage:
+      (localStorage.getItem('rowsPerPage') && Number(localStorage.getItem('rowsPerPage'))) ||
+      (fromAgencia && 100) ||
+      25,
   });
 
   useEffect(() => {

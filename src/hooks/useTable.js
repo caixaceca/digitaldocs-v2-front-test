@@ -58,6 +58,7 @@ export default function useTable(props) {
   };
 
   const onChangeRowsPerPage = (event) => {
+    console.log(parseInt(25, 10));
     setRowsPerPage(parseInt(event.target.value, 10));
     localStorage.setItem('rowsPerPage', event.target.value);
     setPage(0);

@@ -72,7 +72,10 @@ export default function Procura() {
   } = useTable({
     defaultOrderBy: 'noOrderDefault',
     defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
-    defaultRowsPerPage: localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25,
+    defaultRowsPerPage:
+      (localStorage.getItem('rowsPerPage') && Number(localStorage.getItem('rowsPerPage'))) ||
+      (fromAgencia && 100) ||
+      25,
   });
 
   useEffect(() => {
