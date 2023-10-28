@@ -4,13 +4,7 @@ import { getComparator, applySort } from '../hooks/useTable';
 // ----------------------------------------------------------------------
 
 export function validarAcesso(grupo, grupos) {
-  let itIs = false;
-  grupos?.forEach((row) => {
-    if (row?.grupo?.label === grupo) {
-      itIs = true;
-    }
-  });
-  return itIs;
+  return !!grupos?.find((row) => row?.grupo?.label === grupo);
 }
 
 export function temNomeacao(colaborador) {
@@ -42,9 +36,9 @@ export function isResponsavelUo(uo, mail) {
 
 export function uosResponsavel(uos, colaborador) {
   const responsavel = [];
-  uos?.forEach((_row) => {
-    if (_row?.responsavel === colaborador?.perfil?.mail) {
-      responsavel.push(_row?.id);
+  uos?.forEach((row) => {
+    if (row?.responsavel === colaborador?.perfil?.mail) {
+      responsavel.push(row?.id);
     }
   });
   return responsavel;

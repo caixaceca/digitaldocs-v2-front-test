@@ -17,7 +17,7 @@ import TableContainer from '@mui/material/TableContainer';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 // utils
 import { ptDate } from '../../utils/formatTime';
-import { UosAcesso } from '../../utils/validarAcesso';
+import { validarAcesso, UosAcesso } from '../../utils/validarAcesso';
 import { normalizeText, setItemValue, dataValido } from '../../utils/normalizeText';
 // hooks
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
@@ -54,15 +54,16 @@ const TABLE_HEAD = [
 
 export default function TableCartoes() {
   const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
   const [uo, setUo] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
   const [fase, setFase] = useState(localStorage.getItem('fase') || '');
   const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
   const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
   const [balcaoEntrega, setBalcaoEntrega] = useState(localStorage.getItem('balcaoE') || '');
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, cc, uos, myGroups } = useSelector((state) => state.intranet);
+  const temAcesso = validarAcesso('rececao_cartoes', myGroups);
   const [datai, setDatai] = useState(
     localStorage.getItem('dataIC')
       ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 })
@@ -258,22 +259,23 @@ export default function TableCartoes() {
                 </Stack>
               )}
               {((fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
-                (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0)) && (
-                <Stack direction="row" spacing={1}>
-                  {balcSelect && (
-                    <Tooltip title="CONFIRMAR POR BALCÃO" arrow>
-                      <Fab size="small" color="success" onClick={onOpen1}>
-                        <DoneAllIcon />
+                (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0)) &&
+                temAcesso && (
+                  <Stack direction="row" spacing={1}>
+                    {balcSelect && (
+                      <Tooltip title="CONFIRMAR POR BALCÃO" arrow>
+                        <Fab size="small" color="success" onClick={onOpen1}>
+                          <DoneAllIcon />
+                        </Fab>
+                      </Tooltip>
+                    )}
+                    <Tooltip title="CONFIRMAR MÚLTIPLO" arrow>
+                      <Fab size="small" color="success" onClick={onOpen}>
+                        <ChecklistOutlinedIcon />
                       </Fab>
                     </Tooltip>
-                  )}
-                  <Tooltip title="CONFIRMAR MÚLTIPLO" arrow>
-                    <Fab size="small" color="success" onClick={onOpen}>
-                      <ChecklistOutlinedIcon />
-                    </Fab>
-                  </Tooltip>
-                </Stack>
-              )}
+                  </Stack>
+                )}
             </Stack>
           </Stack>
         }
@@ -315,7 +317,7 @@ export default function TableCartoes() {
                       </TableCell>
                       <TableCell width={10}>
                         <Stack direction="row" spacing={0.75} justifyContent="right">
-                          {!row.rececao_validado && fase === 'Emissão' && <UpdateItem dados={row} />}
+                          {!row.rececao_validado && fase === 'Emissão' && temAcesso && <UpdateItem dados={row} />}
                           <ViewItem handleClick={() => handleViewRow(row?.id)} />
                         </Stack>
                       </TableCell>
