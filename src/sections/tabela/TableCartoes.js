@@ -194,9 +194,6 @@ export default function TableCartoes() {
     if (!balcoes.includes(`${row?.balcao_entrega} - ${balcEntrega?.label}`)) {
       balcoes.push(`${row?.balcao_entrega} - ${balcEntrega?.label}`);
     }
-    if (!tiposCartao.includes(row?.tipo)) {
-      tiposCartao.push(row?.tipo);
-    }
   });
 
   const balcSelect =
@@ -210,6 +207,12 @@ export default function TableCartoes() {
     balcao: fase === 'Emissão' ? balcaoEntrega : '',
   });
   const isNotFound = !dataFiltered.length;
+
+  dataFiltered?.forEach((row) => {
+    if (!tiposCartao.includes(row?.tipo)) {
+      tiposCartao.push(row?.tipo);
+    }
+  });
 
   const handleViewRow = (id) => {
     dispatch(openDetalhes());
