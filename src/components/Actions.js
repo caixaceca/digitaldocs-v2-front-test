@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
@@ -17,6 +18,7 @@ import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
@@ -31,6 +33,27 @@ import SvgIconStyle from './SvgIconStyle';
 import DialogConfirmar from './DialogConfirmar';
 
 const wh = { width: 36, height: 36 };
+
+// ----------------------------------------------------------------------
+
+DefaultAction.propTypes = {
+  icon: PropTypes.string,
+  label: PropTypes.string,
+  color: PropTypes.string,
+  handleClick: PropTypes.func,
+};
+
+export function DefaultAction({ label, color = 'success', icon, handleClick }) {
+  return (
+    <Stack>
+      <Tooltip title={label} arrow>
+        <Fab size="small" color={color} variant="soft" onClick={handleClick}>
+          {(icon === 'doneAll' && <DoneAllIcon />) || (icon === 'multiple' && <ChecklistOutlinedIcon />)}
+        </Fab>
+      </Tooltip>
+    </Stack>
+  );
+}
 
 // ----------------------------------------------------------------------
 

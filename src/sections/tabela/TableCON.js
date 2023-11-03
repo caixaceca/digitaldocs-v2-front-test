@@ -118,8 +118,8 @@ export default function TableCON() {
                 <ReactHTMLTableToExcel
                   table="tabel-con"
                   id="table-xls-button"
-                  className="MuiButtonBase-root-MuiButton-root"
                   sheet="Comunicação Operação Numerário"
+                  className="MuiButtonBase-root-MuiButton-root"
                   filename={`Comunicação Operação Numerário ${dataValido(datai) ? format(datai, 'yyyy-MM-dd') : ''} - ${
                     dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : ''
                   }`}

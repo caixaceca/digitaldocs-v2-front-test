@@ -69,19 +69,6 @@ export default function UploadMultiFile({
 
       <MultiFilePreview files={files} showPreview={showPreview} onRemove={onRemove} />
 
-      {/* {files.length > 0 && (
-        <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
-          <Button color="inherit" size="small" onClick={onRemoveAll}>
-            Remover todos
-          </Button>
-          {onUpload && (
-            <Button size="small" variant="contained" onClick={onUpload}>
-              Adicionar
-            </Button>
-          )}
-        </Stack>
-      )} */}
-
       {helperText && helperText}
     </Box>
   );

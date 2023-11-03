@@ -271,60 +271,33 @@ export function SearchToolbarEntradas({
 // ----------------------------------------------------------------------
 
 SearchToolbarCartoes.propTypes = {
-  balcoes: PropTypes.array,
   filter: PropTypes.string,
   setFilter: PropTypes.func,
   tiposCartao: PropTypes.array,
   tipoCartao: PropTypes.string,
   setTipoCartao: PropTypes.func,
-  balcaoEntrega: PropTypes.string,
-  setBalcaoEntrega: PropTypes.func,
 };
 
-export function SearchToolbarCartoes({
-  filter,
-  balcoes,
-  setFilter,
-  tipoCartao,
-  tiposCartao,
-  setTipoCartao,
-  balcaoEntrega,
-  setBalcaoEntrega,
-}) {
+export function SearchToolbarCartoes({ filter, setFilter, tipoCartao, tiposCartao, setTipoCartao }) {
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {(balcoes?.length > 1 || tiposCartao?.length > 1) && (
-        <Stack spacing={1} direction="row" alignItems="center">
-          {balcoes?.length > 1 && (
-            <Autocomplete
-              fullWidth
-              options={balcoes?.sort()}
-              sx={{ width: { md: 230 } }}
-              value={balcaoEntrega || null}
-              renderInput={(params) => <TextField {...params} label="Balcão entrega" />}
-              onChange={(event, newValue) => setItemValue(newValue, setBalcaoEntrega, 'balcaoE')}
-            />
-          )}
-          {tiposCartao?.length > 1 && (
-            <Autocomplete
-              fullWidth
-              value={tipoCartao || null}
-              sx={{ width: { md: 230 } }}
-              options={tiposCartao?.sort()}
-              renderInput={(params) => <TextField {...params} label="Tipo de cartão" />}
-              onChange={(event, newValue) => setItemValue(newValue, setTipoCartao, 'tipoCartao')}
-            />
-          )}
-        </Stack>
+      {tiposCartao?.length > 0 && (
+        <Autocomplete
+          fullWidth
+          value={tipoCartao || null}
+          sx={{ width: { md: 230 } }}
+          options={tiposCartao?.sort()}
+          renderInput={(params) => <TextField {...params} label="Tipo de cartão" />}
+          onChange={(event, newValue) => setItemValue(newValue, setTipoCartao, 'tipoCartao')}
+        />
       )}
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <SearchField item="filterCartao" filter={filter} setFilter={setFilter} />
-        {(filter || balcaoEntrega) && (
+        {(filter || tipoCartao) && (
           <RemoverFiltros
             removerFiltro={() => {
               setItemValue('', setFilter, 'filterCartao');
               setItemValue('', setTipoCartao, 'tipoCartao');
-              setItemValue('', setBalcaoEntrega, 'balcaoE');
             }}
           />
         )}

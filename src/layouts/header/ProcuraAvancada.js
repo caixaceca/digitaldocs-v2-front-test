@@ -9,6 +9,7 @@ import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
+import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -131,8 +132,9 @@ export default function ProcuraAvancada() {
         maxWidth={avancada ? 'md' : 'sm'}
         sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
       >
+        <DialogTitle>Procurar</DialogTitle>
         <DialogContent sx={{ pb: 0 }}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
             {avancada ? (
               <>
                 <Grid item xs={12} sm={4}>

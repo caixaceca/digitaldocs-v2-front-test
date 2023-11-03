@@ -1,20 +1,16 @@
+import { sub, format } from 'date-fns';
 import { useSnackbar } from 'notistack';
-import { add, sub, format } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
-import Fab from '@mui/material/Fab';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
 import TableContainer from '@mui/material/TableContainer';
-import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 // utils
 import { ptDate } from '../../utils/formatTime';
 import { validarAcesso, UosAcesso } from '../../utils/validarAcesso';
@@ -30,7 +26,7 @@ import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
-import { UpdateItem, ViewItem, Checked } from '../../components/Actions';
+import { UpdateItem, ViewItem, Checked, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { UoData } from './Dados';
@@ -56,24 +52,15 @@ export default function TableCartoes() {
   const dispatch = useDispatch();
   const [uo, setUo] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
-  const [fase, setFase] = useState(localStorage.getItem('fase') || '');
-  const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
-  const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
-  const [balcaoEntrega, setBalcaoEntrega] = useState(localStorage.getItem('balcaoE') || '');
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
+  const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
   const { mail, cc, uos, myGroups } = useSelector((state) => state.intranet);
+  const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
   const temAcesso = validarAcesso('rececao_cartoes', myGroups);
-  const [datai, setDatai] = useState(
-    localStorage.getItem('dataIC')
-      ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 })
-      : sub(new Date(), { days: 1 })
-  );
-  const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFC')
-      ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 })
-      : sub(new Date(), { days: 1 })
-  );
+  const [datai, setDatai] = useState(sub(new Date(), { days: 1 }));
+  const [dataf, setDataf] = useState(sub(new Date(), { days: 1 }));
   const { cartoes, meusAmbientes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
     (state) => state.digitaldocs
   );
@@ -101,8 +88,9 @@ export default function TableCartoes() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrderBy: 'data_emissao',
-    defaultRowsPerPage: (localStorage.getItem('rowsPerPage') && Number(localStorage.getItem('rowsPerPage'))) || 25,
+    defaultOrder: 'asc',
+    defaultOrderBy: 'numero',
+    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
 
   useEffect(() => {
@@ -146,11 +134,10 @@ export default function TableCartoes() {
   }, [uosList, fase, uo, cc?.uo?.balcao]);
 
   useEffect(() => {
-    if (!fase) {
-      const uoSel = uos?.find((row) => Number(row?.balcao) === Number(uo?.id));
-      setFase(uoSel?.tipo === 'Agências' ? 'Receção' : 'Emissão');
+    if (cc?.uo?.tipo) {
+      setFase(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
     }
-  }, [uo?.id, fase, uos]);
+  }, [cc?.uo?.tipo]);
 
   useEffect(() => {
     if (mail && fase && datai && fase === 'Emissão') {
@@ -180,35 +167,31 @@ export default function TableCartoes() {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, fase, datai, dataf, balcaoEntrega]);
+  }, [filter, fase, datai, dataf, uo?.id]);
 
   const dados = [];
-  const balcoes = [];
   const tiposCartao = [];
   cartoes?.forEach((row) => {
     const balcEntrega = uos?.find((uo) => Number(uo.balcao) === Number(row?.balcao_entrega));
-    dados.push({
-      ...row,
-      entrega: `${row?.balcao_entrega} - ${balcEntrega?.label}`,
-    });
-    if (!balcoes.includes(`${row?.balcao_entrega} - ${balcEntrega?.label}`)) {
-      balcoes.push(`${row?.balcao_entrega} - ${balcEntrega?.label}`);
-    }
+    dados.push({ ...row, entrega: balcEntrega?.label });
   });
-
-  const balcSelect =
-    fase === 'Receção' && uo?.id ? uo?.id : dados?.find((row) => row?.entrega === balcaoEntrega)?.balcao_entrega;
 
   const dataFiltered = applySortFilter({
     dados,
     filter,
     tipoCartao,
+    balcao: uo?.id,
     comparator: getComparator(order, orderBy),
-    balcao: fase === 'Emissão' ? balcaoEntrega : '',
   });
   const isNotFound = !dataFiltered.length;
 
-  dataFiltered?.forEach((row) => {
+  applySortFilter({
+    dados,
+    filter,
+    tipoCartao: '',
+    balcao: uo?.id,
+    comparator: getComparator(order, orderBy),
+  })?.forEach((row) => {
     if (!tiposCartao.includes(row?.tipo)) {
       tiposCartao.push(row?.tipo);
     }
@@ -237,7 +220,6 @@ export default function TableCartoes() {
             <UoData
               uo={uo}
               cartoes
-              fase={fase}
               setUo={setUo}
               datai={datai}
               dataf={dataf}
@@ -256,7 +238,7 @@ export default function TableCartoes() {
                     disableClearable
                     value={fase || null}
                     options={['Emissão', 'Receção']}
-                    onChange={(event, newValue) => setItemValue(newValue, changeFase, 'fase')}
+                    onChange={(event, newValue) => setItemValue(newValue, changeFase, '', false)}
                     renderInput={(params) => <TextField {...params} label="Fase" sx={{ width: 120 }} />}
                   />
                 </Stack>
@@ -265,18 +247,8 @@ export default function TableCartoes() {
                 (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0)) &&
                 temAcesso && (
                   <Stack direction="row" spacing={1}>
-                    {balcSelect && (
-                      <Tooltip title="CONFIRMAR POR BALCÃO" arrow>
-                        <Fab size="small" color="success" onClick={onOpen1}>
-                          <DoneAllIcon />
-                        </Fab>
-                      </Tooltip>
-                    )}
-                    <Tooltip title="CONFIRMAR MÚLTIPLO" arrow>
-                      <Fab size="small" color="success" onClick={onOpen}>
-                        <ChecklistOutlinedIcon />
-                      </Fab>
-                    </Tooltip>
+                    {uo && <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />}
+                    <DefaultAction label="CONFIRMAR MÚLTIPLO" handleClick={onOpen} icon="multiple" />
                   </Stack>
                 )}
             </Stack>
@@ -288,13 +260,10 @@ export default function TableCartoes() {
       <Card sx={{ p: 1 }}>
         <SearchToolbarCartoes
           filter={filter}
-          balcoes={balcoes}
           setFilter={setFilter}
           tipoCartao={tipoCartao}
           tiposCartao={tiposCartao}
           setTipoCartao={setTipoCartao}
-          balcaoEntrega={balcaoEntrega}
-          setBalcaoEntrega={setBalcaoEntrega}
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -351,7 +320,7 @@ export default function TableCartoes() {
 
       <Detalhes closeModal={handleCloseModal} />
       <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
-      <ConfirmarPorDataForm balcao={balcSelect} open={open1} fase={fase} c onCancel={onClose1} />
+      <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} c onCancel={onClose1} />
       <ValidarForm balcao={uo?.id} open={open} dense={dense} fase={fase} cartoes={dataFiltered} onCancel={onClose} />
     </>
   );
@@ -367,9 +336,11 @@ function applySortFilter({ dados, comparator, filter, tipoCartao, balcao }) {
     return a[1] - b[1];
   });
   dados = stabilizedThis.map((el) => el[0]);
+
   if (balcao) {
-    dados = dados.filter((row) => row?.entrega === balcao);
+    dados = dados.filter((row) => row?.balcao_entrega === balcao);
   }
+
   if (tipoCartao) {
     dados = dados.filter((row) => row?.tipo === tipoCartao);
   }

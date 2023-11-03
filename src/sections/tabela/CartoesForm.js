@@ -65,7 +65,7 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
               idItem: row?.id,
               check: false,
               numero: row?.numero,
-              nome: row?.nome,
+              tipo: row?.tipo,
               nota: '',
               dataSisp: new Date(),
             }))
@@ -76,7 +76,7 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
               idItem: row?.id,
               check: false,
               numero: row?.numero,
-              nome: row?.nome,
+              tipo: row?.tipo,
               nota: '',
               dataSisp: new Date(),
             })),
@@ -137,23 +137,26 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
                       <TableCell>
                         <Stack>
                           <Typography variant="subtitle1">
-                            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                            <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }} noWrap>
                               Nº cartão:&nbsp;
                             </Typography>
                             {item?.numero}
                           </Typography>
-                          <Typography variant="body2" noWrap>
-                            {item?.nome}
+                          <Typography variant="subtitle2">
+                            <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }} noWrap>
+                              Tipo:&nbsp;
+                            </Typography>
+                            {item?.tipo}
                           </Typography>
                         </Stack>
                       </TableCell>
                       <TableCell width={'100%'}>
                         <Stack direction="row" spacing={1}>
                           <RHFDatePicker
-                            slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
-                            name={`cartoes[${index}].dataSisp`}
-                            label="Data de recessão"
                             disableFuture
+                            label="Data de recessão"
+                            name={`cartoes[${index}].dataSisp`}
+                            slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
                           />
                           <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
                         </Stack>
@@ -178,7 +181,7 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
 ConfirmarPorDataForm.propTypes = {
   open: PropTypes.bool,
   fase: PropTypes.string,
-  balcao: PropTypes.number,
+  balcao: PropTypes.object,
   onCancel: PropTypes.func,
 };
 
@@ -193,8 +196,8 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
     dataSisp: Yup.date().typeError('Introduza uma data válida').required('Data de receção não pode ficar vazio'),
   });
   const defaultValues = useMemo(
-    () => ({ data: sub(new Date(), { days: 1 }), balcao, dataSisp: new Date(), nota: '' }),
-    [balcao]
+    () => ({ data: sub(new Date(), { days: 1 }), balcao: balcao?.id, dataSisp: new Date(), nota: '' }),
+    [balcao?.id]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
@@ -216,7 +219,7 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
             data_emissao: format(values.data, 'yyyy-MM-dd'),
             data_rececao_sisp: fase === 'Emissão' ? values.dataSisp : null,
           }),
-          { mail, fase, balcao, msg: 'rececao confirmada' }
+          { mail, fase, balcao: balcao?.id, msg: 'rececao confirmada' }
         )
       );
     } catch (error) {
@@ -228,16 +231,22 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth={fase === 'Emissão' ? 'sm' : 'xs'}>
       <DialogTitle>Confirmar receção de cartões</DialogTitle>
       <DialogContent>
+        <Stack direction="row" spacing={1} justifyContent="center" sx={{ py: 3 }}>
+          <Typography sx={{ color: 'text.secondary' }}>Balcão de entrega:</Typography>
+          <Typography variant="subtitle1">
+            {balcao?.id} ({balcao?.label})
+          </Typography>
+        </Stack>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={fase === 'Emissão' ? 6 : 12}>
+              <RHFDatePicker name="data" disableFuture label="Data de emissão" />
+            </Grid>
             {fase === 'Emissão' && (
               <Grid item xs={12} sm={6}>
-                <RHFDatePicker name="data" disableFuture label="Data de emissão" />
+                <RHFDatePicker name="dataSisp" label="Data de recessão SISP" disableFuture />
               </Grid>
             )}
-            <Grid item xs={12} sm={fase === 'Emissão' ? 6 : 12}>
-              <RHFDatePicker name="dataSisp" label="Data de recessão SISP" disableFuture />
-            </Grid>
             <Grid item xs={12}>
               <RHFTextField name="nota" label="Nota" />
             </Grid>
@@ -374,6 +383,9 @@ export function Detalhes({ closeModal }) {
               <ListItem disableGutters divider sx={{ pb: 0.5 }}>
                 <Typography variant="subtitle1">Confirmação de receção</Typography>
               </ListItem>
+              {selectedItem?.data_rececao_sisp && (
+                <TextItem title="Data recebido da SISP:" text={ptDate(selectedItem?.data_rececao_sisp)} />
+              )}
               <TextItem
                 title="Confirmação DOP-CE:&nbsp;"
                 label={

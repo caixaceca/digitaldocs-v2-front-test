@@ -62,7 +62,9 @@ export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, val
   if (resetDate) {
     if (newValue && dataValido(newValue) && newValue > valueF) {
       resetDate(new Date());
-      localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
+      if (localSIF) {
+        localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
+      }
     } else if (!newValue) {
       resetDate(null);
       if (localSIF) {

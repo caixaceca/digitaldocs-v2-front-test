@@ -17,7 +17,6 @@ import { ViewItem, CriadoEmPor } from '../../components/Actions';
 UoData.propTypes = {
   uo: PropTypes.object,
   setUo: PropTypes.func,
-  fase: PropTypes.string,
   data: PropTypes.object,
   cartoes: PropTypes.bool,
   datai: PropTypes.object,
@@ -39,27 +38,24 @@ export function UoData({
   setData,
   setDatai,
   setDataf,
-  fase = '',
   cartoes = false,
   entradas = false,
 }) {
   return (
     <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
-      {uosList?.length > 1 && (!cartoes || (cartoes && fase === 'Receção')) && (
-        <Stack>
-          <Autocomplete
-            fullWidth
-            size="small"
-            disableClearable
-            options={uosList}
-            value={uo || null}
-            isOptionEqualToValue={(option, value) => option?.id === value?.id}
-            onChange={(event, newValue) => setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true)}
-            renderInput={(params) => (
-              <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
-            )}
-          />
-        </Stack>
+      {uosList?.length > 0 && (
+        <Autocomplete
+          fullWidth
+          size="small"
+          options={uosList}
+          value={uo || null}
+          disableClearable={!cartoes}
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          onChange={(event, newValue) => setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true)}
+          renderInput={(params) => (
+            <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
+          )}
+        />
       )}
       {entradas || cartoes ? (
         <Stack direction="row" alignItems="center" spacing={1}>
@@ -68,7 +64,9 @@ export function UoData({
             value={datai}
             label="Data inicial"
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-            onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIC', setDataf, 'dataFC', dataf)}
+            onChange={(newValue) =>
+              setDataUtil(newValue, setDatai, cartoes ? '' : 'dataIC', setDataf, cartoes ? '' : 'dataFC', dataf)
+            }
           />
           <DatePicker
             disableFuture
@@ -77,7 +75,7 @@ export function UoData({
             disabled={!datai}
             label="Data final"
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-            onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFC', '', '', '')}
+            onChange={(newValue) => setDataUtil(newValue, setDataf, cartoes ? '' : 'dataFC', '', '', '')}
           />
         </Stack>
       ) : (

@@ -115,12 +115,9 @@ export default function TableControle({ from }) {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrder: 'desc',
-    defaultOrderBy: 'nentrada',
-    defaultRowsPerPage:
-      (localStorage.getItem('rowsPerPage') && Number(localStorage.getItem('rowsPerPage'))) ||
-      (fromAgencia && 100) ||
-      25,
+    defaultOrder: from === 'trabalhados' ? 'asc' : 'desc',
+    defaultOrderBy: from === 'trabalhados' ? 'trabalhado_em' : 'nentrada',
+    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
   });
 
   useEffect(() => {
