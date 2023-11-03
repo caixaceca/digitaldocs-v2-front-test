@@ -152,12 +152,14 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
                       </TableCell>
                       <TableCell width={'100%'}>
                         <Stack direction="row" spacing={1}>
-                          <RHFDatePicker
-                            disableFuture
-                            label="Data de recessão"
-                            name={`cartoes[${index}].dataSisp`}
-                            slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
-                          />
+                          {fase === 'Emissão' && (
+                            <RHFDatePicker
+                              disableFuture
+                              label="Data de recessão"
+                              name={`cartoes[${index}].dataSisp`}
+                              slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
+                            />
+                          )}
                           <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
                         </Stack>
                       </TableCell>
