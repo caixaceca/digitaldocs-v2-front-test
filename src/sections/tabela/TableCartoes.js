@@ -231,17 +231,15 @@ export default function TableCartoes() {
             />
             <Stack direction="row" alignItems="center" spacing={1}>
               {isAdmin && (
-                <Stack>
-                  <Autocomplete
-                    fullWidth
-                    size="small"
-                    disableClearable
-                    value={fase || null}
-                    options={['Emissão', 'Receção']}
-                    onChange={(event, newValue) => setItemValue(newValue, changeFase, '', false)}
-                    renderInput={(params) => <TextField {...params} label="Fase" sx={{ width: 120 }} />}
-                  />
-                </Stack>
+                <Autocomplete
+                  fullWidth
+                  size="small"
+                  disableClearable
+                  value={fase || null}
+                  options={['Emissão', 'Receção']}
+                  onChange={(event, newValue) => setItemValue(newValue, changeFase, '', false)}
+                  renderInput={(params) => <TextField {...params} label="Item" sx={{ width: 120 }} />}
+                />
               )}
               {((fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
                 (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0)) &&

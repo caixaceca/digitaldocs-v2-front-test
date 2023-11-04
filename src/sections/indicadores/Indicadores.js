@@ -386,7 +386,7 @@ export function Criacao({ vista }) {
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'Gráfico' && series?.data?.length > 0 ? (
+                    {currentTab === 'Gráfico' && series?.length > 0 ? (
                       <Chart type="area" series={series} options={chartOptions} height={400} />
                     ) : (
                       <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
@@ -927,7 +927,7 @@ export function Duracao() {
                       </Grid>
                     ))}
                     <Grid item xs={12}>
-                      {currentTab === 'Gráfico' && series?.data?.length > 0 ? (
+                      {currentTab === 'Gráfico' && series?.length > 0 ? (
                         <Chart type="bar" series={series} options={chartOptions} height={500} />
                       ) : (
                         <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
