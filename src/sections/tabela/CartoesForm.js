@@ -364,16 +364,16 @@ export function Detalhes({ closeModal }) {
                 <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
               )}
               {bDomicilio && (
-                <TextItem title="Balcão de domicílio:" text={`${bDomicilio?.balcao} - ${bDomicilio?.label}`} />
+                <TextItem title="Balcão de domicílio:" text={`${bDomicilio?.label} (${bDomicilio?.balcao})`} />
               )}
-              {bEmissao && <TextItem title="Balcão de emissão:" text={`${bEmissao?.balcao} - ${bEmissao?.label}`} />}
+              {bEmissao && <TextItem title="Balcão de emissão:" text={`${bEmissao?.label} (${bEmissao?.balcao})`} />}
               {bEntrega && (
                 <TextItem
                   title="Balcão de entrega:"
-                  text={`${bEntrega?.balcao} - ${bEntrega?.label}`}
+                  text={`${bEntrega?.label} (${bEntrega?.balcao})`}
                   text1={
                     bEntregaOriginal && selectedItem?.balcao_entrega !== selectedItem?.balcao_entrega_original ? (
-                      <Typography>ORIGINAL: {`${bEntregaOriginal?.balcao} - ${bEntregaOriginal?.label}`}</Typography>
+                      <Typography>ORIGINAL: {`${bEntregaOriginal?.label} (${bEntregaOriginal?.balcao})`}</Typography>
                     ) : null
                   }
                 />

@@ -93,7 +93,7 @@ const slice = createSlice({
     },
 
     getLinksSuccess(state, action) {
-      state.links = action.payload;
+      state.links = applySort(action.payload, getComparator('asc', 'nome'));
     },
 
     getUosSuccess(state, action) {

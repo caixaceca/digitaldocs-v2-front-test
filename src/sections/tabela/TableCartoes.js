@@ -64,16 +64,17 @@ export default function TableCartoes() {
   const { cartoes, meusAmbientes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
     (state) => state.digitaldocs
   );
+  const isDopCE = cc?.uo?.label === 'DOP-CE';
   const uosList = useMemo(
     () =>
       UosAcesso(
         uos?.filter((row) => row?.tipo === 'Agências'),
         cc,
-        isAdmin,
+        isDopCE || isAdmin,
         meusAmbientes,
         'balcao'
       ),
-    [cc, isAdmin, meusAmbientes, uos]
+    [cc, isAdmin, isDopCE, meusAmbientes, uos]
   );
 
   const {

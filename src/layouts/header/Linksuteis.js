@@ -15,8 +15,6 @@ import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import { useSelector } from '../../redux/store';
 // utils
 import { BASEURL } from '../../utils/axios';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
 // components
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
@@ -30,10 +28,7 @@ const LogoApp = styled(Avatar)(() => ({ p: 0.5, width: '33px', height: '33px' })
 
 export default function Linksuteis() {
   const { links } = useSelector((state) => state.intranet);
-  const noLink = links.length === 0;
   const [open, setOpen] = useState(false);
-
-  const linksOrder = applySort(links, getComparator('asc', 'nome'));
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -77,20 +72,23 @@ export default function Linksuteis() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar sx={{ maxHeight: { xs: 340, sm: 420 } }}>
-          {linksOrder.map((link) => (
-            <Link href={link.link} rel="noreferrer" target="_blank" key={link.link}>
-              <MenuItem onClick={handleClose} sx={{ py: 1, px: 2.5 }}>
-                <ListItemIcon>
-                  <LogoApp variant="rounded" alt={link.nome} src={`${BASEURL}/aplicacao/logo/${link.logo_disco}`} />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{ variant: 'body2' }}>{link.nome}</ListItemText>
-              </MenuItem>
-            </Link>
-          ))}
-          {noLink && (
+          {links.length === 0 ? (
             <Typography variant="body2" sx={{ color: 'text.secondary', p: 2 }}>
               Sem links disponíveis
             </Typography>
+          ) : (
+            links?.map((link) => (
+              <Link href={link.link} rel="noreferrer" target="_blank" key={link.link}>
+                <MenuItem onClick={handleClose} sx={{ py: 1, px: 2.5 }}>
+                  <ListItemIcon>
+                    <LogoApp variant="rounded" alt={link.nome} src={`${BASEURL}/aplicacao/logo/${link.logo_disco}`} />
+                  </ListItemIcon>
+                  <ListItemText primaryTypographyProps={{ variant: 'body2', color: 'text.primary' }}>
+                    {link.nome}
+                  </ListItemText>
+                </MenuItem>
+              </Link>
+            ))
           )}
         </Scrollbar>
       </MenuPopover>

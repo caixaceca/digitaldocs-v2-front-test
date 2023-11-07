@@ -102,9 +102,9 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export function UosAcesso(uos, cc, isAdmin, meusAmbientes, key) {
+export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
   let uosList = [];
-  if (isAdmin || cc?.nomeacao === 'Administrador Executivo') {
+  if (acessoAll || cc?.nomeacao === 'Administrador Executivo') {
     uosList = uos;
   } else if (cc?.uo?.label === 'DCN') {
     uosList = uos?.filter((uo) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Norte');
