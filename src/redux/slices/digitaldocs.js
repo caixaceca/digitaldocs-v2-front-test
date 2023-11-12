@@ -327,22 +327,16 @@ const slice = createSlice({
     },
 
     getMeusAmbientesSuccess(state, action) {
-      let grpGerente = false;
       state.meusAmbientes = action.payload;
-      action.payload?.forEach((row, index) => {
-        if (row?.nome?.indexOf('Gerência') !== -1) {
-          grpGerente = index;
-        }
-      });
-      if (grpGerente) {
-        state.iAmInGrpGerente = true;
-        state.meuAmbiente = action.payload?.[grpGerente];
-        state.meusFluxos = action.payload?.[grpGerente]?.fluxos;
-      } else {
-        state.meuAmbiente = action.payload?.[0];
-        state.meusFluxos = action.payload?.[0]?.fluxos;
-      }
-      state.meuFluxo = action.payload?.[0]?.fluxos?.[0];
+      const grpGerent = action.payload?.find((row) => row?.nome?.includes('Gerência'));
+      const currentAmbiente =
+        action.payload?.find((row) => row?.id === Number(localStorage.getItem('meuAmbiente'))) ||
+        action.payload?.find((row) => row?.id === grpGerent?.id) ||
+        action.payload?.[0];
+      state.iAmInGrpGerente = !!grpGerent;
+      state.meuAmbiente = currentAmbiente;
+      state.meusFluxos = currentAmbiente?.fluxos || [];
+      state.meuFluxo = currentAmbiente?.fluxos?.[0] || null;
     },
 
     getAmbientesByPerfilSuccess(state, action) {

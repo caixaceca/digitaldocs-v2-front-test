@@ -168,7 +168,7 @@ export default function Processo() {
   }, [done]);
 
   useEffect(() => {
-    const errorStd = error[0]?.msg || error?.error || error;
+    const errorStd = error?.error || error;
     const noMoreProcess = errorStd?.includes('Sem mais processos disponíveis no estado');
     if (errorStd) {
       if (noMoreProcess && errorStd?.includes('Atendimento')) {

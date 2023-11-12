@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 import { ptDateTime, ptDate } from '../utils/formatTime';
 import { normalizeText, entidadesParse, noDados } from '../utils/normalizeText';
 // hooks
-import useTable, { getComparator } from '../hooks/useTable';
+import useTable, { getComparator, applySort } from '../hooks/useTable';
 // redux
 import { useSelector } from '../redux/store';
 // hooks
@@ -271,14 +271,7 @@ export default function Procura() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({ newPesquisa, comparator, uo, search, estado, assunto }) {
-  const stabilizedThis = newPesquisa.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  newPesquisa = stabilizedThis.map((el) => el[0]);
+  newPesquisa = applySort(newPesquisa, comparator);
 
   if (assunto) {
     newPesquisa = newPesquisa.filter((row) => row?.assunto === assunto);

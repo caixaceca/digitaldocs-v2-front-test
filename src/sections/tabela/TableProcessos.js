@@ -16,7 +16,7 @@ import { estadoInicial } from '../../utils/validarAcesso';
 import { fToNow, ptDateTime } from '../../utils/formatTime';
 import { normalizeText, entidadesParse, noDados } from '../../utils/normalizeText';
 // hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
@@ -246,14 +246,7 @@ export default function TableProcessos({ from }) {
 // ----------------------------------------------------------------------
 
 function applySortFilter({ newList, comparator, filter, segmento, colaborador, from }) {
-  const stabilizedThis = newList.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  newList = stabilizedThis.map((el) => el[0]);
+  newList = applySort(newList, comparator);
 
   if (segmento === 'Particulares') {
     newList = newList.filter((row) => row?.segcliente === 'P');

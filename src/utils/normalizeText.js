@@ -90,6 +90,7 @@ export function errorMsg(error) {
     error.response?.mensagem ||
     error.response?.data ||
     error?.mensagem ||
+    error?.[0]?.msg ||
     error?.message ||
     error?.error ||
     'Ocorreu um erro...'

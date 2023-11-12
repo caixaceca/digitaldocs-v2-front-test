@@ -112,7 +112,7 @@ export default function TableAcessos({ tab }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);

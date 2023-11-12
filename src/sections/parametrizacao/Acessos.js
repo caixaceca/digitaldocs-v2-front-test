@@ -16,7 +16,7 @@ import { getFile } from '../../utils/getFile';
 import { normalizeText } from '../../utils/normalizeText';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
 // hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector } from '../../redux/store';
 // routes
@@ -162,25 +162,14 @@ export default function Acessos() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({ colasByName, comparator, filter, uo }) {
-  const stabilizedThis = colasByName.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  colasByName = stabilizedThis.map((el) => el[0]);
-
+  colasByName = applySort(colasByName, comparator);
   if (uo) {
     colasByName = colasByName.filter((row) => row?.uo?.label === uo);
   }
-
   if (filter && filter !== null) {
     colasByName = colasByName.filter(
       (row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1
     );
   }
-
   return colasByName;
 }

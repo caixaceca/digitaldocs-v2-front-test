@@ -16,7 +16,7 @@ import { add, format } from 'date-fns';
 import { getFileThumb } from '../../utils/getFileFormat';
 import { normalizeText, dataValido, setDataUtil } from '../../utils/normalizeText';
 // hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
@@ -245,15 +245,7 @@ export default function TableCON() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({ dados, comparator, filter }) {
-  const stabilizedThis = dados.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  dados = stabilizedThis.map((el) => el[0]);
-
+  dados = applySort(dados, comparator);
   if (filter) {
     dados = dados.filter(
       (row) =>
@@ -263,6 +255,5 @@ function applySortFilter({ dados, comparator, filter }) {
         (row?.nif && normalizeText(row?.nif).indexOf(normalizeText(filter)) !== -1)
     );
   }
-
   return dados;
 }

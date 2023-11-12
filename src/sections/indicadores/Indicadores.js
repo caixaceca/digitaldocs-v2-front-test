@@ -700,7 +700,6 @@ export function Execucao() {
   const colaborador = localStorage.getItem('colaboradorIndic')
     ? colaboradores?.find((row) => Number(row?.perfil?.id) === Number(localStorage.getItem('colaboradorIndic')))
     : '';
-  console.log(localStorage.getItem('colaboradorIndic'));
   const {
     page,
     order,
@@ -713,7 +712,7 @@ export function Execucao() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'assunto' });
-  const dataFiltered = applySortFilter({ indicadores, comparator: getComparator(order, orderBy) });
+  const dataFiltered = applySort(indicadores, getComparator(order, orderBy));
   const totalTempo = sumBy(dataFiltered, 'tempo_execucao') / dataFiltered.length;
   const isNotFound = !dataFiltered.length;
 
@@ -1644,22 +1643,6 @@ function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal }) {
       </Grid>
     </>
   );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-function applySortFilter({ indicadores, comparator }) {
-  const stabilizedThis = indicadores.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  indicadores = stabilizedThis.map((el) => el[0]);
-
-  return indicadores;
 }
 
 // ----------------------------------------------------------------------

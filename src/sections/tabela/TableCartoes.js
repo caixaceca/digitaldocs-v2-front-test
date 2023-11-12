@@ -17,7 +17,7 @@ import { validarAcesso, UosAcesso } from '../../utils/validarAcesso';
 import { normalizeText, setItemValue, dataValido } from '../../utils/normalizeText';
 // hooks
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll, getItem, openDetalhes, closeModal } from '../../redux/slices/digitaldocs';
@@ -328,13 +328,7 @@ export default function TableCartoes() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({ dados, comparator, filter, tipoCartao, balcao }) {
-  const stabilizedThis = dados.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  dados = stabilizedThis.map((el) => el[0]);
+  dados = applySort(dados, comparator);
 
   if (balcao) {
     dados = dados.filter((row) => row?.balcao_entrega === balcao);

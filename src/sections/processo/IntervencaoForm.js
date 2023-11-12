@@ -99,7 +99,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -466,7 +466,7 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -654,7 +654,7 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -751,7 +751,7 @@ export function FinalizarForm({ open, onCancel }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -892,7 +892,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -1234,7 +1234,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
@@ -1348,7 +1348,7 @@ export function ColocarPendente({ from }) {
 
   useEffect(() => {
     if (error) {
-      enqueueSnackbar(error[0]?.msg || error, { variant: 'error' });
+      enqueueSnackbar(error, { variant: 'error' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);

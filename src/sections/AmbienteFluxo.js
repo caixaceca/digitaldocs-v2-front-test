@@ -13,8 +13,9 @@ export function Ambiente() {
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.digitaldocs);
 
   const handleChangeAmbiente = useCallback(
-    (value) => {
-      dispatch(changeMeuAmbiente(value));
+    (newValue) => {
+      dispatch(changeMeuAmbiente(newValue));
+      localStorage.setItem('meuAmbiente', newValue?.id);
     },
     [dispatch]
   );
@@ -41,8 +42,8 @@ export function Fluxo() {
   const { meusFluxos, meuFluxo } = useSelector((state) => state.digitaldocs);
 
   const handleChangeFluxo = useCallback(
-    (value) => {
-      dispatch(changeMeuFluxo(value));
+    (newValue) => {
+      dispatch(changeMeuFluxo(newValue));
     },
     [dispatch]
   );

@@ -1,16 +1,12 @@
+// utils
 import { normalizeText } from '../../utils/normalizeText';
+// hooks
+import { applySort } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
 export default function applySortFilter({ dados, comparator, filter, colaborador, assunto, estado }) {
-  const stabilizedThis = dados.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  dados = stabilizedThis.map((el) => el[0]);
+  dados = applySort(dados, comparator);
 
   if (colaborador) {
     dados = dados.filter((row) => row?.colaborador === colaborador);
