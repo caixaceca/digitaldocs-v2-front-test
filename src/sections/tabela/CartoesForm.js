@@ -62,22 +62,24 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
             ?.filter((item) => !item?.emissao_validado)
             ?.slice(0, 25)
             ?.map((row) => ({
-              idItem: row?.id,
-              check: false,
-              numero: row?.numero,
-              tipo: row?.tipo,
               nota: '',
+              check: false,
+              idItem: row?.id,
+              tipo: row?.tipo,
+              nome: row?.nome,
+              numero: row?.numero,
               dataSisp: new Date(),
             }))
         : cartoes
             ?.filter((item) => !item?.rececao_validado)
             ?.slice(0, 25)
             ?.map((row) => ({
-              idItem: row?.id,
-              check: false,
-              numero: row?.numero,
-              tipo: row?.tipo,
               nota: '',
+              check: false,
+              idItem: row?.id,
+              tipo: row?.tipo,
+              nome: row?.nome,
+              numero: row?.numero,
               dataSisp: new Date(),
             })),
     [cartoes, fase]
@@ -136,17 +138,17 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
                       </TableCell>
                       <TableCell>
                         <Stack>
-                          <Typography variant="subtitle1">
-                            <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }} noWrap>
+                          <Typography variant="subtitle1" noWrap>
+                            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                               Nº cartão:&nbsp;
                             </Typography>
                             {item?.numero}
                           </Typography>
-                          <Typography variant="subtitle2">
-                            <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }} noWrap>
-                              Tipo:&nbsp;
+                          <Typography variant="subtitle2" noWrap>
+                            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                              {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
                             </Typography>
-                            {item?.tipo}
+                            {fase === 'Emissão' ? item?.tipo : item.nome}
                           </Typography>
                         </Stack>
                       </TableCell>
