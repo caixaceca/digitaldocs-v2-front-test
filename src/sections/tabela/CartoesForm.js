@@ -185,11 +185,12 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
 ConfirmarPorDataForm.propTypes = {
   open: PropTypes.bool,
   fase: PropTypes.string,
+  data: PropTypes.object,
   balcao: PropTypes.object,
   onCancel: PropTypes.func,
 };
 
-export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
+export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date(), { days: 1 }), onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
@@ -200,8 +201,8 @@ export function ConfirmarPorDataForm({ open, balcao, fase, onCancel }) {
     dataSisp: Yup.date().typeError('Introduza uma data válida').required('Data de receção não pode ficar vazio'),
   });
   const defaultValues = useMemo(
-    () => ({ data: sub(new Date(), { days: 1 }), balcao: balcao?.id, dataSisp: new Date(), nota: '' }),
-    [balcao?.id]
+    () => ({ data, balcao: balcao?.id, dataSisp: new Date(), nota: '' }),
+    [balcao?.id, data]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;

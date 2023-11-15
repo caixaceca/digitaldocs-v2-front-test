@@ -73,7 +73,7 @@ const TABLE_HEAD_MOTIVOS = [
 
 const TABLE_HEAD_LINHAS = [
   { id: 'linha', label: 'Linha', align: 'left' },
-  { id: 'descricao', label: 'Descrição', align: 'left' },
+  { id: 'descricao', label: 'Segmento', align: 'left' },
   { id: '' },
 ];
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 // form
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Fab from '@mui/material/Fab';
@@ -24,13 +24,11 @@ import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TextField from '@mui/material/TextField';
 import CloseIcon from '@mui/icons-material/Close';
 import BlockIcon from '@mui/icons-material/Block';
 import Typography from '@mui/material/Typography';
 import CircleIcon from '@mui/icons-material/Circle';
 import DialogTitle from '@mui/material/DialogTitle';
-import Autocomplete from '@mui/material/Autocomplete';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -129,7 +127,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, setValue, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   const aberturaSemEntidadeGerencia =
@@ -313,26 +311,15 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
               </Grid>
             ) : (
               <Grid item xs={12}>
-                <Controller
+                <RHFAutocompleteObject
                   name="acao"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <Autocomplete
-                      {...field}
-                      fullWidth
-                      options={destinosSingulares}
-                      onChange={(event, newValue) => {
-                        setPendente(false);
-                        setValue('pender', false);
-                        setValueForm('acao', newValue);
-                      }}
-                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                      getOptionLabel={(option) => option?.label}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Ação" error={!!error} helperText={error?.message} />
-                      )}
-                    />
-                  )}
+                  label="Ação"
+                  options={destinosSingulares}
+                  onChange={(event, newValue) => {
+                    setPendente(false);
+                    setValue('pender', false);
+                    setValueForm('acao', newValue);
+                  }}
                 />
               </Grid>
             )}
@@ -665,7 +652,7 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
   });
   const defaultValues = useMemo(() => ({ estadoID: null, observacao: '' }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -695,21 +682,12 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <Controller
+              <RHFAutocompleteObject
                 name="estadoID"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <Autocomplete
-                    {...field}
-                    fullWidth
-                    getOptionLabel={(option) => option?.nome}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    options={applySort(destinosDesarquivamento, getComparator('asc', 'nome'))}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth label="Estado" error={!!error} helperText={error?.message} />
-                    )}
-                  />
+                label="Estado"
+                options={applySort(
+                  destinosDesarquivamento?.map((row) => ({ id: row?.id, label: row?.nome })),
+                  getComparator('asc', 'nome')
                 )}
               />
             </Grid>

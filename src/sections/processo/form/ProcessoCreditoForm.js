@@ -1,12 +1,10 @@
 import PropTypes from 'prop-types';
 // form
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import TextField from '@mui/material/TextField';
 import CardContent from '@mui/material/CardContent';
-import Autocomplete from '@mui/material/Autocomplete';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
@@ -34,7 +32,7 @@ ProcessoCreditoForm.propTypes = {
 };
 
 export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcesso }) {
-  const { control, watch, setValue } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
   const { linhas } = useSelector((state) => state.digitaldocs);
@@ -57,14 +55,24 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFAutocompleteSimple name="segmento" label="Segmento" options={segmentos} />
+                <RHFAutocompleteSimple
+                  name="segmento"
+                  label="Segmento"
+                  options={segmentos}
+                  onChange={(event, newValue) => {
+                    setValue('segmento', newValue);
+                    setValue('linha_id', null);
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <RHFAutocompleteObject
                   name="linha_id"
                   label="Linha de crédito"
                   options={applySort(
-                    linhas?.map((row) => ({ id: row?.id, label: row?.linha })),
+                    linhas
+                      ?.filter((item) => item?.descricao === values.segmento)
+                      ?.map((row) => ({ id: row?.id, label: row?.linha })),
                     getComparator('asc', 'label')
                   )}
                 />
@@ -95,54 +103,32 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
               <CardContent>
                 <Grid container spacing={3} justifyContent="center">
                   <Grid item xs={12} sm={3}>
-                    <Controller
+                    <RHFAutocompleteSimple
                       name="situacao_final_mes"
-                      control={control}
-                      render={({ field, fieldState: { error } }) => (
-                        <Autocomplete
-                          {...field}
-                          fullWidth
-                          disableClearable
-                          onChange={(event, newValue) => {
-                            setValue('situacao_final_mes', newValue);
-                            setEstado(newValue);
-                          }}
-                          options={situacoes}
-                          renderInput={(params) => (
-                            <TextField {...params} label="Situação" error={!!error} helperText={error?.message} />
-                          )}
-                        />
-                      )}
+                      label="Situação"
+                      options={situacoes}
+                      onChange={(event, newValue) => {
+                        setValue('situacao_final_mes', newValue);
+                        setEstado(newValue);
+                      }}
                     />
                   </Grid>
-                  {values?.situacao_final_mes === 'Indeferido' && (
-                    <Grid item xs={12} sm={3}>
-                      <RHFDatePicker name="data_indeferido" label="Data de indeferimento" disableFuture />
-                    </Grid>
-                  )}
-                  {values?.situacao_final_mes === 'Desistido' && (
-                    <Grid item xs={12} sm={3}>
-                      <RHFDatePicker name="data_desistido" label="Data de desistência" disableFuture />
-                    </Grid>
-                  )}
                   {(values?.situacao_final_mes === 'Aprovado' ||
                     values?.situacao_final_mes === 'Contratado' ||
                     values?.situacao_final_mes === 'Desistido') && (
-                    <Grid item xs={12}>
-                      <Grid container spacing={3} justifyContent="center">
-                        <Grid item xs={12} sm={6} md={3}>
-                          <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                          <RHFNumberField
-                            tipo="moeda"
-                            name="montante_aprovado"
-                            label="Montante aprovado"
-                            inputProps={{ style: { textAlign: 'right' } }}
-                          />
-                        </Grid>
+                    <>
+                      <Grid item xs={12} sm={6} md={3}>
+                        <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
                       </Grid>
-                    </Grid>
+                      <Grid item xs={12} sm={6} md={3}>
+                        <RHFNumberField
+                          tipo="moeda"
+                          name="montante_aprovado"
+                          label="Montante aprovado"
+                          inputProps={{ style: { textAlign: 'right' } }}
+                        />
+                      </Grid>
+                    </>
                   )}
                   {values?.situacao_final_mes === 'Contratado' && (
                     <Grid item xs={12}>
@@ -176,6 +162,16 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                           <RHFTextField name="garantia" label="Garantia" />
                         </Grid>
                       </Grid>
+                    </Grid>
+                  )}
+                  {values?.situacao_final_mes === 'Indeferido' && (
+                    <Grid item xs={12} sm={3}>
+                      <RHFDatePicker name="data_indeferido" label="Data de indeferimento" disableFuture />
+                    </Grid>
+                  )}
+                  {values?.situacao_final_mes === 'Desistido' && (
+                    <Grid item xs={12} sm={3}>
+                      <RHFDatePicker name="data_desistido" label="Data de desistência" disableFuture />
                     </Grid>
                   )}
                 </Grid>

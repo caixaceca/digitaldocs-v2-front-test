@@ -319,8 +319,8 @@ export default function TableCartoes() {
 
       <Detalhes closeModal={handleCloseModal} />
       <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
-      <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} c onCancel={onClose1} />
-      <ValidarForm balcao={uo?.id} open={open} dense={dense} fase={fase} cartoes={dataFiltered} onCancel={onClose} />
+      <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} data={datai} onCancel={onClose1} />
+      <ValidarForm open={open} fase={fase} dense={dense} balcao={uo?.id} onCancel={onClose} cartoes={dataFiltered} />
     </>
   );
 }

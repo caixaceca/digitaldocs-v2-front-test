@@ -3,19 +3,18 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
 // components
 import { DialogButons } from '../../components/Actions';
-import { FormProvider, RHFAutocompleteObject } from '../../components/hook-form';
+import { FormProvider, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -50,16 +49,12 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
   });
 
   const defaultValues = useMemo(
-    () => ({
-      perfilID: null,
-      datalimite: null,
-      perfilIDCC: cc?.perfil_id,
-    }),
+    () => ({ perfilID: null, datalimite: null, perfilIDCC: cc?.perfil_id }),
     [cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -86,18 +81,7 @@ export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
               <RHFAutocompleteObject name="perfilID" label="Colaborador" options={colaboradoresList} />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                name="datalimite"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DateTimePicker
-                    label="Data de término"
-                    value={field.value}
-                    onChange={(newValue) => field.onChange(newValue)}
-                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                  />
-                )}
-              />
+              <RHFDatePicker name="datalimite" label="Data de término" />
             </Grid>
           </Grid>
           <DialogButons label="Atribuir" isSaving={isSaving} onCancel={onCancel} />

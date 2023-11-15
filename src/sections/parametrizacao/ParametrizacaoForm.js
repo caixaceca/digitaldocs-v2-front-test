@@ -4,7 +4,7 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
 import Fab from '@mui/material/Fab';
 import Grid from '@mui/material/Grid';
@@ -18,7 +18,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // utils
 import { emailCheck } from '../../utils/validarAcesso';
 // hooks
@@ -31,6 +30,7 @@ import {
   RHFSwitch,
   FormProvider,
   RHFTextField,
+  RHFDatePicker,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
@@ -350,7 +350,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
     () => ({
       perfilID: Number(perfilId),
       perfilIDCC: cc?.perfil?.id,
-      datalimite: selectedItem?.datalimite || null,
+      datalimite: selectedItem?.datalimite ? new Date(selectedItem?.datalimite) : null,
       objeto: selectedItem?.objeto ? objetos?.find((row) => row?.id === selectedItem?.objeto) : null,
       acesso: selectedItem?.acesso ? codacessos?.find((row) => row?.id === selectedItem?.acesso) : null,
     }),
@@ -358,7 +358,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -401,18 +401,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
               <RHFAutocompleteObject name="acesso" label="Acesso" options={codacessos} />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                name="datalimite"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DateTimePicker
-                    label="Data"
-                    value={field.value}
-                    onChange={(newValue) => field.onChange(newValue)}
-                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                  />
-                )}
-              />
+              <RHFDatePicker dateTime name="datalimite" label="Data" />
             </Grid>
           </Grid>
           <DialogButons
@@ -694,7 +683,11 @@ export function LinhaForm({ onCancel }) {
               <RHFTextField name="linha" label="Linha" />
             </Grid>
             <Grid item xs={12}>
-              <RHFTextField name="descricao" multiline minRows={2} maxRows={4} label="Descrição" />
+              <RHFAutocompleteSimple
+                name="descricao"
+                label="Segmento"
+                options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
+              />
             </Grid>
           </Grid>
           <DialogButons
@@ -887,7 +880,7 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -934,34 +927,10 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                name="data_inicial"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DateTimePicker
-                    fullWidth
-                    value={field.value}
-                    label="Data de início"
-                    onChange={(newValue) => field.onChange(newValue)}
-                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                  />
-                )}
-              />
+              <RHFDatePicker dateTime name="data_inicial" label="Data de início" />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                name="data_limite"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DateTimePicker
-                    fullWidth
-                    value={field.value}
-                    label="Data de término"
-                    onChange={(newValue) => field.onChange(newValue)}
-                    slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                  />
-                )}
-              />
+              <RHFDatePicker dateTime name="data_limite" label="Data de término" />
             </Grid>
             {isEdit && (
               <Grid item xs={12}>
@@ -1066,32 +1035,8 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
                   <Grid item xs={12} sm={6}>
                     <Stack alignItems="flex-end">
                       <Stack direction="row" spacing={1}>
-                        <Controller
-                          control={control}
-                          name={`perfis[${index}].data_inicial`}
-                          render={({ field }) => (
-                            <DateTimePicker
-                              fullWidth
-                              label="Data de início"
-                              value={field.value}
-                              onChange={(newValue) => field.onChange(newValue)}
-                              slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                            />
-                          )}
-                        />
-                        <Controller
-                          control={control}
-                          name={`perfis[${index}].data_limite`}
-                          render={({ field }) => (
-                            <DateTimePicker
-                              fullWidth
-                              label="Data de término"
-                              value={field.value}
-                              onChange={(newValue) => field.onChange(newValue)}
-                              slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-                            />
-                          )}
-                        />
+                        <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Data de início" />
+                        <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Data de término" />
                         {values.perfis.length > 1 && (
                           <Stack direction="row" alignItems="center">
                             <Tooltip title="Remover" arrow>

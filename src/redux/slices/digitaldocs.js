@@ -1164,7 +1164,7 @@ export function getIndicadores(item, params) {
           dispatch(slice.actions.resetItem('estatisticaCredito'));
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}?data_inicio=${params?.dataI}${
-              params?.dataf ? `&data_final=${params?.dataF}` : ''
+              params?.dataF ? `&data_final=${params?.dataF}` : ''
             }`,
             options
           );

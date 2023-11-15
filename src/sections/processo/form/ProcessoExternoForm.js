@@ -1,12 +1,10 @@
 import PropTypes from 'prop-types';
 // form
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import TextField from '@mui/material/TextField';
 import CardContent from '@mui/material/CardContent';
-import Autocomplete from '@mui/material/Autocomplete';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';
 // components
@@ -32,7 +30,7 @@ ProcessoExternoForm.propTypes = {
 };
 
 export default function ProcessoExternoForm({ operacao, setOperacao, selectedProcesso, origensList }) {
-  const { control, setValue } = useFormContext();
+  const { setValue } = useFormContext();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
 
   return (
@@ -61,30 +59,20 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
                 <RHFTextField name="titular" label="Titular" />
               </Grid>
               <Grid item xs={12} sm={operacao === 'Cativo/Penhora' ? 6 : 12} md={operacao === 'Cativo/Penhora' ? 3 : 6}>
-                <Controller
+                <RHFAutocompleteSimple
                   name="operacao"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <Autocomplete
-                      {...field}
-                      fullWidth
-                      onChange={(event, value) => {
-                        setValue('operacao', value);
-                        setOperacao(value);
-                      }}
-                      options={[
-                        'Cativo/Penhora',
-                        'Pedido de Informação',
-                        'Cancelamento/Levantamento de Cativo/Penhora',
-                        'Pedido de Extrato Bancário',
-                        'Outras',
-                      ]}
-                      getOptionLabel={(option) => option}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Operação" error={!!error} helperText={error?.message} />
-                      )}
-                    />
-                  )}
+                  label="Operação"
+                  options={[
+                    'Cativo/Penhora',
+                    'Pedido de Informação',
+                    'Cancelamento/Levantamento de Cativo/Penhora',
+                    'Pedido de Extrato Bancário',
+                    'Outras',
+                  ]}
+                  onChange={(event, newValue) => {
+                    setValue('operacao', newValue);
+                    setOperacao(newValue);
+                  }}
                 />
               </Grid>
               {operacao === 'Cativo/Penhora' && (

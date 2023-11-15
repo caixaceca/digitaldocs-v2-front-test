@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 // ----------------------------------------------------------------------
 
@@ -53,9 +54,9 @@ export function RHFAutocompleteSimple({ name, options, label, multiple = false, 
           multiple={multiple}
           onChange={(event, newValue) => field.onChange(newValue)}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
+          {...other}
         />
       )}
-      {...other}
     />
   );
 }
@@ -88,24 +89,34 @@ export function RHFAutocompleteObject({ name, options, label }) {
 
 // ----------------------------------------------------------------------
 
-RHFDatePicker.propTypes = { name: PropTypes.string, label: PropTypes.string };
+RHFDatePicker.propTypes = { name: PropTypes.string, label: PropTypes.string, dateTime: PropTypes.bool };
 
-export function RHFDatePicker({ name, label, ...other }) {
+export function RHFDatePicker({ name, label = '', dateTime = false, ...other }) {
   const { control } = useFormContext();
 
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState: { error } }) => (
-        <DatePicker
-          label={label}
-          value={field.value}
-          onChange={(newValue) => field.onChange(newValue)}
-          slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
-          {...other}
-        />
-      )}
+      render={({ field, fieldState: { error } }) =>
+        dateTime ? (
+          <DateTimePicker
+            label={label}
+            value={field.value}
+            onChange={(newValue) => field.onChange(newValue)}
+            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
+            {...other}
+          />
+        ) : (
+          <DatePicker
+            label={label}
+            value={field.value}
+            onChange={(newValue) => field.onChange(newValue)}
+            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
+            {...other}
+          />
+        )
+      }
     />
   );
 }

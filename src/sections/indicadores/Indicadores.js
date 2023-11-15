@@ -900,10 +900,10 @@ export function Duracao() {
   return (
     <>
       <HeaderBreadcrumbs
-        heading="Média de duração dos processos"
         links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
         action={<Filtrar tab="duracao" />}
+        sx={{ color: 'text.secondary', px: 1 }}
+        heading="Média de duração dos processos"
       />
 
       <Card sx={{ p: 1 }}>
@@ -926,7 +926,7 @@ export function Duracao() {
                       </Grid>
                     ))}
                     <Grid item xs={12}>
-                      {currentTab === 'Gráfico' && series?.length > 0 ? (
+                      {currentTab === 'Gráfico' && series[0]?.data?.length > 0 ? (
                         <Chart type="bar" series={series} options={chartOptions} height={500} />
                       ) : (
                         <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
