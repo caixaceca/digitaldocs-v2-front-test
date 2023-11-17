@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Checkbox from '@mui/material/Checkbox';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -30,14 +31,14 @@ import { UpdateItem, ViewItem, Checked, DefaultAction } from '../../components/A
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { UoData } from './Dados';
-import { ValidarForm, BalcaoEntregaForm, ConfirmarPorDataForm, Detalhes } from './CartoesForm';
+import { ValidarMultiploForm, BalcaoEntregaForm, ConfirmarPorDataForm, Detalhes } from './CartoesForm';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'data_emissao', label: 'Data emissão', align: 'left' },
   { id: 'balcao_entrega', label: 'Balcão entrega', align: 'left' },
-  { id: 'numero', label: 'Nº cartão', align: 'left' },
+  { id: 'numero', label: 'Nº cartão', align: 'center' },
   { id: 'cliente', label: 'Nº cliente', align: 'left' },
   { id: 'nome', label: 'Nome cliente', align: 'left' },
   { id: 'tipo', label: 'Tipo cartão', align: 'left' },
@@ -78,15 +79,21 @@ export default function TableCartoes() {
   );
 
   const {
-    page,
     dense,
+    page,
     order,
     orderBy,
-    setPage,
     rowsPerPage,
+    setPage,
+    //
+    selected,
+    onSelectRow,
+    setSelected,
+    onSelectAllRows,
+    //
     onSort,
-    onChangePage,
     onChangeDense,
+    onChangePage,
     onChangeRowsPerPage,
   } = useTable({
     defaultOrder: 'asc',
@@ -99,6 +106,7 @@ export default function TableCartoes() {
       enqueueSnackbar('Receção dos cartões confirmada com sucesso', { variant: 'success' });
       onClose();
       onClose1();
+      setSelected([]);
       if (mail && fase && datai && ((fase === 'Receção' && uo?.id) || fase === 'Emissão')) {
         dispatch(
           getAll(fase, {
@@ -141,7 +149,7 @@ export default function TableCartoes() {
   }, [cc?.uo?.tipo]);
 
   useEffect(() => {
-    if (mail && fase && datai && fase === 'Emissão') {
+    if (mail && datai && fase === 'Emissão') {
       dispatch(
         getAll(fase, {
           mail,
@@ -153,7 +161,7 @@ export default function TableCartoes() {
   }, [dispatch, datai, dataf, fase, mail]);
 
   useEffect(() => {
-    if (mail && fase && datai && fase === 'Receção' && uo?.id) {
+    if (mail && datai && fase === 'Receção' && uo?.id) {
       dispatch(
         getAll(fase, {
           mail,
@@ -185,6 +193,9 @@ export default function TableCartoes() {
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
+  const temDadosNaoValidados =
+    (fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
+    (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0);
 
   applySortFilter({
     dados,
@@ -209,6 +220,7 @@ export default function TableCartoes() {
 
   const changeFase = (newValue) => {
     setFase(newValue);
+    setSelected([]);
   };
 
   return (
@@ -229,6 +241,7 @@ export default function TableCartoes() {
               setDatai={setDatai}
               setDataf={setDataf}
               setFilter={setFilter}
+              setSelected={setSelected}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
               {isAdmin && (
@@ -242,14 +255,14 @@ export default function TableCartoes() {
                   renderInput={(params) => <TextField {...params} label="Item" sx={{ width: 120 }} />}
                 />
               )}
-              {((fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
-                (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0)) &&
-                temAcesso && (
-                  <Stack direction="row" spacing={1}>
-                    {uo && <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />}
+              {temDadosNaoValidados && temAcesso && (
+                <Stack direction="row" spacing={1}>
+                  {uo && <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />}
+                  {selected.length > 0 && (
                     <DefaultAction label="CONFIRMAR MÚLTIPLO" handleClick={onOpen} icon="multiple" />
-                  </Stack>
-                )}
+                  )}
+                </Stack>
+              )}
             </Stack>
           </Stack>
         }
@@ -267,16 +280,35 @@ export default function TableCartoes() {
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
+              <TableHeadCustom
+                order={order}
+                onSort={onSort}
+                orderBy={orderBy}
+                headLabel={TABLE_HEAD}
+                numSelected={selected.length}
+                rowCount={dataFiltered.length}
+                onSelectAllRows={(checked) =>
+                  onSelectAllRows(
+                    checked,
+                    dataFiltered.map((row) => row.id)
+                  )
+                }
+              />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={9} row={10} />
+                  <SkeletonTable column={10} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow key={`${row.id}_${index}`} hover>
+                      <TableCell padding="checkbox">
+                        {((fase === 'Emissão' && !row?.emissao_validado) ||
+                          (fase === 'Receção' && !row?.rececao_validado)) && (
+                          <Checkbox checked={selected.includes(row.id)} onClick={() => onSelectRow(row.id)} />
+                        )}
+                      </TableCell>
                       <TableCell>{ptDate(row.data_emissao)}</TableCell>
                       <TableCell>{row?.entrega}</TableCell>
-                      <TableCell>{row?.numero}</TableCell>
+                      <TableCell align="center">{row?.numero}</TableCell>
                       <TableCell>{row?.cliente}</TableCell>
                       <TableCell>{row?.nome}</TableCell>
                       <TableCell>{row?.tipo}</TableCell>
@@ -320,7 +352,18 @@ export default function TableCartoes() {
       <Detalhes closeModal={handleCloseModal} />
       <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
       <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} data={datai} onCancel={onClose1} />
-      <ValidarForm open={open} fase={fase} dense={dense} balcao={uo?.id} onCancel={onClose} cartoes={dataFiltered} />
+      <ValidarMultiploForm
+        open={open}
+        fase={fase}
+        dense={dense}
+        balcao={uo?.id}
+        onCancel={onClose}
+        cartoes={
+          (fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado && selected.includes(row.id))) ||
+          (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado && selected.includes(row.id))) ||
+          []
+        }
+      />
     </>
   );
 }

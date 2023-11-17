@@ -27,19 +27,13 @@ import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
 // components
-import {
-  RHFCheckbox,
-  FormProvider,
-  RHFTextField,
-  RHFDatePicker,
-  RHFAutocompleteObject,
-} from '../../components/hook-form';
 import Label from '../../components/Label';
 import { Fechar, CriadoEmPor, DialogButons } from '../../components/Actions';
+import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ValidarForm.propTypes = {
+ValidarMultiploForm.propTypes = {
   open: PropTypes.bool,
   dense: PropTypes.bool,
   fase: PropTypes.string,
@@ -48,74 +42,41 @@ ValidarForm.propTypes = {
   onCancel: PropTypes.func,
 };
 
-export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
+export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
   const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
 
-  const cartoesPorValidar = useMemo(
-    () =>
-      fase === 'Emissão'
-        ? cartoes
-            ?.filter((item) => !item?.emissao_validado)
-            ?.slice(0, 25)
-            ?.map((row) => ({
-              nota: '',
-              check: false,
-              idItem: row?.id,
-              tipo: row?.tipo,
-              nome: row?.nome,
-              numero: row?.numero,
-              dataSisp: new Date(),
-            }))
-        : cartoes
-            ?.filter((item) => !item?.rececao_validado)
-            ?.slice(0, 25)
-            ?.map((row) => ({
-              nota: '',
-              check: false,
-              idItem: row?.id,
-              tipo: row?.tipo,
-              nome: row?.nome,
-              numero: row?.numero,
-              dataSisp: new Date(),
-            })),
-    [cartoes, fase]
-  );
-
-  const defaultValues = useMemo(() => ({ cartoes: cartoesPorValidar }), [cartoesPorValidar]);
+  const defaultValues = useMemo(() => ({ cartoes }), [cartoes]);
   const methods = useForm({ defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
   const { fields } = useFieldArray({ control, name: 'cartoes' });
   const values = watch();
 
   useEffect(() => {
-    if (cartoesPorValidar) {
+    if (cartoes) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartoesPorValidar]);
+  }, [cartoes]);
 
   const onSubmit = async () => {
-    const cartoesChecked = values?.cartoes?.filter((row) => row?.check);
     try {
-      if (cartoesChecked?.length > 0) {
-        dispatch(
-          updateItem(
-            fase === 'Emissão' ? 'confirmar emissao multiplo' : 'confirmar rececao multiplo',
-            JSON.stringify(
-              cartoesChecked?.map((row) => ({
-                id: row?.idItem,
-                nota: row?.nota,
-                data_rececao_sisp: fase === 'Emissão' ? row.dataSisp : '',
-              }))
-            ),
-            { mail, balcao, msg: 'rececao confirmada' }
-          )
-        );
-      }
+      dispatch(
+        updateItem(
+          fase === 'Emissão' ? 'confirmar emissao multiplo' : 'confirmar rececao multiplo',
+          JSON.stringify(
+            values?.cartoes?.map((row) => ({
+              id: row?.idItem,
+              nota: row?.nota,
+              data_rececao_sisp: fase === 'Emissão' ? row.dataSisp : '',
+            }))
+          ),
+          { mail, balcao, msg: 'rececao confirmada' }
+        )
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -129,45 +90,39 @@ export function ValidarForm({ fase, dense, open, cartoes, balcao, onCancel }) {
           <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
             <Table size={dense ? 'small' : 'medium'}>
               <TableBody>
-                {fields.map((item, index) => {
-                  const isCheck = values?.cartoes?.find((row) => row?.idItem === item.idItem);
-                  return (
-                    <TableRow hover key={`cartao__${index}`} sx={{ bgcolor: isCheck?.check && 'action.selected' }}>
-                      <TableCell sx={{ pr: 0 }}>
-                        <RHFCheckbox name={`cartoes[${index}].check`} />
-                      </TableCell>
-                      <TableCell>
-                        <Stack>
-                          <Typography variant="subtitle1" noWrap>
-                            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                              Nº cartão:&nbsp;
-                            </Typography>
-                            {item?.numero}
+                {fields.map((item, index) => (
+                  <TableRow hover key={`cartao__${index}`}>
+                    <TableCell>
+                      <Stack>
+                        <Typography variant="subtitle1" noWrap>
+                          <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                            Nº cartão:&nbsp;
                           </Typography>
-                          <Typography variant="subtitle2" noWrap>
-                            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                              {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
-                            </Typography>
-                            {fase === 'Emissão' ? item?.tipo : item.nome}
+                          {item?.numero}
+                        </Typography>
+                        <Typography variant="subtitle2" noWrap>
+                          <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                            {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
                           </Typography>
-                        </Stack>
-                      </TableCell>
-                      <TableCell width={'100%'}>
-                        <Stack direction="row" spacing={1}>
-                          {fase === 'Emissão' && (
-                            <RHFDatePicker
-                              disableFuture
-                              label="Data de recessão"
-                              name={`cartoes[${index}].dataSisp`}
-                              slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
-                            />
-                          )}
-                          <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                          {fase === 'Emissão' ? item?.tipo : item.nome}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell width={'100%'}>
+                      <Stack direction="row" spacing={1}>
+                        {fase === 'Emissão' && (
+                          <RHFDatePicker
+                            disableFuture
+                            label="Data de recessão"
+                            name={`cartoes[${index}].dataSisp`}
+                            slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
+                          />
+                        )}
+                        <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>

@@ -26,6 +26,7 @@ UoData.propTypes = {
   setDataf: PropTypes.func,
   entradas: PropTypes.bool,
   uosList: PropTypes.array,
+  setSelected: PropTypes.func,
 };
 
 export function UoData({
@@ -38,6 +39,7 @@ export function UoData({
   setData,
   setDatai,
   setDataf,
+  setSelected,
   cartoes = false,
   entradas = false,
 }) {
@@ -51,7 +53,12 @@ export function UoData({
           value={uo || null}
           disableClearable={!cartoes}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          onChange={(event, newValue) => setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true)}
+          onChange={(event, newValue) => {
+            if (cartoes) {
+              setSelected([]);
+            }
+            setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true);
+          }}
           renderInput={(params) => (
             <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
           )}
@@ -64,9 +71,12 @@ export function UoData({
             value={datai}
             label="Data inicial"
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-            onChange={(newValue) =>
-              setDataUtil(newValue, setDatai, cartoes ? '' : 'dataIC', setDataf, cartoes ? '' : 'dataFC', dataf)
-            }
+            onChange={(newValue) => {
+              if (cartoes) {
+                setSelected([]);
+              }
+              setDataUtil(newValue, setDatai, cartoes ? '' : 'dataIC', setDataf, cartoes ? '' : 'dataFC', dataf);
+            }}
           />
           <DatePicker
             disableFuture
@@ -75,7 +85,12 @@ export function UoData({
             disabled={!datai}
             label="Data final"
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-            onChange={(newValue) => setDataUtil(newValue, setDataf, cartoes ? '' : 'dataFC', '', '', '')}
+            onChange={(newValue) => {
+              if (cartoes) {
+                setSelected([]);
+              }
+              setDataUtil(newValue, setDataf, cartoes ? '' : 'dataFC', '', '', '');
+            }}
           />
         </Stack>
       ) : (
