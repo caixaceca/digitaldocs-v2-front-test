@@ -329,9 +329,11 @@ const slice = createSlice({
     getMeusAmbientesSuccess(state, action) {
       state.meusAmbientes = action.payload;
       const grpGerent = action.payload?.find((row) => row?.nome?.includes('Gerência'));
+      const grpAtend = action.payload?.find((row) => row?.nome?.includes('Atendimento'));
       const currentAmbiente =
         action.payload?.find((row) => row?.id === Number(localStorage.getItem('meuAmbiente'))) ||
         action.payload?.find((row) => row?.id === grpGerent?.id) ||
+        action.payload?.find((row) => row?.id === grpAtend?.id) ||
         action.payload?.[0];
       state.iAmInGrpGerente = !!grpGerent;
       state.meuAmbiente = currentAmbiente;
