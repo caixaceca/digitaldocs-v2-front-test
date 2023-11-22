@@ -33,14 +33,16 @@ export default function Intervencao({ colaboradoresList }) {
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { isSaving, meusAmbientes, iAmInGrpGerente, processo } = useSelector((state) => state.digitaldocs);
+  const { isSaving, meusAmbientes, arquivarProcessos, iAmInGrpGerente, processo } = useSelector(
+    (state) => state.digitaldocs
+  );
+  const perfilId = cc?.perfil_id;
   const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências';
   const aberturaEmpSemValCompliance =
     processo.segcliente === 'E' &&
     processo?.nome?.includes('Gerência') &&
     processo?.assunto === 'Abertura de conta' &&
     !processo?.htransicoes?.find((row) => row?.nome?.includes('Compliance') && row?.modo === 'Seguimento');
-  const perfilId = cc?.perfil_id;
 
   const devolucoes = [];
   const seguimentos = [];
@@ -212,7 +214,8 @@ export default function Intervencao({ colaboradoresList }) {
         arquivoAtendimento(
           processo?.assunto,
           processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.is_resgate
-        )
+        ),
+        arquivarProcessos
       ) && (
         <>
           <Tooltip title="ARQUIVAR" arrow>

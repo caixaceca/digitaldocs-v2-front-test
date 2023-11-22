@@ -25,6 +25,8 @@ const initialState = {
   isLoadingAnexo: false,
   iAmInGrpGerente: false,
   isOpenModalAnexo: false,
+  confirmarCartoes: false,
+  arquivarProcessos: false,
   isOpenModalDesariquivar: false,
   anexo: null,
   fluxo: null,
@@ -374,6 +376,12 @@ const slice = createSlice({
         }
         if (acesso === 'Todo-111' || acesso === 'Todo-110') {
           state.isAdmin = true;
+        }
+        if (acesso === 'rececao-cartoes-110') {
+          state.confirmarCartoes = true;
+        }
+        if (acesso === 'arquivar-processo-110') {
+          state.arquivarProcessos = true;
         }
       });
     },

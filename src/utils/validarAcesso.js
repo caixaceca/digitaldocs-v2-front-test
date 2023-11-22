@@ -159,14 +159,22 @@ export function UosGerente(meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export const podeArquivar = (meusAmbientes, fromAgencia, iAmInGrpGerente, estadoAtualiID, arquivoAtendimento) => {
+export const podeArquivar = (
+  meusAmbientes,
+  fromAgencia,
+  iAmInGrpGerente,
+  estadoAtualiID,
+  arquivoAtendimento,
+  acessoArquivarProcesso
+) => {
   let i = 0;
   while (i < meusAmbientes?.length) {
     if (
       ((meusAmbientes[i]?.is_inicial && fromAgencia && iAmInGrpGerente) ||
         (meusAmbientes[i]?.is_inicial && fromAgencia && arquivoAtendimento) ||
         (meusAmbientes[i]?.is_inicial && !fromAgencia) ||
-        meusAmbientes[i]?.is_final) &&
+        meusAmbientes[i]?.is_final ||
+        acessoArquivarProcesso) &&
       Number(meusAmbientes[i]?.id) === Number(estadoAtualiID)
     ) {
       return true;
@@ -203,14 +211,7 @@ export function arquivoAtendimento(assunto, encGer) {
 // ----------------------------------------------------------------------
 
 export function caixaPrincipal(meusAmbientes) {
-  let i = 0;
-  while (i < meusAmbientes?.length) {
-    if (meusAmbientes[i]?.nome?.includes('Caixa Principal')) {
-      return true;
-    }
-    i += 1;
-  }
-  return false;
+  return !!meusAmbientes?.find((row) => row?.nome?.includes('Caixa Principal'));
 }
 
 // ----------------------------------------------------------------------

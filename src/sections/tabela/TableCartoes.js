@@ -14,7 +14,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDate } from '../../utils/formatTime';
-import { validarAcesso, UosAcesso } from '../../utils/validarAcesso';
+import { UosAcesso } from '../../utils/validarAcesso';
 import { normalizeText, setItemValue, dataValido } from '../../utils/normalizeText';
 // hooks
 import useToggle, { useToggle1 } from '../../hooks/useToggle';
@@ -57,12 +57,11 @@ export default function TableCartoes() {
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
   const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
-  const { mail, cc, uos, myGroups } = useSelector((state) => state.intranet);
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
-  const temAcesso = validarAcesso('rececao_cartoes', myGroups);
   const [datai, setDatai] = useState(sub(new Date(), { days: 1 }));
   const [dataf, setDataf] = useState(sub(new Date(), { days: 1 }));
-  const { cartoes, meusAmbientes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
+  const { cartoes, meusAmbientes, confirmarCartoes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
     (state) => state.digitaldocs
   );
   const isDopCE = cc?.uo?.label === 'DOP-CE';
@@ -255,7 +254,7 @@ export default function TableCartoes() {
                   renderInput={(params) => <TextField {...params} label="Item" sx={{ width: 120 }} />}
                 />
               )}
-              {temDadosNaoValidados && temAcesso && (
+              {temDadosNaoValidados && confirmarCartoes && (
                 <Stack direction="row" spacing={1}>
                   {uo && <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />}
                   {selected.length > 0 && (
@@ -320,7 +319,9 @@ export default function TableCartoes() {
                       </TableCell>
                       <TableCell width={10}>
                         <Stack direction="row" spacing={0.75} justifyContent="right">
-                          {!row.rececao_validado && fase === 'Emissão' && temAcesso && <UpdateItem dados={row} />}
+                          {!row.rececao_validado && fase === 'Emissão' && confirmarCartoes && (
+                            <UpdateItem dados={row} />
+                          )}
                           <ViewItem handleClick={() => handleViewRow(row?.id)} />
                         </Stack>
                       </TableCell>

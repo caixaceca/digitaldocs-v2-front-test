@@ -21,7 +21,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { format, sub } from 'date-fns';
+import { format, add, sub } from 'date-fns';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
@@ -49,7 +49,20 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
   const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const isEdit = !!selectedItem;
 
-  const defaultValues = useMemo(() => ({ cartoes }), [cartoes]);
+  const cartoesList = useMemo(
+    () =>
+      cartoes?.map((row) => ({
+        idItem: row?.id,
+        nome: row?.nome,
+        numero: row?.numero,
+        tipo: row?.tipo,
+        nota: '',
+        dataSisp: new Date(),
+      })),
+    [cartoes]
+  );
+
+  const defaultValues = useMemo(() => ({ cartoes: cartoesList }), [cartoesList]);
   const methods = useForm({ defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
   const { fields } = useFieldArray({ control, name: 'cartoes' });
@@ -156,7 +169,7 @@ export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date()
     dataSisp: Yup.date().typeError('Introduza uma data válida').required('Data de receção não pode ficar vazio'),
   });
   const defaultValues = useMemo(
-    () => ({ data, balcao: balcao?.id, dataSisp: new Date(), nota: '' }),
+    () => ({ data, balcao: balcao?.id, dataSisp: add(data, { days: 1 }), nota: '' }),
     [balcao?.id, data]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
