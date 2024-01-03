@@ -28,7 +28,8 @@ import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
-import { Fechar, CriadoEmPor, DialogButons } from '../../components/Actions';
+import { Criado } from '../../components/Panel';
+import { Fechar, DialogButons } from '../../components/Actions';
 import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -374,12 +375,12 @@ export function Detalhes({ closeModal }) {
                   selectedItem?.emissao_validado ? (
                     <Stack spacing={0.5} sx={{ mt: 1 }}>
                       {selectedItem?.emissao_validado_por && (
-                        <CriadoEmPor tipo="user" value={selectedItem?.emissao_validado_por} />
+                        <Criado tipo="user" value={selectedItem?.emissao_validado_por} />
                       )}
                       {selectedItem?.emissao_validado_em && (
-                        <CriadoEmPor tipo="date" value={ptDateTime(selectedItem?.emissao_validado_em)} />
+                        <Criado tipo="date" value={ptDateTime(selectedItem?.emissao_validado_em)} />
                       )}
-                      {selectedItem?.nota_emissao && <CriadoEmPor tipo="note" value={selectedItem?.nota_emissao} />}
+                      {selectedItem?.nota_emissao && <Criado tipo="note" value={selectedItem?.nota_emissao} />}
                     </Stack>
                   ) : null
                 }
@@ -399,12 +400,12 @@ export function Detalhes({ closeModal }) {
                   selectedItem?.rececao_validado ? (
                     <Stack spacing={0.5} sx={{ mt: 1 }}>
                       {selectedItem?.rececao_validado_por && (
-                        <CriadoEmPor tipo="user" value={selectedItem?.rececao_validado_por} />
+                        <Criado tipo="user" value={selectedItem?.rececao_validado_por} />
                       )}
                       {selectedItem?.rececao_validado_em && (
-                        <CriadoEmPor tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />
+                        <Criado tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />
                       )}
-                      {selectedItem?.nota_rececao && <CriadoEmPor tipo="note" value={selectedItem?.nota_rececao} />}
+                      {selectedItem?.nota_rececao && <Criado tipo="note" value={selectedItem?.nota_rececao} />}
                     </Stack>
                   ) : null
                 }
@@ -431,7 +432,7 @@ export function Detalhes({ closeModal }) {
 
 TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string, text1: PropTypes.node, label: PropTypes.node };
 
-function TextItem({ title, text = '', text1 = null, label = null }) {
+export function TextItem({ title, text = '', text1 = null, label = null }) {
   return (
     <Stack spacing={1} direction="row" alignItems="center" sx={{ p: 1.5, pb: 0 }}>
       <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>

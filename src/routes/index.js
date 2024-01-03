@@ -5,8 +5,8 @@ import { useMsal } from '@azure/msal-react';
 // utils
 import { format } from 'date-fns';
 // redux
-import { getAll } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 import { getFromIntranet, AzureIntranetHandShake, AuthenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
@@ -47,11 +47,11 @@ export default function Router() {
       dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
       dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
       if (perfil?.id) {
-        dispatch(getAll('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getAll('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getAll('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getAll('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getAll('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getFromParametrizacao('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getFromParametrizacao('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getFromParametrizacao('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getFromParametrizacao('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getFromParametrizacao('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
       }
       if (perfil?.colaborador?.id) {
         dispatch(getFromIntranet('colaborador', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
@@ -92,7 +92,9 @@ export default function Router() {
             { path: 'lista', element: <Processos /> },
             { path: 'procurar', element: <Procura /> },
             { path: 'novo', element: <NovoEditarProcesso /> },
+            { path: 'cc/:id', element: <CreditoColaborador /> },
             { path: ':id/editar', element: <NovoEditarProcesso /> },
+            { path: 'cc/:id/editar', element: <EditarPedidoCC /> },
           ],
         },
         {
@@ -134,5 +136,7 @@ const Processos = Loadable(lazy(() => import('../pages/Processos')));
 const Indicadores = Loadable(lazy(() => import('../pages/Indicadores')));
 const PerfisEstado = Loadable(lazy(() => import('../pages/PerfisEstado')));
 const Parametrizacao = Loadable(lazy(() => import('../pages/Parametrizacao')));
+const EditarPedidoCC = Loadable(lazy(() => import('../pages/EditarPedidoCC')));
+const CreditoColaborador = Loadable(lazy(() => import('../pages/CreditoColaborador')));
 const NovoEditarProcesso = Loadable(lazy(() => import('../pages/NovoEditarProcesso')));
 const PerfilEstadosAcessos = Loadable(lazy(() => import('../pages/PerfilEstadosAcessos')));

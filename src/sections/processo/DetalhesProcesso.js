@@ -43,8 +43,9 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 DetalhesProcesso.propTypes = { isPS: PropTypes.bool };
 
 export default function DetalhesProcesso({ isPS }) {
+  const { processo } = useSelector((state) => state.digitaldocs);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const { processo, motivosPendencias, origem } = useSelector((state) => state.digitaldocs);
+  const { origem, motivosPendencias } = useSelector((state) => state.parametrizacao);
   const _entidades = entidadesParse(processo?.entidades);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);

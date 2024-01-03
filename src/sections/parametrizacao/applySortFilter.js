@@ -27,6 +27,7 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.cidade && normalizeText(row?.cidade).indexOf(normalizeText(filter)) !== -1) ||
         (row?.email && normalizeText(row?.email).indexOf(normalizeText(filter)) !== -1) ||
         (row?.telefone && normalizeText(row?.telefone).indexOf(normalizeText(filter)) !== -1) ||
+        (row.estado && normalizeText(row?.estado).indexOf(normalizeText(filter)) !== -1) ||
         (row.estado_inicial && normalizeText(row?.estado_inicial).indexOf(normalizeText(filter)) !== -1) ||
         (row.estado_final && normalizeText(row?.estado_final).indexOf(normalizeText(filter)) !== -1) ||
         (row?.referencia && normalizeText(row?.referencia).indexOf(normalizeText(filter)) !== -1) ||
@@ -37,4 +38,32 @@ export function applySortFilter({ dados, filter, comparator }) {
   }
 
   return dados;
+}
+
+// ----------------------------------------------------------------------
+
+export function listaTransicoes(transicoes, estados) {
+  return (
+    transicoes?.map((row) => ({
+      id: row?.id,
+      label: `${row?.modo} - ${
+        estados?.find((item) => item?.id === row.estado_inicial_id)?.nome || row.estado_inicial_id
+      } para ${estados?.find((item) => item?.id === row.estado_final_id)?.nome || row.estado_final_id}${
+        row?.is_after_devolucao ? ' (DD)' : ''
+      }`,
+      estadoInicial: row.estado_inicial_id,
+    })) || []
+  );
+}
+
+// ----------------------------------------------------------------------
+
+export function listaPerfis(perfis, colaboradores) {
+  perfis = perfis?.map((row) => ({
+    id: row?.perfil_id,
+    label: colaboradores?.find((item) => item?.perfil_id === row?.perfil_id)?.perfil?.displayName || row?.perfil_id,
+  }));
+  const perfisIdDistint = new Set(perfis?.map((objeto) => objeto.id));
+  perfis = Array.from(perfisIdDistint, (id) => perfis?.find((objeto) => objeto.id === id));
+  return perfis;
 }

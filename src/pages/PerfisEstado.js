@@ -6,21 +6,19 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { getFile } from '../utils/getFile';
 import { ptDateTime } from '../utils/formatTime';
 import { nomeacaoBySexo } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getItem, resetItem } from '../redux/slices/digitaldocs';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -32,6 +30,7 @@ import Page from '../components/Page';
 import MyAvatar from '../components/MyAvatar';
 import Scrollbar from '../components/Scrollbar';
 import { SkeletonTable } from '../components/skeleton';
+import { Checked, AddItem } from '../components/Actions';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
@@ -49,6 +48,7 @@ const TABLE_HEAD = [
   { id: 'nomeacao_funcao', label: 'Nomeação/Função', align: 'left' },
   { id: 'data_inicial', label: 'Data de início', align: 'left' },
   { id: 'data_limite', label: 'Data de fim', align: 'left' },
+  { id: 'observador', label: 'Observador', align: 'center' },
 ];
 
 // ----------------------------------------------------------------------
@@ -60,7 +60,7 @@ export default function PerfisEstado() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
-  const { isLoading, estado, done } = useSelector((state) => state.digitaldocs);
+  const { isLoading, estado, done } = useSelector((state) => state.parametrizacao);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
 
   const {
@@ -91,9 +91,8 @@ export default function PerfisEstado() {
 
   useEffect(() => {
     if (mail && id && cc?.perfil_id) {
-      dispatch(getItem('estado', { id, mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('estado', { id, mail, perfilId: cc?.perfil_id }));
     }
-    return () => dispatch(resetItem('estado'));
   }, [dispatch, cc?.perfil_id, mail, id]);
 
   const perfisAssociados = [];
@@ -104,6 +103,7 @@ export default function PerfisEstado() {
         peid: row?.peid,
         uo: colabByPerfil?.uo,
         sexo: colabByPerfil?.sexo,
+        observador: row?.observador,
         data_limite: row?.data_limite,
         perfil: colabByPerfil?.perfil,
         data_inicial: row?.data_inicial,
@@ -131,9 +131,7 @@ export default function PerfisEstado() {
           ]}
           action={
             <RoleBasedGuard roles={['estado-110', 'estado-111', 'Todo-110', 'Todo-111']}>
-              <Button variant="soft" startIcon={<AddCircleIcon />} onClick={onOpen}>
-                Adicionar
-              </Button>
+              <AddItem handleClick={onOpen} />
             </RoleBasedGuard>
           }
           sx={{ color: 'text.secondary' }}
@@ -151,7 +149,7 @@ export default function PerfisEstado() {
                   <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
                   <TableBody>
                     {isLoading && isNotFound ? (
-                      <SkeletonTable column={5} row={10} />
+                      <SkeletonTable column={6} row={10} />
                     ) : (
                       dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                         <TableRow key={row?.id} hover>
@@ -181,6 +179,9 @@ export default function PerfisEstado() {
                           <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
                           <TableCell>{row.data_inicial ? ptDateTime(row.data_inicial) : 'Acesso permanente'}</TableCell>
                           <TableCell>{row.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}</TableCell>
+                          <TableCell align="center" width={10}>
+                            <Checked check={row.observador} />
+                          </TableCell>
                         </TableRow>
                       ))
                     )}

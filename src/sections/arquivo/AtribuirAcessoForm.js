@@ -23,25 +23,9 @@ AtribuirAcessoForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func,
 export default function AtribuirAcessoForm({ open, onCancel, processoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-
   const colaboradoresList = colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
-
-  useEffect(() => {
-    if (done === 'Acesso atribuido') {
-      enqueueSnackbar('Acesso ao processo atribuído com sucesso', { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     perfilID: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),

@@ -58,7 +58,6 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
               {fields.map((item, index) => (
                 <Grid item xs={12} sm={6} xl={3} key={index}>
                   <RHFTextField
-                    required
                     name={`entidades[${index}].numero`}
                     label={fields?.length < 2 ? 'Nº de entidade' : `Nº de entidade ${index + 1}`}
                     InputProps={{
@@ -107,7 +106,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
               <RHFTextField name="titular" label="Descrição" />
             </Grid>
           )}
-          {fluxo?.assunto === 'Banca Virtual - Adesão' && (
+          {(fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') && (
             <Grid item xs={12} xl={6}>
               <RHFTextField name="email" label="Email" />
             </Grid>

@@ -7,20 +7,18 @@ import { DocIllustration404 } from '../../assets';
 
 // ----------------------------------------------------------------------
 
-SearchNotFound.propTypes = { message: PropTypes.string.isRequired };
+SearchNotFound.propTypes = { message: PropTypes.string, noShadow: PropTypes.bool };
 
-export default function SearchNotFound({ message }) {
+export default function SearchNotFound({ message, noShadow = false }) {
   return (
-    <Card sx={{ px: 3, py: 5 }}>
+    <Card sx={{ boxShadow: noShadow && 'none' }}>
       <Stack
-        justifyContent="center"
         align="center"
-        sx={{ typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
+        justifyContent="center"
+        sx={{ py: { md: 7, xs: 3 }, fontStyle: 'italic', color: 'text.secondary' }}
       >
-        <DocIllustration404 sx={{ height: { xs: 300, sm: 450 } }} />
-        <Typography variant="h6" sx={{ pb: 5 }}>
-          {message}
-        </Typography>
+        <DocIllustration404 sx={{ height: 450 }} />
+        <Typography variant="h6">{message}</Typography>
       </Stack>
     </Card>
   );

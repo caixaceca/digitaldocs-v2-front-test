@@ -23,7 +23,7 @@ export function SearchToolbarSimple({ filter, item = '', setFilter }) {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
       <SearchField item={item} filter={filter} setFilter={setFilter} />
-      {filter && <RemoverFiltros removerFiltro={() => setItemValue('', setFilter, item)} />}
+      {filter && <RemoverFiltros removerFiltro={() => setItemValue('', setFilter, item, false)} />}
     </Stack>
   );
 }
@@ -59,9 +59,9 @@ export function SearchToolbarProcura({
 }) {
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {(assuntosList?.length > 1 || estadosList?.length > 1 || uosorigemList?.length > 1) && (
+      {(assuntosList?.length > 0 || estadosList?.length > 0 || uosorigemList?.length > 0) && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {assuntosList?.length > 1 && (
+          {assuntosList?.length > 0 && (
             <Autocomplete
               fullWidth
               value={assunto || null}
@@ -71,7 +71,7 @@ export function SearchToolbarProcura({
               onChange={(event, newValue) => setItemValue(newValue, setAssunto, 'assuntoSearch')}
             />
           )}
-          {estadosList?.length > 1 && (
+          {estadosList?.length > 0 && (
             <Autocomplete
               fullWidth
               value={estado || null}
@@ -81,7 +81,7 @@ export function SearchToolbarProcura({
               onChange={(event, newValue) => setItemValue(newValue, setEstado, 'estadoSearch')}
             />
           )}
-          {uosorigemList?.length > 1 && (
+          {uosorigemList?.length > 0 && (
             <Autocomplete
               fullWidth
               value={uo || null}
@@ -134,7 +134,7 @@ export function SearchToolbarProcessos({
   colaboradoresList,
 }) {
   const { cc } = useSelector((state) => state.intranet);
-  const { meusAmbientes, meusFluxos } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, meusFluxos } = useSelector((state) => state.parametrizacao);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       {(meusAmbientes?.length > 1 ||
@@ -319,7 +319,7 @@ export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
   const { uos } = useSelector((state) => state.intranet);
 
   return (
-    <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ pt: 0.5, pb: 1.5, px: 0 }}>
+    <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ pb: 1, px: 0 }}>
       <Autocomplete
         fullWidth
         value={uo || null}

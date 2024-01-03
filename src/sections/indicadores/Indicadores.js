@@ -50,7 +50,7 @@ import { fNumber, fPercent, fNumber2, fData, converterSegundos } from '../../uti
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/digitaldocs';
+import { getIndicadores } from '../../redux/slices/indicadores';
 // components
 import Panel from '../../components/Panel';
 import Image from '../../components/Image';
@@ -102,7 +102,7 @@ export function FileSystem() {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { fileSystem, isLoading } = useSelector((state) => state.digitaldocs);
+  const { fileSystem, isLoading } = useSelector((state) => state.indicadores);
   const isNotFound = !fileSystem.length;
   const chartColors = [theme.palette.primary.main, theme.palette.primary.dark];
   const chartOptions = useChart({
@@ -310,7 +310,7 @@ export function TotalProcessos() {
 Criacao.propTypes = { vista: PropTypes.string };
 
 export function Criacao({ vista }) {
-  const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
+  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const isNotFound = !indicadores.length;
   const total = sumBy(indicadores, 'total');
@@ -409,7 +409,8 @@ export function EntradasTrabalhados() {
   const [colaborador2, setColaborador2] = useState(null);
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { cc, colaboradores } = useSelector((state) => state.intranet);
-  const { isLoading, isAdmin, meusAmbientes, indicadores } = useSelector((state) => state.digitaldocs);
+  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
+  const { isAdmin, meusAmbientes } = useSelector((state) => state.parametrizacao);
 
   const colaboradoresAcesso = ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.map((row) => row?.id);
   const dadosByColaborador = indicadoresGroupBy(
@@ -614,7 +615,7 @@ export function EntradasTrabalhados() {
 
 export function DevolvidosTipos() {
   const theme = useTheme();
-  const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
+  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const isNotFound = !indicadores.length;
   const total = sumBy(indicadores, 'total');
@@ -690,7 +691,8 @@ export function DevolvidosTipos() {
 
 export function Execucao() {
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { isLoading, indicadores, fluxos, estados } = useSelector((state) => state.digitaldocs);
+  const { fluxos, estados } = useSelector((state) => state.parametrizacao);
+  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const fluxo = localStorage.getItem('fluxoIndic')
     ? fluxos?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic')))
     : '';
@@ -861,7 +863,7 @@ export function Execucao() {
 
 export function Duracao() {
   const { uos } = useSelector((state) => state.intranet);
-  const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
+  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const duracaoByItem = useMemo(() => duracaoP(indicadores, uos), [indicadores, uos]);
   const isNotFound = !duracaoByItem.length;
@@ -889,12 +891,12 @@ export function Duracao() {
   );
 
   const chartOptions = useChart({
-    grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
-    plotOptions: { bar: { columnWidth: '25%' } },
     stroke: { show: false },
-    xaxis: { categories: duracaoByItem?.map((row) => row?.label) },
-    yaxis: { title: { text: 'Dias' }, labels: { formatter: (value) => fNumber(value) } },
+    plotOptions: { bar: { columnWidth: '25%' } },
     tooltip: { y: { formatter: (value) => fNumber2(value) } },
+    xaxis: { categories: duracaoByItem?.map((row) => row?.label) },
+    grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
+    yaxis: { title: { text: 'Dias' }, labels: { formatter: (value) => fNumber(value) } },
   });
 
   return (
@@ -926,7 +928,7 @@ export function Duracao() {
                       </Grid>
                     ))}
                     <Grid item xs={12}>
-                      {currentTab === 'Gráfico' && series[0]?.data?.length > 0 ? (
+                      {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                         <Chart type="bar" series={series} options={chartOptions} height={500} />
                       ) : (
                         <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
@@ -952,7 +954,7 @@ export function Volume({ top }) {
   const agrupamento = localStorage.getItem('agrupamento') || 'Unidade orgânica';
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const topNumb = (top === 'Top 5' && 5) || (top === 'Top 10' && 10) || (top === 'Top 20' && 20) || 'Todos';
-  const { isLoading, indicadores } = useSelector((state) => state.digitaldocs);
+  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
   const volumeByItem = [];
@@ -1071,7 +1073,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
     localStorage.getItem('dataFIndic') ? add(new Date(localStorage.getItem('dataFIndic')), { hours: 2 }) : null
   );
   const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
-  const { fluxos, isAdmin, meusAmbientes, estados } = useSelector((state) => state.digitaldocs);
+  const { isAdmin, meusAmbientes, fluxos, estados } = useSelector((state) => state.parametrizacao);
   const perfilId = useMemo(() => cc?.perfil_id, [cc?.perfil_id]);
 
   const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
@@ -1406,8 +1408,8 @@ function CardInfo({ title, label, total, duracao }) {
 ColaboradorCard.propTypes = { colaboradorDados: PropTypes.object, assuntos: PropTypes.array, total: PropTypes.number };
 
 function ColaboradorCard({ colaboradorDados, total, assuntos }) {
-  const totalColaborador = sumBy(colaboradorDados?.processos, 'total');
   const { colaboradores } = useSelector((state) => state.intranet);
+  const totalColaborador = sumBy(colaboradorDados?.processos, 'total');
   const colaborador = colaboradores?.find((row) => row.perfil_id === colaboradorDados.item);
 
   return (

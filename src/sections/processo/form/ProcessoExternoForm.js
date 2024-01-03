@@ -77,12 +77,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
               </Grid>
               {operacao === 'Cativo/Penhora' && (
                 <Grid item xs={12} sm={6} md={3}>
-                  <RHFNumberField
-                    name="valor"
-                    label="Valor"
-                    tipo="moeda"
-                    inputProps={{ style: { textAlign: 'right' } }}
-                  />
+                  <RHFNumberField name="valor" tipo="moeda" label="Valor" />
                 </Grid>
               )}
             </Grid>

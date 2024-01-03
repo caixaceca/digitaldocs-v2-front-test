@@ -87,6 +87,7 @@ export function errorMsg(error) {
     error?.error?.[0]?.message ||
     error?.error?.[1]?.message ||
     error.response?.data?.mensagem ||
+    error.response?.data?.erro ||
     error.response?.mensagem ||
     error.response?.data ||
     error?.mensagem ||

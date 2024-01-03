@@ -14,11 +14,11 @@ import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getItem, getAll } from '../redux/slices/digitaldocs';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
 import useSettings from '../hooks/useSettings';
-import { getComparator, applySort } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
@@ -39,9 +39,9 @@ export default function NovoEditarProcesso() {
   const isEdit = pathname.includes('edit');
   const [fluxo, setFluxo] = useState(null);
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { processo, origens, linhas, meusAmbientes, meusFluxos, meuAmbiente, isLoadingP } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { linhas } = useSelector((state) => state.parametrizacao);
+  const { processo, isLoadingP } = useSelector((state) => state.digitaldocs);
+  const { origens, meusAmbientes, meusFluxos, meuAmbiente } = useSelector((state) => state.parametrizacao);
   const perfilId = cc?.perfil_id;
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function NovoEditarProcesso() {
 
   useEffect(() => {
     if (mail && perfilId && linhas?.length === 0 && fluxo?.is_credito) {
-      dispatch(getAll('linhas', { mail, perfilId }));
+      dispatch(getFromParametrizacao('linhas', { mail, perfilId }));
     }
   }, [dispatch, linhas, fluxo, processo, perfilId, mail]);
 
@@ -111,10 +111,7 @@ export default function NovoEditarProcesso() {
                     value={fluxo}
                     getOptionLabel={(option) => option?.assunto}
                     onChange={(event, newValue) => setFluxo(newValue)}
-                    options={applySort(
-                      meusFluxos.filter((option) => option?.id > 0),
-                      getComparator('asc', 'assunto')
-                    )}
+                    options={meusFluxos.filter((option) => option?.id > 0)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />

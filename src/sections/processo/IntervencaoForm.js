@@ -80,8 +80,9 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [pendente, setPendente] = useState(false);
+  const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { error, isSaving, processo, motivosPendencias } = useSelector((state) => state.digitaldocs);
+  const { motivosPendencias } = useSelector((state) => state.parametrizacao);
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
 
   const destinosSingulares = [];
@@ -94,13 +95,6 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
     }
   });
   const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     destinos_par: inParalelo && Yup.array().min(1, 'Escolhe os destinos'),
@@ -449,14 +443,8 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { error, isSaving, meusAmbientes } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
 
   const deveInformarNConta = () => {
     if (
@@ -479,7 +467,9 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
     conta:
       deveInformarNConta() &&
       Yup.number().typeError('Introduza o nº de conta do titular').positive('Introduza um nº de conta válido'),
-    data_entrada: Yup.date().typeError('Data de entrada não pode ficar vazio'),
+    data_entrada: Yup.date()
+      .typeError('Data de entrada não pode ficar vazio')
+      .required('Data de entrada não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -637,14 +627,7 @@ export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { error, isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const { isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
     observacao: Yup.string().required('Observação não pode ficar vazio'),
@@ -719,20 +702,13 @@ export function FinalizarForm({ open, onCancel }) {
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { error, isSaving, processo } = useSelector((state) => state.digitaldocs);
+  const { isSaving, processo } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (open) {
       setSelecionados([]);
     }
   }, [open]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const defaultValues = useMemo(
     () => ({
@@ -854,7 +830,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
   const [idAnexo, setIdAnexo] = useState('');
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, error, done, isSaving } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, done, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'parecer enviado') {
@@ -867,13 +843,6 @@ export function ParecerForm({ open, onCancel, processoId }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     descricao: Yup.string().required('Descrição não pode ficar vazio'),
@@ -1008,7 +977,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
                                 border: (theme) => `solid 1px ${theme.palette.divider}`,
                               }}
                             >
-                              <ListItemIcon>{getFileThumb(anexo.nome)}</ListItemIcon>
+                              <ListItemIcon>{getFileThumb(false, null, anexo.nome)}</ListItemIcon>
                               <ListItemText>{anexo.nome}</ListItemText>
                               <Fab
                                 size="small"
@@ -1197,7 +1166,7 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { error, done, isSaving } = useSelector((state) => state.digitaldocs);
+  const { done, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'atribuido') {
@@ -1209,13 +1178,6 @@ export function AtribuirForm({ processoID, perfilId, colaboradoresList }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     perfil: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),
@@ -1308,9 +1270,8 @@ export function ColocarPendente({ from }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, motivosPendencias, isOpenModal, error, done, isSaving } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { motivosPendencias } = useSelector((state) => state.parametrizacao);
+  const { selectedItem, isOpenModal, done, isSaving } = useSelector((state) => state.digitaldocs);
   const pendencia = motivosPendencias?.find((row) => Number(row?.id) === Number(selectedItem?.mpendencia)) || null;
 
   const handleCloseModal = () => {
@@ -1323,13 +1284,6 @@ export function ColocarPendente({ from }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     mpendencia: Yup.mixed().required('Motivo de pendência não pode ficar vazio'),

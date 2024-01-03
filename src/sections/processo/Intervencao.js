@@ -33,9 +33,8 @@ export default function Intervencao({ colaboradoresList }) {
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { isSaving, meusAmbientes, arquivarProcessos, iAmInGrpGerente, processo } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { iAmInGrpGerente, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { isSaving, arquivarProcessos, processo } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências';
   const aberturaEmpSemValCompliance =

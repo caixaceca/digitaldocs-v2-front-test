@@ -35,7 +35,7 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
   const { watch, setValue } = useFormContext();
   const values = watch();
   const hasAnexos = selectedProcesso?.anexos?.length > 0;
-  const { linhas } = useSelector((state) => state.digitaldocs);
+  const { linhas } = useSelector((state) => state.parametrizacao);
 
   return (
     <Grid container spacing={3}>
@@ -47,12 +47,7 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                 <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFNumberField
-                  tipo="moeda"
-                  name="montante_solicitado"
-                  label="Montante solicitado"
-                  inputProps={{ style: { textAlign: 'right' } }}
-                />
+                <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante solicitado" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <RHFAutocompleteSimple
@@ -121,12 +116,7 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                         <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
                       </Grid>
                       <Grid item xs={12} sm={6} md={3}>
-                        <RHFNumberField
-                          tipo="moeda"
-                          name="montante_aprovado"
-                          label="Montante aprovado"
-                          inputProps={{ style: { textAlign: 'right' } }}
-                        />
+                        <RHFNumberField tipo="moeda" name="montante_aprovado" label="Montante aprovado" />
                       </Grid>
                     </>
                   )}
@@ -137,23 +127,13 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                           <RHFDatePicker name="data_contratacao" label="Data de contratação" disableFuture />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                          <RHFNumberField
-                            tipo="moeda"
-                            name="montante_contratado"
-                            label="Montante contratado"
-                            inputProps={{ style: { textAlign: 'right' } }}
-                          />
+                          <RHFNumberField tipo="moeda" name="montante_contratado" label="Montante contratado" />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
                           <RHFTextField name="prazo_amortizacao" label="Prazo de amortização" />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                          <RHFNumberField
-                            tipo="percentagem"
-                            name="taxa_juro"
-                            label="Taxa de juro"
-                            inputProps={{ style: { textAlign: 'right' } }}
-                          />
+                          <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
                         </Grid>
                         <Grid item xs={12} sm={3}>
                           <RHFAutocompleteSimple name="escalao_decisao" label="Escalão de decisão" options={escaloes} />

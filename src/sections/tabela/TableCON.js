@@ -124,7 +124,7 @@ export default function TableCON() {
                     dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : ''
                   }`}
                   children={
-                    <Button variant="soft" startIcon={getFileThumb('file.xlsx')}>
+                    <Button variant="soft" startIcon={getFileThumb(false, null, 'file.xlsx')}>
                       Exportar
                     </Button>
                   }

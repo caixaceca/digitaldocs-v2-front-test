@@ -2,53 +2,91 @@ import PropTypes from 'prop-types';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
+import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import ReplyIcon from '@mui/icons-material/Reply';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import DialogActions from '@mui/material/DialogActions';
+import ListItemButton from '@mui/material/ListItemButton';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import LockPersonIcon from '@mui/icons-material/LockPerson';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
+import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+// utils
+import { ptDate } from '../utils/formatTime';
+import { getFileThumb } from '../utils/getFileFormat';
 // hooks
 import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
-import { openModal, selectItem, getItem } from '../redux/slices/digitaldocs';
+import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/parametrizacao';
 //
 import SvgIconStyle from './SvgIconStyle';
 import DialogConfirmar from './DialogConfirmar';
 
 const wh = { width: 36, height: 36 };
+const whsmall = { width: 30, height: 30 };
 
 // ----------------------------------------------------------------------
 
 DefaultAction.propTypes = {
+  small: PropTypes.bool,
+  button: PropTypes.bool,
   icon: PropTypes.string,
-  label: PropTypes.string,
   color: PropTypes.string,
+  label: PropTypes.string,
+  variant: PropTypes.string,
   handleClick: PropTypes.func,
 };
 
-export function DefaultAction({ label, color = 'success', icon, handleClick }) {
-  return (
+export function DefaultAction({
+  icon,
+  label = '',
+  handleClick,
+  small = false,
+  button = false,
+  variant = 'soft',
+  color = 'success',
+}) {
+  return button ? (
+    <Stack>
+      <Button
+        color={color}
+        variant={variant}
+        onClick={handleClick}
+        size={small ? 'small' : 'medium'}
+        startIcon={icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />}
+      >
+        {label}
+      </Button>
+    </Stack>
+  ) : (
     <Stack>
       <Tooltip title={label} arrow>
-        <Fab size="small" color={color} variant="soft" onClick={handleClick}>
-          {(icon === 'doneAll' && <DoneAllIcon />) || (icon === 'multiple' && <ChecklistOutlinedIcon />)}
+        <Fab size="small" variant="soft" color={color} onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
+          {(icon === 'encaminhar' && <ReplyIcon sx={{ width: small ? 18 : 24, transform: 'scaleX(-1)' }} />) ||
+            (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'abandonar' && <LockOpenOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'doneAll' && <DoneAllIcon />) ||
+            (icon === 'multiple' && <ChecklistOutlinedIcon />)}
         </Fab>
       </Tooltip>
     </Stack>
@@ -57,19 +95,24 @@ export function DefaultAction({ label, color = 'success', icon, handleClick }) {
 
 // ----------------------------------------------------------------------
 
-AddItem.propTypes = { handleAdd: PropTypes.func };
+AddItem.propTypes = { small: PropTypes.bool, label: PropTypes.string, handleClick: PropTypes.func };
 
-export function AddItem({ handleAdd = null }) {
+export function AddItem({ small = false, label = 'Adicionar', handleClick = null }) {
   const dispatch = useDispatch();
 
   const handleOpenModal = () => {
-    dispatch(openModal());
+    dispatch(openModal('add'));
   };
 
   return (
     <Stack>
-      <Button variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd || handleOpenModal}>
-        Adicionar
+      <Button
+        variant="soft"
+        startIcon={<AddCircleIcon />}
+        size={small ? 'small' : 'medium'}
+        onClick={handleClick || handleOpenModal}
+      >
+        {label}
       </Button>
     </Stack>
   );
@@ -84,27 +127,47 @@ export function UpdateItem({ item = '', id = 0, dados = null }) {
   const { mail, cc } = useSelector((state) => state.intranet);
 
   const handleUpdateByItem = () => {
+    dispatch(openModal('update'));
     dispatch(selectItem(dados));
   };
 
   const handleUpdateById = (id) => {
+    dispatch(openModal('update'));
     if (id && cc?.perfil_id && mail) {
-      dispatch(getItem(item, { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao(item, { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
     }
   };
 
-  return dados ? (
-    <Tooltip title="Editar" arrow>
-      <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdateByItem()} sx={{ ...wh }}>
-        <SvgIconStyle src="/assets/icons/editar.svg" />
-      </Fab>
-    </Tooltip>
-  ) : (
-    <Tooltip title="Editar" arrow>
-      <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdateById(id)} sx={{ ...wh }}>
-        <SvgIconStyle src="/assets/icons/editar.svg" />
-      </Fab>
-    </Tooltip>
+  return (
+    <Stack>
+      {dados ? (
+        <Tooltip title="Editar" arrow>
+          <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdateByItem()} sx={{ ...wh }}>
+            <SvgIconStyle src="/assets/icons/editar.svg" />
+          </Fab>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Editar" arrow>
+          <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdateById(id)} sx={{ ...wh }}>
+            <SvgIconStyle src="/assets/icons/editar.svg" />
+          </Fab>
+        </Tooltip>
+      )}
+    </Stack>
+  );
+}
+
+UpdateItemAlt.propTypes = { handleClick: PropTypes.func };
+
+export function UpdateItemAlt({ handleClick }) {
+  return (
+    <Stack>
+      <Tooltip title="Editar" arrow>
+        <Fab size="small" variant="soft" color="warning" onClick={handleClick} sx={{ ...wh }}>
+          <SvgIconStyle src="/assets/icons/editar.svg" />
+        </Fab>
+      </Tooltip>
+    </Stack>
   );
 }
 
@@ -114,13 +177,15 @@ ViewItem.propTypes = { swap: PropTypes.bool, estado: PropTypes.bool, handleClick
 
 export function ViewItem({ swap = false, estado = false, handleClick }) {
   return (
-    <Tooltip title={(estado && 'Colaboradores') || (swap && 'Estados & Acessos') || 'DETALHES'} arrow>
-      <Fab color="success" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
-        {(swap && <SwapHorizOutlinedIcon />) || (estado && <GroupOutlinedIcon />) || (
-          <SvgIconStyle src="/assets/icons/view.svg" />
-        )}
-      </Fab>
-    </Tooltip>
+    <Stack>
+      <Tooltip title={(estado && 'Colaboradores') || (swap && 'Estados & Acessos') || 'DETALHES'} arrow>
+        <Fab color="success" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
+          {(swap && <SwapHorizOutlinedIcon />) || (estado && <GroupOutlinedIcon />) || (
+            <SvgIconStyle src="/assets/icons/view.svg" />
+          )}
+        </Fab>
+      </Tooltip>
+    </Stack>
   );
 }
 
@@ -132,32 +197,37 @@ export function CloneItem({ item, id }) {
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
 
-  const handleClone = (id) => {
+  const handleClone = () => {
     if (id && cc?.perfil_id && mail) {
-      dispatch(getItem(item, { id, mail, from: 'clonagem', perfilId: cc?.perfil_id }));
+      dispatch(openModal('view'));
+      dispatch(getFromParametrizacao(item, { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
     }
   };
 
   return (
-    <Tooltip title="Clonar fluxo" arrow>
-      <Fab color="inherit" size="small" variant="soft" onClick={() => handleClone(id)} sx={{ ...wh }}>
-        <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />
-      </Fab>
-    </Tooltip>
+    <Stack>
+      <Tooltip title="Clonar fluxo" arrow>
+        <Fab color="inherit" size="small" variant="soft" onClick={() => handleClone()} sx={{ ...wh }}>
+          <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />
+        </Fab>
+      </Tooltip>
+    </Stack>
   );
 }
 
 // ----------------------------------------------------------------------
 
-DeleteItem.propTypes = { handleClick: PropTypes.func };
+DeleteItem.propTypes = { small: PropTypes.bool, handleClick: PropTypes.func };
 
-export function DeleteItem({ handleClick }) {
+export function DeleteItem({ small = false, handleClick }) {
   return (
-    <Tooltip title="Eliminar" arrow>
-      <Fab color="error" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
-        <SvgIconStyle src="/assets/icons/trash.svg" />
-      </Fab>
-    </Tooltip>
+    <Stack>
+      <Tooltip title="Eliminar" arrow>
+        <Fab color="error" size="small" variant="soft" onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
+          <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: small ? 18 : 22 }} />
+        </Fab>
+      </Tooltip>
+    </Stack>
   );
 }
 
@@ -179,30 +249,41 @@ Pendente.propTypes = { detail: PropTypes.bool, handleClick: PropTypes.func };
 
 export function Pendente({ detail = false, handleClick }) {
   return (
-    <Tooltip title="PENDENTE" arrow>
-      <Fab
-        color="inherit"
-        size="small"
-        variant="soft"
-        onClick={handleClick}
-        sx={{ width: detail ? 40 : 36, height: detail ? 40 : 36 }}
-      >
-        <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />
-      </Fab>
-    </Tooltip>
+    <Stack>
+      <Tooltip title="PENDENTE" arrow>
+        <Fab
+          color="inherit"
+          size="small"
+          variant="soft"
+          onClick={handleClick}
+          sx={{ width: detail ? 40 : 36, height: detail ? 40 : 36 }}
+        >
+          <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />
+        </Fab>
+      </Tooltip>
+    </Stack>
   );
 }
 
 // ----------------------------------------------------------------------
 
-Fechar.propTypes = { handleClick: PropTypes.func };
+Fechar.propTypes = { button: PropTypes.bool, large: PropTypes.bool, handleClick: PropTypes.func };
 
-export function Fechar({ handleClick }) {
-  return (
+export function Fechar({ button = false, large = false, handleClick }) {
+  return button ? (
+    <Button
+      variant="text"
+      color="inherit"
+      onClick={handleClick}
+      startIcon={<CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />}
+    >
+      Cancelar
+    </Button>
+  ) : (
     <Stack>
       <Tooltip title="Fechar" arrow>
-        <IconButton onClick={handleClick} sx={{ width: 28, height: 28 }}>
-          <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
+        <IconButton onClick={handleClick} sx={{ width: large ? 36 : 28, height: large ? 36 : 28 }}>
+          <CloseOutlinedIcon sx={{ width: large ? 24 : 20, opacity: large ? 1 : 0.75 }} />
         </IconButton>
       </Tooltip>
     </Stack>
@@ -243,19 +324,37 @@ export function DialogButons({ edit = false, isSaving, desc = '', label = '', on
 
 // ----------------------------------------------------------------------
 
-CriadoEmPor.propTypes = { tipo: PropTypes.string, value: PropTypes.string };
+AnexosExistente.propTypes = { mt: PropTypes.number, anexos: PropTypes.array, onOpen: PropTypes.func };
 
-export function CriadoEmPor({ tipo = '', value = '' }) {
+export function AnexosExistente({ mt = 4, anexos, onOpen }) {
   return (
-    <Stack direction="row" spacing={0.5} alignItems="center">
-      {(tipo === 'note' && <CommentOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
-        (tipo === 'date' && <CalendarTodayIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
-        (tipo === 'time' && <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
-        (tipo === 'company' && <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
-        (tipo === 'user' && <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />)}
-      <Typography noWrap variant="body2">
-        {value}
+    <>
+      <Typography variant="body2" sx={{ mt, color: 'text.secondary' }}>
+        Anexos existentes
       </Typography>
-    </Stack>
+      <List component="nav" sx={{ mt: 1 }}>
+        {anexos.map((row, index) => (
+          <ListItemButton
+            key={`${row.name}_${index}`}
+            sx={{
+              mb: 1,
+              p: 1.5,
+              borderRadius: 1,
+              bgcolor: 'background.paper',
+              border: (theme) => `dotted 1px ${theme.palette.divider}`,
+            }}
+          >
+            <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
+            <ListItemText
+              primary={row.name}
+              secondary={row?.data_validade ? `Validade: ${ptDate(row?.data_validade)}` : ''}
+            />
+            <ListItemSecondaryAction>
+              <DeleteItem small handleClick={() => onOpen(row.id)} />
+            </ListItemSecondaryAction>
+          </ListItemButton>
+        ))}
+      </List>
+    </>
   );
 }

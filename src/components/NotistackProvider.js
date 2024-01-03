@@ -1,6 +1,6 @@
-import { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { SnackbarProvider, MaterialDesignContent } from 'notistack';
+import { useRef, useEffect } from 'react';
+import { useSnackbar, SnackbarProvider, MaterialDesignContent } from 'notistack';
 // @mui
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -101,4 +101,27 @@ function SnackbarIcon({ icon, color }) {
       {icon}
     </Box>
   );
+}
+
+// ----------------------------------------------------------------------
+
+Notificacao.propTypes = { done: PropTypes.string, error: PropTypes.string, onCancel: PropTypes.func };
+
+export function Notificacao({ done, error, onCancel }) {
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (done) {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
+      onCancel();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error, { variant: 'error' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 }

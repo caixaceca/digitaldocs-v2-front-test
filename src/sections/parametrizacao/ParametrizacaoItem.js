@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -10,15 +9,13 @@ import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-// utils
-import { newLineText } from '../../utils/normalizeText';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, closeModal, closeParecer } from '../../redux/slices/digitaldocs';
+import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
@@ -27,15 +24,8 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { AddItem, UpdateItem, ViewItem, CloneItem, Checked } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
+import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm, MotivoPendenciaForm } from './ParametrizacaoForm';
 import { applySortFilter } from './applySortFilter';
-import {
-  LinhaForm,
-  FluxoForm,
-  EstadoForm,
-  OrigemForm,
-  ClonarFluxoForm,
-  MotivoPendenciaForm,
-} from './ParametrizacaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -71,12 +61,6 @@ const TABLE_HEAD_MOTIVOS = [
   { id: '' },
 ];
 
-const TABLE_HEAD_LINHAS = [
-  { id: 'linha', label: 'Linha', align: 'left' },
-  { id: 'descricao', label: 'Segmento', align: 'left' },
-  { id: '' },
-];
-
 // ----------------------------------------------------------------------
 
 ParametrizacaoItem.propTypes = { item: PropTypes.string };
@@ -84,11 +68,11 @@ ParametrizacaoItem.propTypes = { item: PropTypes.string };
 export default function ParametrizacaoItem({ item }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterParams') || '');
-  const { fluxos, estados, origens, motivosPendencias, linhas, estadoId, fluxoId, isLoading, done, error } =
-    useSelector((state) => state.digitaldocs);
+  const { fluxos, estados, origens, motivosPendencias, selectedItem, isLoading, done } = useSelector(
+    (state) => state.parametrizacao
+  );
 
   const {
     page,
@@ -107,15 +91,12 @@ export default function ParametrizacaoItem({ item }) {
       (item === 'fluxos' && 'assunto') ||
       (item === 'estados' && 'nome') ||
       (item === 'origens' && 'designacao') ||
-      (item === 'motivos' && 'motivo') ||
-      (item === 'linhas' && 'linha'),
+      (item === 'motivos' && 'motivo'),
     defaultOrder: 'asc',
   });
 
   useEffect(() => {
     if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      handleCloseModal();
       if (
         done === 'Estado adicionado' ||
         done === 'Estado atualizado' ||
@@ -125,8 +106,8 @@ export default function ParametrizacaoItem({ item }) {
       ) {
         navigate(
           item === 'fluxos'
-            ? `${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${fluxoId}`
-            : `${PATH_DIGITALDOCS.parametrizacao.root}/estado/${estadoId}`
+            ? `${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${selectedItem?.id}`
+            : `${PATH_DIGITALDOCS.parametrizacao.root}/estado/${selectedItem?.id}`
         );
       }
     }
@@ -134,15 +115,8 @@ export default function ParametrizacaoItem({ item }) {
   }, [done]);
 
   useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-
-  useEffect(() => {
     if (mail && cc?.perfil_id && item) {
-      dispatch(getAll(item, { mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao(item, { mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, cc?.perfil_id, item, mail]);
 
@@ -153,7 +127,6 @@ export default function ParametrizacaoItem({ item }) {
 
   const handleCloseModal = () => {
     dispatch(closeModal());
-    dispatch(closeParecer());
   };
 
   const handleView = (id) => {
@@ -169,7 +142,6 @@ export default function ParametrizacaoItem({ item }) {
       (item === 'estados' && estados) ||
       (item === 'origens' && origens) ||
       (item === 'motivos' && motivosPendencias) ||
-      (item === 'linhas' && linhas) ||
       [],
     filter,
     comparator: getComparator(order, orderBy),
@@ -179,14 +151,13 @@ export default function ParametrizacaoItem({ item }) {
   return (
     <>
       <HeaderBreadcrumbs
-        links={[{ name: '' }]}
         action={<AddItem />}
+        links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
         heading={
           (item === 'fluxos' && 'Fluxos') ||
           (item === 'estados' && 'Estados') ||
           (item === 'origens' && 'Origens') ||
-          (item === 'linhas' && 'Linhas de crédito') ||
           (item === 'motivos' && 'Motivos de pendências')
         }
       />
@@ -204,8 +175,7 @@ export default function ParametrizacaoItem({ item }) {
                   (item === 'fluxos' && TABLE_HEAD_FLUXOS) ||
                   (item === 'estados' && TABLE_HEAD_ESTADOS) ||
                   (item === 'origens' && TABLE_HEAD_ORIGENS) ||
-                  (item === 'motivos' && TABLE_HEAD_MOTIVOS) ||
-                  (item === 'linhas' && TABLE_HEAD_LINHAS)
+                  (item === 'motivos' && TABLE_HEAD_MOTIVOS)
                 }
               />
               <TableBody>
@@ -216,7 +186,7 @@ export default function ParametrizacaoItem({ item }) {
                       (item === 'fluxos' && 6) ||
                       (item === 'estados' && 4) ||
                       (item === 'origens' && 7) ||
-                      ((item === 'motivos' || item === 'linhas') && 3)
+                      (item === 'motivos' && 3)
                     }
                   />
                 ) : (
@@ -265,19 +235,17 @@ export default function ParametrizacaoItem({ item }) {
                             <TableCell>{row.motivo}</TableCell>
                             <TableCell>{row.obs}</TableCell>
                           </>
-                        )) ||
-                        (item === 'linhas' && (
-                          <>
-                            <TableCell>{row.linha}</TableCell>
-                            <TableCell>{newLineText(row.descricao)}</TableCell>
-                          </>
                         ))}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.75} justifyContent="right">
-                          {item === 'origens' || item === 'estados' ? (
+                          {item === 'origens' || item === 'estados' || item === 'fluxos' ? (
                             <UpdateItem
                               id={row?.id}
-                              item={(item === 'origens' && 'origem') || (item === 'estados' && 'estado')}
+                              item={
+                                (item === 'fluxos' && 'fluxo') ||
+                                (item === 'origens' && 'origem') ||
+                                (item === 'estados' && 'estado')
+                              }
                             />
                           ) : (
                             <UpdateItem dados={row} />
@@ -321,8 +289,7 @@ export default function ParametrizacaoItem({ item }) {
       )) ||
         (item === 'estados' && <EstadoForm onCancel={handleCloseModal} />) ||
         (item === 'origens' && <OrigemForm onCancel={handleCloseModal} />) ||
-        (item === 'motivos' && <MotivoPendenciaForm onCancel={handleCloseModal} />) ||
-        (item === 'linhas' && <LinhaForm onCancel={handleCloseModal} />)}
+        (item === 'motivos' && <MotivoPendenciaForm onCancel={handleCloseModal} />)}
     </>
   );
 }

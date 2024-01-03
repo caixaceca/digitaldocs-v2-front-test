@@ -3,8 +3,8 @@ import { useEffect, useState, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // redux
-import { getAll } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
@@ -20,7 +20,7 @@ export default function Indicadores() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { meusacessos } = useSelector((state) => state.digitaldocs);
+  const { meusacessos } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(
     localStorage.getItem('tabIndicadores') || (meusacessos?.includes('Todo-111') && 'files') || 'total'
   );
@@ -44,9 +44,9 @@ export default function Indicadores() {
 
   useEffect(() => {
     if (mail && cc?.perfil_id) {
-      dispatch(getAll('motivos', { mail, perfilId: cc?.perfil_id }));
-      dispatch(getAll('ambientes', { mail, perfilId: cc?.perfil_id }));
-      dispatch(getAll('meusacessos', { mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('motivos', { mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('ambientes', { mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, cc, mail]);
 
@@ -58,7 +58,7 @@ export default function Indicadores() {
   //     });
 
   //     notification.onclick = () => {
-  //       window.location.href = 'http://localhost:3000';
+  //       window.location.href = 'http://localhost:3001';
   //     };
   //   } else if (Notification.permission !== 'denied') {
   //     Notification.requestPermission().then((permission) => {

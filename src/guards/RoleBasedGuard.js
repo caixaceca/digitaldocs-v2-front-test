@@ -17,14 +17,14 @@ import { useSelector } from '../redux/store';
 // ----------------------------------------------------------------------
 
 RoleBasedGuard.propTypes = {
+  children: PropTypes.node,
   hasContent: PropTypes.bool,
-  children: PropTypes.node.isRequired,
   roles: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default function RoleBasedGuard({ hasContent, roles, children }) {
   const navigate = useNavigate();
-  const { meusacessos } = useSelector((state) => state.digitaldocs);
+  const { meusacessos } = useSelector((state) => state.parametrizacao);
 
   let noRole = true;
   roles?.forEach((_row) => {
@@ -45,11 +45,13 @@ export default function RoleBasedGuard({ hasContent, roles, children }) {
             </m.div>
 
             <m.div variants={varBounce().in}>
-              <Typography sx={{ color: 'text.secondary' }}>
-                Não tens permissão para aceder a este item,
-                <br />
-                Contactar o administrador de sistema (DICS)
-              </Typography>
+              {children || (
+                <Typography sx={{ color: 'text.secondary' }}>
+                  Não tens permissão para aceder a este item,
+                  <br />
+                  Contactar o administrador de sistema (DICS)
+                </Typography>
+              )}
             </m.div>
 
             <m.div variants={varBounce().in}>

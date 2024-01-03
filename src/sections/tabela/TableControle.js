@@ -1,5 +1,5 @@
-import { add, format } from 'date-fns';
 import PropTypes from 'prop-types';
+import { add, format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -91,9 +91,8 @@ export default function TableControle({ from }) {
     localStorage.getItem('dataFC') ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 }) : new Date()
   );
   const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
-  const { entradas, trabalhados, porConcluir, meusAmbientes, isAdmin, isLoading } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
+  const { entradas, trabalhados, porConcluir, isLoading } = useSelector((state) => state.digitaldocs);
   const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
   const [uo, setUo] = useState(
     (localStorage.getItem('uoC') && uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC')))) ||

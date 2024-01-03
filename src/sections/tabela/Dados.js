@@ -10,7 +10,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { ptDateTime } from '../../utils/formatTime';
 import { entidadesParse, noDados, setDataUtil, setItemValue } from '../../utils/normalizeText';
 // components
-import { ViewItem, CriadoEmPor } from '../../components/Actions';
+import { Criado } from '../../components/Panel';
+import { ViewItem } from '../../components/Actions';
 
 // ----------------------------------------------------------------------
 
@@ -119,9 +120,9 @@ export function RowItem({ row, handleViewRow }) {
       <TableCell>{row?.nome}</TableCell>
       <TableCell>
         {(row?.criado_em || row?.trabalhado_em) && (
-          <CriadoEmPor tipo="date" value={ptDateTime(row.criado_em || row?.trabalhado_em)} />
+          <Criado tipo="date" value={ptDateTime(row.criado_em || row?.trabalhado_em)} />
         )}
-        {row?.colaborador && <CriadoEmPor tipo="user" value={row.colaborador} />}
+        {row?.colaborador && <Criado tipo="user" value={row.colaborador} />}
       </TableCell>
       <TableCell align="center">
         <ViewItem handleClick={() => handleViewRow(row?.id)} />

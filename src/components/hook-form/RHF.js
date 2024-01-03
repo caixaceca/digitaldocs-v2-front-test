@@ -63,9 +63,14 @@ export function RHFAutocompleteSimple({ name, options, label, multiple = false, 
 
 // ----------------------------------------------------------------------
 
-RHFAutocompleteObject.propTypes = { name: PropTypes.string, label: PropTypes.string, options: PropTypes.array };
+RHFAutocompleteObject.propTypes = {
+  small: PropTypes.bool,
+  name: PropTypes.string,
+  label: PropTypes.string,
+  options: PropTypes.array,
+};
 
-export function RHFAutocompleteObject({ name, options, label }) {
+export function RHFAutocompleteObject({ name, options, label, small = false, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -77,10 +82,12 @@ export function RHFAutocompleteObject({ name, options, label }) {
           {...field}
           fullWidth
           options={options}
+          size={small ? 'small' : 'medium'}
           getOptionLabel={(option) => option?.label}
           onChange={(event, newValue) => field.onChange(newValue)}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
+          {...other}
         />
       )}
     />
@@ -89,9 +96,15 @@ export function RHFAutocompleteObject({ name, options, label }) {
 
 // ----------------------------------------------------------------------
 
-RHFDatePicker.propTypes = { name: PropTypes.string, label: PropTypes.string, dateTime: PropTypes.bool };
+RHFDatePicker.propTypes = {
+  small: PropTypes.bool,
+  name: PropTypes.string,
+  label: PropTypes.string,
+  dateTime: PropTypes.bool,
+  required: PropTypes.bool,
+};
 
-export function RHFDatePicker({ name, label = '', dateTime = false, ...other }) {
+export function RHFDatePicker({ name, label = '', small = false, required = false, dateTime = false, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -104,7 +117,9 @@ export function RHFDatePicker({ name, label = '', dateTime = false, ...other }) 
             label={label}
             value={field.value}
             onChange={(newValue) => field.onChange(newValue)}
-            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
+            slotProps={{
+              textField: { error, helperText: error?.message, fullWidth: true, size: small ? 'small' : 'medium' },
+            }}
             {...other}
           />
         ) : (
@@ -112,7 +127,15 @@ export function RHFDatePicker({ name, label = '', dateTime = false, ...other }) 
             label={label}
             value={field.value}
             onChange={(newValue) => field.onChange(newValue)}
-            slotProps={{ textField: { error, helperText: error?.message, fullWidth: true } }}
+            slotProps={{
+              textField: {
+                error,
+                required,
+                fullWidth: true,
+                helperText: error?.message,
+                size: small ? 'small' : 'medium',
+              },
+            }}
             {...other}
           />
         )
@@ -140,7 +163,8 @@ export function RHFNumberField({ name, tipo, ...other }) {
           helperText={error?.message}
           InputProps={{
             type: 'number',
-            endAdornment: (
+            inputProps: { style: { textAlign: 'right' } },
+            endAdornment: tipo && (
               <InputAdornment position="end">
                 {(tipo === 'percentagem' && '%') || (tipo === 'moeda' && 'CVE') || (tipo === 'prestacao' && 'meses')}
               </InputAdornment>

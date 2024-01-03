@@ -73,7 +73,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
                 key={anexo?.anexo}
                 sx={{ p: 1, mb: 1, borderRadius: 1, border: (theme) => `solid 1px ${theme.palette.divider}` }}
               >
-                <ListItemIcon>{getFileThumb(anexo.nome)}</ListItemIcon>
+                <ListItemIcon>{getFileThumb(false, null, anexo.nome)}</ListItemIcon>
                 <ListItemText>{anexo.nome}</ListItemText>
                 <Fab
                   size="small"

@@ -80,7 +80,7 @@ export default function Ajuda() {
                 color="inherit"
                 size="medium"
                 onClick={() => handleViewVideo()}
-                startIcon={getFileThumb(`${BASEURL}/help/ficheiro/${ajuda?.video_disco}`)}
+                startIcon={getFileThumb(false, null, ajuda?.video_disco)}
               >
                 Video manual
               </Button>

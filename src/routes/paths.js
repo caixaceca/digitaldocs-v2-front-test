@@ -23,6 +23,7 @@ export const PATH_DIGITALDOCS = {
   },
   processos: {
     root: path(ROOTS_DIGITALDOCS, '/processos'),
+    cc: path(ROOTS_DIGITALDOCS, '/processos/cc/:id'),
     lista: path(ROOTS_DIGITALDOCS, '/processos/lista'),
     processo: path(ROOTS_DIGITALDOCS, '/processos/:id'),
     novoProcesso: path(ROOTS_DIGITALDOCS, '/processos/novo'),

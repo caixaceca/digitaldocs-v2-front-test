@@ -10,8 +10,8 @@ import TableContainer from '@mui/material/TableContainer';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { closeModal } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { closeModal } from '../../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
@@ -68,7 +68,7 @@ export default function TableEstado({ tab }) {
   });
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(localStorage.getItem('filterEstado') || '');
-  const { fluxo, estados, isOpenModal, isLoading } = useSelector((state) => state.digitaldocs);
+  const { fluxo, estados, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     setPage(0);
@@ -181,7 +181,7 @@ export default function TableEstado({ tab }) {
         )}
       </Card>
 
-      <TransicaoForm onCancel={handleCloseModal} fluxoId={fluxo?.id} isOpenModal={isOpenModal} />
+      <TransicaoForm onCancel={handleCloseModal} fluxoId={fluxo?.id} />
     </>
   );
 }

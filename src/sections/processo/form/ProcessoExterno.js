@@ -30,7 +30,8 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { meuAmbiente, processoId, origens, done, error, isSaving } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, origens } = useSelector((state) => state.parametrizacao);
+  const { processo, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const [operacao, setOperacao] = useState(selectedProcesso?.operacao || '');
   const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
@@ -38,10 +39,10 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
   useEffect(() => {
     if (done === 'processo adicionado') {
       enqueueSnackbar('Processo adicionado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processoId}`);
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     } else if (done === 'processo atualizado') {
       enqueueSnackbar('Processo atualizado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processoId}`);
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);

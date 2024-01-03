@@ -71,9 +71,9 @@ export default function Acessos() {
   const colasByName = colaboradores.map((row) => ({
     uo: row?.uo,
     sexo: row.sexo,
+    nome: row?.nome,
     perfil: row?.perfil,
     foto_disk: row?.foto_disk,
-    nome: row?.perfil?.displayName,
     unidade_organica: row?.uo?.label,
     nomeacao_funcao: row.nomeacao || row?.funcao,
   }));

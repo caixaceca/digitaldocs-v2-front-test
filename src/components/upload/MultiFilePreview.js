@@ -84,7 +84,7 @@ export default function MultiFilePreview({ showPreview = false, files, onRemove 
                 border: (theme) => `solid 1px ${theme.palette.divider}`,
               }}
             >
-              <ListItemIcon>{getFileThumb(file.name)}</ListItemIcon>
+              <ListItemIcon>{getFileThumb(false, null, file.name)}</ListItemIcon>
 
               <ListItemText
                 primary={typeof file === 'string' ? file : name}

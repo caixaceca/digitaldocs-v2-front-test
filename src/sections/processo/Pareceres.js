@@ -58,7 +58,8 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { anexoParecer, meusAmbientes, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { anexoParecer, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
     (state) => state.digitaldocs
   );
 
@@ -247,7 +248,7 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
                               size="small"
                               color="inherit"
                               onClick={() => handleValidar(row)}
-                              startIcon={getFileThumb('Minuta do parecer.pdf')}
+                              startIcon={getFileThumb(false, null, 'Minuta do parecer.pdf')}
                               sx={{ justifyContent: 'left', textAlign: 'left', py: 2.25 }}
                             >
                               Minuta do parecer.pdf
@@ -265,7 +266,7 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
                                   color="inherit"
                                   key={anexo?.anexo}
                                   onClick={() => handleAnexo(anexo)}
-                                  startIcon={getFileThumb(anexo.nome)}
+                                  startIcon={getFileThumb(false, null, anexo.nome)}
                                   sx={{ justifyContent: 'left', textAlign: 'left', py: 2.25 }}
                                 >
                                   {anexo?.nome}

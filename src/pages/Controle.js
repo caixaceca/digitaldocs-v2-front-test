@@ -20,7 +20,7 @@ import { TableCON, TableControle, TableCartoes } from '../sections/tabela';
 export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
-  const { isAdmin, meusAmbientes } = useSelector((state) => state.digitaldocs);
+  const { isAdmin, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabControle') || 'trabalhados');
 
   useEffect(() => {

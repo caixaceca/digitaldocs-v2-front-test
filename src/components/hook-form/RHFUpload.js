@@ -4,7 +4,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import FormHelperText from '@mui/material/FormHelperText';
 // type
-import { UploadAvatar, UploadMultiFile, UploadSingleFile } from '../upload';
+import { UploadAvatar, UploadMultiFile, UploadSingleFile, UploadSingleFileSimple } from '../upload';
 
 // ----------------------------------------------------------------------
 
@@ -37,9 +37,7 @@ export function RHFUploadAvatar({ name, ...other }) {
 
 // ----------------------------------------------------------------------
 
-RHFUploadSingleFile.propTypes = {
-  name: PropTypes.string,
-};
+RHFUploadSingleFile.propTypes = { name: PropTypes.string };
 
 export function RHFUploadSingleFile({ name, ...other }) {
   const { control } = useFormContext();
@@ -72,9 +70,7 @@ export function RHFUploadSingleFile({ name, ...other }) {
 
 // ----------------------------------------------------------------------
 
-RHFUploadMultiFile.propTypes = {
-  name: PropTypes.string,
-};
+RHFUploadMultiFile.propTypes = { name: PropTypes.string };
 
 export function RHFUploadMultiFile({ name, ...other }) {
   const { control } = useFormContext();
@@ -94,6 +90,36 @@ export function RHFUploadMultiFile({ name, ...other }) {
               checkError && (
                 <FormHelperText error sx={{ px: 2 }}>
                   {error?.message}
+                </FormHelperText>
+              )
+            }
+            {...other}
+          />
+        );
+      }}
+    />
+  );
+}
+RHFUploadFileSimple.propTypes = { name: PropTypes.string };
+
+export function RHFUploadFileSimple({ name, ...other }) {
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => {
+        const checkError = !!error && !field.value;
+
+        return (
+          <UploadSingleFileSimple
+            file={field.value}
+            error={checkError}
+            helperText={
+              checkError && (
+                <FormHelperText error sx={{ px: 2 }}>
+                  {error.message}
                 </FormHelperText>
               )
             }

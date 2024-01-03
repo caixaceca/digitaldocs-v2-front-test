@@ -10,21 +10,19 @@ import Fab from '@mui/material/Fab';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { emailCheck } from '../../utils/validarAcesso';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem, deleteItem } from '../../redux/slices/digitaldocs';
+import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
 // components
 import {
   RHFSwitch,
@@ -34,10 +32,16 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
-import { DialogButons } from '../../components/Actions';
+import { AddItem, DialogButons } from '../../components/Actions';
+import { FormLoading } from '../../components/skeleton';
 import SvgIconStyle from '../../components/SvgIconStyle';
+import { SearchNotFoundSmall } from '../../components/table';
+import { Notificacao } from '../../components/NotistackProvider';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
+//
+import PesosDecisao from './PesosDecisao';
+import { listaTransicoes, listaPerfis } from './applySortFilter';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -47,8 +51,7 @@ export function FluxoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving, isOpenModal, selectedItem } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     modelo: Yup.mixed().required('Modelo não pode ficar vazio'),
@@ -66,6 +69,7 @@ export function FluxoForm({ onCancel }) {
       is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
       is_ativo: selectedItem ? selectedItem?.is_ativo : true,
+      credito_funcionario: selectedItem?.credito_funcionario || false,
     }),
     [selectedItem, cc?.perfil_id]
   );
@@ -84,7 +88,7 @@ export function FluxoForm({ onCancel }) {
       if (selectedItem) {
         dispatch(updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem?.id, msg: 'Fluxo atualizado' }));
       } else {
-        dispatch(createItem('fluxo', JSON.stringify(values), { mail, msg: 'Fluxo atualizado' }));
+        dispatch(createItem('fluxo', JSON.stringify(values), { mail, msg: 'Fluxo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -104,39 +108,44 @@ export function FluxoForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFTextField name="assunto" label="Assunto" />
+          <ItemComponent item={selectedItem} rows={3}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFTextField name="assunto" label="Assunto" />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <RHFSwitch name="is_interno" label="Interno" />
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <RHFSwitch name="is_ativo" label="Ativo" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="is_credito" label="Crédito" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="credito_funcionario" label="Crédito colaborador" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="limpo" label="Limpo" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="is_con" label="Com. Operação Numerário" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_interno" label="Interno" />
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_ativo" label="Ativo" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch name="is_con" label="Com. Operação Numerário" />
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <RHFSwitch name="is_credito" label="Crédito" />
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <RHFSwitch name="limpo" label="Limpo" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
-            </Grid>
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            desc={isEdit ? 'eliminar este fluxo' : ''}
-          />
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar este fluxo' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -151,7 +160,7 @@ export function ClonarFluxoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving, itemSelected, isOpenParecer } = useSelector((state) => state.digitaldocs);
+  const { isSaving, selectedItem, isOpenView } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     modelo: Yup.string().required('Modelo não pode ficar vazio'),
@@ -161,16 +170,16 @@ export function ClonarFluxoForm({ onCancel }) {
   const defaultValues = useMemo(
     () => ({
       perfilID: cc?.perfil_id,
-      is_con: itemSelected?.is_con,
-      modelo: itemSelected?.modelo || '',
-      limpo: itemSelected?.limpo || false,
-      assunto: itemSelected?.assunto || '',
-      is_ativo: itemSelected?.is_ativo || true,
-      observacao: itemSelected?.observacao || '',
-      is_interno: itemSelected?.is_interno || false,
-      is_credito: itemSelected?.is_credito || false,
+      is_con: selectedItem?.is_con,
+      modelo: selectedItem?.modelo || '',
+      limpo: selectedItem?.limpo || false,
+      assunto: selectedItem?.assunto || '',
+      is_ativo: selectedItem?.is_ativo || true,
+      observacao: selectedItem?.observacao || '',
+      is_interno: selectedItem?.is_interno || false,
+      is_credito: selectedItem?.is_credito || false,
     }),
-    [itemSelected, cc?.perfil_id]
+    [selectedItem, cc?.perfil_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -178,21 +187,21 @@ export function ClonarFluxoForm({ onCancel }) {
   const values = watch();
 
   useEffect(() => {
-    if (itemSelected) {
+    if (selectedItem) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemSelected]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
-      if (itemSelected) {
+      if (selectedItem) {
         dispatch(
           createItem('clonar fluxo', JSON.stringify(values), {
             mail,
-            msg: 'fluxo clonado',
+            msg: 'Fluxo clonado',
             perfilId: cc?.perfil_id,
-            transicoes: itemSelected?.transicoes?.filter((option) => option?.modo !== 'desarquivamento'),
+            transicoes: selectedItem?.transicoes?.filter((option) => option?.modo !== 'desarquivamento'),
           })
         );
       }
@@ -202,22 +211,24 @@ export function ClonarFluxoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenParecer} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open={isOpenView} onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>Clonar fluxo</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: -1 }}>
-            <Grid item xs={12}>
-              <Alert severity="info">
-                Ao clonar este fluxo, será criado uma cópia deste, replicando o seu conteúdo e as transições associadas
-                para um novo fluxo. Pondendo, posteriormente, editar o conteúdo e as transições.
-              </Alert>
+          <ItemComponent item={selectedItem} rows={1}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <Alert severity="info">
+                  Ao clonar este fluxo, será criado uma cópia deste, replicando o seu conteúdo e as transições
+                  associadas para um novo fluxo. Pondendo, posteriormente, editar o conteúdo e as transições.
+                </Alert>
+              </Grid>
+              <Grid item xs={12}>
+                <RHFTextField name="assunto" label="Assunto" />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="assunto" label="Assunto" />
-            </Grid>
-          </Grid>
-          <DialogButons label="Clonar" isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons label="Clonar" isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -232,31 +243,27 @@ export function EstadoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { isOpenModal, isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
-
-  const uosList = uos.map((row) => ({ id: row?.id, label: row?.label }));
-  const uoSelect = uosList?.find((row) => row.id === selectedItem?.uo_id) || null;
+  const { isEdit, isOpenModal, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
+  const uosList = uos?.map((row) => ({ id: row?.id, balcao: row?.balcao, label: row?.label }));
 
   const formSchema = Yup.object().shape({
     nome: Yup.string().required('Nome não pode ficar vazio'),
-    uo_id: Yup.mixed()
-      .nullable('Unidade orgânica não pode ficar vazio')
-      .required('Unidade orgânica não pode ficar vazio'),
+    uo_id: Yup.mixed().required('Unidade orgânica não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
-      uo_id: uoSelect,
       perfilID: cc?.perfil_id,
       nome: selectedItem?.nome || '',
       email: selectedItem?.email || '',
+      balcao: selectedItem?.balcao || '',
       is_final: selectedItem?.is_final || false,
       observacao: selectedItem?.observacao || '',
       is_decisao: selectedItem?.is_decisao || false,
       is_inicial: selectedItem?.is_inicial || false,
+      uo_id: uosList?.find((row) => row.id === selectedItem?.uo_id) || null,
     }),
-    [selectedItem, cc, uoSelect]
+    [selectedItem, cc, uosList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -267,9 +274,9 @@ export function EstadoForm({ onCancel }) {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem, isOpenModal]);
-
   const onSubmit = async () => {
     try {
+      values.balcao = values?.uo_id?.balcao;
       values.uo_id = values?.uo_id?.id;
       if (selectedItem) {
         dispatch(updateItem('estado', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' }));
@@ -338,12 +345,11 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    objeto: Yup.mixed().nullable('Objeto pode ficar vazio').required('Objeto pode ficar vazio'),
-    acesso: Yup.mixed().nullable('Acesso não pode ficar vazio').required('Acesso não pode ficar vazio'),
+    objeto: Yup.mixed().required('Objeto pode ficar vazio'),
+    acesso: Yup.mixed().required('Acesso não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -393,24 +399,26 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
       <DialogTitle>{selectedItem ? 'Editar acesso' : 'Adicionar acesso'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteObject name="objeto" label="Objeto" options={objetos} />
+          <ItemComponent item={selectedItem} rows={2}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFAutocompleteObject name="objeto" label="Objeto" options={objetos} />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFAutocompleteObject name="acesso" label="Acesso" options={codacessos} />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFDatePicker dateTime name="datalimite" label="Data" />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <RHFAutocompleteObject name="acesso" label="Acesso" options={codacessos} />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFDatePicker dateTime name="datalimite" label="Data" />
-            </Grid>
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            desc={isEdit ? 'eliminar este acesso' : ''}
-          />
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar este acesso' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -425,9 +433,8 @@ export function MotivoPendenciaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
   const perfilId = cc?.perfil_id;
-  const isEdit = !!selectedItem;
 
   const formSchema = Yup.object().shape({ motivo: Yup.string().required('Motivo não pode ficar vazio') });
   const defaultValues = useMemo(
@@ -475,21 +482,23 @@ export function MotivoPendenciaForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFTextField name="motivo" label="Motivo" />
+          <ItemComponent item={selectedItem} rows={1}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFTextField name="motivo" label="Motivo" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFTextField name="obs" label="Observação" />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="obs" label="Observação" />
-            </Grid>
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            desc={isEdit ? 'eliminar este motivo' : ''}
-          />
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar este motivo' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -505,8 +514,7 @@ export function OrigemForm({ onCancel }) {
   const { enqueueSnackbar } = useSnackbar();
   const [findConcelhos, setFindConcelhos] = useState([]);
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     tipo: Yup.mixed().required('Tipo não pode ficar vazio'),
@@ -569,50 +577,52 @@ export function OrigemForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFTextField name="designacao" label="Designação" />
+          <ItemComponent item={selectedItem} rows={5}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFTextField name="designacao" label="Designação" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFTextField name="seguimento" label="Segmento" />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFTextField name="codigo" label="Código" />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteSimple name="tipo" label="Tipo" options={['Fiscal', 'Judicial']} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteSimple
+                  name="ilha"
+                  label="Ilha"
+                  options={[...new Set(_concelhos.map((obj) => obj.ilha))]}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteSimple
+                  name="cidade"
+                  label="Concelho"
+                  options={[...new Set(findConcelhos.map((obj) => obj.concelho))]}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFTextField name="email" label="Email" />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFTextField name="telefone" label="Telefone" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="seguimento" label="Segmento" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFTextField name="codigo" label="Código" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteSimple name="tipo" label="Tipo" options={['Fiscal', 'Judicial']} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteSimple
-                name="ilha"
-                label="Ilha"
-                options={[...new Set(_concelhos.map((obj) => obj.ilha))]}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteSimple
-                name="cidade"
-                label="Concelho"
-                options={[...new Set(findConcelhos.map((obj) => obj.concelho))]}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFTextField name="email" label="Email" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFTextField name="telefone" label="Telefone" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
-            </Grid>
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            desc={isEdit ? 'eliminar esta origem' : ''}
-          />
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar esta origem' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -627,12 +637,14 @@ export function LinhaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
 
-  const formSchema = Yup.object().shape({ linha: Yup.string().required('Linha não pode ficar vazio') });
+  const formSchema = Yup.object().shape({
+    descricao: Yup.mixed().required('Escolhe o segmento'),
+    linha: Yup.string().required('Linha não pode ficar vazio'),
+  });
   const defaultValues = useMemo(
-    () => ({ linha: selectedItem?.linha || '', descricao: selectedItem?.descricao || '' }),
+    () => ({ linha: selectedItem?.linha || '', descricao: selectedItem?.descricao || null }),
     [selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -678,25 +690,27 @@ export function LinhaForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFTextField name="linha" label="Linha" />
+          <ItemComponent item={selectedItem} rows={3}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFTextField name="linha" label="Linha" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFAutocompleteSimple
+                  name="descricao"
+                  label="Segmento"
+                  options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <RHFAutocompleteSimple
-                name="descricao"
-                label="Segmento"
-                options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
-              />
-            </Grid>
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            desc={isEdit ? 'eliminar esta linha de crédito' : ''}
-          />
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar esta linha de crédito' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -705,40 +719,22 @@ export function LinhaForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TransicaoForm.propTypes = { isOpenModal: PropTypes.bool, onCancel: PropTypes.func, fluxoId: PropTypes.number };
+TransicaoForm.propTypes = { onCancel: PropTypes.func, fluxoId: PropTypes.number };
 
-export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
+export function TransicaoForm({ onCancel, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, estados, done, error, isSaving } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { selectedItem, estados, done, error, isEdit, isSaving, isOpenModal } = useSelector(
+    (state) => state.parametrizacao
+  );
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     prazoemdias: Yup.string().required('Prazo não pode ficar vazio'),
-    estado_inicial_id: Yup.mixed()
-      .nullable('Estado inicial não pode ficar vazio')
-      .required('Estado inicial não pode ficar vazio'),
-    estado_final_id: Yup.mixed()
-      .nullable('Estado final não pode ficar vazio')
-      .required('Estado final não pode ficar vazio'),
-    modo: Yup.mixed().nullable('Modo não pode ficar vazio').required('Modo não pode ficar vazio'),
+    estado_inicial_id: Yup.mixed().required('Estado inicial não pode ficar vazio'),
+    estado_final_id: Yup.mixed().required('Estado final não pode ficar vazio'),
+    modo: Yup.mixed().required('Modo não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -750,6 +746,7 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
       prazoemdias: selectedItem?.prazoemdias || 0,
       hasopnumero: selectedItem?.hasopnumero || false,
       is_paralelo: selectedItem?.is_paralelo || false,
+      requer_parecer: selectedItem?.requer_parecer || false,
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
       is_after_devolucao: selectedItem?.is_after_devolucao || false,
       estado_final_id: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
@@ -794,58 +791,64 @@ export function TransicaoForm({ isOpenModal, onCancel, fluxoId }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
+        <Notificacao done={done} error={error} onCancel={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteObject
-                name="estado_inicial_id"
-                label="Estado de origem"
-                options={applySort(estadosList, getComparator('asc', 'label'))}
-              />
+          <ItemComponent item={selectedItem} rows={2}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteObject
+                  name="estado_inicial_id"
+                  label="Estado de origem"
+                  options={applySort(estadosList, getComparator('asc', 'label'))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteObject
+                  name="estado_final_id"
+                  label="Estado de destino"
+                  options={applySort(estadosList, getComparator('asc', 'label'))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFAutocompleteSimple name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <RHFTextField
+                  label="Prazo"
+                  name="prazoemdias"
+                  InputProps={{ endAdornment: <InputAdornment position="end">dias</InputAdornment>, type: 'number' }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="is_after_devolucao" label="Depois devolução" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="is_paralelo" label="Paralelo" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="requer_parecer" label="Requer parecer" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="to_alert" label="Notificar" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="hasopnumero" label="Indicar nº de operação" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteObject
-                name="estado_final_id"
-                label="Estado de destino"
-                options={applySort(estadosList, getComparator('asc', 'label'))}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFAutocompleteSimple name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFTextField
-                label="Prazo"
-                name="prazoemdias"
-                InputProps={{ endAdornment: <InputAdornment position="end">dias</InputAdornment>, type: 'number' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch name="is_after_devolucao" label="Depois de devolução" />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <RHFSwitch name="to_alert" label="Notificar" />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <RHFSwitch name="is_paralelo" label="Paralelo" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch name="hasopnumero" label="Indicar nº de operação" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />
-            </Grid>
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            desc={isEdit ? 'eliminar esta transição' : ''}
-          />
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar esta transição' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -860,8 +863,7 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { estados, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { estados, isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
   const estado = estadosList.find((row) => row.id === selectedItem?.estado_id) || null;
@@ -873,6 +875,7 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
       estado_id: estado,
       perfil_id: Number(perfilId),
       perfil_id_cc: cc?.perfil?.id,
+      observador: selectedItem?.observador || false,
       data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
       data_inicial: selectedItem?.data_inicial ? new Date(selectedItem?.data_inicial) : null,
     }),
@@ -918,36 +921,41 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
       <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteObject
-                name="estado_id"
-                label="Estado"
-                options={applySort(estadosList, getComparator('asc', 'label'))}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFDatePicker dateTime name="data_inicial" label="Data de início" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFDatePicker dateTime name="data_limite" label="Data de término" />
-            </Grid>
-            {isEdit && (
+          <ItemComponent item={selectedItem} rows={3}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
               <Grid item xs={12}>
-                <Alert severity="info">
-                  <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
-                  <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
-                </Alert>
+                <RHFAutocompleteObject
+                  name="estado_id"
+                  label="Estado"
+                  options={applySort(estadosList, getComparator('asc', 'label'))}
+                />
               </Grid>
-            )}
-          </Grid>
-          <DialogButons
-            isSaving={isSaving}
-            onCancel={onCancel}
-            handleDelete={handleDelete}
-            edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
-            desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') ? 'eliminar esta transição' : ''}
-          />
+              <Grid item xs={12}>
+                <RHFDatePicker dateTime name="data_inicial" label="Data de início" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFDatePicker dateTime name="data_limite" label="Data de término" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFSwitch name="observador" label="Somente observador" />
+              </Grid>
+              {isEdit && (
+                <Grid item xs={12}>
+                  <Alert severity="info">
+                    <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
+                    <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
+                  </Alert>
+                </Grid>
+              )}
+            </Grid>
+            <DialogButons
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
+              desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') ? 'eliminar esta transição' : ''}
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -961,30 +969,22 @@ PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.objec
 export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const colaboradoresNA = applyFilter1(colaboradores, estado?.perfis);
-
-  useEffect(() => {
-    if (done === 'Perfis adicionados') {
-      enqueueSnackbar('Perfis adicionados com sucesso', { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const { isSaving, done, error } = useSelector((state) => state.parametrizacao);
 
   const defaultValues = useMemo(() => ({ perfis: [{ perfil: null, data_limite: null, data_inicial: null }] }), []);
-  const methods = useForm({ defaultValues });
+  const formSchema = Yup.object().shape({
+    perfis: Yup.array(Yup.object({ perfil: Yup.mixed().required('Estado final não pode ficar vazio') })),
+  });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  // const methods = useForm({ defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
-  const perfisByCategoria = applyFilter(colaboradoresNA, values?.perfis);
+  const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
+  const perfisFilter = applyFilter(
+    colaboradores.filter((colab) => !estado?.perfis?.map((row) => row?.perfil_id)?.includes(colab?.perfil_id)) || [],
+    values?.perfis?.map((row) => row?.perfil?.id)
+  );
 
   useEffect(() => {
     reset(defaultValues);
@@ -997,8 +997,9 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
       values?.perfis?.forEach((row) => {
         formData?.perfis?.push({
           perfil_id: row?.perfil?.id,
-          data_inicial: row?.data_inicial,
           data_limite: row?.data_limite,
+          data_inicial: row?.data_inicial,
+          observador: row?.observador || false,
         });
       });
       dispatch(createItem('perfisEstado', JSON.stringify(formData), { mail, msg: 'Perfis adicionados' }));
@@ -1006,10 +1007,9 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
-  const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
 
   const handleAdd = () => {
-    append({ perfil: null, data_limite: null, data_inicial: null });
+    append({ perfil: null, data_limite: null, data_inicial: null, observador: false });
   };
 
   const handleRemove = (index) => {
@@ -1017,48 +1017,50 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>{`Adicionar colaborador ao estado » ${estado?.nome}`}</DialogTitle>
-      <DialogContent sx={{ minWidth: { md: 820, sm: 520 } }}>
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="lg">
+      <DialogTitle>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+          {`Adicionar colaborador ao estado » ${estado?.nome}`}
+          <AddItem small label="Colaborador" handleClick={handleAdd} />
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <Notificacao done={done} error={error} onCancel={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             {fields.map((item, index) => (
               <Grid item xs={12} key={item.id}>
                 <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} md={5}>
                     <RHFAutocompleteObject
-                      name={`perfis[${index}].perfil`}
                       label="Colaborador"
-                      options={perfisByCategoria}
+                      options={perfisFilter}
+                      name={`perfis[${index}].perfil`}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Stack alignItems="flex-end">
-                      <Stack direction="row" spacing={1}>
-                        <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Data de início" />
-                        <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Data de término" />
-                        {values.perfis.length > 1 && (
-                          <Stack direction="row" alignItems="center">
-                            <Tooltip title="Remover" arrow>
-                              <Fab color="error" size="small" variant="soft" onClick={() => handleRemove(index)}>
-                                <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
-                              </Fab>
-                            </Tooltip>
-                          </Stack>
-                        )}
-                      </Stack>
+                  <Grid item xs={12} sm={9} md={5}>
+                    <Stack direction="row" spacing={1}>
+                      <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Data de início" />
+                      <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Data de término" />
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} sm={3} md={2}>
+                    <Stack direction="row" spacing={1}>
+                      <RHFSwitch name={`perfis[${index}].observador`} label="Somente observador" />
+                      {values.perfis.length > 1 && (
+                        <Stack direction="row" alignItems="center">
+                          <Tooltip title="Remover" arrow>
+                            <Fab color="error" size="small" variant="soft" onClick={() => handleRemove(index)}>
+                              <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
+                            </Fab>
+                          </Tooltip>
+                        </Stack>
+                      )}
                     </Stack>
                   </Grid>
                 </Grid>
               </Grid>
             ))}
-            {perfisByCategoria.length > 0 && (
-              <Grid item xs={12}>
-                <Button size="small" variant="soft" startIcon={<AddCircleIcon />} onClick={handleAdd}>
-                  Colaborador
-                </Button>
-              </Grid>
-            )}
           </Grid>
           <DialogButons isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
@@ -1069,17 +1071,376 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-function applyFilter(colaboradores, perfisSelect) {
-  perfisSelect?.forEach((row) => {
-    colaboradores = colaboradores.filter((colab) => colab?.perfil_id !== row?.perfil?.id);
-  });
-  const perfisFiltered = colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
-  return perfisFiltered;
+AnexoDespesaForm.propTypes = { item: PropTypes.string, onCancel: PropTypes.func };
+
+export function AnexoDespesaForm({ item, onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
+
+  const formSchema = Yup.object().shape({ designacao: Yup.string().required('Designação não pode ficar vazio') });
+  const defaultValues = useMemo(
+    () => ({
+      designacao: selectedItem?.designacao || '',
+      reutilizavel: selectedItem?.reutilizavel || false,
+      obriga_prazo_validade: selectedItem?.obriga_prazo_validade || false,
+    }),
+    [selectedItem]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal, selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      if (selectedItem) {
+        dispatch(updateItem(item, JSON.stringify(values), { mail, id: selectedItem?.id, msg: `${item} atualizado` }));
+      } else {
+        dispatch(createItem(item, JSON.stringify(values), { mail, msg: `${item} adicionado` }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(deleteItem(item, { mail, id: selectedItem?.id, msg: `${item} eliminado` }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>
+        {isEdit
+          ? `Editar ${item === 'Despesa' ? 'despesa' : 'anexo'}`
+          : `Adicionar ${item === 'Despesa' ? 'despesa' : 'anexo'}`}
+      </DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={item === 'Anexo' ? 3 : 1}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFTextField name="designacao" label="Designação" />
+              </Grid>
+              {item === 'Anexo' && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <RHFSwitch name="obriga_prazo_validade" label="Tem prazo de validade" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <RHFSwitch name="reutilizavel" label="Reutilizável" />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? `eliminar ${item === 'Despesa' ? 'esta despesa' : 'este anexo'}` : ''}
+            />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
-function applyFilter1(colaboradores, perfisSelect) {
-  perfisSelect?.forEach((row) => {
-    colaboradores = colaboradores.filter((colab) => colab?.perfil_id !== row?.perfil_id);
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+RegraAnexoForm.propTypes = { onCancel: PropTypes.func };
+
+export function RegraAnexoForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, isOpenModal, selectedItem, fluxo, estados, anexos } = useSelector(
+    (state) => state.parametrizacao
+  );
+  const transicoesList = useMemo(
+    () => listaTransicoes(fluxo?.transicoes || [], estados || []),
+    [estados, fluxo?.transicoes]
+  );
+  const anexosList = useMemo(
+    () => anexos?.filter((item) => item?.ativo)?.map((row) => ({ id: row?.id, label: row?.designacao })) || [],
+    [anexos]
+  );
+
+  const formSchema = Yup.object().shape({ designacao: Yup.mixed().required('Anexo não pode ficar vazio') });
+
+  const defaultValues = useMemo(
+    () => ({
+      obrigatorio: selectedItem ? selectedItem?.obrigatorio : false,
+      transicao: transicoesList?.find((row) => row?.id === selectedItem?.transicao_id),
+      designacao: anexosList?.find((row) => row?.id === selectedItem?.designacao_id) || null,
+    }),
+    [selectedItem, anexosList, transicoesList]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal, selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      const formData = {
+        fluxo_id: fluxo?.id,
+        obrigatorio: values?.obrigatorio,
+        transicao_id: values?.transicao?.id,
+        designacao_id: values?.designacao?.id,
+      };
+      if (selectedItem) {
+        dispatch(
+          updateItem('regra anexo', JSON.stringify(formData), { mail, id: selectedItem?.id, msg: 'Regra atualizado' })
+        );
+      } else {
+        dispatch(createItem('regra anexo', JSON.stringify(formData), { mail, msg: 'Regra atualizado' }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(
+        deleteItem('regra anexo', { mail, id: selectedItem?.id, msg: 'Regra eliminado', perfilId: cc?.perfil_id })
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regra'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={3}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFAutocompleteObject name="designacao" label="Anexo" options={anexosList} />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFAutocompleteObject name="transicao" label="Transição" options={transicoesList} />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFSwitch name="obrigatorio" label="Obrigatório" />
+              </Grid>
+            </Grid>
+            <DialogButons
+              edit={isEdit}
+              isSaving={isSaving}
+              onCancel={onCancel}
+              handleDelete={handleDelete}
+              desc={isEdit ? 'eliminar esta regra' : ''}
+            />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+RegraEstadoForm.propTypes = { onCancel: PropTypes.func };
+
+export function RegraEstadoForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, colaboradores } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, isOpenModal, selectedItem, estado } = useSelector((state) => state.parametrizacao);
+  const perfisList = useMemo(() => listaPerfis(estado?.perfis, colaboradores), [colaboradores, estado?.perfis]);
+
+  const formSchema = Yup.object().shape({
+    pesos: Yup.array(
+      Yup.object({
+        perfil: Yup.mixed().required('Seleciona o colaborador'),
+        percentagem: Yup.number().typeError('Introduza o valor'),
+      })
+    ),
   });
-  return colaboradores;
+
+  const defaultValues = useMemo(() => ({ destribuir: false, pesos: [] }), []);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, setValue, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal, selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      const formData = values?.destribuir
+        ? values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))
+        : { estado_id: estado?.id };
+      dispatch(
+        createItem(values?.destribuir ? 'regra estado destribuido' : 'regra estado', JSON.stringify(formData), {
+          mail,
+          estadoId: estado?.id,
+          msg: 'Regra adicionada',
+        })
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regra'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={1}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography sx={{ color: 'text.secondary' }}>Estado:</Typography>
+                  <Typography variant="subtitle1">{estado?.nome}</Typography>
+                </Stack>
+                <RHFSwitch
+                  name="destribuir"
+                  label="Destribuir peso da decisão"
+                  onChange={(event, value) => {
+                    setValue('pesos', []);
+                    setValue('destribuir', value);
+                  }}
+                />
+              </Grid>
+              {values?.destribuir && (
+                <Grid item xs={12}>
+                  <PesosDecisao perfisList={perfisList} />
+                </Grid>
+              )}
+            </Grid>
+            <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+RegraTransicaoForm.propTypes = { transicao: PropTypes.number, onCancel: PropTypes.func };
+
+export function RegraTransicaoForm({ transicao, onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, colaboradores } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, isOpenModal, selectedItem, estado } = useSelector((state) => state.parametrizacao);
+  const perfisList = useMemo(() => listaPerfis(estado?.perfis, colaboradores), [colaboradores, estado?.perfis]);
+
+  const formSchema = Yup.object().shape({
+    pesos: Yup.array(
+      Yup.object({
+        perfil: Yup.mixed().required('Seleciona o colaborador'),
+        percentagem: Yup.number().typeError('Introduza o valor'),
+      })
+    ),
+  });
+
+  const defaultValues = useMemo(() => ({ destribuir: false, pesos: [] }), []);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal, selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      dispatch(
+        createItem(
+          'regras transicao',
+          JSON.stringify(values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))),
+          { mail, transicaoId: transicao?.id, msg: 'Regra adicionada', estadoId: estado?.id }
+        )
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar regras' : 'Adicionar regras'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={1}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography sx={{ color: 'text.secondary' }}>Estado:</Typography>
+                  <Typography variant="subtitle1">{estado?.nome}</Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography sx={{ color: 'text.secondary' }}>Transição:</Typography>
+                  <Typography variant="subtitle1">{transicao?.label}</Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12}>
+                <PesosDecisao perfisList={perfisList} />
+              </Grid>
+            </Grid>
+            <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+ItemComponent.propTypes = { item: PropTypes.object, rows: PropTypes.number, children: PropTypes.node };
+
+export function ItemComponent({ item, rows, children }) {
+  const { isLoading, isEdit } = useSelector((state) => state.parametrizacao);
+  return isLoading ? (
+    <Grid item xs={12}>
+      <FormLoading rows={rows} />
+    </Grid>
+  ) : (
+    <>
+      {isEdit && !item ? (
+        <Stack sx={{ py: 5 }}>
+          <SearchNotFoundSmall message="Item não disponível..." />
+        </Stack>
+      ) : (
+        children
+      )}
+    </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+function applyFilter(colaboradores, perfisSelect) {
+  return (
+    colaboradores
+      ?.filter((colab) => !perfisSelect?.includes(colab?.perfil_id))
+      ?.map((row) => ({ id: row?.perfil_id, label: row?.nome })) || []
+  );
 }

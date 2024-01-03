@@ -111,7 +111,7 @@ const slice = createSlice({
     getColaboradoresSuccess(state, action) {
       state.colaboradores = applySort(
         action.payload?.filter((row) => row?.is_active)?.map((row) => ({ ...row, nome: row?.perfil?.displayName })),
-        getComparator('asc', 'label')
+        getComparator('asc', 'nome')
       );
     },
 

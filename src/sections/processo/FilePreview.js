@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Viewer } from '@react-pdf-viewer/core';
+import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
 import { useTheme } from '@mui/material/styles';
-//
-import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
 // components
 import Image from '../../components/Image';
 import LightboxModal from '../../components/LightboxModal';

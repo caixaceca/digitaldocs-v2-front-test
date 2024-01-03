@@ -116,3 +116,29 @@ export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
     </Card>
   );
 }
+
+// ----------------------------------------------------------------------
+
+TabCard.propTypes = {
+  tabs: PropTypes.array,
+  tipo: PropTypes.string,
+  item: PropTypes.string,
+  setTipo: PropTypes.func,
+};
+
+export function TabCard({ tabs, tipo, item = '', setTipo }) {
+  return (
+    <Tabs
+      value={tipo}
+      variant="scrollable"
+      scrollButtons="auto"
+      allowScrollButtonsMobile
+      sx={{ px: 2, bgcolor: 'background.neutral' }}
+      onChange={(event, newValue) => setItemValue(newValue, setTipo, item ? `tipo${item}` : '', false)}
+    >
+      {tabs.map((tab) => (
+        <Tab disableRipple key={tab.value} value={tab.value} label={tab.label || tab.value} sx={{ py: 2, px: 0.5 }} />
+      ))}
+    </Tabs>
+  );
+}

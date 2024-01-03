@@ -21,13 +21,13 @@ import useToggle, { useToggle1 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, getItem, openDetalhes, closeModal } from '../../redux/slices/digitaldocs';
+import { getAll, getItem, openModal, selectItem, openDetalhes, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
-import { UpdateItem, ViewItem, Checked, DefaultAction } from '../../components/Actions';
+import { UpdateItemAlt, ViewItem, Checked, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { UoData } from './Dados';
@@ -55,35 +55,34 @@ export default function TableCartoes() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
-  const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
   const [datai, setDatai] = useState(sub(new Date(), { days: 1 }));
   const [dataf, setDataf] = useState(sub(new Date(), { days: 1 }));
-  const { cartoes, meusAmbientes, confirmarCartoes, isAdmin, done, error, isLoading, isOpenModal } = useSelector(
-    (state) => state.digitaldocs
-  );
-  const isDopCE = cc?.uo?.label === 'DOP-CE';
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
+  const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
+  const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
+  const { isAdmin, confirmarCartoes } = useSelector((state) => state.parametrizacao);
+  const { cartoes, done, error, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
+  const fromAgencia = cc?.uo?.tipo === 'Agências';
   const uosList = useMemo(
     () =>
       UosAcesso(
         uos?.filter((row) => row?.tipo === 'Agências'),
         cc,
-        isDopCE || isAdmin,
-        meusAmbientes,
+        fase === 'Emissão' || isAdmin,
+        [],
         'balcao'
       ),
-    [cc, isAdmin, isDopCE, meusAmbientes, uos]
+    [cc, isAdmin, fase, uos]
   );
 
   const {
-    dense,
     page,
     order,
+    dense,
     orderBy,
-    rowsPerPage,
     setPage,
+    rowsPerPage,
     //
     selected,
     onSelectRow,
@@ -91,8 +90,8 @@ export default function TableCartoes() {
     onSelectAllRows,
     //
     onSort,
-    onChangeDense,
     onChangePage,
+    onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
     defaultOrder: 'asc',
@@ -131,7 +130,7 @@ export default function TableCartoes() {
   }, [error]);
 
   useEffect(() => {
-    if (fase === 'Receção' && !uo?.id && uosList && (localStorage.getItem('uoCartao') || cc?.uo?.balcao)) {
+    if (fase === 'Receção' && !uo?.id && uosList?.length > 0 && (localStorage.getItem('uoCartao') || cc?.uo?.balcao)) {
       setUo(
         (localStorage.getItem('uoCartao') &&
           uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoCartao')))) ||
@@ -140,6 +139,14 @@ export default function TableCartoes() {
       localStorage.setItem('uoCartao', localStorage.getItem('uoIndic') || cc?.uo?.balcao || '');
     }
   }, [uosList, fase, uo, cc?.uo?.balcao]);
+
+  useEffect(() => {
+    if (fase === 'Receção' && uosList?.length > 0 && uo?.id !== cc?.uo?.balcao) {
+      setUo(uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.balcao)));
+      localStorage.setItem('uoCartao', cc?.uo?.balcao || '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uosList, fase, cc?.uo?.balcao]);
 
   useEffect(() => {
     if (cc?.uo?.tipo) {
@@ -213,6 +220,11 @@ export default function TableCartoes() {
     dispatch(getItem('cartao', { mail, id }));
   };
 
+  const handleUpdate = (item) => {
+    dispatch(openModal('update'));
+    dispatch(selectItem(item));
+  };
+
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -243,7 +255,7 @@ export default function TableCartoes() {
               setSelected={setSelected}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
-              {isAdmin && (
+              {(isAdmin || fromAgencia) && (
                 <Autocomplete
                   fullWidth
                   size="small"
@@ -251,16 +263,24 @@ export default function TableCartoes() {
                   value={fase || null}
                   options={['Emissão', 'Receção']}
                   onChange={(event, newValue) => setItemValue(newValue, changeFase, '', false)}
-                  renderInput={(params) => <TextField {...params} label="Item" sx={{ width: 120 }} />}
+                  renderInput={(params) => <TextField {...params} label="Dados de" sx={{ width: 120 }} />}
                 />
               )}
               {temDadosNaoValidados && confirmarCartoes && (
-                <Stack direction="row" spacing={1}>
-                  {uo && <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />}
-                  {selected.length > 0 && (
-                    <DefaultAction label="CONFIRMAR MÚLTIPLO" handleClick={onOpen} icon="multiple" />
+                <>
+                  {fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao) && !isAdmin ? (
+                    ''
+                  ) : (
+                    <Stack direction="row" spacing={1}>
+                      {uo && !filter && !tipoCartao && (
+                        <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />
+                      )}
+                      {selected.length > 0 && (
+                        <DefaultAction label="CONFIRMAR MÚLTIPLO" handleClick={onOpen} icon="multiple" />
+                      )}
+                    </Stack>
                   )}
-                </Stack>
+                </>
               )}
             </Stack>
           </Stack>
@@ -319,9 +339,12 @@ export default function TableCartoes() {
                       </TableCell>
                       <TableCell width={10}>
                         <Stack direction="row" spacing={0.75} justifyContent="right">
-                          {!row.rececao_validado && fase === 'Emissão' && confirmarCartoes && (
-                            <UpdateItem dados={row} />
-                          )}
+                          {!row.rececao_validado &&
+                            confirmarCartoes &&
+                            fase === 'Emissão' &&
+                            (cc?.uo?.label === 'DOP-CE' || isAdmin) && (
+                              <UpdateItemAlt handleClick={() => handleUpdate(row)} />
+                            )}
                           <ViewItem handleClick={() => handleViewRow(row?.id)} />
                         </Stack>
                       </TableCell>

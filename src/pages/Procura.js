@@ -24,10 +24,10 @@ import useSettings from '../hooks/useSettings';
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // components
 import Page from '../components/Page';
-import Panel from '../components/Panel';
 import Scrollbar from '../components/Scrollbar';
+import { ViewItem } from '../components/Actions';
+import Panel, { Criado } from '../components/Panel';
 import { SkeletonTable } from '../components/skeleton';
-import { ViewItem, CriadoEmPor } from '../components/Actions';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
@@ -196,21 +196,19 @@ export default function Procura() {
         />
 
         <Card sx={{ p: 1 }}>
-          {newPesquisa.length > 1 && (
-            <SearchToolbarProcura
-              uo={uo}
-              setUo={setUo}
-              search={search}
-              estado={estado}
-              assunto={assunto}
-              setSearch={setSearch}
-              setEstado={setEstado}
-              setAssunto={setAssunto}
-              uosorigemList={uosorigemList}
-              estadosList={estadosList}
-              assuntosList={assuntosList}
-            />
-          )}
+          <SearchToolbarProcura
+            uo={uo}
+            setUo={setUo}
+            search={search}
+            estado={estado}
+            assunto={assunto}
+            setSearch={setSearch}
+            setEstado={setEstado}
+            setAssunto={setAssunto}
+            estadosList={estadosList}
+            assuntosList={assuntosList}
+            uosorigemList={uosorigemList}
+          />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -227,14 +225,11 @@ export default function Procura() {
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
                         <TableCell>{row.estado}</TableCell>
                         <TableCell sx={{ width: 10 }}>
-                          {row?.criado_em && <CriadoEmPor tipo="time" value={ptDateTime(row.criado_em)} />}
+                          {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.uo && (
-                            <CriadoEmPor
-                              tipo="company"
-                              value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo}
-                            />
+                            <Criado tipo="company" value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo} />
                           )}
-                          {row?.colaborador && <CriadoEmPor tipo="user" value={row.colaborador} />}
+                          {row?.colaborador && <Criado tipo="user" value={row.colaborador} />}
                         </TableCell>
                         <TableCell align="center" width={50}>
                           <ViewItem handleClick={() => handleViewRow(row?.id)} />

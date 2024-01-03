@@ -46,8 +46,9 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
+  const { meusProcessos } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabProcessos') || 'tarefas');
-  const { meusProcessos, meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.digitaldocs);
   const tab = localStorage.getItem('tabProcessos');
 
   useEffect(() => {

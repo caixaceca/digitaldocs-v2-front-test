@@ -21,6 +21,7 @@ import { fYear } from '../utils/formatTime';
 import { temNomeacao, isResponsavelUo, processoMePertence, podeDarParecer } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 import { getAll, getItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
@@ -63,18 +64,12 @@ export default function Processo() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, uos, cc, colaboradores } = useSelector((state) => state.intranet);
-  const {
-    done,
-    error,
-    processo,
-    isLoadingP,
-    isOpenModal,
-    meusacessos,
-    meusAmbientes,
-    iAmInGrpGerente,
-    colaboradoresEstado,
-    isOpenModalDesariquivar,
-  } = useSelector((state) => state.digitaldocs);
+  const { done, error, processo, isLoadingP, isOpenModal, isOpenModalDesariquivar } = useSelector(
+    (state) => state.digitaldocs
+  );
+  const { meusacessos, meusAmbientes, iAmInGrpGerente, colaboradoresEstado } = useSelector(
+    (state) => state.parametrizacao
+  );
   const perfilId = cc?.perfil_id;
   const estadoId = processo?.estado_atual_id;
   const fromArquivo = params?.get?.('from') === 'arquivo';
@@ -178,9 +173,7 @@ export default function Processo() {
           errorStd === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
             ? 'Processo não encontrado ou não tens acesso'
             : errorStd,
-          {
-            variant: noMoreProcess ? 'info' : 'error',
-          }
+          { variant: noMoreProcess ? 'info' : 'error' }
         );
       }
       if (noMoreProcess) {
@@ -198,7 +191,7 @@ export default function Processo() {
 
   useEffect(() => {
     if (mail && processo?.origem_id && perfilId) {
-      dispatch(getItem('origem', { id: processo?.origem_id, mail, perfilId }));
+      dispatch(getFromParametrizacao('origem', { id: processo?.origem_id, mail, perfilId }));
     }
   }, [dispatch, perfilId, mail, processo?.origem_id]);
 

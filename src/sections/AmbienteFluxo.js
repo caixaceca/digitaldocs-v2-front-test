@@ -4,13 +4,13 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
-import { changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/digitaldocs';
+import { changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/parametrizacao';
 
 // ----------------------------------------------------------------------
 
 export function Ambiente() {
   const dispatch = useDispatch();
-  const { meusAmbientes, meuAmbiente } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   const handleChangeAmbiente = useCallback(
     (newValue) => {
@@ -39,7 +39,7 @@ export function Ambiente() {
 
 export function Fluxo() {
   const dispatch = useDispatch();
-  const { meusFluxos, meuFluxo } = useSelector((state) => state.digitaldocs);
+  const { meusFluxos, meuFluxo } = useSelector((state) => state.parametrizacao);
 
   const handleChangeFluxo = useCallback(
     (newValue) => {

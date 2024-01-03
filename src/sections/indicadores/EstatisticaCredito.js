@@ -34,7 +34,7 @@ import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/digitaldocs';
+import { getIndicadores } from '../../redux/slices/indicadores';
 // components
 import { TableSearchNotFound } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -54,7 +54,7 @@ const borderStyle = { borderTop: '4px solid transparent', borderColor: 'backgrou
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { meusAmbientes, isAdmin } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
   const [data, setData] = useState(
     localStorage.getItem('dataEst') ? add(new Date(localStorage.getItem('dataEst')), { hours: 2 }) : new Date()
@@ -182,7 +182,7 @@ export default function EstatisticaCredito() {
                   sheet={`${currentTab}`}
                   filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
                   children={
-                    <Button variant="contained" startIcon={getFileThumb('file.xlsx')}>
+                    <Button variant="contained" startIcon={getFileThumb(false, null, 'file.xlsx')}>
                       Exportar
                     </Button>
                   }
@@ -204,7 +204,7 @@ export default function EstatisticaCredito() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Totais() {
-  const { isLoading, estatisticaCredito } = useSelector((state) => state.digitaldocs);
+  const { isLoading, estatisticaCredito } = useSelector((state) => state.indicadores);
 
   // Particular
   const empConst = dadosResumo(estatisticaCredito, 'Empresa', 'Construção', false);
@@ -401,7 +401,7 @@ export function Totais() {
 TableEstatistica.propTypes = { from: PropTypes.string, uo: PropTypes.string, data: PropTypes.string };
 
 export function TableEstatistica({ from, uo, data }) {
-  const { isLoading, estatisticaCredito } = useSelector((state) => state.digitaldocs);
+  const { isLoading, estatisticaCredito } = useSelector((state) => state.indicadores);
   const total =
     ((from === 'entrada' || from === 'desistido' || from === 'indeferido') && 'montantes') ||
     (from === 'aprovado' && 'montante_aprovado') ||

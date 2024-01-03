@@ -23,11 +23,12 @@ import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
+import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { AddItem, ViewItem, Pendente } from '../../components/Actions';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
-import { AddItem, ViewItem, Pendente, CriadoEmPor } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { ColocarPendente } from '../processo/IntervencaoForm';
@@ -40,10 +41,11 @@ export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { isLoading, processos } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorP') || null);
-  const { isLoading, meuAmbiente, meusAmbientes, meuFluxo, processos } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
   const title =
     (from === 'tarefas' && 'Lista de tarefas') ||
@@ -86,8 +88,12 @@ export default function TableProcessos({ from }) {
     navigate(PATH_DIGITALDOCS.processos.novoProcesso);
   };
 
-  const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}`);
+  const handleView = (id, isCC) => {
+    if (isCC) {
+      navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${id}`);
+    } else {
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${id}`);
+    }
   };
 
   const handlePendente = (item) => {
@@ -146,7 +152,7 @@ export default function TableProcessos({ from }) {
         heading={title}
         links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
-        action={estadoInicial(meusAmbientes) && <AddItem button handleAdd={handleAdd} />}
+        action={estadoInicial(meusAmbientes) && <AddItem button handleClick={handleAdd} />}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
@@ -198,8 +204,8 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.data_last_transicao && (
                           <>
-                            <CriadoEmPor tipo="date" value={ptDateTime(row.data_last_transicao)} />
-                            <CriadoEmPor
+                            <Criado tipo="date" value={ptDateTime(row.data_last_transicao)} />
+                            <Criado
                               tipo="time"
                               value={fToNow(row.data_last_transicao)?.replace('aproximadamente', 'aprox.')}
                             />
@@ -211,7 +217,7 @@ export default function TableProcessos({ from }) {
                           {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
                             <Pendente handleClick={() => handlePendente(row)} />
                           )}
-                          <ViewItem handleClick={() => handleView(row?.id)} />
+                          <ViewItem handleClick={() => handleView(row?.id, row?.assunto === 'Crédito Colaborador')} />
                         </Stack>
                       </TableCell>
                     </TableRow>

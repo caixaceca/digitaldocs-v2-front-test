@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
@@ -18,7 +19,6 @@ import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
-import { format } from 'date-fns';
 import cssStyles from '../../utils/cssStyles';
 import { validarAcesso } from '../../utils/validarAcesso';
 // redux

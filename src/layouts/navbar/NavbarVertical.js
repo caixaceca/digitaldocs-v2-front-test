@@ -1,5 +1,7 @@
-import PropTypes from 'prop-types';
+import { format } from 'date-fns';
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
+import Snowfall from 'react-snowfall';
 import { useLocation, NavLink as RouterLink } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
@@ -82,6 +84,9 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
     >
       <Stack spacing={3} sx={{ p: 2.5, flexShrink: 0, ...(isCollapse && { alignItems: 'center' }) }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ minHeight: 55 }}>
+          {format(new Date(), 'MM') > '11' && (
+            <Snowfall style={{ height: 90 }} snowflakeCount={30} changeFrequency={10} radius={[0.5, 1.5]} />
+          )}
           <Logo />
 
           {isDesktop && !isCollapse && (

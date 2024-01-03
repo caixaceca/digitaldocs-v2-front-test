@@ -2,76 +2,47 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
+import { BASEURLDD } from '../../utils/axios';
 
 // ----------------------------------------------------------------------
 
 const initialState = {
   done: '',
   error: '',
-  fluxoId: '',
-  estadoId: '',
-  processoId: '',
   previewType: '',
-  isAdmin: false,
   isSaving: false,
   isLoading: false,
   isLoadingP: false,
   isOpenModal: false,
   isOpenParecer: false,
   isLoadingAnexo: false,
-  iAmInGrpGerente: false,
   isOpenModalAnexo: false,
-  confirmarCartoes: false,
   arquivarProcessos: false,
   isOpenModalDesariquivar: false,
   anexo: null,
-  fluxo: null,
-  acesso: null,
-  estado: null,
-  origem: null,
-  meuFluxo: null,
+  anexoCC: null,
   processo: null,
-  transicao: null,
   filePreview: null,
-  meuAmbiente: null,
   selectedItem: null,
   anexoParecer: null,
   itemSelected: null,
   selectedAnexoId: null,
   indicadoresArquivo: null,
   con: [],
-  linhas: [],
-  fluxos: [],
   versoes: [],
-  estados: [],
-  origens: [],
-  acessos: [],
   cartoes: [],
   pesquisa: [],
   arquivos: [],
   entradas: [],
   processos: [],
-  ambientes: [],
-  fileSystem: [],
-  transicoes: [],
-  meusFluxos: [],
-  meusacessos: [],
   porConcluir: [],
-  indicadores: [],
   trabalhados: [],
-  estadosPerfil: [],
+  transicoesCC: [],
   visualizacoes: [],
-  meusAmbientes: [],
   meusProcessos: [],
   pedidosAcesso: [],
-  motivosPendencias: [],
-  colaboradoresEstado: [],
   destinosDesarquivamento: [],
-  estatisticaCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
 };
 
 const slice = createSlice({
@@ -129,19 +100,12 @@ const slice = createSlice({
       switch (action.payload) {
         case 'processo':
           state.anexo = null;
-          state.origem = null;
           state.processo = null;
           state.filePreview = null;
           state.previewType = '';
           state.isLoadingAnexo = false;
           state.versoes = [];
           state.visualizacoes = [];
-          break;
-        case 'fluxo':
-          state.fluxo = null;
-          break;
-        case 'estado':
-          state.estado = null;
           break;
         case 'processos':
           state.processos = [];
@@ -152,14 +116,8 @@ const slice = createSlice({
         case 'pesquisa':
           state.pesquisa = [];
           break;
-        case 'indicadores':
-          state.indicadores = [];
-          break;
         case 'trabalhados':
           state.trabalhados = [];
-          break;
-        case 'estatisticaCredito':
-          state.estatisticaCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
           break;
         case 'cartoes':
           state.cartoes = [];
@@ -183,52 +141,6 @@ const slice = createSlice({
 
     getPorConcluirSuccess(state, action) {
       state.porConcluir = action.payload;
-    },
-
-    getIndicadoresSuccess(state, action) {
-      state.indicadores = action.payload;
-    },
-
-    getEstatisticaCreditoSuccess(state, action) {
-      state.estatisticaCredito = action.payload;
-    },
-
-    getResumoEstatisticaCreditoSuccess(state, action) {
-      const dados =
-        (action.payload?.label === 'DCN' && action.payload?.dados?.filter((row) => row?.regiao === 'Norte')) ||
-        (action.payload?.label === 'DCS' && action.payload?.dados?.filter((row) => row?.regiao === 'Sul')) ||
-        action.payload?.dados;
-      state.estatisticaCredito.entrada = dados
-        ?.filter((row) => row.fase === 'Entrada')
-        ?.map((row) => ({ ...row, montantes: row?.montante }));
-      state.estatisticaCredito.aprovado = dados
-        ?.filter((row) => row.fase === 'Aprovado')
-        ?.map((row) => ({ ...row, montante_aprovado: row?.montante }));
-      state.estatisticaCredito.contratado = dados
-        ?.filter((row) => row.fase === 'Contratado')
-        ?.map((row) => ({ ...row, montante_contratado: row?.montante }));
-      state.estatisticaCredito.indeferido = dados
-        ?.filter((row) => row.fase === 'Indeferido')
-        ?.map((row) => ({ ...row, montantes: row?.montante }));
-      state.estatisticaCredito.desistido = dados
-        ?.filter((row) => row.fase === 'Desistido')
-        ?.map((row) => ({ ...row, montantes: row?.montante }));
-    },
-
-    getCreditosAprovadosSuccess(state, action) {
-      state.creditosAprovados = action.payload;
-    },
-
-    getCreditosDesistidosSuccess(state, action) {
-      state.creditosDesistidos = action.payload;
-    },
-
-    getCreditosIndeferidosSuccess(state, action) {
-      state.creditosIndeferidos = action.payload;
-    },
-
-    getCreditosContratadosSuccess(state, action) {
-      state.creditosContratados = action.payload;
     },
 
     getArquivosSuccess(state, action) {
@@ -255,34 +167,13 @@ const slice = createSlice({
       state.cartoes = action.payload?.map((row) => ({ ...row, numero: row?.numero?.substring(9, 15) }));
     },
 
-    getFluxosSuccess(state, action) {
-      state.fluxos = applySort(action.payload, getComparator('asc', 'assunto'));
-    },
-
-    getEstadosPerfilSuccess(state, action) {
-      state.estadosPerfil = action.payload;
-    },
-
     getConSuccess(state, action) {
       state.con = action.payload;
     },
 
     getProcessoSuccess(state, action) {
-      state.processoId = '';
       state.processo = action.payload;
       state.isLoadingP = false;
-    },
-
-    getAceitarSuccess(state, action) {
-      state.processo.is_lock = true;
-      state.processo.perfil_id = action.payload.perfilId;
-    },
-
-    getAtribuirSuccess(state, action) {
-      state.processo.perfil_id = action.payload;
-      if (!action.payload) {
-        state.processo.is_lock = false;
-      }
     },
 
     getPesquisaSuccess(state, action) {
@@ -302,92 +193,8 @@ const slice = createSlice({
       state.destinosDesarquivamento = action.payload;
     },
 
-    getFyleSystemSuccess(state, action) {
-      state.fileSystem = action.payload;
-    },
-
-    getEstadosSuccess(state, action) {
-      state.estados = applySort(action.payload, getComparator('asc', 'nome'));
-    },
-
-    getEstadoSuccess(state, action) {
-      state.estadoId = '';
-      state.estado = action.payload;
-    },
-
-    getColaboradoresEstadoSuccess(state, action) {
-      state.colaboradoresEstado = action.payload?.perfis;
-    },
-
-    getOrigemSuccess(state, action) {
-      state.origem = action.payload;
-    },
-
-    getFluxoSuccess(state, action) {
-      state.fluxoId = '';
-      state.fluxo = action.payload;
-    },
-
-    getMeusAmbientesSuccess(state, action) {
-      state.meusAmbientes = action.payload;
-      const grpGerent = action.payload?.find((row) => row?.nome?.includes('Gerência'));
-      const grpAtend = action.payload?.find((row) => row?.nome?.includes('Atendimento'));
-      const currentAmbiente =
-        action.payload?.find((row) => row?.id === Number(localStorage.getItem('meuAmbiente'))) ||
-        action.payload?.find((row) => row?.id === grpGerent?.id) ||
-        action.payload?.find((row) => row?.id === grpAtend?.id) ||
-        action.payload?.[0];
-      state.iAmInGrpGerente = !!grpGerent;
-      state.meuAmbiente = currentAmbiente;
-      state.meusFluxos = currentAmbiente?.fluxos || [];
-      state.meuFluxo = currentAmbiente?.fluxos?.[0] || null;
-    },
-
-    getAmbientesByPerfilSuccess(state, action) {
-      state.ambientes = action.payload;
-      state.isOpenModal = true;
-    },
-
-    getOrigensSuccess(state, action) {
-      state.origens = action.payload;
-    },
-
-    getMotivosPendenciasSuccess(state, action) {
-      state.motivosPendencias = action.payload;
-    },
-
     getArquivadosSuccess(state, action) {
       state.arquivos = action.payload;
-    },
-
-    getAcessosSuccess(state, action) {
-      state.acessos = action.payload;
-    },
-
-    getLinhasSuccess(state, action) {
-      state.linhas = action.payload;
-    },
-
-    getMeusAcessosSuccess(state, action) {
-      action.payload?.forEach((row) => {
-        const acesso = `${row.objeto}-${row.acesso}`;
-        if (!state.meusacessos.includes(acesso)) {
-          state.meusacessos.push(acesso);
-        }
-        if (acesso === 'Todo-111' || acesso === 'Todo-110') {
-          state.isAdmin = true;
-        }
-        if (acesso === 'rececao-cartoes-110') {
-          state.confirmarCartoes = true;
-        }
-        if (acesso === 'arquivar-processo-110') {
-          state.arquivarProcessos = true;
-        }
-      });
-    },
-
-    getAcessoSuccess(state, action) {
-      state.acesso = action.payload;
     },
 
     getCartaoSuccess(state, action) {
@@ -409,54 +216,24 @@ const slice = createSlice({
       state.previewType = action.payload.type;
     },
 
-    createFluxoSuccess(state, action) {
-      state.fluxoId = action.payload.id;
+    getTransicoesSuccess(state, action) {
+      state.transicoesCC = action?.payload || [];
     },
 
-    createEstadoSuccess(state, action) {
-      state.estadoId = action.payload.id;
+    aceitarSuccess(state, action) {
+      state.processo.is_lock = true;
+      state.processo.perfil_id = action.payload.perfilId;
     },
 
-    createLinhaSuccess(state, action) {
-      state.linhas.push(action.payload);
-    },
-
-    createTransicaoSuccess(state, action) {
-      state.fluxo.transicoes?.push(action.payload);
-    },
-
-    createOrigemSuccess(state, action) {
-      state.origens.push(action.payload);
-    },
-
-    createMotivoPendenciaSuccess(state, action) {
-      state.motivosPendencias.push(action.payload);
-    },
-
-    createAcessoSuccess(state, action) {
-      state.acessos.push(action.payload);
+    atribuirSuccess(state, action) {
+      state.processo.perfil_id = action.payload;
+      if (!action.payload) {
+        state.processo.is_lock = false;
+      }
     },
 
     createProcessoSuccess(state, action) {
-      state.processoId = action.payload;
-    },
-
-    updateFluxoSuccess(state, action) {
-      state.fluxoId = action.payload.id;
-    },
-
-    updateEstadoSuccess(state, action) {
-      state.estadoId = action.payload.id;
-    },
-
-    updateTransicaoSuccess(state, action) {
-      const index = state.fluxo.transicoes.findIndex((row) => row.id === action.payload.id);
-      state.fluxo.transicoes[index] = action.payload;
-    },
-
-    updateAcessoSuccess(state, action) {
-      const index = state.acessos.findIndex((row) => row.id === action.payload.id);
-      state.acessos[index] = action.payload;
+      state.processo = action.payload;
     },
 
     patchParecerSuccess(state, action) {
@@ -466,23 +243,8 @@ const slice = createSlice({
       state.processo.pareceres[index] = parecer;
     },
 
-    updateOrigemSuccess(state, action) {
-      const index = state.origens.findIndex((row) => row.id === action.payload.id);
-      state.origens[index] = action.payload;
-    },
-
-    updateLinhaSuccess(state, action) {
-      const index = state.linhas.findIndex((row) => row.id === action.payload.id);
-      state.linhas[index] = action.payload;
-    },
-
-    updateMotivoPendenciaSuccess(state, action) {
-      const index = state.motivosPendencias.findIndex((row) => row.id === action.payload.id);
-      state.motivosPendencias[index] = action.payload;
-    },
-
     updateProcessoSuccess(state, action) {
-      state.processoId = action.payload;
+      state.processo = action.payload;
       state.previewType = '';
       state.filePreview = null;
     },
@@ -505,45 +267,6 @@ const slice = createSlice({
     alterarBalcaopSuccess(state, action) {
       const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
       state.cartoes[index].balcao_entrega = action.payload.balcao;
-    },
-
-    deleteEstadoSuccess(state, action) {
-      state.estados = state.estados.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteFluxoSuccess(state, action) {
-      const index = state.fluxos.findIndex((row) => row.id === action.payload.id);
-      state.fluxos[index].is_ativo = false;
-    },
-
-    deleteTransicaoSuccess(state, action) {
-      state.fluxo.transicoes = state.fluxo.transicoes.filter((row) => row.id !== action.payload);
-    },
-
-    deleteOrigemSuccess(state, action) {
-      state.origens = state.origens.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteLinhaSuccess(state, action) {
-      state.linhas = state.linhas.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteMotivoPendenciaSuccess(state, action) {
-      state.motivosPendencias = state.motivosPendencias.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteAcessosSuccess(state, action) {
-      state.acessos = state.acessos.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteEstadoPerfilSuccess(state, action) {
-      state.estadosPerfil = state.estadosPerfil.filter((row) => row.id !== action.payload.id);
-    },
-
-    deletePerfilFromEstadoSuccess(state, action) {
-      state.estado.perfis = state.estado.perfis.filter((row) => row.peid !== action.payload.id);
-      state.isOpenModalAnexo = false;
-      state.selectedAnexoId = null;
     },
 
     deleteAnexoParecerSuccess(state, action) {
@@ -584,19 +307,8 @@ const slice = createSlice({
     closeModal(state) {
       state.isOpenModal = false;
       state.isOpenModalDesariquivar = false;
-      state.estado = null;
       state.selectedItem = null;
       state.destinosDesarquivamento = [];
-    },
-
-    changeMeuAmbiente(state, action) {
-      state.meuAmbiente = action.payload;
-      state.meusFluxos = action.payload?.fluxos;
-      state.meuFluxo = action.payload?.fluxos?.[0];
-    },
-
-    changeMeuFluxo(state, action) {
-      state.meuFluxo = action.payload;
     },
 
     selectAnexo(state, action) {
@@ -640,9 +352,7 @@ export const {
   openDetalhes,
   closeParecer,
   selectParecer,
-  changeMeuFluxo,
   closeModalAnexo,
-  changeMeuAmbiente,
 } = slice.actions;
 
 // ----------------------------------------------------------------------
@@ -660,19 +370,6 @@ export function getAll(item, params) {
     try {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
-        case 'fluxos': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.perfilId}`, options);
-          dispatch(slice.actions.getFluxosSuccess(response.data));
-          break;
-        }
-        case 'historico fluxo': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/historico/${params?.fluxoId}/${params?.perfilId}`,
-            options
-          );
-          dispatch(slice.actions.getHistoticoFluxoSuccess(response.data));
-          break;
-        }
         case 'tarefas': {
           if (params?.estadoId === -1) {
             const response = await axios.get(
@@ -796,55 +493,12 @@ export function getAll(item, params) {
           dispatch(slice.actions.getProcessosSuccess(response.data));
           break;
         }
-        case 'estados': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.perfilId}`, options);
-          dispatch(slice.actions.getEstadosSuccess(response.data));
-          break;
-        }
-        case 'ambientes': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/${params?.perfilId}`, options);
-          dispatch(slice.actions.getMeusAmbientesSuccess(response.data));
-          break;
-        }
-        case 'ambientesByPerfil': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/${params?.perfilId}`, options);
-          dispatch(slice.actions.getAmbientesByPerfilSuccess(response.data));
-          break;
-        }
-        case 'origens': {
-          const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.perfilId}`, options);
-          dispatch(slice.actions.getOrigensSuccess(response.data));
-          break;
-        }
-        case 'motivos': {
-          const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${params?.perfilId}`, options);
-          dispatch(slice.actions.getMotivosPendenciasSuccess(response.data.objeto));
-          break;
-        }
-        case 'acessos': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${params?.perfilId}`, options);
-          dispatch(slice.actions.getAcessosSuccess(response.data));
-          break;
-        }
-        case 'meusacessos': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${params?.perfilId}`, options);
-          dispatch(slice.actions.getMeusAcessosSuccess(response.data));
-          break;
-        }
         case 'meusprocessos': {
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/default/${params?.fluxoId}/${params?.estadoId}/${params?.perfilId}`,
             options
           );
           dispatch(slice.actions.getMeusProcessosSuccess(response.data));
-          break;
-        }
-        case 'estadosPerfil': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${params?.estadoId}/${params?.perfilId}`,
-            options
-          );
-          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
           break;
         }
         case 'pesquisa': {
@@ -938,11 +592,6 @@ export function getAll(item, params) {
           }
           break;
         }
-        case 'linhas': {
-          const response = await axios.get(`${BASEURLDD}/v1/linhas/${params?.perfilId}`, options);
-          dispatch(slice.actions.getLinhasSuccess(response.data.objeto));
-          break;
-        }
         case 'arquivados': {
           const response = await axios.get(`${BASEURLDD}/v1/arquivos/${params?.perfilId}`, options);
           dispatch(slice.actions.getArquivosSuccess(response.data));
@@ -1006,213 +655,12 @@ export function getAll(item, params) {
 
 // ----------------------------------------------------------------------
 
-export function getIndicadores(item, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
-    dispatch(slice.actions.resetItem('indicadores'));
-    try {
-      const options = { headers: { cc: params?.mail } };
-      switch (item) {
-        case 'fileSystem': {
-          const response = await axios.get(`${BASEURLDD}/v1/indicadores/filesystem/${params?.perfilId}`, options);
-          dispatch(slice.actions.getFyleSystemSuccess(response.data));
-          break;
-        }
-        case 'criacao': {
-          if (params?.perfilId) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
-                params?.uo ? `&uoID=${params?.uo}` : ''
-              }${params?.perfil ? `&perfilID1=${params?.perfil}` : ''}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data));
-          }
-          break;
-        }
-        case 'entradas': {
-          if (params?.uo) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
-            const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
-          }
-          break;
-        }
-        case 'trabalhados': {
-          if (params?.estado) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
-            const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
-          }
-          break;
-        }
-        case 'devolucoesInternas': {
-          if (params?.estado) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
-            const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
-          }
-          break;
-        }
-        case 'devolucoesExternas': {
-          if (params?.estado) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
-            const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
-          }
-          break;
-        }
-        case 'volume': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/top/criacao/${params?.perfilId}?escopo=${params?.agrupamento}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data));
-          break;
-        }
-        case 'tipos': {
-          const query = `${params?.uo ? `uoID=${params?.uo}&` : ''}${
-            params?.perfil ? `perfilPID=${params?.perfil}&` : ''
-          }${params?.datai ? `datai=${params?.datai}&` : ''}${params?.dataf ? `dataf=${params?.dataf}&` : ''}`;
-          const response = await axios.get(
-            params?.uo || params?.perfil || params?.datai || params?.dataf
-              ? `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}?${query.substr(0, query.length - 1)}`
-              : `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data));
-          break;
-        }
-        case 'execucao': {
-          if (params?.estado || params?.perfil || params?.fluxo) {
-            const query = `${params?.estado ? `estadoIDFilter=${params?.estado}&` : ''}${
-              params?.fluxo ? `fluxoIDFilter=${params?.fluxo}&` : ''
-            }${params?.perfil ? `perfilIDFilter=${params?.perfil}&` : ''}`;
-            const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query.substr(0, query.length - 1)}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data));
-          }
-          break;
-        }
-        case 'duracao': {
-          const perfil = params?.perfil ? `&perfilPID=${params?.perfil}` : '';
-          const fluxo = params?.fluxo ? `&fluxoID=${params?.fluxo}` : '';
-          const datai = params?.datai ? `&datai=${params?.datai}` : '';
-          const dataf = params?.dataf ? `&dataf=${params?.dataf}` : '';
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/duracao/${params?.perfilId}?de=${params?.momento}${perfil}${fluxo}${datai}${dataf}`,
-            options
-          );
-          dispatch(slice.actions.getIndicadoresSuccess(response.data));
-          break;
-        }
-        case 'estatisticaCredito': {
-          dispatch(slice.actions.resetItem('estatisticaCredito'));
-          const pathIds = `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}`;
-          const data = `${params?.ano}&mes=${params?.mes}`;
-          const entrada =
-            params?.fase === 'Entradas' ? await axios.get(`${pathIds}&fase=entrada&ano=${data}`, options) : [];
-          const aprovado =
-            params?.fase === 'Aprovados' ? await axios.get(`${pathIds}&fase=aprovado&ano=${data}`, options) : [];
-          const contratado =
-            params?.fase === 'Contratados' ? await axios.get(`${pathIds}&fase=contratado&ano=${data}`, options) : [];
-          const indeferido =
-            params?.fase === 'Indeferidos' ? await axios.get(`${pathIds}&fase=indeferido&ano=${data}`, options) : [];
-          const desistido =
-            params?.fase === 'Desistidos' ? await axios.get(`${pathIds}&fase=desistido&ano=${data}`, options) : [];
-          dispatch(
-            slice.actions.getEstatisticaCreditoSuccess({
-              entrada: entrada?.data || [],
-              aprovado: aprovado?.data || [],
-              contratado: contratado?.data || [],
-              indeferido: indeferido?.data || [],
-              desistido: desistido?.data || [],
-            })
-          );
-          break;
-        }
-        case 'resumoEstCredCaixa': {
-          dispatch(slice.actions.resetItem('estatisticaCredito'));
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo?data_inicio=${params?.dataI}&data_final=${params?.dataF}`,
-            options
-          );
-          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
-          break;
-        }
-        case 'resumoEstCredAg': {
-          dispatch(slice.actions.resetItem('estatisticaCredito'));
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}?data_inicio=${params?.dataI}${
-              params?.dataF ? `&data_final=${params?.dataF}` : ''
-            }`,
-            options
-          );
-          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
-          break;
-        }
-
-        default:
-          break;
-      }
-      dispatch(slice.actions.stopLoading());
-    } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
 export function getItem(item, params) {
   return async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
-        case 'fluxo': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else if (params?.from === 'clonagem') {
-            dispatch(slice.actions.selectParecer(response.data));
-          } else {
-            dispatch(slice.actions.getFluxoSuccess(response.data));
-          }
-          break;
-        }
         case 'processo': {
           dispatch(slice.actions.startLoadingP());
           dispatch(slice.actions.resetItem('processo'));
@@ -1231,43 +679,6 @@ export function getItem(item, params) {
             options
           );
           dispatch(slice.actions.getProcessoSuccess(response.data));
-          break;
-        }
-        case 'estado': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getEstadoSuccess(response.data));
-          }
-          break;
-        }
-        case 'colaboradoresEstado': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.getColaboradoresEstadoSuccess(response.data));
-          break;
-        }
-        case 'origem': {
-          const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getOrigemSuccess(response.data));
-          }
-          break;
-        }
-        case 'transicao': {
-          const response = await axios.get(`${BASEURLDD}/v1/transicoes/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.selectItem(response.data));
-          break;
-        }
-        case 'acesso': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getAcessoSuccess(response.data));
-          }
           break;
         }
         case 'cartao': {
@@ -1342,91 +753,14 @@ export function createItem(item, dados, params) {
       const options1 = { headers: { 'content-type': 'multipart/form-data', cc: params?.mail } };
 
       switch (item) {
-        case 'fluxo': {
-          const response = await axios.post(`${BASEURLDD}/v1/fluxos`, dados, options);
-          dispatch(slice.actions.createFluxoSuccess(response.data));
-          break;
-        }
-        case 'clonar fluxo': {
-          const response = await axios.post(`${BASEURLDD}/v1/fluxos`, dados, options);
-          const transicoes = [];
-          params?.transicoes?.forEach((row) => {
-            transicoes.push({
-              modo: row?.modo,
-              to_alert: row?.to_alert,
-              fluxo_id: response?.data?.id,
-              perfilIDCC: params?.perfilId,
-              hasopnumero: row?.hasopnumero,
-              prazoemdias: row?.prazoemdias,
-              is_paralelo: row?.is_paralelo,
-              estado_final_id: row?.estado_final_id,
-              estado_inicial_id: row?.estado_inicial_id,
-              is_after_devolucao: row?.is_after_devolucao,
-              arqhasopnumero: row?.arqhasopnumero || false,
-            });
-          });
-          await axios.post(`${BASEURLDD}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
-          dispatch(slice.actions.createFluxoSuccess(response.data));
-          break;
-        }
-        case 'estado': {
-          const response = await axios.post(`${BASEURLDD}/v1/estados`, dados, options);
-          dispatch(slice.actions.createEstadoSuccess(response.data));
-          break;
-        }
-        case 'transicao': {
-          const response = await axios.post(`${BASEURLDD}/v1/transicoes`, dados, options);
-          dispatch(slice.actions.createTransicaoSuccess(response.data));
-          break;
-        }
-        case 'linha': {
-          const response = await axios.post(`${BASEURLDD}/v1/linhas`, dados, options);
-          dispatch(slice.actions.createLinhaSuccess(response.data.objeto));
-          break;
-        }
         case 'processo interno': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/interno`, dados, options1);
-          dispatch(slice.actions.createProcessoSuccess(response?.data?.processo?.id));
+          dispatch(slice.actions.createProcessoSuccess(response?.data?.processo));
           break;
         }
         case 'processo externo': {
           const response = await axios.post(`${BASEURLDD}/v1/processos/externo`, dados, options1);
-          dispatch(slice.actions.createProcessoSuccess(response?.data?.processo?.id));
-          break;
-        }
-        case 'origem': {
-          const response = await axios.post(`${BASEURLDD}/v1/origens`, dados, options);
-          dispatch(slice.actions.createOrigemSuccess(response.data));
-          break;
-        }
-        case 'motivo pendencia': {
-          const response = await axios.post(`${BASEURLDD}/v1/motivos/${params?.perfilId}`, dados, options);
-          dispatch(slice.actions.createMotivoPendenciaSuccess(response.data.objeto));
-          break;
-        }
-        case 'acesso': {
-          const response = await axios.post(`${BASEURLDD}/v1/acessos`, dados, options);
-          dispatch(slice.actions.createAcessoSuccess(response.data));
-          break;
-        }
-        case 'estadoPerfil': {
-          await axios.post(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${JSON.parse(dados)?.perfil_id}/${
-              JSON.parse(dados)?.perfil_id_cc
-            }`,
-            options
-          );
-          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
-          break;
-        }
-        case 'perfisEstado': {
-          await axios.post(`${BASEURLDD}/v1/estados/asscc/perfis`, dados, options);
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/${JSON.parse(dados)?.estado_id}/${JSON.parse(dados)?.perfil_id_cc}`,
-            options
-          );
-          dispatch(slice.actions.getEstadoSuccess(response.data));
+          dispatch(slice.actions.createProcessoSuccess(response?.data?.processo));
           break;
         }
         case 'encaminhar': {
@@ -1487,58 +821,12 @@ export function updateItem(item, dados, params) {
       const options1 = { headers: { 'content-type': 'multipart/form-data', cc: params?.mail } };
 
       switch (item) {
-        case 'fluxo': {
-          const response = await axios.put(`${BASEURLDD}/v1/fluxos/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateFluxoSuccess(response.data));
-          break;
-        }
-        case 'estado': {
-          const response = await axios.put(`${BASEURLDD}/v1/estados/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateEstadoSuccess(response.data));
-          break;
-        }
-        case 'origem': {
-          const response = await axios.put(`${BASEURLDD}/v1/origens/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateOrigemSuccess(response.data));
-          break;
-        }
-        case 'linha': {
-          const response = await axios.put(`${BASEURLDD}/v1/linhas/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateLinhaSuccess(response.data.objeto));
-          break;
-        }
-        case 'motivo pendencia': {
-          const response = await axios.put(
-            `${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.updateMotivoPendenciaSuccess(response.data.objeto));
-          break;
-        }
-        case 'transicao': {
-          const response = await axios.put(`${BASEURLDD}/v1/transicoes/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateTransicaoSuccess(response.data));
-          break;
-        }
-        case 'acesso': {
-          const response = await axios.put(`${BASEURLDD}/v1/acessos/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateAcessoSuccess(response.data));
-          break;
-        }
-        case 'estadoPerfil': {
-          await axios.put(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${JSON.parse(dados)?.perfil_id}/${
-              JSON.parse(dados)?.perfil_id_cc
-            }`,
-            options
-          );
-          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
-          break;
-        }
         case 'processo': {
-          await axios.put(`${BASEURLDD}/v1/processos/ei/pro/${params?.id}/${params?.perfilId}`, dados, options1);
+          const response = await axios.put(
+            `${BASEURLDD}/v1/processos/ei/pro/${params?.id}/${params?.perfilId}`,
+            dados,
+            options1
+          );
           if (params?.isPendente) {
             await axios.patch(
               `${BASEURLDD}/v1/processos/abandonar/${params?.id}`,
@@ -1553,7 +841,7 @@ export function updateItem(item, dados, params) {
               options
             );
           }
-          dispatch(slice.actions.updateProcessoSuccess(params?.id));
+          dispatch(slice.actions.updateProcessoSuccess(response?.data?.processo));
           break;
         }
         case 'parecer': {
@@ -1567,7 +855,7 @@ export function updateItem(item, dados, params) {
         }
         case 'aceitar': {
           await axios.patch(`${BASEURLDD}/v1/processos/aceitar/${params?.processoId}`, dados, options);
-          dispatch(slice.actions.getAceitarSuccess(params));
+          dispatch(slice.actions.aceitarSuccess(params));
           break;
         }
         case 'dar aceso': {
@@ -1580,7 +868,7 @@ export function updateItem(item, dados, params) {
             '',
             options
           );
-          dispatch(slice.actions.getAtribuirSuccess(params?.perfilIDAfeto));
+          dispatch(slice.actions.atribuirSuccess(params?.perfilIDAfeto));
           break;
         }
         case 'cancelar': {
@@ -1687,51 +975,6 @@ export function deleteItem(item, params) {
       switch (item) {
         case 'processo': {
           await axios.delete(`${BASEURLDD}/v1/processos/delete/${params?.perfilId}/${params?.processoId}`, options);
-          break;
-        }
-        case 'fluxo': {
-          await axios.delete(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteFluxoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'estado': {
-          await axios.delete(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteEstadoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'transicao': {
-          await axios.delete(`${BASEURLDD}/v1/transicoes/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteTransicaoSuccess(params?.id));
-          break;
-        }
-        case 'origem': {
-          await axios.delete(`${BASEURLDD}/v1/origens/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteOrigemSuccess({ id: params?.id }));
-          break;
-        }
-        case 'linha': {
-          await axios.delete(`${BASEURLDD}/v1/linhas/${params?.linhaID}/${params?.perfilID}`, options);
-          dispatch(slice.actions.deleteLinhaSuccess({ id: params?.id }));
-          break;
-        }
-        case 'motivo pendencia': {
-          await axios.delete(`${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`, options);
-          dispatch(slice.actions.deleteMotivoPendenciaSuccess({ id: params?.id }));
-          break;
-        }
-        case 'acesso': {
-          await axios.delete(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
-          dispatch(slice.actions.deleteAcessosSuccess({ id: params?.id }));
-          break;
-        }
-        case 'estadoPerfil': {
-          await axios.delete(`${BASEURLDD}/v1/estados/asscc/perfil/${params?.perfilId}?peID=${params?.id}`, options);
-          dispatch(slice.actions.deleteEstadoPerfilSuccess({ id: params?.id }));
-          break;
-        }
-        case 'perfil from estado': {
-          await axios.delete(`${BASEURLDD}/v1/estados/asscc/perfil/${params?.perfilId}?peID=${params?.id}`, options);
-          dispatch(slice.actions.deletePerfilFromEstadoSuccess({ id: params?.id }));
           break;
         }
         case 'anexoParecer': {

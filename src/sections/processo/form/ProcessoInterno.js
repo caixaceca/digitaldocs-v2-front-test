@@ -32,8 +32,9 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
+  const { meuAmbiente } = useSelector((state) => state.parametrizacao);
+  const { processo, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
-  const { meuAmbiente, processoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado);
   const [cliente, setCliente] = useState(true);
@@ -42,10 +43,10 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   useEffect(() => {
     if (done === 'processo adicionado') {
       enqueueSnackbar('Processo adicionado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processoId}`);
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     } else if (done === 'processo atualizado') {
       enqueueSnackbar('Processo atualizado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processoId}`);
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -73,7 +74,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       (fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário') &&
       Yup.string().required('Descriçãao não pode ficar vazio'),
     email:
-      fluxo?.assunto === 'Banca Virtual - Adesão' &&
+      (fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') &&
       Yup.string().email('Introduza um email válido').required('Introduza o email'),
     diadomes:
       agendado &&
@@ -101,6 +102,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     local_pais_nascimento: infoConReq && Yup.string().required('Local/País de nascimento não pode ficar vazio'),
     data_nascimento:
       infoConReq && Yup.date().typeError('Introduza a data de nascimento').required('Introduza a data de nascimento'),
+    entidades: Yup.array(Yup.object({ numero: Yup.number().typeError('Introduza um nº de entidade válido') })),
   });
 
   const entidades = useMemo(

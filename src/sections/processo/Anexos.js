@@ -126,7 +126,7 @@ export default function Anexos({ anexos }) {
                         key={row?.anexo}
                         variant="outlined"
                         onClick={() => handleAnexo(row)}
-                        startIcon={getFileThumb(row.nome)}
+                        startIcon={getFileThumb(false, null, row.nome)}
                         disabled={row?.anexo === selectedAnexoPreview?.anexo}
                         sx={{ justifyContent: 'left', textAlign: 'left', mt: 1, py: 1 }}
                       >
@@ -151,7 +151,7 @@ export default function Anexos({ anexos }) {
                           key={row?.anexo}
                           variant="outlined"
                           onClick={() => handleAnexo(row)}
-                          startIcon={getFileThumb(row?.nome)}
+                          startIcon={getFileThumb(false, null, row?.nome)}
                           disabled={row?.anexo === selectedAnexoPreview?.anexo}
                           sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: 0.5 }}
                         >

@@ -17,7 +17,8 @@ import { useSelector } from '../../redux/store';
 // ----------------------------------------------------------------------
 
 export default function ModelosRespostas() {
-  const { processo, origem } = useSelector((state) => state.digitaldocs);
+  const { processo } = useSelector((state) => state.digitaldocs);
+  const { origem } = useSelector((state) => state.parametrizacao);
 
   const exportToWord = async (tipo) => {
     const logo = await fetch('/assets/caixa_logo_carta.png').then((r) => r.blob());
@@ -350,7 +351,7 @@ function ButtonModelo({ modelo, evento }) {
       color="inherit"
       variant="outlined"
       onClick={evento}
-      startIcon={getFileThumb('file.docx')}
+      startIcon={getFileThumb(false, null, 'file.docx')}
       sx={{ justifyContent: 'left', textAlign: 'left', py: 1, mb: 1 }}
     >
       {`Modelo ${modelo}`}

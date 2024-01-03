@@ -1,3 +1,5 @@
+// @mui
+import Box from '@mui/material/Box';
 // components
 import Image from '../components/Image';
 
@@ -83,40 +85,45 @@ export function getFileFormatDisctint(fileUrl) {
   return format;
 }
 
-const getIcon = (name) => (
-  <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24 }} />
-);
+const getIcon = (name, thumbp, sx) =>
+  thumbp ? (
+    <Box component="img" src={`/assets/icons/file_format/${name}.svg`} sx={{ flexShrink: 0, ...sx }} />
+  ) : (
+    <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24 }} {...sx} />
+  );
 
-export function getFileThumb(fileUrl) {
+export function getFileThumb(thumbp, sx, fileUrl = '') {
   let thumb;
   switch (getFileFormat(fileUrl)) {
     case 'video':
-      thumb = getIcon('format_video');
+      thumb = getIcon('format_video', thumbp, sx);
       break;
     case 'word':
-      thumb = getIcon('format_word');
+      thumb = getIcon('format_word', thumbp, sx);
       break;
     case 'excel':
-      thumb = getIcon('format_excel');
+      thumb = getIcon('format_excel', thumbp, sx);
       break;
     case 'powerpoint':
-      thumb = getIcon('format_powerpoint');
+      thumb = getIcon('format_powerpoint', thumbp, sx);
       break;
     case 'pdf':
-      thumb = getIcon('format_pdf');
+      thumb = getIcon('format_pdf', thumbp, sx);
       break;
     case 'photoshop':
-      thumb = getIcon('format_photoshop');
+      thumb = getIcon('format_photoshop', thumbp, sx);
       break;
     case 'illustrator':
-      thumb = getIcon('format_ai');
+      thumb = getIcon('format_ai', thumbp, sx);
       break;
     case 'image':
-      // thumb = <Image src={fileUrl} alt={fileUrl} sx={{ width: 24, borderRadius: 0.25 }} />;
-      thumb = getIcon('format_image');
+      thumb = getIcon('format_image', thumbp, sx);
+      break;
+    case 'txt':
+      thumb = getIcon('format_txt', thumbp, sx);
       break;
     default:
-      thumb = getIcon('file');
+      thumb = getIcon('file', thumbp, sx);
   }
   return thumb;
 }

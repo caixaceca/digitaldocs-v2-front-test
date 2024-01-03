@@ -30,7 +30,8 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { meuAmbiente, processoId, linhas, isSaving, done, error } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, linhas } = useSelector((state) => state.parametrizacao);
+  const { processo, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const credito = selectedProcesso?.credito || null;
   const [estado, setEstado] = useState(credito?.situacao_final_mes);
@@ -38,10 +39,10 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
   useEffect(() => {
     if (done === 'processo adicionado') {
       enqueueSnackbar('Processo adicionado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processoId}`);
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     } else if (done === 'processo atualizado') {
       enqueueSnackbar('Processo atualizado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processoId}`);
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
