@@ -10,9 +10,9 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { getFileThumb } from '../../../utils/getFileFormat';
-import { normalizeText } from '../../../utils/normalizeText';
-import { ptDateTime, ptDate } from '../../../utils/formatTime';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
+import { normalizeText, noDados } from '../../../utils/normalizeText';
+import { ptDateTime, ptDate, fDistance, fToNow } from '../../../utils/formatTime';
 // hooks
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
@@ -59,6 +59,7 @@ const TABLE_HEAD_RESPONSABILIDADES = [
 const TABLE_HEAD_RETENCOES = [
   { id: 'nome', label: 'Colaborador', align: 'left' },
   { id: 'estado', label: 'Estado', align: 'left' },
+  { id: '', label: 'Duração', align: 'center' },
   { id: 'preso_em', label: 'Retido em', align: 'center' },
   { id: 'solto_em', label: 'Solto em', align: 'center' },
   { id: 'solto_por', label: 'Solto por', align: 'left' },
@@ -93,7 +94,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable();
+  } = useTable({ defaultOrderBy: item === 'retencoes' ? 'preso_em' : 'ativo' });
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { mail, colaboradores } = useSelector((state) => state.intranet);
@@ -180,7 +181,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
               {isLoading && isNotFound ? (
                 <SkeletonTable
                   column={
-                    (item === 'retencoes' && 5) ||
+                    (item === 'retencoes' && 6) ||
                     (item === 'responsabilidades' && 8) ||
                     ((item === 'pendencias' || item === 'atribuicoes') && 3) ||
                     4
@@ -194,6 +195,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                       <>
                         <TableCell>
                           <Button
+                            fullWidth
                             variant="soft"
                             color="inherit"
                             onClick={() => viewAnexo(row)}
@@ -203,7 +205,9 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                             {row?.designacao}
                           </Button>
                         </TableCell>
-                        <TableCell align="center">{row?.data_validade ? ptDate(row?.data_validade) : '--'}</TableCell>
+                        <TableCell align="center">
+                          {row?.data_validade ? ptDate(row?.data_validade) : noDados(true)}
+                        </TableCell>
                       </>
                     )) ||
                       (item === 'despesas' && (
@@ -230,9 +234,16 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                             <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} />
                           </TableCell>
                           <TableCell>{row?.estado}</TableCell>
+                          <TableCell align="center">
+                            {(row?.preso_em && row?.solto_em && fDistance(row?.preso_em, row?.solto_em)) ||
+                              (row?.preso_em && !row?.solto_em && fToNow(row?.preso_em)) ||
+                              noDados(true)}
+                          </TableCell>
                           <TableCell align="center">{ptDateTime(row?.preso_em)}</TableCell>
-                          <TableCell align="center">{row?.solto_em ? ptDateTime(row?.solto_em) : '--'}</TableCell>
-                          <TableCell>{row?.solto_por || '--'}</TableCell>
+                          <TableCell align="center">
+                            {row?.solto_em ? ptDateTime(row?.solto_em) : noDados(true)}
+                          </TableCell>
+                          <TableCell>{row?.solto_por || noDados(true)}</TableCell>
                         </>
                       )) ||
                       (item === 'atribuicoes' && (
@@ -246,7 +257,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                       (item === 'pendencias' && (
                         <>
                           <TableCell>{row?.motivo}</TableCell>
-                          <TableCell>{row?.observacao}</TableCell>
+                          <TableCell>{row?.observacao || noDados(true)}</TableCell>
                         </>
                       ))}
                     {item !== 'retencoes' && item !== 'atribuicoes' && item !== 'pendencias' && (
@@ -262,8 +273,14 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                         {(row?.criador || row?.atribuidor || row?.nome) && (
                           <Criado tipo="user" value={row?.criador || row?.atribuidor || row?.nome} />
                         )}
-                        {row?.data_pendente && <Criado tipo="date" value={ptDateTime(row?.data_pendente)} />}
-                        {row?.data_libertado && <Criado tipo="date" value={ptDateTime(row?.data_libertado)} />}
+                        {row?.data_pendente && (
+                          <Criado
+                            tipo="date"
+                            value={`${ptDateTime(row?.data_pendente)}${
+                              row?.data_libertado ? ` | ${ptDateTime(row?.data_libertado)}` : ''
+                            }`}
+                          />
+                        )}
                       </TableCell>
                     )}
                   </TableRow>

@@ -14,6 +14,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
 import { setItemValue } from '../../utils/normalizeText';
+import { ptDate, ptDateTime } from '../../utils/formatTime';
 // hooks
 import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -21,6 +22,7 @@ import useTable, { getComparator } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, openModal, selectItem, closeModal } from '../../redux/slices/parametrizacao';
 // Components
+import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -29,9 +31,16 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { AddItem, UpdateItem, ViewItem, Checked } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
+import {
+  LinhaForm,
+  RegraAnexoForm,
+  RegraEstadoForm,
+  NotificacaoForm,
+  AnexoDespesaForm,
+  RegraTransicaoForm,
+} from './ParametrizacaoForm';
 import { Detalhes } from './Detalhes';
 import { applySortFilter, listaTransicoes } from './applySortFilter';
-import { AnexoDespesaForm, LinhaForm, RegraAnexoForm, RegraEstadoForm, RegraTransicaoForm } from './ParametrizacaoForm';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -83,6 +92,25 @@ const TABLE_HEAD_REGRAS_TRANSICOES = [
   { id: '' },
 ];
 
+const TABLE_HEAD_NOTIFICACOES = [
+  { id: 'assunto', label: 'Assunto', align: 'left' },
+  { id: 'corpo', label: 'Corpo', align: 'left' },
+  { id: 'via', label: 'Via', align: 'left' },
+  { id: 'ativo', label: 'Ativo', align: 'center' },
+  { id: 'criado_em', label: 'Registo', align: 'left' },
+  { id: '' },
+];
+
+const TABLE_HEAD_DESTINATARIOS = [
+  { id: 'email', label: 'Email', align: 'left' },
+  { id: 'telefone', label: 'Telefone', align: 'left' },
+  { id: 'data_inicio', label: 'Data inicial', align: 'center' },
+  { id: 'data_termino', label: 'Data final', align: 'center' },
+  { id: 'ativo', label: 'Ativo', align: 'center' },
+  { id: 'criado_em', label: 'Registo', align: 'left' },
+  { id: '' },
+];
+
 // ----------------------------------------------------------------------
 
 ParametrizacaoItemTabs.propTypes = { item: PropTypes.string };
@@ -102,7 +130,8 @@ export default function ParametrizacaoItemTabs({ item }) {
   const [currentTab, setCurrentTab] = useState(
     (item === 'anexos' && 'Anexos') ||
       (item === 'crédito' && 'Linhas de crédito') ||
-      (item === 'pareceres' && 'Estados')
+      (item === 'pareceres' && 'Estados') ||
+      (item === 'notificacoes' && 'Notificações')
   );
   const estadosList = estados?.map((row) => ({ id: row?.id, label: row?.nome }));
   const [estado, setEstado] = useState(
@@ -151,7 +180,7 @@ export default function ParametrizacaoItemTabs({ item }) {
   }, [dispatch, currentTab, estado?.id, cc?.perfil_id, mail]);
 
   useEffect(() => {
-    if (currentTab === 'Transições' && mail && fluxoR?.id && cc?.perfil_id) {
+    if ((currentTab === 'Transições' || currentTab === 'Notificações') && mail && fluxoR?.id && cc?.perfil_id) {
       dispatch(getFromParametrizacao('fluxo', { id: fluxoR?.id, mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, currentTab, fluxoR?.id, cc?.perfil_id, mail]);
@@ -162,6 +191,12 @@ export default function ParametrizacaoItemTabs({ item }) {
       dispatch(getFromParametrizacao('estado', { id: transicao?.estadoInicial, mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, currentTab, transicao, mail, cc?.perfil_id]);
+
+  useEffect(() => {
+    if (currentTab === 'Notificações' && mail && transicao?.id) {
+      dispatch(getFromParametrizacao('notificacoes', { id: transicao?.id, mail }));
+    }
+  }, [dispatch, currentTab, transicao?.id, mail]);
 
   const tabsList = [
     ...(item === 'anexos'
@@ -180,6 +215,12 @@ export default function ParametrizacaoItemTabs({ item }) {
       ? [
           { value: 'Estados', component: <TableItem item="regras estado" /> },
           { value: 'Transições', component: <TableItem item="regras transicao" transicao={transicao} /> },
+        ]
+      : []),
+    ...(item === 'notificacoes'
+      ? [
+          { value: 'Notificações', component: <TableItem item="notificacoes" transicao={transicao} /> },
+          { value: 'Destinatários', component: <TableItem item="destinatarios" transicao={transicao} /> },
         ]
       : []),
   ];
@@ -201,7 +242,7 @@ export default function ParametrizacaoItemTabs({ item }) {
         action={
           <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
             <Stack direction="row" alignItems="center" spacing={1}>
-              {(currentTab === 'Regras' || currentTab === 'Transições') && (
+              {(currentTab === 'Regras' || currentTab === 'Transições' || currentTab === 'Notificações') && (
                 <Autocomplete
                   fullWidth
                   size="small"
@@ -216,7 +257,7 @@ export default function ParametrizacaoItemTabs({ item }) {
                   renderInput={(params) => <TextField {...params} label="Fluxo" sx={{ width: { md: 250 } }} />}
                 />
               )}
-              {currentTab === 'Transições' && (
+              {(currentTab === 'Transições' || currentTab === 'Notificações') && (
                 <Autocomplete
                   fullWidth
                   size="small"
@@ -225,7 +266,7 @@ export default function ParametrizacaoItemTabs({ item }) {
                   value={transicao || null}
                   isOptionEqualToValue={(option, value) => option?.id === value?.id}
                   onChange={(event, newValue) => setItemValue(newValue, setTransicao, 'transicaoRegras', true)}
-                  renderInput={(params) => <TextField {...params} label="Transicao" sx={{ width: { md: 250 } }} />}
+                  renderInput={(params) => <TextField {...params} label="Transição" sx={{ width: { md: 250 } }} />}
                 />
               )}
               {currentTab === 'Estados' && (
@@ -240,7 +281,8 @@ export default function ParametrizacaoItemTabs({ item }) {
                   renderInput={(params) => <TextField {...params} label="Estado" sx={{ width: { md: 250 } }} />}
                 />
               )}
-              {(currentTab === 'Estados' && !estado) || (currentTab === 'Transições' && (!fluxo || !transicao)) ? (
+              {(currentTab === 'Estados' && !estado) ||
+              ((currentTab === 'Transições' || currentTab === 'notificacoes') && (!fluxo || !transicao)) ? (
                 ''
               ) : (
                 <AddItem />
@@ -270,8 +312,18 @@ function TableItem({ item, transicao = null }) {
   const [filter, setFilter] = useState('');
   const { handleCloseModal } = useModal(closeModal());
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { anexos, regrasAnexos, linhas, despesas, regrasEstado, regrasTransicao, selectedItem, isLoading } =
-    useSelector((state) => state.parametrizacao);
+  const {
+    anexos,
+    linhas,
+    despesas,
+    isLoading,
+    regrasEstado,
+    regrasAnexos,
+    selectedItem,
+    notificacoes,
+    destinatarios,
+    regrasTransicao,
+  } = useSelector((state) => state.parametrizacao);
 
   const {
     page,
@@ -303,7 +355,9 @@ function TableItem({ item, transicao = null }) {
       (item === 'anexos' && anexos) ||
       (item === 'linhas' && linhas) ||
       (item === 'despesas' && despesas) ||
+      (item === 'notificacoes' && notificacoes) ||
       (item === 'regras anexos' && regrasAnexos) ||
+      (item === 'destinatarios' && destinatarios) ||
       (item === 'regras estado' &&
         regrasEstado?.map((row) => ({
           ...row,
@@ -331,6 +385,8 @@ function TableItem({ item, transicao = null }) {
                   (item === 'anexos' && TABLE_HEAD_ANEXO) ||
                   (item === 'linhas' && TABLE_HEAD_LINHAS) ||
                   (item === 'despesas' && TABLE_HEAD_DESPESA) ||
+                  (item === 'notificacoes' && TABLE_HEAD_NOTIFICACOES) ||
+                  (item === 'destinatarios' && TABLE_HEAD_DESTINATARIOS) ||
                   (item === 'regras anexos' && TABLE_HEAD_REGRAS_ANEXOS) ||
                   (item === 'regras estado' && TABLE_HEAD_REGRAS_ESTADOS) ||
                   (item === 'regras transicao' && TABLE_HEAD_REGRAS_TRANSICOES) ||
@@ -342,7 +398,8 @@ function TableItem({ item, transicao = null }) {
                   <SkeletonTable
                     row={10}
                     column={
-                      (item === 'regras transicao' && 7) ||
+                      (item === 'notificacoes' && 6) ||
+                      ((item === 'regras transicao' || item === 'destinatarios') && 7) ||
                       ((item === 'regras anexos' || item === 'regras estado' || item === 'anexos') && 5) ||
                       3
                     }
@@ -411,7 +468,36 @@ function TableItem({ item, transicao = null }) {
                               <Checked check={row.ativo} />
                             </TableCell>
                           </>
+                        )) ||
+                        (item === 'notificacoes' && (
+                          <>
+                            <TableCell>{row.assunto}</TableCell>
+                            <TableCell>{row.corpo}</TableCell>
+                            <TableCell>{row.via}</TableCell>
+                            <TableCell align="center">
+                              <Checked check={row.ativo} />
+                            </TableCell>
+                          </>
+                        )) ||
+                        (item === 'destinatarios' && (
+                          <>
+                            <TableCell>{row.email}</TableCell>
+                            <TableCell>{row.telefone}</TableCell>
+                            <TableCell align="center">{ptDate(row.data_inicio)}</TableCell>
+                            <TableCell align="center">{ptDate(row.data_fim)}</TableCell>
+                            <TableCell align="center">
+                              <Checked check={row.ativo} />
+                            </TableCell>
+                          </>
                         ))}
+                      {(item === 'notificacoes' || item === 'destinatarios') && (
+                        <TableCell width={10}>
+                          {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
+                          {row?.criador && <Criado tipo="user" value={row.criador} />}
+                          {row?.modificado_em && <Criado tipo="time" value={ptDateTime(row.modificado_em)} />}
+                          {row?.modificador && <Criado tipo="user" value={row.modificador} />}
+                        </TableCell>
+                      )}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.75} justifyContent="right">
                           {item !== 'regras estado' && item !== 'regras transicao' && <UpdateItem dados={row} />}
@@ -448,7 +534,8 @@ function TableItem({ item, transicao = null }) {
         (item === 'regras anexos' && <RegraAnexoForm onCancel={handleCloseModal} />) ||
         (item === 'linhas' && <LinhaForm onCancel={handleCloseModal} />) ||
         (item === 'regras estado' && <RegraEstadoForm onCancel={handleCloseModal} />) ||
-        (item === 'regras transicao' && <RegraTransicaoForm onCancel={handleCloseModal} transicao={transicao} />)}
+        (item === 'regras transicao' && <RegraTransicaoForm onCancel={handleCloseModal} transicao={transicao} />) ||
+        (item === 'notificacoes' && <NotificacaoForm onCancel={handleCloseModal} transicao={transicao} />)}
     </>
   );
 }

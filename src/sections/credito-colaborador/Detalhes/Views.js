@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 // @mui
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
@@ -8,15 +7,14 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
-import { getFile } from '../../../utils/getFile';
 import { fDateTime } from '../../../utils/formatTime';
 // redux
 import { getFromCC } from '../../../redux/slices/cc';
 import { useDispatch, useSelector } from '../../../redux/store';
 // components
-import MyAvatar from '../../../components/MyAvatar';
 import Scrollbar from '../../../components/Scrollbar';
 import { SearchNotFound } from '../../../components/table';
+import { ColaboradorInfo } from '../../../components/Panel';
 
 // ----------------------------------------------------------------------
 
@@ -51,20 +49,11 @@ export default function Views() {
               <Accordion key={`view_${index}`} expanded={accord === row.perfilId} onChange={handleAccord(row.perfilId)}>
                 <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1, pr: 2 }}>
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                      <MyAvatar
-                        alt={colaborador?.perfil?.displayName}
-                        src={getFile('colaborador', colaborador?.foto_disk)}
-                      />
-                      <Box>
-                        <Typography variant="body1">
-                          {colaborador?.perfil?.displayName || `Perfil: ${row.perfilId}`}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {colaborador?.uo?.label}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                    <ColaboradorInfo
+                      foto={colaborador?.foto_disk}
+                      label={colaborador?.uo?.label}
+                      nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
+                    />
                     <Typography sx={{ color: 'text.secondary' }}>{row?.views?.length}</Typography>
                   </Stack>
                 </AccordionSummary>

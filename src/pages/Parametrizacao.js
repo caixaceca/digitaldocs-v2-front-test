@@ -46,6 +46,7 @@ export default function Parametrizacao() {
               { value: 'Crédito', component: <ParametrizacaoItemTabs item="crédito" /> },
               { value: 'Pareceres', component: <ParametrizacaoItemTabs item="pareceres" /> },
               { value: 'Motivos pendências', component: <ParametrizacaoItem item="motivos" /> },
+              { value: 'Notificações', component: <ParametrizacaoItemTabs item="notificacoes" /> },
             ]
           : []),
       ] || [],

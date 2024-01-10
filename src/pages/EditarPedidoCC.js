@@ -86,8 +86,7 @@ export default function EditarPedidoCC() {
           <>
             {pedidoCC ? (
               <>
-                {/* {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id ? ( */}
-                {2 / 2 === 1 ? (
+                {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id ? (
                   <PedidoForm dados={pedidoCC} />
                 ) : (
                   <RoleBasedGuard

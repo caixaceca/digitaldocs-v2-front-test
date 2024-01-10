@@ -29,6 +29,7 @@ import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
+import { SearchNotFoundSmall } from '../../components/table';
 import { Fechar, DialogButons } from '../../components/Actions';
 import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
 
@@ -326,101 +327,115 @@ export function Detalhes({ closeModal }) {
           </Stack>
         ) : (
           <>
-            <List>
-              <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                <Typography variant="subtitle1">Dados</Typography>
-              </ListItem>
-              {selectedItem?.tipo && <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />}
-              {selectedItem?.numero && <TextItem title="Nº do cartão:" text={selectedItem?.numero?.substring(9, 15)} />}
-              {selectedItem?.data_emissao && (
-                <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
-              )}
-              {bDomicilio && (
-                <TextItem title="Balcão de domicílio:" text={`${bDomicilio?.label} (${bDomicilio?.balcao})`} />
-              )}
-              {bEmissao && <TextItem title="Balcão de emissão:" text={`${bEmissao?.label} (${bEmissao?.balcao})`} />}
-              {bEntrega && (
-                <TextItem
-                  title="Balcão de entrega:"
-                  text={`${bEntrega?.label} (${bEntrega?.balcao})`}
-                  text1={
-                    bEntregaOriginal && selectedItem?.balcao_entrega !== selectedItem?.balcao_entrega_original ? (
-                      <Typography>ORIGINAL: {`${bEntregaOriginal?.label} (${bEntregaOriginal?.balcao})`}</Typography>
-                    ) : null
-                  }
-                />
-              )}
-              {selectedItem?.cliente && <TextItem title="Nº cliente:" text={selectedItem.cliente} />}
-              {selectedItem?.nome && <TextItem title="Nome:" text={selectedItem.nome} />}
-            </List>
-            <List>
-              <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                <Typography variant="subtitle1">Confirmação de receção</Typography>
-              </ListItem>
-              {selectedItem?.data_rececao_sisp && (
-                <TextItem title="Data recebido da SISP:" text={ptDate(selectedItem?.data_rececao_sisp)} />
-              )}
-              <TextItem
-                title="Confirmação DOP-CE:&nbsp;"
-                label={
-                  <Label
-                    variant="ghost"
-                    sx={{ py: 1.5, typography: 'subtitle2' }}
-                    color={selectedItem?.emissao_validado ? 'success' : 'error'}
-                  >
-                    {selectedItem?.emissao_validado ? 'Sim' : 'Não'}
-                  </Label>
-                }
-                text1={
-                  selectedItem?.emissao_validado ? (
-                    <Stack spacing={0.5} sx={{ mt: 1 }}>
-                      {selectedItem?.emissao_validado_por && (
-                        <Criado tipo="user" value={selectedItem?.emissao_validado_por} />
-                      )}
-                      {selectedItem?.emissao_validado_em && (
-                        <Criado tipo="date" value={ptDateTime(selectedItem?.emissao_validado_em)} />
-                      )}
-                      {selectedItem?.nota_emissao && <Criado tipo="note" value={selectedItem?.nota_emissao} />}
-                    </Stack>
-                  ) : null
-                }
-              />
-              <TextItem
-                title="Confirmação Agência:"
-                label={
-                  <Label
-                    variant="ghost"
-                    sx={{ py: 1.5, typography: 'subtitle2' }}
-                    color={selectedItem?.rececao_validado ? 'success' : 'error'}
-                  >
-                    {selectedItem?.rececao_validado ? 'Sim' : 'Não'}
-                  </Label>
-                }
-                text1={
-                  selectedItem?.rececao_validado ? (
-                    <Stack spacing={0.5} sx={{ mt: 1 }}>
-                      {selectedItem?.rececao_validado_por && (
-                        <Criado tipo="user" value={selectedItem?.rececao_validado_por} />
-                      )}
-                      {selectedItem?.rececao_validado_em && (
-                        <Criado tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />
-                      )}
-                      {selectedItem?.nota_rececao && <Criado tipo="note" value={selectedItem?.nota_rececao} />}
-                    </Stack>
-                  ) : null
-                }
-              />
-            </List>
-            <List>
-              <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                <Typography variant="subtitle1">Registo</Typography>
-              </ListItem>
-              {selectedItem?.criado_em && <TextItem title="Criado em:" text={ptDateTime(selectedItem.criado_em)} />}
-              {selectedItem?.modificado_em && (
-                <TextItem title="Modificado em:" text={ptDateTime(selectedItem.modificado_em)} />
-              )}
-              {selectedItem?.modificado_por && <TextItem title="Modificado por:" text={selectedItem.modificado_por} />}
-            </List>
+            {selectedItem ? (
+              <>
+                <List>
+                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+                    <Typography variant="subtitle1">Dados</Typography>
+                  </ListItem>
+                  {selectedItem?.tipo && <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />}
+                  {selectedItem?.numero && (
+                    <TextItem title="Nº do cartão:" text={selectedItem?.numero?.substring(9, 15)} />
+                  )}
+                  {selectedItem?.data_emissao && (
+                    <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
+                  )}
+                  {bDomicilio && (
+                    <TextItem title="Balcão de domicílio:" text={`${bDomicilio?.label} (${bDomicilio?.balcao})`} />
+                  )}
+                  {bEmissao && (
+                    <TextItem title="Balcão de emissão:" text={`${bEmissao?.label} (${bEmissao?.balcao})`} />
+                  )}
+                  {bEntrega && (
+                    <TextItem
+                      title="Balcão de entrega:"
+                      text={`${bEntrega?.label} (${bEntrega?.balcao})`}
+                      text1={
+                        bEntregaOriginal && selectedItem?.balcao_entrega !== selectedItem?.balcao_entrega_original ? (
+                          <Typography>
+                            ORIGINAL: {`${bEntregaOriginal?.label} (${bEntregaOriginal?.balcao})`}
+                          </Typography>
+                        ) : null
+                      }
+                    />
+                  )}
+                  {selectedItem?.cliente && <TextItem title="Nº cliente:" text={selectedItem.cliente} />}
+                  {selectedItem?.nome && <TextItem title="Nome:" text={selectedItem.nome} />}
+                </List>
+                <List>
+                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+                    <Typography variant="subtitle1">Confirmação de receção</Typography>
+                  </ListItem>
+                  {selectedItem?.data_rececao_sisp && (
+                    <TextItem title="Data recebido da SISP:" text={ptDate(selectedItem?.data_rececao_sisp)} />
+                  )}
+                  <TextItem
+                    title="Confirmação DOP-CE:&nbsp;"
+                    label={
+                      <Label
+                        variant="ghost"
+                        sx={{ py: 1.5, typography: 'subtitle2' }}
+                        color={selectedItem?.emissao_validado ? 'success' : 'error'}
+                      >
+                        {selectedItem?.emissao_validado ? 'Sim' : 'Não'}
+                      </Label>
+                    }
+                    text1={
+                      selectedItem?.emissao_validado ? (
+                        <Stack spacing={0.5} sx={{ mt: 1 }}>
+                          {selectedItem?.emissao_validado_por && (
+                            <Criado tipo="user" value={selectedItem?.emissao_validado_por} />
+                          )}
+                          {selectedItem?.emissao_validado_em && (
+                            <Criado tipo="date" value={ptDateTime(selectedItem?.emissao_validado_em)} />
+                          )}
+                          {selectedItem?.nota_emissao && <Criado tipo="note" value={selectedItem?.nota_emissao} />}
+                        </Stack>
+                      ) : null
+                    }
+                  />
+                  <TextItem
+                    title="Confirmação Agência:"
+                    label={
+                      <Label
+                        variant="ghost"
+                        sx={{ py: 1.5, typography: 'subtitle2' }}
+                        color={selectedItem?.rececao_validado ? 'success' : 'error'}
+                      >
+                        {selectedItem?.rececao_validado ? 'Sim' : 'Não'}
+                      </Label>
+                    }
+                    text1={
+                      selectedItem?.rececao_validado ? (
+                        <Stack spacing={0.5} sx={{ mt: 1 }}>
+                          {selectedItem?.rececao_validado_por && (
+                            <Criado tipo="user" value={selectedItem?.rececao_validado_por} />
+                          )}
+                          {selectedItem?.rececao_validado_em && (
+                            <Criado tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />
+                          )}
+                          {selectedItem?.nota_rececao && <Criado tipo="note" value={selectedItem?.nota_rececao} />}
+                        </Stack>
+                      ) : null
+                    }
+                  />
+                </List>
+                <List>
+                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+                    <Typography variant="subtitle1">Registo</Typography>
+                  </ListItem>
+                  {selectedItem?.criado_em && <TextItem title="Criado em:" text={ptDateTime(selectedItem.criado_em)} />}
+                  {selectedItem?.modificado_em && (
+                    <TextItem title="Modificado em:" text={ptDateTime(selectedItem.modificado_em)} />
+                  )}
+                  {selectedItem?.modificado_por && (
+                    <TextItem title="Modificado por:" text={selectedItem.modificado_por} />
+                  )}
+                </List>
+              </>
+            ) : (
+              <SearchNotFoundSmall message="Cartão não encontrado..." />
+            )}
           </>
         )}
       </DialogContent>

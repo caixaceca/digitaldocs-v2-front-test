@@ -45,10 +45,13 @@ export default function EntidadesGarantias({ item, dados }) {
               onChange={handleAccord(`${item}_${index}`)}
             >
               <AccordionSummary expandIcon={<KeyboardArrowDownIcon />} sx={{ py: 0.75 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1, pr: 2 }}>
+                <Stack direction="row" justifyContent="left" alignItems="center" sx={{ pr: 2 }} spacing={1}>
                   <Typography variant="subtitle1">
                     {item === 'entidades' ? `${row?.nome} ${row?.entidade ? ` - ${row?.entidade}` : ''}` : row?.tipo}
                   </Typography>
+                  {item === 'garantias' && (
+                    <Label color={row?.ativo ? 'success' : 'error'}>{row?.ativo ? 'Ativo' : 'Inativo'}</Label>
+                  )}
                 </Stack>
               </AccordionSummary>
               <AccordionDetails>
@@ -80,12 +83,6 @@ export default function EntidadesGarantias({ item, dados }) {
                       </>
                     ) : (
                       <>
-                        <TextItem
-                          title="Estado:"
-                          label={
-                            <Label color={row?.ativo ? 'success' : 'default'}>{row?.ativo ? 'Ativo' : 'Inativo'}</Label>
-                          }
-                        />
                         {row?.tipo === 'Fiança' && (
                           <TextItem
                             title="Colaborador da Caixa:"
@@ -104,7 +101,7 @@ export default function EntidadesGarantias({ item, dados }) {
                           text={
                             <>
                               <Criado value={row?.criador} />
-                              <Criado tipo="date" value={ptDateTime(row?.criado_em)} />
+                              <Criado tipo="data" value={ptDateTime(row?.criado_em)} />
                             </>
                           }
                         />
@@ -114,7 +111,7 @@ export default function EntidadesGarantias({ item, dados }) {
                             text={
                               <>
                                 {row?.modificador && <Criado value={row?.modificador} />}
-                                {row?.modificado_em && <Criado tipo="date" value={ptDateTime(row?.modificado_em)} />}
+                                {row?.modificado_em && <Criado tipo="data" value={ptDateTime(row?.modificado_em)} />}
                               </>
                             }
                           />

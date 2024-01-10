@@ -37,10 +37,10 @@ export function entidadesParse(entidades) {
 
 // ----------------------------------------------------------------------
 
-export function noDados() {
+export function noDados(vazio) {
   return (
     <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-      Não identificado
+      {vazio ? '--' : 'Não identificado'}
     </Typography>
   );
 }

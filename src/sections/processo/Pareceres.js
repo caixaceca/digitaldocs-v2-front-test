@@ -21,7 +21,6 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 // utils
-import { getFile } from '../../utils/getFile';
 import { newLineText } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { getFileThumb, b64toBlob } from '../../utils/getFileFormat';
@@ -40,8 +39,8 @@ import {
 } from '../../redux/slices/digitaldocs';
 // components
 import Label from '../../components/Label';
-import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
+import { ColaboradorInfo } from '../../components/Panel';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
 //
@@ -196,22 +195,11 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
                     {row?.parecer ? (
                       <>
                         <Stack spacing={3} direction="row" alignItems="center" justifyContent="space-between">
-                          <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <MyAvatar
-                              alt={criador?.perfil?.displayName}
-                              src={getFile('colaborador', criador?.foto_disk)}
-                            />
-                            <Box>
-                              <Typography variant="body2" noWrap>
-                                {criador?.perfil?.displayName} ({criador?.uo?.label})
-                              </Typography>
-                              {row?.data_parecer && (
-                                <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
-                                  {ptDateTime(row.data_parecer)}
-                                </Typography>
-                              )}
-                            </Box>
-                          </Stack>
+                          <ColaboradorInfo
+                            foto={criador?.foto_disk}
+                            label={row?.data_parecer ? ptDateTime(row.data_parecer) : ''}
+                            nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
+                          />
                           {podeDarParecer(row?.estado_id) && !row?.validado && (
                             <Stack direction="row" spacing={1}>
                               <Tooltip title="VALIDAR" arrow>

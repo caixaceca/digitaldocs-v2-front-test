@@ -217,7 +217,7 @@ export default function TableProcessos({ from }) {
                           {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
                             <Pendente handleClick={() => handlePendente(row)} />
                           )}
-                          <ViewItem handleClick={() => handleView(row?.id, row?.assunto === 'Crédito Colaborador')} />
+                          <ViewItem handleClick={() => handleView(row?.id, row?.credito_colaborador)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

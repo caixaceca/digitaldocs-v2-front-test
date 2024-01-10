@@ -40,6 +40,7 @@ export default function DadosGerais() {
   const credito = pedidoCC?.credito || null;
   const situacao = pedidoCC?.credito?.situacao || '';
   const uo = uos?.find((row) => Number(row?.id) === pedidoCC?.uo_id);
+  const colabAR = colaboradores?.find((row) => row?.perfil_id === pedidoCC?.estados?.[0]?.perfil_id);
   const balcaoDomicilio = uos?.find((row) => Number(row?.balcao) === Number(pedidoCC?.balcao_domicilio));
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === pedidoCC?.criador?.toLowerCase());
   return (
@@ -53,7 +54,7 @@ export default function DadosGerais() {
           ) : (
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <Grid container spacing={3}>
+                <Grid container spacing={3} alignItems="center">
                   <DetailItem icon={<NumbersIcon />} title="Nº de entrada" text={pedidoCC?.n_entrada?.toString()} />
                   <DetailItem icon={<AbcOutlinedIcon />} title="Assunto" text={pedidoCC?.assunto} />
                   <DetailItem icon={<PushPinOutlinedIcon />} title="Estado atual" text={pedidoCC?.ultimo_estado} />
@@ -66,16 +67,16 @@ export default function DadosGerais() {
                   )}
                   {pedidoCC?.criado_em && (
                     <DetailItem
-                      icon={<EventOutlinedIcon />}
                       title="Criado em:"
+                      icon={<EventOutlinedIcon />}
                       text={ptDateTime(pedidoCC?.criado_em)}
                     />
                   )}
                   {criador?.perfil?.displayName && (
                     <DetailItem
-                      icon={<AccountCircleOutlinedIcon />}
                       title="Criado por"
                       text={criador?.perfil?.displayName}
+                      icon={<AccountCircleOutlinedIcon />}
                     />
                   )}
                   {pedidoCC?.estado_origem && (
@@ -121,6 +122,28 @@ export default function DadosGerais() {
                   )}
                 </Grid>
               </Grid>
+
+              {pedidoCC?.estados?.length === 1 &&
+                pedidoCC?.estados?.[0]?.pareceres?.length === 0 &&
+                (pedidoCC?.pendente || pedidoCC?.afeto || pedidoCC?.preso) && (
+                  <Grid item xs={12}>
+                    <Grid container spacing={3} alignItems="center">
+                      {pedidoCC?.pendente && (
+                        <DetailLabel label="Pendente" divide={pedidoCC?.afeto || pedidoCC?.preso} />
+                      )}
+                      {colabAR && pedidoCC?.preso && (
+                        <DetailLabel label="Preso" colaborador={colabAR} divide={pedidoCC?.pendente} />
+                      )}
+                      {colabAR && pedidoCC?.afeto && !pedidoCC?.preso && (
+                        <DetailLabel
+                          label="Afeto"
+                          colaborador={colabAR}
+                          divide={pedidoCC?.pendente || pedidoCC?.preso}
+                        />
+                      )}
+                    </Grid>
+                  </Grid>
+                )}
 
               {pedidoCC?.observacao && (
                 <Grid item xs={12}>
@@ -212,7 +235,7 @@ export default function DadosGerais() {
 
 // ----------------------------------------------------------------------
 
-DetailItem.propTypes = { title: PropTypes.string, text: PropTypes.string, icon: PropTypes.node };
+DetailItem.propTypes = { icon: PropTypes.node, text: PropTypes.string, title: PropTypes.string };
 
 function DetailItem({ title, text, icon }) {
   return (
@@ -225,7 +248,7 @@ function DetailItem({ title, text, icon }) {
             display: 'flex',
             borderRadius: '50%',
             color: 'success.main',
-            backgroundColor: (theme) => `${alpha(theme.palette.primary.main, 0.125)}`,
+            backgroundColor: (theme) => `${alpha(theme.palette.text.primary, 0.1)}`,
           }}
         >
           {icon}
@@ -236,6 +259,37 @@ function DetailItem({ title, text, icon }) {
           </Typography>
           <Typography>{text}</Typography>
         </Box>
+      </Stack>
+    </Grid>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DetailLabel.propTypes = { label: PropTypes.string, divide: PropTypes.bool, colaborador: PropTypes.object };
+
+function DetailLabel({ label, divide, colaborador = null }) {
+  return (
+    <Grid item xs={12} sm={divide ? 6 : 12}>
+      <Stack>
+        <Label
+          sx={{ typography: 'body1', p: 2, textTransform: 'none' }}
+          color={
+            (label === 'Pendente' && 'warning') || (label === 'Afeto' && 'info') || (label === 'Preso' && 'success')
+          }
+        >
+          {(label === 'Pendente' && 'Processo pendente') ||
+            (label === 'Afeto' && (
+              <>
+                Este processo foi atribuído a<b>&nbsp;{colaborador?.perfil?.displayName}</b>
+              </>
+            )) ||
+            (label === 'Preso' && (
+              <>
+                <b>{colaborador?.perfil?.displayName}</b>&nbsp;está trabalhando neste processo
+              </>
+            ))}
+        </Label>
       </Stack>
     </Grid>
   );

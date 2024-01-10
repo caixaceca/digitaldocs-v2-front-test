@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 // @mui
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -28,7 +27,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
-import { getFile } from '../../utils/getFile';
 import { newLineText } from '../../utils/normalizeText';
 import { ptDateTime, fDistance, fToNow } from '../../utils/formatTime';
 // hooks
@@ -37,9 +35,9 @@ import useToggle from '../../hooks/useToggle';
 import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
-import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import SvgIconStyle from '../../components/SvgIconStyle';
+import { ColaboradorInfo } from '../../components/Panel';
 
 // ----------------------------------------------------------------------
 
@@ -278,19 +276,11 @@ function Transicao({ row, addConector }) {
             </Stack>
           </Paper>
           <Stack sx={{ p: 2 }}>
-            <Stack direction="row" justifyContent="left" alignItems="center" spacing={1.5}>
-              <MyAvatar alt={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
-              <Box>
-                <Typography variant="body2" noWrap>
-                  {criador?.perfil?.displayName} ({criador?.uo?.label})
-                </Typography>
-                {transicao?.data_transicao && (
-                  <Typography variant="body2" sx={{ color: 'text.secondary', typography: 'body2' }}>
-                    {ptDateTime(transicao.data_transicao)}
-                  </Typography>
-                )}
-              </Box>
-            </Stack>
+            <ColaboradorInfo
+              foto={criador?.foto_disk}
+              nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
+              label={transicao.data_transicao ? ptDateTime(transicao.data_transicao) : ''}
+            />
             {transicao?.observacao && <Typography sx={{ pt: 2 }}>{newLineText(transicao.observacao)}</Typography>}
           </Stack>
         </Paper>
@@ -327,20 +317,11 @@ function Retencao({ historico }) {
             return (
               <TableRow key={item?.preso_em} hover>
                 <TableCell>
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <MyAvatar
-                      alt={colaborador?.perfil?.displayName}
-                      src={getFile('colaborador', colaborador?.foto_disk)}
-                    />
-                    <Box>
-                      <Typography variant="subtitle2" noWrap>
-                        {colaborador?.perfil?.displayName}
-                      </Typography>
-                      <Typography noWrap variant="body2" sx={{ color: 'text.secondary' }}>
-                        {colaborador?.uo?.label}
-                      </Typography>
-                    </Box>
-                  </Stack>
+                  <ColaboradorInfo
+                    foto={colaborador?.foto_disk}
+                    label={colaborador?.uo?.label}
+                    nome={colaborador?.perfil?.displayName}
+                  />
                 </TableCell>
                 <TableCell align="center">{item?.preso_em ? ptDateTime(item?.preso_em) : '--'}</TableCell>
                 <TableCell align="center">{item?.solto_em ? ptDateTime(item?.solto_em) : '--'}</TableCell>

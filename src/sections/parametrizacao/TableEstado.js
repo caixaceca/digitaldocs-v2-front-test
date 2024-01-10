@@ -15,6 +15,7 @@ import { closeModal } from '../../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
+import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -32,7 +33,7 @@ import { TransicaoForm } from './ParametrizacaoForm';
 const TABLE_HEAD_TRANSICOES = [
   { id: 'estado_inicial', label: 'Estado de origem', align: 'left' },
   { id: 'estado_final', label: 'Estado de destino', align: 'left' },
-  { id: 'modo', label: 'Modo', align: 'left' },
+  { id: 'modo', label: 'Modo', align: 'center' },
   { id: 'prazoemdias', label: 'Prazo', align: 'center' },
   { id: 'is_after_devolucao', label: 'Depois devolução', align: 'center' },
   { id: 'is_paralelo', label: 'Paralelo', align: 'center' },
@@ -128,7 +129,9 @@ export default function TableEstado({ tab }) {
                         <>
                           <TableCell>{row.estado_inicial}</TableCell>
                           <TableCell>{row.estado_final}</TableCell>
-                          <TableCell>{row.modo}</TableCell>
+                          <TableCell align="center">
+                            <Label color={row?.modo === 'Seguimento' ? 'success' : 'error'}>{row?.modo}</Label>
+                          </TableCell>
                           <TableCell align="center">
                             {row.prazoemdias > 1 ? `${row.prazoemdias} dias` : `${row.prazoemdias} dia`}
                           </TableCell>

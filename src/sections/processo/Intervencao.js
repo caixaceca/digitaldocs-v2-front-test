@@ -10,7 +10,7 @@ import { podeArquivar, caixaPrincipal, pertencoAoEstado, arquivoAtendimento } fr
 import { useDispatch, useSelector } from '../../redux/store';
 import { updateItem, selectItem } from '../../redux/slices/digitaldocs';
 // hooks
-import useToggle, { useToggle1, useToggle2, useToggle3, useToggle4, useToggle5 } from '../../hooks/useToggle';
+import useToggle, { useToggle1, useToggle3, useToggle4, useToggle5 } from '../../hooks/useToggle';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -18,7 +18,7 @@ import { Pendente } from '../../components/Actions';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
 //
-import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente } from './IntervencaoForm';
+import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente, Abandonar } from './IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -28,7 +28,6 @@ export default function Intervencao({ colaboradoresList }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
@@ -84,11 +83,6 @@ export default function Intervencao({ colaboradoresList }) {
       estado_id: processo?.estado_atual_id,
     };
     dispatch(updateItem('finalizar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'finalizado' }));
-  };
-
-  const handleAbandonar = () => {
-    const formData = { perfilID: perfilId, fluxoID: processo?.fluxo_id, estadoID: processo?.estado_atual_id };
-    dispatch(updateItem('abandonar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'abandonado' }));
   };
 
   const handlePendente = (item) => {
@@ -172,24 +166,12 @@ export default function Intervencao({ colaboradoresList }) {
           </>
         )}
 
-      <Tooltip title="ABANDONAR" arrow>
-        <Fab color="warning" size="small" variant="soft" onClick={onOpen2}>
-          <SvgIconStyle src="/assets/icons/abandonar.svg" />
-        </Fab>
-      </Tooltip>
-      <DialogConfirmar
-        open={open2}
-        onClose={onClose2}
-        isSaving={isSaving}
-        handleOk={handleAbandonar}
-        color="warning"
-        title="Abandonar"
-        desc="abandonar este processo"
-      />
+      <Abandonar isSaving={isSaving} processo={processo} />
+
       {!processo?.ispendente && (
         <>
           <Pendente detail handleClick={() => handlePendente(processo)} />
-          <ColocarPendente from="detalhes" />
+          <ColocarPendente from="processo" />
         </>
       )}
 

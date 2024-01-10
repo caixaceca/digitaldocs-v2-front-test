@@ -7,9 +7,9 @@ import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import ReplyIcon from '@mui/icons-material/Reply';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -40,7 +40,7 @@ import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/pa
 import SvgIconStyle from './SvgIconStyle';
 import DialogConfirmar from './DialogConfirmar';
 
-const wh = { width: 36, height: 36 };
+const wh = { width: 38, height: 38 };
 const whsmall = { width: 30, height: 30 };
 
 // ----------------------------------------------------------------------
@@ -80,11 +80,14 @@ export function DefaultAction({
     <Stack>
       <Tooltip title={label} arrow>
         <Fab size="small" variant="soft" color={color} onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
-          {(icon === 'encaminhar' && <ReplyIcon sx={{ width: small ? 18 : 24, transform: 'scaleX(-1)' }} />) ||
+          {(icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" />) ||
             (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             (icon === 'abandonar' && <LockOpenOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'edit' && <SvgIconStyle src="/assets/icons/editar.svg" sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'add' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'parecer' && <NotesIcon />) ||
             (icon === 'doneAll' && <DoneAllIcon />) ||
             (icon === 'multiple' && <ChecklistOutlinedIcon />)}
         </Fab>
@@ -120,9 +123,14 @@ export function AddItem({ small = false, label = 'Adicionar', handleClick = null
 
 // ----------------------------------------------------------------------
 
-UpdateItem.propTypes = { dados: PropTypes.object, id: PropTypes.number, item: PropTypes.string };
+UpdateItem.propTypes = {
+  id: PropTypes.number,
+  item: PropTypes.string,
+  dados: PropTypes.object,
+  handleClick: PropTypes.func,
+};
 
-export function UpdateItem({ item = '', id = 0, dados = null }) {
+export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null }) {
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
 
@@ -140,19 +148,25 @@ export function UpdateItem({ item = '', id = 0, dados = null }) {
 
   return (
     <Stack>
-      {dados ? (
-        <Tooltip title="Editar" arrow>
-          <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdateByItem()} sx={{ ...wh }}>
-            <SvgIconStyle src="/assets/icons/editar.svg" />
-          </Fab>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Editar" arrow>
-          <Fab size="small" variant="soft" color="warning" onClick={() => handleUpdateById(id)} sx={{ ...wh }}>
-            <SvgIconStyle src="/assets/icons/editar.svg" />
-          </Fab>
-        </Tooltip>
-      )}
+      <Tooltip title="Editar" arrow>
+        <Fab
+          size="small"
+          variant="soft"
+          color="warning"
+          onClick={() => {
+            if (handleClick) {
+              handleClick();
+            } else if (dados) {
+              handleUpdateByItem();
+            } else {
+              handleUpdateById(id);
+            }
+          }}
+          sx={{ ...wh }}
+        >
+          <SvgIconStyle src="/assets/icons/editar.svg" />
+        </Fab>
+      </Tooltip>
     </Stack>
   );
 }

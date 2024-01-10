@@ -14,10 +14,16 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 // redux
-import { createItem } from '../../../redux/slices/cc';
 import { useSelector, useDispatch } from '../../../redux/store';
+import { createItem, updateItem, closeModal } from '../../../redux/slices/cc';
 // components
-import { FormProvider, RHFTextField, RHFAutocompleteObject } from '../../../components/hook-form';
+import {
+  RHFSwitch,
+  FormProvider,
+  RHFTextField,
+  RHFAutocompleteObject,
+  RHFAutocompleteSimple,
+} from '../../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -111,6 +117,95 @@ export function EncaminharForm({ open, destinos, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+export function ParecerForm() {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail } = useSelector((state) => state.intranet);
+  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.cc);
+
+  const formSchema = Yup.object().shape({
+    parecer: Yup.mixed().required('Escolhe o parecer'),
+    descritivo: Yup.string().required('Descreve o parecer'),
+  });
+  const defaultValues = useMemo(
+    () => ({
+      id: selectedItem?.id,
+      validado: selectedItem?.validado,
+      descritivo: selectedItem?.descritivo,
+      parecer:
+        (selectedItem?.descritivo && selectedItem?.parecer_favoravel && 'Favorável') ||
+        (selectedItem?.descritivo && !selectedItem?.parecer_favoravel && 'Não favorável') ||
+        null,
+    }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      dispatch(
+        updateItem(
+          'parecer',
+          JSON.stringify({
+            id: selectedItem?.id,
+            validado: values?.validado,
+            descritivo: values?.descritivo,
+            perfil_id: selectedItem?.perfil_id,
+            parecerfavoravel: values?.parecer === 'Favorável',
+          }),
+          { mail, values, msg: 'Parecer enviado' }
+        )
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const onCancel = () => {
+    dispatch(closeModal());
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+      <DialogTitle>Parecer</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12} sm={6}>
+              <RHFAutocompleteSimple name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <RHFSwitch name="validado" label="Parecer final" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="descritivo" multiline minRows={10} maxRows={15} label="Descritivo" />
+            </Grid>
+          </Grid>
+          <DialogActions sx={{ pb: '0px !important', px: '0px !important' }}>
+            <Box sx={{ flexGrow: 1 }} />
+            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
+              Cancelar
+            </LoadingButton>
+            <LoadingButton type="submit" variant="contained" loading={isSaving}>
+              Enviar
+            </LoadingButton>
+          </DialogActions>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 ArquivarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 
 export function ArquivarForm({ open, onCancel }) {
@@ -126,8 +221,7 @@ export function ArquivarForm({ open, onCancel }) {
       fluxoID: pedidoCC?.fluxo_id,
       estadoID: pedidoCC?.ultimo_estado_id,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pedidoCC]
+    [cc?.perfil?.id, pedidoCC?.fluxo_id, pedidoCC?.ultimo_estado_id]
   );
 
   const methods = useForm({ defaultValues });

@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Fab from '@mui/material/Fab';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
@@ -16,7 +15,6 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
-import { getFile } from '../../utils/getFile';
 import { fDateTime } from '../../utils/formatTime';
 // hooks
 import useToggle from '../../hooks/useToggle';
@@ -24,9 +22,9 @@ import useToggle from '../../hooks/useToggle';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll } from '../../redux/slices/digitaldocs';
 // components
-import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import { SearchNotFound } from '../../components/table';
+import { ColaboradorInfo } from '../../components/Panel';
 //
 import DetalhesProcesso from './DetalhesProcesso';
 
@@ -110,18 +108,12 @@ export default function Versoes({ processoId }) {
                     </Stack>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5}>
-                      <MyAvatar
-                        alt={colaborador?.perfil?.displayName}
-                        src={getFile('colaborador', colaborador?.foto_disk)}
-                      />
-                      <Box>
-                        <Typography variant="body1">{colaborador?.perfil?.displayName}</Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {colaborador?.uo?.label}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                    <ColaboradorInfo
+                      foto={colaborador?.foto_disk}
+                      label={colaborador?.uo?.label}
+                      nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
+                      sx={{ justifyContent: 'center' }}
+                    />
                     <DetalhesProcesso
                       processo={index === 0 ? getNew(row, processo) : getNew(versoes[index - 1], row)}
                     />

@@ -18,7 +18,13 @@ import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 // utils
 import { fYear } from '../utils/formatTime';
-import { temNomeacao, isResponsavelUo, processoMePertence, podeDarParecer } from '../utils/validarAcesso';
+import {
+  temNomeacao,
+  podeDarParecer,
+  isResponsavelUo,
+  findColaboradores,
+  processoMePertence,
+} from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
@@ -67,7 +73,7 @@ export default function Processo() {
   const { done, error, processo, isLoadingP, isOpenModal, isOpenModalDesariquivar } = useSelector(
     (state) => state.digitaldocs
   );
-  const { meusacessos, meusAmbientes, iAmInGrpGerente, colaboradoresEstado } = useSelector(
+  const { meusacessos, meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector(
     (state) => state.parametrizacao
   );
   const perfilId = cc?.perfil_id;
@@ -96,13 +102,10 @@ export default function Processo() {
     ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
     `${PATH_DIGITALDOCS.processos.lista}`;
 
-  const colaboradoresList = [];
-  colaboradoresEstado?.forEach((row) => {
-    const colaborador = colaboradores?.find((colaborador) => colaborador?.perfil_id === row?.perfil_id);
-    if (colaborador) {
-      colaboradoresList.push({ id: colaborador?.perfil_id, label: colaborador?.perfil?.displayName });
-    }
-  });
+  const colaboradoresList = findColaboradores(
+    colaboradores,
+    colaboradoresEstado?.map((row) => row?.perfil_id)
+  );
 
   const idEstado = (item) => {
     if (item === 'devdop') {
@@ -136,7 +139,8 @@ export default function Processo() {
     } else if (done === 'realizada') {
       enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
       handlePrevNext(true);
-    } else if (done === 'processo pendente') {
+    } else if (done === 'Processo adicionado a listagem de pendentes') {
+      enqueueSnackbar('Processo adicionado a listagem de pendentes', { variant: 'success' });
       handlePrevNext(true);
     } else if (done === 'resgatado') {
       enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
@@ -147,9 +151,6 @@ export default function Processo() {
     } else if (done === 'finalizado') {
       enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
       handlePrevNext(true);
-    } else if (done === 'abandonado') {
-      enqueueSnackbar('Processo abandonado com sucesso', { variant: 'success' });
-      navigate(linkNavigate);
     } else if (done === 'solicitado') {
       enqueueSnackbar('Pedido enviado com sucesso', { variant: 'success' });
     } else if (done === 'desarquivado') {
@@ -158,6 +159,9 @@ export default function Processo() {
       navigate(linkNavigate);
     } else if (done === 'processo libertado') {
       enqueueSnackbar('Processo libertado com sucesso', { variant: 'success' });
+    } else if (done === 'Processo abandonado' || done === 'Atribuição eliminada' || done === 'Processo atribuído') {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
+      navigate(linkNavigate);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -201,13 +205,13 @@ export default function Processo() {
         (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
         idEstado('gerencia')?.id
       ) {
-        dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('gerencia')?.id }));
+        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('gerencia')?.id }));
       } else if (processo?.nome === 'Devolução AN' && idEstado('devdop')?.id) {
-        dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('devdop')?.id }));
+        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('devdop')?.id }));
       } else if (processo?.nome === 'Diário' && idEstado('diario')?.id) {
-        dispatch(getItem('colaboradoresEstado', { mail, perfilId, id: idEstado('diario')?.id }));
+        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('diario')?.id }));
       } else if (estadoId) {
-        dispatch(getItem('colaboradoresEstado', { mail, id: estadoId, perfilId }));
+        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, id: estadoId, perfilId }));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -344,24 +348,28 @@ export default function Processo() {
                       )}
                       {!processo?.is_lock && !processo?.in_paralelo_mode && (
                         <>
-                          {processoMePertence(meusAmbientes, processo?.estado_atual_id) && (
-                            <>
-                              {isResponsavel && processo?.nome !== 'Diário' && processo?.nome !== 'Devolução AN' && (
-                                <AtribuirForm
-                                  processoID={processo?.id}
-                                  perfilId={processo?.perfil_id}
-                                  colaboradoresList={colaboradoresList}
-                                />
-                              )}
-                              {(!processo?.perfil_id || processo?.perfil_id === perfilId) && (
-                                <Tooltip title="ACEITAR" arrow>
-                                  <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
-                                    <LockPersonIcon />
-                                  </Fab>
-                                </Tooltip>
-                              )}
-                            </>
+                          {((processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
+                            isResponsavel &&
+                            processo?.nome !== 'Diário' &&
+                            processo?.nome !== 'Devolução AN' &&
+                            !processo?.nome?.includes('Gerência') &&
+                            !processo?.nome?.includes('Caixa Principal')) ||
+                            isAdmin) && (
+                            <AtribuirForm
+                              processoID={processo?.id}
+                              fluxoId={processo?.fluxo_id}
+                              perfilId={processo?.perfil_id}
+                              colaboradoresList={colaboradoresList}
+                            />
                           )}
+                          {processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
+                            (!processo?.perfil_id || processo?.perfil_id === perfilId) && (
+                              <Tooltip title="ACEITAR" arrow>
+                                <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
+                                  <LockPersonIcon />
+                                </Fab>
+                              </Tooltip>
+                            )}
                           {!processo.ispendente &&
                             processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id &&
                             perfilId === processo?.htransicoes?.[0]?.perfil_id &&

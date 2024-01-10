@@ -225,13 +225,6 @@ const slice = createSlice({
       state.processo.perfil_id = action.payload.perfilId;
     },
 
-    atribuirSuccess(state, action) {
-      state.processo.perfil_id = action.payload;
-      if (!action.payload) {
-        state.processo.is_lock = false;
-      }
-    },
-
     createProcessoSuccess(state, action) {
       state.processo = action.payload;
     },
@@ -259,14 +252,27 @@ const slice = createSlice({
 
     confirmarCartaoDopSuccess(state, action) {
       const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
-      state.cartoes[index].confirmacao_dop = true;
-      state.cartoes[index].confirmado_por_dop = action.payload.perfilId;
-      state.cartoes[index].data_confirmacao_dop = format(new Date(), 'yyyy-MM-dd');
+      if (index === 0 || index) {
+        state.cartoes[index].confirmacao_dop = true;
+        state.cartoes[index].confirmado_por_dop = action.payload.perfilId;
+        state.cartoes[index].data_confirmacao_dop = format(new Date(), 'yyyy-MM-dd');
+      }
     },
 
     alterarBalcaopSuccess(state, action) {
       const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
       state.cartoes[index].balcao_entrega = action.payload.balcao;
+    },
+
+    deleteAnexoProcessoSuccess(state, action) {
+      const index = state?.processo?.anexos?.findIndex((row) => row.id === action.payload);
+      if (index === 0 || index) {
+        state.processo.anexos[index].is_ativo = false;
+        state.isOpenModalAnexo = false;
+        state.selectedAnexoId = null;
+        state.previewType = '';
+        state.filePreview = null;
+      }
     },
 
     deleteAnexoParecerSuccess(state, action) {
@@ -279,15 +285,6 @@ const slice = createSlice({
 
     desarquivarProcessoSuccess(state) {
       state.destinosDesarquivamento = [];
-    },
-
-    deleteAnexoProcessoSuccess(state, action) {
-      const index = state.processo.anexos.findIndex((row) => row.id === action.payload);
-      state.processo.anexos[index].is_ativo = false;
-      state.isOpenModalAnexo = false;
-      state.selectedAnexoId = null;
-      state.previewType = '';
-      state.filePreview = null;
     },
 
     selectItem(state, action) {
@@ -827,20 +824,6 @@ export function updateItem(item, dados, params) {
             dados,
             options1
           );
-          if (params?.isPendente) {
-            await axios.patch(
-              `${BASEURLDD}/v1/processos/abandonar/${params?.id}`,
-              JSON.stringify(params?.abandonar),
-              options
-            );
-          }
-          if (params?.atribuir) {
-            await axios.patch(
-              `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
-              '',
-              options
-            );
-          }
           dispatch(slice.actions.updateProcessoSuccess(response?.data?.processo));
           break;
         }
@@ -864,11 +847,10 @@ export function updateItem(item, dados, params) {
         }
         case 'atribuir': {
           await axios.patch(
-            `${BASEURLDD}/v1/processos/afetar/${params?.processoID}?perfilID=${params?.perfilID}&perfilIDAfeto=${params?.perfilIDAfeto}`,
+            `${BASEURLDD}/v1/processos/afetar/${params?.processoID}?perfilID=${params?.perfilID}&perfilIDAfeto=${params?.perfilIDAfeto}&fluxo_id=${params?.fluxoId}`,
             '',
             options
           );
-          dispatch(slice.actions.atribuirSuccess(params?.perfilIDAfeto));
           break;
         }
         case 'cancelar': {
@@ -921,7 +903,7 @@ export function updateItem(item, dados, params) {
           );
           if (params?.atribuir) {
             await axios.patch(
-              `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}`,
+              `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.perfilId}&fluxo_id=${params?.fluxoId}`,
               '',
               options
             );

@@ -165,25 +165,45 @@ const slice = createSlice({
       state.pedidoCC = action.payload;
     },
 
-    aceitarSuccess(state, action) {
+    aceitarProcessoSuccess(state, action) {
       state.pedidoCC.preso = true;
       state.pedidoCC.perfil_id = action.payload?.dados?.perfilId;
       state.destinos = action.payload?.destinos || [];
     },
 
+    parecerSuccess(state, action) {
+      const index = state?.pedidoCC?.estados?.[0]?.pareceres?.findIndex(
+        (row) => Number(row.id) === Number(action.payload.id)
+      );
+      if (index === 0 || index) {
+        state.pedidoCC.estados[0].pareceres[index].validado = action.payload.validado;
+        state.pedidoCC.estados[0].pareceres[index].descritivo = action.payload.descritivo;
+        state.pedidoCC.estados[0].pareceres[index].validado_em = action.payload.validado ? new Date() : null;
+        state.pedidoCC.estados[0].pareceres[index].parecer_favoravel = action.payload?.parecer === 'Favorável';
+      }
+      state.selectedItem = null;
+      state.isOpenModal = false;
+    },
+
     deleteAnexoProcessoSuccess(state, action) {
-      const index = state.pedidoCC.anexos.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      state.pedidoCC.anexos[index].ativo = false;
+      const index = state?.pedidoCC?.anexos?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
+      if (index === 0 || index) {
+        state.pedidoCC.anexos[index].ativo = false;
+      }
     },
 
     deleteDespesaSuccess(state, action) {
-      const index = state.pedidoCC.despesas.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      state.pedidoCC.despesas[index].ativo = false;
+      const index = state?.pedidoCC?.despesas?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
+      if (index === 0 || index) {
+        state.pedidoCC.despesas[index].ativo = false;
+      }
     },
 
     deleteGarantiaSuccess(state, action) {
-      const index = state.pedidoCC.garantias.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      state.pedidoCC.garantias[index].ativo = false;
+      const index = state?.pedidoCC?.garantias?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
+      if (index === 0 || index) {
+        state.pedidoCC.garantias[index].ativo = false;
+      }
     },
 
     deleteEntidadeSuccess(state, action) {
@@ -191,8 +211,12 @@ const slice = createSlice({
     },
 
     deleteResponsabilidadeSuccess(state, action) {
-      const index = state.pedidoCC.outros_creditos.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      state.pedidoCC.outros_creditos[index].ativo = false;
+      const index = state?.pedidoCC?.outros_creditos?.findIndex(
+        (row) => Number(row.id) === Number(action.payload.itemId)
+      );
+      if (index === 0 || index) {
+        state.pedidoCC.outros_creditos[index].ativo = false;
+      }
     },
 
     deleteAnexoGarantiaSuccess(state, action) {
@@ -204,7 +228,7 @@ const slice = createSlice({
     },
 
     deleteAnexoEntidadeSuccess(state, action) {
-      const index = state.pedidoCC.entidades.findIndex((row) => Number(row.id) === Number(action.payload.garantiaId));
+      const index = state.pedidoCC.entidades.findIndex((row) => Number(row.id) === Number(action.payload.entidadeId));
       const index1 = state.pedidoCC.entidades[index].anexos.findIndex(
         (row) => Number(row.id) === Number(action.payload.itemId)
       );
@@ -381,15 +405,6 @@ export function createItem(item, dados, params) {
       const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
       // const options1 = { headers: { 'content-type': 'multipart/form-data', cc: params?.mail } };
       switch (item) {
-        case 'resgatar processo': {
-          const response = await axios.post(
-            `${BASEURLCC}/v1/creditos/funcionario/resgate/${params?.id}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.resgatarProcessoSucess(response.data));
-          break;
-        }
         case 'encaminhar': {
           await axios.post(
             `${BASEURLCC}/v1/creditos/funcionario/encaminhar/${params?.perfilId}/${params?.id}/${params?.fluxoId}`,
@@ -446,7 +461,7 @@ export function updateItem(item, dados, params) {
         }
         case 'parecer': {
           await axios.patch(`${BASEURLCC}/v1/creditos/funcionario/dar_parecer`, dados, options);
-          // dispatch(slice.actions.getColaboradorSuccess(response.data));
+          dispatch(slice.actions.parecerSuccess(params?.values));
           break;
         }
         case 'responsabilidade': {
@@ -525,7 +540,7 @@ export function updateItem(item, dados, params) {
             `${BASEURLCC}/v1/creditos/funcionario/destinos/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
-          dispatch(slice.actions.aceitarSuccess({ dados: params, destinos: destinos.data.objeto }));
+          dispatch(slice.actions.aceitarProcessoSuccess({ dados: params, destinos: destinos.data.objeto }));
           break;
         }
         case 'abandonar': {
@@ -533,8 +548,12 @@ export function updateItem(item, dados, params) {
           break;
         }
         case 'resgatar': {
-          const response = await axios.patch(`${BASEURLDD}/v1/processos/resgate/${params?.id}`, dados, options);
-          dispatch(slice.actions.getProcessoSuccess(response.data));
+          const response = await axios.post(
+            `${BASEURLCC}/v1/creditos/funcionario/resgate/${params?.id}`,
+            dados,
+            options
+          );
+          dispatch(slice.actions.getProcessoSuccess(response.data.objeto));
           break;
         }
 

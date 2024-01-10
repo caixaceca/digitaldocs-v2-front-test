@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
@@ -12,7 +10,6 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { getFile } from '../../utils/getFile';
 import { normalizeText } from '../../utils/normalizeText';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
 // hooks
@@ -22,9 +19,9 @@ import { useSelector } from '../../redux/store';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
-import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import { ViewItem } from '../../components/Actions';
+import { ColaboradorInfo } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
@@ -106,17 +103,7 @@ export default function Acessos() {
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow key={row?.id} hover>
                         <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <MyAvatar alt={row?.nome} src={getFile('colaborador', row?.foto_disk)} />
-                            <Stack sx={{ ml: 2 }}>
-                              <Typography variant="subtitle2" noWrap>
-                                {row?.nome}
-                              </Typography>
-                              <Typography noWrap variant="body2" sx={{ color: (theme) => theme.palette.text.disabled }}>
-                                {row?.perfil?.mail}
-                              </Typography>
-                            </Stack>
-                          </Box>
+                          <ColaboradorInfo foto={row?.foto_disk} label={row?.perfil?.mail} nome={row?.nome} />
                         </TableCell>
                         <TableCell align="left">
                           <Typography variant="subtitle2"> {row?.uo?.label}</Typography>

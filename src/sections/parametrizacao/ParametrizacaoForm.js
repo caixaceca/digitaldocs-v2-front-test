@@ -25,6 +25,7 @@ import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
 // components
 import {
+  RHFEditor,
   RHFSwitch,
   FormProvider,
   RHFTextField,
@@ -1406,6 +1407,80 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
             </Grid>
             <DialogButons isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+NotificacaoForm.propTypes = { transicao: PropTypes.number, onCancel: PropTypes.func };
+
+export function NotificacaoForm({ transicao, onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, isOpenModal, selectedItem, estado } = useSelector((state) => state.parametrizacao);
+
+  const formSchema = Yup.object().shape({
+    corpo: Yup.string().required('Corpo não pode ficar vazio'),
+    via: Yup.mixed().required('Seleciona a via de notificação'),
+    assunto: Yup.string().required('Assunto não pode ficar vazio'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      via: selectedItem?.via || null,
+      corpo: selectedItem?.corpo || '',
+      assunto: selectedItem?.assunto || '',
+      transicao_id: selectedItem?.transicao_id || transicao?.id,
+    }),
+    [selectedItem, transicao?.id]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal, selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      dispatch(
+        createItem(
+          'regras transicao',
+          JSON.stringify(values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))),
+          { mail, transicaoId: transicao?.id, msg: 'Regra adicionada', estadoId: estado?.id }
+        )
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+      <DialogTitle>{isEdit ? 'Editar notificação' : 'Adicionar notificação'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1">{transicao?.label}</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <RHFAutocompleteSimple name="via" label="Via" options={['Email', 'SMS']} />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="assunto" label="Assunto" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFEditor simple name="corpo" />
+            </Grid>
+          </Grid>
+          <DialogButons isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>

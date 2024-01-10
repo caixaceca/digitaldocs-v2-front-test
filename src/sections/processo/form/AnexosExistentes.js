@@ -60,7 +60,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
     }
   };
 
-  return (
+  return anexosAtivos?.length > 0 ? (
     <>
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Anexos existentes
@@ -97,5 +97,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
         handleOk={() => handleDelete(selectedAnexoID)}
       />
     </>
+  ) : (
+    ''
   );
 }

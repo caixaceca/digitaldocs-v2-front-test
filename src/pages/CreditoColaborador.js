@@ -6,30 +6,37 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
+// utils
+import { temNomeacao, processoMePertence, findColaboradores } from '../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
 import useSettings from '../hooks/useSettings';
 // hooks
-import useToggle, { useToggle1, useToggle2, useToggle3 } from '../hooks/useToggle';
+import { getComparator, applySort } from '../hooks/useTable';
+import useToggle, { useToggle1, useToggle3 } from '../hooks/useToggle';
 // redux
+import { selectItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromCC, updateItem } from '../redux/slices/cc';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // components
 import Page from '../components/Page';
 import { TabCard } from '../components/TabsWrapper';
 import DialogConfirmar from '../components/DialogConfirmar';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import { UpdateItem, DefaultAction } from '../components/Actions';
+import { UpdateItem, DefaultAction, Pendente } from '../components/Actions';
 // sections
-import { EncaminharForm, ArquivarForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
 import {
   Views,
+  Pareceres,
   Transicoes,
   DadosGerais,
   TableDetalhes,
   EntidadesGarantias,
 } from '../sections/credito-colaborador/Detalhes';
+import { Abandonar, ColocarPendente, AtribuirForm } from '../sections/processo/IntervencaoForm';
+import { EncaminharForm, ArquivarForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -42,11 +49,16 @@ export default function CreditoColaborador() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { pedidoCC, destinos, done, error, isSaving } = useSelector((state) => state.cc);
   const [currentTab, setCurrentTab] = useState('Dados gerais');
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { pedidoCC, destinos, done, error, isSaving } = useSelector((state) => state.cc);
+  const { meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
+  const isResponsavel = temNomeacao(cc) || iAmInGrpGerente;
+  const colaboradoresList = findColaboradores(
+    colaboradores,
+    colaboradoresEstado?.map((row) => row?.perfil_id)
+  );
 
   const fromArquivo = params?.get?.('from') === 'arquivo';
   const fromProcurar = params?.get?.('from') === 'procurar';
@@ -62,7 +74,13 @@ export default function CreditoColaborador() {
   useEffect(() => {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      if (done === 'Processo encaminhado' || done === 'Processo abandonado' || done === 'Processo arquivado') {
+      if (
+        done === 'Processo encaminhado' ||
+        done === 'Processo abandonado' ||
+        done === 'Processo arquivado' ||
+        done === 'Atribuição eliminada' ||
+        done === 'Processo atribuído'
+      ) {
         navigate(linkNavigate);
       }
     }
@@ -82,10 +100,19 @@ export default function CreditoColaborador() {
       ...(pedidoCC?.entidades?.length > 0
         ? [{ value: 'Entidades', component: <EntidadesGarantias item="entidades" dados={pedidoCC?.entidades} /> }]
         : []),
-
       ...(pedidoCC?.anexos?.length > 0 ? [{ value: 'Anexos', component: <TableDetalhes item="anexos" /> }] : []),
       ...(pedidoCC?.garantias?.length > 0
-        ? [{ value: 'Garantias', component: <EntidadesGarantias item="garantias" dados={pedidoCC?.garantias} /> }]
+        ? [
+            {
+              value: 'Garantias',
+              component: (
+                <EntidadesGarantias
+                  item="garantias"
+                  dados={applySort(pedidoCC?.garantias, getComparator('desc', 'ativo'))}
+                />
+              ),
+            },
+          ]
         : []),
       ...(pedidoCC?.despesas?.length > 0 ? [{ value: 'Despesas', component: <TableDetalhes item="despesas" /> }] : []),
       ...(pedidoCC?.outros_creditos?.length > 0
@@ -111,6 +138,15 @@ export default function CreditoColaborador() {
     }
   }, [dispatch, id, cc?.perfil_id, mail]);
 
+  useEffect(() => {
+    if (mail && podeAtribuir() && pedidoCC?.ultimo_estado_id && cc?.perfil_id) {
+      dispatch(
+        getFromParametrizacao('colaboradoresEstado', { mail, id: pedidoCC?.ultimo_estado_id, perfilId: cc?.perfil_id })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mail, dispatch, pedidoCC]);
+
   const handleAceitar = () => {
     dispatch(
       updateItem(
@@ -125,27 +161,13 @@ export default function CreditoColaborador() {
     );
   };
 
-  const handleAbandonar = () => {
-    dispatch(
-      updateItem(
-        'abandonar',
-        JSON.stringify({
-          perfilID: cc?.perfil_id,
-          fluxoID: pedidoCC?.fluxo_id,
-          estadoID: pedidoCC?.ultimo_estado_id,
-        }),
-        { id: pedidoCC?.id, mail, msg: 'Processo abandonado' }
-      )
-    );
-  };
-
   const handleResgatar = () => {
     dispatch(
       updateItem(
         'resgatar',
         JSON.stringify({
           perfil_id: cc?.perfil_id,
-          fluxoID: pedidoCC?.fluxo_id,
+          fluxo_id: pedidoCC?.fluxo_id,
           estado_id: pedidoCC?.ultimo_estado_id,
         }),
         { id: pedidoCC?.id, mail, msg: 'Processo resgatado' }
@@ -154,6 +176,15 @@ export default function CreditoColaborador() {
     onClose();
   };
 
+  const handlePendente = (item) => {
+    dispatch(selectItem(item));
+  };
+
+  function podeAtribuir() {
+    return (
+      !pedidoCC?.preso && ((processoMePertence(meusAmbientes, pedidoCC?.ultimo_estado_id) && isResponsavel) || isAdmin)
+    );
+  }
   return (
     <Page title="Detalhes do pedido">
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -181,44 +212,61 @@ export default function CreditoColaborador() {
               <Stack direction="row" spacing={0.75}>
                 {!pedidoCC?.preso && (
                   <>
-                    <DefaultAction icon="aceitar" label="Aceitar" handleClick={handleAceitar} />
-                    <DefaultAction icon="resgatar" label="Resgatar" color="warning" handleClick={onOpen} />
+                    {processoMePertence(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
+                      (!pedidoCC?.afeto || (pedidoCC?.afeto && pedidoCC?.estados?.[0]?.perfil_id === cc?.perfil_id)) &&
+                      pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
+                        <DefaultAction icon="aceitar" label="Aceitar" handleClick={handleAceitar} />
+                      )}
+                    {!pedidoCC?.pendente && pedidoCC?.estados?.length === 1 && (
+                      <>
+                        <DefaultAction icon="resgatar" label="Resgatar" color="warning" handleClick={onOpen} />
+                        <DialogConfirmar
+                          open={open}
+                          onClose={onClose}
+                          isSaving={isSaving}
+                          handleOk={handleResgatar}
+                          color="warning"
+                          title="Resgatar"
+                          desc="resgatar este processo"
+                        />
+                      </>
+                    )}
+
+                    {podeAtribuir() &&
+                      pedidoCC?.estados?.length === 1 &&
+                      pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
+                        <AtribuirForm
+                          processoID={pedidoCC?.id}
+                          fluxoId={pedidoCC?.fluxo_id}
+                          colaboradoresList={colaboradoresList}
+                          perfilId={pedidoCC?.estados?.[0]?.perfil_id}
+                        />
+                      )}
                   </>
                 )}
+                {pedidoCC?.estados?.[0]?.pareceres?.length > 0 && <Pareceres />}
                 {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id && (
                   <>
                     <UpdateItem handleClick={handleEdit} />
                     {destinos?.length > 0 && (
-                      <DefaultAction icon="encaminhar" label="Encaminhar" handleClick={onOpen1} />
+                      <>
+                        <DefaultAction icon="encaminhar" label="Encaminhar" handleClick={onOpen1} />
+                        <EncaminharForm open={open1} onCancel={onClose1} destinos={destinos} />
+                      </>
                     )}
-                    <DefaultAction icon="abandonar" label="Abandonar" color="warning" handleClick={onOpen2} />
+                    <Abandonar isSaving={isSaving} processo={pedidoCC} />
+                    {!pedidoCC?.pendente &&
+                      pedidoCC?.estados?.length === 1 &&
+                      pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
+                        <>
+                          <Pendente detail handleClick={() => handlePendente(pedidoCC)} />
+                          <ColocarPendente from="pediddoCC" />
+                        </>
+                      )}
                     <DefaultAction icon="arquivo" label="Arquivar" color="error" handleClick={onOpen3} />
+                    <ArquivarForm open={open3} onCancel={onClose3} />
                   </>
                 )}
-
-                <DialogConfirmar
-                  open={open}
-                  onClose={onClose}
-                  isSaving={isSaving}
-                  handleOk={handleResgatar}
-                  color="warning"
-                  title="Resgatar"
-                  desc="resgatar este processo"
-                />
-
-                <EncaminharForm open={open1} onCancel={onClose1} destinos={destinos} />
-
-                <DialogConfirmar
-                  open={open2}
-                  onClose={onClose2}
-                  isSaving={isSaving}
-                  handleOk={handleAbandonar}
-                  color="warning"
-                  title="Abandonar"
-                  desc="abandonar este processo"
-                />
-
-                <ArquivarForm open={open3} onCancel={onClose3} />
               </Stack>
             )
           }

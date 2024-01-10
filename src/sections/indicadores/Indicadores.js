@@ -312,10 +312,10 @@ Criacao.propTypes = { vista: PropTypes.string };
 export function Criacao({ vista }) {
   const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
-  const isNotFound = !indicadores.length;
+  const isNotFound = !indicadores?.filter((row) => row?.criado_em).length;
   const total = sumBy(indicadores, 'total');
   const series = useMemo(
-    () => [{ name: 'Nº de processos', data: indicadores?.map((row) => row?.total) }],
+    () => [{ name: 'Nº de processos', data: indicadores?.map((row) => row?.criado_em && row?.total) }],
     [indicadores]
   );
   const chartOptions = useChart({
@@ -323,8 +323,8 @@ export function Criacao({ vista }) {
     xaxis: {
       categories:
         vista === 'anual'
-          ? indicadores?.map((row) => row?.criado_em && fMShortYear(row?.criado_em))
-          : indicadores?.map((row) => row?.criado_em && fYear(row?.criado_em)),
+          ? indicadores?.map((row) => row?.criado_em && fYear(row?.criado_em))
+          : indicadores?.map((row) => row?.criado_em && fMShortYear(row?.criado_em)),
     },
     yaxis: { labels: { formatter: (value) => fNumber(value) }, title: { text: 'Nº de processos' } },
     tooltip: { y: { formatter: (value) => fNumber(value) } },
@@ -366,27 +366,23 @@ export function Criacao({ vista }) {
                         title={row?.label}
                         total={row?.valor}
                         label={
-                          (
-                            row?.desc &&
+                          (row?.desc &&
                             row?.label !== 'Total' &&
                             row?.label !== 'Média' &&
                             vista === 'anual' &&
-                            fYear(row?.desc)
-                          )?.toString() ||
-                          (
-                            row?.desc &&
+                            fYear(row?.desc)?.toString()) ||
+                          (row?.desc &&
                             row?.label !== 'Total' &&
                             row?.label !== 'Média' &&
                             vista === 'mensal' &&
-                            fMonthYear(row?.desc)
-                          )?.toString() ||
+                            fMonthYear(row?.desc)) ||
                           row?.desc?.toString()
                         }
                       />
                     </Grid>
                   ))}
                   <Grid item xs={12}>
-                    {currentTab === 'Gráfico' && series?.length > 0 ? (
+                    {currentTab === 'Gráfico' ? (
                       <Chart type="area" series={series} options={chartOptions} height={400} />
                     ) : (
                       <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
@@ -431,6 +427,8 @@ export function EntradasTrabalhados() {
       });
     }
   });
+  const totalC1 = sumBy(dadosByColaborador?.find((row) => row?.item === colaborador1?.id)?.processos, 'total');
+  const totalC2 = sumBy(dadosByColaborador?.find((row) => row?.item === colaborador2?.id)?.processos, 'total');
 
   const handleClose = () => {
     onClose1();
@@ -538,14 +536,9 @@ export function EntradasTrabalhados() {
                                       <LineProgress
                                         isTotal
                                         item="Total"
-                                        trabalhadoC1={sumBy(
-                                          dadosByColaborador?.find((row) => row?.item === colaborador1?.id)?.processos,
-                                          'total'
-                                        )}
-                                        trabalhadoC2={sumBy(
-                                          dadosByColaborador?.find((row) => row?.item === colaborador2?.id)?.processos,
-                                          'total'
-                                        )}
+                                        trabalhadoC1={totalC1}
+                                        trabalhadoC2={totalC2}
+                                        leftSuccess={totalC1 > totalC2}
                                       />
                                       {dadosByAssunto?.map((row) => {
                                         const trabalhadoC1 =
@@ -563,6 +556,7 @@ export function EntradasTrabalhados() {
                                                 item={row?.item}
                                                 trabalhadoC1={trabalhadoC1}
                                                 trabalhadoC2={trabalhadoC2}
+                                                leftSuccess={trabalhadoC1 > trabalhadoC2}
                                               />
                                             )}
                                           </>
@@ -582,7 +576,7 @@ export function EntradasTrabalhados() {
                         const subtotal = sumBy(row?.processos, 'total');
                         const percentagem = (subtotal * 100) / total;
                         return (
-                          <Stack key={`${row.item}_entrab`} spacing={0.5} sx={{ width: 1, mb: 2 }}>
+                          <Stack key={`${row.item}_entrab`} spacing={0.5} sx={{ width: 1, mb: 3 }}>
                             <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
                               <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
                                 {row?.item}
@@ -617,7 +611,7 @@ export function DevolvidosTipos() {
   const theme = useTheme();
   const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
-  const isNotFound = !indicadores.length;
+  const isNotFound = !indicadores?.filter((row) => row.total)?.length;
   const total = sumBy(indicadores, 'total');
   const labels = indicadores?.map((row) => row?.assunto);
   const quantidades = indicadores?.map((row) => row?.total);
@@ -866,7 +860,7 @@ export function Duracao() {
   const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const duracaoByItem = useMemo(() => duracaoP(indicadores, uos), [indicadores, uos]);
-  const isNotFound = !duracaoByItem.length;
+  const isNotFound = !duracaoByItem?.filter((row) => row?.dias).length;
 
   const resumo = useMemo(
     () => [
@@ -975,7 +969,7 @@ export function Volume({ top }) {
       }
     }
   });
-  const isNotFound = !volumeByItem.length;
+  const isNotFound = !volumeByItem?.filter((row) => row?.total).length;
   const total = sumBy(volumeByItem, 'total');
   const labels = volumeByItem?.map((row) => row?.label);
   const quantidades = volumeByItem?.map((row) => row?.total);
@@ -1430,7 +1424,7 @@ function ColaboradorCard({ colaboradorDados, total, assuntos }) {
           direction="row"
           alignItems="center"
           justifyContent="center"
-          sx={{ p: 2, mb: 2, width: 1, borderRadius: 1, backgroundColor: 'background.neutral' }}
+          sx={{ p: 2, mb: 3, width: 1, borderRadius: 1, backgroundColor: 'background.neutral' }}
         >
           <MyAvatar
             alt={colaborador?.perfil?.displayName}
@@ -1452,7 +1446,7 @@ function ColaboradorCard({ colaboradorDados, total, assuntos }) {
           const percentagem = (row?.total * 100) / totalColaborador;
           const totalAssunto = assuntos?.find((assunto) => assunto?.item === row?.assunto);
           return (
-            <Stack key={row.assunto} spacing={0.5} sx={{ width: 1, mb: 2 }}>
+            <Stack key={row.assunto} spacing={0.5} sx={{ width: 1, mb: 3 }}>
               <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
                 <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
                   {row?.assunto}
@@ -1609,12 +1603,15 @@ function TabView({ currentTab, setCurrentTab }) {
 LineProgress.propTypes = {
   item: PropTypes.string,
   isTotal: PropTypes.bool,
+  leftSuccess: PropTypes.bool,
   trabalhadoC1: PropTypes.number,
   trabalhadoC2: PropTypes.number,
 };
 
-function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal }) {
+function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSuccess }) {
   const theme = useTheme();
+  const colorLeft = leftSuccess ? theme.palette.success.main : theme.palette.focus.main;
+  const colorRight = leftSuccess ? theme.palette.focus.main : theme.palette.success.main;
   const totalT = trabalhadoC1 > trabalhadoC2 ? trabalhadoC1 : trabalhadoC2;
   return (
     <>
@@ -1629,18 +1626,14 @@ function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal }) {
       </Grid>
       <Grid item xs={6} sx={{ pt: '6px !important' }}>
         <Stack direction="column" alignItems="flex-end">
-          <Box sx={{ width: `${(trabalhadoC1 * 100) / totalT}%`, border: `2px solid ${theme.palette.success.main}` }}>
-            {' '}
-          </Box>
-          <Box sx={{ width: '100%', border: `1px solid ${theme.palette.success.main}` }}> </Box>
+          <Box sx={{ width: `${(trabalhadoC1 * 100) / totalT}%`, border: `2px solid ${colorLeft}` }}> </Box>
+          <Box sx={{ width: '100%', border: `1px solid ${colorLeft}` }}> </Box>
         </Stack>
       </Grid>
       <Grid item xs={6} sx={{ pt: '6px !important' }}>
         <Stack direction="column" alignItems="flex-start">
-          <Box sx={{ width: `${(trabalhadoC2 * 100) / totalT}%`, border: `2px solid ${theme.palette.focus.main}` }}>
-            {' '}
-          </Box>
-          <Box sx={{ width: '100%', border: `1px solid ${theme.palette.focus.main}` }}> </Box>
+          <Box sx={{ width: `${(trabalhadoC2 * 100) / totalT}%`, border: `2px solid ${colorRight}` }}> </Box>
+          <Box sx={{ width: '100%', border: `1px solid ${colorRight}` }}> </Box>
         </Stack>
       </Grid>
     </>

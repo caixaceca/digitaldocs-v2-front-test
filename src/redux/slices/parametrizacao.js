@@ -38,10 +38,12 @@ const initialState = {
   transicoes: [],
   meusFluxos: [],
   meusacessos: [],
+  notificacoes: [],
   regrasEstado: [],
   regrasAnexos: [],
   perfisEstado: [],
   meusAmbientes: [],
+  destinatarios: [],
   estadosPerfil: [],
   regrasTransicao: [],
   motivosPendencias: [],
@@ -216,6 +218,14 @@ const slice = createSlice({
 
     getEstadoRegraSuccess(state, action) {
       state.estadoRegra = action.payload;
+    },
+
+    getNotificacoesSuccess(state, action) {
+      state.notificacoes = action.payload;
+    },
+
+    getDestinatariosSuccess(state, action) {
+      state.destinatarios = action.payload;
     },
 
     createAcessoSuccess(state, action) {
@@ -530,6 +540,16 @@ export function getFromParametrizacao(item, params) {
         case 'colaboradoresEstado': {
           const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
           dispatch(slice.actions.getColaboradoresEstadoSuccess(response.data));
+          break;
+        }
+        case 'notificacoes': {
+          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/transicao/${params?.id}`, options);
+          dispatch(slice.actions.getNotificacoesSuccess(response.data.objeto));
+          break;
+        }
+        case 'destinatarios': {
+          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
+          dispatch(slice.actions.getDestinatariosSuccess(response.data.objeto));
           break;
         }
 

@@ -2,8 +2,8 @@ import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
-import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -21,13 +21,22 @@ import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // components
 import DialogConfirmar from '../../../components/DialogConfirmar';
 import { Notificacao } from '../../../components/NotistackProvider';
-import { FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObject } from '../../../components/hook-form';
+import {
+  FormProvider,
+  RHFTextField,
+  RHFNumberField,
+  RHFDatePicker,
+  RHFAutocompleteSimple,
+  RHFAutocompleteObject,
+} from '../../../components/hook-form';
 //
 import Anexos from './Anexos';
 import Despesas from './Despesas';
 import Garantias from './Garantias';
 import Entidades from './Entidades';
 import OutrosCreditos from './OutrosCreditos';
+// _mock
+import { escaloes } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +46,7 @@ export default function PedidoForm({ dados }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const [estado, setEstado] = useState(dados?.situacao);
   const { mail, cc } = useSelector((state) => state.intranet);
   const { linhas } = useSelector((state) => state.parametrizacao);
   const { done, error, itemId, isSaving, tipoItem, entidadeId, garantiaId, pedidoCC } = useSelector(
@@ -54,6 +64,22 @@ export default function PedidoForm({ dados }) {
     prazo_amortizacao: Yup.number().typeError('Introduza o prazo de amortização'),
     categoria_nivel: Yup.string().required('Categoria/Nível não pode ficar vazio'),
     setor_atividade: Yup.string().required('Setor de atividade não pode ficar vazio'),
+    montante_contratado: estado === 'Contratado' && Yup.number().typeError('Introduza o montante contratado'),
+    data_desistido:
+      estado === 'Desistido' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de desistência não pode ficar vazio'),
+    escalao_decisao: estado === 'Contratado' && Yup.string().required('Escalão de decisão não pode ficar vazio'),
+    data_contratacao:
+      estado === 'Contratado' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de contratação não pode ficar vazio'),
+    data_indeferido:
+      estado === 'Indeferido' &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de indeferimento não pode ficar vazio'),
+    data_aprovacao:
+      (estado === 'Aprovado' || estado === 'Contratado') &&
+      Yup.date().typeError('Introduza uma data válida').required('Data de aprovação não pode ficar vazio'),
+    montante_aprovado:
+      (estado === 'Aprovado' || estado === 'Contratado') && Yup.number().typeError('Introduza o montante aprovado'),
     anexos: Yup.array(
       Yup.object({
         anexo: Yup.mixed().required('Introduza o anexo'),
@@ -107,6 +133,7 @@ export default function PedidoForm({ dados }) {
       salario: dados?.salario || '',
       cliente: dados?.cliente || '',
       observacao: dados?.observacao || '',
+      situacao: dados?.credito?.situacao || '',
       conta_salario: dados?.conta_salario || '',
       estado_origem_id: dados?.estado_origem_id,
       taxa_juros: dados?.credito?.taxa_juros || '',
@@ -115,9 +142,23 @@ export default function PedidoForm({ dados }) {
       salario_conjuge: dados?.salario_conjuge || '',
       setor_atividade: dados?.credito?.setor_atividade || '',
       prazo_amortizacao: dados?.credito?.prazo_amortizacao || '',
+      montante_aprovado: dados?.credito?.montante_aprovado || '',
+      montante_contratado: dados?.credito?.montante_contratado || '',
       montante_solicitado: dados?.credito?.montante_solicitado || '',
       entidade_patronal_conjuge: dados?.entidade_patronal_conjuge || '',
       linha: dados?.credito?.linha_id ? { id: dados?.credito?.linha_id, label: dados?.credito?.linha } : null,
+      data_desistido: dados?.credito?.data_desistido
+        ? add(new Date(dados?.credito?.data_desistido), { hours: 2 })
+        : null,
+      data_aprovacao: dados?.credito?.data_aprovacao
+        ? add(new Date(dados?.credito?.data_aprovacao), { hours: 2 })
+        : null,
+      data_indeferido: dados?.credito?.data_indeferido
+        ? add(new Date(dados?.credito?.data_indeferido), { hours: 2 })
+        : null,
+      data_contratacao: dados?.credito?.data_contratacao
+        ? add(new Date(dados?.credito?.data_contratacao), { hours: 2 })
+        : null,
       despesas:
         dados?.despesas
           ?.filter((item) => item?.ativo)
@@ -176,7 +217,7 @@ export default function PedidoForm({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -209,6 +250,36 @@ export default function PedidoForm({ dados }) {
       }
       if (values.entidade_patronal_conjuge) {
         formData.append('entidade_patronal_conjuge', values.entidade_patronal_conjuge);
+      }
+      if (
+        values.situacao === 'Aprovado' ||
+        values.situacao === 'Contratado' ||
+        (values.situacao === 'Desistido' && values.montante_aprovado && values.data_aprovacao)
+      ) {
+        formData.append('montante_aprovado', values.montante_aprovado);
+        formData.append('data_aprovacao', format(values.data_aprovacao, 'yyyy-MM-dd'));
+      } else {
+        formData.append('data_aprovacao', '');
+        formData.append('montante_aprovado', '');
+      }
+      if (values.situacao === 'Indeferido' && values.data_indeferido) {
+        formData.append('data_indeferido', format(values.data_indeferido, 'yyyy-MM-dd'));
+      } else {
+        formData.append('data_indeferido', '');
+      }
+      if (values.situacao === 'Desistido' && values.data_desistido) {
+        formData.append('data_desistido', format(values.data_desistido, 'yyyy-MM-dd'));
+      } else {
+        formData.append('data_desistido', '');
+      }
+      if (values.situacao === 'Contratado') {
+        formData.append('escalao_decisao', values.escalao_decisao);
+        formData.append('montante_contratado', values.montante_contratado);
+        formData.append('data_contratacao', format(values.data_contratacao, 'yyyy-MM-dd'));
+      } else {
+        formData.append('escalao_decisao', '');
+        formData.append('data_contratacao', '');
+        formData.append('montante_contratado', '');
       }
       values?.anexos?.forEach((row, index) => {
         if (row?.anexo instanceof File) {
@@ -361,7 +432,7 @@ export default function PedidoForm({ dados }) {
   };
 
   const goToDetail = () => {
-    navigate(`${PATH_DIGITALDOCS.root}/${pedidoCC.id}`);
+    navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${pedidoCC?.id}`);
   };
 
   return (
@@ -423,6 +494,62 @@ export default function PedidoForm({ dados }) {
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
                     <RHFTextField name="finalidade" label="Finalidade" />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Grid container spacing={3} justifyContent="center">
+                      <Grid item xs={12} sm={3}>
+                        <RHFAutocompleteSimple
+                          name="situacao"
+                          label="Situação"
+                          options={['Entrada', 'Aprovado', 'Contratado', 'Indeferido', 'Desistido']}
+                          onChange={(event, newValue) => {
+                            setValue('situacao', newValue);
+                            setEstado(newValue);
+                          }}
+                        />
+                      </Grid>
+                      {(values?.situacao === 'Aprovado' ||
+                        values?.situacao === 'Contratado' ||
+                        values?.situacao === 'Desistido') && (
+                        <>
+                          <Grid item xs={12} sm={6} md={3}>
+                            <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={3}>
+                            <RHFNumberField tipo="moeda" name="montante_aprovado" label="Montante aprovado" />
+                          </Grid>
+                        </>
+                      )}
+                      {values?.situacao === 'Contratado' && (
+                        <Grid item xs={12}>
+                          <Grid container spacing={3} justifyContent="center">
+                            <Grid item xs={12} sm={6} md={3}>
+                              <RHFDatePicker name="data_contratacao" label="Data de contratação" disableFuture />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                              <RHFNumberField tipo="moeda" name="montante_contratado" label="Montante contratado" />
+                            </Grid>
+                            <Grid item xs={12} sm={3}>
+                              <RHFAutocompleteSimple
+                                options={escaloes}
+                                name="escalao_decisao"
+                                label="Escalão de decisão"
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      )}
+                      {values?.situacao === 'Indeferido' && (
+                        <Grid item xs={12} sm={3}>
+                          <RHFDatePicker name="data_indeferido" label="Data de indeferimento" disableFuture />
+                        </Grid>
+                      )}
+                      {values?.situacao === 'Desistido' && (
+                        <Grid item xs={12} sm={3}>
+                          <RHFDatePicker name="data_desistido" label="Data de desistência" disableFuture />
+                        </Grid>
+                      )}
+                    </Grid>
                   </Grid>
                   <Grid item xs={12}>
                     <RHFTextField name="observacao" label="Observações" multiline minRows={2} maxRows={4} />

@@ -27,8 +27,8 @@ export default function RoleBasedGuard({ hasContent, roles, children }) {
   const { meusacessos } = useSelector((state) => state.parametrizacao);
 
   let noRole = true;
-  roles?.forEach((_row) => {
-    if (meusacessos.includes(_row)) {
+  roles?.forEach((row) => {
+    if (meusacessos.includes(row)) {
       noRole = false;
     }
   });

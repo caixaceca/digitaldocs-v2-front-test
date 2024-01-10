@@ -4,12 +4,16 @@ import PropTypes from 'prop-types';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import EventIcon from '@mui/icons-material/Event';
+import RemoveIcon from '@mui/icons-material/Remove';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
 import { newLineText } from '../../../utils/normalizeText';
+import { ptDateTime, fDistance } from '../../../utils/formatTime';
 // redux
 import { getFromCC } from '../../../redux/slices/cc';
 import { useDispatch, useSelector } from '../../../redux/store';
@@ -25,7 +29,7 @@ export default function Transicoes() {
   const dispatch = useDispatch();
   const { mail } = useSelector((state) => state.intranet);
   const { pedidoCC, transicoes } = useSelector((state) => state.cc);
-  const historicoGrouped = groupBy(transicoes, 'data_transicao');
+  const historicoGrouped = groupBy(transicoes, 'data_entrada');
 
   useEffect(() => {
     if (mail && pedidoCC?.id) {
@@ -41,7 +45,7 @@ export default function Transicoes() {
         </Stack>
       ) : (
         <Scrollbar sx={{ p: 3 }}>
-          <Timeline position="right">
+          <Timeline position="right" sx={{ p: 0 }}>
             {historicoGrouped
               .sort((a, b) => {
                 const datetimeA = new Date(a.data);
@@ -97,44 +101,83 @@ function Transicao({ row, addConector }) {
         <Paper sx={{ bgcolor: 'background.neutral' }}>
           <Paper
             sx={{
-              p: 2,
+              p: 1.5,
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
               bgcolor: 'background.neutral',
               borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-              <Label
-                variant="ghost"
-                color={
-                  (transicao?.is_resgate && 'warning') ||
-                  ((transicao?.modo === 'Devolução' || transicao?.modo === 'desarquivamento') && 'error') ||
-                  'success'
-                }
-              >
-                {(transicao?.is_resgate && 'Resgate') ||
-                  (transicao?.modo === 'Paralelo' && 'Seguimento em paralelo') ||
-                  transicao?.modo}
-              </Label>
-              <Stack direction="row" justifyContent="left" alignItems="center" spacing={0.5}>
-                <Typography variant="body2">
-                  {transicao?.is_resgate ? estadoDestino() : transicao?.estado_inicial}
-                </Typography>
-                <ArrowRightAltIcon />
-                <Typography variant="body2">
-                  {transicao?.is_resgate ? transicao?.estado_inicial : estadoDestino()}
-                </Typography>
+            <Stack
+              alignItems="center"
+              spacing={{ xs: 1, sm: 3 }}
+              justifyContent="space-between"
+              direction={{ xs: 'column', sm: 'row' }}
+            >
+              <Stack>
+                <Stack spacing={0.5} direction="row" alignItems="center" justifyContent={{ xs: 'center', sm: 'left' }}>
+                  <DateRangeIcon sx={{ width: 14, color: 'text.secondary' }} />
+                  <Typography variant="caption">{ptDateTime(transicao?.data_entrada)}</Typography>
+                  <RemoveIcon sx={{ width: 15 }} />
+                  <Typography variant="caption">{ptDateTime(transicao?.data_saida)}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent={{ xs: 'center', sm: 'left' }} alignItems="center" spacing={0.5}>
+                  <AccessTimeIcon sx={{ width: 14, color: 'text.secondary' }} />
+                  <Typography variant="caption">{fDistance(transicao?.data_entrada, transicao?.data_saida)}</Typography>
+                </Stack>
+              </Stack>
+              <Stack>
+                <Label
+                  variant="ghost"
+                  color={
+                    (transicao?.is_resgate && 'warning') ||
+                    ((transicao?.modo === 'Devolução' || transicao?.modo === 'desarquivamento') && 'error') ||
+                    'success'
+                  }
+                >
+                  {(transicao?.is_resgate && 'Resgate') ||
+                    (transicao?.modo === 'Paralelo' && 'Seguimento em paralelo') ||
+                    transicao?.modo}
+                </Label>
+                <Stack direction="row" justifyContent={{ xs: 'center', sm: 'right' }} alignItems="center" spacing={0.5}>
+                  <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                    {transicao?.is_resgate ? estadoDestino() : transicao?.estado_inicial}
+                  </Typography>
+                  <ArrowRightAltIcon />
+                  <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                    {transicao?.is_resgate ? transicao?.estado_inicial : estadoDestino()}
+                  </Typography>
+                </Stack>
               </Stack>
             </Stack>
           </Paper>
           <Stack sx={{ p: 2 }}>
-            <ColaboradorInfo
-              foto={criador?.foto_disk}
-              nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
-              label={transicao?.data_transicao ? ptDateTime(transicao.data_transicao) : ''}
-            />
-            {transicao?.observacao && <Typography sx={{ pt: 2 }}>{newLineText(transicao.observacao)}</Typography>}
+            {criador && (
+              <ColaboradorInfo
+                foto={criador?.foto_disk}
+                nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
+                label={transicao?.data_transicao ? ptDateTime(transicao.data_transicao) : ''}
+              />
+            )}
+            {transicao?.observacao && (
+              <Typography sx={{ pt: criador && 2 }}>{newLineText(transicao.observacao)}</Typography>
+            )}
+            {transicao?.data_parecer && (
+              <Stack sx={{ pt: 2 }}>
+                <Stack spacing={0.5} direction="row" alignItems="center">
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    Parecer:
+                  </Typography>
+                  <Label variant="ghost" color={(transicao?.parecer_favoravel && 'success') || 'error'}>
+                    {transicao?.parecer_favoravel ? 'Favorável' : 'Não favorável'}
+                  </Label>
+                </Stack>
+                <Stack spacing={0.5} direction="row" alignItems="center" justifyContent={{ xs: 'center', sm: 'left' }}>
+                  <EventIcon sx={{ width: 14, color: 'text.secondary' }} />
+                  <Typography variant="caption">{ptDateTime(transicao?.data_parecer)}</Typography>
+                </Stack>
+              </Stack>
+            )}
           </Stack>
         </Paper>
       </TimelineContent>

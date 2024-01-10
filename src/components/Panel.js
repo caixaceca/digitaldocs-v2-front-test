@@ -75,15 +75,16 @@ export function Criado({ tipo = '', value }) {
 
 ColaboradorInfo.propTypes = {
   ef: PropTypes.bool,
+  sx: PropTypes.object,
   pi: PropTypes.string,
   foto: PropTypes.string,
   nome: PropTypes.string,
   label: PropTypes.string,
 };
 
-export function ColaboradorInfo({ nome, label, foto, pi = '', ef = false }) {
+export function ColaboradorInfo({ nome, label, foto, pi = '', ef = false, sx = null }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
       <MyAvatar alt={nome} src={getFile('colaborador', foto)} />
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>
@@ -99,7 +100,7 @@ export function ColaboradorInfo({ nome, label, foto, pi = '', ef = false }) {
         <Typography
           noWrap={!ef}
           variant={ef ? 'caption' : 'body2'}
-          sx={{ color: ef ? 'text.secondary' : 'text.disabled' }}
+          sx={{ color: ef ? 'text.disabled' : 'text.secondary' }}
         >
           {label}
         </Typography>

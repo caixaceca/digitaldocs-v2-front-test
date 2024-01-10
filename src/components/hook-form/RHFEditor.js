@@ -24,7 +24,7 @@ export default function RHFEditor({ name, ...other }) {
           onChange={field.onChange}
           error={!!error}
           helperText={
-            <FormHelperText error sx={{ px: 2, textTransform: 'capitalize' }}>
+            <FormHelperText error sx={{ px: 2 }}>
               {error?.message}
             </FormHelperText>
           }

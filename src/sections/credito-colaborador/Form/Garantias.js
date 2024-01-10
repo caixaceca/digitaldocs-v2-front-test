@@ -6,6 +6,9 @@ import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
+// redux
+import { useDispatch } from '../../../redux/store';
+import { deleteAnexo } from '../../../redux/slices/cc';
 // components
 import { AddItem, DeleteItem } from '../../../components/Actions';
 import { RHFTextField, RHFSwitch, RHFAutocompleteSimple } from '../../../components/hook-form';
@@ -15,6 +18,7 @@ import { AnexosGarantias } from './Anexos';
 // ----------------------------------------------------------------------
 
 export default function Garantias() {
+  const dispatch = useDispatch();
   const { control, watch } = useFormContext();
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'garantias' });
@@ -31,8 +35,12 @@ export default function Garantias() {
     });
   };
 
-  const handleRemove = (index) => {
-    remove(index);
+  const handleRemove = (index, itemId) => {
+    if (itemId) {
+      dispatch(deleteAnexo({ itemId, tipoItem: 'garantia' }));
+    } else {
+      remove(index);
+    }
   };
 
   return (
@@ -67,7 +75,7 @@ export default function Garantias() {
                         </Stack>
                       )}
                     </Stack>
-                    <DeleteItem small handleClick={() => handleRemove(index)} />
+                    <DeleteItem small handleClick={() => handleRemove(index, item?.idItem)} />
                   </Stack>
                   <AnexosGarantias indexGarantia={index} garantiaId={item?.idItem} />
                 </Paper>

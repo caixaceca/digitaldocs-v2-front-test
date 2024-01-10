@@ -100,6 +100,9 @@ export function RHFUploadMultiFile({ name, ...other }) {
     />
   );
 }
+
+// ----------------------------------------------------------------------
+
 RHFUploadFileSimple.propTypes = { name: PropTypes.string };
 
 export function RHFUploadFileSimple({ name, ...other }) {

@@ -53,7 +53,7 @@ export function Detalhes({ item, closeModal }) {
               </ListItem>
               {'ativo' in selectedItem && (
                 <TextItem
-                  title="Ambiente/Estado:"
+                  title="Estado:"
                   label={
                     <Label variant="ghost" color={selectedItem?.ativo ? 'success' : 'default'}>
                       {selectedItem?.ativo ? 'Ativo' : 'Inativo'}
@@ -93,7 +93,7 @@ export function Detalhes({ item, closeModal }) {
               )}
               {selectedItem?.estado_final && (
                 <TextItem
-                  title="Destino"
+                  title="Destino:"
                   text={`${selectedItem.estado_final}${
                     selectedItem?.estado_final_id ? ` (ID: ${selectedItem?.estado_final_id})` : ''
                   }`}
@@ -101,11 +101,13 @@ export function Detalhes({ item, closeModal }) {
               )}
               {perfil && (
                 <TextItem
-                  title="Colaborador"
+                  title="Colaborador:"
                   text={`${perfil?.perfil?.displayName} (ID_Perfil: ${perfil?.perfil_id})`}
                 />
               )}
-              {selectedItem?.percentagem && <TextItem title="Percentagem" text={fPercent(selectedItem?.percentagem)} />}
+              {selectedItem?.percentagem && (
+                <TextItem title="Percentagem:" text={fPercent(selectedItem?.percentagem)} />
+              )}
               {'obriga_prazo_validade' in selectedItem && (
                 <TextItem
                   title="Obriga prazo de validade:"

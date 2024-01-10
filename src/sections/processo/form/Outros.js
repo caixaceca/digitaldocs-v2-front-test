@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
+// hooks
+import useAnexos from '../../../hooks/useAnexos';
 // components
 import { RHFTextField, RHFUploadMultiFile } from '../../../components/hook-form';
 
@@ -10,26 +11,7 @@ import { RHFTextField, RHFUploadMultiFile } from '../../../components/hook-form'
 export function ObsNovosAnexos() {
   const { watch, setValue } = useFormContext();
   const values = watch();
-
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const anexos = values.anexos || [];
-      setValue('anexos', [
-        ...anexos,
-        ...acceptedFiles.map((file) => Object.assign(file, { preview: URL.createObjectURL(file) })),
-      ]);
-    },
-    [setValue, values.anexos]
-  );
-
-  const handleRemoveAll = () => {
-    setValue('anexos', []);
-  };
-
-  const handleRemove = (file) => {
-    const filteredItems = values.anexos && values.anexos?.filter((_file) => _file !== file);
-    setValue('anexos', filteredItems);
-  };
+  const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
 
   return (
     <>
@@ -37,7 +19,7 @@ export function ObsNovosAnexos() {
         <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
       </Grid>
       <Grid item xs={12}>
-        <RHFUploadMultiFile name="anexos" onDrop={handleDrop} onRemove={handleRemove} onRemoveAll={handleRemoveAll} />
+        <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
       </Grid>
     </>
   );

@@ -244,3 +244,10 @@ export function podeDarParecer(meusAmbientes, pareceres) {
   });
   return parecer;
 }
+
+// ----------------------------------------------------------------------
+
+export function findColaboradores(colaboradores, idsList) {
+  colaboradores = colaboradores?.filter((row) => idsList.includes(row?.perfil_id));
+  return colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
+}

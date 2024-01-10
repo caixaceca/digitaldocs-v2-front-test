@@ -43,7 +43,7 @@ export default function ParecerExport({ dados }) {
               Parecer: <Text style={[styles.caption]}>{dados?.parecer?.parecer}</Text>
             </Text>
             <Text>
-              Unidade orgânica: <Text style={[styles.caption]}>{dados?.parecer?.nome}</Text>
+              Unidade orgânica: <Text style={[styles.caption]}>{dados?.parecer?.nome?.replace(' - P/S/P', '')}</Text>
             </Text>
             <Text>
               Data parecer:{' '}

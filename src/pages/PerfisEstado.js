@@ -2,9 +2,7 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -13,7 +11,6 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { getFile } from '../utils/getFile';
 import { ptDateTime } from '../utils/formatTime';
 import { nomeacaoBySexo } from '../utils/validarAcesso';
 // redux
@@ -27,8 +24,8 @@ import useSettings from '../hooks/useSettings';
 import useTable, { getComparator } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
-import MyAvatar from '../components/MyAvatar';
 import Scrollbar from '../components/Scrollbar';
+import { ColaboradorInfo } from '../components/Panel';
 import { SkeletonTable } from '../components/skeleton';
 import { Checked, AddItem } from '../components/Actions';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
@@ -154,21 +151,11 @@ export default function PerfisEstado() {
                       dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                         <TableRow key={row?.id} hover>
                           <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <MyAvatar alt={row?.perfil?.displayName} src={getFile('colaborador', row?.foto_disk)} />
-                              <Stack sx={{ ml: 2 }}>
-                                <Typography variant="subtitle2" noWrap>
-                                  {row?.perfil?.displayName}
-                                </Typography>
-                                <Typography
-                                  noWrap
-                                  variant="body2"
-                                  sx={{ color: (theme) => theme.palette.text.disabled }}
-                                >
-                                  {row?.perfil?.mail}
-                                </Typography>
-                              </Stack>
-                            </Box>
+                            <ColaboradorInfo
+                              foto={row?.foto_disk}
+                              label={row?.uo?.label}
+                              nome={row?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
+                            />
                           </TableCell>
                           <TableCell align="left">
                             <Typography variant="subtitle2"> {row?.uo?.label}</Typography>
