@@ -17,7 +17,7 @@ import { ptDate } from '../../utils/formatTime';
 import { UosAcesso } from '../../utils/validarAcesso';
 import { normalizeText, setItemValue, dataValido } from '../../utils/normalizeText';
 // hooks
-import useToggle, { useToggle1 } from '../../hooks/useToggle';
+import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -31,7 +31,7 @@ import { UpdateItemAlt, ViewItem, Checked, DefaultAction } from '../../component
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { UoData } from './Dados';
-import { ValidarMultiploForm, BalcaoEntregaForm, ConfirmarPorDataForm, Detalhes } from './CartoesForm';
+import { ValidarMultiploForm, BalcaoEntregaForm, ConfirmarPorDataForm, AnularForm, Detalhes } from './CartoesForm';
 
 // ----------------------------------------------------------------------
 
@@ -55,6 +55,7 @@ export default function TableCartoes() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const [datai, setDatai] = useState(sub(new Date(), { days: 1 }));
   const [dataf, setDataf] = useState(sub(new Date(), { days: 1 }));
   const { mail, cc, uos } = useSelector((state) => state.intranet);
@@ -64,17 +65,6 @@ export default function TableCartoes() {
   const { isAdmin, confirmarCartoes } = useSelector((state) => state.parametrizacao);
   const { cartoes, done, error, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
-  const uosList = useMemo(
-    () =>
-      UosAcesso(
-        uos?.filter((row) => row?.tipo === 'Agências'),
-        cc,
-        fase === 'Emissão' || isAdmin,
-        [],
-        'balcao'
-      ),
-    [cc, isAdmin, fase, uos]
-  );
 
   const {
     page,
@@ -98,12 +88,24 @@ export default function TableCartoes() {
     defaultOrderBy: 'numero',
     defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
+  const uosList = useMemo(
+    () =>
+      UosAcesso(
+        uos?.filter((row) => row?.tipo === 'Agências'),
+        cc,
+        fase === 'Emissão' || isAdmin,
+        [],
+        'balcao'
+      ),
+    [cc, isAdmin, fase, uos]
+  );
 
   useEffect(() => {
-    if (done === 'rececao confirmada') {
-      enqueueSnackbar('Receção dos cartões confirmada com sucesso', { variant: 'success' });
+    if (done === 'Receção dos cartões confirmada' || done === 'Confirmação anulada') {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       onClose();
       onClose1();
+      onClose2();
       setSelected([]);
       if (mail && fase && datai && ((fase === 'Receção' && uo?.id) || fase === 'Emissão')) {
         dispatch(
@@ -202,6 +204,10 @@ export default function TableCartoes() {
   const temDadosNaoValidados =
     (fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
     (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0);
+  const temDadosValidados =
+    (fase === 'Emissão' &&
+      dataFiltered?.filter((row) => row?.emissao_validado && !row?.rececao_validado)?.length > 0) ||
+    (fase === 'Receção' && dataFiltered?.filter((row) => row?.rececao_validado)?.length > 0);
 
   applySortFilter({
     dados,
@@ -237,8 +243,9 @@ export default function TableCartoes() {
   return (
     <>
       <HeaderBreadcrumbs
-        heading="Receção de cartões"
         links={[{ name: '' }]}
+        heading="Receção de cartões"
+        sx={{ color: 'text.secondary', px: 1 }}
         action={
           <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
             <UoData
@@ -247,11 +254,9 @@ export default function TableCartoes() {
               setUo={setUo}
               datai={datai}
               dataf={dataf}
-              filter={filter}
               uosList={uosList}
               setDatai={setDatai}
               setDataf={setDataf}
-              setFilter={setFilter}
               setSelected={setSelected}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
@@ -272,20 +277,26 @@ export default function TableCartoes() {
                     ''
                   ) : (
                     <Stack direction="row" spacing={1}>
-                      {uo && !filter && !tipoCartao && (
-                        <DefaultAction label="CONFIRMAR POR DATA & BALCÃO" handleClick={onOpen1} icon="doneAll" />
+                      {uo && !filter && !tipoCartao && selected.length === 0 && (
+                        <DefaultAction label="CONFIRMAR" handleClick={onOpen1} icon="confirmar" variant="contained" />
                       )}
                       {selected.length > 0 && (
-                        <DefaultAction label="CONFIRMAR MÚLTIPLO" handleClick={onOpen} icon="multiple" />
+                        <DefaultAction label="CONFIRMAR" handleClick={onOpen} icon="confirmar" variant="contained" />
                       )}
                     </Stack>
                   )}
                 </>
               )}
+              {temDadosValidados &&
+                confirmarCartoes &&
+                ((fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao)) ||
+                  (fase === 'Emissão' && cc?.uo?.label === 'DOP-CE') ||
+                  isAdmin) && (
+                  <DefaultAction label="ANULAR CONFIRMAÇÂO" handleClick={onOpen2} icon="cancelar" color="error" />
+                )}
             </Stack>
           </Stack>
         }
-        sx={{ color: 'text.secondary', px: 1 }}
       />
 
       <Card sx={{ p: 1 }}>
@@ -374,20 +385,48 @@ export default function TableCartoes() {
       </Card>
 
       <Detalhes closeModal={handleCloseModal} />
-      <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
-      <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} data={datai} onCancel={onClose1} />
-      <ValidarMultiploForm
-        open={open}
-        fase={fase}
-        dense={dense}
-        balcao={uo?.id}
-        onCancel={onClose}
-        cartoes={
-          (fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado && selected.includes(row.id))) ||
-          (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado && selected.includes(row.id))) ||
-          []
-        }
-      />
+      {confirmarCartoes && fase === 'Emissão' && (cc?.uo?.label === 'DOP-CE' || isAdmin) && (
+        <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
+      )}
+      {uo && !filter && !tipoCartao && selected.length === 0 && (
+        <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} data={datai} onCancel={onClose1} />
+      )}
+      {selected.length > 0 && (
+        <ValidarMultiploForm
+          open={open}
+          fase={fase}
+          dense={dense}
+          balcao={uo?.id}
+          onCancel={onClose}
+          cartoes={
+            (fase === 'Emissão' &&
+              dataFiltered?.filter((row) => !row?.emissao_validado && selected.includes(row.id))) ||
+            (fase === 'Receção' &&
+              dataFiltered?.filter((row) => !row?.rececao_validado && selected.includes(row.id))) ||
+            []
+          }
+        />
+      )}
+      {temDadosValidados &&
+        confirmarCartoes &&
+        ((fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao)) ||
+          (fase === 'Emissão' && cc?.uo?.label === 'DOP-CE') ||
+          isAdmin) && (
+          <AnularForm
+            uo={uo}
+            fase={fase}
+            data={datai}
+            open={open2}
+            dense={dense}
+            uosList={uosList}
+            onCancel={onClose2}
+            cartoes={
+              (fase === 'Emissão' && dataFiltered?.filter((row) => row?.emissao_validado && !row?.rececao_validado)) ||
+              (fase === 'Receção' && dataFiltered?.filter((row) => row?.rececao_validado)) ||
+              []
+            }
+          />
+        )}
     </>
   );
 }

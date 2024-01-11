@@ -932,6 +932,22 @@ export function updateItem(item, dados, params) {
           await axios.patch(`${BASEURLDD}/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`, dados, options);
           break;
         }
+        case 'anular por balcao e data': {
+          await axios.patch(
+            `${BASEURLDD}/v1/cartoes/anular/validacao/todas?emissao=${params?.emissao}`,
+            dados,
+            options
+          );
+          break;
+        }
+        case 'anular multiplo': {
+          await axios.patch(
+            `${BASEURLDD}/v1/cartoes/anular/validacao/listagem?emissao=${params?.emissao}`,
+            dados,
+            options
+          );
+          break;
+        }
 
         default:
           break;

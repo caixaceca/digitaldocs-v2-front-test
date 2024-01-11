@@ -7,12 +7,13 @@ import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import ListItemButton from '@mui/material/ListItemButton';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -23,7 +24,6 @@ import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
@@ -79,7 +79,7 @@ export function DefaultAction({
   ) : (
     <Stack>
       <Tooltip title={label} arrow>
-        <Fab size="small" variant="soft" color={color} onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
+        <Fab size="small" variant={variant} color={color} onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
           {(icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" />) ||
             (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
@@ -87,9 +87,9 @@ export function DefaultAction({
             (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'edit' && <SvgIconStyle src="/assets/icons/editar.svg" sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'add' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'parecer' && <NotesIcon />) ||
-            (icon === 'doneAll' && <DoneAllIcon />) ||
-            (icon === 'multiple' && <ChecklistOutlinedIcon />)}
+            (icon === 'confirmar' && <DoneAllIcon />) ||
+            (icon === 'cancelar' && <ClearIcon />) ||
+            (icon === 'cancel' && <NotesIcon />)}
         </Fab>
       </Tooltip>
     </Stack>
@@ -308,14 +308,23 @@ export function Fechar({ button = false, large = false, handleClick }) {
 
 DialogButons.propTypes = {
   edit: PropTypes.bool,
+  desc: PropTypes.string,
+  label: PropTypes.string,
+  color: PropTypes.string,
   isSaving: PropTypes.bool,
   onCancel: PropTypes.func,
   handleDelete: PropTypes.func,
-  desc: PropTypes.string,
-  label: PropTypes.string,
 };
 
-export function DialogButons({ edit = false, isSaving, desc = '', label = '', onCancel, handleDelete }) {
+export function DialogButons({
+  isSaving,
+  onCancel,
+  desc = '',
+  label = '',
+  edit = false,
+  handleDelete,
+  color = 'success',
+}) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
@@ -329,7 +338,7 @@ export function DialogButons({ edit = false, isSaving, desc = '', label = '', on
       <Button variant="outlined" color="inherit" onClick={onCancel}>
         Cancelar
       </Button>
-      <LoadingButton type="submit" variant="contained" loading={isSaving}>
+      <LoadingButton type="submit" variant={color === 'error' ? 'soft' : 'contained'} color={color} loading={isSaving}>
         {(label && label) || (edit && 'Guardar') || 'Adicionar'}
       </LoadingButton>
     </DialogActions>

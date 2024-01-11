@@ -1,16 +1,20 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Switch from '@mui/material/Switch';
+import Checkbox from '@mui/material/Checkbox';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
@@ -18,20 +22,33 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
+import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { format, add, sub } from 'date-fns';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
+// hooks
+import useTable from '../../hooks/useTable';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
-import { SearchNotFoundSmall } from '../../components/table';
 import { Fechar, DialogButons } from '../../components/Actions';
+import { TableHeadCustom, SearchNotFoundSmall } from '../../components/table';
 import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
+
+// ----------------------------------------------------------------------
+
+const TABLE_HEAD = [
+  { id: 'data_emissao', label: 'Data emissão', align: 'left' },
+  { id: 'numero', label: 'Nº cartão', align: 'center' },
+  { id: 'nome', label: 'Nome cliente', align: 'left' },
+  { id: 'tipo', label: 'Tipo cartão', align: 'left' },
+];
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,17 +65,16 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
-  const isEdit = !!selectedItem;
+  const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const cartoesList = useMemo(
     () =>
       cartoes?.map((row) => ({
+        nota: '',
         idItem: row?.id,
         nome: row?.nome,
-        numero: row?.numero,
         tipo: row?.tipo,
-        nota: '',
+        numero: row?.numero,
         dataSisp: new Date(),
       })),
     [cartoes]
@@ -89,7 +105,7 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
               data_rececao_sisp: fase === 'Emissão' ? row.dataSisp : '',
             }))
           ),
-          { mail, balcao, msg: 'rececao confirmada' }
+          { mail, balcao, msg: 'Receção dos cartões confirmada' }
         )
       );
     } catch (error) {
@@ -142,7 +158,7 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
             </Table>
           </TableContainer>
           <Stack sx={{ pb: 3, pr: 3 }}>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
+            <DialogButons isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
           </Stack>
         </FormProvider>
       </DialogContent>
@@ -194,7 +210,7 @@ export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date()
             data_emissao: format(values.data, 'yyyy-MM-dd'),
             data_rececao_sisp: fase === 'Emissão' ? values.dataSisp : null,
           }),
-          { mail, fase, balcao: balcao?.id, msg: 'rececao confirmada' }
+          { mail, fase, balcao: balcao?.id, msg: 'Receção dos cartões confirmada' }
         )
       );
     } catch (error) {
@@ -294,6 +310,150 @@ export function BalcaoEntregaForm({ open, onCancel }) {
           <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+AnularForm.propTypes = {
+  uo: PropTypes.number,
+  open: PropTypes.bool,
+  fase: PropTypes.string,
+  data: PropTypes.object,
+  uosList: PropTypes.array,
+  cartoes: PropTypes.array,
+  onCancel: PropTypes.func,
+};
+
+export function AnularForm({ fase, open, cartoes, uo, data, uosList, onCancel }) {
+  const {
+    order,
+    dense,
+    orderBy,
+    //
+    selected,
+    onSelectRow,
+    onSelectAllRows,
+    //
+    onSort,
+  } = useTable({ defaultOrder: 'asc', defaultOrderBy: 'numero' });
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const [uoData, setUoData] = useState(false);
+  const { mail } = useSelector((state) => state.intranet);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+
+  const formSchema = Yup.object().shape({
+    uo: Yup.mixed().required('Data de receção não pode ficar vazio'),
+    data: Yup.date().typeError('Introduza uma data válida').required('Data de emissão não pode ficar vazio'),
+  });
+  const defaultValues = useMemo(() => ({ data, uo }), [uo, data]);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const onSubmit = async () => {
+    try {
+      dispatch(
+        updateItem(
+          'anular por balcao e data',
+          JSON.stringify({ balcao: values?.uo?.id, data_emissao: format(values.data, 'yyyy-MM-dd') }),
+          { mail, emissao: fase === 'Emissão' ? 'true' : 'false', msg: 'Confirmação anulada' }
+        )
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleAnular = async () => {
+    try {
+      dispatch(
+        updateItem('anular multiplo', JSON.stringify(selected?.map((row) => ({ id: row }))), {
+          mail,
+          emissao: fase === 'Emissão' ? 'true' : 'false',
+          msg: 'Confirmação anulada',
+        })
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
+      <DialogTitle sx={{ mb: 2 }}>Anular confirmação de receção de cartões</DialogTitle>
+      <DialogContent>
+        <FormControlLabel
+          label="Anular por balcão e data de emissão"
+          sx={{ mb: 2, width: 1, justifyContent: 'center' }}
+          control={<Switch checked={uoData} onChange={(event, value) => setUoData(value)} />}
+        />
+        {uoData ? (
+          <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={8}>
+                <RHFAutocompleteObject name="uo" label="Balcão de entrega" options={uosList} />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFDatePicker name="data" disableFuture label="Data de emissão" />
+              </Grid>
+            </Grid>
+            <DialogButons edit isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
+          </FormProvider>
+        ) : (
+          <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
+            <Table size={dense ? 'small' : 'medium'}>
+              <TableHeadCustom
+                order={order}
+                onSort={onSort}
+                orderBy={orderBy}
+                headLabel={TABLE_HEAD}
+                numSelected={selected.length}
+                rowCount={cartoes.length}
+                onSelectAllRows={(checked) =>
+                  onSelectAllRows(
+                    checked,
+                    cartoes.map((row) => row.id)
+                  )
+                }
+              />
+              <TableBody>
+                {cartoes.map((row, index) => (
+                  <TableRow key={`${row.id}_${index}`} hover>
+                    <TableCell padding="checkbox">
+                      <Checkbox checked={selected.includes(row.id)} onClick={() => onSelectRow(row.id)} />
+                    </TableCell>
+                    <TableCell>{ptDate(row.data_emissao)}</TableCell>
+                    <TableCell align="center">{row?.numero}</TableCell>
+                    <TableCell>{row?.nome}</TableCell>
+                    <TableCell>{row?.tipo}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </DialogContent>
+      {!uoData && (
+        <DialogActions>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button variant="outlined" color="inherit" onClick={onCancel}>
+            Cancelar
+          </Button>
+          {selected.length > 0 && (
+            <Button onClick={handleAnular} variant="soft" color="error" loading={isSaving}>
+              Anular
+            </Button>
+          )}
+        </DialogActions>
+      )}
     </Dialog>
   );
 }
