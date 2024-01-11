@@ -1,17 +1,16 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
+import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
-import Fab from '@mui/material/Fab';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -33,11 +32,10 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
-import { AddItem, DialogButons } from '../../components/Actions';
 import { FormLoading } from '../../components/skeleton';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { SearchNotFoundSmall } from '../../components/table';
 import { Notificacao } from '../../components/NotistackProvider';
+import { AddItem, DeleteItem, DialogButons } from '../../components/Actions';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
 //
@@ -795,7 +793,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
-        <Notificacao done={done} error={error} onCancel={onCancel} />
+        {done && <Notificacao done={done} error={error} onCancel={onCancel} />}
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -1026,7 +1024,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
         </Stack>
       </DialogTitle>
       <DialogContent>
-        <Notificacao done={done} error={error} onCancel={onCancel} />
+        {done && <Notificacao done={done} error={error} onCancel={onCancel} />}
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             {fields.map((item, index) => (
@@ -1048,15 +1046,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
                   <Grid item xs={12} sm={3} md={2}>
                     <Stack direction="row" spacing={1}>
                       <RHFSwitch name={`perfis[${index}].observador`} label="Somente observador" />
-                      {values.perfis.length > 1 && (
-                        <Stack direction="row" alignItems="center">
-                          <Tooltip title="Remover" arrow>
-                            <Fab color="error" size="small" variant="soft" onClick={() => handleRemove(index)}>
-                              <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
-                            </Fab>
-                          </Tooltip>
-                        </Stack>
-                      )}
+                      {values.perfis.length > 1 && <DeleteItem handleClick={() => handleRemove(index)} />}
                     </Stack>
                   </Grid>
                 </Grid>
@@ -1391,16 +1381,7 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography sx={{ color: 'text.secondary' }}>Estado:</Typography>
-                  <Typography variant="subtitle1">{estado?.nome}</Typography>
-                </Stack>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography sx={{ color: 'text.secondary' }}>Transição:</Typography>
-                  <Typography variant="subtitle1">{transicao?.label}</Typography>
-                </Stack>
-              </Grid>
+              <Transicao item={estado?.nome} transicao={transicao?.label} />
               <Grid item xs={12}>
                 <PesosDecisao perfisList={perfisList} />
               </Grid>
@@ -1415,13 +1396,13 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-NotificacaoForm.propTypes = { transicao: PropTypes.number, onCancel: PropTypes.func };
+NotificacaoForm.propTypes = { fluxo: PropTypes.object, transicao: PropTypes.object, onCancel: PropTypes.func };
 
-export function NotificacaoForm({ transicao, onCancel }) {
+export function NotificacaoForm({ fluxo, transicao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem, estado } = useSelector((state) => state.parametrizacao);
+  const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     corpo: Yup.string().required('Corpo não pode ficar vazio'),
@@ -1449,15 +1430,27 @@ export function NotificacaoForm({ transicao, onCancel }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(
-        createItem(
-          'regras transicao',
-          JSON.stringify(values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))),
-          { mail, transicaoId: transicao?.id, msg: 'Regra adicionada', estadoId: estado?.id }
-        )
-      );
+      if (selectedItem) {
+        dispatch(
+          updateItem('notificacao', JSON.stringify(values), {
+            mail,
+            id: selectedItem?.id,
+            msg: 'Notificação atualizada',
+          })
+        );
+      } else {
+        dispatch(createItem('notificacao', JSON.stringify(values), { mail, msg: 'Notificação adicionada' }));
+      }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(deleteItem('notificacao', { mail, id: selectedItem?.id, msg: 'Notificação eliminada' }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
     }
   };
 
@@ -1467,20 +1460,182 @@ export function NotificacaoForm({ transicao, onCancel }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1">{transicao?.label}</Typography>
-            </Grid>
-            <Grid item xs={12}>
+            <Transicao item={fluxo?.assunto} transicao={transicao?.label} fluxo />
+            <Grid item xs={12} sm={4}>
               <RHFAutocompleteSimple name="via" label="Via" options={['Email', 'SMS']} />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={8}>
               <RHFTextField name="assunto" label="Assunto" />
             </Grid>
             <Grid item xs={12}>
               <RHFEditor simple name="corpo" />
             </Grid>
           </Grid>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit ? 'eliminar esta notificação' : ''}
+          />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+DestinatarioForm.propTypes = { onCancel: PropTypes.func };
+
+export function DestinatarioForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, colaboradores } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, isOpenModal, selectedItem, notificacaoId } = useSelector((state) => state.parametrizacao);
+  const perfisList = useMemo(
+    () => colaboradores?.map((row) => ({ id: row?.id, label: row?.perfil?.displayName, email: row?.perfil?.mail })),
+    [colaboradores]
+  );
+
+  const formSchema = Yup.object().shape({
+    perfil: isEdit && Yup.mixed().required('Seleciona o colaborador'),
+    destinatarios: !isEdit && Yup.array(Yup.object({ perfil: Yup.mixed().required('Seleciona o colaborador') })),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      telefone: selectedItem?.telefone || '',
+      data_inicio: selectedItem?.data_inicio ? add(new Date(selectedItem?.data_inicio), { hours: 2 }) : null,
+      data_termino: selectedItem?.data_termino ? add(new Date(selectedItem?.data_termino), { hours: 2 }) : null,
+      perfil: isEdit
+        ? perfisList?.find((row) => row?.email?.toLowerCase() === selectedItem?.email?.toLowerCase())
+        : null,
+      destinatarios: isEdit ? [] : [{ perfil: null, data_inicio: null, data_termino: null, telefone: '' }],
+    }),
+    [selectedItem, isEdit, perfisList]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'destinatarios' });
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenModal, selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      if (selectedItem) {
+        dispatch(
+          updateItem(
+            'destinatario',
+            JSON.stringify({
+              telefone: values?.telefone,
+              email: values?.perfil?.email,
+              data_inicio: values?.data_inicio ? format(values.data_inicio, 'yyyy-MM-dd') : null,
+              data_termino: values?.data_termino ? format(values.data_termino, 'yyyy-MM-dd') : null,
+            }),
+            { mail, id: selectedItem?.id, msg: 'Destinatário atualizado' }
+          )
+        );
+      } else {
+        dispatch(
+          createItem(
+            'destinatario',
+            JSON.stringify(
+              values?.destinatarios?.map((row) => ({
+                telefone: row?.telefone,
+                email: row?.perfil?.email,
+                data_inicio: row?.data_inicio ? format(row.data_inicio, 'yyyy-MM-dd') : null,
+                data_termino: row?.data_termino ? format(row.data_termino, 'yyyy-MM-dd') : null,
+              }))
+            ),
+            { mail, id: notificacaoId, msg: 'Destinatários adicionado' }
+          )
+        );
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(deleteItem('destinatario', { mail, id: selectedItem?.id, msg: 'Destinatário eliminado' }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
+    }
+  };
+
+  const handleAdd = () => {
+    append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' });
+  };
+
+  const handleRemove = (index) => {
+    remove(index);
+  };
+
+  return (
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
+      <DialogTitle>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+          {isEdit ? 'Editar destinatário' : 'Adicionar destinatários'}
+          <AddItem small handleClick={handleAdd} />
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            {isEdit ? (
+              <>
+                <Grid item xs={12}>
+                  <RHFAutocompleteObject label="Colaborador" options={perfisList} name="perfil" />
+                </Grid>
+                <Grid item xs={12}>
+                  <RHFTextField label="Telefone" name="telefone" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <RHFDatePicker label="Data de início" name="data_inicio" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <RHFDatePicker label="Data de fim" name="data_termino" />
+                </Grid>
+              </>
+            ) : (
+              fields.map((item, index) => (
+                <Grid item xs={12} key={item.id}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={5}>
+                      <RHFAutocompleteObject
+                        label="Colaborador"
+                        options={perfisList}
+                        name={`destinatarios[${index}].perfil`}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <RHFTextField label="Telefone" name={`destinatarios[${index}].telefone`} />
+                    </Grid>
+                    <Grid item xs={12} md={5}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
+                        <RHFDatePicker label="Data de início" name={`destinatarios[${index}].data_inicio`} />
+                        <RHFDatePicker label="Data de fim" name={`destinatarios[${index}].data_termino`} />
+                        {values.destinatarios.length > 1 && <DeleteItem handleClick={() => handleRemove(index)} />}
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              ))
+            )}
+          </Grid>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit ? 'eliminar esta destinatário' : ''}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -1507,6 +1662,25 @@ export function ItemComponent({ item, rows, children }) {
         children
       )}
     </>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+Transicao.propTypes = { item: PropTypes.string, transicao: PropTypes.string, fluxo: PropTypes.bool };
+
+export function Transicao({ item, transicao, fluxo = false }) {
+  return (
+    <Grid item xs={12}>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Typography sx={{ color: 'text.secondary' }}>{fluxo ? 'Fluxo:' : 'Estado:'}</Typography>
+        <Typography variant="subtitle1">{item}</Typography>
+      </Stack>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Typography sx={{ color: 'text.secondary' }}>Transição:</Typography>
+        <Typography variant="subtitle1">{transicao}</Typography>
+      </Stack>
+    </Grid>
   );
 }
 

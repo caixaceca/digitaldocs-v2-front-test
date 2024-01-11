@@ -13,16 +13,23 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
-import { setItemValue } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
+import { setItemValue, noDados } from '../../utils/normalizeText';
 // hooks
 import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, openModal, selectItem, closeModal } from '../../redux/slices/parametrizacao';
+import {
+  openModal,
+  selectItem,
+  closeModal,
+  setNotificacaoId,
+  getFromParametrizacao,
+} from '../../redux/slices/parametrizacao';
 // Components
 import { Criado } from '../../components/Panel';
+import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -37,6 +44,7 @@ import {
   RegraEstadoForm,
   NotificacaoForm,
   AnexoDespesaForm,
+  DestinatarioForm,
   RegraTransicaoForm,
 } from './ParametrizacaoForm';
 import { Detalhes } from './Detalhes';
@@ -118,7 +126,7 @@ ParametrizacaoItemTabs.propTypes = { item: PropTypes.string };
 export default function ParametrizacaoItemTabs({ item }) {
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { fluxo, fluxos, estados } = useSelector((state) => state.parametrizacao);
+  const { fluxo, fluxos, estados, notificacaoId } = useSelector((state) => state.parametrizacao);
   const fluxosList = fluxos?.map((row) => ({ id: row?.id, label: row?.assunto }));
   const transicoesList = useMemo(() => listaTransicoes(fluxo?.transicoes || [], estados), [estados, fluxo?.transicoes]);
   const [fluxoR, setFluxoR] = useState(
@@ -198,6 +206,16 @@ export default function ParametrizacaoItemTabs({ item }) {
     }
   }, [dispatch, currentTab, transicao?.id, mail]);
 
+  useEffect(() => {
+    if (currentTab === 'Destinatários' && mail && notificacaoId) {
+      dispatch(getFromParametrizacao('destinatarios', { id: notificacaoId, mail }));
+    }
+  }, [dispatch, currentTab, notificacaoId, mail]);
+
+  const handleChangeTab = async (event, newValue) => {
+    setItemValue(newValue, setCurrentTab, '', false);
+  };
+
   const tabsList = [
     ...(item === 'anexos'
       ? [
@@ -219,15 +237,14 @@ export default function ParametrizacaoItemTabs({ item }) {
       : []),
     ...(item === 'notificacoes'
       ? [
-          { value: 'Notificações', component: <TableItem item="notificacoes" transicao={transicao} /> },
-          { value: 'Destinatários', component: <TableItem item="destinatarios" transicao={transicao} /> },
+          {
+            value: 'Notificações',
+            component: <TableItem item="notificacoes" transicao={transicao} fluxo={fluxo} changeTab={setCurrentTab} />,
+          },
+          ...(notificacaoId ? [{ value: 'Destinatários', component: <TableItem item="destinatarios" /> }] : []),
         ]
       : []),
   ];
-
-  const handleChangeTab = async (event, newValue) => {
-    setItemValue(newValue, setCurrentTab, '', false);
-  };
 
   return (
     <>
@@ -305,9 +322,14 @@ export default function ParametrizacaoItemTabs({ item }) {
 
 // ----------------------------------------------------------------------
 
-TableItem.propTypes = { item: PropTypes.string, transicao: PropTypes.object };
+TableItem.propTypes = {
+  item: PropTypes.string,
+  fluxo: PropTypes.object,
+  changeTab: PropTypes.func,
+  transicao: PropTypes.object,
+};
 
-function TableItem({ item, transicao = null }) {
+function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { handleCloseModal } = useModal(closeModal());
@@ -344,9 +366,14 @@ function TableItem({ item, transicao = null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const handleView = (item) => {
-    dispatch(openModal('view'));
-    dispatch(selectItem(item));
+  const handleView = (dados) => {
+    if (item === 'notificacoes') {
+      dispatch(setNotificacaoId(dados?.id));
+      changeTab('Destinatários');
+    } else {
+      dispatch(openModal('view'));
+      dispatch(selectItem(dados));
+    }
   };
 
   const dataFiltered = applySortFilter({
@@ -472,7 +499,9 @@ function TableItem({ item, transicao = null }) {
                         (item === 'notificacoes' && (
                           <>
                             <TableCell>{row.assunto}</TableCell>
-                            <TableCell>{row.corpo}</TableCell>
+                            <TableCell>
+                              <Markdown own children={row.corpo} />
+                            </TableCell>
                             <TableCell>{row.via}</TableCell>
                             <TableCell align="center">
                               <Checked check={row.ativo} />
@@ -482,9 +511,13 @@ function TableItem({ item, transicao = null }) {
                         (item === 'destinatarios' && (
                           <>
                             <TableCell>{row.email}</TableCell>
-                            <TableCell>{row.telefone}</TableCell>
-                            <TableCell align="center">{ptDate(row.data_inicio)}</TableCell>
-                            <TableCell align="center">{ptDate(row.data_fim)}</TableCell>
+                            <TableCell>{row?.telefone || noDados()}</TableCell>
+                            <TableCell align="center">
+                              {row.data_inicio ? ptDate(row.data_inicio) : 'Acesso permanente'}
+                            </TableCell>
+                            <TableCell align="center">
+                              {row.data_fim ? ptDate(row.data_fim) : 'Acesso permanente'}
+                            </TableCell>
                             <TableCell align="center">
                               <Checked check={row.ativo} />
                             </TableCell>
@@ -501,7 +534,12 @@ function TableItem({ item, transicao = null }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.75} justifyContent="right">
                           {item !== 'regras estado' && item !== 'regras transicao' && <UpdateItem dados={row} />}
-                          {item !== 'linhas' && <ViewItem handleClick={() => handleView(row)} />}
+                          {item !== 'linhas' && item !== 'destinatarios' && (
+                            <ViewItem
+                              handleClick={() => handleView(row)}
+                              label={item === 'notificacoes' ? 'DESTINATÁRIOS' : ''}
+                            />
+                          )}
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -528,6 +566,7 @@ function TableItem({ item, transicao = null }) {
           />
         )}
       </Card>
+
       {selectedItem && <Detalhes item={item} closeModal={handleCloseModal} />}
       {(item === 'anexos' && <AnexoDespesaForm item="Anexo" onCancel={handleCloseModal} />) ||
         (item === 'despesas' && <AnexoDespesaForm item="Despesa" onCancel={handleCloseModal} />) ||
@@ -535,7 +574,10 @@ function TableItem({ item, transicao = null }) {
         (item === 'linhas' && <LinhaForm onCancel={handleCloseModal} />) ||
         (item === 'regras estado' && <RegraEstadoForm onCancel={handleCloseModal} />) ||
         (item === 'regras transicao' && <RegraTransicaoForm onCancel={handleCloseModal} transicao={transicao} />) ||
-        (item === 'notificacoes' && <NotificacaoForm onCancel={handleCloseModal} transicao={transicao} />)}
+        (item === 'notificacoes' && (
+          <NotificacaoForm onCancel={handleCloseModal} transicao={transicao} fluxo={fluxo} />
+        )) ||
+        (item === 'destinatarios' && <DestinatarioForm onCancel={handleCloseModal} />)}
     </>
   );
 }

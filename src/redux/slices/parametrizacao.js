@@ -28,6 +28,7 @@ const initialState = {
   meuAmbiente: null,
   estadoRegra: null,
   selectedItem: null,
+  notificacaoId: null,
   fluxos: [],
   linhas: [],
   anexos: [],
@@ -221,6 +222,7 @@ const slice = createSlice({
     },
 
     getNotificacoesSuccess(state, action) {
+      state.notificacaoId = null;
       state.notificacoes = action.payload;
     },
 
@@ -238,6 +240,14 @@ const slice = createSlice({
 
     createLinhaSuccess(state, action) {
       state.linhas.push(action.payload);
+    },
+
+    createNotificacaoSuccess(state, action) {
+      state.notificacoes.push(action.payload);
+    },
+
+    createDestinatarioSuccess(state, action) {
+      state.destinatarios.push(action.payload);
     },
 
     createMotivoPendenciaSuccess(state, action) {
@@ -287,6 +297,16 @@ const slice = createSlice({
     updateLinhaSuccess(state, action) {
       const index = state.linhas.findIndex((row) => row.id === action.payload.id);
       state.linhas[index] = action.payload;
+    },
+
+    updateNotificacaoSuccess(state, action) {
+      const index = state.notificacoes.findIndex((row) => row.id === action.payload.id);
+      state.notificacoes[index] = action.payload;
+    },
+
+    updateDestinatarioSuccess(state, action) {
+      const index = state.destinatarios.findIndex((row) => row.id === action.payload.id);
+      state.destinatarios[index] = action.payload;
     },
 
     updateAnexoSuccess(state, action) {
@@ -399,6 +419,10 @@ const slice = createSlice({
     changeMeuFluxo(state, action) {
       state.meuFluxo = action.payload;
     },
+
+    setNotificacaoId(state, action) {
+      state.notificacaoId = action.payload;
+    },
   },
 });
 
@@ -406,8 +430,16 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, openModalItem, selectItem, closeModal, resetItem, changeMeuAmbiente, changeMeuFluxo } =
-  slice.actions;
+export const {
+  openModal,
+  resetItem,
+  selectItem,
+  closeModal,
+  openModalItem,
+  changeMeuFluxo,
+  setNotificacaoId,
+  changeMeuAmbiente,
+} = slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -688,6 +720,17 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.getRegrasTransicaoSuccess(response.data.objeto));
           break;
         }
+        case 'notificacao': {
+          const response = await axios.post(`${BASEURLDD}/v1/notificacoes`, dados, options);
+          dispatch(slice.actions.createNotificacaoSuccess(response.data.objeto));
+          break;
+        }
+        case 'destinatario': {
+          await axios.post(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, dados, options);
+          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
+          dispatch(slice.actions.getDestinatariosSuccess(response.data.objeto));
+          break;
+        }
 
         default:
           break;
@@ -759,6 +802,16 @@ export function updateItem(item, dados, params) {
         case 'linha': {
           const response = await axios.put(`${BASEURLDD}/v1/linhas/${params?.id}`, dados, options);
           dispatch(slice.actions.updateLinhaSuccess(response.data.objeto));
+          break;
+        }
+        case 'notificacao': {
+          const response = await axios.put(`${BASEURLDD}/v1/notificacoes/${params?.id}`, dados, options);
+          dispatch(slice.actions.updateNotificacaoSuccess(response.data.objeto));
+          break;
+        }
+        case 'destinatario': {
+          const response = await axios.put(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, dados, options);
+          dispatch(slice.actions.updateDestinatarioSuccess(response.data.objeto));
           break;
         }
         case 'Despesa': {

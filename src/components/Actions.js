@@ -187,12 +187,17 @@ export function UpdateItemAlt({ handleClick }) {
 
 // ----------------------------------------------------------------------
 
-ViewItem.propTypes = { swap: PropTypes.bool, estado: PropTypes.bool, handleClick: PropTypes.func };
+ViewItem.propTypes = {
+  swap: PropTypes.bool,
+  estado: PropTypes.bool,
+  label: PropTypes.string,
+  handleClick: PropTypes.func,
+};
 
-export function ViewItem({ swap = false, estado = false, handleClick }) {
+export function ViewItem({ swap = false, estado = false, label = 'DETALHES', handleClick }) {
   return (
     <Stack>
-      <Tooltip title={(estado && 'Colaboradores') || (swap && 'Estados & Acessos') || 'DETALHES'} arrow>
+      <Tooltip title={(estado && 'Colaboradores') || (swap && 'Estados & Acessos') || label} arrow>
         <Fab color="success" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
           {(swap && <SwapHorizOutlinedIcon />) || (estado && <GroupOutlinedIcon />) || (
             <SvgIconStyle src="/assets/icons/view.svg" />
