@@ -349,7 +349,7 @@ export default function TableCartoes() {
                         <Checked check={row.rececao_validado} color={row.rececao_validado ? '' : 'error.main'} />
                       </TableCell>
                       <TableCell width={10}>
-                        <Stack direction="row" spacing={0.75} justifyContent="right">
+                        <Stack direction="row" spacing={0.5} justifyContent="right">
                           {!row.rececao_validado &&
                             confirmarCartoes &&
                             fase === 'Emissão' &&

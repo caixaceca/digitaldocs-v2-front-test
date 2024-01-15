@@ -532,7 +532,7 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                         </TableCell>
                       )}
                       <TableCell align="center" width={10}>
-                        <Stack direction="row" spacing={0.75} justifyContent="right">
+                        <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item !== 'regras estado' && item !== 'regras transicao' && <UpdateItem dados={row} />}
                           {item !== 'linhas' && item !== 'destinatarios' && (
                             <ViewItem

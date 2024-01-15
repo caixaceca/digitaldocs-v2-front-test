@@ -237,7 +237,7 @@ export default function ParametrizacaoItem({ item }) {
                           </>
                         ))}
                       <TableCell align="center" width={10}>
-                        <Stack direction="row" spacing={0.75} justifyContent="right">
+                        <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item === 'origens' || item === 'estados' || item === 'fluxos' ? (
                             <UpdateItem
                               id={row?.id}

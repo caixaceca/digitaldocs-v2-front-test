@@ -526,7 +526,7 @@ export function Detalhes({ closeModal }) {
                   <ListItem disableGutters divider sx={{ pb: 0.5 }}>
                     <Typography variant="subtitle1">Confirmação de receção</Typography>
                   </ListItem>
-                  {selectedItem?.data_rececao_sisp && (
+                  {selectedItem?.emissao_validado && selectedItem?.data_rececao_sisp && (
                     <TextItem title="Data recebido da SISP:" text={ptDate(selectedItem?.data_rececao_sisp)} />
                   )}
                   <TextItem

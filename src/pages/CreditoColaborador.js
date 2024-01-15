@@ -209,7 +209,7 @@ export default function CreditoColaborador() {
           ]}
           action={
             pedidoCC && (
-              <Stack direction="row" spacing={0.75}>
+              <Stack direction="row" spacing={0.5}>
                 {!pedidoCC?.preso && (
                   <>
                     {processoMePertence(meusAmbientes, pedidoCC?.ultimo_estado_id) &&

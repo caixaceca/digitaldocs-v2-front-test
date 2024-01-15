@@ -328,7 +328,7 @@ export function DialogButons({
   label = '',
   edit = false,
   handleDelete,
-  color = 'success',
+  color = 'primary',
 }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
