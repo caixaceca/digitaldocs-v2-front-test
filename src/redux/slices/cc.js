@@ -167,7 +167,7 @@ const slice = createSlice({
 
     aceitarProcessoSuccess(state, action) {
       state.pedidoCC.preso = true;
-      state.pedidoCC.perfil_id = action.payload?.dados?.perfilId;
+      state.pedidoCC.estados[0].perfil_id = action.payload?.dados?.perfilId;
       state.destinos = action.payload?.destinos || [];
     },
 

@@ -19,6 +19,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import PermContactCalendarOutlinedIcon from '@mui/icons-material/PermContactCalendarOutlined';
 // utils
 import { newLineText } from '../../../utils/normalizeText';
+import { colorLabel } from '../../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../../utils/formatTime';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 // redux
@@ -183,16 +184,7 @@ export default function DadosGerais() {
                 {situacao && (
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ ...itemStyle }}>
                     <Typography sx={{ color: 'text.secondary' }}>Situação:</Typography>
-                    <Label
-                      color={
-                        (situacao === 'Em análise' && 'default') ||
-                        (situacao === 'Entrada' && 'default') ||
-                        (situacao === 'Aprovado' && 'success') ||
-                        (situacao === 'Contratado' && 'primary') ||
-                        'error'
-                      }
-                      sx={{ typography: 'subtitle2', py: 1.5 }}
-                    >
+                    <Label color={colorLabel(situacao)} sx={{ typography: 'subtitle2', py: 1.5 }}>
                       {situacao}
                     </Label>
                   </Stack>
@@ -272,12 +264,7 @@ function DetailLabel({ label, divide, colaborador = null }) {
   return (
     <Grid item xs={12} sm={divide ? 6 : 12}>
       <Stack>
-        <Label
-          sx={{ typography: 'body1', p: 2, textTransform: 'none' }}
-          color={
-            (label === 'Pendente' && 'warning') || (label === 'Afeto' && 'info') || (label === 'Preso' && 'success')
-          }
-        >
+        <Label sx={{ typography: 'body1', p: 2, textTransform: 'none' }} color={colorLabel(label)}>
           {(label === 'Pendente' && 'Processo pendente') ||
             (label === 'Afeto' && (
               <>

@@ -62,7 +62,7 @@ export default function Parametrizacao() {
   return (
     <Page title="Parametrização | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        {done && <Notificacao done={done} error={error} onCancel={handleCloseModal} />}
+        <Notificacao done={done} error={error} onCancel={handleCloseModal} />
         <TabsWrapper
           tab="tabParams"
           tabsList={tabsList}

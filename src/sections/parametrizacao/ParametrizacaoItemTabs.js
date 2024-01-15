@@ -111,7 +111,7 @@ const TABLE_HEAD_NOTIFICACOES = [
 
 const TABLE_HEAD_DESTINATARIOS = [
   { id: 'email', label: 'Email', align: 'left' },
-  { id: 'telefone', label: 'Telefone', align: 'left' },
+  { id: 'telefone', label: 'Telefone', align: 'center' },
   { id: 'data_inicio', label: 'Data inicial', align: 'center' },
   { id: 'data_termino', label: 'Data final', align: 'center' },
   { id: 'ativo', label: 'Ativo', align: 'center' },
@@ -511,7 +511,7 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                         (item === 'destinatarios' && (
                           <>
                             <TableCell>{row.email}</TableCell>
-                            <TableCell>{row?.telefone || noDados()}</TableCell>
+                            <TableCell align="center">{row?.telefone || noDados()}</TableCell>
                             <TableCell align="center">
                               {row.data_inicio ? ptDate(row.data_inicio) : 'Acesso permanente'}
                             </TableCell>

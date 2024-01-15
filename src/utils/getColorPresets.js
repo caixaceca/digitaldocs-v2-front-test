@@ -78,3 +78,17 @@ export default function getColorPresets(presetsKey) {
     default: defaultPreset,
   }[presetsKey];
 }
+
+// ----------------------------------------------------------------------
+
+export function colorLabel(value) {
+  return (
+    ((value === 'Preso' || value === 'Aprovado' || value === 'Favorável') && 'success') ||
+    ((value === 'retidos' || value === 'Pendente' || value === 'Favorável parcial') && 'warning') ||
+    (value === 'pendentes' && 'focus') ||
+    ((value === 'atribuidos' || value === 'Afeto') && 'info') ||
+    ((value === 'Em análise' || value === 'Entrada') && 'default') ||
+    ((value === 'Indeferido' || value === 'Desistido' || value === 'Não favorável') && 'error') ||
+    'primary'
+  );
+}

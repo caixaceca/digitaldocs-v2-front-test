@@ -31,11 +31,12 @@ import { TransicaoForm } from './ParametrizacaoForm';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD_TRANSICOES = [
-  { id: 'estado_inicial', label: 'Estado de origem', align: 'left' },
-  { id: 'estado_final', label: 'Estado de destino', align: 'left' },
+  { id: 'estado_inicial', label: 'Origem', align: 'left' },
+  { id: 'estado_final', label: 'Destino', align: 'left' },
   { id: 'modo', label: 'Modo', align: 'center' },
   { id: 'prazoemdias', label: 'Prazo', align: 'center' },
-  { id: 'is_after_devolucao', label: 'Depois devolução', align: 'center' },
+  { id: 'is_after_devolucao', label: 'Depois dev.', align: 'center' },
+  { id: 'requer_parecer', label: 'Requer parecer', align: 'center' },
   { id: 'is_paralelo', label: 'Paralelo', align: 'center' },
   { id: '' },
 ];
@@ -121,7 +122,7 @@ export default function TableEstado({ tab }) {
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={tab === 'transicoes' ? 7 : 3} row={10} />
+                  <SkeletonTable column={tab === 'transicoes' ? 8 : 3} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${tab}_${index}`}>
@@ -137,6 +138,9 @@ export default function TableEstado({ tab }) {
                           </TableCell>
                           <TableCell align="center">
                             <Checked check={row.is_after_devolucao} />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Checked check={row.requer_parecer} />
                           </TableCell>
                           <TableCell align="center">
                             <Checked check={row.is_paralelo} />
@@ -196,8 +200,8 @@ function transicoesList(transicoes, estados) {
   transicoes?.forEach((row) => {
     transicoesL.push({
       ...row,
-      estado_inicial: estados?.find((_row) => _row.id === row.estado_inicial_id)?.nome,
-      estado_final: estados?.find((_row) => _row.id === row.estado_final_id)?.nome,
+      estado_inicial: estados?.find((item) => item.id === row.estado_inicial_id)?.nome,
+      estado_final: estados?.find((item) => item.id === row.estado_final_id)?.nome,
     });
   });
   return transicoesL;

@@ -273,7 +273,8 @@ export default function TableCartoes() {
               )}
               {temDadosNaoValidados && confirmarCartoes && (
                 <>
-                  {fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao) && !isAdmin ? (
+                  {(fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao) && !isAdmin) ||
+                  (fase === 'Emissão' && fromAgencia) ? (
                     ''
                   ) : (
                     <Stack direction="row" spacing={1}>

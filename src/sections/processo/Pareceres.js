@@ -22,6 +22,7 @@ import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 // utils
 import { newLineText } from '../../utils/normalizeText';
+import { colorLabel } from '../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { getFileThumb, b64toBlob } from '../../utils/getFileFormat';
 // hooks
@@ -168,15 +169,7 @@ export default function Pareceres({ pareceres, processoId, assunto }) {
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <Typography variant="subtitle1">{row?.nome?.replace(' - P/S/P', '')}</Typography>
                         {row?.parecer && (
-                          <Label
-                            variant="ghost"
-                            sx={{ typography: 'subtitle2' }}
-                            color={
-                              (row?.parecer === 'Favorável' && 'success') ||
-                              (row?.parecer === 'Não favorável' && 'error') ||
-                              'warning'
-                            }
-                          >
+                          <Label variant="ghost" sx={{ typography: 'subtitle2' }} color={colorLabel(row?.parecer)}>
                             {row?.parecer}
                           </Label>
                         )}

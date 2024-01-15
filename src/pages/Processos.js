@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import { styled, alpha } from '@mui/material/styles';
 // utils
 import selectTab from '../utils/selectTab';
+import { colorLabel } from '../utils/getColorPresets';
 import { pertencoAoEstado } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';
@@ -182,12 +183,7 @@ export default function Processos() {
                       showZero
                       max={999}
                       badgeContent={tab.num}
-                      color={
-                        (tab.value === 'retidos' && 'warning') ||
-                        (tab.value === 'pendentes' && 'focus') ||
-                        (tab.value === 'atribuidos' && 'info') ||
-                        'success'
-                      }
+                      color={colorLabel(tab.value)}
                       sx={{
                         ml: 0.5,
                         '& .MuiBadge-badge': {

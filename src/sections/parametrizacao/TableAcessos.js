@@ -137,7 +137,7 @@ export default function TableAcessos({ tab }) {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <RoleBasedGuard hasContent roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
-        {done && <Notificacao done={done} error={error} onCancel={handleCloseModal} />}
+        <Notificacao done={done} error={error} onCancel={handleCloseModal} />
         <Card sx={{ p: 1 }}>
           <SearchToolbarSimple item="filterAcesso" filter={filter} setFilter={setFilter} />
           <Scrollbar>

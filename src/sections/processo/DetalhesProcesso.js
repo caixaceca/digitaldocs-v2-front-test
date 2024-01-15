@@ -19,6 +19,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
+import { colorLabel } from '../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { valorPorExtenso } from '../../utils/numeroPorExtenso';
 import { fNumber, fCurrency, fPercent } from '../../utils/formatNumber';
@@ -257,15 +258,7 @@ export default function DetalhesProcesso({ isPS }) {
           {situacao && (
             <Stack direction="row" alignItems="center" spacing={1} sx={{ ...itemStyle }}>
               <Typography sx={{ color: 'text.secondary' }}>Situação:</Typography>
-              <Label
-                color={
-                  (situacao === 'Em análise' && 'default') ||
-                  (situacao === 'Aprovado' && 'success') ||
-                  (situacao === 'Contratado' && 'primary') ||
-                  'error'
-                }
-                sx={{ typography: 'subtitle2', py: 1.5 }}
-              >
+              <Label color={colorLabel(situacao)} sx={{ typography: 'subtitle2', py: 1.5 }}>
                 {situacao}
               </Label>
             </Stack>
