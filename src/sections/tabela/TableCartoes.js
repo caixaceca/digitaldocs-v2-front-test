@@ -410,7 +410,7 @@ export default function TableCartoes() {
       )}
       {temDadosValidados &&
         confirmarCartoes &&
-        ((fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao)) ||
+        ((fase === 'Receção' && Number(uo?.id) === Number(cc?.uo?.balcao)) ||
           (fase === 'Emissão' && cc?.uo?.label === 'DOP-CE') ||
           isAdmin) && (
           <AnularForm

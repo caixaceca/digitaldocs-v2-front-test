@@ -22,10 +22,10 @@ export default axiosInstance;
 
 /// ---------------------------- TESTE ----------------------------
 
-// export const BASEURL = 'https://intraneteste.caixa.cv:5000';
-// export const BASEURLCC = 'https://ddocsteste.caixa.cv/aranha';
-// export const BASEURLDD = 'https://ddocsteste.caixa.cv/forminga';
-// export const BASEURLSLIM = 'https://intraneteste.caixa.cv:8090';
+export const BASEURL = 'https://intraneteste.caixa.cv:5000';
+export const BASEURLCC = 'https://ddocsteste.caixa.cv/aranha';
+export const BASEURLDD = 'https://ddocsteste.caixa.cv/forminga';
+export const BASEURLSLIM = 'https://intraneteste.caixa.cv:8090';
 
 /// --------------------------- PRODUÇÃo --------------------------
 
