@@ -274,7 +274,7 @@ export default function TableCartoes() {
               {temDadosNaoValidados && confirmarCartoes && (
                 <>
                   {(fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao) && !isAdmin) ||
-                  (fase === 'Emissão' && fromAgencia) ? (
+                  (fase === 'Emissão' && fromAgencia && !isAdmin) ? (
                     ''
                   ) : (
                     <Stack direction="row" spacing={1}>
@@ -290,7 +290,7 @@ export default function TableCartoes() {
               )}
               {temDadosValidados &&
                 confirmarCartoes &&
-                ((fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao)) ||
+                ((fase === 'Receção' && Number(uo?.id) === Number(cc?.uo?.balcao)) ||
                   (fase === 'Emissão' && cc?.uo?.label === 'DOP-CE') ||
                   isAdmin) && (
                   <DefaultAction label="ANULAR CONFIRMAÇÂO" handleClick={onOpen2} icon="cancelar" color="error" />
