@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
+import { format, add, sub } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -27,7 +28,6 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { format, add, sub } from 'date-fns';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable from '../../hooks/useTable';
@@ -231,7 +231,7 @@ export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date()
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={fase === 'Emissão' ? 6 : 12}>
-              <RHFDatePicker name="data" disableFuture label="Data de emissão" />
+              <RHFDatePicker name="data" label="Data de emissão" disableFuture />
             </Grid>
             {fase === 'Emissão' && (
               <Grid item xs={12} sm={6}>
@@ -320,13 +320,12 @@ AnularForm.propTypes = {
   uo: PropTypes.number,
   open: PropTypes.bool,
   fase: PropTypes.string,
-  data: PropTypes.object,
   uosList: PropTypes.array,
   cartoes: PropTypes.array,
   onCancel: PropTypes.func,
 };
 
-export function AnularForm({ fase, open, cartoes, uo, data, uosList, onCancel }) {
+export function AnularForm({ fase, open, cartoes, uo, uosList, onCancel }) {
   const {
     order,
     dense,
@@ -348,7 +347,7 @@ export function AnularForm({ fase, open, cartoes, uo, data, uosList, onCancel })
     uo: Yup.mixed().required('Data de receção não pode ficar vazio'),
     data: Yup.date().typeError('Introduza uma data válida').required('Data de emissão não pode ficar vazio'),
   });
-  const defaultValues = useMemo(() => ({ data, uo }), [uo, data]);
+  const defaultValues = useMemo(() => ({ data: null, uo }), [uo]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
   const values = watch();
@@ -377,8 +376,8 @@ export function AnularForm({ fase, open, cartoes, uo, data, uosList, onCancel })
       dispatch(
         updateItem('anular multiplo', JSON.stringify(selected?.map((row) => ({ id: row }))), {
           mail,
-          emissao: fase === 'Emissão' ? 'true' : 'false',
           msg: 'Confirmação anulada',
+          emissao: fase === 'Emissão' ? 'true' : 'false',
         })
       );
     } catch (error) {
@@ -402,7 +401,12 @@ export function AnularForm({ fase, open, cartoes, uo, data, uosList, onCancel })
                 <RHFAutocompleteObject name="uo" label="Balcão de entrega" options={uosList} />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <RHFDatePicker name="data" disableFuture label="Data de emissão" />
+                <RHFDatePicker
+                  name="data"
+                  disableFuture
+                  label="Data de emissão"
+                  minDate={fase === 'Emissão' ? sub(new Date(), { years: 1 }) : sub(new Date(), { months: 1 })}
+                />
               </Grid>
             </Grid>
             <DialogButons edit isSaving={isSaving} onCancel={onCancel} label="Confirmar" />

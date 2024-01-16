@@ -156,6 +156,7 @@ export default function NovoEditarProcesso() {
           </>
         ) : (
           <RoleBasedGuard
+            apChild
             hasContent
             roles={['XXXXX']}
             children={

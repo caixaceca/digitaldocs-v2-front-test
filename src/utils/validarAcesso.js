@@ -163,25 +163,25 @@ export const podeArquivar = (
   meusAmbientes,
   fromAgencia,
   iAmInGrpGerente,
-  estadoAtualiID,
+  estadoAtualID,
   arquivoAtendimento,
   acessoArquivarProcesso
 ) => {
-  let i = 0;
-  while (i < meusAmbientes?.length) {
-    if (
-      ((meusAmbientes[i]?.is_inicial && fromAgencia && iAmInGrpGerente) ||
-        (meusAmbientes[i]?.is_inicial && fromAgencia && arquivoAtendimento) ||
-        (meusAmbientes[i]?.is_inicial && !fromAgencia) ||
-        meusAmbientes[i]?.is_final ||
-        acessoArquivarProcesso) &&
-      Number(meusAmbientes[i]?.id) === Number(estadoAtualiID)
-    ) {
-      return true;
-    }
-    i += 1;
-  }
-  return false;
+  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoAtualID));
+  return (
+    (estadoProcesso?.is_inicial && fromAgencia && iAmInGrpGerente) ||
+    (estadoProcesso?.is_inicial && fromAgencia && arquivoAtendimento) ||
+    (estadoProcesso?.is_inicial && !fromAgencia) ||
+    estadoProcesso?.is_final ||
+    acessoArquivarProcesso
+  );
+};
+
+// ----------------------------------------------------------------------
+
+export const arquivarCC = (meusAmbientes, estadoAtualID) => {
+  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoAtualID));
+  return estadoProcesso?.is_inicial || estadoProcesso?.is_final;
 };
 
 // ----------------------------------------------------------------------

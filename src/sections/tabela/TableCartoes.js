@@ -206,8 +206,14 @@ export default function TableCartoes() {
     (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0);
   const temDadosValidados =
     (fase === 'Emissão' &&
-      dataFiltered?.filter((row) => row?.emissao_validado && !row?.rececao_validado)?.length > 0) ||
-    (fase === 'Receção' && dataFiltered?.filter((row) => row?.rececao_validado)?.length > 0);
+      dataFiltered?.filter(
+        (row) =>
+          row?.emissao_validado && !row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { years: 1 })
+      )?.length > 0) ||
+    (fase === 'Receção' &&
+      dataFiltered?.filter(
+        (row) => row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { months: 1 })
+      )?.length > 0);
 
   applySortFilter({
     dados,
@@ -416,14 +422,22 @@ export default function TableCartoes() {
           <AnularForm
             uo={uo}
             fase={fase}
-            data={datai}
             open={open2}
             dense={dense}
             uosList={uosList}
             onCancel={onClose2}
             cartoes={
-              (fase === 'Emissão' && dataFiltered?.filter((row) => row?.emissao_validado && !row?.rececao_validado)) ||
-              (fase === 'Receção' && dataFiltered?.filter((row) => row?.rececao_validado)) ||
+              (fase === 'Emissão' &&
+                dataFiltered?.filter(
+                  (row) =>
+                    row?.emissao_validado &&
+                    !row?.rececao_validado &&
+                    new Date(row?.data_emissao) > sub(new Date(), { years: 1 })
+                )) ||
+              (fase === 'Receção' &&
+                dataFiltered?.filter(
+                  (row) => row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { months: 1 })
+                )) ||
               []
             }
           />

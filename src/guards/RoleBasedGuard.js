@@ -17,12 +17,13 @@ import { useSelector } from '../redux/store';
 // ----------------------------------------------------------------------
 
 RoleBasedGuard.propTypes = {
+  apChild: PropTypes.bool,
   children: PropTypes.node,
   hasContent: PropTypes.bool,
   roles: PropTypes.arrayOf(PropTypes.string),
 };
 
-export default function RoleBasedGuard({ hasContent, roles, children }) {
+export default function RoleBasedGuard({ hasContent, roles, children, apChild }) {
   const navigate = useNavigate();
   const { meusacessos } = useSelector((state) => state.parametrizacao);
 
@@ -45,9 +46,11 @@ export default function RoleBasedGuard({ hasContent, roles, children }) {
             </m.div>
 
             <m.div variants={varBounce().in}>
-              {children || (
+              {apChild ? (
+                children
+              ) : (
                 <Typography sx={{ color: 'text.secondary' }}>
-                  Não tens permissão para aceder a este item,
+                  Não tens permissão para aceder a este item
                   <br />
                   Contactar o administrador de sistema (DICS)
                 </Typography>

@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { temNomeacao, processoMePertence, findColaboradores } from '../utils/validarAcesso';
+import { temNomeacao, processoMePertence, findColaboradores, arquivarCC } from '../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -264,7 +264,9 @@ export default function CreditoColaborador() {
                         </>
                       )}
                     <DefaultAction icon="arquivo" label="Arquivar" color="error" handleClick={onOpen3} />
-                    <ArquivarForm open={open3} onCancel={onClose3} />
+                    {arquivarCC(meusAmbientes, pedidoCC?.ultimo_estado_id) && (
+                      <ArquivarForm open={open3} onCancel={onClose3} />
+                    )}
                   </>
                 )}
               </Stack>
