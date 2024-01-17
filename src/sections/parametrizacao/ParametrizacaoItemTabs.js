@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -527,6 +528,7 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                         <TableCell width={10}>
                           {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.criador && <Criado tipo="user" value={row.criador} />}
+                          {(row?.modificado_em || row.modificador) && <Divider sx={{ my: 0.5 }} />}
                           {row?.modificado_em && <Criado tipo="time" value={ptDateTime(row.modificado_em)} />}
                           {row?.modificador && <Criado tipo="user" value={row.modificador} />}
                         </TableCell>
