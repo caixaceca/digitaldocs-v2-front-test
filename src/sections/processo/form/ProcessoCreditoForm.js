@@ -76,7 +76,7 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                 <RHFTextField name="titular" label="Proponente" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFTextField name="cliente" label="Nº de cliente" InputProps={{ type: 'number' }} />
+                <RHFNumberField name="cliente" label="Nº de cliente" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <RHFTextField name="numero_proposta" label="Nº de proposta" />

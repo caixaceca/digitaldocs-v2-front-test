@@ -51,6 +51,7 @@ import {
   FormProvider,
   RHFTextField,
   RHFDatePicker,
+  RHFNumberField,
   RHFAutocomplete,
   RHFUploadMultiFile,
   RHFAutocompleteSimple,
@@ -305,7 +306,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                 )}
                 {values?.acao?.hasopnumero && (
                   <Grid item xs={12}>
-                    <RHFTextField name="noperacao" required label="Nº de operação" InputProps={{ type: 'number' }} />
+                    <RHFNumberField name="noperacao" required label="Nº de operação" />
                   </Grid>
                 )}
                 <Grid item xs={12}>
@@ -525,12 +526,12 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
             </Grid>
             {processo?.assunto !== 'Encerramento de conta' && (
               <Grid item xs={12} sm={6}>
-                <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
+                <RHFNumberField name="noperacao" label="Nº de operação" />
               </Grid>
             )}
             {deveInformarNConta() && (
               <Grid item xs={12}>
-                <RHFTextField name="conta" label="Nº de conta" InputProps={{ type: 'number' }} />
+                <RHFNumberField name="conta" label="Nº de conta" />
               </Grid>
             )}
             <Grid item xs={12}>

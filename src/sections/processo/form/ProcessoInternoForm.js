@@ -10,6 +10,7 @@ import {
   RHFSwitch,
   RHFTextField,
   RHFDatePicker,
+  RHFNumberField,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
@@ -68,7 +69,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFTextField name="diadomes" label="Dia do mês" InputProps={{ type: 'number' }} />
+                      <RHFNumberField name="diadomes" label="Dia do mês" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
                       <RHFDatePicker name="data_inicio" label="Data de início" />

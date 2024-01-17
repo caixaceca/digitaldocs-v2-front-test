@@ -166,7 +166,10 @@ export function RHFNumberField({ name, tipo, ...other }) {
             inputProps: { style: { textAlign: 'right' } },
             endAdornment: tipo && (
               <InputAdornment position="end">
-                {(tipo === 'percentagem' && '%') || (tipo === 'moeda' && 'CVE') || (tipo === 'prestacao' && 'meses')}
+                {(tipo === 'dia' && 'dias') ||
+                  (tipo === 'moeda' && 'CVE') ||
+                  (tipo === 'percentagem' && '%') ||
+                  (tipo === 'prestacao' && 'meses')}
               </InputAdornment>
             ),
           }}

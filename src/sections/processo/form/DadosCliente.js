@@ -10,7 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 // components
 import SvgIconStyle from '../../../components/SvgIconStyle';
-import { RHFTextField, RHFDatePicker } from '../../../components/hook-form';
+import { RHFTextField, RHFNumberField, RHFDatePicker } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
             <>
               {!isPS && !isPSC && (
                 <Grid item xs={12} sm={6} xl={3}>
-                  <RHFTextField name="conta" label="Nº de conta" InputProps={{ type: 'number' }} />
+                  <RHFNumberField name="conta" label="Nº de conta" />
                 </Grid>
               )}
             </>
@@ -113,7 +113,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
           )}
           {(noperacao || fluxo?.is_con) && (
             <Grid item xs={12} sm={6} xl={3}>
-              <RHFTextField name="noperacao" label="Nº de operação" InputProps={{ type: 'number' }} />
+              <RHFNumberField name="noperacao" label="Nº de operação" />
             </Grid>
           )}
         </>
@@ -126,18 +126,10 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
             <RHFTextField name="docids" label="Nº de identificação secundário" />
           </Grid>
           <Grid item xs={12} sm={6} xl={3}>
-            <RHFTextField
-              name="cliente"
-              label="Nº de cliente"
-              InputProps={{ type: 'number', inputProps: { max: 999999999 } }}
-            />
+            <RHFNumberField name="cliente" label="Nº de cliente" />
           </Grid>
           <Grid item xs={12} sm={6} xl={3}>
-            <RHFTextField
-              name="conta"
-              label="Nº de conta"
-              InputProps={{ type: 'number', inputProps: { max: 99999999999999 } }}
-            />
+            <RHFNumberField name="conta" label="Nº de conta" />
           </Grid>
           <Grid item xs={12} sm={6} md={4} xl={3}>
             <Button

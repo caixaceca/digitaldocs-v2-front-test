@@ -142,7 +142,7 @@ export default function ProcuraAvancada() {
                     fullWidth
                     value={conta}
                     label="Nº de conta"
-                    InputProps={{ type: 'number' }}
+                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
                     onChange={(event) => setItemValue(event.target.value, setConta, 'conta')}
                   />
                 </Grid>
@@ -151,7 +151,7 @@ export default function ProcuraAvancada() {
                     fullWidth
                     value={cliente}
                     label="Nº de cliente"
-                    InputProps={{ type: 'number' }}
+                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
                     onChange={(event) => setItemValue(event.target.value, setCliente, 'cliente')}
                   />
                 </Grid>
@@ -160,7 +160,7 @@ export default function ProcuraAvancada() {
                     fullWidth
                     value={entidade}
                     label="Nº de entidade"
-                    InputProps={{ type: 'number' }}
+                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
                     onChange={(event) => setItemValue(event.target.value, setEntidade, 'entidade')}
                   />
                 </Grid>
@@ -169,7 +169,7 @@ export default function ProcuraAvancada() {
                     fullWidth
                     value={nentrada}
                     label="Nº de entrada"
-                    InputProps={{ type: 'number' }}
+                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
                     onChange={(event) => setItemValue(event.target.value, setNentrada, 'nentrada')}
                   />
                 </Grid>
@@ -178,7 +178,7 @@ export default function ProcuraAvancada() {
                     fullWidth
                     value={noperacao}
                     label="Nº de operação"
-                    InputProps={{ type: 'number' }}
+                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
                     onChange={(event) => setItemValue(event.target.value, setNoperacao, 'noperacao')}
                   />
                 </Grid>
