@@ -75,11 +75,12 @@ export default function CreditoColaborador() {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       if (
-        done === 'Processo encaminhado' ||
-        done === 'Processo abandonado' ||
         done === 'Processo arquivado' ||
+        done === 'Processo atribuído' ||
+        done === 'Processo abandonado' ||
         done === 'Atribuição eliminada' ||
-        done === 'Processo atribuído'
+        done === 'Processo encaminhado' ||
+        done === 'Processo adicionado a listagem de pendentes'
       ) {
         navigate(linkNavigate);
       }

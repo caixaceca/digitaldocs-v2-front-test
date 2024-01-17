@@ -376,6 +376,11 @@ const slice = createSlice({
       state.regrasAnexos[index].ativo = false;
     },
 
+    deleteDestinatarioSuccess(state, action) {
+      const index = state.destinatarios.findIndex((row) => row.id === action.payload.id);
+      state.destinatarios[index].ativo = false;
+    },
+
     openModal(state, action) {
       switch (action.payload) {
         case 'add':
@@ -907,6 +912,11 @@ export function deleteItem(item, params) {
         case 'regra anexo': {
           await axios.delete(`${BASEURLCC}/v1/anexos/regra/${params?.id}`, options);
           dispatch(slice.actions.deleteRegraAnexoSuccess({ id: params?.id }));
+          break;
+        }
+        case 'destinatario': {
+          await axios.delete(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
+          dispatch(slice.actions.deleteDestinatarioSuccess({ id: params?.id }));
           break;
         }
 

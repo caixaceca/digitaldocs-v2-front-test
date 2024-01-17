@@ -11,11 +11,11 @@ export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (
     colaborador?.nomeacao === 'Gerente' ||
-    colaborador?.nomeacao === 'Gerente Caixa Empresas' ||
+    colaborador?.nomeacao === 'Director' ||
     colaborador?.nomeacao === 'Sub-gerente' ||
-    colaborador?.nomeacao === 'Coordenador Gabinete' ||
     colaborador?.nomeacao === 'Coordenador Adjunto' ||
-    colaborador?.nomeacao === 'Director'
+    colaborador?.nomeacao === 'Coordenador Gabinete' ||
+    colaborador?.nomeacao === 'Gerente Caixa Empresas'
   ) {
     nomeacao = colaborador?.nomeacao;
   }
@@ -88,7 +88,7 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
     );
   } else if (cc?.uo?.label === 'DOP') {
     colaboradoresList = colaboradores?.filter((colaborador) => colaborador?.uo?.label?.includes('DOP'));
-  } else if (UosGerente(meusAmbientes)?.length > 1) {
+  } else if (UosGerente(meusAmbientes)?.length > 0) {
     colaboradoresList = colaboradores?.filter((colaborador) =>
       UosGerente(meusAmbientes)?.includes(colaborador?.uo?.id)
     );
@@ -112,7 +112,7 @@ export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
     uosList = uos?.filter((uo) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Sul');
   } else if (cc?.uo?.label === 'DOP') {
     uosList = uos?.filter((uo) => uo?.label?.includes('DOP'));
-  } else if (UosGerente(meusAmbientes)?.length > 1) {
+  } else if (UosGerente(meusAmbientes)?.length > 0) {
     uosList = uos?.filter((uo) => UosGerente(meusAmbientes)?.includes(Number(uo?.id)));
   } else {
     uosList = uos?.filter((uo) => uo?.id === cc?.uo_id);
