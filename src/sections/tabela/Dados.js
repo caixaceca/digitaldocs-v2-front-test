@@ -11,7 +11,7 @@ import { ptDateTime } from '../../utils/formatTime';
 import { entidadesParse, noDados, setDataUtil, setItemValue } from '../../utils/normalizeText';
 // components
 import { Criado } from '../../components/Panel';
-import { ViewItem } from '../../components/Actions';
+import { DefaultAction } from '../../components/Actions';
 
 // ----------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ export function RowItem({ row, handleViewRow }) {
         {row?.colaborador && <Criado tipo="user" value={row.colaborador} />}
       </TableCell>
       <TableCell align="center">
-        <ViewItem handleClick={() => handleViewRow(row?.id)} />
+        <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
       </TableCell>
     </TableRow>
   );

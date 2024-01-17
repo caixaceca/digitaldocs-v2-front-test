@@ -35,7 +35,7 @@ import { SkeletonTable } from '../../components/skeleton';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { AddItem, UpdateItem, ViewItem, Checked } from '../../components/Actions';
+import { AddItem, UpdateItem, DefaultAction, Checked } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import {
@@ -535,9 +535,9 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item !== 'regras estado' && item !== 'regras transicao' && <UpdateItem dados={row} />}
                           {item !== 'linhas' && item !== 'destinatarios' && (
-                            <ViewItem
+                            <DefaultAction
                               handleClick={() => handleView(row)}
-                              label={item === 'notificacoes' ? 'DESTINATÁRIOS' : ''}
+                              label={item === 'notificacoes' ? 'DESTINATÁRIOS' : 'DETALHES'}
                             />
                           )}
                         </Stack>

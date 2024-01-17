@@ -14,7 +14,7 @@ import CardContent from '@mui/material/CardContent';
 import { deleteAnexo } from '../../../redux/slices/cc';
 import { useSelector, useDispatch } from '../../../redux/store';
 // components
-import { AddItem, DeleteItem, AnexosExistente } from '../../../components/Actions';
+import { AddItem, DefaultAction, AnexosExistente } from '../../../components/Actions';
 import { RHFDatePicker, RHFUploadFileSimple, RHFAutocompleteObject } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -97,7 +97,7 @@ export default function Anexos({ anexos }) {
                       </Grid>
                     </Grid>
                   </Box>
-                  <DeleteItem small handleClick={() => handleRemove(index)} />
+                  <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
                 </Stack>
               );
             })}
@@ -204,7 +204,7 @@ export function AnexosGarantias({ indexGarantia, garantiaId }) {
                         </Grid>
                       </Grid>
                     </Box>
-                    <DeleteItem small handleClick={() => handleRemove(index)} />
+                    <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
                   </Stack>
                 );
               })}
@@ -315,7 +315,7 @@ export function AnexosEntidades({ indexEntidade, entidadeId }) {
                         </Grid>
                       </Grid>
                     </Box>
-                    <DeleteItem small handleClick={() => handleRemove(index)} />
+                    <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
                   </Stack>
                 );
               })}

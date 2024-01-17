@@ -21,7 +21,7 @@ import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { AddItem, UpdateItem, ViewItem, CloneItem, Checked } from '../../components/Actions';
+import { AddItem, UpdateItem, DefaultAction, CloneItem, Checked } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm, MotivoPendenciaForm } from './ParametrizacaoForm';
@@ -252,7 +252,7 @@ export default function ParametrizacaoItem({ item }) {
                           )}
                           {item === 'fluxos' && <CloneItem item="fluxo" id={row?.id} />}
                           {(item === 'fluxos' || item === 'estados') && (
-                            <ViewItem estado={item === 'estados'} handleClick={() => handleView(row?.id)} />
+                            <DefaultAction label="COLABORADORES" handleClick={() => handleView(row?.id)} />
                           )}
                         </Stack>
                       </TableCell>

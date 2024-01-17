@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // components
-import { AddItem, DeleteItem } from '../../components/Actions';
+import { AddItem, DefaultAction } from '../../components/Actions';
 import { RHFNumberField, RHFAutocompleteObject } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -50,7 +50,7 @@ export default function PesosDecisao({ perfisList }) {
               sx={{ width: '44%' }}
               name={`pesos[${index}].percentagem`}
             />
-            <DeleteItem small handleClick={() => handleRemove(index)} />
+            <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
           </Stack>
         ))}
       </Stack>

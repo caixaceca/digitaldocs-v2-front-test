@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Link as RouterLink } from 'react-router-dom';
-// @mui
-import Fab from '@mui/material/Fab';
-import Tooltip from '@mui/material/Tooltip';
+import { useNavigate } from 'react-router-dom';
 // utils
 import { podeArquivar, caixaPrincipal, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
 // redux
@@ -14,8 +11,7 @@ import useToggle, { useToggle1, useToggle3, useToggle4, useToggle5 } from '../..
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
-import { Pendente } from '../../components/Actions';
-import SvgIconStyle from '../../components/SvgIconStyle';
+import { DefaultAction } from '../../components/Actions';
 import DialogConfirmar from '../../components/DialogConfirmar';
 //
 import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente, Abandonar } from './IntervencaoForm';
@@ -25,6 +21,7 @@ import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente, Abandona
 Intervencao.propTypes = { colaboradoresList: PropTypes.array };
 
 export default function Intervencao({ colaboradoresList }) {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
@@ -89,17 +86,17 @@ export default function Intervencao({ colaboradoresList }) {
     dispatch(selectItem(item));
   };
 
+  const handleEdit = () => {
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`);
+  };
+
   return (
     <>
       {processo?.destinos?.length !== 0 && (
         <>
           {devolucoes?.length > 0 && (
             <>
-              <Tooltip title="DEVOLVER" arrow>
-                <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
-                  <SvgIconStyle src="/assets/icons/resgatar.svg" />
-                </Fab>
-              </Tooltip>
+              <DefaultAction color="warning" icon="devolver" handleClick={onOpen} label="DEVOLVER" />
               <IntervencaoForm
                 title="Devolver"
                 onCancel={onClose}
@@ -112,11 +109,11 @@ export default function Intervencao({ colaboradoresList }) {
 
           {seguimentos?.length > 0 && (
             <>
-              <Tooltip title={processo?.nome === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'} arrow>
-                <Fab color="success" size="small" variant="soft" onClick={onOpen3}>
-                  <SvgIconStyle src="/assets/icons/seguimento.svg" />
-                </Fab>
-              </Tooltip>
+              <DefaultAction
+                icon="encaminhar"
+                handleClick={onOpen3}
+                label={processo?.nome === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
+              />
               <IntervencaoForm
                 isOpenModal={open3}
                 onCancel={onClose3}
@@ -135,11 +132,7 @@ export default function Intervencao({ colaboradoresList }) {
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
         pertencoAoEstado(meusAmbientes, 'Autorização SWIFT') && (
           <>
-            <Tooltip title="FINALIZAR" arrow>
-              <Fab color="success" size="small" variant="soft" onClick={onOpen4}>
-                <SvgIconStyle src="/assets/icons/stop.svg" />
-              </Fab>
-            </Tooltip>
+            <DefaultAction icon="finalizar" handleClick={onOpen4} label="FINALIZAR" />
             <DialogConfirmar
               open={open4}
               onClose={onClose4}
@@ -157,11 +150,7 @@ export default function Intervencao({ colaboradoresList }) {
         processo?.nome === 'DOP - Validação Notas Externas' &&
         pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') && (
           <>
-            <Tooltip title="FINALIZAR" arrow>
-              <Fab color="success" size="small" variant="soft" onClick={onOpen5}>
-                <SvgIconStyle src="/assets/icons/stop.svg" />
-              </Fab>
-            </Tooltip>
+            <DefaultAction icon="finalizar" handleClick={onOpen5} label="FINALIZAR" />
             <FinalizarForm open={open5} onCancel={onClose5} />
           </>
         )}
@@ -170,22 +159,12 @@ export default function Intervencao({ colaboradoresList }) {
 
       {!processo?.ispendente && (
         <>
-          <Pendente detail handleClick={() => handlePendente(processo)} />
+          <DefaultAction color="inherit" label="PENDENTE" handleClick={() => handlePendente(processo)} />
           <ColocarPendente from="processo" />
         </>
       )}
 
-      <Tooltip title="EDITAR" arrow>
-        <Fab
-          size="small"
-          variant="soft"
-          color="warning"
-          component={RouterLink}
-          to={`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`}
-        >
-          <SvgIconStyle src="/assets/icons/editar.svg" />
-        </Fab>
-      </Tooltip>
+      <DefaultAction color="warning" handleClick={handleEdit} label="EDITAR" />
 
       {podeArquivar(
         meusAmbientes,
@@ -199,11 +178,7 @@ export default function Intervencao({ colaboradoresList }) {
         arquivarProcessos
       ) && (
         <>
-          <Tooltip title="ARQUIVAR" arrow>
-            <Fab color="error" size="small" variant="soft" onClick={onOpen1}>
-              <SvgIconStyle src="/assets/icons/archive.svg" />
-            </Fab>
-          </Tooltip>
+          <DefaultAction color="error" handleClick={onOpen1} label="ARQUIVAR" />
           <ArquivarForm
             open={open1}
             processo={processo}
@@ -244,11 +219,7 @@ export function Libertar({ perfilID, processoID }) {
 
   return (
     <>
-      <Tooltip title="LIBERTAR" arrow>
-        <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
-          <SvgIconStyle src="/assets/icons/abandonar.svg" />
-        </Fab>
-      </Tooltip>
+      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="LIBERTAR" />
       <DialogConfirmar
         open={open}
         onClose={onClose}

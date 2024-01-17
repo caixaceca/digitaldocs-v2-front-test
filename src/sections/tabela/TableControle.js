@@ -26,7 +26,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import { ViewItem } from '../../components/Actions';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
@@ -315,7 +315,7 @@ export default function TableControle({ from }) {
                             )}
                           </TableCell>
                           <TableCell align="center">
-                            <ViewItem handleClick={() => handleView(row?.id)} />
+                            <DefaultAction label="DETALHES" handleClick={() => handleView(row?.id)} />
                           </TableCell>
                         </TableRow>
                       ) : (

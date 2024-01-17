@@ -26,8 +26,8 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
+import { AddItem, DefaultAction } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { AddItem, ViewItem, Pendente } from '../../components/Actions';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
@@ -215,9 +215,12 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center">
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
-                            <Pendente handleClick={() => handlePendente(row)} />
+                            <DefaultAction color="inherit" label="PENDENTE" handleClick={() => handlePendente(row)} />
                           )}
-                          <ViewItem handleClick={() => handleView(row?.id, row?.credito_colaborador)} />
+                          <DefaultAction
+                            label="DETALHES"
+                            handleClick={() => handleView(row?.id, row?.credito_colaborador)}
+                          />
                         </Stack>
                       </TableCell>
                     </TableRow>

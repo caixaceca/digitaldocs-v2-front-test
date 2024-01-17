@@ -11,18 +11,23 @@ import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import HistoryIcon from '@mui/icons-material/History';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListItemButton from '@mui/material/ListItemButton';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
-import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
+import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
@@ -80,16 +85,30 @@ export function DefaultAction({
     <Stack>
       <Tooltip title={label} arrow>
         <Fab size="small" variant={variant} color={color} onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
-          {(icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" />) ||
-            (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
-            (icon === 'abandonar' && <LockOpenOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'edit' && <SvgIconStyle src="/assets/icons/editar.svg" sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'add' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'confirmar' && <DoneAllIcon />) ||
+          {(icon === 'parecer' && <NotesIcon />) ||
+            (icon === 'back' && <ArrowBackIcon />) ||
             (icon === 'cancelar' && <ClearIcon />) ||
-            (icon === 'parecer' && <NotesIcon />)}
+            (icon === 'history' && <HistoryIcon />) ||
+            (icon === 'confirmar' && <DoneAllIcon />) ||
+            (icon === 'forward' && <ArrowForwardIcon />) ||
+            (icon === 'views' && <PreviewOutlinedIcon />) ||
+            (icon === 'acesso' && <TaskAltOutlinedIcon />) ||
+            (label === 'COLABORADORES' && <GroupOutlinedIcon />) ||
+            (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
+            (label === 'Acessos & Estados' && <SwapHorizOutlinedIcon />) ||
+            (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
+            (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
+            (icon === 'abandonar' && <SvgIconStyle src="/assets/icons/abandonar.svg" sx={{ width: 22 }} />) ||
+            (icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" sx={{ width: 22 }} />) ||
+            (label === 'EDITAR' && <SvgIconStyle src="/assets/icons/editar.svg" sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'ELIMINAR' && <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: small ? 18 : 22 }} />) ||
+            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <SvgIconStyle src="/assets/icons/view.svg" />) ||
+            (icon === 'devolver' && <SvgIconStyle src="/assets/icons/resgatar.svg" />) ||
+            (label === 'ARQUIVAR' && <SvgIconStyle src="/assets/icons/archive.svg" />) ||
+            (icon === 'finalizar' && <SvgIconStyle src="/assets/icons/stop.svg" />)}
         </Fab>
       </Tooltip>
     </Stack>
@@ -171,43 +190,6 @@ export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null
   );
 }
 
-UpdateItemAlt.propTypes = { handleClick: PropTypes.func };
-
-export function UpdateItemAlt({ handleClick }) {
-  return (
-    <Stack>
-      <Tooltip title="Editar" arrow>
-        <Fab size="small" variant="soft" color="warning" onClick={handleClick} sx={{ ...wh }}>
-          <SvgIconStyle src="/assets/icons/editar.svg" />
-        </Fab>
-      </Tooltip>
-    </Stack>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-ViewItem.propTypes = {
-  swap: PropTypes.bool,
-  estado: PropTypes.bool,
-  label: PropTypes.string,
-  handleClick: PropTypes.func,
-};
-
-export function ViewItem({ swap = false, estado = false, label = 'DETALHES', handleClick }) {
-  return (
-    <Stack>
-      <Tooltip title={(estado && 'Colaboradores') || (swap && 'Estados & Acessos') || label} arrow>
-        <Fab color="success" size="small" variant="soft" onClick={handleClick} sx={{ ...wh }}>
-          {(swap && <SwapHorizOutlinedIcon />) || (estado && <GroupOutlinedIcon />) || (
-            <SvgIconStyle src="/assets/icons/view.svg" />
-          )}
-        </Fab>
-      </Tooltip>
-    </Stack>
-  );
-}
-
 // ----------------------------------------------------------------------
 
 CloneItem.propTypes = { item: PropTypes.string, id: PropTypes.number };
@@ -236,22 +218,6 @@ export function CloneItem({ item, id }) {
 
 // ----------------------------------------------------------------------
 
-DeleteItem.propTypes = { small: PropTypes.bool, handleClick: PropTypes.func };
-
-export function DeleteItem({ small = false, handleClick }) {
-  return (
-    <Stack>
-      <Tooltip title="Eliminar" arrow>
-        <Fab color="error" size="small" variant="soft" onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
-          <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: small ? 18 : 22 }} />
-        </Fab>
-      </Tooltip>
-    </Stack>
-  );
-}
-
-// ----------------------------------------------------------------------
-
 Checked.propTypes = { check: PropTypes.bool, color: PropTypes.string };
 
 export function Checked({ check, color = '' }) {
@@ -259,28 +225,6 @@ export function Checked({ check, color = '' }) {
     <CheckCircleOutlineOutlinedIcon sx={{ color: color || 'success.main', width: 20 }} />
   ) : (
     <CloseOutlinedIcon sx={{ color: color || 'focus.main', width: 20 }} />
-  );
-}
-
-// ----------------------------------------------------------------------
-
-Pendente.propTypes = { detail: PropTypes.bool, handleClick: PropTypes.func };
-
-export function Pendente({ detail = false, handleClick }) {
-  return (
-    <Stack>
-      <Tooltip title="PENDENTE" arrow>
-        <Fab
-          color="inherit"
-          size="small"
-          variant="soft"
-          onClick={handleClick}
-          sx={{ width: detail ? 40 : 36, height: detail ? 40 : 36 }}
-        >
-          <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />
-        </Fab>
-      </Tooltip>
-    </Stack>
   );
 }
 
@@ -335,7 +279,7 @@ export function DialogButons({
     <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
       {desc && (
         <>
-          <DeleteItem handleClick={onOpen} />
+          <DefaultAction color="error" label="ELIMINAR" handleClick={onOpen} />
           <DialogConfirmar desc={desc} open={open} onClose={onClose} isSaving={isSaving} handleOk={handleDelete} />
         </>
       )}
@@ -378,7 +322,7 @@ export function AnexosExistente({ mt = 4, anexos, onOpen }) {
               secondary={row?.data_validade ? `Validade: ${ptDate(row?.data_validade)}` : ''}
             />
             <ListItemSecondaryAction>
-              <DeleteItem small handleClick={() => onOpen(row.id)} />
+              <DefaultAction color="error" label="ELIMINAR" small handleClick={() => onOpen(row.id)} />
             </ListItemSecondaryAction>
           </ListItemButton>
         ))}

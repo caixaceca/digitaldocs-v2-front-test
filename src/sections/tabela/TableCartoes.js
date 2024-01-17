@@ -25,9 +25,9 @@ import { getAll, getItem, openModal, selectItem, openDetalhes, closeModal } from
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
+import { Checked, DefaultAction } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
-import { UpdateItemAlt, ViewItem, Checked, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { UoData } from './Dados';
@@ -361,9 +361,9 @@ export default function TableCartoes() {
                             confirmarCartoes &&
                             fase === 'Emissão' &&
                             (cc?.uo?.label === 'DOP-CE' || isAdmin) && (
-                              <UpdateItemAlt handleClick={() => handleUpdate(row)} />
+                              <DefaultAction label="EDITAR" handleClick={() => handleUpdate(row)} color="warning" />
                             )}
-                          <ViewItem handleClick={() => handleViewRow(row?.id)} />
+                          <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

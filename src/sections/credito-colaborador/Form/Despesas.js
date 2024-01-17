@@ -9,7 +9,7 @@ import CardContent from '@mui/material/CardContent';
 import { deleteAnexo } from '../../../redux/slices/cc';
 import { useSelector, useDispatch } from '../../../redux/store';
 // components
-import { AddItem, DeleteItem } from '../../../components/Actions';
+import { AddItem, DefaultAction } from '../../../components/Actions';
 import { RHFNumberField, RHFAutocompleteObject } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -52,7 +52,12 @@ export default function Despesas() {
                   name={`despesas[${index}].despesa`}
                 />
                 <RHFNumberField tipo="moeda" label="Valor" sx={{ width: '60%' }} name={`despesas[${index}].valor`} />
-                <DeleteItem small handleClick={() => handleRemove(index, item?.idItem)} />
+                <DefaultAction
+                  small
+                  color="error"
+                  label="ELIMINAR"
+                  handleClick={() => handleRemove(index, item?.idItem)}
+                />
               </Stack>
             ))}
           </Stack>

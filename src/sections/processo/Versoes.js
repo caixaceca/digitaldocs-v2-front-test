@@ -1,16 +1,13 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import HistoryIcon from '@mui/icons-material/History';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -25,6 +22,7 @@ import { getAll } from '../../redux/slices/digitaldocs';
 import Scrollbar from '../../components/Scrollbar';
 import { SearchNotFound } from '../../components/table';
 import { ColaboradorInfo } from '../../components/Panel';
+import { DefaultAction } from '../../components/Actions';
 //
 import DetalhesProcesso from './DetalhesProcesso';
 
@@ -57,12 +55,7 @@ export default function Versoes({ processoId }) {
 
   return (
     <>
-      <Tooltip title="VERSÕES" arrow>
-        <Fab color="inherit" size="small" variant="soft" onClick={onOpen}>
-          <HistoryIcon />
-        </Fab>
-      </Tooltip>
-
+      <DefaultAction icon="history" color="inherit" label="VERSÕES" handleClick={onOpen} />
       <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Versões anteriores do processo</Typography>

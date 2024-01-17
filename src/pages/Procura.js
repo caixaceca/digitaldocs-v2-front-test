@@ -25,8 +25,8 @@ import { PATH_DIGITALDOCS } from '../routes/paths';
 // components
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
-import { ViewItem } from '../components/Actions';
 import Panel, { Criado } from '../components/Panel';
+import { DefaultAction } from '../components/Actions';
 import { SkeletonTable } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../components/SearchToolbar';
@@ -232,7 +232,7 @@ export default function Procura() {
                           {row?.colaborador && <Criado tipo="user" value={row.colaborador} />}
                         </TableCell>
                         <TableCell align="center" width={50}>
-                          <ViewItem handleClick={() => handleViewRow(row?.id)} />
+                          <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
                         </TableCell>
                       </TableRow>
                     ))

@@ -25,7 +25,7 @@ import Page from '../components/Page';
 import { TabCard } from '../components/TabsWrapper';
 import DialogConfirmar from '../components/DialogConfirmar';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import { UpdateItem, DefaultAction, Pendente } from '../components/Actions';
+import { UpdateItem, DefaultAction } from '../components/Actions';
 // sections
 import {
   Views,
@@ -264,7 +264,11 @@ export default function CreditoColaborador() {
                       pedidoCC?.estados?.length === 1 &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
                         <>
-                          <Pendente detail handleClick={() => handlePendente(pedidoCC)} />
+                          <DefaultAction
+                            color="inherit"
+                            label="PENDENTE"
+                            handleClick={() => handlePendente(pedidoCC)}
+                          />
                           <ColocarPendente from="pediddoCC" />
                         </>
                       )}

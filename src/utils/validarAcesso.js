@@ -113,7 +113,7 @@ export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
   } else if (cc?.uo?.label === 'DOP') {
     uosList = uos?.filter((uo) => uo?.label?.includes('DOP'));
   } else if (UosGerente(meusAmbientes)?.length > 1) {
-    uosList = uos?.filter((uo) => UosGerente(meusAmbientes)?.includes(uo?.id));
+    uosList = uos?.filter((uo) => UosGerente(meusAmbientes)?.includes(Number(uo?.id)));
   } else {
     uosList = uos?.filter((uo) => uo?.id === cc?.uo_id);
   }
@@ -151,7 +151,7 @@ export function UosGerente(meusAmbientes) {
   const uosGerente = [];
   meusAmbientes?.forEach((row) => {
     if (row?.nome?.includes('Gerência')) {
-      uosGerente.push(row?.uo_id);
+      uosGerente.push(Number(row?.uo_id));
     }
   });
   return uosGerente;

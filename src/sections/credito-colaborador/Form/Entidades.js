@@ -20,7 +20,7 @@ import {
   RHFNumberField,
   RHFAutocompleteSimple,
 } from '../../../components/hook-form';
-import { AddItem, DeleteItem } from '../../../components/Actions';
+import { AddItem, DefaultAction } from '../../../components/Actions';
 //
 import { AnexosEntidades } from './Anexos';
 // _mock_
@@ -164,7 +164,14 @@ export default function Entidades() {
                         </>
                       )}
                     </Grid>
-                    {!item?.titularidade && <DeleteItem small handleClick={() => handleRemove(index, item?.idItem)} />}
+                    {!item?.titularidade && (
+                      <DefaultAction
+                        small
+                        color="error"
+                        label="ELIMINAR"
+                        handleClick={() => handleRemove(index, item?.idItem)}
+                      />
+                    )}
                   </Stack>
                   <AnexosEntidades indexEntidade={index} entidadeId={item?.idItem} />
                 </Paper>

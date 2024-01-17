@@ -35,7 +35,7 @@ import {
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
 import { Notificacao } from '../../components/NotistackProvider';
-import { AddItem, DeleteItem, DialogButons } from '../../components/Actions';
+import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
 //
@@ -1024,7 +1024,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
         </Stack>
       </DialogTitle>
       <DialogContent>
-       <Notificacao done={done} error={error} onCancel={onCancel} />
+        <Notificacao done={done} error={error} onCancel={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             {fields.map((item, index) => (
@@ -1046,7 +1046,9 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
                   <Grid item xs={12} sm={3} md={2}>
                     <Stack direction="row" spacing={1}>
                       <RHFSwitch name={`perfis[${index}].observador`} label="Somente observador" />
-                      {values.perfis.length > 1 && <DeleteItem handleClick={() => handleRemove(index)} />}
+                      {values.perfis.length > 1 && (
+                        <DefaultAction color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
+                      )}
                     </Stack>
                   </Grid>
                 </Grid>
@@ -1621,7 +1623,9 @@ export function DestinatarioForm({ onCancel }) {
                       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
                         <RHFDatePicker label="Data de início" name={`destinatarios[${index}].data_inicio`} />
                         <RHFDatePicker label="Data de fim" name={`destinatarios[${index}].data_termino`} />
-                        {values.destinatarios.length > 1 && <DeleteItem handleClick={() => handleRemove(index)} />}
+                        {values.destinatarios.length > 1 && (
+                          <DefaultAction color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
+                        )}
                       </Stack>
                     </Grid>
                   </Grid>

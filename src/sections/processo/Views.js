@@ -1,18 +1,15 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
-import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { fDateTime } from '../../utils/formatTime';
@@ -23,6 +20,7 @@ import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
 import Scrollbar from '../../components/Scrollbar';
+import { DefaultAction } from '../../components/Actions';
 import { ColaboradorInfo } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
 
@@ -50,11 +48,7 @@ export default function Views({ processoId }) {
 
   return (
     <>
-      <Tooltip title="VISUALIZAÇÕES" arrow>
-        <Fab color="inherit" size="small" variant="soft" onClick={onOpen}>
-          <PreviewOutlinedIcon />
-        </Fab>
-      </Tooltip>
+      <DefaultAction icon="views" color="inherit" label="VISUALIZAÇÕES" handleClick={onOpen} />
       <Drawer open={open} anchor="right" onClose={onClose} PaperProps={{ sx: { width: { xs: 1, sm: 400 } } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
           <Typography variant="h6">Visualizações</Typography>

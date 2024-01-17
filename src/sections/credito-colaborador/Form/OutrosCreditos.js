@@ -9,7 +9,7 @@ import CardContent from '@mui/material/CardContent';
 import { useDispatch } from '../../../redux/store';
 import { deleteAnexo } from '../../../redux/slices/cc';
 // components
-import { AddItem, DeleteItem } from '../../../components/Actions';
+import { AddItem, DefaultAction } from '../../../components/Actions';
 import { RHFNumberField, RHFSwitch } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -83,7 +83,12 @@ export default function OutrosCreditos() {
                   />
                   <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                     <RHFSwitch name={`outros_creditos[${index}].na_caixa`} label="Caixa" />
-                    <DeleteItem small handleClick={() => handleRemove(index, item?.idItem)} />
+                    <DefaultAction
+                      small
+                      color="error"
+                      label="ELIMINAR"
+                      handleClick={() => handleRemove(index, item?.idItem)}
+                    />
                   </Stack>
                 </Stack>
               </Stack>

@@ -10,12 +10,8 @@ import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
 import CardContent from '@mui/material/CardContent';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
-import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 // utils
 import { fYear } from '../utils/formatTime';
 import {
@@ -37,6 +33,7 @@ import useToggle from '../hooks/useToggle';
 import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
+import { DefaultAction } from '../components/Actions';
 import { SearchNotFound404 } from '../components/table';
 import { SkeletonProcesso } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
@@ -289,16 +286,18 @@ export default function Processo() {
                 <Stack spacing={0.5} direction={{ xs: 'row' }}>
                   {estadoAtual && (
                     <>
-                      <Tooltip title={`ANTERIOR (${estadoAtual?.nome})`} arrow>
-                        <Fab color="inherit" size="small" variant="soft" onClick={() => handlePrevNext(false)}>
-                          <ArrowBackIcon />
-                        </Fab>
-                      </Tooltip>
-                      <Tooltip title={`PRÓXIMO (${estadoAtual?.nome})`} arrow>
-                        <Fab color="inherit" size="small" variant="soft" onClick={() => handlePrevNext(true)}>
-                          <ArrowForwardIcon />
-                        </Fab>
-                      </Tooltip>
+                      <DefaultAction
+                        icon="back"
+                        color="inherit"
+                        label={`ANTERIOR (${estadoAtual?.nome})`}
+                        handleClick={() => handlePrevNext(false)}
+                      />
+                      <DefaultAction
+                        icon="forward"
+                        color="inherit"
+                        label={`PRÓXIMO (${estadoAtual?.nome})`}
+                        handleClick={() => handlePrevNext(true)}
+                      />
                     </>
                   )}
                   <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
@@ -308,17 +307,8 @@ export default function Processo() {
                   {processo?.situacao === 'A' ? (
                     <>
                       <RoleBasedGuard roles={['arquivo-110', 'arquivo-111']}>
-                        <Tooltip title="ATRIBUIR ACESSO" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={onOpen}>
-                            <TaskAltOutlinedIcon />
-                          </Fab>
-                        </Tooltip>
-
-                        <Tooltip title="DESARQUIVAR" arrow>
-                          <Fab color="error" size="small" variant="soft" onClick={handleDesarquivar}>
-                            <UnarchiveOutlinedIcon />
-                          </Fab>
-                        </Tooltip>
+                        <DefaultAction icon="acesso" label="ATRIBUIR ACESSO" handleClick={onOpen} />
+                        <DefaultAction color="error" label="DESARQUIVAR" handleClick={handleDesarquivar} />
                         <Dialog open={isOpenModalDesariquivar} onClose={handleClose} fullWidth maxWidth="sm">
                           <DesarquivarForm
                             open={isOpenModalDesariquivar}
@@ -332,11 +322,7 @@ export default function Processo() {
                         </Dialog>
                       </RoleBasedGuard>
                       {!meusacessos.includes('arquivo-110') && !meusacessos.includes('arquivo-111') && (
-                        <Tooltip title="PEDIR ACESSO" arrow>
-                          <Fab color="success" size="small" variant="soft" onClick={handlePedirAcesso}>
-                            <TaskAltOutlinedIcon />
-                          </Fab>
-                        </Tooltip>
+                        <DefaultAction icon="acesso" label="ATRIBUIR ACESSO" handleClick={handlePedirAcesso} />
                       )}
                     </>
                   ) : (

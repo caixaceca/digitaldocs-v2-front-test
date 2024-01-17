@@ -90,19 +90,13 @@ export default function PareceresEstado({ pareceres, estado, normal = false }) {
                           {(row?.descritivo && !row?.validado && (
                             <DefaultAction
                               small
-                              icon="edit"
                               label="EDITAR"
                               color="warning"
                               handleClick={() => handleParecer(row)}
                             />
                           )) ||
                             (!row?.descritivo && (
-                              <DefaultAction
-                                small
-                                icon="add"
-                                label="ADICIONAR"
-                                handleClick={() => handleParecer(row)}
-                              />
+                              <DefaultAction small label="ADICIONAR" handleClick={() => handleParecer(row)} />
                             ))}
                         </>
                       )}

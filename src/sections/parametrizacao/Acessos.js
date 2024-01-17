@@ -20,7 +20,7 @@ import { useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import { ViewItem } from '../../components/Actions';
+import { DefaultAction } from '../../components/Actions';
 import { ColaboradorInfo } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -114,7 +114,10 @@ export default function Acessos() {
                         <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
                         <TableCell align="center" width={50}>
                           <Tooltip title="Gerir acessos" arrow>
-                            <ViewItem swap handleClick={() => handleUpdate(row?.perfil?.id)} />
+                            <DefaultAction
+                              label="Acessos & Estados"
+                              handleClick={() => handleUpdate(row?.perfil?.id)}
+                            />
                           </Tooltip>
                         </TableCell>
                       </TableRow>

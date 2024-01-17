@@ -10,7 +10,7 @@ import CardContent from '@mui/material/CardContent';
 import { useDispatch } from '../../../redux/store';
 import { deleteAnexo } from '../../../redux/slices/cc';
 // components
-import { AddItem, DeleteItem } from '../../../components/Actions';
+import { AddItem, DefaultAction } from '../../../components/Actions';
 import { RHFTextField, RHFSwitch, RHFAutocompleteSimple } from '../../../components/hook-form';
 //
 import { AnexosGarantias } from './Anexos';
@@ -75,7 +75,12 @@ export default function Garantias() {
                         </Stack>
                       )}
                     </Stack>
-                    <DeleteItem small handleClick={() => handleRemove(index, item?.idItem)} />
+                    <DefaultAction
+                      small
+                      color="error"
+                      label="ELIMINAR"
+                      handleClick={() => handleRemove(index, item?.idItem)}
+                    />
                   </Stack>
                   <AnexosGarantias indexGarantia={index} garantiaId={item?.idItem} />
                 </Paper>

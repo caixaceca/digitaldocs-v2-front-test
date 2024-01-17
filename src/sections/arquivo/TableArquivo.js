@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
-import { ViewItem } from '../../components/Actions';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -169,7 +169,7 @@ export default function TableArquivo({ tab }) {
                             )}
                           </TableCell>
                           <TableCell align="center">
-                            <ViewItem handleClick={() => handleView(row?.id)} />
+                            <DefaultAction label="DETALHES" handleClick={() => handleView(row?.id)} />
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -184,7 +184,7 @@ export default function TableArquivo({ tab }) {
                             )}
                           </TableCell>
                           <TableCell align="center">
-                            <ViewItem handleClick={() => handleView(row?.processo_id)} />
+                            <DefaultAction label="DETALHES" handleClick={() => handleView(row?.processo_id)} />
                           </TableCell>
                         </TableRow>
                       )}

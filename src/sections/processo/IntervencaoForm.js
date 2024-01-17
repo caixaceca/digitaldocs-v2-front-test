@@ -34,7 +34,6 @@ import TableContainer from '@mui/material/TableContainer';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import SettingsBackupRestoreOutlinedIcon from '@mui/icons-material/SettingsBackupRestoreOutlined';
 // utils
 import { format, add } from 'date-fns';
 import { fNumber, fCurrency } from '../../utils/formatNumber';
@@ -57,9 +56,8 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import DialogConfirmar from '../../components/DialogConfirmar';
-import { DialogButons, AnexosExistente } from '../../components/Actions';
+import { DefaultAction, DialogButons, AnexosExistente } from '../../components/Actions';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -921,12 +919,7 @@ export function Resgatar({ fluxoId, estadoId, processoId }) {
 
   return (
     <>
-      <Tooltip title="RESGATAR" arrow>
-        <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
-          <SettingsBackupRestoreOutlinedIcon />
-        </Fab>
-      </Tooltip>
-
+      <DefaultAction label="RESGATAR" icon="resgatar" handleClick={onOpen} color="warning" />
       <DialogConfirmar
         open={open}
         onClose={onClose}
@@ -1267,11 +1260,7 @@ export function Abandonar({ isSaving, processo }) {
 
   return (
     <>
-      <Tooltip title="ABANDONAR" arrow>
-        <Fab color="warning" size="small" variant="soft" onClick={onOpen}>
-          <SvgIconStyle src="/assets/icons/abandonar.svg" />
-        </Fab>
-      </Tooltip>
+      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="ABANDONAR" />
       <DialogConfirmar
         open={open}
         onClose={onClose}
