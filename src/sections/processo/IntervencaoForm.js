@@ -1006,13 +1006,13 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
           isSaving={isSaving}
           handleOk={handleCancelar}
           color="error"
-          title="Cancelar"
+          title="Cancelar envio do processo"
           desc="cancelar o envio deste processo para parecer"
           descSec="ATENÇÃO: Esta ação é irreversível e eliminará os dados dos parceres enviados neste seguimento."
         />
       ) : (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-          <DialogTitle>Fechar</DialogTitle>
+          <DialogTitle>>Fechar processo para parecer</DialogTitle>
           <DialogContent>
             <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3} sx={{ mt: 0 }}>
