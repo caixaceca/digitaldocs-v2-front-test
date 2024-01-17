@@ -145,6 +145,7 @@ export default function Processo() {
     } else if (done === 'Parecer enviado') {
       enqueueSnackbar('Parecer enviado com sucesso', { variant: 'success' });
       dispatch(parecerEstadoSuccess());
+      handlePrevNext(true);
     } else if (done === 'finalizado') {
       enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
       handlePrevNext(true);

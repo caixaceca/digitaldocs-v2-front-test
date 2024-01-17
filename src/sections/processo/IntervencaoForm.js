@@ -774,10 +774,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
   const { selectedItem, done, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
-    if (done === 'parecer enviado') {
-      enqueueSnackbar('Parecer enviado com sucesso', { variant: 'success' });
-      onCancel();
-    } else if (done === 'anexo parecer eliminado') {
+    if (done === 'anexo parecer eliminado') {
       enqueueSnackbar('Anexo eliminado com sucesso', { variant: 'success' });
       setIdAnexo('');
       onClose1();
@@ -827,7 +824,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
           formData.append('anexos', listaanexo[i]);
         }
       }
-      dispatch(updateItem('parecer', formData, { mail, id: selectedItem.id, processoId, msg: 'parecer enviado' }));
+      dispatch(updateItem('parecer', formData, { mail, id: selectedItem.id, processoId, msg: 'Parecer enviado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -1012,7 +1009,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
         />
       ) : (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-          <DialogTitle>>Fechar processo para parecer</DialogTitle>
+          <DialogTitle>Fechar processo para parecer</DialogTitle>
           <DialogContent>
             <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3} sx={{ mt: 0 }}>

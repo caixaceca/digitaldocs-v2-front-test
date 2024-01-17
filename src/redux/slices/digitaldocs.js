@@ -229,14 +229,12 @@ const slice = createSlice({
       state.processo = action.payload;
     },
 
-    patchParecerSuccess(state, action) {
-      const index = state.processo.pareceres.findIndex((row) => row.id === action.payload.id);
-      const parecer = action.payload.dados.pareceres.find((row) => row.id === action.payload.id);
-      state.processo.in_paralelo_mode = action.payload.in_paralelo_mode;
-      state.processo.pareceres[index] = parecer;
+    parecerSuccess(state) {
+      state.isOpenModal = false;
+      state.selectedItem = null;
     },
 
-    parecerEstadoSuccess(state, action) {
+    parecerEstSuccess(state, action) {
       const index = state?.processo?.pareceres_estado?.findIndex((row) => Number(row.id) === Number(action.payload.id));
       if (index === 0 || index) {
         state.processo.pareceres_estado[index].validado = action.payload.validado;
@@ -838,17 +836,13 @@ export function updateItem(item, dados, params) {
           break;
         }
         case 'parecer': {
-          const response = await axios.patch(
-            `${BASEURLDD}/v1/processos/parecer/${params?.processoId}`,
-            dados,
-            options1
-          );
-          dispatch(slice.actions.patchParecerSuccess({ id: params?.id, dados: response.data }));
+          await axios.patch(`${BASEURLDD}/v1/processos/parecer/${params?.processoId}`, dados, options1);
+          dispatch(slice.actions.parecerSuccess());
           break;
         }
         case 'parecer estado': {
           await axios.patch(`${BASEURLDD}/v1/processos/dar_parecer/estado`, dados, options);
-          dispatch(slice.actions.parecerEstadoSuccess(params?.values));
+          dispatch(slice.actions.parecerEstSuccess(params?.values));
           break;
         }
         case 'aceitar': {
