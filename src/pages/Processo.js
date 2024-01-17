@@ -27,6 +27,7 @@ import {
 } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
+import { parecerEstadoSuccess } from '../redux/slices/cc';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 import { getAll, getItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
 // routes
@@ -54,7 +55,9 @@ import {
   HistoricoPrisoesAnt,
   HistoricoTransicaoAnt,
 } from '../sections/processo';
+// sections
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
+import { PareceresEstado } from '../sections/credito-colaborador/Detalhes';
 import { DesarquivarForm, ParecerForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/IntervencaoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
@@ -142,23 +145,25 @@ export default function Processo() {
     } else if (done === 'Processo adicionado a listagem de pendentes') {
       enqueueSnackbar('Processo adicionado a listagem de pendentes', { variant: 'success' });
       handlePrevNext(true);
-    } else if (done === 'resgatado') {
-      enqueueSnackbar('Processo resgatado com sucesso', { variant: 'success' });
-    } else if (done === 'cancelado') {
-      enqueueSnackbar('Envio cancelado com sucesso', { variant: 'success' });
-    } else if (done === 'fechado') {
-      enqueueSnackbar('Pareceres fechado com sucesso', { variant: 'success' });
+    } else if (done === 'Parecer enviado') {
+      enqueueSnackbar('Parecer enviado com sucesso', { variant: 'success' });
+      dispatch(parecerEstadoSuccess());
     } else if (done === 'finalizado') {
       enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
       handlePrevNext(true);
-    } else if (done === 'solicitado') {
-      enqueueSnackbar('Pedido enviado com sucesso', { variant: 'success' });
     } else if (done === 'desarquivado') {
       enqueueSnackbar('Processo desarquivado com sucesso', { variant: 'success' });
       handleClose();
       navigate(linkNavigate);
-    } else if (done === 'processo libertado') {
-      enqueueSnackbar('Processo libertado com sucesso', { variant: 'success' });
+    } else if (
+      done === 'Pedido enviado' ||
+      done === 'Envio cancelado' ||
+      done === 'Pareceres fechado' ||
+      done === 'Processo aceitado' ||
+      done === 'Processo libertado' ||
+      done === 'Processo resgatado'
+    ) {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
     } else if (done === 'Processo abandonado' || done === 'Atribuição eliminada' || done === 'Processo atribuído') {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       navigate(linkNavigate);
@@ -220,12 +225,17 @@ export default function Processo() {
   const handleAceitar = () => {
     const formData = { fluxoID: processo?.fluxo_id, perfilID: perfilId, estadoID: estadoId };
     dispatch(
-      updateItem('aceitar', JSON.stringify(formData), { processoId: processo?.id, perfilId, mail, msg: 'aceitado' })
+      updateItem('aceitar', JSON.stringify(formData), {
+        mail,
+        perfilId,
+        processoId: processo?.id,
+        msg: 'Processo aceitado',
+      })
     );
   };
 
   const handlePedirAcesso = () => {
-    dispatch(updateItem('pedir acesso', '', { perfilId, id: processo?.id, mail, msg: 'solicitado' }));
+    dispatch(updateItem('pedir acesso', '', { perfilId, id: processo?.id, mail, msg: 'Pedido enviado' }));
   };
 
   const handleDesarquivar = () => {
@@ -348,28 +358,38 @@ export default function Processo() {
                       )}
                       {!processo?.is_lock && !processo?.in_paralelo_mode && (
                         <>
-                          {((processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
-                            isResponsavel &&
-                            processo?.nome !== 'Diário' &&
-                            processo?.nome !== 'Devolução AN' &&
-                            !processo?.nome?.includes('Gerência') &&
-                            !processo?.nome?.includes('Caixa Principal')) ||
-                            isAdmin) && (
-                            <AtribuirForm
-                              processoID={processo?.id}
-                              fluxoId={processo?.fluxo_id}
-                              perfilId={processo?.perfil_id}
-                              colaboradoresList={colaboradoresList}
+                          {processo?.pareceres_estado?.length === 0 ? (
+                            <>
+                              {((processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
+                                isResponsavel &&
+                                processo?.nome !== 'Diário' &&
+                                processo?.nome !== 'Devolução AN' &&
+                                !processo?.nome?.includes('Gerência') &&
+                                !processo?.nome?.includes('Caixa Principal')) ||
+                                isAdmin) && (
+                                <AtribuirForm
+                                  processoID={processo?.id}
+                                  fluxoId={processo?.fluxo_id}
+                                  perfilId={processo?.perfil_id}
+                                  colaboradoresList={colaboradoresList}
+                                />
+                              )}
+                              {processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
+                                (!processo?.perfil_id || processo?.perfil_id === perfilId) && (
+                                  <Tooltip title="ACEITAR" arrow>
+                                    <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
+                                      <LockPersonIcon />
+                                    </Fab>
+                                  </Tooltip>
+                                )}
+                            </>
+                          ) : (
+                            <PareceresEstado
+                              normal
+                              pareceres={processo?.pareceres_estado}
+                              estado={processo?.nome?.replace(' - P/S/P', '')}
                             />
                           )}
-                          {processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
-                            (!processo?.perfil_id || processo?.perfil_id === perfilId) && (
-                              <Tooltip title="ACEITAR" arrow>
-                                <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
-                                  <LockPersonIcon />
-                                </Fab>
-                              </Tooltip>
-                            )}
                           {!processo.ispendente &&
                             processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id &&
                             perfilId === processo?.htransicoes?.[0]?.perfil_id &&

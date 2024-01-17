@@ -272,6 +272,11 @@ const slice = createSlice({
       state.entidadeId = '';
       state.tipoItem = '';
     },
+
+    parecerEstadoSuccess(state) {
+      state.selectedItem = null;
+      state.isOpenModal = false;
+    },
   },
 });
 
@@ -279,7 +284,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, closeModal, closeModalAnexo, deleteAnexo, selectItem } = slice.actions;
+export const { openModal, closeModal, closeModalAnexo, deleteAnexo, selectItem, parecerEstadoSuccess } = slice.actions;
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -398,7 +403,7 @@ export function getFromCC(item, params) {
 
 // ----------------------------------------------------------------------
 
-export function createItem(item, dados, params) {
+export function createItemCC(item, dados, params) {
   return async (dispatch) => {
     dispatch(slice.actions.startSaving());
     try {
@@ -434,7 +439,7 @@ export function createItem(item, dados, params) {
 
 // ----------------------------------------------------------------------
 
-export function updateItem(item, dados, params) {
+export function updateItemCC(item, dados, params) {
   return async (dispatch) => {
     dispatch(slice.actions.startSaving());
     try {

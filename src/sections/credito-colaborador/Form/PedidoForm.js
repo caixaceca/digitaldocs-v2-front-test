@@ -15,7 +15,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import CardContent from '@mui/material/CardContent';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { updateItem, closeModalAnexo } from '../../../redux/slices/cc';
+import { updateItemCC, closeModalAnexo } from '../../../redux/slices/cc';
 // routes
 import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // components
@@ -396,7 +396,7 @@ export default function PedidoForm({ dados }) {
       });
 
       dispatch(
-        updateItem('pedido credito', formData, {
+        updateItemCC('pedido credito', formData, {
           mail,
           id: dados?.id,
           perfilId: cc?.perfil_id,
@@ -412,7 +412,7 @@ export default function PedidoForm({ dados }) {
   const handleConfirmeDelete = async () => {
     try {
       dispatch(
-        updateItem(tipoItem, null, {
+        updateItemCC(tipoItem, null, {
           mail,
           itemId,
           entidadeId,

@@ -18,7 +18,7 @@ import useToggle, { useToggle1, useToggle3 } from '../hooks/useToggle';
 // redux
 import { selectItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
-import { getFromCC, updateItem } from '../redux/slices/cc';
+import { getFromCC, updateItemCC } from '../redux/slices/cc';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // components
 import Page from '../components/Page';
@@ -29,10 +29,10 @@ import { UpdateItem, DefaultAction, Pendente } from '../components/Actions';
 // sections
 import {
   Views,
-  Pareceres,
   Transicoes,
   DadosGerais,
   TableDetalhes,
+  PareceresEstado,
   EntidadesGarantias,
 } from '../sections/credito-colaborador/Detalhes';
 import { Abandonar, ColocarPendente, AtribuirForm } from '../sections/processo/IntervencaoForm';
@@ -149,7 +149,7 @@ export default function CreditoColaborador() {
 
   const handleAceitar = () => {
     dispatch(
-      updateItem(
+      updateItemCC(
         'aceitar',
         JSON.stringify({
           perfilID: cc?.perfil_id,
@@ -163,7 +163,7 @@ export default function CreditoColaborador() {
 
   const handleResgatar = () => {
     dispatch(
-      updateItem(
+      updateItemCC(
         'resgatar',
         JSON.stringify({
           perfil_id: cc?.perfil_id,
@@ -244,7 +244,12 @@ export default function CreditoColaborador() {
                       )}
                   </>
                 )}
-                {pedidoCC?.estados?.[0]?.pareceres?.length > 0 && <Pareceres />}
+                {pedidoCC?.estados?.[0]?.pareceres?.length > 0 && (
+                  <PareceresEstado
+                    estado={pedidoCC?.estados?.[0]?.estado}
+                    pareceres={pedidoCC?.estados?.[0]?.pareceres}
+                  />
+                )}
                 {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id && (
                   <>
                     <UpdateItem handleClick={handleEdit} />

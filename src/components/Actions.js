@@ -89,7 +89,7 @@ export function DefaultAction({
             (icon === 'add' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'confirmar' && <DoneAllIcon />) ||
             (icon === 'cancelar' && <ClearIcon />) ||
-            (icon === 'cancel' && <NotesIcon />)}
+            (icon === 'parecer' && <NotesIcon />)}
         </Fab>
       </Tooltip>
     </Stack>

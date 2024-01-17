@@ -232,14 +232,14 @@ export function Libertar({ perfilID, processoID }) {
   const { isSaving, done } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
-    if (done === 'processo libertado') {
+    if (done === 'Processo libertado') {
       onClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
   const handleAbandonar = () => {
-    dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'processo libertado' }));
+    dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'Processo libertado' }));
   };
 
   return (

@@ -14,8 +14,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 // redux
+import { updateItem } from '../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../redux/store';
-import { createItem, updateItem, closeModal } from '../../../redux/slices/cc';
+import { createItemCC, updateItemCC, closeModal } from '../../../redux/slices/cc';
 // components
 import {
   RHFSwitch,
@@ -74,7 +75,7 @@ export function EncaminharForm({ open, destinos, onCancel }) {
       ];
 
       dispatch(
-        createItem('encaminhar', JSON.stringify(formData), {
+        createItemCC('encaminhar', JSON.stringify(formData), {
           mail,
           id: pedidoCC.id,
           perfilId: cc?.perfil_id,
@@ -117,7 +118,9 @@ export function EncaminharForm({ open, destinos, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function ParecerForm() {
+ParecerForm.propTypes = { normal: PropTypes.bool };
+
+export function ParecerForm({ normal = false }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
@@ -151,19 +154,35 @@ export function ParecerForm() {
 
   const onSubmit = async () => {
     try {
-      dispatch(
-        updateItem(
-          'parecer',
-          JSON.stringify({
-            id: selectedItem?.id,
-            validado: values?.validado,
-            descritivo: values?.descritivo,
-            perfil_id: selectedItem?.perfil_id,
-            parecerfavoravel: values?.parecer === 'Favorável',
-          }),
-          { mail, values, msg: 'Parecer enviado' }
-        )
-      );
+      if (normal) {
+        dispatch(
+          updateItem(
+            'parecer estado',
+            JSON.stringify({
+              id: selectedItem?.id,
+              validado: values?.validado,
+              descritivo: values?.descritivo,
+              perfil_id: selectedItem?.perfil_id,
+              favoravel: values?.parecer === 'Favorável',
+            }),
+            { mail, values, msg: 'Parecer enviado' }
+          )
+        );
+      } else {
+        dispatch(
+          updateItemCC(
+            'parecer',
+            JSON.stringify({
+              id: selectedItem?.id,
+              validado: values?.validado,
+              descritivo: values?.descritivo,
+              perfil_id: selectedItem?.perfil_id,
+              parecerfavoravel: values?.parecer === 'Favorável',
+            }),
+            { mail, values, msg: 'Parecer enviado' }
+          )
+        );
+      }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -235,7 +254,7 @@ export function ArquivarForm({ open, onCancel }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(createItem('arquivar', JSON.stringify(values), { mail, id: pedidoCC.id, msg: 'Processo arquivado' }));
+      dispatch(createItemCC('arquivar', JSON.stringify(values), { mail, id: pedidoCC.id, msg: 'Processo arquivado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

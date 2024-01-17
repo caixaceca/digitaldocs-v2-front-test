@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -26,11 +27,12 @@ import { ParecerForm } from '../Form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
-export default function Pareceres() {
+PareceresEstado.propTypes = { pareceres: PropTypes.array, estado: PropTypes.string, normal: PropTypes.bool };
+
+export default function PareceresEstado({ pareceres, estado, normal = false }) {
   const dispatch = useDispatch();
-  const [accord, setAccord] = useState(false);
+  const [accord, setAccord] = useState(null);
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { pedidoCC } = useSelector((state) => state.cc);
   const { cc, colaboradores } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
@@ -44,18 +46,18 @@ export default function Pareceres() {
 
   return (
     <>
-      <DefaultAction icon="parecer" label={`Pareceres - ${pedidoCC?.estados?.[0]?.estado}`} handleClick={onOpen} />
+      <DefaultAction icon="parecer" label={`Pareceres - ${estado}`} handleClick={onOpen} />
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>{`Pareceres - ${pedidoCC?.estados?.[0]?.estado}`}</DialogTitle>
+        <DialogTitle>{`Pareceres - ${estado}`}</DialogTitle>
         <DialogContent sx={{ mt: 1 }}>
-          {pedidoCC?.estados?.[0]?.pareceres?.map((row, index) => {
+          {pareceres?.map((row, index) => {
             const colaborador = colaboradores?.find((colab) => colab.perfil_id === row.perfil_id);
             return (
               <Accordion
                 sx={{ py: 0.5 }}
-                key={`view_${index}`}
-                expanded={accord === row.perfil_id}
-                onChange={handleAccord(row.perfil_id)}
+                key={`parecer__${index}`}
+                expanded={accord === `parecer_${row.id}`}
+                onChange={handleAccord(`parecer_${row.id}`)}
               >
                 <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1, pr: 2 }}>
@@ -102,7 +104,6 @@ export default function Pareceres() {
                                 handleClick={() => handleParecer(row)}
                               />
                             ))}
-                          <ParecerForm />
                         </>
                       )}
                     </Stack>
@@ -114,6 +115,7 @@ export default function Pareceres() {
           })}
         </DialogContent>
       </Dialog>
+      <ParecerForm normal={normal} />
     </>
   );
 }

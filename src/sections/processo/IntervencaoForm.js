@@ -915,7 +915,7 @@ export function Resgatar({ fluxoId, estadoId, processoId }) {
 
   const handleResgatar = () => {
     const formData = { estado_id: estadoId, fluxoID: fluxoId, perfil_id: cc?.perfil_id };
-    dispatch(updateItem('resgatar', JSON.stringify(formData), { id: processoId, mail, msg: 'resgatado' }));
+    dispatch(updateItem('resgatar', JSON.stringify(formData), { id: processoId, mail, msg: 'Processo resgatado' }));
     onClose();
   };
 
@@ -977,7 +977,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
             mail,
             id: processoId,
             perfilId: cc?.perfil_id,
-            msg: cancelar ? 'cancelado' : 'fechado',
+            msg: cancelar ? 'Envio cancelado' : 'Pareceres fechado',
           })
         );
       }
@@ -992,7 +992,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
         mail,
         id: processoId,
         perfilId: cc?.perfil_id,
-        msg: cancelar ? 'cancelado' : 'fechado',
+        msg: cancelar ? 'Envio cancelado' : 'Pareceres fechado',
       })
     );
     onClose();

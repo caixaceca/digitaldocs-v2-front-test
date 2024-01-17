@@ -160,17 +160,17 @@ export default function TableAcessos({ tab }) {
                             <TableCell>{row?.nome}</TableCell>
                             <TableCell>{row?.acesso}</TableCell>
                             <TableCell align="center">
-                              {row.datalimite ? ptDateTime(row.datalimite) : 'Acesso permanente'}
+                              {row?.datalimite ? ptDateTime(row.datalimite) : 'Acesso permanente'}
                             </TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell>{row.nome}</TableCell>
                             <TableCell align="center">
-                              {row.data_inicial ? ptDateTime(row.data_inicial) : 'Acesso permanente'}
+                              {row?.data_inicial ? ptDateTime(row.data_inicial) : 'Acesso permanente'}
                             </TableCell>
                             <TableCell align="center">
-                              {row.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}
+                              {row?.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}
                             </TableCell>
                             <TableCell align="center" width={10}>
                               <Checked check={row.observador} />
@@ -178,8 +178,15 @@ export default function TableAcessos({ tab }) {
                           </>
                         )}
                         <TableCell align="center" width={10}>
-                          {tab === 'acessos' && row.objeto !== 'Processo' && <UpdateItem item="acesso" id={row?.id} />}
-                          {tab === 'estados' && <UpdateItem dados={row} />}
+                          {tab === 'acessos' &&
+                            row.objeto !== 'Processo' &&
+                            (!row?.datalimite || (row?.datalimite && new Date(row?.datalimite) > new Date())) && (
+                              <UpdateItem item="acesso" id={row?.id} />
+                            )}
+                          {tab === 'estados' &&
+                            (!row?.data_limite || (row?.data_limite && new Date(row?.data_limite) > new Date())) && (
+                              <UpdateItem dados={row} />
+                            )}
                         </TableCell>
                       </TableRow>
                     ))

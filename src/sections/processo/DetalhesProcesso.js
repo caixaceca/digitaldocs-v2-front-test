@@ -104,7 +104,7 @@ export default function DetalhesProcesso({ isPS }) {
                   pareceresNaoValidados()
                 ) : (
                   <>
-                    {processo.nome}
+                    {processo?.nome?.replace(' - P/S/P', '')}
                     {colaboradorLock && (
                       <>
                         {processo.is_lock ? (

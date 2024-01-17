@@ -236,6 +236,16 @@ const slice = createSlice({
       state.processo.pareceres[index] = parecer;
     },
 
+    parecerEstadoSuccess(state, action) {
+      const index = state?.processo?.pareceres_estado?.findIndex((row) => Number(row.id) === Number(action.payload.id));
+      if (index === 0 || index) {
+        state.processo.pareceres_estado[index].validado = action.payload.validado;
+        state.processo.pareceres_estado[index].descritivo = action.payload.descritivo;
+        state.processo.pareceres_estado[index].validado_em = action.payload.validado ? new Date() : null;
+        state.processo.pareceres_estado[index].parecer_favoravel = action.payload?.parecer === 'Favorável';
+      }
+    },
+
     updateProcessoSuccess(state, action) {
       state.processo = action.payload;
       state.previewType = '';
@@ -834,6 +844,11 @@ export function updateItem(item, dados, params) {
             options1
           );
           dispatch(slice.actions.patchParecerSuccess({ id: params?.id, dados: response.data }));
+          break;
+        }
+        case 'parecer estado': {
+          await axios.patch(`${BASEURLDD}/v1/processos/dar_parecer/estado`, dados, options);
+          dispatch(slice.actions.parecerEstadoSuccess(params?.values));
           break;
         }
         case 'aceitar': {
