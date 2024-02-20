@@ -1,116 +1,119 @@
-import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
 // @mui
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
-import Drawer from '@mui/material/Drawer';
-import Divider from '@mui/material/Divider';
-import Collapse from '@mui/material/Collapse';
 import TableRow from '@mui/material/TableRow';
-import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import CloseIcon from '@mui/icons-material/Close';
-import CircleIcon from '@mui/icons-material/Circle';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemButton from '@mui/material/ListItemButton';
+import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
-import LockPersonIcon from '@mui/icons-material/LockPerson';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
-import { newLineText } from '../../utils/normalizeText';
 import { ptDateTime, fDistance, fToNow } from '../../utils/formatTime';
+import { newLineText, normalizeText, noDados } from '../../utils/normalizeText';
 // hooks
-import useToggle from '../../hooks/useToggle';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import SvgIconStyle from '../../components/SvgIconStyle';
 import { ColaboradorInfo } from '../../components/Panel';
+import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+
+const TABLE_HEAD_RETENCOES = [
+  { id: 'nome', label: 'Colaborador', align: 'left' },
+  { id: '', label: 'Duração', align: 'center' },
+  { id: 'preso_em', label: 'Retido em', align: 'center' },
+  { id: 'solto_em', label: 'Solto em', align: 'center' },
+  { id: 'solto_por', label: 'Solto por', align: 'left' },
+];
 
 // ----------------------------------------------------------------------
 
 HistoricoPrisoes.propTypes = { historico: PropTypes.array };
 
 export function HistoricoPrisoes({ historico }) {
-  const { toggle: open, onOpen, onClose } = useToggle();
+  const {
+    page,
+    dense,
+    order,
+    orderBy,
+    setPage,
+    rowsPerPage,
+    //
+    onSort,
+    onChangePage,
+    onChangeDense,
+    onChangeRowsPerPage,
+  } = useTable({ defaultOrderBy: 'preso_em' });
+  const [filter, setFilter] = useState('');
+  const { colaboradores } = useSelector((state) => state.intranet);
+
+  const dataFiltered = applySortFilter({
+    dados: historico?.map((row) => ({
+      ...row,
+      uo: colaboradores?.find((colab) => colab?.perfil?.id === row?.perfil_id)?.uo?.label,
+      foto: colaboradores?.find((colab) => colab?.perfil?.id === row?.perfil_id)?.foto_disk,
+      nome: colaboradores?.find((colab) => colab?.perfil?.id === row?.perfil_id)?.perfil?.displayName,
+    })),
+    comparator: getComparator(order, orderBy),
+    filter,
+  });
+  const isNotFound = !dataFiltered.length;
+
+  useEffect(() => {
+    setPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   return (
-    <>
-      <Button
-        size="large"
-        variant="soft"
-        color="inherit"
-        onClick={onOpen}
-        startIcon={<LockPersonIcon sx={{ width: 20 }} />}
-      >
-        Histórico de retenções
-      </Button>
+    <CardContent sx={{ p: 1 }}>
+      <SearchToolbarSimple filter={filter} setFilter={setFilter} />
+      <Scrollbar>
+        <TableContainer sx={{ overflow: 'hidden', position: 'relative', minWidth: 800 }}>
+          <Table>
+            <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD_RETENCOES} onSort={onSort} />
+            <TableBody>
+              {dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((row) => (
+                <TableRow key={row?.preso_em} hover>
+                  <TableCell>
+                    <ColaboradorInfo nome={row?.nome} foto={row?.foto} label={row?.uo} />
+                  </TableCell>
+                  <TableCell align="center">
+                    {(row?.preso_em && row?.solto_em && fDistance(row?.preso_em, row?.solto_em)) ||
+                      (row?.preso_em && !row?.solto_em && fToNow(row?.preso_em)) ||
+                      noDados(true)}
+                  </TableCell>
+                  <TableCell align="center">{ptDateTime(row?.preso_em)}</TableCell>
+                  <TableCell align="center">{row?.solto_em ? ptDateTime(row?.solto_em) : noDados(true)}</TableCell>
+                  <TableCell>{row?.por && row?.solto_em ? row?.por : noDados(true)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            {isNotFound && <TableSearchNotFound message="Não foi encontrado nenhum registo disponível..." />}
+          </Table>
+        </TableContainer>
+      </Scrollbar>
 
-      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
-          <Typography variant="h6">Histórico de retenções</Typography>
-
-          <IconButton onClick={onClose}>
-            <CloseIcon sx={{ width: 20 }} />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-        <Scrollbar sx={{ p: 1 }}>
-          <Retencao historico={historico} />
-        </Scrollbar>
-      </Drawer>
-    </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-HistoricoPrisoesAnt.propTypes = { historico: PropTypes.object };
-
-export function HistoricoPrisoesAnt({ historico }) {
-  const [openHistoricoPrisoes, setOpenHistoricoPrisoes] = useState(false);
-
-  const handleHistoricoPrisoes = () => {
-    setOpenHistoricoPrisoes(!openHistoricoPrisoes);
-  };
-
-  return (
-    <>
-      <ListItemButton
-        onClick={handleHistoricoPrisoes}
-        sx={{
-          py: 3,
-          borderRadius: 1.5,
-          boxShadow: (theme) => theme.customShadows.card,
-          borderBottomLeftRadius: openHistoricoPrisoes && 0,
-          borderBottomRightRadius: openHistoricoPrisoes && 0,
-          background: (theme) => theme.palette.background.paper,
-        }}
-      >
-        <ListItemIcon>{openHistoricoPrisoes ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</ListItemIcon>
-        <ListItemText primary="Histórico de retenções" />
-      </ListItemButton>
-      <Collapse in={openHistoricoPrisoes}>
-        <Card sx={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, p: 2 }}>
-          <Scrollbar>
-            <Retencao historico={historico} />
-          </Scrollbar>
-        </Card>
-      </Collapse>
-    </>
+      {!isNotFound && dataFiltered.length > 10 && (
+        <TablePaginationAlt
+          page={page}
+          dense={dense}
+          rowsPerPage={rowsPerPage}
+          count={dataFiltered.length}
+          onChangePage={onChangePage}
+          onChangeDense={onChangeDense}
+          onChangeRowsPerPage={onChangeRowsPerPage}
+        />
+      )}
+    </CardContent>
   );
 }
 
@@ -119,92 +122,23 @@ export function HistoricoPrisoesAnt({ historico }) {
 HistoricoTransicao.propTypes = { historico: PropTypes.array };
 
 export function HistoricoTransicao({ historico }) {
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const historicoGrouped = groupBy(historico, 'data_transicao');
-
   return (
     <>
-      <Button
-        size="large"
-        variant="soft"
-        color="inherit"
-        onClick={onOpen}
-        sx={{ justifyContent: 'left' }}
-        startIcon={
-          <SvgIconStyle
-            src={`/assets/icons/navbar/transition.svg`}
-            sx={{ width: 20, height: 20, transform: 'rotate(180deg)' }}
-          />
-        }
-      >
-        Histórico de transições
-      </Button>
-
-      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
-          <Typography variant="h6">Histórico de transições</Typography>
-          <IconButton onClick={onClose}>
-            <CloseIcon sx={{ width: 20 }} />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-
-        <Scrollbar>
-          <Timeline position="right">
-            {historicoGrouped
-              .sort((a, b) => {
-                const datetimeA = new Date(a.data);
-                const datetimeB = new Date(b.data);
-                return datetimeB - datetimeA;
-              })
-              .map((row, index) => (
-                <Transicao key={row.data} row={row} addConector={index !== historicoGrouped?.length - 1} />
-              ))}
-          </Timeline>
-        </Scrollbar>
-      </Drawer>
-    </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-HistoricoTransicaoAnt.propTypes = { historico: PropTypes.array };
-
-export function HistoricoTransicaoAnt({ historico }) {
-  const [openHistorico, setOpenHistorico] = useState(false);
-  const historicoGrouped = groupBy(historico, 'data_transicao');
-
-  const handleHistorico = () => {
-    setOpenHistorico(!openHistorico);
-  };
-
-  return (
-    <>
-      <ListItemButton
-        onClick={handleHistorico}
-        sx={{
-          py: 3,
-          borderRadius: 1.5,
-          borderBottomLeftRadius: openHistorico && 0,
-          borderBottomRightRadius: openHistorico && 0,
-          boxShadow: (theme) => theme.customShadows.card,
-          background: (theme) => theme.palette.background.paper,
-        }}
-      >
-        <ListItemIcon>{openHistorico ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</ListItemIcon>
-        <ListItemText primary="Histórico de transições" />
-      </ListItemButton>
-      <Collapse in={openHistorico}>
-        <Card sx={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, pb: 1 }}>
-          <Timeline position="right">
-            {historicoGrouped.map((row, index) => (
-              <Transicao key={row.data_transicao} row={row} addConector={index !== historicoGrouped?.length - 1} />
-            ))}
-          </Timeline>
-        </Card>
-      </Collapse>
+      <Timeline position="right">
+        {groupBy(historico, 'data_transicao')
+          ?.sort((a, b) => {
+            const datetimeA = new Date(a.data);
+            const datetimeB = new Date(b.data);
+            return datetimeB - datetimeA;
+          })
+          .map((row, index) => (
+            <Transicao
+              row={row}
+              key={`transicao_${index}`}
+              addConector={index !== groupBy(historico, 'data_transicao')?.length - 1}
+            />
+          ))}
+      </Timeline>
     </>
   );
 }
@@ -291,67 +225,16 @@ function Transicao({ row, addConector }) {
 
 // ----------------------------------------------------------------------
 
-Retencao.propTypes = { historico: PropTypes.array };
-
-function Retencao({ historico }) {
-  let soltoPeloSistema = 0;
-  const { colaboradores } = useSelector((state) => state.intranet);
-  return (
-    <TableContainer sx={{ minWidth: 650, position: 'relative', overflow: 'hidden' }}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Colaborador</TableCell>
-            <TableCell align="center">Retido em</TableCell>
-            <TableCell align="center">Solto em</TableCell>
-            <TableCell align="right">Duração</TableCell>
-            <TableCell align="right"> </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {historico?.map((item) => {
-            const colaborador = colaboradores?.find((row) => Number(row?.perfil_id) === Number(item?.perfil_id));
-            if (colaborador?.perfil?.mail?.toLowerCase() !== item.por?.toLowerCase()) {
-              soltoPeloSistema += 1;
-            }
-            return (
-              <TableRow key={item?.preso_em} hover>
-                <TableCell>
-                  <ColaboradorInfo
-                    foto={colaborador?.foto_disk}
-                    label={colaborador?.uo?.label}
-                    nome={colaborador?.perfil?.displayName}
-                  />
-                </TableCell>
-                <TableCell align="center">{item?.preso_em ? ptDateTime(item?.preso_em) : '--'}</TableCell>
-                <TableCell align="center">{item?.solto_em ? ptDateTime(item?.solto_em) : '--'}</TableCell>
-                <TableCell align="right">
-                  {(item?.preso_em && item?.solto_em && fDistance(item?.preso_em, item?.solto_em)) ||
-                    (item?.preso_em && !item?.solto_em && fToNow(item?.preso_em)) ||
-                    '--'}
-                </TableCell>
-                <TableCell align="right">
-                  {colaborador?.perfil?.mail?.toLowerCase() !== item.por?.toLowerCase() && (
-                    <CircleIcon color="error" sx={{ width: 15, mt: 1.5 }} />
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-          {soltoPeloSistema > 0 && (
-            <TableRow>
-              <TableCell colSpan={5}>
-                <Stack direction="row" justifyContent="right" alignItems="center" spacing={0.5}>
-                  <CircleIcon color="error" sx={{ width: 15, mt: 0.25 }} />
-                  <Typography variant="caption">Solto pelo sistema</Typography>
-                </Stack>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+function applySortFilter({ dados, comparator, filter }) {
+  dados = applySort(dados, comparator);
+  if (filter) {
+    dados = dados.filter(
+      (row) =>
+        (row?.uo && normalizeText(row?.uo).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1)
+    );
+  }
+  return dados;
 }
 
 // ----------------------------------------------------------------------

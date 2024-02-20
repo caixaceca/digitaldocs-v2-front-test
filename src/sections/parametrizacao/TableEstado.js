@@ -101,7 +101,8 @@ export default function TableEstado({ tab }) {
           { name: tab === 'transicoes' ? 'Transições' : 'Estados' },
         ]}
         action={
-          tab === 'transicoes' && (
+          tab === 'transicoes' &&
+          fluxo?.is_ativo && (
             <RoleBasedGuard roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}>
               <AddItem />
             </RoleBasedGuard>
@@ -150,7 +151,7 @@ export default function TableEstado({ tab }) {
                               hasContent
                               roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}
                             >
-                              <UpdateItem item="transicao" id={row?.id} />
+                              {fluxo?.is_ativo && <UpdateItem item="transicao" id={row?.id} />}
                             </RoleBasedGuard>
                           </TableCell>
                         </>

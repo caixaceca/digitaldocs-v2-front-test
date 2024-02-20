@@ -177,6 +177,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
       if (values?.pendenteLevantamento) {
         formPendencia = {
           pender: true,
+          fluxo_id: processo?.fluxo_id,
           mobs: 'Para levantamento do pedido',
           mpendencia: motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id,
         };

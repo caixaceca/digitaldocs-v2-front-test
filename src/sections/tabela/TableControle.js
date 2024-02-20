@@ -26,9 +26,9 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { DefaultAction, ExportExcel } from '../../components/Actions';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // sections
@@ -192,31 +192,35 @@ export default function TableControle({ from }) {
       dados?.dados?.filter((row) => row?.colaborador === colaborador)?.length) ||
     0;
 
+  const title =
+    (from === 'entradas' && 'Entradas') ||
+    (from === 'trabalhados' && 'Processos trabalhados') ||
+    (from === 'porconcluir' && 'Processos por concluir');
+
   return (
     <>
       <HeaderBreadcrumbs
-        heading={
-          (from === 'entradas' && 'Entradas') ||
-          (from === 'trabalhados' && 'Processos trabalhados') ||
-          (from === 'porconcluir' && 'Processos por concluir')
-        }
+        heading={title}
         links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
         action={
-          from !== 'porconcluir' && (
-            <UoData
-              uo={uo}
-              data={data}
-              setUo={setUo}
-              datai={datai}
-              dataf={dataf}
-              uosList={uosList}
-              setData={setData}
-              setDatai={setDatai}
-              setDataf={setDataf}
-              entradas={from === 'entradas'}
-            />
-          )
+          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
+            {from !== 'porconcluir' && (
+              <UoData
+                uo={uo}
+                data={data}
+                setUo={setUo}
+                datai={datai}
+                dataf={dataf}
+                uosList={uosList}
+                setData={setData}
+                setDatai={setDatai}
+                setDataf={setDataf}
+                entradas={from === 'entradas'}
+              />
+            )}
+            {isAdmin && !isNotFound && <ExportExcel table="entradas" filename={title} icon />}
+          </Stack>
         }
       />
 
@@ -273,7 +277,7 @@ export default function TableControle({ from }) {
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
-            <Table size={dense ? 'small' : 'medium'}>
+            <Table size={dense ? 'small' : 'medium'} id="entradas">
               <TableHeadCustom
                 order={order}
                 onSort={onSort}

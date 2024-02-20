@@ -12,8 +12,8 @@ import CardContent from '@mui/material/CardContent';
 // utils
 import { fYear } from '../utils/formatTime';
 // redux
+import { getItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
-import { getItem, getAll } from '../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
@@ -52,7 +52,7 @@ export default function NovoEditarProcesso() {
 
   useEffect(() => {
     if (mail && perfilId && origens?.length === 0 && fluxo && !fluxo?.is_interno) {
-      dispatch(getAll('origens', { mail, perfilId }));
+      dispatch(getFromParametrizacao('origens', { mail, perfilId }));
     }
   }, [dispatch, origens, fluxo, processo, perfilId, mail]);
 

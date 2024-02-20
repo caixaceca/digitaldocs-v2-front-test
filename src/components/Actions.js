@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
@@ -21,6 +22,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
@@ -30,6 +32,7 @@ import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
@@ -91,14 +94,16 @@ export function DefaultAction({
             (icon === 'history' && <HistoryIcon />) ||
             (icon === 'confirmar' && <DoneAllIcon />) ||
             (icon === 'forward' && <ArrowForwardIcon />) ||
+            (label === 'PARECER' && <ChatOutlinedIcon />) ||
             (icon === 'views' && <PreviewOutlinedIcon />) ||
             (icon === 'acesso' && <TaskAltOutlinedIcon />) ||
-            (label === 'COLABORADORES' && <GroupOutlinedIcon />) ||
+            (label === 'VALIDAR' && <SpellcheckOutlinedIcon />) ||
+            (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
-            (label === 'Acessos & Estados' && <SwapHorizOutlinedIcon />) ||
-            (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
+            ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
             (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (icon === 'abandonar' && <SvgIconStyle src="/assets/icons/abandonar.svg" sx={{ width: 22 }} />) ||
@@ -328,5 +333,39 @@ export function AnexosExistente({ mt = 4, anexos, onOpen }) {
         ))}
       </List>
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+ExportExcel.propTypes = {
+  icon: PropTypes.bool,
+  sheet: PropTypes.string,
+  table: PropTypes.string,
+  filename: PropTypes.string,
+};
+
+export function ExportExcel({ filename, sheet = '', table, icon = false }) {
+  return (
+    <ReactHTMLTableToExcel
+      table={table}
+      filename={filename}
+      sheet={sheet || filename}
+      id="table-xls-button-tipo"
+      className="MuiButtonBase-root-MuiButton-root"
+      children={
+        icon ? (
+          <Tooltip title="EXPORTAR" arrow>
+            <Fab color="inherit" size="small" variant="soft" sx={{ ...wh }}>
+              {getFileThumb(false, null, 'file.xlsx')}
+            </Fab>
+          </Tooltip>
+        ) : (
+          <Button variant="contained" startIcon={getFileThumb(false, null, 'file.xlsx')}>
+            Exportar
+          </Button>
+        )
+      }
+    />
   );
 }

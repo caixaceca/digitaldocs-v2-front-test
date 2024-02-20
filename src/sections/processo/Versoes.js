@@ -2,40 +2,32 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
-import Drawer from '@mui/material/Drawer';
-import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { fDateTime } from '../../utils/formatTime';
-// hooks
-import useToggle from '../../hooks/useToggle';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll } from '../../redux/slices/digitaldocs';
 // components
-import Scrollbar from '../../components/Scrollbar';
+import { SkeletonBar } from '../../components/skeleton';
 import { SearchNotFound } from '../../components/table';
 import { ColaboradorInfo } from '../../components/Panel';
-import { DefaultAction } from '../../components/Actions';
 //
 import DetalhesProcesso from './DetalhesProcesso';
 
 // ----------------------------------------------------------------------
 
-Versoes.propTypes = { processoId: PropTypes.number };
+Versoes.propTypes = { id: PropTypes.number };
 
-export default function Versoes({ processoId }) {
+export default function Versoes({ id }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const { versoes, processo } = useSelector((state) => state.digitaldocs);
   const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
+  const { isLoading, versoes, processo } = useSelector((state) => state.digitaldocs);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
@@ -48,29 +40,23 @@ export default function Versoes({ processoId }) {
   }, [dispatch, versoes]);
 
   useEffect(() => {
-    if (mail && processoId && cc?.perfil_id && open) {
-      dispatch(getAll('versoes', { mail, processoId, perfilId: cc?.perfil_id }));
+    if (mail && id && cc?.perfil_id) {
+      dispatch(getAll('versoes', { mail, id, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, processoId, mail, open, cc?.perfil_id]);
+  }, [dispatch, id, mail, cc?.perfil_id]);
 
   return (
     <>
-      <DefaultAction icon="history" color="inherit" label="VERSÕES" handleClick={onOpen} />
-      <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 1, md: 800 } } }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
-          <Typography variant="h6">Versões anteriores do processo</Typography>
-          <IconButton onClick={onClose}>
-            <CloseIcon sx={{ width: 20 }} />
-          </IconButton>
+      {isLoading ? (
+        <Stack sx={{ p: 2 }}>
+          <SkeletonBar column={3} height={150} />
         </Stack>
-
-        <Divider />
-
-        {versoes?.length === 0 ? (
-          <SearchNotFound message="O processo ainda não foi modificado..." />
-        ) : (
-          <Scrollbar sx={{ p: 3 }}>
-            {versoes?.map((row, index) => {
+      ) : (
+        <>
+          {versoes?.length === 0 ? (
+            <SearchNotFound message="O processo ainda não foi modificado..." />
+          ) : (
+            versoes?.map((row, index) => {
               const colaborador = colaboradores?.find((_row) => _row.perfil_id === row?.updated_by);
 
               const getNew = (newObj, oldObj) => {
@@ -88,6 +74,7 @@ export default function Versoes({ processoId }) {
               };
               return (
                 <Accordion
+                  sx={{ px: 1 }}
                   key={row?.updated_in}
                   expanded={accord === row?.updated_in}
                   onChange={handleAccord(row?.updated_in)}
@@ -113,10 +100,10 @@ export default function Versoes({ processoId }) {
                   </AccordionDetails>
                 </Accordion>
               );
-            })}
-          </Scrollbar>
-        )}
-      </Drawer>
+            })
+          )}
+        </>
+      )}
     </>
   );
 }

@@ -1,14 +1,12 @@
 import { sumBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
-import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -28,7 +26,6 @@ import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturn
 import { format, add } from 'date-fns';
 import { bgGradient } from '../../utils/cssStyles';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { getFileThumb } from '../../utils/getFileFormat';
 import { ptDate, fMonthYear } from '../../utils/formatTime';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText';
@@ -36,6 +33,7 @@ import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
 // components
+import { ExportExcel } from '../../components/Actions';
 import { TableSearchNotFound } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -174,20 +172,11 @@ export default function EstatisticaCredito() {
               )}
             </Stack>
             {((uo?.label !== 'Caixa' && uo?.label !== 'DCN' && uo?.label !== 'DCS') || currentTab === 'Resumo') && (
-              <Stack>
-                <ReactHTMLTableToExcel
-                  id="table-xls-button-tipo"
-                  table="tabel-estatistica-credito"
-                  className="MuiButtonBase-root-MuiButton-root"
-                  sheet={`${currentTab}`}
-                  filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
-                  children={
-                    <Button variant="contained" startIcon={getFileThumb(false, null, 'file.xlsx')}>
-                      Exportar
-                    </Button>
-                  }
-                />
-              </Stack>
+              <ExportExcel
+                sheet={`${currentTab}`}
+                table="tabel-estatistica-credito"
+                filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
+              />
             )}
           </Stack>
         }

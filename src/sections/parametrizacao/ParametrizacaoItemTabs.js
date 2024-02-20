@@ -526,16 +526,26 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                         ))}
                       {(item === 'notificacoes' || item === 'destinatarios') && (
                         <TableCell width={10}>
-                          {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
-                          {row?.criador && <Criado tipo="user" value={row.criador} />}
-                          {(row?.modificado_em || row.modificador) && <Divider sx={{ my: 0.5 }} />}
-                          {row?.modificado_em && <Criado tipo="time" value={ptDateTime(row.modificado_em)} />}
-                          {row?.modificador && <Criado tipo="user" value={row.modificador} />}
+                          {row?.criado_em && <Criado caption tipo="time" value={ptDateTime(row.criado_em)} />}
+                          {row?.criador && <Criado caption tipo="user" value={row.criador} />}
+                          {row?.modificado_em && row.modificador ? (
+                            <Box sx={{ color: 'text.secondary' }}>
+                              <Divider sx={{ my: 0.5 }} />
+                              {row?.modificado_em && (
+                                <Criado caption tipo="time" value={ptDateTime(row.modificado_em)} />
+                              )}
+                              {row?.modificador && <Criado caption tipo="user" value={row.modificador} />}
+                            </Box>
+                          ) : (
+                            ''
+                          )}
                         </TableCell>
                       )}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {item !== 'regras estado' && item !== 'regras transicao' && <UpdateItem dados={row} />}
+                          {item !== 'regras estado' && item !== 'regras transicao' && row?.ativo && (
+                            <UpdateItem dados={row} />
+                          )}
                           {item !== 'linhas' && item !== 'destinatarios' && (
                             <DefaultAction
                               handleClick={() => handleView(row)}

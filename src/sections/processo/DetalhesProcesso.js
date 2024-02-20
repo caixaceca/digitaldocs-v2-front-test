@@ -31,7 +31,6 @@ import useToggle from '../../hooks/useToggle';
 // components
 import Label from '../../components/Label';
 import { Fechar } from '../../components/Actions';
-import Scrollbar from '../../components/Scrollbar';
 // _mock
 import { dis, estadosCivis } from '../../_mock';
 
@@ -70,7 +69,7 @@ export default function DetalhesProcesso({ isPS }) {
   };
 
   return (
-    <Scrollbar sx={{ mt: -2, mb: -1 }}>
+    <>
       {(uo ||
         criador ||
         processo?.obs ||
@@ -81,7 +80,7 @@ export default function DetalhesProcesso({ isPS }) {
         processo?.referencia ||
         processo?.data_entrada ||
         processo.ispendente) && (
-        <List>
+        <List sx={{ pt: 0 }}>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
@@ -336,7 +335,7 @@ export default function DetalhesProcesso({ isPS }) {
           {con?.finalidade && <TextItem title="Finalidade do fundo:" text={newLineText(con?.finalidade)} />}
         </List>
       )}
-    </Scrollbar>
+    </>
   );
 }
 

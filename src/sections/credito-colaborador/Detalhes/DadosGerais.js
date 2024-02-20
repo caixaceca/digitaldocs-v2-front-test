@@ -8,6 +8,7 @@ import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import NumbersIcon from '@mui/icons-material/Numbers';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import AbcOutlinedIcon from '@mui/icons-material/AbcOutlined';
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
@@ -16,7 +17,6 @@ import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import PermContactCalendarOutlinedIcon from '@mui/icons-material/PermContactCalendarOutlined';
 // utils
 import { newLineText } from '../../../utils/normalizeText';
 import { colorLabel } from '../../../utils/getColorPresets';
@@ -101,11 +101,7 @@ export default function DadosGerais() {
                     />
                   )}
                   {pedidoCC?.modificador && (
-                    <DetailItem
-                      icon={<PermContactCalendarOutlinedIcon />}
-                      title="Modificado por"
-                      text={pedidoCC?.modificador}
-                    />
+                    <DetailItem icon={<EditNoteIcon />} title="Modificado por" text={pedidoCC?.modificador} />
                   )}
                   {pedidoCC?.data_ultima_transicao && (
                     <DetailItem

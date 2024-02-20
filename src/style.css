@@ -21,9 +21,8 @@
   font-size: 0.875rem;
   text-transform: capitalize;
   font-family: NeoSansStd;
-  min-width: 64px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: 0;
   transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   text-transform: none;
 }

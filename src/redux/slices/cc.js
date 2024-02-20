@@ -93,7 +93,6 @@ const slice = createSlice({
           state.pedidoCC = null;
           state.selectedAnexo = null;
           state.destinos = [];
-          state.destinos = [];
           state.retencoes = [];
           state.pendencias = [];
           state.transicoes = [];
@@ -553,12 +552,18 @@ export function updateItemCC(item, dados, params) {
           break;
         }
         case 'resgatar': {
-          const response = await axios.post(
+          const processo = await axios.post(
             `${BASEURLCC}/v1/creditos/funcionario/resgate/${params?.id}`,
             dados,
             options
           );
-          dispatch(slice.actions.getProcessoSuccess(response.data.objeto));
+          const destinos = await axios.get(
+            `${BASEURLCC}/v1/creditos/funcionario/destinos/${params?.perfilId}?processoID=${params?.id}`,
+            options
+          );
+          dispatch(
+            slice.actions.getPedidoCreditoSuccess({ processo: processo.data.objeto, destinos: destinos.data.objeto })
+          );
           break;
         }
 

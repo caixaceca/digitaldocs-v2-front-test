@@ -69,7 +69,7 @@ export default function ParametrizacaoItem({ item }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const [filter, setFilter] = useState(localStorage.getItem('filterParams') || '');
+  const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
   const { fluxos, estados, origens, motivosPendencias, selectedItem, isLoading, done } = useSelector(
     (state) => state.parametrizacao
   );
@@ -163,7 +163,7 @@ export default function ParametrizacaoItem({ item }) {
       />
 
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple item="filterParams" filter={filter} setFilter={setFilter} />
+        <SearchToolbarSimple item={`filter${item}`} filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -238,21 +238,26 @@ export default function ParametrizacaoItem({ item }) {
                         ))}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {item === 'origens' || item === 'estados' || item === 'fluxos' ? (
-                            <UpdateItem
-                              id={row?.id}
-                              item={
-                                (item === 'fluxos' && 'fluxo') ||
-                                (item === 'origens' && 'origem') ||
-                                (item === 'estados' && 'estado')
-                              }
-                            />
-                          ) : (
-                            <UpdateItem dados={row} />
-                          )}
+                          {item === 'origens' ||
+                            item === 'estados' ||
+                            (item === 'fluxos' && row.is_ativo && (
+                              <UpdateItem
+                                id={row?.id}
+                                item={
+                                  (item === 'fluxos' && 'fluxo') ||
+                                  (item === 'origens' && 'origem') ||
+                                  (item === 'estados' && 'estado')
+                                }
+                              />
+                            ))}
+                          {item !== 'estados' && item !== 'fluxos' && <UpdateItem dados={row} />}
+                          {item === 'estados' && <UpdateItem item="estado" id={row?.id} />}
                           {item === 'fluxos' && <CloneItem item="fluxo" id={row?.id} />}
                           {(item === 'fluxos' || item === 'estados') && (
-                            <DefaultAction label="COLABORADORES" handleClick={() => handleView(row?.id)} />
+                            <DefaultAction
+                              handleClick={() => handleView(row?.id)}
+                              label={item === 'estados' ? 'Colaboradores' : 'Transições'}
+                            />
                           )}
                         </Stack>
                       </TableCell>

@@ -1,12 +1,10 @@
 export { Libertar } from './Intervencao';
-export { default as Views } from './Views';
 export { default as Anexos } from './Anexos';
 export { default as Versoes } from './Versoes';
 export { HistoricoPrisoes } from './Historico';
 export { HistoricoTransicao } from './Historico';
-export { HistoricoPrisoesAnt } from './Historico';
 export { default as Pareceres } from './Pareceres';
-export { HistoricoTransicaoAnt } from './Historico';
+export { default as DadosGerais } from './DadosGerais';
 export { default as Intervencao } from './Intervencao';
 export { default as NotaProcesso } from './NotaProcesso';
 export { default as DetalhesProcesso } from './DetalhesProcesso';

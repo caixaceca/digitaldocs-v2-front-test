@@ -28,29 +28,23 @@ import {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EncaminharForm.propTypes = { onCancel: PropTypes.func, open: PropTypes.bool, destinos: PropTypes.array };
+EncaminharForm.propTypes = {
+  dev: PropTypes.bool,
+  open: PropTypes.bool,
+  onCancel: PropTypes.func,
+  destinos: PropTypes.array,
+};
 
-export function EncaminharForm({ open, destinos, onCancel }) {
+export function EncaminharForm({ open, destinos, onCancel, dev }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { pedidoCC, isSaving } = useSelector((state) => state.cc);
 
-  const destinosList = useMemo(
-    () =>
-      destinos?.map((row) => ({
-        modo: row.modo,
-        id: row.transicao_id,
-        estado_final_id: row.estado_id,
-        label: `${row?.modo} para ${row?.nome}`,
-      })) || [],
-    [destinos]
-  );
-
   const formSchema = Yup.object().shape({ acao: Yup.mixed().required('Introduza o destino') });
   const defaultValues = useMemo(
-    () => ({ observacao: '', acao: destinosList?.length === 1 ? destinosList?.[0] : null }),
-    [destinosList]
+    () => ({ observacao: '', acao: destinos?.length === 1 ? destinos?.[0] : null }),
+    [destinos]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -90,12 +84,12 @@ export function EncaminharForm({ open, destinos, onCancel }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Encaminhar</DialogTitle>
+      <DialogTitle>{dev ? 'Devolver' : 'Encaminhar'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFAutocompleteObject name="acao" label="Ação" options={destinosList} />
+              <RHFAutocompleteObject name="acao" label="Ação" options={destinos} />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
@@ -205,7 +199,7 @@ export function ParecerForm({ normal = false }) {
               <RHFSwitch name="validado" label="Parecer final" />
             </Grid>
             <Grid item xs={12}>
-              <RHFTextField name="descritivo" multiline minRows={10} maxRows={15} label="Descritivo" />
+              <RHFTextField name="descritivo" multiline minRows={8} maxRows={15} label="Descritivo" />
             </Grid>
           </Grid>
           <DialogActions sx={{ pb: '0px !important', px: '0px !important' }}>

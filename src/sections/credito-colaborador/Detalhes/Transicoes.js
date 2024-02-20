@@ -88,7 +88,7 @@ function Transicao({ row, addConector }) {
         <TimelineDot
           sx={{ p: 0 }}
           color={
-            (transicao?.is_resgate && 'warning') ||
+            (transicao?.resgate && 'warning') ||
             ((transicao?.modo === 'Devolução' || transicao?.modo === 'desarquivamento') && 'error') ||
             'success'
           }
@@ -116,13 +116,13 @@ function Transicao({ row, addConector }) {
             >
               <Stack>
                 <Stack spacing={0.5} direction="row" alignItems="center" justifyContent={{ xs: 'center', sm: 'left' }}>
-                  <DateRangeIcon sx={{ width: 14, color: 'text.secondary' }} />
+                  <DateRangeIcon sx={{ width: 14, color: 'text.secondary', height: 14 }} />
                   <Typography variant="caption">{ptDateTime(transicao?.data_entrada)}</Typography>
-                  <RemoveIcon sx={{ width: 15 }} />
+                  <RemoveIcon sx={{ width: 15, height: 20 }} />
                   <Typography variant="caption">{ptDateTime(transicao?.data_saida)}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent={{ xs: 'center', sm: 'left' }} alignItems="center" spacing={0.5}>
-                  <AccessTimeIcon sx={{ width: 14, color: 'text.secondary' }} />
+                  <AccessTimeIcon sx={{ width: 14, color: 'text.secondary', height: 14 }} />
                   <Typography variant="caption">{fDistance(transicao?.data_entrada, transicao?.data_saida)}</Typography>
                 </Stack>
               </Stack>
@@ -130,22 +130,22 @@ function Transicao({ row, addConector }) {
                 <Label
                   variant="ghost"
                   color={
-                    (transicao?.is_resgate && 'warning') ||
+                    (transicao?.resgate && 'warning') ||
                     ((transicao?.modo === 'Devolução' || transicao?.modo === 'desarquivamento') && 'error') ||
                     'success'
                   }
                 >
-                  {(transicao?.is_resgate && 'Resgate') ||
+                  {(transicao?.resgate && 'Resgate') ||
                     (transicao?.modo === 'Paralelo' && 'Seguimento em paralelo') ||
                     transicao?.modo}
                 </Label>
                 <Stack direction="row" justifyContent={{ xs: 'center', sm: 'right' }} alignItems="center" spacing={0.5}>
                   <Typography variant="body2" sx={{ textAlign: 'center' }}>
-                    {transicao?.is_resgate ? estadoDestino() : transicao?.estado_inicial}
+                    {transicao?.resgate ? estadoDestino() : transicao?.estado_inicial}
                   </Typography>
                   <ArrowRightAltIcon />
                   <Typography variant="body2" sx={{ textAlign: 'center' }}>
-                    {transicao?.is_resgate ? transicao?.estado_inicial : estadoDestino()}
+                    {transicao?.resgate ? transicao?.estado_inicial : estadoDestino()}
                   </Typography>
                 </Stack>
               </Stack>

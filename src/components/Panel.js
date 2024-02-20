@@ -52,9 +52,9 @@ export default function Panel({ label, children, sx }) {
 
 // ----------------------------------------------------------------------
 
-Criado.propTypes = { tipo: PropTypes.string, value: PropTypes.string };
+Criado.propTypes = { tipo: PropTypes.string, value: PropTypes.string, caption: PropTypes.bool };
 
-export function Criado({ tipo = '', value }) {
+export function Criado({ tipo = '', value, caption = false }) {
   return (
     <Stack direction="row" spacing={0.5} alignItems="center">
       {(tipo === 'uo' && <BusinessIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
@@ -64,7 +64,7 @@ export function Criado({ tipo = '', value }) {
         (tipo === 'time' && <AccessTimeOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
         (tipo === 'company' && <BusinessOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />) ||
         (tipo === 'user' && <AccountCircleOutlinedIcon sx={{ width: 15, height: 15, color: 'text.secondary' }} />)}
-      <Typography noWrap variant="body2">
+      <Typography noWrap variant={caption ? 'caption' : 'body2'}>
         {value}
       </Typography>
     </Stack>

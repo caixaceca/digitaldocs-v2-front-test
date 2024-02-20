@@ -1,19 +1,13 @@
-import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // @mui
-import Fab from '@mui/material/Fab';
-import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
-import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
-import CardContent from '@mui/material/CardContent';
-import LockPersonIcon from '@mui/icons-material/LockPerson';
-import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 // utils
-import { fYear } from '../utils/formatTime';
 import {
   temNomeacao,
   podeDarParecer,
@@ -21,6 +15,8 @@ import {
   findColaboradores,
   processoMePertence,
 } from '../utils/validarAcesso';
+import selectTab from '../utils/selectTab';
+import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { parecerEstadoSuccess } from '../redux/slices/cc';
@@ -33,28 +29,22 @@ import useToggle from '../hooks/useToggle';
 import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
+import { TabCard } from '../components/TabsWrapper';
 import { DefaultAction } from '../components/Actions';
-import { SearchNotFound404 } from '../components/table';
-import { SkeletonProcesso } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
 import {
-  Views,
-  Anexos,
   Versoes,
   Libertar,
   Pareceres,
   Intervencao,
-  NotaProcesso,
-  DetalhesProcesso,
+  DadosGerais,
   HistoricoPrisoes,
   HistoricoTransicao,
-  HistoricoPrisoesAnt,
-  HistoricoTransicaoAnt,
 } from '../sections/processo';
 // sections
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
-import { PareceresEstado } from '../sections/credito-colaborador/Detalhes';
+import { Views, PareceresEstado } from '../sections/credito-colaborador/Detalhes';
 import { DesarquivarForm, ParecerForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/IntervencaoForm';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
@@ -69,8 +59,9 @@ export default function Processo() {
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
+  const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { mail, uos, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { done, error, processo, isLoadingP, isOpenModal, isOpenModalDesariquivar } = useSelector(
+  const { done, error, processo, isOpenModal, isLoading, isOpenModalDesariquivar } = useSelector(
     (state) => state.digitaldocs
   );
   const { meusacessos, meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector(
@@ -83,18 +74,9 @@ export default function Processo() {
   const fromEntradas = params?.get?.('from') === 'entradas';
   const fromPorConcluir = params?.get?.('from') === 'porconcluir';
   const fromTrabalhados = params?.get?.('from') === 'trabalhados';
-  const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
   const uo = uos?.find((row) => row?.id === processo?.uoIdEstadoAtual);
   const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
-  const hasHPrisoes = processo?.hprisoes && processo?.hprisoes?.length > 0;
-  const hasPareceres = processo?.pareceres && processo?.pareceres?.length > 0;
-  const hasHistorico = processo?.htransicoes && processo?.htransicoes?.length > 0;
   const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
-  const isPS =
-    processo?.assunto === 'Diário' ||
-    processo?.assunto === 'Preçário' ||
-    processo?.assunto === 'Produtos e Serviços' ||
-    processo?.assunto === 'Receção de Cartões - DOP';
 
   const linkNavigate =
     (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}`) ||
@@ -105,6 +87,32 @@ export default function Processo() {
   const colaboradoresList = findColaboradores(
     colaboradores,
     colaboradoresEstado?.map((row) => row?.perfil_id)
+  );
+
+  const tabsList = useMemo(
+    () => [
+      { value: 'Dados gerais', component: <DadosGerais /> },
+      ...(processo && processo?.pareceres && processo?.pareceres?.length > 0
+        ? [
+            {
+              value: 'Pareceres',
+              component: <Pareceres id={processo?.id} assunto={processo?.titular} pareceres={processo?.pareceres} />,
+            },
+          ]
+        : []),
+      ...(processo && processo?.htransicoes && processo?.htransicoes?.length > 0
+        ? [{ value: 'Transições', component: <HistoricoTransicao historico={processo?.htransicoes} /> }]
+        : []),
+      ...(processo && processo?.hprisoes && processo?.hprisoes?.length > 0
+        ? [{ value: 'Retenções', component: <HistoricoPrisoes historico={processo?.hprisoes} /> }]
+        : []),
+      ...(processo && isAdmin ? [{ value: 'Versões', component: <Versoes id={processo?.id} /> }] : []),
+      ...(processo && isAdmin
+        ? [{ value: 'Visualizações', component: <Views id={processo?.id} isLoading={isLoading} /> }]
+        : []),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [processo]
   );
 
   const idEstado = (item) => {
@@ -248,6 +256,13 @@ export default function Processo() {
     dispatch(selectItem(podeDarParecer(meusAmbientes, processo?.pareceres)));
   };
 
+  useEffect(() => {
+    if (currentTab !== selectTab(tabsList, currentTab)) {
+      setCurrentTab(tabsList?.[0]?.value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabsList, currentTab]);
+
   return (
     <Page title="Processo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -301,10 +316,6 @@ export default function Processo() {
                       />
                     </>
                   )}
-                  <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-                    <Versoes processoId={processo?.id} />
-                    <Views processoId={processo?.id} />
-                  </RoleBasedGuard>
                   {processo?.situacao === 'A' ? (
                     <>
                       <RoleBasedGuard roles={['arquivo-110', 'arquivo-111']}>
@@ -363,11 +374,7 @@ export default function Processo() {
                               )}
                               {processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
                                 (!processo?.perfil_id || processo?.perfil_id === perfilId) && (
-                                  <Tooltip title="ACEITAR" arrow>
-                                    <Fab color="success" size="small" variant="soft" onClick={handleAceitar}>
-                                      <LockPersonIcon />
-                                    </Fab>
-                                  </Tooltip>
+                                  <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
                                 )}
                             </>
                           ) : (
@@ -391,11 +398,7 @@ export default function Processo() {
                       )}
                       {podeDarParecer(meusAmbientes, processo?.pareceres) && (
                         <>
-                          <Tooltip title="PARECER" arrow>
-                            <Fab color="success" size="small" variant="soft" onClick={() => handleParecer()}>
-                              <ChatOutlinedIcon />
-                            </Fab>
-                          </Tooltip>
+                          <DefaultAction label="PARECER" handleClick={() => handleParecer()} />
                           <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} />
                         </>
                       )}
@@ -416,68 +419,15 @@ export default function Processo() {
           }
           sx={{ color: 'text.secondary' }}
         />
-        {isLoadingP ? (
-          <SkeletonProcesso />
-        ) : (
-          <Grid container spacing={3}>
-            {!processo ? (
-              <Grid item xs={12}>
-                <SearchNotFound404 message="Processo não encontrado ou não tens acesso..." />
-              </Grid>
-            ) : (
-              <>
-                {(hasHistorico || hasHPrisoes || hasPareceres) && (
-                  <Grid item xs={12} sx={{ mt: { sm: -1 } }}>
-                    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
-                      {hasPareceres && (
-                        <Pareceres
-                          processoId={processo?.id}
-                          assunto={processo?.titular}
-                          pareceres={processo?.pareceres}
-                        />
-                      )}
-                      {hasHistorico && <HistoricoTransicao historico={processo?.htransicoes} />}
-                      {hasHPrisoes && <HistoricoPrisoes historico={processo?.hprisoes} />}
-                    </Stack>
-                  </Grid>
-                )}
-                <Grid item xs={12} lg={hasAnexos && 5}>
-                  <Card sx={{ height: 1 }}>
-                    <CardContent id="card_detail">
-                      {!isPS && processo?.nota && (
-                        <NotaProcesso nota={processo?.nota} segmento={processo?.segcliente} />
-                      )}
-                      <DetalhesProcesso isPS={isPS} />
-                    </CardContent>
-                  </Card>
-                </Grid>
-                {hasAnexos && (
-                  <Grid item xs={12} lg={7}>
-                    <Card sx={{ height: 1 }}>
-                      <CardContent>
-                        <Anexos anexos={processo?.anexos} />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                )}
-                {cc?.id === 423 && (
-                  <>
-                    {hasHistorico && (
-                      <Grid item xs={12} lg={hasHPrisoes && 6}>
-                        <HistoricoTransicaoAnt historico={processo?.htransicoes} />
-                      </Grid>
-                    )}
-                    {hasHPrisoes && (
-                      <Grid item xs={12} lg={hasHistorico && 6}>
-                        <HistoricoPrisoesAnt historico={processo?.hprisoes} />
-                      </Grid>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </Grid>
-        )}
+        <>
+          <Card sx={{ height: 1 }}>
+            <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
+            {tabsList.map((tab) => {
+              const isMatched = tab.value === currentTab;
+              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
+            })}
+          </Card>
+        </>
       </Container>
     </Page>
   );

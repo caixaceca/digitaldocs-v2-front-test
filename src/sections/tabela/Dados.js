@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { ptDateTime } from '../../utils/formatTime';
+import { ptDateTime, fYear } from '../../utils/formatTime';
 import { entidadesParse, noDados, setDataUtil, setItemValue } from '../../utils/normalizeText';
 // components
 import { Criado } from '../../components/Panel';
@@ -113,7 +113,10 @@ RowItem.propTypes = { row: PropTypes.object, handleViewRow: PropTypes.func };
 export function RowItem({ row, handleViewRow }) {
   return (
     <TableRow hover>
-      <TableCell>{row.nentrada}</TableCell>
+      <TableCell>
+        {row.nentrada}
+        {row?.criado_em ? `/${fYear(row?.criado_em)}` : ''}
+      </TableCell>
       <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
       <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
       <TableCell>{row?.assunto}</TableCell>

@@ -4,7 +4,7 @@ import { Page, View, Text, Image, Document } from '@react-pdf/renderer';
 import { add } from 'date-fns';
 import { ptDate } from '../../utils/formatTime';
 //
-import styles from './Style';
+import styles from '../Style';
 
 // ----------------------------------------------------------------------
 

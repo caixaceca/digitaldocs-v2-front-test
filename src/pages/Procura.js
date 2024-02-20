@@ -12,7 +12,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime, ptDate } from '../utils/formatTime';
+import { ptDateTime, ptDate, fYear } from '../utils/formatTime';
 import { normalizeText, entidadesParse, noDados } from '../utils/normalizeText';
 // hooks
 import useTable, { getComparator, applySort } from '../hooks/useTable';
@@ -219,7 +219,7 @@ export default function Procura() {
                   ) : (
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow hover key={row.id}>
-                        <TableCell>{row.nentrada}</TableCell>
+                        <TableCell>{`${row.nentrada}${row.criado_em ? `/${fYear(row.criado_em)}` : ''}`}</TableCell>
                         <TableCell>{row.assunto}</TableCell>
                         <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>

@@ -14,7 +14,7 @@ import { PATH_DIGITALDOCS } from '../routes/paths';
 import useSettings from '../hooks/useSettings';
 // hooks
 import { getComparator, applySort } from '../hooks/useTable';
-import useToggle, { useToggle1, useToggle3 } from '../hooks/useToggle';
+import useToggle, { useToggle1, useToggle2, useToggle3 } from '../hooks/useToggle';
 // redux
 import { selectItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
@@ -49,15 +49,39 @@ export default function CreditoColaborador() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { pedidoCC, destinos, done, error, isSaving } = useSelector((state) => state.cc);
+  const { pedidoCC, destinos, done, error, isLoading, isSaving } = useSelector((state) => state.cc);
   const { meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
   const isResponsavel = temNomeacao(cc) || iAmInGrpGerente;
   const colaboradoresList = findColaboradores(
     colaboradores,
     colaboradoresEstado?.map((row) => row?.perfil_id)
+  );
+  const destinosList = useMemo(
+    () => ({
+      seguimentos:
+        destinos
+          ?.filter((item) => item.modo === 'Seguimento')
+          ?.map((row) => ({
+            modo: row.modo,
+            id: row.transicao_id,
+            estado_final_id: row.estado_id,
+            label: `${row?.modo} para ${row?.nome}`,
+          })) || [],
+      devolucoes:
+        destinos
+          ?.filter((item) => item.modo !== 'Seguimento')
+          ?.map((row) => ({
+            modo: row.modo,
+            id: row.transicao_id,
+            estado_final_id: row.estado_id,
+            label: `${row?.modo} para ${row?.nome}`,
+          })) || [],
+    }),
+    [destinos]
   );
 
   const fromArquivo = params?.get?.('from') === 'arquivo';
@@ -119,13 +143,17 @@ export default function CreditoColaborador() {
       ...(pedidoCC?.outros_creditos?.length > 0
         ? [{ value: 'Responsabilidades', component: <TableDetalhes item="responsabilidades" /> }]
         : []),
-      ...(pedidoCC ? [{ value: 'Transições', component: <Transicoes /> }] : []),
-      // ...(pedidoCC?.estados?.length > 0 ? [{ value: 'Estados', component: <Estados /> }] : []),
-      ...(pedidoCC ? [{ value: 'Visualizações', component: <Views /> }] : []),
-      ...(pedidoCC ? [{ value: 'Retenções', component: <TableDetalhes item="retencoes" /> }] : []),
-      ...(pedidoCC ? [{ value: 'Atribuições', component: <TableDetalhes item="atribuicoes" /> }] : []),
-      ...(pedidoCC ? [{ value: 'Pendências', component: <TableDetalhes item="pendencias" /> }] : []),
+      ...(pedidoCC
+        ? [
+            { value: 'Transições', component: <Transicoes /> },
+            { value: 'Visualizações', component: <Views id={pedidoCC?.id} from="cc" isLoading={isLoading} /> },
+            { value: 'Retenções', component: <TableDetalhes item="retencoes" /> },
+            { value: 'Atribuições', component: <TableDetalhes item="atribuicoes" /> },
+            { value: 'Pendências', component: <TableDetalhes item="pendencias" /> },
+          ]
+        : []),
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pedidoCC]
   );
 
@@ -169,9 +197,10 @@ export default function CreditoColaborador() {
         JSON.stringify({
           perfil_id: cc?.perfil_id,
           fluxo_id: pedidoCC?.fluxo_id,
-          estado_id: pedidoCC?.ultimo_estado_id,
+          // estado_id: pedidoCC?.ultimo_estado_id,
+          estado_id: 22,
         }),
-        { id: pedidoCC?.id, mail, msg: 'Processo resgatado' }
+        { id: pedidoCC?.id, perfilId: cc?.perfil_id, mail, msg: 'Processo resgatado' }
       )
     );
     onClose();
@@ -198,9 +227,9 @@ export default function CreditoColaborador() {
               name:
                 (fromArquivo && 'Arquivos') ||
                 (fromEntradas && 'Entradas') ||
+                (fromProcurar && 'Pesquisa') ||
                 (fromTrabalhados && 'Trabalhados') ||
                 (fromPorConcluir && 'Por concluir') ||
-                (fromProcurar && 'Pesquisa') ||
                 (params?.get?.('from') &&
                   params?.get?.('from')?.charAt(0)?.toUpperCase() + params?.get?.('from')?.slice(1)) ||
                 'Processos',
@@ -211,12 +240,12 @@ export default function CreditoColaborador() {
           action={
             pedidoCC && (
               <Stack direction="row" spacing={0.5}>
-                {!pedidoCC?.preso && (
+                {!pedidoCC?.preso && pedidoCC?.ultimo_estado !== 'Arquivo' && (
                   <>
                     {processoMePertence(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
                       (!pedidoCC?.afeto || (pedidoCC?.afeto && pedidoCC?.estados?.[0]?.perfil_id === cc?.perfil_id)) &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
-                        <DefaultAction icon="aceitar" label="Aceitar" handleClick={handleAceitar} />
+                        <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
                       )}
                     {!pedidoCC?.pendente && pedidoCC?.estados?.length === 1 && (
                       <>
@@ -253,11 +282,16 @@ export default function CreditoColaborador() {
                 )}
                 {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id && (
                   <>
-                    <UpdateItem handleClick={handleEdit} />
-                    {destinos?.length > 0 && (
+                    {destinosList?.devolucoes?.length > 0 && (
+                      <>
+                        <DefaultAction color="warning" icon="devolver" label="Devolver" handleClick={onOpen2} />
+                        <EncaminharForm dev open={open2} onCancel={onClose2} destinos={destinosList?.devolucoes} />
+                      </>
+                    )}
+                    {destinosList?.seguimentos?.length > 0 && (
                       <>
                         <DefaultAction icon="encaminhar" label="Encaminhar" handleClick={onOpen1} />
-                        <EncaminharForm open={open1} onCancel={onClose1} destinos={destinos} />
+                        <EncaminharForm open={open1} onCancel={onClose1} destinos={destinosList?.seguimentos} />
                       </>
                     )}
                     <Abandonar isSaving={isSaving} processo={pedidoCC} />
@@ -273,9 +307,12 @@ export default function CreditoColaborador() {
                           <ColocarPendente from="pediddoCC" />
                         </>
                       )}
-                    <DefaultAction icon="arquivo" label="Arquivar" color="error" handleClick={onOpen3} />
+                    <UpdateItem handleClick={handleEdit} />
                     {arquivarCC(meusAmbientes, pedidoCC?.ultimo_estado_id) && (
-                      <ArquivarForm open={open3} onCancel={onClose3} />
+                      <>
+                        <DefaultAction icon="arquivo" label="Arquivar" color="error" handleClick={onOpen3} />
+                        <ArquivarForm open={open3} onCancel={onClose3} />
+                      </>
                     )}
                   </>
                 )}

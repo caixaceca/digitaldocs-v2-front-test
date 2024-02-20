@@ -6,6 +6,20 @@ import Skeleton from '@mui/material/Skeleton';
 
 // ----------------------------------------------------------------------
 
+SkeletonBar.propTypes = { column: PropTypes.number, height: PropTypes.number };
+
+export function SkeletonBar({ column, height = 50 }) {
+  return (
+    <Stack spacing={2}>
+      {[...Array(column)].map((row, index) => (
+        <Skeleton key={`index1_${index}`} variant="text" height={height} sx={{ transform: 'none' }} />
+      ))}
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function PieChart() {
   return <Skeleton variant="circular" sx={{ width: 280, height: 280 }} />;
 }

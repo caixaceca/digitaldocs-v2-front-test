@@ -330,14 +330,14 @@ export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
         renderInput={(params) => <TextField {...params} label="Unidade orgânica" />}
       />
       <Stack spacing={1} direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
-        <SearchField item="filterParams" filter={filter} setFilter={setFilter} />
+        <SearchField item="filterAcessos" filter={filter} setFilter={setFilter} />
         {(filter || uo) && (
           <Tooltip title="Remover pesquiza" arrow>
             <IconButton
               color="inherit"
               onClick={() => {
                 setItemValue('', setUo, 'uoParams');
-                setItemValue('', setFilter, 'filterParams');
+                setItemValue('', setFilter, 'filterAcessos');
               }}
             >
               <ClearAllIcon />

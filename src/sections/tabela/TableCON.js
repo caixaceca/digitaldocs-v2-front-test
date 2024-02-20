@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
@@ -13,7 +11,6 @@ import TableContainer from '@mui/material/TableContainer';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { add, format } from 'date-fns';
-import { getFileThumb } from '../../utils/getFileFormat';
 import { normalizeText, dataValido, setDataUtil } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
@@ -21,9 +18,9 @@ import useTable, { getComparator, applySort } from '../../hooks/useTable';
 import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 // Components
-import { Checked } from '../../components/Actions';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
+import { ExportExcel, Checked } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -115,19 +112,12 @@ export default function TableCON() {
             />
             {con?.length > 0 && (
               <Stack>
-                <ReactHTMLTableToExcel
+                <ExportExcel
                   table="tabel-con"
-                  id="table-xls-button"
                   sheet="Comunicação Operação Numerário"
-                  className="MuiButtonBase-root-MuiButton-root"
                   filename={`Comunicação Operação Numerário ${dataValido(datai) ? format(datai, 'yyyy-MM-dd') : ''} - ${
                     dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : ''
                   }`}
-                  children={
-                    <Button variant="soft" startIcon={getFileThumb(false, null, 'file.xlsx')}>
-                      Exportar
-                    </Button>
-                  }
                 />
               </Stack>
             )}

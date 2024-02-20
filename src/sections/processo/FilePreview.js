@@ -17,7 +17,7 @@ export function PdfPreview({ url }) {
   const theme = useTheme();
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
   const heightContent =
-    document.getElementById('card_detail').clientHeight - document.getElementById('list_anexos').clientHeight - 100;
+    document.getElementById('card_detail').clientHeight - document.getElementById('list_anexos').clientHeight - 80;
 
   return (
     <div style={{ height: `${heightContent}px`, minHeight: '630px' }}>

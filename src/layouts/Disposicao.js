@@ -118,7 +118,7 @@ function DisposicaoDialog() {
           </RadioGroup>
         </Stack>
         <Stack direction="row" justifyContent="center">
-          <FraseContent frase={frase} img="" origem="disposicao" />
+          <FraseContent frase={frase} />
         </Stack>
       </DialogContent>
     </DialogAnimate>

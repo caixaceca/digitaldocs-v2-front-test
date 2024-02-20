@@ -1,7 +1,6 @@
 import { sumBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
-import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -15,7 +14,6 @@ import Paper from '@mui/material/Paper';
 import Drawer from '@mui/material/Drawer';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import { useTheme } from '@mui/material/styles';
@@ -53,10 +51,10 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
 // components
 import Panel from '../../components/Panel';
-import Image from '../../components/Image';
 import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import Chart, { useChart } from '../../components/chart';
+import { Fechar, ExportExcel } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
@@ -476,15 +474,9 @@ export function EntradasTrabalhados() {
                             </Button>
                             <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
                               <DialogTitle sx={{ pr: 1 }}>
-                                <Stack direction="row" spacing={3} justifyContent="space-between">
+                                <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ pr: 1.5 }}>
                                   <Typography variant="h6">Comparação colaboradores</Typography>
-                                  <Stack sx={{ pr: 1 }}>
-                                    <Tooltip title="Fechar">
-                                      <IconButton color="inherit" onClick={handleClose}>
-                                        <CloseOutlinedIcon sx={{ width: 20, opacity: 0.75 }} />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Stack>
+                                  <Fechar handleClick={handleClose} />
                                 </Stack>
                               </DialogTitle>
                               <DialogContent>
@@ -1503,29 +1495,6 @@ function FilterAutocomplete({ label, value, options, setValue, ...other }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-function ButtonExport() {
-  return (
-    <ReactHTMLTableToExcel
-      id="table-xls-button-tipo"
-      className="MuiButtonBase-root-MuiButton-root"
-      table="table-to-xls-tipo"
-      filename="Indicadore"
-      sheet="Indicadore"
-      children={
-        <Button
-          size="small"
-          variant="soft"
-          startIcon={<Image src="/assets/icons/file_format/format_excel.svg" sx={{ height: 20 }} />}
-        >
-          Exportar
-        </Button>
-      }
-    />
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
 TableExport.propTypes = {
   dados: PropTypes.array,
   total: PropTypes.number,
@@ -1584,7 +1553,6 @@ TabView.propTypes = { currentTab: PropTypes.string, setCurrentTab: PropTypes.fun
 function TabView({ currentTab, setCurrentTab }) {
   return (
     <Stack direction="row" justifyContent="right" alignItems="center" spacing={1}>
-      {currentTab === 'tabela' && <ButtonExport />}
       <Tabs
         value={currentTab}
         sx={{ width: 120, minHeight: '35px' }}
@@ -1594,6 +1562,7 @@ function TabView({ currentTab, setCurrentTab }) {
           <Tab key={tab} label={tab} value={tab} sx={{ mx: '5px !important', minHeight: '35px' }} />
         ))}
       </Tabs>
+      {currentTab === 'Tabela' && <ExportExcel icon filename="Indicadores" table="table-to-xls-tipo" />}
     </Stack>
   );
 }

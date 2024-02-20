@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { format } from 'date-fns';
+import { format, add } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { errorMsg } from '../../utils/normalizeText';
@@ -223,6 +223,12 @@ const slice = createSlice({
     aceitarSuccess(state, action) {
       state.processo.is_lock = true;
       state.processo.perfil_id = action.payload.perfilId;
+      state.processo.hprisoes.push({
+        preso_em: `${format(new Date(), 'yyyy-MM-dd')}T${format(add(new Date(), { hours: 1 }), 'HH:mm:ss')}.823+00:00`,
+        perfil_id: action.payload.perfilId,
+        solto_em: null,
+        por: null,
+      });
     },
 
     createProcessoSuccess(state, action) {
@@ -364,12 +370,7 @@ export const {
 
 export function getAll(item, params) {
   return async (dispatch) => {
-    if (
-      item !== 'versoes' &&
-      item !== 'visualizacoes' &&
-      item !== 'meusprocessos' &&
-      item !== 'destinosDesarquivamento'
-    ) {
+    if (item !== 'meusprocessos' && item !== 'destinosDesarquivamento') {
       dispatch(slice.actions.startLoading());
     }
     try {
@@ -546,7 +547,7 @@ export function getAll(item, params) {
         }
         case 'visualizacoes': {
           const response = await axios.get(
-            `${BASEURLDD}/v1/processos/visualizacoes/${params?.perfilId}?processoID=${params?.processoId}`,
+            `${BASEURLDD}/v1/processos/visualizacoes/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
           dispatch(slice.actions.getVisualizacoesSuccess(response.data));
@@ -554,7 +555,7 @@ export function getAll(item, params) {
         }
         case 'versoes': {
           const response = await axios.get(
-            `${BASEURLDD}/v1/processos/versoes/${params?.perfilId}?processoID=${params?.processoId}`,
+            `${BASEURLDD}/v1/processos/versoes/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
           dispatch(slice.actions.getVersoesSuccess(response.data));
@@ -780,13 +781,13 @@ export function createItem(item, dados, params) {
               params?.pendencia,
               options
             );
-            if (params?.atribuir) {
-              await axios.patch(
-                `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.atribuir}`,
-                '',
-                options
-              );
-            }
+          }
+          if (params?.atribuir) {
+            await axios.patch(
+              `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilId}&perfilIDAfeto=${params?.atribuir}`,
+              '',
+              options
+            );
           }
           break;
         }

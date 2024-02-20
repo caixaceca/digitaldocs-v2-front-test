@@ -2,9 +2,10 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 // utils
 import { getFileFormat, getFileThumb, b64toBlob } from '../../utils/getFileFormat';
@@ -84,20 +85,22 @@ export default function Anexos({ anexos }) {
   }, [dispatch, filePreview?.ficheiro]);
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sx={{ mb: -2 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Anexos
-        </Typography>
-        <Divider />
-      </Grid>
+    <>
+      <List sx={{ pt: 0, pb: 0.5 }}>
+        <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+          <Typography variant="subtitle1">Anexos</Typography>
+        </ListItem>
+      </List>
       {isLoadingAnexo ? (
-        <Grid item xs={12}>
-          <Stack direction="column" justifyContent="center" alignItems="center" sx={{ height: { xs: 400, lg: 600 } }}>
-            <Loading />
-            <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>
-          </Stack>
-        </Grid>
+        <Stack
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          sx={{ height: { xs: 400, lg: 600 }, bgcolor: 'background.neutral', borderRadius: 1 }}
+        >
+          <Loading />
+          <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>
+        </Stack>
       ) : (
         <>
           {url && previewType === 'pdf' && (
@@ -113,61 +116,54 @@ export default function Anexos({ anexos }) {
         </>
       )}
       {(anexosInativos?.length > 0 || anexosAtivos.length > 0) && (
-        <Grid item xs={12} id="list_anexos">
-          <Grid container spacing={3}>
-            {anexosAtivos.length > 0 && (
-              <Grid item xs={12}>
-                {anexosAtivos.map(
-                  (row) =>
-                    row?.nome && (
-                      <Button
-                        fullWidth
-                        color="inherit"
-                        key={row?.anexo}
-                        variant="outlined"
-                        onClick={() => handleAnexo(row)}
-                        startIcon={getFileThumb(false, null, row.nome)}
-                        disabled={row?.anexo === selectedAnexoPreview?.anexo}
-                        sx={{ justifyContent: 'left', textAlign: 'left', mt: 1, py: 1 }}
-                      >
-                        {row?.nome} {row?.anexo === selectedAnexoPreview?.anexo && '(Em pré-vizualização)'}
-                      </Button>
-                    )
-                )}
-              </Grid>
+        <Stack id="list_anexos" sx={{ mt: 1 }}>
+          {anexosAtivos.length > 0 &&
+            anexosAtivos.map(
+              (row) =>
+                row?.nome && (
+                  <Button
+                    fullWidth
+                    color="inherit"
+                    key={row?.anexo}
+                    variant="soft"
+                    onClick={() => handleAnexo(row)}
+                    startIcon={getFileThumb(false, null, row.nome)}
+                    disabled={row?.anexo === selectedAnexoPreview?.anexo}
+                    sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, boxShadow: 'none' }}
+                  >
+                    {row?.nome} {row?.anexo === selectedAnexoPreview?.anexo && '(Em pré-vizualização)'}
+                  </Button>
+                )
             )}
-            {anexosInativos?.length > 0 && (
-              <RoleBasedGuard roles={['Todo-111']}>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Eliminados
-                  </Typography>
-                  {anexosInativos?.map(
-                    (row) =>
-                      row?.nome && (
-                        <Button
-                          fullWidth
-                          color="inherit"
-                          key={row?.anexo}
-                          variant="outlined"
-                          onClick={() => handleAnexo(row)}
-                          startIcon={getFileThumb(false, null, row?.nome)}
-                          disabled={row?.anexo === selectedAnexoPreview?.anexo}
-                          sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: 0.5 }}
-                        >
-                          {row?.nome} {row?.anexo === selectedAnexoPreview?.anexo && '(Em pré-vizualização)'}
-                        </Button>
-                      )
-                  )}
-                </Grid>
-              </RoleBasedGuard>
-            )}
-            {!processo?.is_interno && processo?.nome?.includes('Notas Externas') && processo?.nome !== 'Arquivo' && (
-              <ModelosRespostas />
-            )}
-          </Grid>
-        </Grid>
+          {anexosInativos?.length > 0 && (
+            <RoleBasedGuard roles={['Todo-111']}>
+              <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                Eliminados
+              </Typography>
+              {anexosInativos?.map(
+                (row) =>
+                  row?.nome && (
+                    <Button
+                      fullWidth
+                      variant="soft"
+                      color="inherit"
+                      key={row?.anexo}
+                      onClick={() => handleAnexo(row)}
+                      startIcon={getFileThumb(false, null, row?.nome)}
+                      disabled={row?.anexo === selectedAnexoPreview?.anexo}
+                      sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: 0.5, boxShadow: 'none' }}
+                    >
+                      {row?.nome} {row?.anexo === selectedAnexoPreview?.anexo && '(Em pré-vizualização)'}
+                    </Button>
+                  )
+              )}
+            </RoleBasedGuard>
+          )}
+          {!processo?.is_interno && processo?.nome?.includes('Notas Externas') && processo?.nome !== 'Arquivo' && (
+            <ModelosRespostas />
+          )}
+        </Stack>
       )}
-    </Grid>
+    </>
   );
 }

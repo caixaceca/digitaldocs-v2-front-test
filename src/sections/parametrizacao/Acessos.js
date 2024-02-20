@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -59,7 +58,7 @@ export default function Acessos() {
   const { isLoading } = useSelector((state) => state.digitaldocs);
   const { colaboradores } = useSelector((state) => state.intranet);
   const [uo, setUo] = useState(localStorage.getItem('uoParams') || '');
-  const [filter, setFilter] = useState(localStorage.getItem('filterParams') || '');
+  const [filter, setFilter] = useState(localStorage.getItem('filterAcessos') || '');
 
   const handleUpdate = (id) => {
     navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${id}`);
@@ -85,7 +84,6 @@ export default function Acessos() {
   return (
     <>
       <HeaderBreadcrumbs heading="Acessos" links={[{ name: '' }]} action="" sx={{ color: 'text.secondary', px: 1 }} />
-
       <RoleBasedGuard
         hasContent
         roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
@@ -113,12 +111,7 @@ export default function Acessos() {
                         </TableCell>
                         <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
                         <TableCell align="center" width={50}>
-                          <Tooltip title="Gerir acessos" arrow>
-                            <DefaultAction
-                              label="Acessos & Estados"
-                              handleClick={() => handleUpdate(row?.perfil?.id)}
-                            />
-                          </Tooltip>
+                          <DefaultAction label="Gerir acessos" handleClick={() => handleUpdate(row?.perfil?.id)} />
                         </TableCell>
                       </TableRow>
                     ))
