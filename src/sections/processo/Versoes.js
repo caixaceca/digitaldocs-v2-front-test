@@ -72,6 +72,7 @@ export default function Versoes({ id }) {
 
                 return oldObj;
               };
+
               return (
                 <Accordion
                   sx={{ px: 1 }}
@@ -80,20 +81,21 @@ export default function Versoes({ id }) {
                   onChange={handleAccord(row?.updated_in)}
                 >
                   <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
-                    <Stack spacing={0.5} direction="row" alignItems="center" sx={{ flexGrow: 1, pr: 2 }}>
-                      <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
-                        ALTERADO EM:
-                      </Typography>
-                      <Typography variant="subtitle1">{row?.updated_in ? fDateTime(row?.updated_in) : ''}</Typography>
+                    <Stack spacing={3} direction="row" sx={{ flexGrow: 1, pr: 3 }} justifyContent="space-between">
+                      <Stack>
+                        <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
+                          Alterado em:
+                        </Typography>
+                        <Typography variant="subtitle1">{row?.updated_in ? fDateTime(row?.updated_in) : ''}</Typography>
+                      </Stack>
+                      <ColaboradorInfo
+                        foto={colaborador?.foto_disk}
+                        label={colaborador?.uo?.label}
+                        nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
+                      />
                     </Stack>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <ColaboradorInfo
-                      foto={colaborador?.foto_disk}
-                      label={colaborador?.uo?.label}
-                      nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
-                      sx={{ justifyContent: 'center' }}
-                    />
                     <DetalhesProcesso
                       processo={index === 0 ? getNew(row, processo) : getNew(versoes[index - 1], row)}
                     />

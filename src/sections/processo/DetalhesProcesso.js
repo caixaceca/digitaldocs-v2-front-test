@@ -40,10 +40,9 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 
 // ----------------------------------------------------------------------
 
-DetalhesProcesso.propTypes = { isPS: PropTypes.bool };
+DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object };
 
-export default function DetalhesProcesso({ isPS }) {
-  const { processo } = useSelector((state) => state.digitaldocs);
+export default function DetalhesProcesso({ isPS, processo }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const { origem, motivosPendencias } = useSelector((state) => state.parametrizacao);
   const _entidades = entidadesParse(processo?.entidades);
@@ -183,7 +182,7 @@ export default function DetalhesProcesso({ isPS }) {
           )}
         </List>
       )}
-      {(!processo?.is_interno || processo?.noperacao) && (
+      {(processo?.noperacao || con || processo?.operacao || origem) && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Operação</Typography>
