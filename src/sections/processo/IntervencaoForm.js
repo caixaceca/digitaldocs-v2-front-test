@@ -137,6 +137,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   const onSubmit = async () => {
     try {
       let haveAnexos = false;
+      let formPendencia = null;
       const formData = [];
       if (inParalelo) {
         values?.destinos_par?.forEach((row) => {
@@ -173,16 +174,15 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           anexos.append('anexos', listaanexo[i]);
         }
       }
-      let formPendencia = null;
-      if (values?.pendenteLevantamento) {
+      if (values?.pendenteLevantamento || values?.pender) {
         formPendencia = {
           pender: true,
           fluxo_id: processo?.fluxo_id,
-          mobs: 'Para levantamento do pedido',
-          mpendencia: motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id,
+          mobs: values?.pendenteLevantamento ? 'Para levantamento do pedido' : values?.mobs,
+          mpendencia: values?.pendenteLevantamento
+            ? motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id
+            : values?.mpendencia?.id,
         };
-      } else if (values?.pender) {
-        formPendencia = { pender: values?.pender, mpendencia: values?.mpendencia?.id, mobs: values?.mobs };
       }
 
       const formAceitar = {

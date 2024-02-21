@@ -12,6 +12,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import RemoveIcon from '@mui/icons-material/Remove';
 import HistoryIcon from '@mui/icons-material/History';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -79,7 +80,12 @@ export function DefaultAction({
         variant={variant}
         onClick={handleClick}
         size={small ? 'small' : 'medium'}
-        startIcon={icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />}
+        startIcon={
+          (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
+          (label === 'Mostrar detalhes' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+          (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
+          (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />)
+        }
       >
         {label}
       </Button>

@@ -21,7 +21,6 @@ import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
-import CardHeader from '@mui/material/CardHeader';
 import RadioGroup from '@mui/material/RadioGroup';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -34,7 +33,6 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 // utils
 import { format, add } from 'date-fns';
@@ -54,7 +52,7 @@ import Panel from '../../components/Panel';
 import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import Chart, { useChart } from '../../components/chart';
-import { Fechar, ExportExcel } from '../../components/Actions';
+import { Fechar, ExportExcel, DefaultAction } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
@@ -399,6 +397,7 @@ export function Criacao({ vista }) {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function EntradasTrabalhados() {
+  const [accord, setAccord] = useState(false);
   const [colaborador1, setColaborador1] = useState(null);
   const [colaborador2, setColaborador2] = useState(null);
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
@@ -456,137 +455,145 @@ export function EntradasTrabalhados() {
             <>
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} md={6} lg={4}>
-                  <Card sx={{ height: 1 }}>
-                    <CardHeader
-                      title={
-                        <Stack spacing={1} direction="row" alignItems="center">
-                          <Typography variant="h5" sx={{ color: 'text.secondary' }}>
-                            Total:
-                          </Typography>
-                          <Typography variant="h5">{fNumber(total)}</Typography>
-                        </Stack>
-                      }
-                      action={
-                        dadosByColaborador.length > 1 && (
-                          <>
-                            <Button size="small" variant="soft" startIcon={<SwapHorizOutlinedIcon />} onClick={onOpen1}>
-                              Comparação
-                            </Button>
-                            <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
-                              <DialogTitle sx={{ pr: 1 }}>
-                                <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ pr: 1.5 }}>
-                                  <Typography variant="h6">Comparação colaboradores</Typography>
-                                  <Fechar handleClick={handleClose} />
-                                </Stack>
-                              </DialogTitle>
-                              <DialogContent>
-                                <Grid container spacing={1.5} sx={{ mt: 1 }}>
-                                  <Grid item xs={12} sm={6}>
-                                    <Autocomplete
-                                      fullWidth
-                                      size="small"
-                                      disableClearable
-                                      value={colaborador1}
-                                      onChange={(event, newValue) => setColaborador1(newValue)}
-                                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                      options={colaboradoresList?.filter((row) => row?.id !== colaborador2?.id)}
-                                      renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
-                                    />
-                                    {colaborador1 && (
-                                      <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                        <MyAvatar
-                                          alt={colaborador1?.label}
-                                          src={getFile('colaborador', colaborador1?.foto)}
-                                          sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
-                                        />
-                                      </Stack>
-                                    )}
-                                  </Grid>
-                                  <Grid item xs={12} sm={6}>
-                                    <Autocomplete
-                                      fullWidth
-                                      size="small"
-                                      disableClearable
-                                      value={colaborador2}
-                                      onChange={(event, newValue) => setColaborador2(newValue)}
-                                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                      options={colaboradoresList?.filter((row) => row?.id !== colaborador1?.id)}
-                                      renderInput={(params) => <TextField {...params} label="Colaborador 2" />}
-                                    />
-                                    {colaborador2 && (
-                                      <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                        <MyAvatar
-                                          alt={colaborador2?.label}
-                                          src={getFile('colaborador', colaborador2?.foto)}
-                                          sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
-                                        />
-                                      </Stack>
-                                    )}
-                                  </Grid>
-                                  {colaborador1 && colaborador2 && (
-                                    <>
-                                      <LineProgress
-                                        isTotal
-                                        item="Total"
-                                        trabalhadoC1={totalC1}
-                                        trabalhadoC2={totalC2}
-                                        leftSuccess={totalC1 > totalC2}
+                  <Card sx={{ height: 1, p: 2 }}>
+                    <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
+                      <Typography variant="h5" sx={{ color: 'text.secondary' }}>
+                        Total:
+                      </Typography>
+                      <Typography variant="h5">{fNumber(total)}</Typography>
+                    </Stack>
+                    <Stack spacing={1} direction="row" alignItems="center" justifyContent="center">
+                      <DefaultAction
+                        small
+                        button
+                        handleClick={() => setAccord(!accord)}
+                        label={accord ? 'Esconder detalhes' : 'Mostrar detalhes'}
+                      />
+                      {dadosByColaborador.length > 1 && (
+                        <>
+                          <DefaultAction small button handleClick={onOpen1} label="Comparar colaboradores" />
+                          <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
+                            <DialogTitle sx={{ pr: 1 }}>
+                              <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ pr: 1.5 }}>
+                                <Typography variant="h6">Comparação colaboradores</Typography>
+                                <Fechar handleClick={handleClose} />
+                              </Stack>
+                            </DialogTitle>
+                            <DialogContent>
+                              <Grid container spacing={1.5} sx={{ mt: 1 }}>
+                                <Grid item xs={12} sm={6}>
+                                  <Autocomplete
+                                    fullWidth
+                                    size="small"
+                                    disableClearable
+                                    value={colaborador1}
+                                    onChange={(event, newValue) => setColaborador1(newValue)}
+                                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                    options={colaboradoresList?.filter((row) => row?.id !== colaborador2?.id)}
+                                    renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
+                                  />
+                                  {colaborador1 && (
+                                    <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
+                                      <MyAvatar
+                                        alt={colaborador1?.label}
+                                        src={getFile('colaborador', colaborador1?.foto)}
+                                        sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
                                       />
-                                      {dadosByAssunto?.map((row) => {
-                                        const trabalhadoC1 =
-                                          dadosByColaborador
-                                            ?.find((colaborador) => colaborador?.item === colaborador1?.id)
-                                            ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
-                                        const trabalhadoC2 =
-                                          dadosByColaborador
-                                            ?.find((colaborador) => colaborador?.item === colaborador2?.id)
-                                            ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
-                                        return (
-                                          <>
-                                            {(trabalhadoC1 > 0 || trabalhadoC2 > 0) && (
-                                              <LineProgress
-                                                item={row?.item}
-                                                trabalhadoC1={trabalhadoC1}
-                                                trabalhadoC2={trabalhadoC2}
-                                                leftSuccess={trabalhadoC1 > trabalhadoC2}
-                                              />
-                                            )}
-                                          </>
-                                        );
-                                      })}
-                                    </>
+                                    </Stack>
                                   )}
                                 </Grid>
-                              </DialogContent>
-                            </Dialog>
-                          </>
-                        )
-                      }
-                    />
-                    <CardContent>
-                      {dadosByAssunto?.map((row) => {
-                        const subtotal = sumBy(row?.processos, 'total');
-                        const percentagem = (subtotal * 100) / total;
-                        return (
-                          <Stack key={`${row.item}_entrab`} spacing={0.5} sx={{ width: 1, mb: 3 }}>
-                            <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
-                              <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
-                                {row?.item}
-                              </Typography>
-                              <Typography variant="subtitle1">&nbsp;{fNumber(subtotal)}</Typography>
-                              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                ({fPercent(percentagem)})
-                              </Typography>
+                                <Grid item xs={12} sm={6}>
+                                  <Autocomplete
+                                    fullWidth
+                                    size="small"
+                                    disableClearable
+                                    value={colaborador2}
+                                    onChange={(event, newValue) => setColaborador2(newValue)}
+                                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                    options={colaboradoresList?.filter((row) => row?.id !== colaborador1?.id)}
+                                    renderInput={(params) => <TextField {...params} label="Colaborador 2" />}
+                                  />
+                                  {colaborador2 && (
+                                    <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
+                                      <MyAvatar
+                                        alt={colaborador2?.label}
+                                        src={getFile('colaborador', colaborador2?.foto)}
+                                        sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
+                                      />
+                                    </Stack>
+                                  )}
+                                </Grid>
+                                {colaborador1 && colaborador2 && (
+                                  <>
+                                    <LineProgress
+                                      isTotal
+                                      item="Total"
+                                      trabalhadoC1={totalC1}
+                                      trabalhadoC2={totalC2}
+                                      leftSuccess={totalC1 > totalC2}
+                                    />
+                                    {dadosByAssunto?.map((row) => {
+                                      const trabalhadoC1 =
+                                        dadosByColaborador
+                                          ?.find((colaborador) => colaborador?.item === colaborador1?.id)
+                                          ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
+                                      const trabalhadoC2 =
+                                        dadosByColaborador
+                                          ?.find((colaborador) => colaborador?.item === colaborador2?.id)
+                                          ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
+                                      return (
+                                        <>
+                                          {(trabalhadoC1 > 0 || trabalhadoC2 > 0) && (
+                                            <LineProgress
+                                              item={row?.item}
+                                              trabalhadoC1={trabalhadoC1}
+                                              trabalhadoC2={trabalhadoC2}
+                                              leftSuccess={trabalhadoC1 > trabalhadoC2}
+                                            />
+                                          )}
+                                        </>
+                                      );
+                                    })}
+                                  </>
+                                )}
+                              </Grid>
+                            </DialogContent>
+                          </Dialog>
+                        </>
+                      )}
+                    </Stack>
+                    {accord && (
+                      <>
+                        {dadosByAssunto?.map((row) => {
+                          const subtotal = sumBy(row?.processos, 'total');
+                          const percentagem = (subtotal * 100) / total;
+                          return (
+                            <Stack key={`${row.item}_entrab`} spacing={0.5} sx={{ width: 1, my: 3 }}>
+                              <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
+                                <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
+                                  {row?.item}
+                                </Typography>
+                                <Typography variant="subtitle1">&nbsp;{fNumber(subtotal)}</Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                  ({fPercent(percentagem)})
+                                </Typography>
+                              </Stack>
+                              <LinearProgress variant="determinate" value={percentagem} color="success" />
                             </Stack>
-                            <LinearProgress variant="determinate" value={percentagem} color="success" />
-                          </Stack>
-                        );
-                      })}
-                    </CardContent>
+                          );
+                        })}
+                      </>
+                    )}
                   </Card>
                 </Grid>
                 {dadosByColaborador?.map((row) => (
-                  <ColaboradorCard key={row.item} colaboradorDados={row} total={total} assuntos={dadosByAssunto} />
+                  <ColaboradorCard
+                    total={total}
+                    key={row.item}
+                    accord={accord}
+                    colaboradorDados={row}
+                    assuntos={dadosByAssunto}
+                  />
                 ))}
               </Grid>
             </>
@@ -1391,70 +1398,62 @@ function CardInfo({ title, label, total, duracao }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ColaboradorCard.propTypes = { colaboradorDados: PropTypes.object, assuntos: PropTypes.array, total: PropTypes.number };
+ColaboradorCard.propTypes = {
+  accord: PropTypes.bool,
+  total: PropTypes.number,
+  assuntos: PropTypes.array,
+  colaboradorDados: PropTypes.object,
+};
 
-function ColaboradorCard({ colaboradorDados, total, assuntos }) {
+function ColaboradorCard({ colaboradorDados, total, assuntos, accord }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const totalColaborador = sumBy(colaboradorDados?.processos, 'total');
   const colaborador = colaboradores?.find((row) => row.perfil_id === colaboradorDados.item);
 
   return (
     <Grid item xs={12} md={6} lg={4}>
-      <Card
-        sx={{
-          p: 3,
-          pb: 2,
-          height: 1,
-          display: 'flex',
-          position: 'relative',
-          alignItems: 'center',
-          flexDirection: 'column',
-        }}
-      >
-        <Stack
-          spacing={2}
-          direction="row"
-          alignItems="center"
-          justifyContent="center"
-          sx={{ p: 2, mb: 3, width: 1, borderRadius: 1, backgroundColor: 'background.neutral' }}
-        >
+      <Card sx={{ height: 1, p: 2 }}>
+        <Stack spacing={2} direction="row" alignItems="center" justifyContent="center" sx={{ py: 1 }}>
           <MyAvatar
             alt={colaborador?.perfil?.displayName}
             src={getFile('colaborador', colaborador?.foto_disk)}
-            sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
+            sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
           />
           <Stack>
             <Typography variant="subtitle1" noWrap>
               {colaborador?.perfil?.displayName}
             </Typography>
             <Stack spacing={1} direction="row" alignItems="center" sx={{ color: 'text.success' }}>
-              <Typography variant="h5">{fNumber(totalColaborador)}</Typography>
+              <Typography variant="h6">{fNumber(totalColaborador)}</Typography>
               <Typography sx={{ opacity: 0.75 }}>({fPercent((totalColaborador * 100) / total)})</Typography>
             </Stack>
           </Stack>
         </Stack>
-
-        {colaboradorDados?.processos?.map((row) => {
-          const percentagem = (row?.total * 100) / totalColaborador;
-          const totalAssunto = assuntos?.find((assunto) => assunto?.item === row?.assunto);
-          return (
-            <Stack key={row.assunto} spacing={0.5} sx={{ width: 1, mb: 3 }}>
-              <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
-                  {row?.assunto}
-                </Typography>
-                <Typography variant="subtitle1">&nbsp;{fNumber(row?.total)}</Typography>
-                <Typography variant="caption" sx={{ color: 'text.success', opacity: 0.75 }}>
-                  ({fPercent(percentagem)})
-                </Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  ({fPercent((row?.total * 100) / sumBy(totalAssunto?.processos, 'total'))})
-                </Typography>
-              </Stack>
-              <LinearProgress variant="determinate" value={percentagem} color="success" />
-            </Stack>
-          );
-        })}
+        {accord && (
+          <>
+            {colaboradorDados?.processos?.map((row) => {
+              const percentagem = (row?.total * 100) / totalColaborador;
+              const totalAssunto = assuntos?.find((assunto) => assunto?.item === row?.assunto);
+              return (
+                <Stack key={row.assunto} spacing={0.5} sx={{ width: 1, my: 3 }}>
+                  <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
+                      {row?.assunto}
+                    </Typography>
+                    <Typography variant="subtitle1">&nbsp;{fNumber(row?.total)}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.success', opacity: 0.75 }}>
+                      ({fPercent(percentagem)})
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      ({fPercent((row?.total * 100) / sumBy(totalAssunto?.processos, 'total'))})
+                    </Typography>
+                  </Stack>
+                  <LinearProgress variant="determinate" value={percentagem} color="success" />
+                </Stack>
+              );
+            })}
+          </>
+        )}
       </Card>
     </Grid>
   );
