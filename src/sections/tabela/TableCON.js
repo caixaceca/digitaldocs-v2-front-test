@@ -1,3 +1,4 @@
+import { add, format } from 'date-fns';
 import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -10,7 +11,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { add, format } from 'date-fns';
+import { ptDate } from '../../utils/formatTime';
 import { normalizeText, dataValido, setDataUtil } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
@@ -92,8 +93,9 @@ export default function TableCON() {
   return (
     <>
       <HeaderBreadcrumbs
-        heading="Comunicação Operação Numerário"
         links={[{ name: '' }]}
+        sx={{ color: 'text.secondary', px: 1 }}
+        heading="Comunicação Operação Numerário"
         action={
           <Stack direction="row" alignItems="center" spacing={1}>
             <DatePicker
@@ -123,7 +125,6 @@ export default function TableCON() {
             )}
           </Stack>
         }
-        sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarSimple item="filterCon" filter={filter} setFilter={setFilter} />
@@ -143,7 +144,7 @@ export default function TableCON() {
                       <TableCell>{row?.ordenador}</TableCell>
                       <TableCell>{row?.docid}</TableCell>
                       <TableCell>{row?.nif}</TableCell>
-                      <TableCell>{row?.data_nascimento}</TableCell>
+                      <TableCell>{row?.data_nascimento ? ptDate(row?.data_nascimento) : ''}</TableCell>
                       <TableCell>
                         {estadosCivis?.find((item) => item?.id === row?.estado_civil)?.label || row?.estado_civil}
                       </TableCell>

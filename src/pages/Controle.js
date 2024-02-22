@@ -35,37 +35,21 @@ export default function Controle() {
     }
   }, [cc?.perfil?.displayName]);
 
-  const entradas = useMemo(
-    () =>
-      estadoInicial(meusAmbientes) || isAdmin
-        ? [{ value: 'entradas', label: 'Entradas', component: <TableControle from="entradas" /> }]
-        : [],
-    [isAdmin, meusAmbientes]
-  );
-
-  const cartoes = useMemo(
-    () =>
-      isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
-        ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
-        : [],
-    [cc?.uo?.label, cc?.uo?.tipo, isAdmin]
-  );
-
-  const con = useMemo(
-    () => (isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON /> }] : []),
-    [cc?.uo?.label, isAdmin]
-  );
-
   const tabsList = useMemo(
     () =>
       [
-        ...entradas,
+        ...(estadoInicial(meusAmbientes) || isAdmin
+          ? [
+              { value: 'entradas', label: 'Entradas', component: <TableControle from="entradas" /> },
+              { value: 'porconcluir', label: 'Por concluir', component: <TableControle from="porconcluir" /> },
+            ]
+          : []),
         { value: 'trabalhados', label: 'Trabalhados', component: <TableControle from="trabalhados" /> },
-        { value: 'porconcluir', label: 'Por concluir', component: <TableControle from="porconcluir" /> },
-        ...cartoes,
-        ...con,
+        ...(isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
+          ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
+          : []),
+        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON /> }] : []),
       ] || [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [meusAmbientes, isAdmin, cc?.uo]
   );
 

@@ -38,7 +38,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
   const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado);
   const [cliente, setCliente] = useState(true);
-  const infoConReq = (fluxo?.is_con && !cliente && !isEdit) || (fluxo?.is_con && isEdit);
+  const infoConReq = (fluxo?.is_con && !cliente && !isEdit) || (fluxo?.is_con && isEdit && !cliente);
 
   useEffect(() => {
     if (done === 'processo adicionado') {

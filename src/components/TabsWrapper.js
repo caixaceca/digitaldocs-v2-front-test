@@ -4,18 +4,12 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { alpha, styled } from '@mui/material/styles';
 // utils
 import { setItemValue } from '../utils/normalizeText';
 
 // ----------------------------------------------------------------------
-
-const RootStyle = styled('div')(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  backgroundColor: alpha(theme.palette.primary.main, 1),
-}));
 
 const TabsWrapperStyle = styled('div')(({ theme }) => ({
   zIndex: 9,
@@ -52,11 +46,9 @@ TabsWrapper.propTypes = {
 export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab }) {
   return (
     <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-      <RootStyle>
-        <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>
-          <Typography variant="h4">{title}</Typography>
-        </Box>
-      </RootStyle>
+      <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: (theme) => theme.palette.primary.main }}>
+        <Typography variant="h4">{title}</Typography>
+      </Box>
       <TabsWrapperStyle>
         <Tabs
           value={currentTab}
@@ -119,12 +111,7 @@ export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
 
 // ----------------------------------------------------------------------
 
-TabCard.propTypes = {
-  tabs: PropTypes.array,
-  tipo: PropTypes.string,
-  item: PropTypes.string,
-  setTipo: PropTypes.func,
-};
+TabCard.propTypes = { tabs: PropTypes.array, tipo: PropTypes.string, item: PropTypes.string, setTipo: PropTypes.func };
 
 export function TabCard({ tabs, tipo, item = '', setTipo }) {
   return (
