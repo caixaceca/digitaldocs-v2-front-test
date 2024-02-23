@@ -114,7 +114,9 @@ export function SearchToolbarProcura({
 
 SearchToolbarProcessos.propTypes = {
   tab: PropTypes.string,
+  motivo: PropTypes.string,
   filter: PropTypes.string,
+  setMotivo: PropTypes.func,
   setFilter: PropTypes.func,
   segmento: PropTypes.string,
   setSegmento: PropTypes.func,
@@ -125,8 +127,10 @@ SearchToolbarProcessos.propTypes = {
 
 export function SearchToolbarProcessos({
   tab,
+  motivo,
   filter,
   segmento,
+  setMotivo,
   setFilter,
   colaborador,
   setSegmento,
@@ -137,39 +141,44 @@ export function SearchToolbarProcessos({
   const { meusAmbientes, meusFluxos } = useSelector((state) => state.parametrizacao);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {(meusAmbientes?.length > 1 ||
-        meusFluxos?.length > 1 ||
-        colaboradoresList?.length > 0 ||
-        cc?.uo?.tipo !== 'Agências') && (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {(meusAmbientes?.length > 1 || meusFluxos?.length > 1) && tab !== 'retidos' && tab !== 'atribuidos' && (
-            <>
-              {meusAmbientes?.length > 1 && <Ambiente />}
-              {meusFluxos?.length > 1 && <Fluxo />}
-            </>
-          )}
-          {colaboradoresList?.length > 0 && (
-            <Autocomplete
-              fullWidth
-              value={colaborador || null}
-              options={colaboradoresList}
-              sx={{ width: { md: 250, xl: 300 } }}
-              renderInput={(params) => <TextField {...params} label="Colaborador" />}
-              onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP')}
-            />
-          )}
-          {cc?.uo?.tipo !== 'Agências' && (
-            <Autocomplete
-              fullWidth
-              value={segmento || null}
-              sx={{ width: { md: 150, xl: 200 } }}
-              options={['Particulares', 'Empresas']}
-              renderInput={(params) => <TextField {...params} label="Segmento" />}
-              onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}
-            />
-          )}
-        </Stack>
-      )}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        {tab !== 'retidos' && tab !== 'atribuidos' && (
+          <>
+            {meusAmbientes?.length > 1 && <Ambiente />}
+            {meusFluxos?.length > 1 && <Fluxo />}
+          </>
+        )}
+        {cc?.uo?.tipo === 'Agências' && tab === 'pendentes' && (
+          <Autocomplete
+            fullWidth
+            value={motivo || null}
+            sx={{ width: { md: 150, xl: 200 } }}
+            options={['Levantamento do pedido', 'Outros']}
+            renderInput={(params) => <TextField {...params} label="Motivo" />}
+            onChange={(event, newValue) => setItemValue(newValue, setMotivo, 'motivoP')}
+          />
+        )}
+        {colaboradoresList?.length > 0 && (
+          <Autocomplete
+            fullWidth
+            value={colaborador || null}
+            options={colaboradoresList}
+            sx={{ width: { md: 250, xl: 300 } }}
+            renderInput={(params) => <TextField {...params} label="Colaborador" />}
+            onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP')}
+          />
+        )}
+        {cc?.uo?.tipo !== 'Agências' && tab !== 'pendentes' && (
+          <Autocomplete
+            fullWidth
+            value={segmento || null}
+            sx={{ width: { md: 150, xl: 200 } }}
+            options={['Particulares', 'Empresas']}
+            renderInput={(params) => <TextField {...params} label="Segmento" />}
+            onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}
+          />
+        )}
+      </Stack>
       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
         <SearchField item="filterP" filter={filter} setFilter={setFilter} />
         {(filter || segmento) && (

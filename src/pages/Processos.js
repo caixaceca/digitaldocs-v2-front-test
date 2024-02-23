@@ -5,9 +5,9 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Tabs from '@mui/material/Tabs';
 import Badge from '@mui/material/Badge';
+import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import { styled, alpha } from '@mui/material/styles';
 // utils
 import selectTab from '../utils/selectTab';
 import { colorLabel } from '../utils/getColorPresets';
@@ -33,12 +33,6 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
   [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
-}));
-
-const RootStyle = styled('div')(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  backgroundColor: alpha(theme.palette.primary.main, 1),
 }));
 
 // ----------------------------------------------------------------------
@@ -159,11 +153,9 @@ export default function Processos() {
     <Page title="Processos | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-          <RootStyle>
-            <Box sx={{ px: 2, py: 1, color: 'common.white', textAlign: { md: 'left' } }}>
-              <Typography variant="h4">Processos</Typography>
-            </Box>
-          </RootStyle>
+          <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: 'primary.main' }}>
+            <Typography variant="h4">Processos</Typography>
+          </Box>
 
           <TabsWrapperStyle>
             <Tabs

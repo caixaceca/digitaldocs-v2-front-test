@@ -117,7 +117,7 @@ const slice = createSlice({
     },
 
     getMeusAmbientesSuccess(state, action) {
-      state.meusAmbientes = action.payload;
+      state.meusAmbientes = applySort(action.payload, getComparator('asc', 'nome')) || [];
       const grpGerent = action.payload?.find((row) => row?.nome?.includes('Gerência'));
       const grpAtend = action.payload?.find((row) => row?.nome?.includes('Atendimento'));
       const currentAmbiente =
@@ -417,8 +417,9 @@ const slice = createSlice({
 
     changeMeuAmbiente(state, action) {
       state.meuAmbiente = action.payload;
-      state.meusFluxos = action.payload?.fluxos;
-      state.meuFluxo = action.payload?.fluxos?.[0];
+      const fluxos = action.payload?.fluxos || [{ id: -1, assunto: 'Todos' }];
+      state.meusFluxos = applySort(fluxos, getComparator('asc', 'assunto'));
+      state.meuFluxo = fluxos[0];
     },
 
     changeMeuFluxo(state, action) {

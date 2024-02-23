@@ -129,54 +129,68 @@ export default function Procura() {
               {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
                   {localStorage.getItem('uoSearch') && (
-                    <Panel label="Agência/U.O">
-                      <Typography noWrap>
-                        {uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
-                      </Typography>
-                    </Panel>
+                    <Panel
+                      label="Agência/U.O"
+                      children={
+                        <Typography noWrap>
+                          {uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
+                        </Typography>
+                      }
+                    />
                   )}
                   {localStorage.getItem('colaboradorSearch') && (
-                    <Panel label="Criado por">
-                      <Typography noWrap>
-                        {
-                          colaboradores?.find(
-                            (row) => row?.perfil_id === Number(localStorage.getItem('colaboradorSearch'))
-                          )?.perfil?.displayName
-                        }
-                      </Typography>
-                    </Panel>
+                    <Panel
+                      label="Criado por"
+                      children={
+                        <Typography noWrap>
+                          {
+                            colaboradores?.find(
+                              (row) => row?.perfil_id === Number(localStorage.getItem('colaboradorSearch'))
+                            )?.perfil?.displayName
+                          }
+                        </Typography>
+                      }
+                    />
                   )}
                   {localStorage.getItem('conta') && (
-                    <Panel label="Nº conta">
-                      <Typography noWrap>{localStorage.getItem('conta')}</Typography>
-                    </Panel>
+                    <Panel
+                      label="Nº conta"
+                      children={<Typography noWrap>{localStorage.getItem('conta')}</Typography>}
+                    />
                   )}
                   {localStorage.getItem('cliente') && (
-                    <Panel label="Nº cliente">
-                      <Typography noWrap>{localStorage.getItem('cliente')}</Typography>
-                    </Panel>
+                    <Panel
+                      label="Nº cliente"
+                      children={<Typography noWrap>{localStorage.getItem('cliente')}</Typography>}
+                    />
                   )}
                   {localStorage.getItem('entidade') && (
-                    <Panel label="Nº entidade">
-                      <Typography noWrap>{localStorage.getItem('entidade')}</Typography>
-                    </Panel>
+                    <Panel
+                      label="Nº entidade"
+                      children={<Typography noWrap>{localStorage.getItem('entidade')}</Typography>}
+                    />
                   )}
                   {localStorage.getItem('nentrada') && (
-                    <Panel label="Nº entrada">
-                      <Typography noWrap>{localStorage.getItem('nentrada')}</Typography>
-                    </Panel>
+                    <Panel
+                      label="Nº entrada"
+                      children={<Typography noWrap>{localStorage.getItem('nentrada')}</Typography>}
+                    />
                   )}
                   {localStorage.getItem('noperacao') && (
-                    <Panel label="Nº operação">
-                      <Typography noWrap>{localStorage.getItem('noperacao')}</Typography>
-                    </Panel>
+                    <Panel
+                      label="Nº operação"
+                      children={<Typography noWrap>{localStorage.getItem('noperacao')}</Typography>}
+                    />
                   )}
                   {localStorage.getItem('dataISearch') && localStorage.getItem('dataFSearch') && (
-                    <Panel label="Data">
-                      <Typography noWrap>
-                        {ptDate(localStorage.getItem('dataISearch'))} - {ptDate(localStorage.getItem('dataFSearch'))}
-                      </Typography>
-                    </Panel>
+                    <Panel
+                      label="Data"
+                      children={
+                        <Typography noWrap>
+                          {ptDate(localStorage.getItem('dataISearch'))} - {ptDate(localStorage.getItem('dataFSearch'))}
+                        </Typography>
+                      }
+                    />
                   )}
                 </Stack>
               ) : (

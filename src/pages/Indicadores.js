@@ -25,21 +25,15 @@ export default function Indicadores() {
     localStorage.getItem('tabIndicadores') || (meusacessos?.includes('Todo-111') && 'files') || 'total'
   );
 
-  const tabFiles = useMemo(
-    () =>
-      meusacessos?.includes('Todo-111') ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }] : [],
-    [meusacessos]
-  );
-
   const tabsList = useMemo(
     () => [
-      ...tabFiles,
+      ...(meusacessos?.includes('Todo-111') ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }] : []),
       { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
       { value: 'duracao', label: 'Duração', component: <Duracao /> },
       { value: 'execucao', label: 'Tempo execução', component: <Execucao /> },
       { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
     ],
-    [tabFiles]
+    [meusacessos]
   );
 
   useEffect(() => {

@@ -43,6 +43,7 @@ export default function TableProcessos({ from }) {
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, processos } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
+  const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorP') || null);
   const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
@@ -112,6 +113,7 @@ export default function TableProcessos({ from }) {
 
   const dataFiltered = applySortFilter({
     from,
+    motivo,
     filter,
     newList,
     segmento,
@@ -157,8 +159,10 @@ export default function TableProcessos({ from }) {
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
           tab={from}
+          motivo={motivo}
           filter={filter}
           segmento={segmento}
+          setMotivo={setMotivo}
           setFilter={setFilter}
           setSegmento={setSegmento}
           colaborador={colaborador}
@@ -254,7 +258,7 @@ export default function TableProcessos({ from }) {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newList, comparator, filter, segmento, colaborador, from }) {
+function applySortFilter({ newList, comparator, filter, segmento, colaborador, motivo, from }) {
   newList = applySort(newList, comparator);
 
   if (segmento === 'Particulares') {
@@ -266,6 +270,26 @@ function applySortFilter({ newList, comparator, filter, segmento, colaborador, f
 
   if ((from === 'atribuidos' || from === 'retidos') && colaborador) {
     newList = newList.filter((row) => row?.colaborador === colaborador);
+  }
+
+  if (from === 'pendentes' && motivo === 'Levantamento do pedido') {
+    newList = newList.filter(
+      (row) =>
+        row?.assunto?.includes('Cartão') ||
+        row?.assunto?.includes('Extrato') ||
+        row?.assunto?.includes('Declarações') ||
+        row?.assunto?.includes('Cheques - Requisição')
+    );
+  }
+
+  if (from === 'pendentes' && motivo === 'Outros') {
+    newList = newList.filter(
+      (row) =>
+        !row?.assunto?.includes('Cartão') &&
+        !row?.assunto?.includes('Extrato') &&
+        !row?.assunto?.includes('Declarações') &&
+        !row?.assunto?.includes('Cheques - Requisição')
+    );
   }
 
   if (filter) {

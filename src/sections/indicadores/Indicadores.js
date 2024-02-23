@@ -174,92 +174,70 @@ export function FileSystem() {
   }, [dispatch, cc?.perfil_id, mail]);
 
   return (
-    <>
-      <Card>
-        <CardContent>
+    <Card>
+      <IndicadorItem
+        isLoading={isLoading}
+        isNotFound={isNotFound}
+        children={
           <Grid container spacing={3} alignItems="center">
-            {isLoading ? (
-              <Grid item xs={12}>
-                <Stack direction="row" justifyContent="center">
-                  <BarChart />
-                </Stack>
-              </Grid>
-            ) : (
-              <>
-                {isNotFound ? (
-                  <Grid item xs={12}>
-                    <SearchNotFound message="Nenhum registo encontrado..." />
-                  </Grid>
-                ) : (
-                  <>
-                    <Grid item xs={12} sm={6}>
-                      <Chart
-                        height={500}
-                        type="radialBar"
-                        options={chartOptions}
-                        series={[((total?.tamanho * 100) / 500000000000).toFixed(2)]}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={2}>
-                        {[total, pdf, imagem, excel, word, outros].map(
-                          (folder) =>
-                            folder.qnt > 0 && (
-                              <Card
-                                key={folder.tipo}
-                                sx={{
-                                  p: 2,
-                                  borderRadius: 1,
-                                  boxShadow: 'none',
-                                  border: `solid 1px ${theme.palette.divider}`,
-                                  '&:hover': { bgcolor: 'background.neutral', boxShadow: theme.customShadows.z2 },
-                                }}
-                              >
-                                <Stack spacing={2} direction="row" alignItems="center">
-                                  <Box
-                                    component="img"
-                                    sx={{ width: 45, height: 45 }}
-                                    src={`/assets/icons/file_format/${folder.file}.svg`}
-                                  />
+            <Grid item xs={12} sm={6}>
+              <Chart
+                height={500}
+                type="radialBar"
+                options={chartOptions}
+                series={[((total?.tamanho * 100) / 500000000000).toFixed(2)]}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Stack spacing={2}>
+                {[total, pdf, imagem, excel, word, outros].map(
+                  (folder) =>
+                    folder.qnt > 0 && (
+                      <Card
+                        key={folder.tipo}
+                        sx={{
+                          p: 2,
+                          borderRadius: 1,
+                          boxShadow: 'none',
+                          border: `solid 1px ${theme.palette.divider}`,
+                          '&:hover': { bgcolor: 'background.neutral', boxShadow: theme.customShadows.z2 },
+                        }}
+                      >
+                        <Stack spacing={2} direction="row" alignItems="center">
+                          <Box
+                            component="img"
+                            sx={{ width: 45, height: 45 }}
+                            src={`/assets/icons/file_format/${folder.file}.svg`}
+                          />
 
-                                  <Stack spacing={0.5} flexGrow={1}>
-                                    <Typography variant="subtitle1">{folder.tipo}</Typography>
-                                    <Stack direction="row" alignContent="center" spacing={0.5}>
-                                      <Typography variant="body2">{fNumber(folder.qnt)} </Typography>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: 'text.secondary', typography: 'body2' }}
-                                      >
-                                        {folder.qnt > 1 ? 'ficheiros' : 'ficheiro'}
-                                      </Typography>
-                                    </Stack>
-                                  </Stack>
+                          <Stack spacing={0.5} flexGrow={1}>
+                            <Typography variant="subtitle1">{folder.tipo}</Typography>
+                            <Stack direction="row" alignContent="center" spacing={0.5}>
+                              <Typography variant="body2">{fNumber(folder.qnt)} </Typography>
+                              <Typography variant="caption" sx={{ color: 'text.secondary', typography: 'body2' }}>
+                                {folder.qnt > 1 ? 'ficheiros' : 'ficheiro'}
+                              </Typography>
+                            </Stack>
+                          </Stack>
 
-                                  <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={0.5}>
-                                    <Typography variant="h6"> {fData(folder.tamanho)} </Typography>
-                                    {folder.tipo !== 'Total' && (
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: 'text.secondary', typography: 'body2' }}
-                                      >
-                                        ({fPercent((folder.tamanho * 100) / total.tamanho)})
-                                      </Typography>
-                                    )}
-                                  </Stack>
-                                </Stack>
-                              </Card>
-                            )
-                        )}
-                      </Stack>
-                    </Grid>
-                  </>
+                          <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={0.5}>
+                            <Typography variant="h6"> {fData(folder.tamanho)} </Typography>
+                            {folder.tipo !== 'Total' && (
+                              <Typography variant="caption" sx={{ color: 'text.secondary', typography: 'body2' }}>
+                                ({fPercent((folder.tamanho * 100) / total.tamanho)})
+                              </Typography>
+                            )}
+                          </Stack>
+                        </Stack>
+                      </Card>
+                    )
                 )}
-              </>
-            )}
+              </Stack>
+            </Grid>
           </Grid>
-        </CardContent>
-      </Card>
-    </>
+        }
+      />
+    </Card>
   );
 }
 
@@ -268,14 +246,14 @@ export function FileSystem() {
 export function TotalProcessos() {
   const [top, setTop] = useState(localStorage.getItem('top') || 'Todos');
   const [vista, setVista] = useState(localStorage.getItem('vista') || 'mensal');
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabTotal') || 'criacao');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabTotal') || 'data');
 
   const tabsList = [
-    { value: 'criacao', label: 'Criação', component: <Criacao vista={vista} /> },
-    { value: 'entradas', label: 'Entradas', component: <EntradasTrabalhados /> },
+    { value: 'data', label: 'Data', component: <Criacao vista={vista} /> },
+    { value: 'criacao', label: 'Criação', component: <EntradasTrabalhados /> },
+    { value: 'entradas', label: 'Entradas', component: <DevolvidosTipos /> },
     { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados /> },
-    { value: 'devolucoesInternas', label: 'Devoluções internas', component: <DevolvidosTipos /> },
-    { value: 'devolucoesExternas', label: 'Devoluções externas', component: <DevolvidosTipos /> },
+    { value: 'devolucoes', label: 'Devoluções', component: <DevolvidosTipos /> },
     { value: 'volume', label: 'Volume', component: <Volume top={top} /> },
     { value: 'tipos', label: 'Fluxos/Assuntos', component: <DevolvidosTipos /> },
   ];
@@ -287,10 +265,10 @@ export function TotalProcessos() {
   return (
     <>
       <HeaderBreadcrumbs
-        action={<Filtrar top={top} vista={vista} setTop={setTop} tab={currentTab} setVista={setVista} />}
         links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
         heading={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
+        action={<Filtrar top={top} vista={vista} setTop={setTop} tab={currentTab} setVista={setVista} />}
       />
       <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
       {tabsList.map((tab) => {
@@ -344,52 +322,42 @@ export function Criacao({ vista }) {
   return (
     <Card sx={{ p: 1 }}>
       {indicadores.length > 0 && <TabView currentTab={currentTab} setCurrentTab={setCurrentTab} />}
-      <CardContent>
-        {isLoading ? (
-          <Stack direction="row" justifyContent="center">
-            <BarChart />
-          </Stack>
-        ) : (
-          <>
-            {isNotFound ? (
-              <SearchNotFound message="Nenhum registo encontrado..." />
-            ) : (
-              <>
-                <Grid container spacing={3}>
-                  {resumo?.map((row) => (
-                    <Grid key={row?.label} item xs={12} sm={6} md={3}>
-                      <CardInfo
-                        title={row?.label}
-                        total={row?.valor}
-                        label={
-                          (row?.desc &&
-                            row?.label !== 'Total' &&
-                            row?.label !== 'Média' &&
-                            vista === 'anual' &&
-                            fYear(row?.desc)?.toString()) ||
-                          (row?.desc &&
-                            row?.label !== 'Total' &&
-                            row?.label !== 'Média' &&
-                            vista === 'mensal' &&
-                            fMonthYear(row?.desc)) ||
-                          row?.desc?.toString()
-                        }
-                      />
-                    </Grid>
-                  ))}
-                  <Grid item xs={12}>
-                    {currentTab === 'Gráfico' ? (
-                      <Chart type="area" series={series} options={chartOptions} height={400} />
-                    ) : (
-                      <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
-                    )}
-                  </Grid>
-                </Grid>
-              </>
-            )}
-          </>
-        )}
-      </CardContent>
+      <IndicadorItem
+        isLoading={isLoading}
+        isNotFound={isNotFound}
+        children={
+          <Grid container spacing={3}>
+            {resumo?.map((row) => (
+              <Grid key={row?.label} item xs={12} sm={6} md={3}>
+                <CardInfo
+                  title={row?.label}
+                  total={row?.valor}
+                  label={
+                    (row?.desc &&
+                      row?.label !== 'Total' &&
+                      row?.label !== 'Média' &&
+                      vista === 'anual' &&
+                      fYear(row?.desc)?.toString()) ||
+                    (row?.desc &&
+                      row?.label !== 'Total' &&
+                      row?.label !== 'Média' &&
+                      vista === 'mensal' &&
+                      fMonthYear(row?.desc)) ||
+                    row?.desc?.toString()
+                  }
+                />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              {currentTab === 'Gráfico' ? (
+                <Chart type="area" series={series} options={chartOptions} height={400} />
+              ) : (
+                <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
+              )}
+            </Grid>
+          </Grid>
+        }
+      />
     </Card>
   );
 }
@@ -434,173 +402,163 @@ export function EntradasTrabalhados() {
   };
 
   return (
-    <>
-      {isLoading ? (
-        <Card>
-          <CardContent>
-            <Stack direction="row" justifyContent="center">
-              <BarChart />
-            </Stack>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {isNotFound ? (
-            <Card>
-              <CardContent>
-                <SearchNotFound message="Nenhum registo encontrado..." />
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} md={6} lg={4}>
-                  <Card sx={{ height: 1, p: 2 }}>
-                    <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
-                      <Typography variant="h5" sx={{ color: 'text.secondary' }}>
-                        Total:
-                      </Typography>
-                      <Typography variant="h5">{fNumber(total)}</Typography>
-                    </Stack>
-                    <Stack spacing={1} direction="row" alignItems="center" justifyContent="center">
-                      <DefaultAction
-                        small
-                        button
-                        handleClick={() => setAccord(!accord)}
-                        label={accord ? 'Esconder detalhes' : 'Mostrar detalhes'}
-                      />
-                      {dadosByColaborador.length > 1 && (
-                        <>
-                          <DefaultAction small button handleClick={onOpen1} label="Comparar colaboradores" />
-                          <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
-                            <DialogTitle sx={{ pr: 1 }}>
-                              <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ pr: 1.5 }}>
-                                <Typography variant="h6">Comparação colaboradores</Typography>
-                                <Fechar handleClick={handleClose} />
-                              </Stack>
-                            </DialogTitle>
-                            <DialogContent>
-                              <Grid container spacing={1.5} sx={{ mt: 1 }}>
-                                <Grid item xs={12} sm={6}>
-                                  <Autocomplete
-                                    fullWidth
-                                    size="small"
-                                    disableClearable
-                                    value={colaborador1}
-                                    onChange={(event, newValue) => setColaborador1(newValue)}
-                                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                    options={colaboradoresList?.filter((row) => row?.id !== colaborador2?.id)}
-                                    renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
-                                  />
-                                  {colaborador1 && (
-                                    <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                      <MyAvatar
-                                        alt={colaborador1?.label}
-                                        src={getFile('colaborador', colaborador1?.foto)}
-                                        sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
-                                      />
-                                    </Stack>
-                                  )}
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                  <Autocomplete
-                                    fullWidth
-                                    size="small"
-                                    disableClearable
-                                    value={colaborador2}
-                                    onChange={(event, newValue) => setColaborador2(newValue)}
-                                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                    options={colaboradoresList?.filter((row) => row?.id !== colaborador1?.id)}
-                                    renderInput={(params) => <TextField {...params} label="Colaborador 2" />}
-                                  />
-                                  {colaborador2 && (
-                                    <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                      <MyAvatar
-                                        alt={colaborador2?.label}
-                                        src={getFile('colaborador', colaborador2?.foto)}
-                                        sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
-                                      />
-                                    </Stack>
-                                  )}
-                                </Grid>
-                                {colaborador1 && colaborador2 && (
-                                  <>
-                                    <LineProgress
-                                      isTotal
-                                      item="Total"
-                                      trabalhadoC1={totalC1}
-                                      trabalhadoC2={totalC2}
-                                      leftSuccess={totalC1 > totalC2}
-                                    />
-                                    {dadosByAssunto?.map((row) => {
-                                      const trabalhadoC1 =
-                                        dadosByColaborador
-                                          ?.find((colaborador) => colaborador?.item === colaborador1?.id)
-                                          ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
-                                      const trabalhadoC2 =
-                                        dadosByColaborador
-                                          ?.find((colaborador) => colaborador?.item === colaborador2?.id)
-                                          ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
-                                      return (
-                                        <>
-                                          {(trabalhadoC1 > 0 || trabalhadoC2 > 0) && (
-                                            <LineProgress
-                                              item={row?.item}
-                                              trabalhadoC1={trabalhadoC1}
-                                              trabalhadoC2={trabalhadoC2}
-                                              leftSuccess={trabalhadoC1 > trabalhadoC2}
-                                            />
-                                          )}
-                                        </>
-                                      );
-                                    })}
-                                  </>
-                                )}
-                              </Grid>
-                            </DialogContent>
-                          </Dialog>
-                        </>
-                      )}
-                    </Stack>
-                    {accord && (
-                      <>
-                        {dadosByAssunto?.map((row) => {
-                          const subtotal = sumBy(row?.processos, 'total');
-                          const percentagem = (subtotal * 100) / total;
-                          return (
-                            <Stack key={`${row.item}_entrab`} spacing={0.5} sx={{ width: 1, my: 3 }}>
-                              <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
-                                <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
-                                  {row?.item}
-                                </Typography>
-                                <Typography variant="subtitle1">&nbsp;{fNumber(subtotal)}</Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                  ({fPercent(percentagem)})
-                                </Typography>
-                              </Stack>
-                              <LinearProgress variant="determinate" value={percentagem} color="success" />
-                            </Stack>
-                          );
-                        })}
-                      </>
-                    )}
-                  </Card>
-                </Grid>
-                {dadosByColaborador?.map((row) => (
-                  <ColaboradorCard
-                    total={total}
-                    key={row.item}
-                    accord={accord}
-                    colaboradorDados={row}
-                    assuntos={dadosByAssunto}
+    <Card
+      sx={{
+        boxShadow: !isLoading && !isNotFound && 'none !important',
+        backgroundColor: !isLoading && !isNotFound && 'transparent !important',
+      }}
+    >
+      <IndicadorItem
+        isLoading={isLoading}
+        isNotFound={isNotFound}
+        nop={!isLoading && !isNotFound}
+        children={
+          <Grid container spacing={3} justifyContent="center">
+            <Grid item xs={12} md={6} lg={4}>
+              <Card sx={{ height: 1, p: 2, pt: 1 }}>
+                <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
+                  <Typography variant="h4" sx={{ color: 'text.secondary' }}>
+                    Total:
+                  </Typography>
+                  <Typography variant="h4">{fNumber(total)}</Typography>
+                </Stack>
+                <Stack spacing={1} direction="row" alignItems="center" justifyContent="center">
+                  <DefaultAction
+                    small
+                    button
+                    handleClick={() => setAccord(!accord)}
+                    label={accord ? 'Esconder detalhes' : 'Mostrar detalhes'}
                   />
-                ))}
-              </Grid>
-            </>
-          )}
-        </>
-      )}
-    </>
+                  {dadosByColaborador.length > 1 && (
+                    <>
+                      <DefaultAction small button handleClick={onOpen1} label="Comparar colaboradores" />
+                      <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
+                        <DialogTitle sx={{ pr: 1 }}>
+                          <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ pr: 1.5 }}>
+                            <Typography variant="h6">Comparação colaboradores</Typography>
+                            <Fechar handleClick={handleClose} />
+                          </Stack>
+                        </DialogTitle>
+                        <DialogContent>
+                          <Grid container spacing={1.5} sx={{ mt: 1 }}>
+                            <Grid item xs={12} sm={6}>
+                              <Autocomplete
+                                fullWidth
+                                size="small"
+                                disableClearable
+                                value={colaborador1}
+                                onChange={(event, newValue) => setColaborador1(newValue)}
+                                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                options={colaboradoresList?.filter((row) => row?.id !== colaborador2?.id)}
+                                renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
+                              />
+                              {colaborador1 && (
+                                <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
+                                  <MyAvatar
+                                    alt={colaborador1?.label}
+                                    src={getFile('colaborador', colaborador1?.foto)}
+                                    sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
+                                  />
+                                </Stack>
+                              )}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <Autocomplete
+                                fullWidth
+                                size="small"
+                                disableClearable
+                                value={colaborador2}
+                                onChange={(event, newValue) => setColaborador2(newValue)}
+                                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                options={colaboradoresList?.filter((row) => row?.id !== colaborador1?.id)}
+                                renderInput={(params) => <TextField {...params} label="Colaborador 2" />}
+                              />
+                              {colaborador2 && (
+                                <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
+                                  <MyAvatar
+                                    alt={colaborador2?.label}
+                                    src={getFile('colaborador', colaborador2?.foto)}
+                                    sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
+                                  />
+                                </Stack>
+                              )}
+                            </Grid>
+                            {colaborador1 && colaborador2 && (
+                              <>
+                                <LineProgress
+                                  isTotal
+                                  item="Total"
+                                  trabalhadoC1={totalC1}
+                                  trabalhadoC2={totalC2}
+                                  leftSuccess={totalC1 > totalC2}
+                                />
+                                {dadosByAssunto?.map((row) => {
+                                  const trabalhadoC1 =
+                                    dadosByColaborador
+                                      ?.find((colaborador) => colaborador?.item === colaborador1?.id)
+                                      ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
+                                  const trabalhadoC2 =
+                                    dadosByColaborador
+                                      ?.find((colaborador) => colaborador?.item === colaborador2?.id)
+                                      ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
+                                  return (
+                                    <>
+                                      {(trabalhadoC1 > 0 || trabalhadoC2 > 0) && (
+                                        <LineProgress
+                                          item={row?.item}
+                                          trabalhadoC1={trabalhadoC1}
+                                          trabalhadoC2={trabalhadoC2}
+                                          leftSuccess={trabalhadoC1 > trabalhadoC2}
+                                        />
+                                      )}
+                                    </>
+                                  );
+                                })}
+                              </>
+                            )}
+                          </Grid>
+                        </DialogContent>
+                      </Dialog>
+                    </>
+                  )}
+                </Stack>
+                {accord && (
+                  <>
+                    {dadosByAssunto?.map((row) => {
+                      const subtotal = sumBy(row?.processos, 'total');
+                      const percentagem = (subtotal * 100) / total;
+                      return (
+                        <Stack key={`${row.item}_entrab`} spacing={0.5} sx={{ width: 1, my: 3 }}>
+                          <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
+                              {row?.item}
+                            </Typography>
+                            <Typography variant="subtitle1">&nbsp;{fNumber(subtotal)}</Typography>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              ({fPercent(percentagem)})
+                            </Typography>
+                          </Stack>
+                          <LinearProgress variant="determinate" value={percentagem} color="success" />
+                        </Stack>
+                      );
+                    })}
+                  </>
+                )}
+              </Card>
+            </Grid>
+            {dadosByColaborador?.map((row) => (
+              <ColaboradorCard
+                total={total}
+                key={row.item}
+                accord={accord}
+                colaboradorDados={row}
+                assuntos={dadosByAssunto}
+              />
+            ))}
+          </Grid>
+        }
+      />{' '}
+    </Card>
   );
 }
 
@@ -646,36 +604,26 @@ export function DevolvidosTipos() {
   return (
     <Card sx={{ p: 1 }}>
       {indicadores.length > 0 && <TabView currentTab={currentTab} setCurrentTab={setCurrentTab} />}
-      <CardContent>
-        {isLoading ? (
-          <Stack direction="row" justifyContent="center">
-            <BarChart />
-          </Stack>
-        ) : (
-          <>
-            {isNotFound ? (
-              <SearchNotFound message="Nenhum registo encontrado..." />
-            ) : (
-              <>
-                <Grid container spacing={3}>
-                  {resumo?.map((row) => (
-                    <Grid key={row?.label} item xs={12} sm={4}>
-                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
-                    </Grid>
-                  ))}
-                  <Grid item xs={12}>
-                    {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
-                      <Chart type="line" series={series} options={chartOptions} height={500} />
-                    ) : (
-                      <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
-                    )}
-                  </Grid>
-                </Grid>
-              </>
-            )}
-          </>
-        )}
-      </CardContent>
+      <IndicadorItem
+        isLoading={isLoading}
+        isNotFound={isNotFound}
+        children={
+          <Grid container spacing={3}>
+            {resumo?.map((row) => (
+              <Grid key={row?.label} item xs={12} sm={4}>
+                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
+                <Chart type="line" series={series} options={chartOptions} height={500} />
+              ) : (
+                <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
+              )}
+            </Grid>
+          </Grid>
+        }
+      />
     </Card>
   );
 }
@@ -903,36 +851,26 @@ export function Duracao() {
 
       <Card sx={{ p: 1 }}>
         {duracaoByItem.length > 0 && <TabView currentTab={currentTab} setCurrentTab={setCurrentTab} />}
-        <CardContent>
-          {isLoading ? (
-            <Stack direction="row" justifyContent="center">
-              <BarChart />
-            </Stack>
-          ) : (
-            <>
-              {isNotFound ? (
-                <SearchNotFound message="Nenhum registo encontrado..." />
-              ) : (
-                <>
-                  <Grid container spacing={3}>
-                    {resumo?.map((row) => (
-                      <Grid key={row?.label} item xs={12} sm={4}>
-                        <CardInfo title={row?.label} total={row?.valor} label={row?.desc} duracao />
-                      </Grid>
-                    ))}
-                    <Grid item xs={12}>
-                      {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
-                        <Chart type="bar" series={series} options={chartOptions} height={500} />
-                      ) : (
-                        <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
-                      )}
-                    </Grid>
-                  </Grid>
-                </>
-              )}
-            </>
-          )}
-        </CardContent>
+        <IndicadorItem
+          isLoading={isLoading}
+          isNotFound={isNotFound}
+          children={
+            <Grid container spacing={3}>
+              {resumo?.map((row) => (
+                <Grid key={row?.label} item xs={12} sm={4}>
+                  <CardInfo title={row?.label} total={row?.valor} label={row?.desc} duracao />
+                </Grid>
+              ))}
+              <Grid item xs={12}>
+                {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
+                  <Chart type="bar" series={series} options={chartOptions} height={500} />
+                ) : (
+                  <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
+                )}
+              </Grid>
+            </Grid>
+          }
+        />
       </Card>
     </>
   );
@@ -1004,43 +942,50 @@ export function Volume({ top }) {
   return (
     <Card sx={{ p: 1 }}>
       {indicadores.length > 0 && <TabView currentTab={currentTab} setCurrentTab={setCurrentTab} />}
-      <CardContent>
-        {isLoading ? (
-          <Stack direction="row" justifyContent="center">
-            <BarChart />
-          </Stack>
-        ) : (
-          <>
-            {isNotFound ? (
-              <SearchNotFound message="Nenhum registo encontrado..." />
-            ) : (
-              <>
-                <Grid container spacing={3}>
-                  {resumo?.map((row) => (
-                    <Grid key={row?.label} item xs={12} sm={6} md={3}>
-                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
-                    </Grid>
-                  ))}
-                  <Grid item xs={12}>
-                    {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
-                      <Chart type="line" series={series} options={chartOptions} height={500} />
-                    ) : (
-                      <TableExport
-                        percentagem
-                        total={total}
-                        label={agrupamento}
-                        label1="Quantidade"
-                        dados={volumeByItem}
-                      />
-                    )}
-                  </Grid>
-                </Grid>
-              </>
-            )}
-          </>
-        )}
-      </CardContent>
+      <IndicadorItem
+        isLoading={isLoading}
+        isNotFound={isNotFound}
+        children={
+          <Grid container spacing={3}>
+            {resumo?.map((row) => (
+              <Grid key={row?.label} item xs={12} sm={6} md={3}>
+                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
+                <Chart type="line" series={series} options={chartOptions} height={500} />
+              ) : (
+                <TableExport percentagem total={total} label={agrupamento} label1="Quantidade" dados={volumeByItem} />
+              )}
+            </Grid>
+          </Grid>
+        }
+      />
     </Card>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+IndicadorItem.propTypes = {
+  nop: PropTypes.bool,
+  children: PropTypes.node,
+  isLoading: PropTypes.bool,
+  isNotFound: PropTypes.bool,
+};
+
+function IndicadorItem({ isLoading, isNotFound, children, nop }) {
+  return (
+    <CardContent sx={{ p: nop && 0 }}>
+      {isLoading ? (
+        <Stack direction="row" justifyContent="center">
+          <BarChart />
+        </Stack>
+      ) : (
+        <>{isNotFound ? <SearchNotFound message="Nenhum registo encontrado..." /> : children}</>
+      )}
+    </CardContent>
   );
 }
 
@@ -1057,6 +1002,7 @@ Filtrar.propTypes = {
 export function Filtrar({ tab, top, vista, setTop, setVista }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
+  const [origem, setOrigem] = useState(localStorage.getItem('origem') || 'Interna');
   const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
   const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
   const [datai, setDatai] = useState(
@@ -1142,6 +1088,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
         getIndicadores(tab, {
           mail,
           vista,
+          origem,
           perfilId,
           uo: uo?.id,
           fluxo: fluxo?.id,
@@ -1154,76 +1101,77 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
         })
       );
     }
-  }, [dispatch, tab, mail, vista, datai, dataf, momento, perfilId, estado, uo?.id, fluxo?.id, perfil?.id, agrupamento]);
+  }, [
+    tab,
+    mail,
+    vista,
+    datai,
+    dataf,
+    estado,
+    uo?.id,
+    origem,
+    momento,
+    dispatch,
+    perfilId,
+    fluxo?.id,
+    perfil?.id,
+    agrupamento,
+  ]);
 
-  const haveColaborador = tab === 'criacao' || tab === 'tipos' || tab === 'duracao' || tab === 'execucao';
-  const haveEstado =
-    tab === 'trabalhados' || tab === 'devolucoesInternas' || tab === 'devolucoesExternas' || tab === 'execucao';
+  const haveColaborador = tab === 'data' || tab === 'tipos' || tab === 'duracao' || tab === 'execucao';
+  const haveEstado = tab === 'trabalhados' || tab === 'entradas' || tab === 'devolucoes' || tab === 'execucao';
   const havePeriodo =
+    tab === 'criacao' ||
     tab === 'entradas' ||
     tab === 'trabalhados' ||
-    tab === 'devolucoesInternas' ||
-    tab === 'devolucoesExternas' ||
+    tab === 'devolucoes' ||
     tab === 'tipos' ||
     tab === 'duracao';
 
   return (
     <>
-      <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-        {tab === 'duracao' && momento && (
-          <Panel label="Momento">
-            <Typography noWrap>{momento}</Typography>
-          </Panel>
-        )}
+      <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+        {tab === 'duracao' && momento && <Panel label="Momento" children={<Typography noWrap>{momento}</Typography>} />}
         {tab === 'volume' && (agrupamento || top !== 'Todos') && (
           <>
-            {agrupamento && (
-              <Panel label="Agrupamento">
-                <Typography noWrap>{agrupamento}</Typography>
-              </Panel>
-            )}
-            {top !== 'Todos' && (
-              <Panel label="Top">
-                <Typography noWrap>{top}</Typography>
-              </Panel>
-            )}
+            {agrupamento && <Panel label="Agrupamento" children={<Typography noWrap>{agrupamento}</Typography>} />}
+            {top !== 'Todos' && <Panel label="Top" children={<Typography noWrap>{top}</Typography>} />}
           </>
         )}
-        {tab === 'criacao' && vista && (
-          <Panel label="Vista">
-            <Typography noWrap sx={{ textTransform: 'capitalize' }}>
-              {vista}
-            </Typography>
-          </Panel>
+        {tab === 'data' && vista && (
+          <Panel
+            label="Vista"
+            children={
+              <Typography noWrap sx={{ textTransform: 'capitalize' }}>
+                {vista}
+              </Typography>
+            }
+          />
         )}
-        {(tab === 'criacao' || tab === 'entradas' || tab === 'tipos') && uo?.label && (
-          <Panel label="Agência/U.O">
-            <Typography noWrap>{uo?.label}</Typography>
-          </Panel>
+        {(tab === 'data' || tab === 'criacao' || tab === 'tipos') && uo?.label && (
+          <Panel label="Agência/U.O" children={<Typography noWrap>{uo?.label}</Typography>} />
         )}
         {haveColaborador && perfil?.label && (
-          <Panel label="Colaborador">
-            <Typography noWrap>{perfil?.label}</Typography>
-          </Panel>
+          <Panel label="Colaborador" children={<Typography noWrap>{perfil?.label}</Typography>} />
         )}
         {haveEstado && estado?.label && (
-          <Panel label="Estado/Ambiente">
-            <Typography noWrap>{estado?.label}</Typography>
-          </Panel>
+          <Panel label="Estado/Ambiente" children={<Typography noWrap>{estado?.label}</Typography>} />
         )}
+        {tab === 'devolucoes' && origem && <Panel label="Origem" children={<Typography noWrap>{origem}</Typography>} />}
         {(tab === 'duracao' || tab === 'execucao') && fluxo?.label && (
-          <Panel label="Fluxo/Assunto">
-            <Typography noWrap>{fluxo?.label}</Typography>
-          </Panel>
+          <Panel label="Fluxo/Assunto" children={<Typography noWrap>{fluxo?.label}</Typography>} />
         )}
         {havePeriodo && (datai || dataf) && (
-          <Panel label={(datai && dataf && 'Período') || (datai && 'Desde') || (dataf && 'Até')}>
-            <Typography noWrap>
-              {(datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
-                (datai && ptDate(datai)) ||
-                (dataf && ptDate(dataf))}
-            </Typography>
-          </Panel>
+          <Panel
+            label={(datai && dataf && 'Período') || (datai && 'Desde') || (dataf && 'Até')}
+            children={
+              <Typography noWrap>
+                {(datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
+                  (datai && ptDate(datai)) ||
+                  (dataf && ptDate(dataf))}
+              </Typography>
+            }
+          />
         )}
         <Button variant="contained" endIcon={<FilterListOutlinedIcon />} onClick={onOpen}>
           Filtrar
@@ -1284,7 +1232,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                 </Stack>
               </>
             )}
-            {tab === 'criacao' && (
+            {tab === 'data' && (
               <Stack spacing={0.5}>
                 <Typography variant="subtitle2">Vista</Typography>
                 <RadioGroup row value={vista} onChange={(event, newValue) => setItemValue(newValue, setVista, 'vista')}>
@@ -1300,13 +1248,13 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                 </RadioGroup>
               </Stack>
             )}
-            {(tab === 'criacao' || tab === 'entradas' || tab === 'tipos') && (
+            {(tab === 'data' || tab === 'criacao' || tab === 'tipos') && (
               <FilterAutocomplete
                 value={uo}
                 setValue={setUo}
                 options={uosList}
                 label="Unidade orgânica"
-                disableClearable={tab === 'entradas'}
+                disableClearable={tab === 'criacao'}
               />
             )}
             {haveColaborador && (
@@ -1335,6 +1283,20 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                 disableClearable={tab === 'execucao' && !perfil && !estado}
                 options={fluxosList}
               />
+            )}
+            {tab === 'devolucoes' && (
+              <Stack spacing={1}>
+                <Typography variant="subtitle2"> Origem </Typography>
+                <RadioGroup
+                  row
+                  value={origem}
+                  onChange={(event, newValue) => setItemValue(newValue, setOrigem, 'origem')}
+                >
+                  {['Interna', 'Externa'].map((row) => (
+                    <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
+                  ))}
+                </RadioGroup>
+              </Stack>
             )}
             {havePeriodo && (
               <Stack spacing={1}>

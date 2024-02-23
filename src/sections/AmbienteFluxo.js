@@ -25,12 +25,12 @@ export function Ambiente() {
       fullWidth
       disableClearable
       value={meuAmbiente}
-      options={meusAmbientes}
       sx={{ width: { md: 200, xl: 250 } }}
       getOptionLabel={(option) => option?.nome}
       onChange={(event, newValue) => handleChangeAmbiente(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
       renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
+      options={[{ id: -1, nome: 'Todos' }, ...meusAmbientes?.filter((row) => row?.id !== -1)]}
     />
   );
 }
@@ -53,12 +53,12 @@ export function Fluxo() {
       fullWidth
       disableClearable
       value={meuFluxo}
-      options={meusFluxos}
       sx={{ width: { md: 200, xl: 250 } }}
       getOptionLabel={(option) => option?.assunto}
       onChange={(event, newValue) => handleChangeFluxo(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
       renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
+      options={[{ id: -1, assunto: 'Todos' }, ...meusFluxos?.filter((row) => row?.id !== -1)]}
     />
   );
 }

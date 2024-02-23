@@ -97,13 +97,16 @@ export function getIndicadores(item, params) {
     dispatch(slice.actions.resetItem('indicadores'));
     try {
       const options = { headers: { cc: params?.mail } };
+      const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
+        params?.dataf ? `dataf=${params?.dataf}&` : ''
+      }`;
       switch (item) {
         case 'fileSystem': {
           const response = await axios.get(`${BASEURLDD}/v1/indicadores/filesystem/${params?.perfilId}`, options);
           dispatch(slice.actions.getFyleSystemSuccess(response.data));
           break;
         }
-        case 'criacao': {
+        case 'data': {
           if (params?.perfilId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
@@ -115,15 +118,24 @@ export function getIndicadores(item, params) {
           }
           break;
         }
-        case 'entradas': {
+        case 'criacao': {
           if (params?.uo) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
             const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}`,
+              `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}${
+                query ? `?${query.substr(0, query.length - 1)}` : ''
+              }`,
+              options
+            );
+            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          }
+          break;
+        }
+        case 'entradas': {
+          if (params?.estado) {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/indicadores/chegaram/num_estado/${params?.estado}${
+                query ? `?${query.substr(0, query.length - 1)}` : ''
+              }`,
               options
             );
             dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
@@ -132,43 +144,22 @@ export function getIndicadores(item, params) {
         }
         case 'trabalhados': {
           if (params?.estado) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
             const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}`,
+              `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}${
+                query ? `?${query.substr(0, query.length - 1)}` : ''
+              }`,
               options
             );
             dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
           }
           break;
         }
-        case 'devolucoesInternas': {
+        case 'devolucoes': {
           if (params?.estado) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
             const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/devolucao/interno/${params?.estado}`,
-              options
-            );
-            dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
-          }
-          break;
-        }
-        case 'devolucoesExternas': {
-          if (params?.estado) {
-            const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-              params?.dataf ? `dataf=${params?.dataf}&` : ''
-            }`;
-            const response = await axios.get(
-              params?.datai || params?.dataf
-                ? `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}?${query.substr(0, query.length - 1)}`
-                : `${BASEURLDD}/v1/indicadores/devolucao/${params?.estado}`,
+              `${BASEURLDD}/v1/indicadores/devolucao${params?.origem === 'Interna' ? '/interno' : ''}/${
+                params?.estado
+              }${query ? `?${query.substr(0, query.length - 1)}` : ''}`,
               options
             );
             dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
@@ -184,13 +175,13 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'tipos': {
-          const query = `${params?.uo ? `uoID=${params?.uo}&` : ''}${
+          const query1 = `${params?.uo ? `uoID=${params?.uo}&` : ''}${
             params?.perfil ? `perfilPID=${params?.perfil}&` : ''
-          }${params?.datai ? `datai=${params?.datai}&` : ''}${params?.dataf ? `dataf=${params?.dataf}&` : ''}`;
+          }${query}`;
           const response = await axios.get(
-            params?.uo || params?.perfil || params?.datai || params?.dataf
-              ? `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}?${query.substr(0, query.length - 1)}`
-              : `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}`,
+            `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}${
+              query ? `?${query1.substr(0, query1.length - 1)}` : ''
+            }`,
             options
           );
           dispatch(slice.actions.getIndicadoresSuccess(response.data));

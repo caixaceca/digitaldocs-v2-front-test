@@ -46,7 +46,7 @@ TabsWrapper.propTypes = {
 export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab }) {
   return (
     <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-      <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: (theme) => theme.palette.primary.main }}>
+      <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: 'primary.main' }}>
         <Typography variant="h4">{title}</Typography>
       </Box>
       <TabsWrapperStyle>
@@ -64,7 +64,7 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
               icon={tab?.icon}
               value={tab?.value}
               label={tab?.label || tab?.value}
-              sx={{ typography: 'subtitle2', px: 0.5, mt: 0.5 }}
+              sx={{ px: 0.5, mt: 0.5 }}
             />
           ))}
         </Tabs>
