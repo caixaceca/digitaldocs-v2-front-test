@@ -94,7 +94,7 @@ export default function TableArquivo({ tab }) {
   }, [filter]);
 
   const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.arquivo.root}/${id}?from=arquivo`);
+    navigate(`${PATH_DIGITALDOCS.arquivo.root}/${id}?from=Arquivos`);
   };
 
   const dataFiltered = applySortFilter({

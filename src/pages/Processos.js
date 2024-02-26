@@ -41,9 +41,9 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { meusProcessos } = useSelector((state) => state.digitaldocs);
+  const { totalP } = useSelector((state) => state.digitaldocs);
   const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabProcessos') || 'tarefas');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabProcessos') || 'Tarefas');
   const tab = localStorage.getItem('tabProcessos');
 
   useEffect(() => {
@@ -59,87 +59,32 @@ export default function Processos() {
     localStorage.setItem('tabProcessos', newValue);
   };
 
-  const agendados = useMemo(
-    () =>
-      pertencoAoEstado(meusAmbientes, 'Validação OPE') || pertencoAoEstado(meusAmbientes, 'Execução OPE')
-        ? [
-            {
-              value: 'agendados',
-              label: 'Agendados',
-              num: meusProcessos?.totalagendado || 0,
-              component: <TableProcessos from="agendados" />,
-            },
-          ]
-        : [],
-    [meusAmbientes, meusProcessos?.totalagendado]
-  );
-
-  const finalizados = useMemo(
-    () =>
-      (pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') ||
-        pertencoAoEstado(meusAmbientes, 'DOP - Execução Notas Externas')) &&
-      meusProcessos?.totalfinalizado > 0
-        ? [
-            {
-              value: 'finalizados',
-              label: 'Finalizados',
-              num: meusProcessos?.totalfinalizado || 0,
-              component: <TableProcessos from="finalizados" />,
-            },
-          ]
-        : [],
-    [meusAmbientes, meusProcessos?.totalfinalizado]
-  );
-
-  const executados = useMemo(
-    () =>
-      (pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') ||
-        pertencoAoEstado(meusAmbientes, 'DOP - Execução Notas Externas')) &&
-      meusProcessos?.totalexecutado > 0
-        ? [
-            {
-              value: 'executados',
-              label: 'Executados',
-              num: meusProcessos?.totalexecutado || 0,
-              component: <TableProcessos from="executados" />,
-            },
-          ]
-        : [],
-    [meusAmbientes, meusProcessos?.totalexecutado]
-  );
-
   const VIEW_TABS = useMemo(
     () =>
       [
-        {
-          value: 'tarefas',
-          label: 'Tarefas',
-          num: meusProcessos?.total || 0,
-          component: <TableProcessos from="tarefas" />,
-        },
-        {
-          value: 'retidos',
-          label: 'Retidos',
-          num: meusProcessos?.totalpendenteEQ || 0,
-          component: <TableProcessos from="retidos" />,
-        },
-        {
-          value: 'atribuidos',
-          label: 'Atribuídos',
-          num: meusProcessos?.totalafetosEQ || 0,
-          component: <TableProcessos from="atribuidos" />,
-        },
-        {
-          value: 'pendentes',
-          label: 'Pendentes',
-          num: meusProcessos?.totalpendencias || 0,
-          component: <TableProcessos from="pendentes" />,
-        },
-        ...agendados,
-        ...finalizados,
-        ...executados,
+        { value: 'Tarefas', num: totalP?.total || 0, component: <TableProcessos from="tarefas" /> },
+        { value: 'Retidos', num: totalP?.totalpendenteEQ || 0, component: <TableProcessos from="retidos" /> },
+        { value: 'Atribuídos', num: totalP?.totalafetosEQ || 0, component: <TableProcessos from="atribuidos" /> },
+        { value: 'Pendentes', num: totalP?.totalpendencias || 0, component: <TableProcessos from="pendentes" /> },
+        ...(pertencoAoEstado(meusAmbientes, ['Validação OPE', 'Execução OPE'])
+          ? [{ value: 'Agendados', num: totalP?.totalagendado || 0, component: <TableProcessos from="agendados" /> }]
+          : []),
+        ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas']) &&
+        totalP?.totalfinalizado > 0
+          ? [
+              {
+                value: 'Finalizados',
+                num: totalP?.totalfinalizado || 0,
+                component: <TableProcessos from="finalizados" />,
+              },
+            ]
+          : []),
+        ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas']) &&
+        totalP?.totalexecutado > 0
+          ? [{ value: 'Executados', num: totalP?.totalexecutado || 0, component: <TableProcessos from="executados" /> }]
+          : []),
       ] || [],
-    [agendados, finalizados, executados, meusProcessos]
+    [totalP, meusAmbientes]
   );
 
   useEffect(() => {
@@ -187,7 +132,7 @@ export default function Processos() {
                         mr: (tab.num < 100 && 3.5) || (tab.num < 1000 && 4.5) || 5.5,
                       }}
                     >
-                      {tab.label}
+                      {tab.value}
                     </Badge>
                   }
                 />

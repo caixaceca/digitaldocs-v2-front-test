@@ -69,8 +69,6 @@ export default function Processo() {
   );
   const perfilId = cc?.perfil_id;
   const estadoId = processo?.estado_atual_id;
-  const fromArquivo = params?.get?.('from') === 'arquivo';
-  const fromProcurar = params?.get?.('from') === 'procurar';
   const fromEntradas = params?.get?.('from') === 'entradas';
   const fromPorConcluir = params?.get?.('from') === 'porconcluir';
   const fromTrabalhados = params?.get?.('from') === 'trabalhados';
@@ -79,8 +77,8 @@ export default function Processo() {
   const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
 
   const linkNavigate =
-    (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}`) ||
-    (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
+    (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
+    (params?.get?.('from') === 'Pesquisa' && `${PATH_DIGITALDOCS.processos.procurar}`) ||
     ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
     `${PATH_DIGITALDOCS.processos.lista}`;
 
@@ -278,11 +276,9 @@ export default function Processo() {
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             {
               name:
-                (fromArquivo && 'Arquivos') ||
                 (fromEntradas && 'Entradas') ||
                 (fromTrabalhados && 'Trabalhados') ||
                 (fromPorConcluir && 'Por concluir') ||
-                (fromProcurar && 'Pesquisa') ||
                 (params?.get?.('from') &&
                   params?.get?.('from')?.charAt(0)?.toUpperCase() + params?.get?.('from')?.slice(1)) ||
                 'Processos',

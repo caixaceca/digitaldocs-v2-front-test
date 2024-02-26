@@ -21,6 +21,7 @@ const initialState = {
   arquivarProcessos: false,
   isOpenModalDesariquivar: false,
   anexo: null,
+  totalP: null,
   anexoCC: null,
   processo: null,
   filePreview: null,
@@ -40,7 +41,6 @@ const initialState = {
   trabalhados: [],
   transicoesCC: [],
   visualizacoes: [],
-  meusProcessos: [],
   pedidosAcesso: [],
   destinosDesarquivamento: [],
 };
@@ -156,7 +156,7 @@ const slice = createSlice({
     },
 
     getMeusProcessosSuccess(state, action) {
-      state.meusProcessos = action.payload;
+      state.totalP = action.payload;
     },
 
     getIndicadoresArquivoSuccess(state, action) {

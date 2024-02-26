@@ -228,8 +228,8 @@ export function processoMePertence(meusAmbientes, estadoId) {
 
 // ----------------------------------------------------------------------
 
-export function pertencoAoEstado(meusAmbientes, estado) {
-  return !!meusAmbientes?.find((row) => row?.nome === estado);
+export function pertencoAoEstado(meusAmbientes, estados) {
+  return !!meusAmbientes?.find((row) => estados?.includes(row?.nome));
 }
 
 // ----------------------------------------------------------------------

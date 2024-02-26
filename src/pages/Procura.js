@@ -81,7 +81,7 @@ export default function Procura() {
   }, [uo, search, assunto, estado]);
 
   const handleViewRow = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=procurar`);
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Pesquisa`);
   };
 
   const newPesquisa = [];

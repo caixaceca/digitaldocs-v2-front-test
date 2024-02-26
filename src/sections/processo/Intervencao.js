@@ -130,7 +130,7 @@ export default function Intervencao({ colaboradoresList }) {
         processo.situacao !== 'X' &&
         processo?.nome === 'Autorização SWIFT' &&
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
-        pertencoAoEstado(meusAmbientes, 'Autorização SWIFT') && (
+        pertencoAoEstado(meusAmbientes, ['Autorização SWIFT']) && (
           <>
             <DefaultAction icon="finalizar" handleClick={onOpen4} label="FINALIZAR" />
             <DialogConfirmar
@@ -148,7 +148,7 @@ export default function Intervencao({ colaboradoresList }) {
       {processo?.situacao === 'E' &&
         processo?.operacao === 'Cativo/Penhora' &&
         processo?.nome === 'DOP - Validação Notas Externas' &&
-        pertencoAoEstado(meusAmbientes, 'DOP - Validação Notas Externas') && (
+        pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && (
           <>
             <DefaultAction icon="finalizar" handleClick={onOpen5} label="FINALIZAR" />
             <FinalizarForm open={open5} onCancel={onClose5} />

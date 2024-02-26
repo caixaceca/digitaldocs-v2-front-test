@@ -84,9 +84,9 @@ export default function getColorPresets(presetsKey) {
 export function colorLabel(value) {
   return (
     ((value === 'Preso' || value === 'Aprovado' || value === 'Favorável') && 'success') ||
-    ((value === 'retidos' || value === 'Pendente' || value === 'Favorável parcial') && 'warning') ||
-    (value === 'pendentes' && 'focus') ||
-    ((value === 'atribuidos' || value === 'Afeto') && 'info') ||
+    ((value === 'Retidos' || value === 'Pendente' || value === 'Favorável parcial') && 'warning') ||
+    (value === 'Pendentes' && 'focus') ||
+    ((value === 'Atribuídos' || value === 'Afeto') && 'info') ||
     ((value === 'Em análise' || value === 'Entrada') && 'default') ||
     ((value === 'Indeferido' || value === 'Desistido' || value === 'Não favorável') && 'error') ||
     'primary'
