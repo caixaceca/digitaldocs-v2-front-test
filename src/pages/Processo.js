@@ -9,13 +9,13 @@ import Dialog from '@mui/material/Dialog';
 import Container from '@mui/material/Container';
 // utils
 import {
+  temAcesso,
   temNomeacao,
   podeDarParecer,
   isResponsavelUo,
   findColaboradores,
   processoMePertence,
 } from '../utils/validarAcesso';
-import selectTab from '../utils/selectTab';
 import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
@@ -61,13 +61,16 @@ export default function Processo() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { mail, uos, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { done, error, processo, isOpenModal, isLoading, isOpenModalDesariquivar } = useSelector(
+  const { processo, destinos, done, error, isOpenModal, isLoading, isOpenModalDesariquivar } = useSelector(
     (state) => state.digitaldocs
   );
   const { meusacessos, meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector(
     (state) => state.parametrizacao
   );
   const perfilId = cc?.perfil_id;
+  const fluxoId = processo?.fluxo_id;
+  const perfilP = processo?.perfil_id;
+  const estado = processo?.estado_atual;
   const estadoId = processo?.estado_atual_id;
   const fromEntradas = params?.get?.('from') === 'entradas';
   const fromPorConcluir = params?.get?.('from') === 'porconcluir';
@@ -75,6 +78,7 @@ export default function Processo() {
   const uo = uos?.find((row) => row?.id === processo?.uoIdEstadoAtual);
   const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
   const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
+  const inGerencia = estado?.includes('Gerência') || estado?.includes('Caixa Principal');
 
   const linkNavigate =
     (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
@@ -82,32 +86,34 @@ export default function Processo() {
     ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
     `${PATH_DIGITALDOCS.processos.lista}`;
 
-  const colaboradoresList = findColaboradores(
-    colaboradores,
-    colaboradoresEstado?.map((row) => row?.perfil_id)
+  const colaboradoresList = useMemo(
+    () =>
+      findColaboradores(
+        colaboradores,
+        colaboradoresEstado?.map((row) => row?.perfil_id)
+      ),
+    [colaboradores, colaboradoresEstado]
   );
 
   const tabsList = useMemo(
     () => [
       { value: 'Dados gerais', component: <DadosGerais /> },
-      ...(processo && processo?.pareceres && processo?.pareceres?.length > 0
+      ...(processo && processo?.pareceres_estado?.length > 0
         ? [
             {
               value: 'Pareceres',
-              component: <Pareceres id={processo?.id} assunto={processo?.titular} pareceres={processo?.pareceres} />,
+              component: <Pareceres id={id} assunto={processo?.titular} pareceres={processo?.pareceres_estado} />,
             },
           ]
         : []),
-      ...(processo && processo?.htransicoes && processo?.htransicoes?.length > 0
+      ...(processo && processo?.htransicoes?.length > 0
         ? [{ value: 'Transições', component: <HistoricoTransicao historico={processo?.htransicoes} /> }]
         : []),
-      ...(processo && processo?.hprisoes && processo?.hprisoes?.length > 0
+      ...(processo && processo?.hprisoes?.length > 0
         ? [{ value: 'Retenções', component: <HistoricoPrisoes historico={processo?.hprisoes} /> }]
         : []),
-      ...(processo && isAdmin ? [{ value: 'Versões', component: <Versoes id={processo?.id} /> }] : []),
-      ...(processo && isAdmin
-        ? [{ value: 'Visualizações', component: <Views id={processo?.id} isLoading={isLoading} /> }]
-        : []),
+      ...(processo && isAdmin ? [{ value: 'Versões', component: <Versoes id={id} /> }] : []),
+      ...(processo && isAdmin ? [{ value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> }] : []),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [processo]
@@ -115,22 +121,20 @@ export default function Processo() {
 
   const idEstado = (item) => {
     if (item === 'devdop') {
-      return processo?.destinos?.find((row) => row?.modo === 'Seguimento' && !row?.nome?.includes('Atendimento'));
+      return destinos?.find((row) => row?.modo === 'Seguimento' && !row?.nome?.includes('Atendimento'));
     }
     if (item === 'gerencia') {
-      return processo?.destinos?.find((row) => row?.nome?.includes('Atendimento'));
+      return destinos?.find((row) => row?.nome?.includes('Atendimento'));
     }
     if (item === 'diario') {
-      return processo?.destinos?.find((row) => row?.nome === 'Conferência de Diário');
+      return destinos?.find((row) => row?.nome === 'Conferência de Diário');
     }
     return null;
   };
 
   const handlePrevNext = (next) => {
-    if (mail && perfilId && processo?.id && estadoId) {
-      dispatch(
-        getItem('prevnext', { mail, perfilId, estadoId, processoId: processo?.id, next, estado: processo?.nome })
-      );
+    if (mail && perfilId && id && estadoId) {
+      dispatch(getItem('prevnext', { mail, next, perfilId, estadoId, processoId: id, estado }));
     } else {
       navigate(linkNavigate);
     }
@@ -142,8 +146,8 @@ export default function Processo() {
     } else if (done === 'arquivado') {
       enqueueSnackbar('Processo arquivado com sucesso', { variant: 'success' });
       handlePrevNext(true);
-    } else if (done === 'realizada') {
-      enqueueSnackbar('Intervenção realizada com sucesso', { variant: 'success' });
+    } else if (done === 'devolvida' || done === 'encaminhada') {
+      enqueueSnackbar(`Processo ${done} com sucesso`, { variant: 'success' });
       handlePrevNext(true);
     } else if (done === 'Processo adicionado a listagem de pendentes') {
       enqueueSnackbar('Processo adicionado a listagem de pendentes', { variant: 'success' });
@@ -176,16 +180,15 @@ export default function Processo() {
   }, [done]);
 
   useEffect(() => {
-    const errorStd = error?.error || error;
-    const noMoreProcess = errorStd?.includes('Sem mais processos disponíveis no estado');
-    if (errorStd) {
-      if (noMoreProcess && errorStd?.includes('Atendimento')) {
+    const noMoreProcess = error?.includes('Sem mais processos disponíveis no estado');
+    if (error) {
+      if (noMoreProcess && error?.includes('Atendimento')) {
         //
       } else {
         enqueueSnackbar(
-          errorStd === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
+          error === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
             ? 'Processo não encontrado ou não tens acesso'
-            : errorStd,
+            : error,
           { variant: noMoreProcess ? 'info' : 'error' }
         );
       }
@@ -203,47 +206,38 @@ export default function Processo() {
   }, [dispatch, perfilId, mail, id]);
 
   useEffect(() => {
-    if (mail && processo?.origem_id && perfilId) {
-      dispatch(getFromParametrizacao('origem', { id: processo?.origem_id, mail, perfilId }));
+    if (mail && id && processo?.preso && processo?.perfil_id === perfilId) {
+      dispatch(getAll('destinos', { id, mail, perfilId, estadoId }));
     }
-  }, [dispatch, perfilId, mail, processo?.origem_id]);
+  }, [dispatch, perfilId, estadoId, mail, id, processo?.preso, processo?.perfil_id]);
 
   useEffect(() => {
-    if (mail && perfilId && processo?.nome) {
-      if (
-        (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal')) &&
-        idEstado('gerencia')?.id
-      ) {
+    if (mail && perfilId && estado) {
+      if (estadoId && !processo?.preso && perfilP && inGerencia) {
+        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: estadoId }));
+      } else if (inGerencia && idEstado('gerencia')?.id) {
         dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('gerencia')?.id }));
-      } else if (processo?.nome === 'Devolução AN' && idEstado('devdop')?.id) {
+      } else if (estado === 'Devolução AN' && idEstado('devdop')?.id) {
         dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('devdop')?.id }));
-      } else if (processo?.nome === 'Diário' && idEstado('diario')?.id) {
+      } else if (estado === 'Diário' && idEstado('diario')?.id) {
         dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('diario')?.id }));
       } else if (estadoId) {
         dispatch(getFromParametrizacao('colaboradoresEstado', { mail, id: estadoId, perfilId }));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mail, dispatch, perfilId, processo?.nome, estadoId]);
+  }, [mail, dispatch, perfilId, estado, estadoId]);
 
   const handleAceitar = () => {
-    const formData = { fluxoID: processo?.fluxo_id, perfilID: perfilId, estadoID: estadoId };
-    dispatch(
-      updateItem('aceitar', JSON.stringify(formData), {
-        mail,
-        perfilId,
-        processoId: processo?.id,
-        msg: 'Processo aceitado',
-      })
-    );
+    dispatch(updateItem('aceitar', null, { mail, fluxoId, perfilId, estadoId, id, msg: 'Processo aceitado' }));
   };
 
   const handlePedirAcesso = () => {
-    dispatch(updateItem('pedir acesso', '', { perfilId, id: processo?.id, mail, msg: 'Pedido enviado' }));
+    dispatch(updateItem('pedir acesso', '', { perfilId, id, mail, msg: 'Pedido enviado' }));
   };
 
   const handleDesarquivar = () => {
-    dispatch(getAll('destinosDesarquivamento', { mail, processoId: processo?.id }));
+    dispatch(getAll('destinosDesarquivamento', { mail, processoId: id }));
   };
 
   const handleClose = () => {
@@ -251,23 +245,17 @@ export default function Processo() {
   };
 
   const handleParecer = () => {
-    dispatch(selectItem(podeDarParecer(meusAmbientes, processo?.pareceres)));
+    dispatch(selectItem(podeDarParecer(meusAmbientes, processo?.pareceres_estado)));
   };
-
-  useEffect(() => {
-    if (currentTab !== selectTab(tabsList, currentTab)) {
-      setCurrentTab(tabsList?.[0]?.value);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabsList, currentTab]);
 
   return (
     <Page title="Processo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
+          sx={{ color: 'text.secondary' }}
           heading={
             processo
-              ? `${processo?.nentrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+              ? `${processo?.numero_entrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
                   processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                 }`
               : 'Detalhes do processo'
@@ -286,7 +274,7 @@ export default function Processo() {
             },
             {
               name: processo
-                ? `${processo?.nentrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                ? `${processo?.numero_entrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
                     processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                   }`
                 : 'Detalhes do processo',
@@ -319,101 +307,84 @@ export default function Processo() {
                         <DefaultAction color="error" label="DESARQUIVAR" handleClick={handleDesarquivar} />
                         <Dialog open={isOpenModalDesariquivar} onClose={handleClose} fullWidth maxWidth="sm">
                           <DesarquivarForm
-                            open={isOpenModalDesariquivar}
+                            processoID={id}
+                            fluxoID={fluxoId}
                             onCancel={handleClose}
-                            processoID={processo?.id}
-                            fluxoID={processo?.fluxo_id}
+                            open={isOpenModalDesariquivar}
                           />
                         </Dialog>
                         <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-                          <AtribuirAcessoForm open={open} onCancel={onClose} processoId={processo?.id} />
+                          <AtribuirAcessoForm open={open} onCancel={onClose} processoId={id} />
                         </Dialog>
                       </RoleBasedGuard>
-                      {!meusacessos.includes('arquivo-110') && !meusacessos.includes('arquivo-111') && (
+                      {!temAcesso(['arquivo-110', 'arquivo-111'], meusacessos) && (
                         <DefaultAction icon="acesso" label="ATRIBUIR ACESSO" handleClick={handlePedirAcesso} />
                       )}
                     </>
                   ) : (
                     <>
-                      {processo?.in_paralelo_mode && processoMePertence(meusAmbientes, processo?.estado_atual_id) && (
+                      {processo?.em_paralelo && processoMePertence(meusAmbientes, estadoId) && (
                         <>
-                          <Cancelar
-                            processoId={processo?.id}
-                            fluxoId={processo?.fluxo_id}
-                            estadoId={processo?.estado_atual_id}
-                          />
-                          <Cancelar
-                            cancelar
-                            processoId={processo?.id}
-                            fluxoId={processo?.fluxo_id}
-                            estadoId={processo?.estado_atual_id}
-                          />
+                          <Cancelar fluxoId={fluxoId} processoId={id} estadoId={estadoId} />
+                          <Cancelar cancelar fluxoId={fluxoId} processoId={id} estadoId={estadoId} />
                         </>
                       )}
-                      {!processo?.is_lock && !processo?.in_paralelo_mode && (
+                      {!processo?.preso && !processo?.em_paralelo && (
                         <>
                           {processo?.pareceres_estado?.length === 0 ? (
                             <>
-                              {((processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
+                              {((processoMePertence(meusAmbientes, estadoId) &&
                                 isResponsavel &&
-                                processo?.nome !== 'Diário' &&
-                                processo?.nome !== 'Devolução AN' &&
-                                !processo?.nome?.includes('Gerência') &&
-                                !processo?.nome?.includes('Caixa Principal')) ||
+                                ((!processo?.preso && perfilP && inGerencia) ||
+                                  (estado !== 'Diário' && estado !== 'Devolução AN' && !inGerencia))) ||
                                 isAdmin) && (
                                 <AtribuirForm
-                                  processoID={processo?.id}
-                                  fluxoId={processo?.fluxo_id}
-                                  perfilId={processo?.perfil_id}
+                                  processoID={id}
+                                  fluxoId={fluxoId}
+                                  perfilId={perfilP}
                                   colaboradoresList={colaboradoresList}
                                 />
                               )}
-                              {processoMePertence(meusAmbientes, processo?.estado_atual_id) &&
-                                (!processo?.perfil_id || processo?.perfil_id === perfilId) && (
-                                  <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
-                                )}
+                              {processoMePertence(meusAmbientes, estadoId) && (!perfilP || perfilP === perfilId) && (
+                                <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
+                              )}
                             </>
                           ) : (
                             <PareceresEstado
                               normal
                               pareceres={processo?.pareceres_estado}
-                              estado={processo?.nome?.replace(' - P/S/P', '')}
+                              estado={estado?.replace(' - P/S/P', '')}
                             />
                           )}
-                          {!processo.ispendente &&
-                            processo?.estado_atual_id !== processo?.htransicoes?.[0]?.estado_inicial_id &&
+                          {!processo.pendente &&
+                            estadoId !== processo?.htransicoes?.[0]?.estado_inicial_id &&
                             perfilId === processo?.htransicoes?.[0]?.perfil_id &&
                             processoMePertence(meusAmbientes, processo?.htransicoes?.[0]?.estado_inicial_id) && (
                               <Resgatar
-                                processoId={processo?.id}
-                                fluxoId={processo?.fluxo_id}
+                                processoId={id}
+                                fluxoId={fluxoId}
                                 estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
                               />
                             )}
                         </>
                       )}
-                      {podeDarParecer(meusAmbientes, processo?.pareceres) && (
+                      {podeDarParecer(meusAmbientes, processo?.pareceres_estado) && (
                         <>
                           <DefaultAction label="PARECER" handleClick={() => handleParecer()} />
-                          <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} />
+                          <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={id} />
                         </>
                       )}
-                      {processo?.is_lock && processo?.perfil_id === perfilId && (
-                        <Intervencao colaboradoresList={colaboradoresList} />
-                      )}
+                      {processo?.preso && perfilP === perfilId && <Intervencao colaboradoresList={colaboradoresList} />}
                       {isResponsavel &&
-                        processo?.is_lock &&
-                        processo?.perfil_id !== perfilId &&
-                        processoMePertence(meusAmbientes, processo?.estado_atual_id) && (
-                          <Libertar processoID={processo?.id} perfilID={perfilId} />
-                        )}
+                        processo?.preso &&
+                        perfilP !== perfilId &&
+                        processoMePertence(meusAmbientes, estadoId) && <Libertar processoID={id} perfilID={perfilId} />}
                     </>
                   )}
                 </Stack>
               )}
             </Stack>
           }
-          sx={{ color: 'text.secondary' }}
         />
         <>
           <Card sx={{ height: 1 }}>

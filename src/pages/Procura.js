@@ -70,8 +70,6 @@ export default function Procura() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrderBy: 'noOrderDefault',
-    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
     defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
   });
 

@@ -48,6 +48,7 @@ export default function Router() {
       dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
       if (perfil?.id) {
         dispatch(getFromParametrizacao('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
+        dispatch(getFromParametrizacao('origens', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getFromParametrizacao('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getFromParametrizacao('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
         dispatch(getFromParametrizacao('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));

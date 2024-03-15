@@ -29,14 +29,14 @@ import {
   getFromParametrizacao,
 } from '../../redux/slices/parametrizacao';
 // Components
-import { Criado } from '../../components/Panel';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
+import { Checked, Criado } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { AddItem, UpdateItem, DefaultAction, Checked } from '../../components/Actions';
+import { AddItem, UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import {
@@ -392,7 +392,12 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
           nome:
             colaboradores?.find((item) => item?.perfil_id === row?.perfil_id)?.perfil?.displayName || row?.perfil_id,
         }))) ||
-      (item === 'regras transicao' && regrasTransicao) ||
+      (item === 'regras transicao' &&
+        regrasTransicao?.map((row) => ({
+          ...row,
+          nome:
+            colaboradores?.find((item) => item?.perfil_id === row?.perfil_id)?.perfil?.displayName || row?.perfil_id,
+        }))) ||
       [],
     comparator: getComparator(order, orderBy),
   });

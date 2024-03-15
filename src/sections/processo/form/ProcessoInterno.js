@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import { useMemo, useEffect, useState } from 'react';
 // form
 import { useForm } from 'react-hook-form';
@@ -14,8 +13,6 @@ import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
@@ -28,35 +25,17 @@ import { dis, estadosCivis } from '../../../_mock';
 ProcessoInterno.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, selectedProcesso: PropTypes.object };
 
 export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { meuAmbiente } = useSelector((state) => state.parametrizacao);
-  const { processo, isSaving, done, error } = useSelector((state) => state.digitaldocs);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
   const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
   const perfilId = cc?.perfil_id;
   const [agendado, setAgendado] = useState(selectedProcesso?.agendado);
   const [cliente, setCliente] = useState(true);
   const infoConReq = (fluxo?.is_con && !cliente && !isEdit) || (fluxo?.is_con && isEdit && !cliente);
-
-  useEffect(() => {
-    if (done === 'processo adicionado') {
-      enqueueSnackbar('Processo adicionado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
-    } else if (done === 'processo atualizado') {
-      enqueueSnackbar('Processo atualizado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
 
   const formSchema = Yup.object().shape({
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
@@ -66,10 +45,11 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     data_entrada:
       fluxo?.modelo !== 'Paralelo' &&
       Yup.date()
-        .typeError('Introduza a data de entrada do processo na agência')
-        .required('Introduza a data de entrada do processo na agência'),
+        .typeError('Introduza a data de entrada do processo')
+        .required('Introduza a data de entrada do processo'),
     noperacao:
-      (selectedProcesso?.noperacao || fluxo?.is_con) && Yup.string().required('Nº de operação não pode ficar vazio'),
+      (selectedProcesso?.numero_operacao || fluxo?.is_con) &&
+      Yup.string().required('Nº de operação não pode ficar vazio'),
     titular:
       (fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário') &&
       Yup.string().required('Descriçãao não pode ficar vazio'),
@@ -99,15 +79,21 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     origem_fundo: fluxo?.is_con && Yup.string().required('Origem do fundo não pode ficar vazio'),
     tipo_docid: infoConReq && Yup.mixed().required('Tipo doc. identificação não pode ficar vazio'),
     finalidade_fundo: fluxo?.is_con && Yup.string().required('Finalidade do fundo não pode ficar vazio'),
+    entidade_con: fluxo?.is_con && cliente && Yup.string().required('Nº da entidade não pode ficar vazio'),
+    entidades: Yup.array(Yup.object({ numero: Yup.number('hhhh').typeError('Introduza um nº de entidade') })),
     local_pais_nascimento: infoConReq && Yup.string().required('Local/País de nascimento não pode ficar vazio'),
+    valor:
+      fluxo?.is_con &&
+      Yup.number()
+        .min(999999, 'O valor deve ser igual ou superior a um milhão de escudos')
+        .required('Introduza o valor da operção'),
     data_nascimento:
       infoConReq && Yup.date().typeError('Introduza a data de nascimento').required('Introduza a data de nascimento'),
-    entidades: Yup.array(Yup.object({ numero: Yup.number().typeError('Introduza um nº de entidade válido') })),
   });
 
   const entidades = useMemo(
     () =>
-      (selectedProcesso?.entidades && selectedProcesso?.entidades?.split(';')?.map((row) => ({ numero: row }))) ||
+      (selectedProcesso?.entidade && selectedProcesso?.entidade?.split(';')?.map((row) => ({ numero: row }))) ||
       (!selectedProcesso && fluxo?.assunto === 'Abertura de conta' && [{ numero: '' }]) ||
       [],
     [fluxo?.assunto, selectedProcesso]
@@ -118,20 +104,17 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       entidades,
       anexos: [],
       fluxo_id: fluxo?.id,
-      obs: selectedProcesso?.obs || '',
-      mobs: selectedProcesso?.mobs || '',
+      valor: selectedProcesso?.valor || 0,
       conta: selectedProcesso?.conta || '',
       email: selectedProcesso?.email || '',
+      obs: selectedProcesso?.observacao || '',
       titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       diadomes: selectedProcesso?.diadomes || '',
-      noperacao: selectedProcesso?.noperacao || '',
       agendado: selectedProcesso?.agendado || false,
+      noperacao: selectedProcesso?.numero_operacao || '',
+      balcao: selectedProcesso?.balcao || balcaoAmbiente,
       periodicidade: selectedProcesso?.periodicidade || null,
-      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
-      balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
-      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
-      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       data_inicio: selectedProcesso?.data_inicio ? new Date(selectedProcesso?.data_inicio) : null,
       data_arquivamento: selectedProcesso?.data_arquivamento ? new Date(selectedProcesso?.data_arquivamento) : null,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
@@ -161,7 +144,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
         ? add(new Date(selectedProcesso?.con?.data_nascimento), { hours: 2 })
         : null,
     }),
-    [selectedProcesso, fluxo?.id, meuAmbiente, cc, entidades]
+    [entidades, fluxo?.id, selectedProcesso, balcaoAmbiente]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -182,7 +165,6 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
     try {
       const formData = new FormData();
       // required
-      formData.append('modelo', fluxo?.modelo);
       formData.append('balcao', values.balcao);
       formData.append('fluxo_id', values.fluxo_id);
       formData.append('agendado', values.agendado);
@@ -235,6 +217,7 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       }
       // CON
       if (fluxo?.is_con) {
+        formData.append('valor', values.valor);
         formData.append('residente', values.residente);
         formData.append('origem_fundo', values.origem_fundo);
         formData.append('finalidade_fundo', values.finalidade_fundo);
@@ -298,21 +281,14 @@ export default function ProcessoInterno({ isEdit, selectedProcesso, fluxo }) {
       }
 
       if (selectedProcesso) {
-        formData.append('uo_perfil_id ', cc?.uo?.id);
         formData.append('is_interno ', selectedProcesso?.is_interno);
         dispatch(
-          updateItem('processo', formData, {
-            mail,
-            perfilId,
-            id: selectedProcesso?.id,
-            msg: 'processo atualizado',
-          })
+          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'Processo atualizado' })
         );
       } else {
-        formData.append('perfil_id', values.perfil_id);
-        formData.append('uo_origem_id', values.uo_origem_id);
-        formData.append('estado_atual_id', values.estado_atual_id);
-        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'processo adicionado' }));
+        formData.append('uo_origem_id', meuAmbiente?.uo_id);
+        formData.append('estado_atual_id', meuAmbiente?.id);
+        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

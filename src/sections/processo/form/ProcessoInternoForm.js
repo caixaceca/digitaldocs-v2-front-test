@@ -119,11 +119,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                   <Grid item xs={12}>
                     <Grid container spacing={3} justifyContent="center">
                       <Grid item xs={12} sm={6} xl={3}>
-                        <RHFTextField
-                          name="entidade_con"
-                          label="Nº da entidade"
-                          required={values?.is_cliente && !values?.entidade_con}
-                        />
+                        <RHFTextField name="entidade_con" label="Nº da entidade" />
                       </Grid>
                     </Grid>
                   </Grid>

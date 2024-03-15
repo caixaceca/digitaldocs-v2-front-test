@@ -18,10 +18,12 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
+import TableRowsIcon from '@mui/icons-material/TableRows';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListItemButton from '@mui/material/ListItemButton';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
@@ -36,7 +38,6 @@ import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // utils
 import { ptDate } from '../utils/formatTime';
 import { getFileThumb } from '../utils/getFileFormat';
@@ -106,11 +107,13 @@ export function DefaultAction({
             (label === 'VALIDAR' && <SpellcheckOutlinedIcon />) ||
             (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
+            (label === 'INFO. DAS CONTAS' && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
             (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'Mostrar mais processos' && <TableRowsIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (icon === 'abandonar' && <SvgIconStyle src="/assets/icons/abandonar.svg" sx={{ width: 22 }} />) ||
             (icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" sx={{ width: 22 }} />) ||
@@ -224,18 +227,6 @@ export function CloneItem({ item, id }) {
         </Fab>
       </Tooltip>
     </Stack>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-Checked.propTypes = { check: PropTypes.bool, color: PropTypes.string };
-
-export function Checked({ check, color = '' }) {
-  return check ? (
-    <CheckCircleOutlineOutlinedIcon sx={{ color: color || 'success.main', width: 20 }} />
-  ) : (
-    <CloseOutlinedIcon sx={{ color: color || 'focus.main', width: 20 }} />
   );
 }
 
@@ -357,7 +348,7 @@ export function ExportExcel({ filename, sheet = '', table, icon = false }) {
       table={table}
       filename={filename}
       sheet={sheet || filename}
-      id="table-xls-button-tipo"
+      id="react-html-table-to-excel-button"
       className="MuiButtonBase-root-MuiButton-root"
       children={
         icon ? (

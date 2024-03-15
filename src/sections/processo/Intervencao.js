@@ -30,45 +30,38 @@ export default function Intervencao({ colaboradoresList }) {
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { iAmInGrpGerente, meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { isSaving, arquivarProcessos, processo } = useSelector((state) => state.digitaldocs);
+  const { processo, destinos, isSaving, arquivarProcessos } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências';
   const aberturaEmpSemValCompliance =
-    processo.segcliente === 'E' &&
-    processo?.nome?.includes('Gerência') &&
+    processo.segmento === 'E' &&
     processo?.assunto === 'Abertura de conta' &&
-    !processo?.htransicoes?.find((row) => row?.nome?.includes('Compliance') && row?.modo === 'Seguimento');
+    processo?.estado_atual?.includes('Gerência') &&
+    !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento');
 
   const devolucoes = [];
   const seguimentos = [];
   const destinosFora = [];
-  processo.destinos?.forEach((row) => {
+  destinos?.forEach((row) => {
     if (processo?.uo_origem_id !== row?.uo_id) {
       destinosFora.push(row?.nome);
     }
+    const destino = {
+      modo: row.modo,
+      label: row?.nome,
+      id: row.transicao_id,
+      hasopnumero: row.hasopnumero,
+      estado_final_id: row.estado_id,
+      requer_parecer: row?.requer_parecer,
+    };
     if (row.modo === 'Seguimento') {
-      const seguimento = {
-        modo: row.modo,
-        id: row.transicao_id,
-        estado_final_id: row.id,
-        paralelo: row?.is_paralelo,
-        hasopnumero: row.hasopnumero,
-        label: row?.is_paralelo ? row?.nome : `${row?.modo} para ${row?.nome}`,
-      };
       if (aberturaEmpSemValCompliance && row?.nome?.includes('Compliance')) {
-        seguimentos?.push(seguimento);
+        seguimentos?.push(destino);
       } else if (!aberturaEmpSemValCompliance) {
-        seguimentos?.push(seguimento);
+        seguimentos?.push(destino);
       }
     } else {
-      devolucoes.push({
-        modo: row.modo,
-        id: row.transicao_id,
-        estado_final_id: row.id,
-        paralelo: row?.is_paralelo,
-        hasopnumero: row.hasopnumero,
-        label: row?.is_paralelo ? row?.nome : `${row?.modo} para ${row?.nome}`,
-      });
+      devolucoes.push(destino);
     }
   });
 
@@ -92,7 +85,7 @@ export default function Intervencao({ colaboradoresList }) {
 
   return (
     <>
-      {processo?.destinos?.length !== 0 && (
+      {destinos?.length !== 0 && (
         <>
           {devolucoes?.length > 0 && (
             <>
@@ -112,14 +105,14 @@ export default function Intervencao({ colaboradoresList }) {
               <DefaultAction
                 icon="encaminhar"
                 handleClick={onOpen3}
-                label={processo?.nome === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
+                label={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
               />
               <IntervencaoForm
                 isOpenModal={open3}
                 onCancel={onClose3}
                 destinos={seguimentos}
                 colaboradoresList={colaboradoresList}
-                title={processo?.nome === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
+                title={processo?.estado_atual === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
               />
             </>
           )}
@@ -128,7 +121,7 @@ export default function Intervencao({ colaboradoresList }) {
 
       {processo?.agendado &&
         processo.situacao !== 'X' &&
-        processo?.nome === 'Autorização SWIFT' &&
+        processo?.estado_atual === 'Autorização SWIFT' &&
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
         pertencoAoEstado(meusAmbientes, ['Autorização SWIFT']) && (
           <>
@@ -147,7 +140,7 @@ export default function Intervencao({ colaboradoresList }) {
 
       {processo?.situacao === 'E' &&
         processo?.operacao === 'Cativo/Penhora' &&
-        processo?.nome === 'DOP - Validação Notas Externas' &&
+        processo?.estado_atual === 'DOP - Validação Notas Externas' &&
         pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && (
           <>
             <DefaultAction icon="finalizar" handleClick={onOpen5} label="FINALIZAR" />
@@ -157,10 +150,10 @@ export default function Intervencao({ colaboradoresList }) {
 
       <Abandonar isSaving={isSaving} processo={processo} />
 
-      {!processo?.ispendente && (
+      {!processo?.pendente && (
         <>
           <DefaultAction color="inherit" label="PENDENTE" handleClick={() => handlePendente(processo)} />
-          <ColocarPendente from="processo" />
+          <ColocarPendente />
         </>
       )}
 
@@ -184,7 +177,7 @@ export default function Intervencao({ colaboradoresList }) {
             processo={processo}
             onCancel={onClose1}
             arquivoAg={
-              (processo?.nome?.includes('Gerência') || processo?.nome?.includes('Atendimento')) &&
+              (processo?.estado_atual?.includes('Gerência') || processo?.estado_atual?.includes('Atendimento')) &&
               destinosFora?.length > 0
                 ? destinosFora
                 : []
@@ -213,7 +206,7 @@ export function Libertar({ perfilID, processoID }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
-  const handleAbandonar = () => {
+  const hanndleLibertar = () => {
     dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'Processo libertado' }));
   };
 
@@ -224,7 +217,7 @@ export function Libertar({ perfilID, processoID }) {
         open={open}
         onClose={onClose}
         isSaving={isSaving}
-        handleOk={handleAbandonar}
+        handleOk={hanndleLibertar}
         color="warning"
         title="Libertar"
         desc="libertar este processo"

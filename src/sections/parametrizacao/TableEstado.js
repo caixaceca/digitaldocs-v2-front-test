@@ -16,11 +16,12 @@ import { closeModal } from '../../redux/slices/parametrizacao';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
+import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { Checked, AddItem, UpdateItem } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';

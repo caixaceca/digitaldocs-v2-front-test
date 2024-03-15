@@ -6,6 +6,9 @@ import { getComparator, applySort } from '../hooks/useTable';
 export function validarAcesso(grupo, grupos) {
   return !!grupos?.find((row) => row?.grupo?.label === grupo);
 }
+export function temAcesso(acessos, acessosList) {
+  return !!acessosList?.find((row) => acessos?.includes(row));
+}
 
 export function temNomeacao(colaborador) {
   let nomeacao = '';
@@ -137,7 +140,7 @@ export function EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
   } else if (cc?.uo?.label === 'DOP') {
     estadosList = estados?.filter((estado) => uosDOP?.includes(estado?.uo_id));
   } else {
-    estadosList = meusAmbientes;
+    estadosList = meusAmbientes?.filter((item) => item?.id > 0);
   }
   return applySort(
     estadosList?.map((row) => ({ id: row?.id, label: row?.nome })),
@@ -248,6 +251,7 @@ export function podeDarParecer(meusAmbientes, pareceres) {
 // ----------------------------------------------------------------------
 
 export function findColaboradores(colaboradores, idsList) {
-  colaboradores = colaboradores?.filter((row) => idsList.includes(row?.perfil_id));
-  return colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
+  return colaboradores
+    ?.filter((row) => idsList.includes(row?.perfil_id))
+    ?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
 }

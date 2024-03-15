@@ -6,14 +6,14 @@ export const codacessos = [
 
 export const objetos = [
   { id: 'acesso', label: 'Acesso' },
-  { id: 'arquivar-processo', label: 'Arquivar processo' },
+  // { id: 'arquivar-processo', label: 'Arquivar processo' },
   { id: 'arquivo', label: 'Arquivo' },
-  // { id: 'atribuir', label: 'Atribuir' },
+  { id: 'rececao-cartoes', label: 'Confirmar receção de cartões' },
   { id: 'estado', label: 'Estado' },
   { id: 'fluxo', label: 'Fluxo' },
   { id: 'origem', label: 'Origem' },
   { id: 'perfilestado', label: 'Perfil/Estado' },
-  { id: 'rececao-cartoes', label: 'Confirmar receção de cartões' },
+  { id: 'pjf', label: 'Processos Judiciais e Fiscais' },
   { id: 'transicao', label: 'Transição' },
   { id: 'Todo', label: 'Todos' },
 ];

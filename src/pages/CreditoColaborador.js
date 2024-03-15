@@ -1,4 +1,3 @@
-import { useSnackbar } from 'notistack';
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // @mui
@@ -24,6 +23,7 @@ import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 import Page from '../components/Page';
 import { TabCard } from '../components/TabsWrapper';
 import DialogConfirmar from '../components/DialogConfirmar';
+import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { UpdateItem, DefaultAction } from '../components/Actions';
 // sections
@@ -46,7 +46,6 @@ export default function CreditoColaborador() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { themeStretch } = useSettings();
-  const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
@@ -95,29 +94,18 @@ export default function CreditoColaborador() {
     ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
     `${PATH_DIGITALDOCS.processos.lista}`;
 
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      if (
-        done === 'Processo arquivado' ||
-        done === 'Processo atribuído' ||
-        done === 'Processo abandonado' ||
-        done === 'Atribuição eliminada' ||
-        done === 'Processo encaminhado' ||
-        done === 'Processo adicionado a listagem de pendentes'
-      ) {
-        navigate(linkNavigate);
-      }
+  const navigateToProcess = () => {
+    if (
+      done === 'Processo arquivado' ||
+      done === 'Processo atribuído' ||
+      done === 'Processo abandonado' ||
+      done === 'Atribuição eliminada' ||
+      done === 'Processo encaminhado' ||
+      done === 'Processo adicionado a listagem de pendentes'
+    ) {
+      navigate(linkNavigate);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  };
 
   const tabsList = useMemo(
     () => [
@@ -197,8 +185,7 @@ export default function CreditoColaborador() {
         JSON.stringify({
           perfil_id: cc?.perfil_id,
           fluxo_id: pedidoCC?.fluxo_id,
-          // estado_id: pedidoCC?.ultimo_estado_id,
-          estado_id: 22,
+          estado_id: pedidoCC?.ultimo_estado_id,
         }),
         { id: pedidoCC?.id, perfilId: cc?.perfil_id, mail, msg: 'Processo resgatado' }
       )
@@ -218,6 +205,7 @@ export default function CreditoColaborador() {
   return (
     <Page title="Detalhes do pedido">
       <Container maxWidth={themeStretch ? false : 'xl'}>
+        <Notificacao done={done} error={error} afterSuccess={navigateToProcess} />
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
           heading="Detalhes do pedido de crédito"
@@ -304,7 +292,7 @@ export default function CreditoColaborador() {
                             label="PENDENTE"
                             handleClick={() => handlePendente(pedidoCC)}
                           />
-                          <ColocarPendente from="pediddoCC" />
+                          <ColocarPendente />
                         </>
                       )}
                     <UpdateItem handleClick={handleEdit} />

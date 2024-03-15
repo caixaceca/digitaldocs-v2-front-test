@@ -69,11 +69,11 @@ export default function ParecerExport({ dados }) {
                 <Text key={`desc_${index}`}>{row}</Text>
               ))}
             </View>
-            {dados?.parecer?.anexos?.filter((item) => item?.is_ativo)?.length > 0 && (
+            {dados?.parecer?.anexos?.filter((item) => item?.ativo)?.length > 0 && (
               <View style={[styles.mt15]}>
                 <Text style={[styles.caption]}>Anexos:</Text>
                 {dados?.parecer?.anexos
-                  ?.filter((item) => item?.is_ativo)
+                  ?.filter((item) => item?.ativo)
                   .map((row) => (
                     <Text key={row?.nome}> - {row?.nome?.replace(' - P/S/P', '')}</Text>
                   ))}

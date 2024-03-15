@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
 import selectTab from '../utils/selectTab';
-import { estadoInicial } from '../utils/validarAcesso';
+import { temAcesso, estadoInicial } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';
 // redux
@@ -20,7 +20,7 @@ import { TableCON, TableControle, TableCartoes } from '../sections/tabela';
 export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
-  const { isAdmin, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { isAdmin, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabControle') || 'trabalhados');
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function Controle() {
   const tabsList = useMemo(
     () =>
       [
-        ...(estadoInicial(meusAmbientes) || isAdmin
+        ...(isAdmin || estadoInicial(meusAmbientes)
           ? [
               { value: 'entradas', label: 'Entradas', component: <TableControle from="entradas" /> },
               { value: 'porconcluir', label: 'Por concluir', component: <TableControle from="porconcluir" /> },
@@ -48,9 +48,12 @@ export default function Controle() {
         ...(isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
           ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
-        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON /> }] : []),
+        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON isCon /> }] : []),
+        ...(isAdmin || temAcesso(['pjf-110'], meusacessos)
+          ? [{ value: 'pjf', label: 'Judiciais & Fiscais', component: <TableCON /> }]
+          : []),
       ] || [],
-    [meusAmbientes, isAdmin, cc?.uo]
+    [meusAmbientes, meusacessos, isAdmin, cc?.uo]
   );
 
   useEffect(() => {

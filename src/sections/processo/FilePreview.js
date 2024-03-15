@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Viewer } from '@react-pdf-viewer/core';
 import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
+import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
+import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
 // components
 import Image from '../../components/Image';
@@ -17,17 +18,18 @@ export function PdfPreview({ url }) {
   const theme = useTheme();
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
   const heightContent =
-    document.getElementById('card_detail').clientHeight - document.getElementById('list_anexos').clientHeight - 80;
+    document?.getElementById('detalhes')?.clientHeight - document?.getElementById('anexos')?.clientHeight - 52;
 
   return (
-    <div style={{ height: `${heightContent}px`, minHeight: '630px' }}>
+    <Grid item xs={12} sx={{ height: `${heightContent}px`, minHeight: '650px' }}>
       <Viewer
         fileUrl={url}
         localization={pt}
         theme={{ theme: theme.palette.mode }}
         plugins={[defaultLayoutPluginInstance]}
+        defaultScale={SpecialZoomLevel.PageWidth}
       />
-    </div>
+    </Grid>
   );
 }
 
@@ -45,7 +47,7 @@ export function ImagemPreview({ imagem }) {
   };
 
   return (
-    <>
+    <Grid item xs={12}>
       <Image src={imagem} sx={{ cursor: 'zoom-in', borderRadius: 2 }} onClick={() => handleOpenLightbox()} />
 
       <LightboxModal
@@ -56,6 +58,6 @@ export function ImagemPreview({ imagem }) {
         setPhotoIndex={setSelectedImage}
         onCloseRequest={() => setOpenLightbox(false)}
       />
-    </>
+    </Grid>
   );
 }

@@ -21,10 +21,9 @@ import { useSelector, useDispatch } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
-import { Checked } from '../../../components/Actions';
 import { SkeletonTable } from '../../../components/skeleton';
-import { Criado, ColaboradorInfo } from '../../../components/Panel';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
+import { Checked, Criado, ColaboradorInfo } from '../../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
 import Anexo from './Anexo';

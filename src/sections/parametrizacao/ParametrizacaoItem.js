@@ -17,11 +17,12 @@ import useTable, { getComparator } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
 // Components
+import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { AddItem, UpdateItem, DefaultAction, CloneItem, Checked } from '../../components/Actions';
+import { AddItem, UpdateItem, DefaultAction, CloneItem } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm, MotivoPendenciaForm } from './ParametrizacaoForm';
@@ -88,8 +89,8 @@ export default function ParametrizacaoItem({ item }) {
     onChangeRowsPerPage,
   } = useTable({
     defaultOrderBy:
-      (item === 'fluxos' && 'assunto') ||
       (item === 'estados' && 'nome') ||
+      (item === 'fluxos' && 'assunto') ||
       (item === 'origens' && 'designacao') ||
       (item === 'motivos' && 'motivo'),
     defaultOrder: 'asc',
@@ -238,19 +239,15 @@ export default function ParametrizacaoItem({ item }) {
                         ))}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {item === 'origens' ||
-                            item === 'estados' ||
+                          {item === 'estados' ||
                             (item === 'fluxos' && row.is_ativo && (
                               <UpdateItem
                                 id={row?.id}
-                                item={
-                                  (item === 'fluxos' && 'fluxo') ||
-                                  (item === 'origens' && 'origem') ||
-                                  (item === 'estados' && 'estado')
-                                }
+                                item={(item === 'fluxos' && 'fluxo') || (item === 'estados' && 'estado')}
                               />
                             ))}
-                          {item !== 'estados' && item !== 'fluxos' && <UpdateItem dados={row} />}
+                          {item === 'origens' && <UpdateItem item="origem" id={row?.id} />}
+                          {item !== 'estados' && item !== 'fluxos' && item !== 'origens' && <UpdateItem dados={row} />}
                           {item === 'estados' && <UpdateItem item="estado" id={row?.id} />}
                           {item === 'fluxos' && <CloneItem item="fluxo" id={row?.id} />}
                           {(item === 'fluxos' || item === 'estados') && (

@@ -5,6 +5,7 @@ import { Packer, Header, Footer, TextRun, Document, ImageRun, Paragraph, PageNum
 // @mui
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
 import { fDate } from '../../utils/formatTime';
@@ -18,47 +19,27 @@ import { useSelector } from '../../redux/store';
 
 export default function ModelosRespostas() {
   const { processo } = useSelector((state) => state.digitaldocs);
-  const { origem } = useSelector((state) => state.parametrizacao);
+  const { origens } = useSelector((state) => state.parametrizacao);
+  const origem = origens?.find((row) => row?.id === processo?.origem_id);
 
   const exportToWord = async (tipo) => {
     const logo = await fetch('/assets/caixa_logo_carta.png').then((r) => r.blob());
-    const iso27001 = await fetch(
-      'https://intranet.caixa.cv:5000/certificacao/file/certificacao/9e057faebb314f598707f61280c482f3.png'
-    ).then((r) => r.blob());
-    const iso9001 = await fetch(
-      'https://intranet.caixa.cv:5000/certificacao/file/certificacao/ebaf39b46de3400591558770138f96fd.png'
-    ).then((r) => r.blob());
-
+    const iso27001 = await fetch('/assets/ISO27001.png').then((r) => r.blob());
+    const iso9001 = await fetch('/assets/ISO9001.png').then((r) => r.blob());
     const alignSpacing = { spacing: { line: 360 }, alignment: AlignmentType.JUSTIFIED };
 
-    const contasList = () => {
-      const contas = [];
-      if (processo?.contasCativado?.length > 0) {
-        processo?.contasCativado?.forEach((row) => {
-          contas?.push(
+    const cativosList = () => {
+      const cativos = [];
+      if (processo?.cativos?.length > 0) {
+        processo?.cativos?.forEach((row) => {
+          cativos?.push(
             new Paragraph({
               ...alignSpacing,
               bullet: { level: 0 },
               children: [
                 new TextRun({
-                  text: `${row?.conta}, com saldo de ${fCurrency(row?.saldocve)} (${valorPorExtenso(
-                    row?.saldocve
-                  )}) à ${row?.tipo || 'ordem/prazo'};`,
-                }),
-              ],
-            })
-          );
-        });
-      } else if (processo?.contasEleitosCativo?.length > 0) {
-        processo?.contasEleitosCativo?.forEach((row) => {
-          contas?.push(
-            new Paragraph({
-              ...alignSpacing,
-              bullet: { level: 0 },
-              children: [
-                new TextRun({
-                  text: `${row?.conta}, com saldo de ${fCurrency(row?.saldocve)} (${valorPorExtenso(
-                    row?.saldocve
+                  text: `${row?.conta}, com saldo de ${fCurrency(row?.saldo_cve)} (${valorPorExtenso(
+                    row?.saldo_cve
                   )}) à ${row?.tipo || 'ordem/prazo'};`,
                 }),
               ],
@@ -66,7 +47,7 @@ export default function ModelosRespostas() {
           );
         });
       } else {
-        contas?.push(
+        cativos?.push(
           new Paragraph({
             ...alignSpacing,
             bullet: { level: 0 },
@@ -74,7 +55,7 @@ export default function ModelosRespostas() {
           })
         );
       }
-      return contas;
+      return cativos;
     };
 
     const dadosCliente = [
@@ -86,7 +67,7 @@ export default function ModelosRespostas() {
           new TextRun({ text: ', é cliente desta Instituição Financeira, titular da seguinte conta:' }),
         ],
       }),
-      ...contasList(),
+      ...cativosList(),
     ];
 
     const anexos = [
@@ -313,9 +294,9 @@ export default function ModelosRespostas() {
 
   return (
     <Grid item xs={12}>
-      <Typography variant="subtitle1" gutterBottom>
-        Modelos de resposta
-      </Typography>
+      <Divider sx={{ mt: 1 }}>
+        <Typography variant="subtitle1">Modelos de resposta</Typography>
+      </Divider>
       {(processo?.operacao === 'Pedido de Informação' && (
         <>
           <ButtonModelo modelo="1: Entidade cliente.docx" evento={() => exportToWord('Cliente')} />
@@ -348,11 +329,11 @@ function ButtonModelo({ modelo, evento }) {
   return (
     <Button
       fullWidth
+      variant="soft"
       color="inherit"
-      variant="outlined"
       onClick={evento}
       startIcon={getFileThumb(false, null, 'file.docx')}
-      sx={{ justifyContent: 'left', textAlign: 'left', py: 1, mb: 1 }}
+      sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, boxShadow: 'none' }}
     >
       {`Modelo ${modelo}`}
     </Button>

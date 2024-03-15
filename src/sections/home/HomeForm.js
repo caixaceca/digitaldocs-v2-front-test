@@ -30,7 +30,83 @@ import { createItem, getFromIntranet, resetItem } from '../../redux/slices/intra
 // components
 import { Loading } from '../../components/LoadingScreen';
 import { Fechar, DialogButons } from '../../components/Actions';
+import { Notificacao } from '../../components/NotistackProvider';
 import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
+
+// ----------------------------------------------------------------------
+
+FormSugestao.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
+
+export function FormSugestao({ open, onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail } = useSelector((state) => state.intranet);
+  const { done, error, isSaving } = useSelector((state) => state.intranet);
+
+  const formSchema = Yup.object().shape({
+    titulo: Yup.string().required('Título não pode ficar vazio'),
+    descricao: Yup.string().required('Descrção não pode ficar vazio'),
+  });
+
+  const defaultValues = useMemo(() => ({ titulo: '', descricao: '', imagem: '' }), []);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, setValue, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    if (open) {
+      reset(defaultValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const onSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('titulo', values.titulo);
+      formData.append('descricao', values.descricao);
+      if (values.imagem instanceof File) {
+        formData.append('imagem', values.imagem);
+      }
+      dispatch(createItem('sugestao', formData, { mail, msg: 'Sugestão enviada' }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  const handleDropSingle = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        setValue('imagem', Object.assign(file, { preview: URL.createObjectURL(file) }));
+      }
+    },
+    [setValue]
+  );
+
+  return (
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+      <Notificacao error={error} afterSuccess={onCancel} done={done} />
+      <DialogTitle>Deixe-nos a tua sugestão/feedback</DialogTitle>
+      <DialogContent sx={{ mt: 2 }}>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ pt: 1 }}>
+            <Grid item xs={12}>
+              <RHFTextField name="titulo" label="Título" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField multiline minRows={6} maxRows={8} name="descricao" label="Descrição" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFUploadSingleFile name="imagem" onDrop={handleDropSingle} />
+            </Grid>
+          </Grid>
+          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // ----------------------------------------------------------------------
 
@@ -40,21 +116,6 @@ export function DenunciaForm({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, done, error, isSaving } = useSelector((state) => state.intranet);
-
-  useEffect(() => {
-    if (done === 'denuncia') {
-      enqueueSnackbar('Denúncia enviada com sucesso', { variant: 'success' });
-      onCancel();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
@@ -104,6 +165,7 @@ export function DenunciaForm({ open, onCancel }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
+      <Notificacao error={error} afterSuccess={onCancel} done={done} />
       <DialogTitle>Denúncia</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -135,14 +197,7 @@ ValidarDocForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 export function ValidarDocForm({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { documento, error, isLoading } = useSelector((state) => state.intranet);
-
-  useEffect(() => {
-    if (error && error !== 'field required') {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const { documento, isLoading } = useSelector((state) => state.intranet);
 
   const formSchema = Yup.object().shape({ documento: Yup.string().required('Introduza o nº do documento') });
   const defaultValues = useMemo(() => ({ documento: '', cache: true }), []);

@@ -36,8 +36,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 // utils
 import { format, add } from 'date-fns';
+import { podeSerAtribuido } from '../../utils/validarAcesso';
 import { fNumber, fCurrency } from '../../utils/formatNumber';
-import { podeSerAtribuido, emailCheck } from '../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem, closeModal } from '../../redux/slices/digitaldocs';
@@ -95,7 +95,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
     destinos_par: inParalelo && Yup.array().min(1, 'Escolhe os destinos'),
     mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
-    acao: !inParalelo && Yup.mixed().nullable('Ação não pode ficar vazio').required('Escolhe uma ação'),
+    estado: !inParalelo && Yup.mixed().nullable('Estado não pode ficar vazio').required('Escolhe um estado'),
   });
 
   const defaultValues = useMemo(
@@ -109,7 +109,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
       destinos_par: [],
       mpendencia: null,
       pendenteLevantamento: false,
-      acao: destinos?.length === 1 ? destinos?.[0] : null,
+      estado: destinos?.length === 1 ? destinos?.[0] : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [processo]
@@ -120,12 +120,12 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   const values = watch();
 
   const aberturaSemEntidadeGerencia =
-    values?.acao &&
-    !processo?.entidades &&
+    values?.estado &&
+    !processo?.entidade &&
     title === 'Encaminhar' &&
-    processo?.nome?.includes('Gerência') &&
     processo?.assunto === 'Abertura de conta' &&
-    !values?.acao?.label?.includes('Atendimento');
+    processo?.estado_atual?.includes('Gerência') &&
+    !values?.estado?.label?.includes('Atendimento');
 
   useEffect(() => {
     if (processo) {
@@ -136,33 +136,43 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
 
   const onSubmit = async () => {
     try {
+      const formData = [];
       let haveAnexos = false;
       let formPendencia = null;
-      const formData = [];
+      const atribuir =
+        values?.perfil?.id ||
+        (values?.estado?.label?.includes('Atendimento') && podeSerAtribuido(processo?.assunto) && criador?.perfil_id) ||
+        '';
+      if (values?.pendenteLevantamento || values?.pender) {
+        formPendencia = {
+          pender: true,
+          fluxo_id: processo?.fluxo_id,
+          mobs: values?.pendenteLevantamento ? 'Para levantamento do pedido' : values?.mobs,
+          mpendencia: values?.pendenteLevantamento
+            ? motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id
+            : values?.mpendencia?.id,
+        };
+      }
+      const colocarPendente = (values?.pendenteLevantamento || values?.pender) && formPendencia?.mpendencia;
+
       if (inParalelo) {
         values?.destinos_par?.forEach((row) => {
           const destino = destinosParalelo?.find((item) => item?.label === row);
           if (destino) {
             formData?.push({
-              perfilIDAfeto: '',
-              modo: destino?.modo,
-              perfilID: cc?.perfil_id,
-              transicaoID: destino?.id,
-              noperacao: values.noperacao,
-              observacao: values.observacao,
-              estado_finalID: destino?.estado_final_id,
+              perfil_afeto_id: '',
+              transicao_id: destino?.id,
+              observacao: values.observacao || '',
+              noperacao: values.numero_operacao || '',
             });
           }
         });
       } else {
         formData?.push({
-          perfilIDAfeto: '',
-          perfilID: cc?.perfil_id,
-          modo: values?.acao?.modo,
-          noperacao: values.noperacao,
-          observacao: values.observacao,
-          transicaoID: values?.acao?.id,
-          estado_finalID: values?.acao?.estado_final_id,
+          transicao_id: values?.estado?.id,
+          observacao: values.observacao || '',
+          noperacao: values.numero_operacao || '',
+          perfil_afeto_id: colocarPendente ? '' : atribuir,
         });
       }
       const anexos = new FormData();
@@ -174,40 +184,20 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           anexos.append('anexos', listaanexo[i]);
         }
       }
-      if (values?.pendenteLevantamento || values?.pender) {
-        formPendencia = {
-          pender: true,
-          fluxo_id: processo?.fluxo_id,
-          mobs: values?.pendenteLevantamento ? 'Para levantamento do pedido' : values?.mobs,
-          mpendencia: values?.pendenteLevantamento
-            ? motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id
-            : values?.mpendencia?.id,
-        };
-      }
-
-      const formAceitar = {
-        perfilID: cc?.perfil_id,
-        fluxoID: processo?.fluxo_id,
-        estadoID: values?.acao?.estado_final_id,
-      };
 
       dispatch(
-        createItem('encaminhar', JSON.stringify(formData), {
+        updateItem('encaminhar', JSON.stringify(formData), {
           mail,
           anexos,
           haveAnexos,
+          colocarPendente,
           id: processo.id,
-          msg: 'realizada',
           perfilId: cc?.perfil_id,
-          aceitar: JSON.stringify(formAceitar),
+          fluxoId: processo?.fluxo_id,
           pendencia: JSON.stringify(formPendencia),
-          pender: (values?.pendenteLevantamento || values?.pender) && formPendencia?.mpendencia,
-          atribuir:
-            values?.perfil?.id ||
-            (values?.acao?.label?.includes('Atendimento') &&
-              podeSerAtribuido(processo?.assunto) &&
-              criador?.perfil_id) ||
-            '',
+          atribuir: colocarPendente ? atribuir : '',
+          estadoId: values?.estado?.estado_final_id,
+          msg: title === 'Devolver' ? 'devolvida' : 'encaminhada',
         })
       );
     } catch (error) {
@@ -219,17 +209,18 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
 
   const setValueForm = (fild, newValue) => {
     setValue('perfil', null);
-    setValue('acao', fild === 'acao' ? newValue : null);
+    setValue('estado', fild === 'estado' ? newValue : null);
     setValue('destinos_par', fild === 'destinos_par' ? newValue : []);
   };
 
-  const segAt = values?.acao?.label?.includes('Atendimento');
-  const onGerencia = processo?.nome?.includes('Gerência') || processo?.nome?.includes('Caixa Principal');
+  const segAt = values?.estado?.label?.includes('Atendimento');
+  const onGerencia =
+    processo?.estado_atual?.includes('Gerência') || processo?.estado_atual?.includes('Caixa Principal');
 
   const podeAtribuir =
     ((onGerencia && segAt) ||
-      (processo?.nome === 'Devolução AN' && values?.acao?.modo === 'Seguimento' && !segAt) ||
-      processo?.nome === 'Diário') &&
+      (processo?.estado_atual === 'Devolução AN' && values?.estado?.modo === 'Seguimento' && !segAt) ||
+      processo?.estado_atual === 'Diário') &&
     colaboradoresList?.length > 0;
 
   const podeColocarPendente = onGerencia && segAt;
@@ -277,13 +268,13 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
             ) : (
               <Grid item xs={12}>
                 <RHFAutocompleteObject
-                  name="acao"
-                  label="Ação"
+                  name="estado"
+                  label="Estado"
                   options={destinosSingulares}
                   onChange={(event, newValue) => {
                     setPendente(false);
                     setValue('pender', false);
-                    setValueForm('acao', newValue);
+                    setValueForm('estado', newValue);
                   }}
                 />
               </Grid>
@@ -305,7 +296,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                     <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
                   </Grid>
                 )}
-                {values?.acao?.hasopnumero && (
+                {values?.estado?.hasopnumero && (
                   <Grid item xs={12}>
                     <RHFNumberField name="noperacao" required label="Nº de operação" />
                   </Grid>
@@ -445,9 +436,9 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
       perfilID: cc?.perfil?.id,
       fluxoID: processo?.fluxo_id,
       conta: processo?.conta || '',
-      entidades: processo?.entidades,
+      entidades: processo?.entidade,
       estadoID: processo?.estado_atual_id,
-      noperacao: processo?.noperacao || '',
+      noperacao: processo?.numero_operacao || '',
       data_entrada: processo?.data_entrada ? add(new Date(processo?.data_entrada), { hours: 2 }) : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -472,9 +463,9 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
         fluxoID: values?.fluxoID,
         estadoID: values?.estadoID,
         perfilID: values?.perfilID,
-        entidades: values?.entidades,
-        noperacao: values?.noperacao,
+        entidades: values?.entidade,
         observacao: values?.observacao,
+        noperacao: values?.numero_operacao,
         data_entrada: format(values.data_entrada, 'yyyy-MM-dd'),
       };
       let haveA = false;
@@ -507,12 +498,10 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
               <Grid item xs={12}>
                 <Alert severity="error">
                   <Typography variant="body2">
-                    Este processo geralmente é encaminhado para outro estado fora da sua U.O.
+                    Normalmente, este processo é encaminhado para outro estado fora da sua Unidade Orgânica,
+                    certifique-se de que realmente pretende arquivá-lo em vez de encaminhá-lo.
                   </Typography>
-                  <Typography variant="body2">
-                    Certifique de que pretendes mesmo o arquivar em vez de encaminhar.
-                  </Typography>
-                  <Typography sx={{ typography: 'caption', fontWeight: 700 }}>Posssíveis destinos:</Typography>
+                  <Typography sx={{ typography: 'caption', fontWeight: 700, mt: 1 }}>Posssíveis destinos:</Typography>
                   {arquivoAg?.map((row) => (
                     <Stack key={row} direction="row" spacing={0.5} alignItems="center">
                       <CircleIcon sx={{ width: 8, height: 8, ml: 1 }} />
@@ -738,7 +727,7 @@ export function FinalizarForm({ open, onCancel }) {
                         <TableCell align="right">
                           {fNumber(row?.saldo)} {row?.moeda}
                         </TableCell>
-                        <TableCell align="right">{fCurrency(row?.saldocve)}</TableCell>
+                        <TableCell align="right">{fCurrency(row?.saldo_cve)}</TableCell>
                       </TableRow>
                     );
                   })
@@ -796,7 +785,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
       parecer: selectedItem?.parecer || null,
       validado: selectedItem?.validado || false,
       descricao: selectedItem?.parecer_obs || '',
-      perfilID: selectedItem?.parecer_perfil_id || cc?.perfil_id,
+      perfilID: selectedItem?.perfil_id || cc?.perfil_id,
     }),
     [selectedItem, cc?.perfil_id]
   );
@@ -858,7 +847,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>Parecer - {selectedItem?.nome?.replace(' - P/S/P', '')}</DialogTitle>
+      <DialogTitle>Parecer - {selectedItem?.estado_atual?.replace(' - P/S/P', '')}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -1144,6 +1133,7 @@ ColocarPendente.propTypes = { from: PropTypes.string };
 export function ColocarPendente({ from }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const [levantamento, setLevantamento] = useState(false);
   const { mail, cc } = useSelector((state) => state.intranet);
   const { motivosPendencias } = useSelector((state) => state.parametrizacao);
   const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
@@ -1154,18 +1144,19 @@ export function ColocarPendente({ from }) {
   };
 
   const formSchema = Yup.object().shape({
-    mpendencia: Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
+    mpendencia: !levantamento && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
   });
   const defaultValues = useMemo(
     () => ({
+      pendenteLevantamento: false,
       mobs: selectedItem?.mobs || '',
-      atribuir: podeSerAtribuido(selectedItem?.assunto),
       mpendencia: pendencia ? { id: pendencia?.id, label: pendencia?.motivo } : null,
+      atribuir: !selectedItem?.estado_atual?.includes('Gerência') && podeSerAtribuido(selectedItem?.assunto),
     }),
     [selectedItem, pendencia]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -1180,22 +1171,21 @@ export function ColocarPendente({ from }) {
           'pendencia',
           JSON.stringify({
             pender: true,
-            mobs: values?.mobs,
             fluxo_id: selectedItem?.fluxo_id,
-            mpendencia: values?.mpendencia?.id,
+            mobs: values?.pendenteLevantamento ? 'Para levantamento do pedido' : values?.mobs,
+            mpendencia: values?.pendenteLevantamento
+              ? motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id
+              : values?.mpendencia?.id,
           }),
           {
             mail,
+            from,
             id: selectedItem?.id,
             perfilId: cc?.perfil_id,
             atribuir: values?.atribuir,
+            aceitar: !selectedItem?.preso,
             fluxoId: selectedItem?.fluxo_id,
-            formDataAceitar: JSON.stringify({
-              perfilID: cc?.perfil_id,
-              fluxoID: selectedItem?.fluxo_id,
-              estadoID: selectedItem?.estado_atual_id,
-            }),
-            aceitar: (from === 'pediddoCC' && !selectedItem?.preso) || (from !== 'pediddoCC' && !selectedItem?.is_lock),
+            estadoId: selectedItem?.estado_atual_id || selectedItem?.estado_id,
             msg: 'Processo adicionado a listagem de pendentes',
           }
         )
@@ -1211,27 +1201,35 @@ export function ColocarPendente({ from }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteObject
-                label="Motivo"
-                name="mpendencia"
-                options={applySort(
-                  motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
-                  getComparator('asc', 'label')
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="mobs" label="Observação" />
-            </Grid>
-            {podeSerAtribuido(selectedItem?.assunto) &&
-              (emailCheck(mail, 'vc.axiac@semog.acinom') ||
-                emailCheck(mail, 'vc.axiac@asor.airam') ||
-                emailCheck(mail, 'vc.axiac@arove.ordnavi')) && (
+            {!values?.atribuir && (
+              <Grid item xs={12}>
+                <RHFSwitch
+                  name="pendenteLevantamento"
+                  label="Pendente de levantamento"
+                  onChange={(event, value) => {
+                    setLevantamento(value);
+                    setValue('pendenteLevantamento', value);
+                  }}
+                />
+              </Grid>
+            )}
+            {!values?.pendenteLevantamento && (
+              <>
                 <Grid item xs={12}>
-                  <RHFSwitch name="atribuir" label="Atribuir" />
+                  <RHFAutocompleteObject
+                    label="Motivo"
+                    name="mpendencia"
+                    options={applySort(
+                      motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
+                      getComparator('asc', 'label')
+                    )}
+                  />
                 </Grid>
-              )}
+                <Grid item xs={12}>
+                  <RHFTextField name="mobs" label="Observação" />
+                </Grid>
+              </>
+            )}
           </Grid>
           <DialogButons edit isSaving={isSaving} onCancel={handleCloseModal} />
         </FormProvider>
@@ -1242,19 +1240,23 @@ export function ColocarPendente({ from }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Abandonar.propTypes = { processo: PropTypes.object, isSaving: PropTypes.object };
+Abandonar.propTypes = { processo: PropTypes.object, isSaving: PropTypes.bool };
 
 export function Abandonar({ isSaving, processo }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const handleAbandonar = () => {
-    const formData = {
-      perfilID: cc?.perfil_id,
-      fluxoID: processo?.fluxo_id,
-      estadoID: processo?.estado_atual_id || processo?.ultimo_estado_id,
-    };
-    dispatch(updateItem('abandonar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'Processo abandonado' }));
+    dispatch(
+      updateItem('abandonar', null, {
+        id: processo?.id,
+        mail,
+        perfilId: cc?.perfil_id,
+        msg: 'Processo abandonado',
+        fluxoId: processo?.fluxo_id,
+        estadoId: processo?.estado_atual_id || processo?.ultimo_estado_id,
+      })
+    );
   };
 
   return (

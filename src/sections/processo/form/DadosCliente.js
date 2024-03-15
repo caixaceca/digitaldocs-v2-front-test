@@ -47,7 +47,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                   fullWidth
                   size="large"
                   variant="soft"
-                  sx={{ py: 3.5 }}
+                  sx={{ py: 3.45 }}
                   onClick={handleAdd}
                   startIcon={<AddCircleIcon />}
                 >
@@ -112,9 +112,14 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
             </Grid>
           )}
           {(noperacao || fluxo?.is_con) && (
-            <Grid item xs={12} sm={6} xl={3}>
-              <RHFNumberField name="noperacao" label="Nº de operação" />
-            </Grid>
+            <>
+              <Grid item xs={12} sm={6} xl={3}>
+                <RHFNumberField tipo="moeda" name="valor" label="Valor" />
+              </Grid>
+              <Grid item xs={12} sm={6} xl={3}>
+                <RHFNumberField name="noperacao" label="Nº de operação" />
+              </Grid>
+            </>
           )}
         </>
       ) : (

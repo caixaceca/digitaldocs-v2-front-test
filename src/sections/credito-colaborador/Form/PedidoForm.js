@@ -440,7 +440,7 @@ export default function PedidoForm({ dados }) {
       <Notificacao
         done={done}
         error={error}
-        onCancel={() => {
+        afterSuccess={() => {
           if (done === 'Pedido adicionado' || done === 'Pedido atualizado') {
             goToDetail();
           }

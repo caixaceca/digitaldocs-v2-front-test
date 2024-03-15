@@ -9,7 +9,6 @@ import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
-import CircleIcon from '@mui/icons-material/Circle';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { estadoInicial } from '../../utils/validarAcesso';
@@ -23,8 +22,8 @@ import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
-import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
+import { Criado, Registos } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import { AddItem, DefaultAction } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -41,12 +40,15 @@ export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { isLoading, processos } = useSelector((state) => state.digitaldocs);
+  const { isLoading, processosInfo, processos } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
   const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorP') || null);
   const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
+  const fluxoId = meuFluxo?.id;
+  const perfilId = cc?.perfil_id;
+  const estadoId = meuAmbiente?.id;
   const fromAgencia = cc?.uo?.tipo === 'Agências';
   const title =
     (from === 'tarefas' && 'Lista de tarefas') ||
@@ -70,20 +72,23 @@ export default function TableProcessos({ from }) {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrderBy: 'data_last_transicao',
-    defaultOrder: cc?.id === 362 ? 'desc' : 'asc',
+    defaultOrder: 'asc',
+    defaultOrderBy: 'transitado_em',
     defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
   });
 
   useEffect(() => {
-    if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
-      setPage(0);
-      dispatch(resetItem('processo'));
+    if (mail && perfilId) {
       dispatch(resetItem('processos'));
-      dispatch(getAll(from, { mail, fluxoId: meuFluxo?.id, estadoId: meuAmbiente?.id, perfilId: cc?.perfil_id }));
+      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, segmento }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, from, mail]);
+  }, [dispatch, estadoId, fluxoId, perfilId, segmento, from, mail]);
+
+  const verMais = () => {
+    if (mail && perfilId && processosInfo?.proxima_pagina) {
+      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, segmento, pagina: processosInfo?.proxima_pagina }));
+    }
+  };
 
   const handleAdd = () => {
     navigate(PATH_DIGITALDOCS.processos.novoProcesso);
@@ -116,7 +121,6 @@ export default function TableProcessos({ from }) {
     motivo,
     filter,
     newList,
-    segmento,
     colaborador,
     comparator: getComparator(order, orderBy),
   });
@@ -136,7 +140,7 @@ export default function TableProcessos({ from }) {
       id:
         (from === 'pendentes' && 'motivo') ||
         ((from === 'retidos' || from === 'atribuidos') && 'colaborador') ||
-        'nome',
+        'estado',
       label:
         (from === 'pendentes' && 'Motivo') ||
         (from === 'retidos' && 'Retido em') ||
@@ -144,7 +148,7 @@ export default function TableProcessos({ from }) {
         'Estado',
       align: 'left',
     },
-    { id: 'data_last_transicao', label: 'Desde', align: 'center', width: 50 },
+    { id: 'transitado_em', label: 'Enviado em', align: 'center', width: 50 },
     { id: 'empty', width: 50 },
   ];
 
@@ -154,7 +158,12 @@ export default function TableProcessos({ from }) {
         heading={title}
         links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
-        action={estadoInicial(meusAmbientes) && <AddItem button handleClick={handleAdd} />}
+        action={
+          <Stack direction="row" spacing={1.5}>
+            <Registos info={processosInfo} total={processos?.length} handleClick={verMais} />
+            {estadoInicial(meusAmbientes) && <AddItem button handleClick={handleAdd} />}
+          </Stack>
+        }
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
@@ -178,47 +187,39 @@ export default function TableProcessos({ from }) {
                   <SkeletonTable column={7} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow hover key={row.id}>
+                    <TableRow hover key={row?.id}>
+                      <TableCell>{row?.entrada}</TableCell>
+                      <TableCell>{row?.titular ? row?.titular : noDados()}</TableCell>
+                      <TableCell>{row?.conta || row?.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
+                      <TableCell>{row?.assunto ? row?.assunto : meuFluxo?.assunto}</TableCell>
                       <TableCell>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <CircleIcon
-                            sx={{
-                              ml: -1.5,
-                              width: 15,
-                              height: 15,
-                              color:
-                                (row?.cor === 'verde' && 'text.success') ||
-                                (row?.cor === 'vermelha' && 'text.error') ||
-                                (row?.cor === 'amarela' && 'text.warning') ||
-                                'text.focus',
-                            }}
-                          />
-                          <Stack>{row.nentrada}</Stack>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
-                      <TableCell>{row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
-                      <TableCell>{row?.assunto ? row.assunto : meuFluxo.assunto}</TableCell>
-                      <TableCell>
-                        {from === 'pendentes' && <Typography variant="body2">{row?.motivo}</Typography>}
-                        {from === 'tarefas' && row.nome && row?.nome}
-                        {from === 'tarefas' && !row.nome && meuAmbiente.nome}
-                        {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
+                        <Typography variant="body2">
+                          {from === 'pendentes' && row?.motivo}
+                          {from === 'tarefas' && row?.estado && row?.estado}
+                          {from === 'tarefas' && !row?.estado && meuAmbiente.estado}
+                          {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
+                        </Typography>
+                        {row?.observacao && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {row?.observacao}
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell align="center" sx={{ width: 10 }}>
-                        {row?.data_last_transicao && (
+                        {row?.transitado_em && (
                           <>
-                            <Criado tipo="date" value={ptDateTime(row.data_last_transicao)} />
+                            <Criado tipo="date" value={ptDateTime(row?.transitado_em)} />
                             <Criado
                               tipo="time"
-                              value={fToNow(row.data_last_transicao)?.replace('aproximadamente', 'aprox.')}
+                              sx={{ color: colorProcesso(row?.cor) }}
+                              value={fToNow(row?.transitado_em)?.replace('aproximadamente', 'aprox.')}
                             />
                           </>
                         )}
                       </TableCell>
                       <TableCell align="center">
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {from === 'tarefas' && row?.nome?.includes('Atendimento') && (
+                          {from === 'tarefas' && row?.estado?.includes('Atendimento') && (
                             <DefaultAction color="inherit" label="PENDENTE" handleClick={() => handlePendente(row)} />
                           )}
                           <DefaultAction
@@ -251,22 +252,15 @@ export default function TableProcessos({ from }) {
           />
         )}
       </Card>
-      <ColocarPendente from="tarefas" />
+      <ColocarPendente />
     </>
   );
 }
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newList, comparator, filter, segmento, colaborador, motivo, from }) {
+function applySortFilter({ newList, comparator, filter, colaborador, motivo, from }) {
   newList = applySort(newList, comparator);
-
-  if (segmento === 'Particulares') {
-    newList = newList.filter((row) => row?.segcliente === 'P');
-  }
-  if (segmento === 'Empresas') {
-    newList = newList.filter((row) => row?.segcliente === 'E');
-  }
 
   if ((from === 'atribuidos' || from === 'retidos') && colaborador) {
     newList = newList.filter((row) => row?.colaborador === colaborador);
@@ -295,16 +289,23 @@ function applySortFilter({ newList, comparator, filter, segmento, colaborador, m
   if (filter) {
     newList = newList.filter(
       (row) =>
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
         (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.entrada && normalizeText(row?.entrada).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(filter)) !== -1) ||
         (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(filter)) !== -1)
     );
   }
 
   return newList;
+}
+
+export function colorProcesso(cor) {
+  return (
+    (cor?.toLowerCase() === 'verde' && 'text.success') ||
+    (cor?.toLowerCase() === 'vermelha' && 'text.error') ||
+    (cor?.toLowerCase() === 'amarela' && 'text.warning')
+  );
 }

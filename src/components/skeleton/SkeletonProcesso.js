@@ -6,7 +6,7 @@ import Skeleton from '@mui/material/Skeleton';
 
 export default function SkeletonNormativa() {
   return (
-    <Grid container spacing={5}>
+    <Grid container spacing={5} sx={{ pt: 2 }}>
       <Grid item xs={12} md={5}>
         <Skeleton variant="text" sx={{ width: 0.5, height: 50 }} />
         <Skeleton variant="text" sx={{ width: 0.75, height: 50 }} />

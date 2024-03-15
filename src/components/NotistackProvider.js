@@ -105,15 +105,15 @@ function SnackbarIcon({ icon, color }) {
 
 // ----------------------------------------------------------------------
 
-Notificacao.propTypes = { done: PropTypes.string, error: PropTypes.string, onCancel: PropTypes.func };
+Notificacao.propTypes = { done: PropTypes.string, error: PropTypes.string, afterSuccess: PropTypes.func };
 
-export function Notificacao({ done, error, onCancel }) {
+export function Notificacao({ done = '', error = '', afterSuccess = null }) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      onCancel();
+      afterSuccess();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);

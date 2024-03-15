@@ -15,10 +15,11 @@ import { pertencoAoEstado } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';
 // redux
-import { getAll } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
+import { getIndicadores } from '../redux/slices/indicadores';
 // components
 import Page from '../components/Page';
+import { Notificacao } from '../components/NotistackProvider';
 // sections
 import { TableProcessos } from '../sections/tabela';
 
@@ -41,18 +42,16 @@ export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { totalP } = useSelector((state) => state.digitaldocs);
-  const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
+  const { error } = useSelector((state) => state.digitaldocs);
+  const { totalP } = useSelector((state) => state.indicadores);
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabProcessos') || 'Tarefas');
-  const tab = localStorage.getItem('tabProcessos');
 
   useEffect(() => {
-    if (mail && meuAmbiente?.id && meuFluxo?.id && cc?.perfil_id) {
-      dispatch(
-        getAll('meusprocessos', { mail, fluxoId: meuFluxo?.id, estadoId: meuAmbiente?.id, perfilId: cc?.perfil_id })
-      );
+    if (mail && cc?.perfil_id) {
+      dispatch(getIndicadores('totalP', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, mail, meuAmbiente?.id, meuFluxo?.id, cc?.perfil_id, tab]);
+  }, [dispatch, mail, currentTab, cc?.perfil_id]);
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);
@@ -62,26 +61,32 @@ export default function Processos() {
   const VIEW_TABS = useMemo(
     () =>
       [
-        { value: 'Tarefas', num: totalP?.total || 0, component: <TableProcessos from="tarefas" /> },
-        { value: 'Retidos', num: totalP?.totalpendenteEQ || 0, component: <TableProcessos from="retidos" /> },
-        { value: 'Atribuídos', num: totalP?.totalafetosEQ || 0, component: <TableProcessos from="atribuidos" /> },
-        { value: 'Pendentes', num: totalP?.totalpendencias || 0, component: <TableProcessos from="pendentes" /> },
+        { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="tarefas" /> },
+        { value: 'Retidos', num: totalP?.total_retido || 0, component: <TableProcessos from="retidos" /> },
+        { value: 'Atribuídos', num: totalP?.total_afeto || 0, component: <TableProcessos from="atribuidos" /> },
+        { value: 'Pendentes', num: totalP?.total_pendente || 0, component: <TableProcessos from="pendentes" /> },
         ...(pertencoAoEstado(meusAmbientes, ['Validação OPE', 'Execução OPE'])
-          ? [{ value: 'Agendados', num: totalP?.totalagendado || 0, component: <TableProcessos from="agendados" /> }]
+          ? [{ value: 'Agendados', num: totalP?.total_agendado || 0, component: <TableProcessos from="agendados" /> }]
           : []),
         ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas']) &&
-        totalP?.totalfinalizado > 0
+        totalP?.total_finalizado > 0
           ? [
               {
                 value: 'Finalizados',
-                num: totalP?.totalfinalizado || 0,
+                num: totalP?.total_finalizado || 0,
                 component: <TableProcessos from="finalizados" />,
               },
             ]
           : []),
         ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas']) &&
-        totalP?.totalexecutado > 0
-          ? [{ value: 'Executados', num: totalP?.totalexecutado || 0, component: <TableProcessos from="executados" /> }]
+        totalP?.total_executado > 0
+          ? [
+              {
+                value: 'Executados',
+                num: totalP?.total_executado || 0,
+                component: <TableProcessos from="executados" />,
+              },
+            ]
           : []),
       ] || [],
     [totalP, meusAmbientes]
@@ -97,6 +102,7 @@ export default function Processos() {
   return (
     <Page title="Processos | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
+        <Notificacao error={error} />
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
           <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: 'primary.main' }}>
             <Typography variant="h4">Processos</Typography>

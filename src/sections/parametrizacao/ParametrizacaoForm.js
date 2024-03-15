@@ -732,8 +732,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   const formSchema = Yup.object().shape({
     modo: Yup.mixed().required('Modo não pode ficar vazio'),
     prazoemdias: Yup.string().required('Prazo não pode ficar vazio'),
-    estado_inicial_id: Yup.mixed().required('Estado inicial não pode ficar vazio'),
     estado_final_id: Yup.mixed().required('Estado final não pode ficar vazio'),
+    estado_inicial_id: Yup.mixed().required('Estado inicial não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -793,7 +793,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
     <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
-        <Notificacao done={done} error={error} onCancel={onCancel} />
+        <Notificacao done={done} error={error} afterSuccess={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -1024,7 +1024,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
         </Stack>
       </DialogTitle>
       <DialogContent>
-        <Notificacao done={done} error={error} onCancel={onCancel} />
+        <Notificacao done={done} error={error} afterSuccess={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             {fields.map((item, index) => (

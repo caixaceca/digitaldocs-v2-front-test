@@ -35,8 +35,7 @@ import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 // sections
 import Ajuda from '../../sections/home/Ajuda';
-import { FormSugestao } from '../../sections/sobre/FormSugestao';
-import { ValidarDocForm, DenunciaForm } from '../../sections/home/HomeForm';
+import { ValidarDocForm, DenunciaForm, FormSugestao } from '../../sections/home/HomeForm';
 //
 import Linksuteis from './Linksuteis';
 import Notificacoes from './Notificacoes';
@@ -97,7 +96,9 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   return (
     <>
       <RootStyle isCollapse={isCollapse} isOffset={isOffset} verticalLayout={verticalLayout}>
-        {format(new Date(), 'MM') > '11' && <Snowfall snowflakeCount={100} changeFrequency={10} radius={[0.5, 1.5]} />}
+        {format(new Date(), 'MM') === '12' && (
+          <Snowfall snowflakeCount={100} changeFrequency={10} radius={[0.5, 1.5]} />
+        )}
         <Toolbar sx={{ minHeight: '100% !important', px: { lg: 5 } }}>
           {isDesktop && verticalLayout && <Logo sx={{ mr: 2.5 }} />}
 
@@ -184,10 +185,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           </Tooltip>
         </Box>
       </Box>
-
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <FormSugestao open={open} onCancel={onClose} />
-      </Dialog>
+      <FormSugestao open={open} onCancel={onClose} />
     </>
   );
 }

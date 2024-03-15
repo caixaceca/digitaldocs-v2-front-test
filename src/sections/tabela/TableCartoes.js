@@ -23,9 +23,10 @@ import useTable, { getComparator, applySort } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll, getItem, openModal, selectItem, openDetalhes, closeModal } from '../../redux/slices/digitaldocs';
 // Components
+import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { Checked, DefaultAction } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';

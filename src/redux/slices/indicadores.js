@@ -8,6 +8,7 @@ import { errorMsg } from '../../utils/normalizeText';
 
 const initialState = {
   error: '',
+  totalP: null,
   isLoading: false,
   fileSystem: [],
   indicadores: [],
@@ -48,6 +49,10 @@ const slice = createSlice({
         default:
           break;
       }
+    },
+
+    getTotalProcessosSuccess(state, action) {
+      state.totalP = action.payload;
     },
 
     getFyleSystemSuccess(state, action) {
@@ -101,6 +106,11 @@ export function getIndicadores(item, params) {
         params?.dataf ? `dataf=${params?.dataf}&` : ''
       }`;
       switch (item) {
+        case 'totalP': {
+          const response = await axios.get(`${BASEURLDD}/v2/indicadores/default/${params?.perfilId}`, options);
+          dispatch(slice.actions.getTotalProcessosSuccess(response.data.objeto));
+          break;
+        }
         case 'fileSystem': {
           const response = await axios.get(`${BASEURLDD}/v1/indicadores/filesystem/${params?.perfilId}`, options);
           dispatch(slice.actions.getFyleSystemSuccess(response.data));
@@ -131,9 +141,11 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'entradas': {
-          if (params?.estado) {
+          if ((params?.agrEntradas === 'Ambiente' && params?.estado) || params?.balcao) {
             const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/chegaram/num_estado/${params?.estado}${
+              `${BASEURLDD}/v1/indicadores/chegaram/${
+                params?.agrEntradas === 'Ambiente' ? 'num_estado' : 'num_balcao'
+              }/${params?.agrEntradas === 'Ambiente' ? params?.estado : params?.balcao}${
                 query ? `?${query.substr(0, query.length - 1)}` : ''
               }`,
               options

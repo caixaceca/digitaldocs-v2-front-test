@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+// utils
+import { temAcesso } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
@@ -22,12 +24,14 @@ export default function Indicadores() {
   const { mail, cc } = useSelector((state) => state.intranet);
   const { meusacessos } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(
-    localStorage.getItem('tabIndicadores') || (meusacessos?.includes('Todo-111') && 'files') || 'total'
+    localStorage.getItem('tabIndicadores') || (temAcesso(['Todo-111'], meusacessos) && 'files') || 'total'
   );
 
   const tabsList = useMemo(
     () => [
-      ...(meusacessos?.includes('Todo-111') ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }] : []),
+      ...(temAcesso(['Todo-111'], meusacessos)
+        ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }]
+        : []),
       { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
       { value: 'duracao', label: 'Duração', component: <Duracao /> },
       { value: 'execucao', label: 'Tempo execução', component: <Execucao /> },

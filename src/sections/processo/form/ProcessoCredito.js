@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import { useMemo, useEffect, useState } from 'react';
 // form
 import { useForm } from 'react-hook-form';
@@ -14,8 +13,6 @@ import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
@@ -26,33 +23,14 @@ import ProcessoCreditoForm from './ProcessoCreditoForm';
 ProcessoCredito.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, selectedProcesso: PropTypes.object };
 
 export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { meuAmbiente, linhas } = useSelector((state) => state.parametrizacao);
-  const { processo, isSaving, done, error } = useSelector((state) => state.digitaldocs);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const credito = selectedProcesso?.credito || null;
   const [estado, setEstado] = useState(credito?.situacao_final_mes);
-
-  useEffect(() => {
-    if (done === 'processo adicionado') {
-      enqueueSnackbar('Processo adicionado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
-    } else if (done === 'processo atualizado') {
-      enqueueSnackbar('Processo atualizado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   const formSchema = Yup.object().shape({
     linha_id: Yup.mixed().required('Linha não pode ficar vazio'),
@@ -96,15 +74,11 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       anexos: [],
       entidades: [],
       fluxo_id: fluxo?.id,
-      obs: selectedProcesso?.obs || '',
-      mobs: selectedProcesso?.mobs || '',
+      obs: selectedProcesso?.observacao || '',
       titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       agendado: selectedProcesso?.agendado || false,
-      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
       balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
-      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
-      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       // info credito
       segmento: credito?.segmento || null,
@@ -112,20 +86,20 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
       taxa_juro: credito?.taxa_juro || '',
       finalidade: credito?.finalidade || '',
       numero_proposta: credito?.nproposta || '',
-      montante_solicitado: credito?.montantes || '',
       setor_atividade: credito?.setor_atividade || '',
       escalao_decisao: credito?.escalao_decisao || null,
       montante_aprovado: credito?.montante_aprovado || '',
       prazo_amortizacao: credito?.prazo_amortizacao || '',
+      montante_solicitado: credito?.montante_solicitado || '',
       situacao_final_mes: credito?.situacao_final_mes || null,
       montante_contratado: credito?.montante_contratado || '',
-      linha_id: credito?.linha ? { id: credito?.linha?.id, label: credito?.linha?.linha } : null,
+      linha_id: credito?.linha ? { id: credito?.linha_id, label: credito?.linha } : null,
       data_desistido: credito?.data_desistido ? add(new Date(credito?.data_desistido), { hours: 2 }) : null,
       data_aprovacao: credito?.data_aprovacao ? add(new Date(credito?.data_aprovacao), { hours: 2 }) : null,
       data_indeferido: credito?.data_indeferido ? add(new Date(credito?.data_indeferido), { hours: 2 }) : null,
       data_contratacao: credito?.data_contratacao ? add(new Date(credito?.data_contratacao), { hours: 2 }) : null,
     }),
-    [selectedProcesso, fluxo?.id, credito, meuAmbiente, cc]
+    [selectedProcesso, fluxo?.id, credito, cc]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, reset, handleSubmit } = methods;
@@ -145,7 +119,6 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
     try {
       const formData = new FormData();
       // required
-      formData.append('modelo', fluxo?.modelo);
       formData.append('balcao', values.balcao);
       formData.append('titular', values.titular);
       formData.append('fluxo_id', values.fluxo_id);
@@ -186,8 +159,8 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
         formData.append('periodicidade', '');
         formData.append('data_inicio', null);
         formData.append('data_arquivamento', null);
-        formData.append('uo_perfil_id ', cc?.uo?.id);
-        formData.append('is_interno ', selectedProcesso?.is_interno);
+        formData.append('uo_perfil_id', cc?.uo?.id);
+        formData.append('is_interno', fluxo?.is_interno);
         formData.append('situacao_final_mes', values.situacao_final_mes);
         if (
           values.situacao_final_mes === 'Aprovado' ||
@@ -226,14 +199,13 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
           formData.append('montante_contratado', '');
         }
         dispatch(
-          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'processo atualizado' })
+          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'Processo atualizado' })
         );
       } else {
-        formData.append('perfil_id', values.perfil_id);
         formData.append('situacao_final_mes', 'Em análise');
-        formData.append('uo_origem_id', values.uo_origem_id);
-        formData.append('estado_atual_id', values.estado_atual_id);
-        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'processo adicionado' }));
+        formData.append('uo_origem_id', meuAmbiente?.uo_id);
+        formData.append('estado_atual_id', meuAmbiente?.id);
+        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -246,7 +218,6 @@ export default function ProcessoCredito({ isEdit, selectedProcesso, fluxo }) {
         <Grid item xs={12}>
           <ProcessoCreditoForm isEdit={isEdit} setEstado={setEstado} selectedProcesso={selectedProcesso} />
         </Grid>
-
         <Grid item xs={12} textAlign="center">
           <LoadingButton size="large" type="submit" variant="contained" loading={isSaving}>
             {!isEdit ? 'Adicionar' : 'Guardar'}

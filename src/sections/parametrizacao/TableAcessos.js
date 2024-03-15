@@ -10,6 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
+import { emailCheck } from '../../utils/validarAcesso';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -18,12 +19,13 @@ import { getFromParametrizacao, closeModal } from '../../redux/slices/parametriz
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
+import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
+import { AddItem, UpdateItem } from '../../components/Actions';
 import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { AddItem, UpdateItem, Checked } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -69,14 +71,11 @@ export default function TableAcessos({ tab }) {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'nome' });
 
-  const { done, error, estados, acessos, isLoading, isOpenModal, estadosPerfil } = useSelector(
-    (state) => state.parametrizacao
-  );
-
   const { id } = useParams();
   const dispatch = useDispatch();
   const { mail, cc } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
+  const { done, error, acessos, isLoading, isOpenModal, estadosPerfil } = useSelector((state) => state.parametrizacao);
 
   const dataFiltered = applySortFilter({
     filter,
@@ -109,13 +108,6 @@ export default function TableAcessos({ tab }) {
     }
   }, [dispatch, id, cc?.perfil_id, tab, mail]);
 
-  useEffect(() => {
-    if (mail && cc?.perfil_id && estados?.length === 0 && tab === 'estados') {
-      dispatch(getFromParametrizacao('estados', { mail, perfilId: cc?.perfil_id }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, cc?.perfil_id, tab, mail]);
-
   const handleCloseModal = () => {
     dispatch(closeModal());
   };
@@ -137,7 +129,7 @@ export default function TableAcessos({ tab }) {
         sx={{ color: 'text.secondary', px: 1 }}
       />
       <RoleBasedGuard hasContent roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
-        <Notificacao done={done} error={error} onCancel={handleCloseModal} />
+        <Notificacao done={done} error={error} afterSuccess={handleCloseModal} />
         <Card sx={{ p: 1 }}>
           <SearchToolbarSimple item="filterAcesso" filter={filter} setFilter={setFilter} />
           <Scrollbar>
@@ -184,7 +176,9 @@ export default function TableAcessos({ tab }) {
                               <UpdateItem item="acesso" id={row?.id} />
                             )}
                           {tab === 'estados' &&
-                            (!row?.data_limite || (row?.data_limite && new Date(row?.data_limite) > new Date())) && (
+                            (emailCheck(mail, 'vc.axiac@arove.ordnavi') ||
+                              !row?.data_limite ||
+                              (row?.data_limite && new Date(row?.data_limite) > new Date())) && (
                               <UpdateItem dados={row} />
                             )}
                         </TableCell>

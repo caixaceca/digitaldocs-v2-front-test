@@ -87,7 +87,7 @@ export function Detalhes({ item, closeModal }) {
               )}
               {selectedItem?.estado && (
                 <TextItem
-                  title={item === 'regras transicao' ? 'Origem:' : 'Ambiente/Estado:'}
+                  title={item === 'regras transicao' ? 'Origem:' : 'Ambiente:'}
                   text={`${selectedItem.estado}${selectedItem?.estado_id ? ` (ID: ${selectedItem?.estado_id})` : ''}`}
                 />
               )}

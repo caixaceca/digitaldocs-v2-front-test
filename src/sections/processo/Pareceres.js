@@ -75,7 +75,7 @@ export default function Pareceres({ pareceres, id, assunto }) {
   }, [done]);
 
   const handleAnexo = (anexo) => {
-    dispatch(getAnexo('anexoParecer', anexo, '', mail));
+    dispatch(getAnexo('anexoParecer', { anexo, mail }));
   };
 
   const handleEditar = (item) => {
@@ -120,7 +120,7 @@ export default function Pareceres({ pareceres, id, assunto }) {
       <Stack spacing={2} sx={{ p: 2 }}>
         {pareceres.map((row) => {
           const key = `parecer_${row.id}`;
-          const criador = colaboradores?.find((_row) => _row?.perfil?.id === row?.parecer_perfil_id);
+          const criador = colaboradores?.find((item) => item?.perfil?.id === row?.perfil_id);
           return (
             <Paper key={key} sx={{ bgcolor: 'background.neutral' }}>
               <Paper
@@ -197,7 +197,7 @@ export default function Pareceres({ pareceres, id, assunto }) {
                       </>
                     )}
                     {row?.anexos
-                      ?.filter((item) => item?.is_ativo)
+                      ?.filter((item) => item?.ativo)
                       .map(
                         (anexo) =>
                           anexo?.nome && (
@@ -253,8 +253,7 @@ export default function Pareceres({ pareceres, id, assunto }) {
                 assunto,
                 parecer: itemSelected,
                 nome: itemSelected?.validado
-                  ? colaboradores?.find((_row) => _row?.perfil?.id === itemSelected?.parecer_perfil_id)?.perfil
-                      ?.displayName
+                  ? colaboradores?.find((_row) => _row?.perfil?.id === itemSelected?.perfil_id)?.perfil?.displayName
                   : cc?.perfil?.displayName,
               }}
             />

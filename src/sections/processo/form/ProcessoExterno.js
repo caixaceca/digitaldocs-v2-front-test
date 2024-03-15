@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 // form
 import { useForm } from 'react-hook-form';
@@ -14,8 +13,6 @@ import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
@@ -26,33 +23,22 @@ import ProcessoExternoForm from './ProcessoExternoForm';
 ProcessoExterno.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, selectedProcesso: PropTypes.object };
 
 export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { meuAmbiente, origens } = useSelector((state) => state.parametrizacao);
-  const { processo, done, error, isSaving } = useSelector((state) => state.digitaldocs);
   const perfilId = cc?.perfil_id;
   const [operacao, setOperacao] = useState(selectedProcesso?.operacao || '');
-  const origensList = origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` }));
-
-  useEffect(() => {
-    if (done === 'processo adicionado') {
-      enqueueSnackbar('Processo adicionado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
-    } else if (done === 'processo atualizado') {
-      enqueueSnackbar('Processo atualizado com sucesso', { variant: 'success' });
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
+  const origensList = useMemo(
+    () => origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` })) || [],
+    [origens]
+  );
+  const entidadesList = useMemo(
+    () => selectedProcesso?.entidade?.split(';')?.map((row) => ({ numero: row })) || [],
+    [selectedProcesso?.entidade]
+  );
 
   const formSchema = Yup.object().shape({
     origem_id: Yup.mixed().required('Origem não pode ficar vazio'),
@@ -68,37 +54,28 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       Yup.number().typeError('Introduza o valor').positive('O valor não pode ser negativo'),
   });
 
-  const _entidades = useMemo(
-    () => selectedProcesso?.entidades?.split(';')?.map((row) => ({ numero: row })) || [],
-    [selectedProcesso?.entidades]
-  );
-
   const defaultValues = useMemo(
     () => ({
       anexos: [],
       fluxo_id: fluxo?.id,
-      entidades: _entidades,
-      obs: selectedProcesso?.obs || '',
-      mobs: selectedProcesso?.mobs || '',
+      entidades: entidadesList,
       valor: selectedProcesso?.valor || '',
       conta: selectedProcesso?.conta || '',
       canal: selectedProcesso?.canal || null,
-      docidp: selectedProcesso?.docidp || '',
-      docids: selectedProcesso?.docids || '',
+      docidp: selectedProcesso?.doc_idp || '',
+      docids: selectedProcesso?.doc_ids || '',
+      obs: selectedProcesso?.observacao || '',
       titular: selectedProcesso?.titular || '',
       cliente: selectedProcesso?.cliente || '',
       operacao: selectedProcesso?.operacao || null,
       referencia: selectedProcesso?.referencia || '',
-      perfil_id: selectedProcesso?.perfil_id || cc?.perfil_id,
-      balcao: selectedProcesso?.balcao || Number(cc?.uo?.balcao),
-      uo_origem_id: selectedProcesso?.uo_origem_id || meuAmbiente?.uo_id,
-      estado_atual_id: selectedProcesso?.estado_atual_id || meuAmbiente?.id,
+      balcao: selectedProcesso?.balcao || balcaoAmbiente,
       data_entrada: selectedProcesso?.data_entrada ? add(new Date(selectedProcesso?.data_entrada), { hours: 2 }) : null,
       origem_id: selectedProcesso?.origem_id
         ? origensList?.find((row) => row.id === selectedProcesso?.origem_id)
         : null,
     }),
-    [selectedProcesso, fluxo?.id, meuAmbiente, origensList, _entidades, cc]
+    [selectedProcesso, fluxo?.id, origensList, entidadesList, balcaoAmbiente]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -123,7 +100,6 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       formData.append('is_interno ', false);
       formData.append('canal', values.canal);
       formData.append('balcao', values.balcao);
-      formData.append('modelo', fluxo?.modelo);
       formData.append('fluxo_id', values.fluxo_id);
       formData.append('referencia', values.referencia);
       formData.append('origem_id', values?.origem_id?.id);
@@ -166,15 +142,13 @@ export default function ProcessoExterno({ isEdit, selectedProcesso, fluxo }) {
       }
 
       if (selectedProcesso) {
-        formData.append('uo_perfil_id ', cc?.uo?.id);
         dispatch(
-          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'processo atualizado' })
+          updateItem('processo', formData, { mail, perfilId, id: selectedProcesso?.id, msg: 'Processo atualizado' })
         );
       } else {
-        formData.append('perfil_id', values.perfil_id);
-        formData.append('uo_origem_id', values.uo_origem_id);
-        formData.append('estado_atual_id', values.estado_atual_id);
-        dispatch(createItem('processo externo', formData, { mail, perfilId, msg: 'processo adicionado' }));
+        formData.append('uo_origem_id', meuAmbiente?.uo_id);
+        formData.append('estado_atual_id', meuAmbiente?.id);
+        dispatch(createItem('processo externo', formData, { mail, perfilId, msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

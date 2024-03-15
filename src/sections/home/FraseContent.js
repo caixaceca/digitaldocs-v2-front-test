@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -22,6 +23,11 @@ export default function FraseContent({ frase }) {
     <Stack sx={{ flexGrow: 1, color: 'text.secondary' }}>
       <Typography gutterBottom variant="h5" sx={{ textAlign: 'center' }}>
         Frase da semana
+        {format(new Date(), 'MM') === '03' && (
+          <Typography variant="spam" sx={{ fontWeight: 300 }}>
+            &nbsp;- Especial março mês da Mulher 🌹
+          </Typography>
+        )}
       </Typography>
       <Typography variant="subtitle1" sx={{ fontStyle: 'italic', textAlign: 'center', mb: 1 }}>
         {isKPI ? (

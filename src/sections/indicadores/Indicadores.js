@@ -11,10 +11,8 @@ import Radio from '@mui/material/Radio';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Paper from '@mui/material/Paper';
-import Drawer from '@mui/material/Drawer';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import { useTheme } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
@@ -23,7 +21,6 @@ import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 import RadioGroup from '@mui/material/RadioGroup';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import CardContent from '@mui/material/CardContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -32,7 +29,6 @@ import TableContainer from '@mui/material/TableContainer';
 import LinearProgress from '@mui/material/LinearProgress';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 // utils
 import { format, add } from 'date-fns';
@@ -52,17 +48,16 @@ import Panel from '../../components/Panel';
 import MyAvatar from '../../components/MyAvatar';
 import Scrollbar from '../../components/Scrollbar';
 import Chart, { useChart } from '../../components/chart';
-import { Fechar, ExportExcel, DefaultAction } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
+import { Fechar, ExportExcel, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, SearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'assunto', label: 'Fluxo/Assunto', align: 'left' },
-  { id: 'nome', label: 'Estado/Ambiente', align: 'left' },
+  { id: 'nome', label: 'Ambiente', align: 'left' },
   { id: 'tempo_execucao', label: 'Tempo médio', align: 'left' },
 ];
 
@@ -250,8 +245,8 @@ export function TotalProcessos() {
 
   const tabsList = [
     { value: 'data', label: 'Data', component: <Criacao vista={vista} /> },
-    { value: 'criacao', label: 'Criação', component: <EntradasTrabalhados /> },
     { value: 'entradas', label: 'Entradas', component: <DevolvidosTipos /> },
+    { value: 'criacao', label: 'Criação', component: <EntradasTrabalhados /> },
     { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados /> },
     { value: 'devolucoes', label: 'Devoluções', component: <DevolvidosTipos /> },
     { value: 'volume', label: 'Volume', component: <Volume top={top} /> },
@@ -264,13 +259,18 @@ export function TotalProcessos() {
 
   return (
     <>
-      <HeaderBreadcrumbs
-        links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
-        heading={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
-        action={<Filtrar top={top} vista={vista} setTop={setTop} tab={currentTab} setVista={setVista} />}
+      <Cabecalho
+        top={top}
+        vista={vista}
+        setTop={setTop}
+        tab={currentTab}
+        setVista={setVista}
+        tabsList={tabsList}
+        currentTab={currentTab}
+        changeTab={handleChangeTab}
+        title={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
       />
-      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
+
       {tabsList.map((tab) => {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;
@@ -365,13 +365,13 @@ export function Criacao({ vista }) {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function EntradasTrabalhados() {
-  const [accord, setAccord] = useState(false);
   const [colaborador1, setColaborador1] = useState(null);
   const [colaborador2, setColaborador2] = useState(null);
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { cc, colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const { isAdmin, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const [detail, setDetail] = useState(localStorage.getItem('detail') === 'true');
 
   const colaboradoresAcesso = ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.map((row) => row?.id);
   const dadosByColaborador = indicadoresGroupBy(
@@ -426,8 +426,8 @@ export function EntradasTrabalhados() {
                   <DefaultAction
                     small
                     button
-                    handleClick={() => setAccord(!accord)}
-                    label={accord ? 'Esconder detalhes' : 'Mostrar detalhes'}
+                    label={detail ? 'Esconder detalhes' : 'Mostrar detalhes'}
+                    handleClick={() => setItemValue(!detail, setDetail, 'detail', false)}
                   />
                   {dadosByColaborador.length > 1 && (
                     <>
@@ -522,7 +522,7 @@ export function EntradasTrabalhados() {
                     </>
                   )}
                 </Stack>
-                {accord && (
+                {detail && (
                   <>
                     {dadosByAssunto?.map((row) => {
                       const subtotal = sumBy(row?.processos, 'total');
@@ -550,7 +550,7 @@ export function EntradasTrabalhados() {
               <ColaboradorCard
                 total={total}
                 key={row.item}
-                accord={accord}
+                detail={detail}
                 colaboradorDados={row}
                 assuntos={dadosByAssunto}
               />
@@ -661,13 +661,7 @@ export function Execucao() {
 
   return (
     <>
-      <HeaderBreadcrumbs
-        links={[{ name: '' }]}
-        heading="Tempo de execução"
-        action={<Filtrar tab="execucao" />}
-        sx={{ color: 'text.secondary', px: 1 }}
-      />
-
+      <Cabecalho title="Tempo de execução" tab="execucao" />
       <Card sx={{ p: 1 }}>
         {dataFiltered.length > 0 && (
           <Paper sx={{ p: 2, mb: dataFiltered.length > 1 ? 1 : 0, bgcolor: 'background.neutral', flexGrow: 1 }}>
@@ -842,13 +836,7 @@ export function Duracao() {
 
   return (
     <>
-      <HeaderBreadcrumbs
-        links={[{ name: '' }]}
-        action={<Filtrar tab="duracao" />}
-        sx={{ color: 'text.secondary', px: 1 }}
-        heading="Média de duração dos processos"
-      />
-
+      <Cabecalho tab="duracao" title="Média de duração dos processos" />
       <Card sx={{ p: 1 }}>
         {duracaoByItem.length > 0 && <TabView currentTab={currentTab} setCurrentTab={setCurrentTab} />}
         <IndicadorItem
@@ -865,7 +853,7 @@ export function Duracao() {
                 {currentTab === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                   <Chart type="bar" series={series} options={chartOptions} height={500} />
                 ) : (
-                  <TableExport label="Estado/Ambiente" label1="Média em dias" dados={duracaoByItem} />
+                  <TableExport label="Ambiente" label1="Média em dias" dados={duracaoByItem} />
                 )}
               </Grid>
             </Grid>
@@ -991,19 +979,24 @@ function IndicadorItem({ isLoading, isNotFound, children, nop }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Filtrar.propTypes = {
+Cabecalho.propTypes = {
   tab: PropTypes.string,
   top: PropTypes.string,
   setTop: PropTypes.func,
+  title: PropTypes.string,
   vista: PropTypes.string,
   setVista: PropTypes.func,
+  changeTab: PropTypes.func,
+  tabsList: PropTypes.array,
+  currentTab: PropTypes.string,
 };
 
-export function Filtrar({ tab, top, vista, setTop, setVista }) {
+export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList = [], currentTab = '', changeTab }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const [origem, setOrigem] = useState(localStorage.getItem('origem') || 'Interna');
   const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
+  const [agrEntradas, setAgrEntradas] = useState(localStorage.getItem('agrEntradas') || 'Balcão');
   const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
   const [datai, setDatai] = useState(
     localStorage.getItem('dataIIndic') ? add(new Date(localStorage.getItem('dataIIndic')), { hours: 2 }) : null
@@ -1024,6 +1017,16 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
   const [uo, setUo] = useState(
     uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoIndic'))) ||
       uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
+      null
+  );
+
+  const balcoesList = useMemo(
+    () => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'balcao'),
+    [cc, isAdmin, meusAmbientes, uos]
+  );
+  const [balcao, setBalcao] = useState(
+    balcoesList?.find((row) => Number(row?.id) === Number(localStorage.getItem('balcaoIndic'))) ||
+      balcoesList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
       null
   );
 
@@ -1091,6 +1094,8 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
           origem,
           perfilId,
           uo: uo?.id,
+          agrEntradas,
+          balcao: balcao?.id,
           fluxo: fluxo?.id,
           perfil: perfil?.id,
           estado: estado?.id,
@@ -1107,6 +1112,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
     vista,
     datai,
     dataf,
+    balcao,
     estado,
     uo?.id,
     origem,
@@ -1116,10 +1122,15 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
     fluxo?.id,
     perfil?.id,
     agrupamento,
+    agrEntradas,
   ]);
 
   const haveColaborador = tab === 'data' || tab === 'tipos' || tab === 'duracao' || tab === 'execucao';
-  const haveEstado = tab === 'trabalhados' || tab === 'entradas' || tab === 'devolucoes' || tab === 'execucao';
+  const haveEstado =
+    tab === 'execucao' ||
+    tab === 'devolucoes' ||
+    tab === 'trabalhados' ||
+    (tab === 'entradas' && agrEntradas === 'Ambiente');
   const havePeriodo =
     tab === 'criacao' ||
     tab === 'entradas' ||
@@ -1130,123 +1141,137 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
-        {tab === 'duracao' && momento && <Panel label="Momento" children={<Typography noWrap>{momento}</Typography>} />}
-        {tab === 'volume' && (agrupamento || top !== 'Todos') && (
-          <>
-            {agrupamento && <Panel label="Agrupamento" children={<Typography noWrap>{agrupamento}</Typography>} />}
-            {top !== 'Todos' && <Panel label="Top" children={<Typography noWrap>{top}</Typography>} />}
-          </>
-        )}
-        {tab === 'data' && vista && (
-          <Panel
-            label="Vista"
-            children={
-              <Typography noWrap sx={{ textTransform: 'capitalize' }}>
-                {vista}
-              </Typography>
-            }
-          />
-        )}
-        {(tab === 'data' || tab === 'criacao' || tab === 'tipos') && uo?.label && (
-          <Panel label="Agência/U.O" children={<Typography noWrap>{uo?.label}</Typography>} />
-        )}
-        {haveColaborador && perfil?.label && (
-          <Panel label="Colaborador" children={<Typography noWrap>{perfil?.label}</Typography>} />
-        )}
-        {haveEstado && estado?.label && (
-          <Panel label="Estado/Ambiente" children={<Typography noWrap>{estado?.label}</Typography>} />
-        )}
-        {tab === 'devolucoes' && origem && <Panel label="Origem" children={<Typography noWrap>{origem}</Typography>} />}
-        {(tab === 'duracao' || tab === 'execucao') && fluxo?.label && (
-          <Panel label="Fluxo/Assunto" children={<Typography noWrap>{fluxo?.label}</Typography>} />
-        )}
-        {havePeriodo && (datai || dataf) && (
-          <Panel
-            label={(datai && dataf && 'Período') || (datai && 'Desde') || (dataf && 'Até')}
-            children={
-              <Typography noWrap>
-                {(datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
-                  (datai && ptDate(datai)) ||
-                  (dataf && ptDate(dataf))}
-              </Typography>
-            }
-          />
-        )}
-        <Button variant="contained" endIcon={<FilterListOutlinedIcon />} onClick={onOpen}>
-          Filtrar
-        </Button>
+      <Box sx={{ mb: 2, color: 'text.secondary', px: 1 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" gutterBottom sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+              {title}
+            </Typography>
+          </Box>
+
+          <Button variant="contained" endIcon={<FilterListOutlinedIcon />} onClick={onOpen}>
+            Filtrar
+          </Button>
+        </Stack>
+      </Box>
+
+      {currentTab && (
+        <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={changeTab} sx={{ mb: 2 }} />
+      )}
+
+      <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
+        <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+          {tab === 'duracao' && momento && (
+            <Panel label="Momento" children={<Typography noWrap>{momento}</Typography>} />
+          )}
+          {tab === 'volume' && (agrupamento || top !== 'Todos') && (
+            <>
+              {agrupamento && <Panel label="Agrupamento" children={<Typography noWrap>{agrupamento}</Typography>} />}
+              {top !== 'Todos' && <Panel label="Top" children={<Typography noWrap>{top}</Typography>} />}
+            </>
+          )}
+          {tab === 'entradas' && agrEntradas && (
+            <Panel label="Agrupamento" children={<Typography noWrap>{agrEntradas}</Typography>} />
+          )}
+          {tab === 'data' && vista && (
+            <Panel
+              label="Vista"
+              children={
+                <Typography noWrap sx={{ textTransform: 'capitalize' }}>
+                  {vista}
+                </Typography>
+              }
+            />
+          )}
+          {(tab === 'data' || tab === 'criacao' || tab === 'tipos') && uo?.label && (
+            <Panel label="Agência/U.O" children={<Typography noWrap>{uo?.label}</Typography>} />
+          )}
+          {tab === 'entradas' && balcao?.label && agrEntradas === 'Balcão' && (
+            <Panel label="Balcão" children={<Typography noWrap>{balcao?.label}</Typography>} />
+          )}
+          {haveColaborador && perfil?.label && (
+            <Panel label="Colaborador" children={<Typography noWrap>{perfil?.label}</Typography>} />
+          )}
+          {haveEstado && estado?.label && (
+            <Panel label="Ambiente" children={<Typography noWrap>{estado?.label}</Typography>} />
+          )}
+          {tab === 'devolucoes' && origem && (
+            <Panel label="Origem" children={<Typography noWrap>{origem}</Typography>} />
+          )}
+          {(tab === 'duracao' || tab === 'execucao') && fluxo?.label && (
+            <Panel label="Fluxo/Assunto" children={<Typography noWrap>{fluxo?.label}</Typography>} />
+          )}
+          {havePeriodo && (datai || dataf) && (
+            <Panel
+              label={(datai && dataf && 'Período') || (datai && 'Desde') || (dataf && 'Até')}
+              children={
+                <Typography noWrap>
+                  {(datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
+                    (datai && ptDate(datai)) ||
+                    (dataf && ptDate(dataf))}
+                </Typography>
+              }
+            />
+          )}
+        </Stack>
       </Stack>
 
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={onClose}
-        BackdropProps={{ invisible: true }}
-        PaperProps={{ sx: { width: 300 } }}
-      >
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 1, pl: 2 }}>
-          <Typography variant="subtitle1">Filtrar</Typography>
-          <IconButton onClick={onClose}>
-            <CloseOutlinedIcon />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-
-        <Scrollbar>
-          <Stack spacing={3} sx={{ p: 2 }}>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            Filtrar
+            <Fechar handleClick={onClose} />
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 3 }}>
+            {tab === 'devolucoes' && (
+              <FilterRG
+                label="Origem"
+                localS="origem"
+                value={origem}
+                setValue={setOrigem}
+                options={['Interna', 'Externa']}
+              />
+            )}
             {tab === 'duracao' && (
-              <Stack spacing={1}>
-                <Typography variant="subtitle2"> Momento </Typography>
-                <RadioGroup
-                  value={momento}
-                  onChange={(event, newValue) => setItemValue(newValue, setMomento, 'momento')}
-                >
-                  {['Criação no sistema', 'Data de entrada'].map((row) => (
-                    <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
-                  ))}
-                </RadioGroup>
-              </Stack>
+              <FilterRG
+                label="Momento"
+                localS="momento"
+                value={momento}
+                setValue={setMomento}
+                options={['Criação no sistema', 'Data de entrada']}
+              />
+            )}
+            {tab === 'entradas' && (
+              <FilterRG
+                label="Agrupamento"
+                localS="agrEntradas"
+                value={agrEntradas}
+                setValue={setAgrEntradas}
+                options={['Balcão', 'Ambiente']}
+              />
             )}
             {tab === 'volume' && (
               <>
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2">Agrupamento</Typography>
-                  <RadioGroup
-                    value={agrupamento}
-                    onChange={(event, newValue) => setItemValue(newValue, setAgrupamento, 'agrupamento')}
-                  >
-                    {['Unidade orgânica', 'Colaborador'].map((row) => (
-                      <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
-                    ))}
-                  </RadioGroup>
-                </Stack>
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2">Top</Typography>
-                  <RadioGroup value={top} onChange={(event, newValue) => setItemValue(newValue, setTop, 'top')}>
-                    {['Todos', 'Top 5', 'Top 10', 'Top 20'].map((row) => (
-                      <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
-                    ))}
-                  </RadioGroup>
-                </Stack>
+                <FilterRG
+                  label="Agrupamento"
+                  localS="agrupamento"
+                  value={agrupamento}
+                  setValue={setAgrupamento}
+                  options={['Unidade orgânica', 'Colaborador']}
+                />
+                <FilterRG
+                  label="Top"
+                  localS="top"
+                  value={top}
+                  setValue={setTop}
+                  options={['Todos', 'Top 5', 'Top 10', 'Top 20']}
+                />
               </>
             )}
             {tab === 'data' && (
-              <Stack spacing={0.5}>
-                <Typography variant="subtitle2">Vista</Typography>
-                <RadioGroup row value={vista} onChange={(event, newValue) => setItemValue(newValue, setVista, 'vista')}>
-                  {['mensal', 'anual'].map((row) => (
-                    <FormControlLabel
-                      key={row}
-                      value={row}
-                      label={row}
-                      control={<Radio size="small" />}
-                      sx={{ textTransform: 'capitalize' }}
-                    />
-                  ))}
-                </RadioGroup>
-              </Stack>
+              <FilterRG label="Vista" localS="vista" value={vista} setValue={setVista} options={['mensal', 'anual']} />
             )}
             {(tab === 'data' || tab === 'criacao' || tab === 'tipos') && (
               <FilterAutocomplete
@@ -1255,6 +1280,15 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                 options={uosList}
                 label="Unidade orgânica"
                 disableClearable={tab === 'criacao'}
+              />
+            )}
+            {tab === 'entradas' && agrEntradas === 'Balcão' && (
+              <FilterAutocomplete
+                value={balcao}
+                label="Balcão"
+                disableClearable
+                setValue={setBalcao}
+                options={balcoesList}
               />
             )}
             {haveColaborador && (
@@ -1269,7 +1303,7 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
             {haveEstado && (
               <FilterAutocomplete
                 value={estado}
-                label="Estado/Ambiente"
+                label="Ambiente"
                 setValue={setEstado}
                 options={estadosList}
                 disableClearable={haveEstado && !perfil && !fluxo}
@@ -1284,23 +1318,8 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
                 options={fluxosList}
               />
             )}
-            {tab === 'devolucoes' && (
-              <Stack spacing={1}>
-                <Typography variant="subtitle2"> Origem </Typography>
-                <RadioGroup
-                  row
-                  value={origem}
-                  onChange={(event, newValue) => setItemValue(newValue, setOrigem, 'origem')}
-                >
-                  {['Interna', 'Externa'].map((row) => (
-                    <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
-                  ))}
-                </RadioGroup>
-              </Stack>
-            )}
             {havePeriodo && (
-              <Stack spacing={1}>
-                <Typography variant="subtitle2">Período</Typography>
+              <Stack direction="row" spacing={1}>
                 <DatePicker
                   disableFuture
                   value={datai}
@@ -1320,8 +1339,8 @@ export function Filtrar({ tab, top, vista, setTop, setVista }) {
               </Stack>
             )}
           </Stack>
-        </Scrollbar>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -1361,13 +1380,13 @@ function CardInfo({ title, label, total, duracao }) {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 ColaboradorCard.propTypes = {
-  accord: PropTypes.bool,
+  detail: PropTypes.bool,
   total: PropTypes.number,
   assuntos: PropTypes.array,
   colaboradorDados: PropTypes.object,
 };
 
-function ColaboradorCard({ colaboradorDados, total, assuntos, accord }) {
+function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const totalColaborador = sumBy(colaboradorDados?.processos, 'total');
   const colaborador = colaboradores?.find((row) => row.perfil_id === colaboradorDados.item);
@@ -1391,7 +1410,7 @@ function ColaboradorCard({ colaboradorDados, total, assuntos, accord }) {
             </Stack>
           </Stack>
         </Stack>
-        {accord && (
+        {detail && (
           <>
             {colaboradorDados?.processos?.map((row) => {
               const percentagem = (row?.total * 100) / totalColaborador;
@@ -1432,24 +1451,44 @@ FilterAutocomplete.propTypes = {
 
 function FilterAutocomplete({ label, value, options, setValue, ...other }) {
   const localS =
+    (label === 'Ambiente' && 'estadoIndic') ||
     (label === 'Unidade orgânica' && 'uoIndic') ||
     (label === 'Fluxo/Assunto' && 'fluxoIndic') ||
-    (label === 'Estado/Ambiente' && 'estadoIndic') ||
     (label === 'Colaborador' && 'colaboradorIndic') ||
     '';
   return (
-    <Stack spacing={1}>
-      <Typography variant="subtitle2"> {label} </Typography>
-      <Autocomplete
-        fullWidth
-        value={value}
-        options={options}
-        getOptionLabel={(option) => option?.label}
-        isOptionEqualToValue={(option, value) => option?.id === value?.id}
-        onChange={(event, newValue) => setItemValue(newValue, setValue, localS, true)}
-        renderInput={(params) => <TextField {...params} placeholder="Selecionar..." />}
-        {...other}
-      />
+    <Autocomplete
+      fullWidth
+      value={value}
+      options={options}
+      getOptionLabel={(option) => option?.label}
+      renderInput={(params) => <TextField {...params} label={label} />}
+      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      onChange={(event, newValue) => setItemValue(newValue, setValue, localS, true)}
+      {...other}
+    />
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+FilterRG.propTypes = {
+  label: PropTypes.string,
+  value: PropTypes.string,
+  localS: PropTypes.string,
+  options: PropTypes.array,
+  setValue: PropTypes.func,
+};
+
+function FilterRG({ label, localS, value, setValue, options = [] }) {
+  return (
+    <Stack>
+      <Typography variant="subtitle2">{label}</Typography>
+      <RadioGroup row value={value} onChange={(event, newValue) => setItemValue(newValue, setValue, localS)}>
+        {options?.map((row) => (
+          <FormControlLabel key={row} value={row} label={row} control={<Radio size="small" />} />
+        ))}
+      </RadioGroup>
     </Stack>
   );
 }

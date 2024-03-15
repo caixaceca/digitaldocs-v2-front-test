@@ -148,3 +148,7 @@ export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
   const blob = new Blob(byteArrays, { type: contentType });
   return blob;
 };
+
+export function canPreview(anexo) {
+  return (anexo?.conteudo === 'application/pdf' && 'pdf') || (getFileFormat(anexo?.anexo) === 'image' && 'image') || '';
+}

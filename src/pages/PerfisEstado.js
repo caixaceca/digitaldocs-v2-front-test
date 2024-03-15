@@ -25,9 +25,9 @@ import useTable, { getComparator } from '../hooks/useTable';
 // components
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
-import { ColaboradorInfo } from '../components/Panel';
+import { AddItem } from '../components/Actions';
 import { SkeletonTable } from '../components/skeleton';
-import { Checked, AddItem } from '../components/Actions';
+import { ColaboradorInfo, Checked } from '../components/Panel';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';

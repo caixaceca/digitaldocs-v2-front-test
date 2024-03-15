@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
 import selectTab from '../utils/selectTab';
+import { temAcesso } from '../utils/validarAcesso';
 import { setItemValue } from '../utils/normalizeText';
 // routes
 import useSettings from '../hooks/useSettings';
@@ -28,18 +29,22 @@ export default function Parametrizacao() {
   const { handleCloseModal } = useModal(closeModal());
   const { done, error, meusacessos, isAdmin } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabParams') || 'Acessos');
-  const acessoFluxos = isAdmin || meusacessos?.includes('fluxo-110') || meusacessos?.includes('fluxo-110');
-  const acessoOrigens = isAdmin || meusacessos?.includes('origem-110') || meusacessos?.includes('origem-110');
-  const acessoEstados = isAdmin || meusacessos?.includes('estado-110') || meusacessos?.includes('estado-110');
-  const acessoAcessos = isAdmin || meusacessos?.includes('acesso-110') || meusacessos?.includes('acesso-110');
 
   const tabsList = useMemo(
     () =>
       [
-        ...(acessoAcessos ? [{ value: 'Acessos', component: <Acessos /> }] : []),
-        ...(acessoFluxos ? [{ value: 'Fluxos', component: <ParametrizacaoItem item="fluxos" /> }] : []),
-        ...(acessoEstados ? [{ value: 'Estados', component: <ParametrizacaoItem item="estados" /> }] : []),
-        ...(acessoOrigens ? [{ value: 'Origens', component: <ParametrizacaoItem item="origens" /> }] : []),
+        ...(isAdmin || temAcesso(['acesso-110', 'acesso-111'], meusacessos)
+          ? [{ value: 'Acessos', component: <Acessos /> }]
+          : []),
+        ...(isAdmin || temAcesso(['fluxo-110', 'fluxo-111'], meusacessos)
+          ? [{ value: 'Fluxos', component: <ParametrizacaoItem item="fluxos" /> }]
+          : []),
+        ...(isAdmin || temAcesso(['estado-110', 'estado-111'], meusacessos)
+          ? [{ value: 'Estados', component: <ParametrizacaoItem item="estados" /> }]
+          : []),
+        ...(isAdmin || temAcesso(['origem-110', 'origem-111'], meusacessos)
+          ? [{ value: 'Origens', component: <ParametrizacaoItem item="origens" /> }]
+          : []),
         ...(isAdmin
           ? [
               { value: 'Anexos', component: <ParametrizacaoItemTabs item="anexos" /> },
@@ -50,7 +55,7 @@ export default function Parametrizacao() {
             ]
           : []),
       ] || [],
-    [acessoAcessos, acessoEstados, acessoFluxos, acessoOrigens, isAdmin]
+    [isAdmin, meusacessos]
   );
 
   useEffect(() => {
@@ -62,7 +67,7 @@ export default function Parametrizacao() {
   return (
     <Page title="Parametrização | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Notificacao done={done} error={error} onCancel={handleCloseModal} />
+        <Notificacao done={done} error={error} afterSuccess={handleCloseModal} />
         <TabsWrapper
           tab="tabParams"
           tabsList={tabsList}

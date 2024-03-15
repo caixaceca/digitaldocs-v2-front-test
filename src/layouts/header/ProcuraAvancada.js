@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -128,8 +129,8 @@ export default function ProcuraAvancada() {
       <Dialog
         fullWidth
         open={open}
+        maxWidth="md"
         onClose={onClose}
-        maxWidth={avancada ? 'md' : 'sm'}
         sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
       >
         <DialogTitle>Procurar</DialogTitle>
@@ -138,49 +139,19 @@ export default function ProcuraAvancada() {
             {avancada ? (
               <>
                 <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    value={conta}
-                    label="Nº de conta"
-                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
-                    onChange={(event) => setItemValue(event.target.value, setConta, 'conta')}
-                  />
+                  <TextFieldNumb value={conta} setValue={setConta} label="Nº de conta" localS="conta" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    value={cliente}
-                    label="Nº de cliente"
-                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
-                    onChange={(event) => setItemValue(event.target.value, setCliente, 'cliente')}
-                  />
+                  <TextFieldNumb value={cliente} setValue={setCliente} label="Nº de cliente" localS="cliente" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    value={entidade}
-                    label="Nº de entidade"
-                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
-                    onChange={(event) => setItemValue(event.target.value, setEntidade, 'entidade')}
-                  />
+                  <TextFieldNumb value={entidade} setValue={setEntidade} label="Nº de entidade" localS="entidade" />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <TextField
-                    fullWidth
-                    value={nentrada}
-                    label="Nº de entrada"
-                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
-                    onChange={(event) => setItemValue(event.target.value, setNentrada, 'nentrada')}
-                  />
+                  <TextFieldNumb value={nentrada} setValue={setNentrada} label="Nº de entrada" localS="nentrada" />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <TextField
-                    fullWidth
-                    value={noperacao}
-                    label="Nº de operação"
-                    InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
-                    onChange={(event) => setItemValue(event.target.value, setNoperacao, 'noperacao')}
-                  />
+                  <TextFieldNumb value={noperacao} setValue={setNoperacao} label="Nº de operação" localS="noperacao" />
                 </Grid>
                 <Grid item xs={6} md={3}>
                   <DatePicker
@@ -235,7 +206,6 @@ export default function ProcuraAvancada() {
                   autoFocus
                   value={search}
                   onKeyUp={handleKeyUp}
-                  label="Pesquisa global"
                   placeholder="Introduza uma palavra/texto chave..."
                   onChange={(event) => setItemValue(event.target.value, setSearch, 'search')}
                 />
@@ -262,18 +232,34 @@ export default function ProcuraAvancada() {
           <Button variant="outlined" color="inherit" onClick={onClose}>
             Cancelar
           </Button>
-          {(avancada && (
+          {(avancada || search) && (
             <Button variant="contained" onClick={handleSearch}>
               Procurar
             </Button>
-          )) ||
-            (search && (
-              <Button variant="contained" onClick={handleSearch}>
-                Procurar
-              </Button>
-            ))}
+          )}
         </DialogActions>
       </Dialog>
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+TextFieldNumb.propTypes = {
+  value: PropTypes.number,
+  label: PropTypes.string,
+  localS: PropTypes.string,
+  setValue: PropTypes.func,
+};
+
+function TextFieldNumb({ value, setValue, label, localS }) {
+  return (
+    <TextField
+      fullWidth
+      value={value}
+      label={label}
+      onChange={(event) => setItemValue(event.target.value, setValue, localS)}
+      InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
+    />
   );
 }

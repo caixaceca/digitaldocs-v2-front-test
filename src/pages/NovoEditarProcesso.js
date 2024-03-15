@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -22,6 +22,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
+import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
 import { Ambiente } from '../sections/AmbienteFluxo';
@@ -33,6 +34,7 @@ import RoleBasedGuard from '../guards/RoleBasedGuard';
 
 export default function NovoEditarProcesso() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
   const { themeStretch } = useSettings();
@@ -40,8 +42,8 @@ export default function NovoEditarProcesso() {
   const [fluxo, setFluxo] = useState(null);
   const { mail, cc } = useSelector((state) => state.intranet);
   const { linhas } = useSelector((state) => state.parametrizacao);
-  const { processo, isLoadingP } = useSelector((state) => state.digitaldocs);
-  const { origens, meusAmbientes, meusFluxos, meuAmbiente } = useSelector((state) => state.parametrizacao);
+  const { processo, isLoadingP, done, error } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, meusFluxos, meuAmbiente } = useSelector((state) => state.parametrizacao);
   const perfilId = cc?.perfil_id;
 
   useEffect(() => {
@@ -49,12 +51,6 @@ export default function NovoEditarProcesso() {
       dispatch(getItem('processo', { id, mail, perfilId }));
     }
   }, [dispatch, perfilId, mail, id]);
-
-  useEffect(() => {
-    if (mail && perfilId && origens?.length === 0 && fluxo && !fluxo?.is_interno) {
-      dispatch(getFromParametrizacao('origens', { mail, perfilId }));
-    }
-  }, [dispatch, origens, fluxo, processo, perfilId, mail]);
 
   useEffect(() => {
     if (mail && perfilId && linhas?.length === 0 && fluxo?.is_credito) {
@@ -66,10 +62,19 @@ export default function NovoEditarProcesso() {
     setFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null);
   }, [meuAmbiente?.id, meusFluxos, processo?.fluxo_id]);
 
+  const navigateToProcess = () => {
+    if (done === 'Processo adicionado' || done === 'Processo atualizado') {
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
+    }
+  };
+
   return (
     <Page title={!isEdit ? 'Novo processo | DigitalDocs' : 'Editar processo | DigitalDocs'}>
       <Container maxWidth={themeStretch ? false : 'xl'}>
+        <Notificacao done={done} error={error} afterSuccess={navigateToProcess} />
         <HeaderBreadcrumbs
+          sx={{ color: 'text.secondary' }}
+          action={meusAmbientes?.length > 1 && <Ambiente />}
           heading={!isEdit ? 'Novo processo' : 'Editar processo'}
           links={
             isEdit
@@ -78,7 +83,7 @@ export default function NovoEditarProcesso() {
                   { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
                   {
                     name: processo
-                      ? `${processo?.nentrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                      ? `${processo?.numero_entrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
                           processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                         }`
                       : id,
@@ -92,27 +97,20 @@ export default function NovoEditarProcesso() {
                   { name: 'Novo processo' },
                 ]
           }
-          action={
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems="center">
-              {meusAmbientes?.length > 1 && <Ambiente />}
-            </Stack>
-          }
-          sx={{ color: 'text.secondary' }}
         />
         {(!isEdit && meuAmbiente?.is_inicial && meuAmbiente?.id !== -1) ||
-        (processo?.is_lock &&
-          processo?.perfil_id === cc?.perfil_id &&
-          processo?.estado_atual_id === meuAmbiente?.id) ? (
+        (processo?.preso && processo?.perfil_id === cc?.perfil_id && processo?.estado_atual_id === meuAmbiente?.id) ? (
           <>
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="center">
                   <Autocomplete
                     value={fluxo}
+                    disableClearable
                     getOptionLabel={(option) => option?.assunto}
                     onChange={(event, newValue) => setFluxo(newValue)}
-                    options={meusFluxos.filter((option) => option?.id > 0)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    options={meusFluxos.filter((option) => option?.id > 0 && option?.assunto !== 'Crédito Colaborador')}
                     renderInput={(params) => (
                       <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
                     )}
@@ -133,19 +131,19 @@ export default function NovoEditarProcesso() {
                 {!fluxo ? (
                   <Card sx={{ mb: 3 }}>
                     <CardContent>
-                      <SearchNotFound message="Seleciona um fluxo válido para inciar um processo..." />
+                      <SearchNotFound message="Seleciona o fluxo para o processo pretendido..." />
                     </CardContent>
                   </Card>
                 ) : (
                   <>
                     {fluxo?.is_credito ? (
-                      <ProcessoCredito isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                      <ProcessoCredito isEdit={isEdit} selectedProcesso={isEdit ? processo : null} fluxo={fluxo} />
                     ) : (
                       <>
                         {fluxo?.is_interno ? (
-                          <ProcessoInterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                          <ProcessoInterno isEdit={isEdit} selectedProcesso={isEdit ? processo : null} fluxo={fluxo} />
                         ) : (
-                          <ProcessoExterno isEdit={isEdit} selectedProcesso={processo} fluxo={fluxo} />
+                          <ProcessoExterno isEdit={isEdit} selectedProcesso={isEdit ? processo : null} fluxo={fluxo} />
                         )}
                       </>
                     )}
@@ -162,7 +160,7 @@ export default function NovoEditarProcesso() {
             children={
               isEdit ? (
                 <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  Este ambiente não permite a edição deste processo...
+                  Este ambiente não permite editar este processo...
                 </Typography>
               ) : (
                 <Typography variant="subtitle1" sx={{ mb: 3 }}>

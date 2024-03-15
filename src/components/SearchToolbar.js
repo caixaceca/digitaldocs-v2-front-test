@@ -168,11 +168,11 @@ export function SearchToolbarProcessos({
             onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP')}
           />
         )}
-        {cc?.uo?.tipo !== 'Agências' && tab !== 'pendentes' && (
+        {tab === 'tarefas' && (
           <Autocomplete
             fullWidth
             value={segmento || null}
-            sx={{ width: { md: 150, xl: 200 } }}
+            sx={{ width: { md: 170 } }}
             options={['Particulares', 'Empresas']}
             renderInput={(params) => <TextField {...params} label="Segmento" />}
             onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}

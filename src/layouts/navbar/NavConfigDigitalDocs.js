@@ -55,8 +55,6 @@ const navConfig = [
           'estado-111',
           'acesso-110',
           'acesso-111',
-          'perfilestado-110',
-          'perfilestado-111',
         ],
         path: PATH_DIGITALDOCS.parametrizacao.root,
         icon: <SettingsOutlinedIcon />,

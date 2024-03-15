@@ -37,6 +37,13 @@ export function entidadesParse(entidades) {
 
 // ----------------------------------------------------------------------
 
+export function findColaborador(mail, colaboradores) {
+  const colaboradorfind = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
+  return colaboradorfind ? `${colaboradorfind?.perfil?.displayName} (${colaboradorfind?.uo?.label})` : mail;
+}
+
+// ----------------------------------------------------------------------
+
 export function noDados(vazio) {
   return (
     <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
@@ -86,9 +93,10 @@ export function errorMsg(error) {
     error.response?.data?.errop ||
     error?.error?.[0]?.message ||
     error?.error?.[1]?.message ||
-    error.response?.data?.mensagem ||
-    error.response?.data?.erro ||
-    error.response?.mensagem ||
+    error?.response?.data?.error ||
+    error?.response?.data?.mensagem ||
+    error?.response?.data?.erro ||
+    error?.response?.mensagem ||
     error.response?.data ||
     error?.mensagem ||
     error?.[0]?.msg ||
