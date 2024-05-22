@@ -19,8 +19,6 @@ import { Criado } from '../../components/Panel';
 import { TextItem } from '../tabela/CartoesForm';
 import { Fechar } from '../../components/Actions';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
 // ----------------------------------------------------------------------
 
 Detalhes.propTypes = { item: PropTypes.string, closeModal: PropTypes.func };
@@ -81,7 +79,7 @@ export function Detalhes({ item, closeModal }) {
               )}
               {selectedItem?.assunto && (
                 <TextItem
-                  title="Fluxo/Assunto:"
+                  title="Assunto:"
                   text={`${selectedItem.assunto}${selectedItem?.fluxo_id ? ` (ID: ${selectedItem?.fluxo_id})` : ''}`}
                 />
               )}
@@ -137,8 +135,10 @@ export function Detalhes({ item, closeModal }) {
                 title="Adicionado:"
                 text1={
                   <Stack spacing={0.5} sx={{ mt: 1 }}>
-                    {selectedItem?.criador && <Criado tipo="user" value={selectedItem?.criador} />}
-                    {selectedItem?.criado_em && <Criado tipo="date" value={ptDateTime(selectedItem?.criado_em)} />}
+                    {selectedItem?.criador && <Criado tipo="user" value={selectedItem?.criador} shuffle />}
+                    {selectedItem?.criado_em && (
+                      <Criado tipo="date" value={ptDateTime(selectedItem?.criado_em)} shuffle />
+                    )}
                   </Stack>
                 }
               />
@@ -147,8 +147,10 @@ export function Detalhes({ item, closeModal }) {
                   title="Modificado:"
                   text1={
                     <Stack spacing={0.5} sx={{ mt: 1 }}>
-                      {selectedItem?.modificador && <Criado tipo="user" value={selectedItem?.modificador} />}
-                      {selectedItem?.modificado_por && <Criado tipo="user" value={selectedItem?.modificado_por} />}
+                      {selectedItem?.modificador && <Criado tipo="user" value={selectedItem?.modificador} shuffle />}
+                      {selectedItem?.modificado_por && (
+                        <Criado tipo="user" value={selectedItem?.modificado_por} shuffle />
+                      )}
                       {selectedItem?.modificado_em && (
                         <Criado tipo="date" value={ptDateTime(selectedItem?.modificado_em)} />
                       )}

@@ -15,10 +15,12 @@ const initialState = {
   isAdmin: false,
   isSaving: false,
   isLoading: false,
+  isGerente: false,
   isOpenView: false,
   isOpenModal: false,
-  iAmInGrpGerente: false,
   confirmarCartoes: false,
+  auditoriaProcesso: false,
+  arquivarProcessos: false,
   fluxo: null,
   acesso: null,
   estado: null,
@@ -117,7 +119,11 @@ const slice = createSlice({
     },
 
     getMeusAmbientesSuccess(state, action) {
-      state.meusAmbientes = applySort(action.payload, getComparator('asc', 'nome')) || [];
+      state.meusAmbientes =
+        applySort(
+          action.payload?.filter((row) => row?.id !== -1),
+          getComparator('asc', 'nome')
+        ) || [];
       const grpGerent = action.payload?.find((row) => row?.nome?.includes('Gerência'));
       const grpAtend = action.payload?.find((row) => row?.nome?.includes('Atendimento'));
       const currentAmbiente =
@@ -125,10 +131,11 @@ const slice = createSlice({
         action.payload?.find((row) => row?.id === grpGerent?.id) ||
         action.payload?.find((row) => row?.id === grpAtend?.id) ||
         action.payload?.[0];
-      state.iAmInGrpGerente = !!grpGerent;
+      state.isGerente = !!grpGerent;
       state.meuAmbiente = currentAmbiente;
-      state.meusFluxos = applySort(currentAmbiente?.fluxos, getComparator('asc', 'assunto')) || [];
-      state.meuFluxo = currentAmbiente?.fluxos?.[0] || null;
+      const fluxos = currentAmbiente?.fluxos?.filter((row) => row?.id !== -1) || [];
+      state.meusFluxos = applySort(fluxos, getComparator('asc', 'assunto'));
+      state.meuFluxo = fluxos?.length === 1 ? fluxos?.[0] : null;
     },
 
     getMeusAcessosSuccess(state, action) {
@@ -145,6 +152,9 @@ const slice = createSlice({
         }
         if (acesso === 'arquivar-processo-110') {
           state.arquivarProcessos = true;
+        }
+        if (acesso === 'auditoria-processo-100') {
+          state.auditoriaProcesso = true;
         }
       });
     },
@@ -417,9 +427,12 @@ const slice = createSlice({
 
     changeMeuAmbiente(state, action) {
       state.meuAmbiente = action.payload;
-      const fluxos = action.payload?.fluxos || [{ id: -1, assunto: 'Todos' }];
-      state.meusFluxos = applySort(fluxos, getComparator('asc', 'assunto'));
-      state.meuFluxo = fluxos[0];
+      const fluxos = action.payload?.fluxos || [];
+      state.meusFluxos = applySort(
+        fluxos?.filter((row) => row?.id !== -1),
+        getComparator('asc', 'assunto')
+      );
+      state.meuFluxo = fluxos?.length === 1 ? fluxos?.[0] : null;
     },
 
     changeMeuFluxo(state, action) {

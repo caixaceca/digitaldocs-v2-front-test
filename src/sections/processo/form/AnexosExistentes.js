@@ -2,7 +2,6 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 // @mui
-import Fab from '@mui/material/Fab';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
@@ -18,7 +17,7 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import { selectAnexo, closeModalAnexo, deleteItem } from '../../../redux/slices/digitaldocs';
 // components
 import { Criado } from '../../../components/Panel';
-import SvgIconStyle from '../../../components/SvgIconStyle';
+import { DefaultAction } from '../../../components/Actions';
 import DialogConfirmar from '../../../components/DialogConfirmar';
 
 // ----------------------------------------------------------------------
@@ -59,24 +58,16 @@ export default function AnexosExistentes({ anexos, processoId }) {
             <ListItemIcon>{getFileThumb(false, null, anexo.nome)}</ListItemIcon>
             <ListItemText
               primary={anexo?.nome}
+              primaryTypographyProps={{ variant: 'subtitle2' }}
               secondary={
                 <Stack direction="row" spacing={1}>
-                  <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} />
+                  <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} shuffle />
                   {anexo?.criado_em && <Criado caption tipo="date" value={ptDateTime(anexo?.criado_em)} />}
                 </Stack>
               }
-              primaryTypographyProps={{ variant: 'subtitle2' }}
             />
             {anexo?.criador?.toLowerCase() === mail?.toLowerCase() && (
-              <Fab
-                size="small"
-                color="error"
-                variant="soft"
-                sx={{ width: 30, height: 30 }}
-                onClick={() => handleClickOpen(anexo.id)}
-              >
-                <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 20 }} />
-              </Fab>
+              <DefaultAction color="error" label="ELIMINAR" small onClick={() => handleClickOpen(anexo.id)} />
             )}
           </ListItem>
         ))}

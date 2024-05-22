@@ -21,6 +21,8 @@ import { Notificacao } from '../components/NotistackProvider';
 import Acessos from '../sections/parametrizacao/Acessos';
 import ParametrizacaoItem from '../sections/parametrizacao/ParametrizacaoItem';
 import ParametrizacaoItemTabs from '../sections/parametrizacao/ParametrizacaoItemTabs';
+// guards
+import RoleBasedGuard from '../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -75,10 +77,11 @@ export default function Parametrizacao() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        {tabsList.map((tab) => {
+        {tabsList?.map((tab) => {
           const isMatched = tab?.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
         })}
+        {tabsList?.length === 0 && <RoleBasedGuard hasContent roles={[]} />}
       </Container>
     </Page>
   );

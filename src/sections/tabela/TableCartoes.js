@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDate } from '../../utils/formatTime';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { normalizeText, setItemValue, dataValido } from '../../utils/normalizeText';
+import { normalizeText, setItemValue, dataValido, shuffleString } from '../../utils/normalizeText';
 // hooks
 import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
@@ -346,9 +346,9 @@ export default function TableCartoes() {
                       </TableCell>
                       <TableCell>{ptDate(row.data_emissao)}</TableCell>
                       <TableCell>{row?.entrega}</TableCell>
-                      <TableCell align="center">{row?.numero}</TableCell>
-                      <TableCell>{row?.cliente}</TableCell>
-                      <TableCell>{row?.nome}</TableCell>
+                      <TableCell align="center">{shuffleString(row?.numero)}</TableCell>
+                      <TableCell>{shuffleString(row?.cliente)}</TableCell>
+                      <TableCell>{shuffleString(row?.nome)}</TableCell>
                       <TableCell>{row?.tipo}</TableCell>
                       <TableCell align="center" sx={{ width: 10 }}>
                         <Checked check={row.emissao_validado} color={row.emissao_validado ? '' : 'error.main'} />

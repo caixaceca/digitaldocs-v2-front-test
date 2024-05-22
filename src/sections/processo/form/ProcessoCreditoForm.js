@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 // form
 import { useFormContext } from 'react-hook-form';
@@ -25,17 +26,18 @@ import { segmentos, escaloes, situacoes } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
-ProcessoCreditoForm.propTypes = {
-  isEdit: PropTypes.bool,
-  setEstado: PropTypes.func,
-  selectedProcesso: PropTypes.object,
-};
+ProcessoCreditoForm.propTypes = { isEdit: PropTypes.bool, processo: PropTypes.object };
 
-export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcesso }) {
+export default function ProcessoCreditoForm({ isEdit, processo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
-  const hasAnexos = selectedProcesso?.anexos?.length > 0;
+  const hasAnexos = processo?.anexos?.length > 0;
   const { linhas } = useSelector((state) => state.parametrizacao);
+
+  useEffect(() => {
+    setValue('linha_id', null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.segmento]);
 
   return (
     <Grid container spacing={3}>
@@ -50,18 +52,11 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                 <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante solicitado" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFAutocompleteSimple
-                  name="segmento"
-                  label="Segmento"
-                  options={segmentos}
-                  onChange={(event, newValue) => {
-                    setValue('segmento', newValue);
-                    setValue('linha_id', null);
-                  }}
-                />
+                <RHFAutocompleteSimple name="segmento" label="Segmento" options={segmentos} />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <RHFAutocompleteObject
+                  disabled={!values?.segmento}
                   name="linha_id"
                   label="Linha de crédito"
                   options={applySort(
@@ -82,7 +77,7 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                 <RHFTextField name="numero_proposta" label="Nº de proposta" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <RHFTextField name="setor_atividade" label="Setor de atividade" />
+                <RHFTextField name="setor_atividade" label="Entidade patronal" />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <RHFTextField name="finalidade" label="Finalidade" />
@@ -99,13 +94,10 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
                 <Grid container spacing={3} justifyContent="center">
                   <Grid item xs={12} sm={3}>
                     <RHFAutocompleteSimple
-                      name="situacao_final_mes"
                       label="Situação"
+                      disableClearable
                       options={situacoes}
-                      onChange={(event, newValue) => {
-                        setValue('situacao_final_mes', newValue);
-                        setEstado(newValue);
-                      }}
+                      name="situacao_final_mes"
                     />
                   </Grid>
                   {(values?.situacao_final_mes === 'Aprovado' ||
@@ -168,7 +160,7 @@ export default function ProcessoCreditoForm({ isEdit, setEstado, selectedProcess
               <ObsNovosAnexos />
               {hasAnexos && (
                 <Grid item xs={12}>
-                  <AnexosExistentes anexos={selectedProcesso.anexos} processoId={selectedProcesso.id} />
+                  <AnexosExistentes anexos={processo.anexos} processoId={processo.id} />
                 </Grid>
               )}
             </Grid>

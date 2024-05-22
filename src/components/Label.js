@@ -75,20 +75,12 @@ Label.propTypes = {
 };
 
 export default function Label({ children, color = 'default', variant = 'ghost', startIcon, endIcon, sx }) {
-  const style = {
-    width: 16,
-    height: 16,
-    '& svg, img': { width: 1, height: 1, objectFit: 'cover' },
-  };
+  const style = { width: 16, height: 16, '& svg, img': { width: 1, height: 1, objectFit: 'cover' } };
 
   return (
     <RootStyle
       ownerState={{ color, variant }}
-      sx={{
-        ...(startIcon && { pl: 0.75 }),
-        ...(endIcon && { pr: 0.75 }),
-        ...sx,
-      }}
+      sx={{ ...(startIcon && { pl: 0.75 }), ...(endIcon && { pr: 0.75 }), ...sx }}
     >
       {startIcon && <Box sx={{ mr: 0.75, ...style }}>{startIcon}</Box>}
 

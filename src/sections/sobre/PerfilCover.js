@@ -1,13 +1,19 @@
 import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import Badge from '@mui/material/Badge';
+import Switch from '@mui/material/Switch';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
+import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { getFile } from '../../utils/getFile';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
+// redux
+import { changeDadosView } from '../../redux/slices/banka';
+import { useDispatch, useSelector } from '../../redux/store';
 // components
 import MyAvatar from '../../components/MyAvatar';
 
@@ -28,10 +34,10 @@ const RootStyle = styled('div')(({ theme }) => ({
 const InfoStyle = styled('div')(({ theme }) => ({
   left: 20,
   zIndex: 99,
-  position: 'absolute',
-  marginTop: theme.spacing(3),
   right: 'auto',
   display: 'flex',
+  position: 'absolute',
+  marginTop: theme.spacing(3),
   [theme.breakpoints.up('md')]: { alignItems: 'center', left: theme.spacing(2), bottom: theme.spacing(4) },
 }));
 
@@ -84,12 +90,7 @@ export default function PerfilCover({ perfilColaborador }) {
             {perfilColaborador ? (
               perfilColaborador?.perfil?.displayName || perfilColaborador?.perfil?.mail
             ) : (
-              <Skeleton
-                animation="wave"
-                height={40}
-                width={250}
-                sx={{ backgroundColor: (theme) => theme.palette.background.neutral, opacity: 0.72 }}
-              />
+              <Skeleton height={40} width={250} animation="wave" sx={{ backgroundColor: 'background.neutral' }} />
             )}
           </Typography>
           <Typography>
@@ -99,16 +100,60 @@ export default function PerfilCover({ perfilColaborador }) {
                 {perfilColaborador?.uo?.label}
               </>
             ) : (
-              <Skeleton
-                animation="wave"
-                height={25}
-                width={150}
-                sx={{ backgroundColor: (theme) => theme.palette.background.neutral }}
-              />
+              <Skeleton height={25} width={150} animation="wave" sx={{ backgroundColor: 'background.neutra' }} />
             )}
           </Typography>
         </Box>
       </InfoStyle>
     </RootStyle>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+EntidadeCover.propTypes = { numero: PropTypes.number, entidade: PropTypes.object };
+
+export function EntidadeCover({ numero, entidade }) {
+  const dispatch = useDispatch();
+  const { dadosComValores } = useSelector((state) => state.banka);
+
+  const changeView = (newValue) => {
+    dispatch(changeDadosView(newValue));
+  };
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={3} sx={{ p: 2 }}>
+      <MyAvatar
+        sx={{
+          borderStyle: 'solid',
+          borderColor: 'common.white',
+          width: { xs: 80, md: 120 },
+          height: { xs: 80, md: 120 },
+        }}
+        src={getFile('colaborador', '')}
+      />
+      <Stack
+        spacing={2}
+        sx={{ flexGrow: 1 }}
+        direction={{ xs: 'column', md: 'row' }}
+        alignItems={{ xs: 'left', md: 'center' }}
+        justifyContent={{ xs: 'left', md: 'space-between' }}
+      >
+        <Box sx={{ color: 'common.white' }}>
+          <Typography variant="h5">{numero}</Typography>
+          <Typography variant="h5">{entidade?.nomeDaEntidade}</Typography>
+          <Typography>
+            {entidade?.descritivoSectorial} - {entidade?.descritivoResidencia}
+          </Typography>
+        </Box>
+        <Box>
+          <FormControlLabel
+            label="Somente campos com valores"
+            sx={{ ml: 0, pr: 2, borderRadius: 1, color: 'text.secondary', bgcolor: 'background.paper' }}
+            control={<Switch checked={dadosComValores} onChange={(event, newValue) => changeView(newValue)} />}
+          />
+        </Box>
+      </Stack>
+    </Stack>
   );
 }

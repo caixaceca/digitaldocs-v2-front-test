@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
@@ -14,7 +14,7 @@ import { fYear } from '../utils/formatTime';
 // redux
 import { getItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
+import { getFromParametrizacao, changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -25,7 +25,6 @@ import { SearchNotFound } from '../components/table';
 import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
-import { Ambiente } from '../sections/AmbienteFluxo';
 import { ProcessoInterno, ProcessoExterno, ProcessoCredito } from '../sections/processo/form';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
@@ -39,11 +38,10 @@ export default function NovoEditarProcesso() {
   const { pathname } = useLocation();
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
-  const [fluxo, setFluxo] = useState(null);
   const { mail, cc } = useSelector((state) => state.intranet);
   const { linhas } = useSelector((state) => state.parametrizacao);
   const { processo, isLoadingP, done, error } = useSelector((state) => state.digitaldocs);
-  const { meusAmbientes, meusFluxos, meuAmbiente } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
   const perfilId = cc?.perfil_id;
 
   useEffect(() => {
@@ -53,19 +51,38 @@ export default function NovoEditarProcesso() {
   }, [dispatch, perfilId, mail, id]);
 
   useEffect(() => {
-    if (mail && perfilId && linhas?.length === 0 && fluxo?.is_credito) {
+    if (mail && perfilId && linhas?.length === 0 && meuFluxo?.is_credito) {
       dispatch(getFromParametrizacao('linhas', { mail, perfilId }));
     }
-  }, [dispatch, linhas, fluxo, processo, perfilId, mail]);
+  }, [dispatch, linhas, meuFluxo, perfilId, mail]);
 
   useEffect(() => {
-    setFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null);
-  }, [meuAmbiente?.id, meusFluxos, processo?.fluxo_id]);
+    dispatch(changeMeuFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null));
+  }, [dispatch, meusFluxos, processo?.fluxo_id]);
+
+  useEffect(() => {
+    dispatch(
+      changeMeuAmbiente(
+        meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id) ||
+          meusAmbientes?.find((row) => row?.id === meuAmbiente?.id) ||
+          null
+      )
+    );
+  }, [dispatch, meuAmbiente?.id, meusAmbientes, processo?.estado_atual_id]);
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
       navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     }
+  };
+
+  const changeAmbiente = (newValue) => {
+    dispatch(changeMeuAmbiente(newValue));
+    localStorage.setItem('meuAmbiente', newValue?.id);
+  };
+
+  const changeFluxo = (newValue) => {
+    dispatch(changeMeuFluxo(newValue));
   };
 
   return (
@@ -74,7 +91,6 @@ export default function NovoEditarProcesso() {
         <Notificacao done={done} error={error} afterSuccess={navigateToProcess} />
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
-          action={meusAmbientes?.length > 1 && <Ambiente />}
           heading={!isEdit ? 'Novo processo' : 'Editar processo'}
           links={
             isEdit
@@ -98,26 +114,41 @@ export default function NovoEditarProcesso() {
                 ]
           }
         />
-        {(!isEdit && meuAmbiente?.is_inicial && meuAmbiente?.id !== -1) ||
-        (processo?.preso && processo?.perfil_id === cc?.perfil_id && processo?.estado_atual_id === meuAmbiente?.id) ? (
-          <>
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="center">
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} sm={6} lg={4}>
+                <Autocomplete
+                  fullWidth
+                  disableClearable
+                  readOnly={isEdit}
+                  value={meuAmbiente}
+                  getOptionLabel={(option) => option?.nome}
+                  onChange={(event, newValue) => changeAmbiente(newValue)}
+                  isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                  renderInput={(params) => <TextField {...params} label="Estado" />}
+                  options={isEdit ? meusAmbientes : meusAmbientes?.filter((row) => row?.is_inicial)}
+                />
+              </Grid>
+              {(isEdit || (!isEdit && meuAmbiente?.is_inicial)) && (
+                <Grid item xs={12} sm={6} lg={4}>
                   <Autocomplete
-                    value={fluxo}
+                    value={meuFluxo}
                     disableClearable
                     getOptionLabel={(option) => option?.assunto}
-                    onChange={(event, newValue) => setFluxo(newValue)}
+                    onChange={(event, newValue) => changeFluxo(newValue)}
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    options={meusFluxos.filter((option) => option?.id > 0 && option?.assunto !== 'Crédito Colaborador')}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth label="Assunto" sx={{ minWidth: { md: 500 } }} />
-                    )}
+                    renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
+                    options={meusFluxos?.filter((option) => option?.assunto !== 'Crédito Colaborador')}
                   />
-                </Stack>
-              </CardContent>
-            </Card>
+                </Grid>
+              )}
+            </Grid>
+          </CardContent>
+        </Card>
+        {(!isEdit && meuAmbiente?.is_inicial) ||
+        (processo?.preso && processo?.perfil_id === cc?.perfil_id && processo?.estado_atual_id === meuAmbiente?.id) ? (
+          <>
             {isEdit && isLoadingP ? (
               <Card sx={{ mb: 3 }}>
                 <CardContent>
@@ -128,22 +159,22 @@ export default function NovoEditarProcesso() {
               </Card>
             ) : (
               <>
-                {!fluxo ? (
+                {!meuFluxo ? (
                   <Card sx={{ mb: 3 }}>
                     <CardContent>
-                      <SearchNotFound message="Seleciona o fluxo para o processo pretendido..." />
+                      <SearchNotFound message="Seleciona o assunto do processo que pretendes criar..." />
                     </CardContent>
                   </Card>
                 ) : (
                   <>
-                    {fluxo?.is_credito ? (
-                      <ProcessoCredito isEdit={isEdit} selectedProcesso={isEdit ? processo : null} fluxo={fluxo} />
+                    {meuFluxo?.is_credito ? (
+                      <ProcessoCredito isEdit={isEdit} processo={isEdit ? processo : null} fluxo={meuFluxo} />
                     ) : (
                       <>
-                        {fluxo?.is_interno ? (
-                          <ProcessoInterno isEdit={isEdit} selectedProcesso={isEdit ? processo : null} fluxo={fluxo} />
+                        {meuFluxo?.is_interno ? (
+                          <ProcessoInterno isEdit={isEdit} processo={isEdit ? processo : null} fluxo={meuFluxo} />
                         ) : (
-                          <ProcessoExterno isEdit={isEdit} selectedProcesso={isEdit ? processo : null} fluxo={fluxo} />
+                          <ProcessoExterno isEdit={isEdit} processo={isEdit ? processo : null} fluxo={meuFluxo} />
                         )}
                       </>
                     )}
@@ -160,11 +191,11 @@ export default function NovoEditarProcesso() {
             children={
               isEdit ? (
                 <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  Este ambiente não permite editar este processo...
+                  Este estado não permite editar este processo...
                 </Typography>
               ) : (
                 <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  Este ambiente não permite a criação de processos, selecione outro ambiente...
+                  Seleciona um estado válido para criar um processo...
                 </Typography>
               )
             }

@@ -84,3 +84,23 @@ export function SkeletonPedidoCredito() {
     </Grid>
   );
 }
+
+// ----------------------------------------------------------------------
+
+export function SkeletonEntidade() {
+  return (
+    <>
+      <Grid item xs={12}>
+        <Skeleton variant="text" height={140} sx={{ transform: 'none' }} />
+      </Grid>
+      <Grid item xs={12}>
+        <Skeleton variant="text" height={45} sx={{ transform: 'none' }} />
+      </Grid>
+      {[...Array(2)].map((row, index) => (
+        <Grid item xs={12} sm={6} key={`SkeletonEntidade_${index}`}>
+          <Skeleton variant="text" height={500} sx={{ transform: 'none' }} />
+        </Grid>
+      ))}
+    </>
+  );
+}

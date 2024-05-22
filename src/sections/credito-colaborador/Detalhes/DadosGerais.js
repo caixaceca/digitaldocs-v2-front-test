@@ -190,7 +190,7 @@ export default function DadosGerais() {
                 <TextItem title="Prazo de amortização:" text={`${credito?.prazo_amortizacao} meses`} />
                 <TextItem title="Taxa de juro:" text={fPercent(credito?.taxa_juros)} />
                 <TextItem title="Linha de crédito:" text={credito?.linha} />
-                <TextItem title="Setor de atividade:" text={credito?.setor_atividade} />
+                <TextItem title="Entidade patronal:" text={credito?.setor_atividade} />
                 <TextItem title="Finalidade:" text={credito?.finalidade} />
                 {credito?.montante_aprovado && (
                   <TextItem title="Montante aprovado:" text={fCurrency(credito?.montante_aprovado)} />

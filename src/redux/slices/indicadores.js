@@ -40,6 +40,7 @@ const slice = createSlice({
     resetItem(state, action) {
       switch (action.payload) {
         case 'indicadores':
+          state.totalP = null;
           state.indicadores = [];
           break;
         case 'estatisticaCredito':
@@ -119,7 +120,7 @@ export function getIndicadores(item, params) {
         case 'data': {
           if (params?.perfilId) {
             const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.vista}${
+              `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.periodo}${
                 params?.uo ? `&uoID=${params?.uo}` : ''
               }${params?.perfil ? `&perfilID1=${params?.perfil}` : ''}`,
               options
@@ -141,13 +142,11 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'entradas': {
-          if ((params?.agrEntradas === 'Ambiente' && params?.estado) || params?.balcao) {
+          if ((params?.agrEntradas === 'Estado' && params?.estado) || params?.balcao) {
             const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/chegaram/${
-                params?.agrEntradas === 'Ambiente' ? 'num_estado' : 'num_balcao'
-              }/${params?.agrEntradas === 'Ambiente' ? params?.estado : params?.balcao}${
-                query ? `?${query.substr(0, query.length - 1)}` : ''
-              }`,
+              `${BASEURLDD}/v1/indicadores/chegaram/${params?.agrEntradas === 'Estado' ? 'num_estado' : 'num_balcao'}/${
+                params?.agrEntradas === 'Estado' ? params?.estado : params?.balcao
+              }${query ? `?${query.substr(0, query.length - 1)}` : ''}`,
               options
             );
             dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
@@ -178,7 +177,7 @@ export function getIndicadores(item, params) {
           }
           break;
         }
-        case 'volume': {
+        case 'origem': {
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/top/criacao/${params?.perfilId}?escopo=${params?.agrupamento}`,
             options
@@ -192,7 +191,7 @@ export function getIndicadores(item, params) {
           }${query}`;
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/fluxo/${params?.perfilId}${
-              query ? `?${query1.substr(0, query1.length - 1)}` : ''
+              query1 ? `?${query1.substr(0, query1.length - 1)}` : ''
             }`,
             options
           );
@@ -201,18 +200,18 @@ export function getIndicadores(item, params) {
         }
         case 'execucao': {
           if (params?.estado || params?.perfil || params?.fluxo) {
-            const query = `${params?.estado ? `estadoIDFilter=${params?.estado}&` : ''}${
+            const query1 = `${params?.estado ? `estadoIDFilter=${params?.estado}&` : ''}${
               params?.fluxo ? `fluxoIDFilter=${params?.fluxo}&` : ''
             }${params?.perfil ? `perfilIDFilter=${params?.perfil}&` : ''}`;
             const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query.substr(0, query.length - 1)}`,
+              `${BASEURLDD}/v1/indicadores/tempo/execucao/${params?.perfilId}?${query1.substr(0, query1.length - 1)}`,
               options
             );
             dispatch(slice.actions.getIndicadoresSuccess(response.data));
           }
           break;
         }
-        case 'duracao': {
+        case 'conclusao': {
           const perfil = params?.perfil ? `&perfilPID=${params?.perfil}` : '';
           const fluxo = params?.fluxo ? `&fluxoID=${params?.fluxo}` : '';
           const datai = params?.datai ? `&datai=${params?.datai}` : '';
@@ -222,6 +221,16 @@ export function getIndicadores(item, params) {
             options
           );
           dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          break;
+        }
+        case 'equipa': {
+          const uo = params?.agrEntradas === 'Balcão' && params?.uo ? `&uo_id=${params?.uo}` : '';
+          const estado = params?.agrEntradas === 'Estado' && params?.estado ? `&estado_id=${params?.estado}` : '';
+          const response = await axios.get(
+            `${BASEURLDD}/v2/indicadores/duracao/${params?.perfilId}?ano=${params?.ano}${uo}${estado}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
           break;
         }
         case 'estatisticaCredito': {

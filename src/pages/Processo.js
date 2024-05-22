@@ -10,8 +10,8 @@ import Container from '@mui/material/Container';
 // utils
 import {
   temAcesso,
+  naGerencia,
   temNomeacao,
-  podeDarParecer,
   isResponsavelUo,
   findColaboradores,
   processoMePertence,
@@ -20,8 +20,7 @@ import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { parecerEstadoSuccess } from '../redux/slices/cc';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getAll, getItem, closeModal, selectItem, updateItem } from '../redux/slices/digitaldocs';
+import { getAll, getItem, closeModal, updateItem } from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -33,19 +32,10 @@ import { TabCard } from '../components/TabsWrapper';
 import { DefaultAction } from '../components/Actions';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
-import {
-  Versoes,
-  Libertar,
-  Pareceres,
-  Intervencao,
-  DadosGerais,
-  HistoricoPrisoes,
-  HistoricoTransicao,
-} from '../sections/processo';
-// sections
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
-import { Views, PareceresEstado } from '../sections/credito-colaborador/Detalhes';
-import { DesarquivarForm, ParecerForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/IntervencaoForm';
+import Intervencao, { Libertar } from '../sections/processo/Intervencao';
+import { DesarquivarForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/form/IntervencaoForm';
+import { Views, Versoes, Pareceres, Transicoes, DadosGerais, TableDetalhes } from '../sections/processo/Detalhes';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -60,11 +50,9 @@ export default function Processo() {
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
+  const { processo, done, error } = useSelector((state) => state.digitaldocs);
   const { mail, uos, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { processo, destinos, done, error, isOpenModal, isLoading, isOpenModalDesariquivar } = useSelector(
-    (state) => state.digitaldocs
-  );
-  const { meusacessos, meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector(
+  const { meusacessos, meusAmbientes, isGerente, isAdmin, auditoriaProcesso, colaboradoresEstado } = useSelector(
     (state) => state.parametrizacao
   );
   const perfilId = cc?.perfil_id;
@@ -76,9 +64,10 @@ export default function Processo() {
   const fromPorConcluir = params?.get?.('from') === 'porconcluir';
   const fromTrabalhados = params?.get?.('from') === 'trabalhados';
   const uo = uos?.find((row) => row?.id === processo?.uoIdEstadoAtual);
+  const uoOrigem = uos?.find((row) => row?.id === processo?.uo_origem_id);
   const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
-  const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || iAmInGrpGerente;
-  const inGerencia = estado?.includes('Gerência') || estado?.includes('Caixa Principal');
+  const isResponsavel = temNomeacao(cc) || isResponsavelUo(uo, mail) || isGerente;
+  const inGerencia = naGerencia(estado);
 
   const linkNavigate =
     (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
@@ -107,30 +96,20 @@ export default function Processo() {
           ]
         : []),
       ...(processo && processo?.htransicoes?.length > 0
-        ? [{ value: 'Transições', component: <HistoricoTransicao historico={processo?.htransicoes} /> }]
+        ? [{ value: 'Transições', component: <Transicoes transicoes={processo?.htransicoes} /> }]
         : []),
-      ...(processo && processo?.hprisoes?.length > 0
-        ? [{ value: 'Retenções', component: <HistoricoPrisoes historico={processo?.hprisoes} /> }]
+      ...(processo
+        ? [
+            { value: 'Retenções', component: <TableDetalhes id={processo?.id} item="hretencoes" /> },
+            { value: 'Pendências', component: <TableDetalhes id={processo?.id} item="hpendencias" /> },
+            { value: 'Atribuições', component: <TableDetalhes id={processo?.id} item="hatribuicoes" /> },
+          ]
         : []),
-      ...(processo && isAdmin ? [{ value: 'Versões', component: <Versoes id={id} /> }] : []),
-      ...(processo && isAdmin ? [{ value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> }] : []),
+      ...(processo && (isAdmin || auditoriaProcesso) ? [{ value: 'Versões', component: <Versoes id={id} /> }] : []),
+      ...(processo && (isAdmin || auditoriaProcesso) ? [{ value: 'Visualizações', component: <Views id={id} /> }] : []),
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [processo]
+    [id, isAdmin, auditoriaProcesso, processo]
   );
-
-  const idEstado = (item) => {
-    if (item === 'devdop') {
-      return destinos?.find((row) => row?.modo === 'Seguimento' && !row?.nome?.includes('Atendimento'));
-    }
-    if (item === 'gerencia') {
-      return destinos?.find((row) => row?.nome?.includes('Atendimento'));
-    }
-    if (item === 'diario') {
-      return destinos?.find((row) => row?.nome === 'Conferência de Diário');
-    }
-    return null;
-  };
 
   const handlePrevNext = (next) => {
     if (mail && perfilId && id && estadoId) {
@@ -166,6 +145,7 @@ export default function Processo() {
     } else if (
       done === 'Pedido enviado' ||
       done === 'Envio cancelado' ||
+      done === 'Anexo eliminado' ||
       done === 'Pareceres fechado' ||
       done === 'Processo aceitado' ||
       done === 'Processo libertado' ||
@@ -212,21 +192,10 @@ export default function Processo() {
   }, [dispatch, perfilId, estadoId, mail, id, processo?.preso, processo?.perfil_id]);
 
   useEffect(() => {
-    if (mail && perfilId && estado) {
-      if (estadoId && !processo?.preso && perfilP && inGerencia) {
-        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: estadoId }));
-      } else if (inGerencia && idEstado('gerencia')?.id) {
-        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('gerencia')?.id }));
-      } else if (estado === 'Devolução AN' && idEstado('devdop')?.id) {
-        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('devdop')?.id }));
-      } else if (estado === 'Diário' && idEstado('diario')?.id) {
-        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: idEstado('diario')?.id }));
-      } else if (estadoId) {
-        dispatch(getFromParametrizacao('colaboradoresEstado', { mail, id: estadoId, perfilId }));
-      }
+    if (mail && processo?.id) {
+      dispatch(getAll('htransicoes', { id: processo?.id, mail, perfilId }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mail, dispatch, perfilId, estado, estadoId]);
+  }, [dispatch, mail, perfilId, processo?.id]);
 
   const handleAceitar = () => {
     dispatch(updateItem('aceitar', null, { mail, fluxoId, perfilId, estadoId, id, msg: 'Processo aceitado' }));
@@ -236,16 +205,8 @@ export default function Processo() {
     dispatch(updateItem('pedir acesso', '', { perfilId, id, mail, msg: 'Pedido enviado' }));
   };
 
-  const handleDesarquivar = () => {
-    dispatch(getAll('destinosDesarquivamento', { mail, processoId: id }));
-  };
-
   const handleClose = () => {
     dispatch(closeModal());
-  };
-
-  const handleParecer = () => {
-    dispatch(selectItem(podeDarParecer(meusAmbientes, processo?.pareceres_estado)));
   };
 
   return (
@@ -255,7 +216,7 @@ export default function Processo() {
           sx={{ color: 'text.secondary' }}
           heading={
             processo
-              ? `${processo?.numero_entrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+              ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
                   processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                 }`
               : 'Detalhes do processo'
@@ -274,7 +235,7 @@ export default function Processo() {
             },
             {
               name: processo
-                ? `${processo?.numero_entrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
                     processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                   }`
                 : 'Detalhes do processo',
@@ -300,19 +261,11 @@ export default function Processo() {
                       />
                     </>
                   )}
-                  {processo?.situacao === 'A' ? (
+                  {processo?.status === 'Arquivado' ? (
                     <>
                       <RoleBasedGuard roles={['arquivo-110', 'arquivo-111']}>
                         <DefaultAction icon="acesso" label="ATRIBUIR ACESSO" handleClick={onOpen} />
-                        <DefaultAction color="error" label="DESARQUIVAR" handleClick={handleDesarquivar} />
-                        <Dialog open={isOpenModalDesariquivar} onClose={handleClose} fullWidth maxWidth="sm">
-                          <DesarquivarForm
-                            processoID={id}
-                            fluxoID={fluxoId}
-                            onCancel={handleClose}
-                            open={isOpenModalDesariquivar}
-                          />
-                        </Dialog>
+                        <DesarquivarForm id={id} onCancel={handleClose} colaboradoresList={colaboradoresList} />
                         <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
                           <AtribuirAcessoForm open={open} onCancel={onClose} processoId={id} />
                         </Dialog>
@@ -331,7 +284,7 @@ export default function Processo() {
                       )}
                       {!processo?.preso && !processo?.em_paralelo && (
                         <>
-                          {processo?.pareceres_estado?.length === 0 ? (
+                          {processo?.pareceres_estado?.length === 0 && (
                             <>
                               {((processoMePertence(meusAmbientes, estadoId) &&
                                 isResponsavel &&
@@ -349,12 +302,6 @@ export default function Processo() {
                                 <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
                               )}
                             </>
-                          ) : (
-                            <PareceresEstado
-                              normal
-                              pareceres={processo?.pareceres_estado}
-                              estado={estado?.replace(' - P/S/P', '')}
-                            />
                           )}
                           {!processo.pendente &&
                             estadoId !== processo?.htransicoes?.[0]?.estado_inicial_id &&
@@ -366,12 +313,6 @@ export default function Processo() {
                                 estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
                               />
                             )}
-                        </>
-                      )}
-                      {podeDarParecer(meusAmbientes, processo?.pareceres_estado) && (
-                        <>
-                          <DefaultAction label="PARECER" handleClick={() => handleParecer()} />
-                          <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={id} />
                         </>
                       )}
                       {processo?.preso && perfilP === perfilId && <Intervencao colaboradoresList={colaboradoresList} />}
@@ -386,15 +327,13 @@ export default function Processo() {
             </Stack>
           }
         />
-        <>
-          <Card sx={{ height: 1 }}>
-            <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
-            {tabsList.map((tab) => {
-              const isMatched = tab.value === currentTab;
-              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-            })}
-          </Card>
-        </>
+        <Card sx={{ height: 1 }}>
+          <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
+          {tabsList.map((tab) => {
+            const isMatched = tab.value === currentTab;
+            return isMatched && <Box key={tab.value}>{tab.component}</Box>;
+          })}
+        </Card>
       </Container>
     </Page>
   );

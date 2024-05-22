@@ -22,16 +22,12 @@ import AnexosExistentes from './AnexosExistentes';
 
 // ----------------------------------------------------------------------
 
-ProcessoExternoForm.propTypes = {
-  operacao: PropTypes.string,
-  setOperacao: PropTypes.func,
-  origensList: PropTypes.array,
-  selectedProcesso: PropTypes.object,
-};
+ProcessoExternoForm.propTypes = { origensList: PropTypes.array, processo: PropTypes.object };
 
-export default function ProcessoExternoForm({ operacao, setOperacao, selectedProcesso, origensList }) {
-  const { setValue } = useFormContext();
-  const hasAnexos = selectedProcesso?.anexos?.length > 0;
+export default function ProcessoExternoForm({ processo, origensList }) {
+  const { watch } = useFormContext();
+  const values = watch();
+  const hasAnexos = processo?.anexos?.length > 0;
 
   return (
     <Grid container spacing={3}>
@@ -58,7 +54,12 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
               <Grid item xs={12} md={6}>
                 <RHFTextField name="titular" label="Titular" />
               </Grid>
-              <Grid item xs={12} sm={operacao === 'Cativo/Penhora' ? 6 : 12} md={operacao === 'Cativo/Penhora' ? 3 : 6}>
+              <Grid
+                item
+                xs={12}
+                sm={values.operacao === 'Cativo/Penhora' ? 6 : 12}
+                md={values.operacao === 'Cativo/Penhora' ? 3 : 6}
+              >
                 <RHFAutocompleteSimple
                   name="operacao"
                   label="Operação"
@@ -69,13 +70,9 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
                     'Pedido de Extrato Bancário',
                     'Outras',
                   ]}
-                  onChange={(event, newValue) => {
-                    setValue('operacao', newValue);
-                    setOperacao(newValue);
-                  }}
                 />
               </Grid>
-              {operacao === 'Cativo/Penhora' && (
+              {values.operacao === 'Cativo/Penhora' && (
                 <Grid item xs={12} sm={6} md={3}>
                   <RHFNumberField name="valor" tipo="moeda" label="Valor" />
                 </Grid>
@@ -100,7 +97,7 @@ export default function ProcessoExternoForm({ operacao, setOperacao, selectedPro
               <ObsNovosAnexos />
               {hasAnexos && (
                 <Grid item xs={12}>
-                  <AnexosExistentes anexos={selectedProcesso.anexos} processoId={selectedProcesso.id} />
+                  <AnexosExistentes anexos={processo.anexos} processoId={processo.id} />
                 </Grid>
               )}
             </Grid>

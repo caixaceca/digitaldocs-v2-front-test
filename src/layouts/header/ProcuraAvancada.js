@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -11,17 +11,14 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import DialogTitle from '@mui/material/DialogTitle';
-import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { add, format } from 'date-fns';
-import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText';
+import { setItemValue } from '../../utils/normalizeText';
 // redux
-import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -37,51 +34,14 @@ export default function ProcuraAvancada() {
   const [search, setSearch] = useState(localStorage.getItem('search') || '');
   const [cliente, setCliente] = useState(localStorage.getItem('cliente') || '');
   const [entidade, setEntidade] = useState(localStorage.getItem('entidade') || '');
-  const [nentrada, setNentrada] = useState(localStorage.getItem('nentrada') || '');
   const [noperacao, setNoperacao] = useState(localStorage.getItem('noperacao') || '');
+  const [arquivo, setArquivo] = useState(localStorage.getItem('procArquivo') === 'true');
   const [avancada, setAvancada] = useState(localStorage.getItem('tipoPesquisa') === 'avancada');
-  const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
-  const [datai, setDatai] = useState(
-    localStorage.getItem('dataISearch') ? add(new Date(localStorage.getItem('dataISearch')), { hours: 2 }) : null
-  );
-  const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFSearch') ? add(new Date(localStorage.getItem('dataFSearch')), { hours: 2 }) : null
-  );
-  const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, label: row?.label })) || [], [uos]);
-  const colaboradoresList = useMemo(
-    () => colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName })) || [],
-    [colaboradores]
-  );
-  const [colaborador, setColaborador] = useState(
-    colaboradoresList?.find((row) => row?.id === Number(localStorage.getItem('colaboradorSearch'))) || null
-  );
-  const [uo, setUo] = useState(
-    uosList?.find((row) => row?.id === Number(localStorage.getItem('uoSearch'))) ||
-      uosList?.find((row) => row?.id === cc?.uo?.id) ||
-      null
-  );
-
-  useEffect(() => {
-    if (!uo && uosList && (localStorage.getItem('uoSearch') || cc?.uo?.id)) {
-      setUo(
-        uosList?.find((row) => row?.id === Number(localStorage.getItem('uoSearch'))) ||
-          uosList?.find((row) => row?.id === cc?.uo?.id) ||
-          null
-      );
-    }
-  }, [uosList, uo, cc?.uo?.id]);
-
-  useEffect(() => {
-    if (!colaborador && colaboradoresList && localStorage.getItem('colaboradorSearch')) {
-      setColaborador(
-        colaboradoresList?.find((row) => row?.id === Number(localStorage.getItem('colaboradorSearch'))) || null
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colaboradoresList]);
+  const { mail, cc } = useSelector((state) => state.intranet);
 
   const handleSearch = () => {
     if (mail && cc?.perfil_id) {
+      dispatch(resetItem('pesquisa'));
       if (localStorage.getItem('tipoPesquisa') === 'avancada') {
         dispatch(
           getAll('pesquisa avancada', {
@@ -89,17 +49,16 @@ export default function ProcuraAvancada() {
             conta,
             cliente,
             entidade,
-            nentrada,
             noperacao,
-            uoID: uo?.id,
-            perfilID: cc?.perfil_id,
-            perfilDono: colaborador?.id,
-            datai: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
-            dataf: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+            pagina: 0,
+            perfilId: cc?.perfil_id,
+            arquivo: arquivo ? 'true' : 'false',
           })
         );
       } else if (cc?.uo_id) {
-        dispatch(getAll('pesquisa v2', { mail, uoID: cc?.uo_id, perfilId: cc?.perfil_id, chave: search }));
+        dispatch(
+          getAll('pesquisa global', { mail, uoID: cc?.uo_id, perfilId: cc?.perfil_id, pagina: 0, chave: search })
+        );
       }
     }
     navigate(PATH_DIGITALDOCS.processos.procurar);
@@ -108,7 +67,7 @@ export default function ProcuraAvancada() {
 
   const handleKeyUp = (event) => {
     if (event.key === 'Enter' && search && cc?.uo_id) {
-      dispatch(getAll('pesquisa v2', { mail, uoID: cc?.uo_id, perfilId: cc?.perfil_id, chave: search }));
+      dispatch(getAll('pesquisa global', { mail, uoID: cc?.uo_id, perfilId: cc?.perfil_id, pagina: 0, chave: search }));
       navigate(PATH_DIGITALDOCS.processos.procurar);
       onClose();
     }
@@ -129,74 +88,58 @@ export default function ProcuraAvancada() {
       <Dialog
         fullWidth
         open={open}
-        maxWidth="md"
+        maxWidth="sm"
         onClose={onClose}
         sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
       >
-        <DialogTitle>Procurar</DialogTitle>
+        <DialogTitle>
+          <Stack direction="row" spacing={3} justifyContent="space-between" alignItems="center">
+            Procurar
+            <FormControlLabel
+              label="Pesquisa avançada"
+              control={
+                <Switch
+                  checked={avancada}
+                  onChange={(event, value) => {
+                    setAvancada(value);
+                    localStorage.setItem('tipoPesquisa', value === true ? 'avancada' : 'global');
+                  }}
+                />
+              }
+            />
+          </Stack>
+        </DialogTitle>
         <DialogContent sx={{ pb: 0 }}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {avancada ? (
               <>
-                <Grid item xs={12} sm={4}>
-                  <TextFieldNumb value={conta} setValue={setConta} label="Nº de conta" localS="conta" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextFieldNumb value={cliente} setValue={setCliente} label="Nº de cliente" localS="cliente" />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
+                  <TextFieldNumb value={conta} setValue={setConta} label="Nº de conta" localS="conta" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
                   <TextFieldNumb value={entidade} setValue={setEntidade} label="Nº de entidade" localS="entidade" />
                 </Grid>
-                <Grid item xs={6} md={3}>
-                  <TextFieldNumb value={nentrada} setValue={setNentrada} label="Nº de entrada" localS="nentrada" />
-                </Grid>
-                <Grid item xs={6} md={3}>
+                <Grid item xs={12} md={6}>
                   <TextFieldNumb value={noperacao} setValue={setNoperacao} label="Nº de operação" localS="noperacao" />
                 </Grid>
-                <Grid item xs={6} md={3}>
-                  <DatePicker
-                    disableFuture
-                    value={datai}
-                    label="Data inicial"
-                    slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                    onChange={(newValue) =>
-                      setDataUtil(newValue, setDatai, 'dataISearch', setDataf, 'dataFSearch', dataf)
-                    }
-                  />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                  <DatePicker
-                    disableFuture
-                    value={dataf}
-                    minDate={datai}
-                    disabled={!datai}
-                    label="Data final"
-                    slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFSearch', '', '', '')}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    fullWidth
-                    disableClearable
-                    options={uosList}
-                    value={uo || null}
-                    getOptionLabel={(option) => option.label}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => <TextField {...params} label="U.O origem" />}
-                    onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoSearch', true)}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    fullWidth
-                    value={colaborador}
-                    options={colaboradoresList}
-                    getOptionLabel={(option) => option.label}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => <TextField {...params} label="Criado por" />}
-                    onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorSearch', true)}
-                  />
+                <Grid item xs={12}>
+                  <Stack direction="row" justifyContent="center">
+                    <FormControlLabel
+                      label="Processo(s) arquivado(s)"
+                      control={
+                        <Switch
+                          checked={arquivo}
+                          onChange={(event, value) => {
+                            setArquivo(value);
+                            localStorage.setItem('procArquivo', value === true ? 'true' : 'false');
+                          }}
+                        />
+                      }
+                    />
+                  </Stack>
                 </Grid>
               </>
             ) : (
@@ -214,20 +157,6 @@ export default function ProcuraAvancada() {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', mt: 3 }}>
-          <Stack direction="row" justifyContent="center">
-            <FormControlLabel
-              label="Pesquisa avançada"
-              control={
-                <Switch
-                  checked={avancada}
-                  onChange={(event, value) => {
-                    setAvancada(value);
-                    localStorage.setItem('tipoPesquisa', value === true ? 'avancada' : 'global');
-                  }}
-                />
-              }
-            />
-          </Stack>
           <Box sx={{ flexGrow: 1 }} />
           <Button variant="outlined" color="inherit" onClick={onClose}>
             Cancelar

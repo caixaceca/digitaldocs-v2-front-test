@@ -2,7 +2,13 @@ import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // utils
-import { podeArquivar, caixaPrincipal, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
+import {
+  naGerencia,
+  podeArquivar,
+  caixaPrincipal,
+  pertencoAoEstado,
+  arquivoAtendimento,
+} from '../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { updateItem, selectItem } from '../../redux/slices/digitaldocs';
@@ -14,7 +20,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { DefaultAction } from '../../components/Actions';
 import DialogConfirmar from '../../components/DialogConfirmar';
 //
-import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente, Abandonar } from './IntervencaoForm';
+import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente, Abandonar } from './form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -29,24 +35,25 @@ export default function Intervencao({ colaboradoresList }) {
   const { toggle4: open4, onOpen4, onClose4 } = useToggle4();
   const { toggle5: open5, onOpen5, onClose5 } = useToggle5();
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { iAmInGrpGerente, meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { processo, destinos, isSaving, arquivarProcessos } = useSelector((state) => state.digitaldocs);
+  const { processo, isSaving } = useSelector((state) => state.digitaldocs);
+  const { isGerente, arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const perfilId = cc?.perfil_id;
   const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências';
   const aberturaEmpSemValCompliance =
     processo.segmento === 'E' &&
+    naGerencia(processo?.estado_atual) &&
     processo?.assunto === 'Abertura de conta' &&
-    processo?.estado_atual?.includes('Gerência') &&
     !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento');
 
   const devolucoes = [];
   const seguimentos = [];
   const destinosFora = [];
-  destinos?.forEach((row) => {
+  processo?.destinos?.forEach((row) => {
     if (processo?.uo_origem_id !== row?.uo_id) {
       destinosFora.push(row?.nome);
     }
     const destino = {
+      // paralelo: row?.nome !== 'Gerência Sede',
       modo: row.modo,
       label: row?.nome,
       id: row.transicao_id,
@@ -66,13 +73,9 @@ export default function Intervencao({ colaboradoresList }) {
   });
 
   const handleFinalizar = () => {
-    const formData = {
-      cativos: [],
-      perfil_id: perfilId,
-      fluxoID: processo?.fluxo_id,
-      estado_id: processo?.estado_atual_id,
-    };
-    dispatch(updateItem('finalizar', JSON.stringify(formData), { id: processo?.id, mail, msg: 'finalizado' }));
+    dispatch(
+      updateItem('finalizar', JSON.stringify({ cativos: [] }), { id: processo?.id, mail, perfilId, msg: 'finalizado' })
+    );
   };
 
   const handlePendente = (item) => {
@@ -85,42 +88,38 @@ export default function Intervencao({ colaboradoresList }) {
 
   return (
     <>
-      {destinos?.length !== 0 && (
+      {devolucoes?.length > 0 && (
         <>
-          {devolucoes?.length > 0 && (
-            <>
-              <DefaultAction color="warning" icon="devolver" handleClick={onOpen} label="DEVOLVER" />
-              <IntervencaoForm
-                title="Devolver"
-                onCancel={onClose}
-                isOpenModal={open}
-                destinos={devolucoes}
-                colaboradoresList={colaboradoresList}
-              />
-            </>
-          )}
+          <DefaultAction color="warning" icon="devolver" handleClick={onOpen} label="DEVOLVER" />
+          <IntervencaoForm
+            title="Devolver"
+            onCancel={onClose}
+            isOpenModal={open}
+            destinos={devolucoes}
+            colaboradoresList={colaboradoresList}
+          />
+        </>
+      )}
 
-          {seguimentos?.length > 0 && (
-            <>
-              <DefaultAction
-                icon="encaminhar"
-                handleClick={onOpen3}
-                label={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
-              />
-              <IntervencaoForm
-                isOpenModal={open3}
-                onCancel={onClose3}
-                destinos={seguimentos}
-                colaboradoresList={colaboradoresList}
-                title={processo?.estado_atual === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
-              />
-            </>
-          )}
+      {seguimentos?.length > 0 && (
+        <>
+          <DefaultAction
+            icon="encaminhar"
+            handleClick={onOpen3}
+            label={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
+          />
+          <IntervencaoForm
+            isOpenModal={open3}
+            onCancel={onClose3}
+            destinos={seguimentos}
+            colaboradoresList={colaboradoresList}
+            title={processo?.estado_atual === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
+          />
         </>
       )}
 
       {processo?.agendado &&
-        processo.situacao !== 'X' &&
+        processo?.status !== 'Executado' &&
         processo?.estado_atual === 'Autorização SWIFT' &&
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
         pertencoAoEstado(meusAmbientes, ['Autorização SWIFT']) && (
@@ -138,7 +137,7 @@ export default function Intervencao({ colaboradoresList }) {
           </>
         )}
 
-      {processo?.situacao === 'E' &&
+      {processo?.status === 'Em andamento' &&
         processo?.operacao === 'Cativo/Penhora' &&
         processo?.estado_atual === 'DOP - Validação Notas Externas' &&
         pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && (
@@ -162,11 +161,11 @@ export default function Intervencao({ colaboradoresList }) {
       {podeArquivar(
         meusAmbientes,
         fromAgencia,
-        iAmInGrpGerente || caixaPrincipal(meusAmbientes),
+        isGerente || caixaPrincipal(meusAmbientes),
         processo?.estado_atual_id,
         arquivoAtendimento(
           processo?.assunto,
-          processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.is_resgate
+          processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
         ),
         arquivarProcessos
       ) && (
@@ -177,7 +176,7 @@ export default function Intervencao({ colaboradoresList }) {
             processo={processo}
             onCancel={onClose1}
             arquivoAg={
-              (processo?.estado_atual?.includes('Gerência') || processo?.estado_atual?.includes('Atendimento')) &&
+              (naGerencia(processo?.estado_atual) || processo?.estado_atual?.includes('Atendimento')) &&
               destinosFora?.length > 0
                 ? destinosFora
                 : []

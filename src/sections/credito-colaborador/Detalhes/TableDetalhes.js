@@ -93,23 +93,23 @@ export default function TableDetalhes({ item, anexosList = [] }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: item === 'retencoes' ? 'preso_em' : 'ativo' });
+  } = useTable({ defaultOrderBy: item === 'hretencoes' ? 'preso_em' : 'ativo' });
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { mail, colaboradores } = useSelector((state) => state.intranet);
-  const { pedidoCC, retencoes, pendencias, atribuicoes, isLoading } = useSelector((state) => state.cc);
+  const { pedidoCC, isLoading } = useSelector((state) => state.cc);
 
   useEffect(() => {
     if (mail && pedidoCC?.id && item) {
       switch (item) {
-        case 'retencoes':
-          dispatch(getFromCC('retencoes', { mail, id: pedidoCC?.id }));
+        case 'hretencoes':
+          dispatch(getFromCC('hretencoes', { mail, id: pedidoCC?.id }));
           break;
-        case 'pendencias':
-          dispatch(getFromCC('pendencias', { mail, id: pedidoCC?.id }));
+        case 'hpendencias':
+          dispatch(getFromCC('hpendencias', { mail, id: pedidoCC?.id }));
           break;
-        case 'atribuicoes':
-          dispatch(getFromCC('atribuicoes', { mail, id: pedidoCC?.id }));
+        case 'hatribuicoes':
+          dispatch(getFromCC('hatribuicoes', { mail, id: pedidoCC?.id }));
           break;
         default:
           break;
@@ -139,10 +139,10 @@ export default function TableDetalhes({ item, anexosList = [] }) {
       (item === 'anexos' && pedidoCC?.anexos) ||
       (item === 'despesas' && pedidoCC?.despesas) ||
       (item === 'responsabilidades' && pedidoCC?.outros_creditos) ||
-      (item === 'retencoes' && dadosComColaboradores(retencoes, colaboradores)) ||
-      (item === 'pendencias' && dadosComColaboradores(pendencias, colaboradores)) ||
+      (item === 'hretencoes' && dadosComColaboradores(pedidoCC?.hretencoes, colaboradores)) ||
+      (item === 'hpendencias' && dadosComColaboradores(pedidoCC?.hpendencias, colaboradores)) ||
       ((item === 'anexos entidades' || item === 'anexos garantias') && anexosList) ||
-      (item === 'atribuicoes' && dadosComColaboradores(atribuicoes, colaboradores)) ||
+      (item === 'hatribuicoes' && dadosComColaboradores(pedidoCC?.hatribuicoes, colaboradores)) ||
       [],
     comparator: getComparator(order, orderBy),
     filter,
@@ -168,9 +168,9 @@ export default function TableDetalhes({ item, anexosList = [] }) {
               orderBy={orderBy}
               headLabel={
                 (item === 'despesas' && TABLE_HEAD_DESPESAS) ||
-                (item === 'retencoes' && TABLE_HEAD_RETENCOES) ||
-                (item === 'pendencias' && TABLE_HEAD_PENDENCIAS) ||
-                (item === 'atribuicoes' && TABLE_HEAD_ATRIBUICOES) ||
+                (item === 'hretencoes' && TABLE_HEAD_RETENCOES) ||
+                (item === 'hpendencias' && TABLE_HEAD_PENDENCIAS) ||
+                (item === 'hatribuicoes' && TABLE_HEAD_ATRIBUICOES) ||
                 (item === 'responsabilidades' && TABLE_HEAD_RESPONSABILIDADES) ||
                 ((item === 'anexos' || item === 'anexos entidades' || item === 'anexos garantias') && TABLE_HEAD_ANEXOS)
               }
@@ -180,9 +180,9 @@ export default function TableDetalhes({ item, anexosList = [] }) {
               {isLoading && isNotFound ? (
                 <SkeletonTable
                   column={
-                    (item === 'retencoes' && 6) ||
+                    (item === 'hretencoes' && 6) ||
                     (item === 'responsabilidades' && 8) ||
-                    ((item === 'pendencias' || item === 'atribuicoes') && 3) ||
+                    ((item === 'hpendencias' || item === 'hatribuicoes') && 3) ||
                     4
                   }
                   row={10}
@@ -227,7 +227,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                           <TableCell align="right">{row?.prazo_restante} meses</TableCell>
                         </>
                       )) ||
-                      (item === 'retencoes' && (
+                      (item === 'hretencoes' && (
                         <>
                           <TableCell>
                             <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} />
@@ -245,7 +245,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                           <TableCell>{row?.solto_por || noDados(true)}</TableCell>
                         </>
                       )) ||
-                      (item === 'atribuicoes' && (
+                      (item === 'hatribuicoes' && (
                         <>
                           <TableCell>
                             <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} />
@@ -253,24 +253,24 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                           <TableCell>{row?.estado}</TableCell>
                         </>
                       )) ||
-                      (item === 'pendencias' && (
+                      (item === 'hpendencias' && (
                         <>
                           <TableCell>{row?.motivo}</TableCell>
                           <TableCell>{row?.observacao || noDados(true)}</TableCell>
                         </>
                       ))}
-                    {item !== 'retencoes' && item !== 'atribuicoes' && item !== 'pendencias' && (
+                    {item !== 'hretencoes' && item !== 'hatribuicoes' && item !== 'hpendencias' && (
                       <TableCell align="center">
                         <Label color={row?.ativo ? 'success' : 'error'}>{row?.ativo ? 'Ativo' : 'Inativo'}</Label>
                       </TableCell>
                     )}
-                    {item !== 'retencoes' && (
+                    {item !== 'hretencoes' && (
                       <TableCell width={10}>
                         {(row?.criado_em || row?.atribuido_em) && (
                           <Criado tipo="date" value={ptDateTime(row?.criado_em || row?.atribuido_em)} />
                         )}
                         {(row?.criador || row?.atribuidor || row?.nome) && (
-                          <Criado tipo="user" value={row?.criador || row?.atribuidor || row?.nome} />
+                          <Criado tipo="user" value={row?.criador || row?.atribuidor || row?.nome} shuffle />
                         )}
                         {row?.data_pendente && (
                           <Criado

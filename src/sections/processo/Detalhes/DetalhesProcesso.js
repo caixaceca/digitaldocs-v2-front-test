@@ -16,23 +16,23 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
-import { colorLabel } from '../../utils/getColorPresets';
-import { valorPorExtenso } from '../../utils/numeroPorExtenso';
-import { ptDate, fToNow, ptDateTime } from '../../utils/formatTime';
-import { fNumber, fCurrency, fPercent } from '../../utils/formatNumber';
-import { newLineText, entidadesParse } from '../../utils/normalizeText';
+import { colorLabel } from '../../../utils/getColorPresets';
+import { valorPorExtenso } from '../../../utils/numeroPorExtenso';
+import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
+import { fNumber, fCurrency, fPercent } from '../../../utils/formatNumber';
+import { newLineText, entidadesParse, shuffleString } from '../../../utils/normalizeText';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '../../../redux/store';
 // hooks
-import useToggle from '../../hooks/useToggle';
+import useToggle from '../../../hooks/useToggle';
 // components
-import Label from '../../components/Label';
-import { Checked, Criado } from '../../components/Panel';
-import { DefaultAction, Fechar } from '../../components/Actions';
+import Label from '../../../components/Label';
+import { Checked, Criado } from '../../../components/Panel';
+import { DefaultAction, Fechar } from '../../../components/Actions';
 //
-import { colorProcesso } from '../tabela/TableProcessos';
+import { colorProcesso } from '../../tabela/TableProcessos';
 // _mock
-import { dis, estadosCivis } from '../../_mock';
+import { dis, estadosCivis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
@@ -43,17 +43,17 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object };
 
 export default function DetalhesProcesso({ isPS, processo }) {
+  const entidadesList = entidadesParse(processo?.entidade);
   const { origens } = useSelector((state) => state.parametrizacao);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const origem = origens?.find((row) => row?.id === processo?.origem_id);
-  const entidadesList = entidadesParse(processo?.entidade);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
   const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);
   const docPLabel = dis?.find((row) => row.id === processo?.tipo_doc_idp)?.label || 'Doc. primário';
   const docSLabel = dis?.find((row) => row.id === processo?.tipo_doc_ids)?.label || 'Doc. secundário';
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
-  const credito = processo?.credito || null;
   const con = processo?.con || null;
+  const credito = processo?.credito || null;
   const situacao = credito?.situacao_final_mes || '';
 
   const pareceresNaoValidados = () => {
@@ -89,11 +89,11 @@ export default function DetalhesProcesso({ isPS, processo }) {
           )}
           {processo?.assunto && <TextItem title="Assunto:" text={processo?.assunto} />}
           {processo?.criado_em && <TextItem title="Criado em:" text={ptDateTime(processo?.criado_em)} />}
-          {criador?.perfil?.displayName && <TextItem title="Criado por:" text={criador?.perfil?.displayName} />}
+          {criador?.perfil?.displayName && <TextItem title="Criado por:" text={criador?.perfil?.displayName} shuffle />}
           {processo?.data_entrada && !isPS && (
             <TextItem
               title="Data de entrada:"
-              text={`${ptDate(processo?.data_entrada)}${processo?.canal ? ` (Via: ${processo?.canal})` : ''}`}
+              text={`${ptDate(processo?.data_entrada)}${processo?.canal ? ` (Via ${processo?.canal})` : ''}`}
             />
           )}
           {processo?.referencia && <TextItem title="Referência:" text={processo?.referencia} />}
@@ -106,13 +106,14 @@ export default function DetalhesProcesso({ isPS, processo }) {
                     {processo?.em_paralelo ? pareceresNaoValidados() : processo?.estado_atual?.replace(' - P/S/P', '')}
                   </Typography>
                   {processo?.data_ultima_transicao && (
-                    <Stack direction="row" spacing={0.5} sx={{ color: 'text.secondary' }}>
+                    <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
                       <Criado caption tipo="date" value={ptDateTime(processo?.data_ultima_transicao)} />
                       {processo?.estado_atual !== 'Arquivo' && (
                         <Criado
                           caption
+                          tipo="time"
                           sx={{ color: colorProcesso(processo?.cor) }}
-                          value={`(${fToNow(processo?.data_ultima_transicao)?.replace('aproximadamente', 'aprox.')})`}
+                          value={fToNow(processo?.data_ultima_transicao)}
                         />
                       )}
                     </Stack>
@@ -122,7 +123,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
                       {processo?.preso ? (
                         <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
                           <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                            {colaboradorLock?.perfil?.displayName}
+                            {shuffleString(colaboradorLock?.perfil?.displayName)}
                           </Typography>
                           &nbsp;está trabalhando neste processo
                         </Typography>
@@ -130,7 +131,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
                         <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
                           Este processo foi atribuído a&nbsp;
                           <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                            {colaboradorLock?.perfil?.displayName}
+                            {shuffleString(colaboradorLock?.perfil?.displayName)}
                           </Typography>
                         </Typography>
                       )}
@@ -145,9 +146,11 @@ export default function DetalhesProcesso({ isPS, processo }) {
             <TextItem
               label={
                 <Stack sx={{ width: 1 }}>
-                  <Label color="warning" startIcon={<InfoOutlinedIcon />}>
-                    Processo pendente
-                  </Label>
+                  <Stack direction="row">
+                    <Label color="warning" startIcon={<InfoOutlinedIcon />}>
+                      Processo pendente
+                    </Label>
+                  </Stack>
                   {processo?.motivo && <TextItem title="Motivo:" text={processo?.motivo} sx={{ mt: 1 }} />}
                   {processo?.observacao_motivo_pendencia && (
                     <TextItem title="Observação:" text={processo?.observacao_motivo_pendencia} sx={{ pt: 0.5 }} />
@@ -171,13 +174,15 @@ export default function DetalhesProcesso({ isPS, processo }) {
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
-          {processo?.titular && <TextItem text={processo?.titular} title={isPS ? 'Descrição:' : 'Titular:'} />}
-          {processo?.email && <TextItem title="Email:" text={processo?.email} />}
-          {processo?.doc_idp && <TextItem title={`${docPLabel}:`} text={processo?.doc_idp?.toString()} />}
-          {processo?.doc_ids && <TextItem title={`${docSLabel}:`} text={processo?.doc_ids?.toString()} />}
-          {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} />}
-          {processo?.cliente && <TextItem title="Nº de cliente:" text={processo?.cliente?.toString()} />}
-          {processo?.conta && <TextItem title="Nº de conta:" text={processo?.conta?.toString()} />}
+          {processo?.titular && (
+            <TextItem text={processo?.titular} title={isPS ? 'Descrição:' : 'Titular:'} shuffle={!isPS} />
+          )}
+          {processo?.email && <TextItem title="Email:" text={processo?.email} shuffle />}
+          {processo?.doc_idp && <TextItem title={`${docPLabel}:`} text={processo?.doc_idp?.toString()} shuffle />}
+          {processo?.doc_ids && <TextItem title={`${docSLabel}:`} text={processo?.doc_ids?.toString()} shuffle />}
+          {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} shuffle />}
+          {processo?.cliente && <TextItem title="Nº de cliente:" text={processo?.cliente?.toString()} shuffle />}
+          {processo?.conta && <TextItem title="Nº de conta:" text={processo?.conta?.toString()} shuffle />}
           {processo?.segmento && (
             <TextItem
               title="Segmento:"
@@ -191,7 +196,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
-          {processo?.numero_operacao && <TextItem title="Nº de operação:" text={processo?.numero_operacao} />}
+          {processo?.numero_operacao && <TextItem title="Nº da operação:" text={processo?.numero_operacao} />}
           {processo?.operacao && <TextItem title="Descrição:" text={processo?.operacao} />}
           {origem && origem?.id === processo?.origem_id && (
             <TextItem
@@ -226,13 +231,14 @@ export default function DetalhesProcesso({ isPS, processo }) {
               }
             />
           )}
-          {processo?.valor > 0 && (
+          {(processo?.operacao === 'Cativo/Penhora' ||
+            (!processo?.operacao === 'Cativo/Penhora' && processo?.valor > 0)) && (
             <ValorItem
               valor={processo?.valor}
               title={processo?.operacao === 'Cativo/Penhora' ? 'Valor para cativo:' : 'Valor:'}
             />
           )}
-          {processo?.operacao === 'Cativo/Penhora' && (
+          {processo?.cativos?.length > 0 && processo?.operacao === 'Cativo/Penhora' && (
             <ValorItem cativos={processo?.cativos} valor={processo?.saldo_cativo} title="Saldo disponível p/ cativo:" />
           )}
         </List>
@@ -243,7 +249,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
             <Typography variant="subtitle1">Agendamento</Typography>
           </ListItem>
           {processo?.periodicidade && <TextItem title="Periodicidade:" text={processo?.periodicidade} />}
-          {processo?.diadomes && <TextItem title="Dia do mês para execução:" text={processo?.diadomes} />}
+          {processo?.dia_mes && <TextItem title="Dia do mês para execução:" text={processo?.dia_mes} />}
           {processo?.data_inicio && <TextItem title="Data de início:" text={ptDate(processo?.data_inicio)} />}
           {processo?.data_arquivamento && (
             <TextItem title="Data de término:" text={ptDate(processo?.data_arquivamento)} />
@@ -262,7 +268,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
           {credito?.montante_solicitado && (
             <TextItem title="Montante solicitado:" text={fCurrency(credito?.montante_solicitado)} />
           )}
-          {credito?.setor_atividade && <TextItem title="Setor de atividade:" text={credito?.setor_atividade} />}
+          {credito?.setor_atividade && <TextItem title="Entidade patronal:" text={credito?.setor_atividade} />}
           {credito?.finalidade && <TextItem title="Finalidade:" text={credito?.finalidade} />}
           {credito?.montante_aprovado && (
             <TextItem title="Montante aprovado:" text={fCurrency(credito?.montante_aprovado)} />
@@ -338,13 +344,18 @@ export default function DetalhesProcesso({ isPS, processo }) {
 
 // ----------------------------------------------------------------------
 
-TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string, label: PropTypes.node };
+TextItem.propTypes = {
+  label: PropTypes.node,
+  text: PropTypes.string,
+  title: PropTypes.string,
+  shuffle: PropTypes.bool,
+};
 
-function TextItem({ title = '', text = '', label = null, ...sx }) {
+function TextItem({ title = '', text = '', label = null, shuffle = false, ...sx }) {
   return (
     <Stack spacing={1} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
       {title && <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>}
-      {text && <Typography>{text}</Typography>}
+      {text && <Typography>{shuffle ? shuffleString(text) : text}</Typography>}
       {label}
     </Stack>
   );
@@ -391,7 +402,7 @@ function ValorItem({ title, valor, cativos }) {
               </Stack>
             </DialogTitle>
             <DialogContent>
-              <TableContainer sx={{ minWidth: 500, mt: 2, position: 'relative', overflow: 'hidden' }}>
+              <TableContainer sx={{ minWidth: 500, mt: 3, position: 'relative', overflow: 'hidden' }}>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -399,12 +410,14 @@ function ValorItem({ title, valor, cativos }) {
                       <TableCell align="right">Saldo</TableCell>
                       <TableCell align="right">Saldo em CVE</TableCell>
                       <TableCell align="center">Enviado a banka</TableCell>
-                      <TableCell align="center">Executado</TableCell>
+                      <TableCell align="center" width={10}>
+                        Executado
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {cativos?.map((row) => (
-                      <TableRow hover key={'labelId'}>
+                    {cativos?.map((row, index) => (
+                      <TableRow hover key={`${row?.id}_${index}`}>
                         <TableCell>{row?.conta}</TableCell>
                         <TableCell align="right">
                           {fNumber(row?.saldo)} {row?.moeda}
@@ -416,7 +429,7 @@ function ValorItem({ title, valor, cativos }) {
                         <TableCell align="center">
                           {row?.executado ? (
                             <>
-                              {row?.cativador && <Criado tipo="user" value={row?.cativador} />}
+                              {row?.cativador && <Criado tipo="user" value={row?.cativador} shuffle />}
                               {row.data_cativo && <Criado tipo="date" value={ptDate(row.data_cativo)} />}
                             </>
                           ) : (

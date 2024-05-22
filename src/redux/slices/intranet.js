@@ -12,7 +12,7 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // ----------------------------------------------------------------------
 
 const initialState = {
-  error: false,
+  error: '',
   isSaving: false,
   isLoading: false,
   isOpenDisposicao: false,
@@ -61,7 +61,7 @@ const slice = createSlice({
     resetError(state) {
       state.isLoading = false;
       state.isSaving = false;
-      state.error = false;
+      state.error = '';
     },
 
     done(state, action) {

@@ -13,7 +13,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { estadoInicial } from '../../utils/validarAcesso';
 import { fToNow, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, entidadesParse, noDados } from '../../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados, shuffleString } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -22,6 +22,7 @@ import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
+import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import { Criado, Registos } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
@@ -30,7 +31,19 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { ColocarPendente } from '../processo/IntervencaoForm';
+import { ColocarPendente } from '../processo/form/IntervencaoForm';
+
+// ----------------------------------------------------------------------
+
+const TABLE_HEAD = [
+  { id: 'nentrada', label: 'Nº', align: 'left' },
+  { id: 'titular', label: 'Titular', align: 'left' },
+  { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
+  { id: 'assunto', label: 'Assunto', align: 'left' },
+  { id: 'estado', label: 'Estado', align: 'left' },
+  { id: 'transitado_em', label: 'Última transição', align: 'center', width: 170 },
+  { id: 'empty', width: 50 },
+];
 
 // ----------------------------------------------------------------------
 
@@ -44,7 +57,6 @@ export default function TableProcessos({ from }) {
   const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
   const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
-  const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorP') || null);
   const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
   const fluxoId = meuFluxo?.id;
   const perfilId = cc?.perfil_id;
@@ -80,9 +92,37 @@ export default function TableProcessos({ from }) {
   useEffect(() => {
     if (mail && perfilId) {
       dispatch(resetItem('processos'));
-      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, segmento }));
+      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, segmento, pagina: 0 }));
     }
   }, [dispatch, estadoId, fluxoId, perfilId, segmento, from, mail]);
+
+  const newList = [];
+  const colaboradoresList = [];
+  processos?.forEach((row) => {
+    const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.perfil_id));
+    if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
+      colaboradoresList.push(colaborador?.perfil?.displayName);
+    }
+    newList.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
+  });
+  const [colaborador, setColaborador] = useState(
+    colaboradoresList?.find((row) => row === localStorage.getItem('colaboradorP')) || null
+  );
+
+  const dataFiltered = applySortFilter({
+    from,
+    motivo,
+    filter,
+    newList,
+    colaborador,
+    comparator: getComparator(order, orderBy),
+  });
+  const isNotFound = !dataFiltered.length;
+
+  useEffect(() => {
+    setPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, segmento, colaborador, meuAmbiente?.id, meuFluxo?.id]);
 
   const verMais = () => {
     if (mail && perfilId && processosInfo?.proxima_pagina) {
@@ -105,52 +145,6 @@ export default function TableProcessos({ from }) {
   const handlePendente = (item) => {
     dispatch(selectItem(item));
   };
-
-  const newList = [];
-  const colaboradoresList = [];
-  processos?.forEach((row) => {
-    const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.perfil_id));
-    if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
-      colaboradoresList.push(colaborador?.perfil?.displayName);
-    }
-    newList.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
-  });
-
-  const dataFiltered = applySortFilter({
-    from,
-    motivo,
-    filter,
-    newList,
-    colaborador,
-    comparator: getComparator(order, orderBy),
-  });
-  const isNotFound = !dataFiltered.length;
-
-  useEffect(() => {
-    setPage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, segmento, colaborador, meuAmbiente?.id, meuFluxo?.id]);
-
-  const TABLE_HEAD = [
-    { id: 'nentrada', label: 'Nº', align: 'left' },
-    { id: 'titular', label: 'Titular', align: 'left' },
-    { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
-    { id: 'assunto', label: 'Assunto', align: 'left' },
-    {
-      id:
-        (from === 'pendentes' && 'motivo') ||
-        ((from === 'retidos' || from === 'atribuidos') && 'colaborador') ||
-        'estado',
-      label:
-        (from === 'pendentes' && 'Motivo') ||
-        (from === 'retidos' && 'Retido em') ||
-        (from === 'atribuidos' && 'Atribuído a') ||
-        'Estado',
-      align: 'left',
-    },
-    { id: 'transitado_em', label: 'Enviado em', align: 'center', width: 50 },
-    { id: 'empty', width: 50 },
-  ];
 
   return (
     <>
@@ -186,24 +180,26 @@ export default function TableProcessos({ from }) {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={7} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow hover key={row?.id}>
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                    <TableRow hover key={`${row?.id}_${index}`}>
                       <TableCell>{row?.entrada}</TableCell>
-                      <TableCell>{row?.titular ? row?.titular : noDados()}</TableCell>
-                      <TableCell>{row?.conta || row?.cliente || entidadesParse(row?.entidades) || noDados()}</TableCell>
+                      <TableCell>{row?.titular ? shuffleString(row?.titular) : noDados()}</TableCell>
+                      <TableCell>
+                        {(row?.conta && shuffleString(row?.conta)) ||
+                          (row?.cliente && shuffleString(row?.cliente)) ||
+                          (row?.entidades && shuffleString(entidadesParse(row?.entidades))) ||
+                          noDados()}
+                      </TableCell>
                       <TableCell>{row?.assunto ? row?.assunto : meuFluxo?.assunto}</TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {from === 'pendentes' && row?.motivo}
-                          {from === 'tarefas' && row?.estado && row?.estado}
-                          {from === 'tarefas' && !row?.estado && meuAmbiente.estado}
-                          {(from === 'retidos' || from === 'atribuidos') && row?.colaborador}
-                        </Typography>
+                        {row?.estado && <Typography variant="body2">{row?.estado}</Typography>}
+                        {row?.motivo && <Label>{row?.motivo}</Label>}
                         {row?.observacao && (
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary', ml: 0.5 }}>
                             {row?.observacao}
                           </Typography>
                         )}
+                        {row?.colaborador && <Label>{shuffleString(row?.colaborador)}</Label>}
                       </TableCell>
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.transitado_em && (
@@ -211,8 +207,8 @@ export default function TableProcessos({ from }) {
                             <Criado tipo="date" value={ptDateTime(row?.transitado_em)} />
                             <Criado
                               tipo="time"
+                              value={fToNow(row?.transitado_em)}
                               sx={{ color: colorProcesso(row?.cor) }}
-                              value={fToNow(row?.transitado_em)?.replace('aproximadamente', 'aprox.')}
                             />
                           </>
                         )}

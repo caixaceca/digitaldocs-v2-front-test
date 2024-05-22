@@ -68,19 +68,13 @@ export default function Processos() {
         ...(pertencoAoEstado(meusAmbientes, ['Validação OPE', 'Execução OPE'])
           ? [{ value: 'Agendados', num: totalP?.total_agendado || 0, component: <TableProcessos from="agendados" /> }]
           : []),
-        ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas']) &&
-        totalP?.total_finalizado > 0
+        ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas'])
           ? [
               {
                 value: 'Finalizados',
                 num: totalP?.total_finalizado || 0,
                 component: <TableProcessos from="finalizados" />,
               },
-            ]
-          : []),
-        ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas']) &&
-        totalP?.total_executado > 0
-          ? [
               {
                 value: 'Executados',
                 num: totalP?.total_executado || 0,
@@ -124,7 +118,7 @@ export default function Processos() {
                   label={
                     <Badge
                       showZero
-                      max={999}
+                      max={9999}
                       badgeContent={tab.num}
                       color={colorLabel(tab.value)}
                       sx={{

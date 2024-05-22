@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
-import { dataValido, entidadesParse, noDados } from '../../utils/normalizeText';
+import { dataValido, entidadesParse, shuffleString, noDados } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -297,9 +297,12 @@ export default function TableControle({ from }) {
                       {from === 'porconcluir' ? (
                         <TableRow hover key={`${from}_${index}`}>
                           <TableCell>{row.nentrada}</TableCell>
-                          <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
+                          <TableCell>{row?.titular ? shuffleString(row.titular) : noDados()}</TableCell>
                           <TableCell>
-                            {row.conta || row.cliente || entidadesParse(row?.entidades) || noDados()}
+                            {(row?.conta && shuffleString(row?.conta)) ||
+                              (row?.cliente && shuffleString(row?.cliente)) ||
+                              (row?.entidades && shuffleString(entidadesParse(row?.entidades))) ||
+                              noDados()}
                           </TableCell>
                           <TableCell>{row?.assunto}</TableCell>
                           <TableCell>
@@ -310,7 +313,7 @@ export default function TableControle({ from }) {
                               </Label>
                             )}
                           </TableCell>
-                          <TableCell>{row?.colaborador}</TableCell>
+                          <TableCell>{shuffleString(row?.colaborador)}</TableCell>
                           <TableCell align="center" sx={{ width: 10 }}>
                             {row?.trabalhado_em && (
                               <Typography noWrap variant="body2">

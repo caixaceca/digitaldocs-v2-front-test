@@ -2,8 +2,8 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
+import { BASEURLDD, BASEURLSLIM } from '../../utils/axios';
 import { canPreview, b64toBlob } from '../../utils/getFileFormat';
 
 // ----------------------------------------------------------------------
@@ -19,12 +19,11 @@ const initialState = {
   isOpenParecer: false,
   isLoadingAnexo: false,
   isOpenModalAnexo: false,
-  arquivarProcessos: false,
   isOpenModalDesariquivar: false,
   pjfInfo: null,
-  anexoCC: null,
   processo: null,
   filePreview: null,
+  pesquisaInfo: null,
   fileDownload: null,
   selectedItem: null,
   anexoParecer: null,
@@ -34,7 +33,6 @@ const initialState = {
   indicadoresArquivo: null,
   con: [],
   pjf: [],
-  versoes: [],
   cartoes: [],
   pesquisa: [],
   arquivos: [],
@@ -42,10 +40,8 @@ const initialState = {
   processos: [],
   porConcluir: [],
   trabalhados: [],
-  transicoesCC: [],
-  visualizacoes: [],
   pedidosAcesso: [],
-  destinosDesarquivamento: [],
+  reconciliacao: [],
 };
 
 const slice = createSlice({
@@ -106,9 +102,6 @@ const slice = createSlice({
           state.filePreview = null;
           state.fileDownload = null;
           state.isLoadingAnexo = false;
-          state.versoes = [];
-          state.destinos = [];
-          state.visualizacoes = [];
           break;
         case 'processos':
           state.processos = [];
@@ -119,6 +112,7 @@ const slice = createSlice({
           break;
         case 'pesquisa':
           state.pesquisa = [];
+          state.pesquisaInfo = null;
           break;
         case 'trabalhados':
           state.trabalhados = [];
@@ -181,30 +175,27 @@ const slice = createSlice({
       state.pjf = [...state.pjf, ...action.payload.objeto];
     },
 
+    getReconciliacaoSuccess(state, action) {
+      state.reconciliacao = action.payload;
+    },
+
     getProcessoSuccess(state, action) {
       state.processo = action.payload;
       state.isLoadingP = false;
     },
 
-    getDestinosSuccess(state, action) {
-      state.destinos = action.payload;
-    },
-
     getPesquisaSuccess(state, action) {
-      state.pesquisa = action.payload;
+      state.pesquisaInfo = action.payload.paginacao;
+      state.pesquisa = [...state.pesquisa, ...action.payload.objeto];
     },
 
-    getVisualizacoesSuccess(state, action) {
-      state.visualizacoes = action.payload;
-    },
-
-    getVersoesSuccess(state, action) {
-      state.versoes = action.payload;
+    getProcessoItemSuccess(state, action) {
+      state.processo = { ...state.processo, ...action.payload };
     },
 
     getDestinosDesarquivamentoSuccess(state, action) {
       state.isOpenModalDesariquivar = true;
-      state.destinosDesarquivamento = action.payload;
+      state.processo = { ...state.processo, ...action.payload };
     },
 
     getArquivadosSuccess(state, action) {
@@ -225,7 +216,7 @@ const slice = createSlice({
           state.filePreview = { ...action?.payload?.dados };
           break;
         case 'infoDownload':
-          state.fileDownload = { ...action?.payload?.dados };
+          state.fileDownload = action?.payload?.dados;
           break;
         case 'filePreview':
           state.isLoadingAnexo = false;
@@ -241,24 +232,9 @@ const slice = createSlice({
       }
     },
 
-    getFileDownloadSuccess(state, action) {
-      state.isLoadingAnexo = false;
-      state.fileDownload = action.payload;
-    },
-
-    getTransicoesSuccess(state, action) {
-      state.transicoesCC = action?.payload || [];
-    },
-
     aceitarSuccess(state, action) {
       state.processo.preso = true;
       state.processo.perfil_id = action.payload.perfilId;
-      // state.processo?.hprisoes.push({
-      //   preso_em: `${format(new Date(), 'yyyy-MM-dd')}T${format(add(new Date(), { hours: 1 }), 'HH:mm:ss')}.823+00:00`,
-      //   perfil_id: action.payload.perfilId,
-      //   solto_em: null,
-      //   por: null,
-      // });
     },
 
     createProcessoSuccess(state, action) {
@@ -270,7 +246,7 @@ const slice = createSlice({
       state.selectedItem = null;
     },
 
-    parecerEstSuccess(state, action) {
+    parecerEstaSuccess(state, action) {
       const index = state?.processo?.pareceres_estado?.findIndex((row) => Number(row.id) === Number(action.payload.id));
       if (index === 0 || index) {
         state.processo.pareceres_estado[index].validado = action.payload.validado;
@@ -313,14 +289,18 @@ const slice = createSlice({
 
     deleteAnexoParecerSuccess(state, action) {
       const index = state.processo.pareceres_estado.findIndex((row) => row.id === action.payload.parecerId);
-      state.processo.pareceres_estado[index].anexos = state.processo.pareceres_estado[index].anexos.filter(
-        (row) => row.id !== action.payload.id
-      );
-      state.selectedItem.anexos = state.selectedItem.anexos.filter((row) => row.id !== action.payload.id);
-    },
-
-    desarquivarProcessoSuccess(state) {
-      state.destinosDesarquivamento = [];
+      if (index) {
+        const index1 = state.processo.pareceres_estado[index].anexos.findIndex((row) => row.id === action.payload.id);
+        if (index1) {
+          state.processo.pareceres_estado[index].anexos[index1].ativo = false;
+        }
+      }
+      const index2 = state.selectedItem.anexos.findIndex((row) => row.id === action.payload.id);
+      if (index2) {
+        state.selectedItem.anexos[index2].ativo = false;
+      }
+      state.isOpenModalAnexo = false;
+      state.selectedAnexoId = null;
     },
 
     selectItem(state, action) {
@@ -341,7 +321,6 @@ const slice = createSlice({
       state.isOpenModal = false;
       state.isOpenModalDesariquivar = false;
       state.selectedItem = null;
-      state.destinosDesarquivamento = [];
     },
 
     selectAnexo(state, action) {
@@ -392,10 +371,16 @@ export const {
 
 export function getAll(item, params) {
   return async (dispatch) => {
-    if (item !== 'destinos' && item !== 'destinosDesarquivamento') {
-      dispatch(slice.actions.startLoading());
-    }
-    if (item !== 'versoes' && item !== 'visualizacoes' && item !== 'destinos' && item !== 'destinosDesarquivamento') {
+    if (
+      item !== 'hversoes' &&
+      item !== 'hvisualizacoes' &&
+      item !== 'destinos' &&
+      item !== 'destinosDesarquivamento' &&
+      item !== 'htransicoes' &&
+      item !== 'hretencoes' &&
+      item !== 'hpendencias' &&
+      item !== 'hatribuicoes'
+    ) {
       dispatch(slice.actions.resetItem('processo'));
     }
     try {
@@ -407,11 +392,11 @@ export function getAll(item, params) {
       }`;
       switch (item) {
         case 'destinos': {
-          const destinos = await axios.get(
+          const response = await axios.get(
             `${BASEURLDD}/v2/processos/destinos/${params?.perfilId}/${params?.id}?estado_id=${params?.estadoId}`,
             options
           );
-          dispatch(slice.actions.getDestinosSuccess(destinos.data.objeto));
+          dispatch(slice.actions.getProcessoItemSuccess({ destinos: response.data.objeto }));
           break;
         }
         case 'tarefas': {
@@ -435,84 +420,32 @@ export function getAll(item, params) {
           break;
         }
         case 'finalizados': {
-          if (params?.estadoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusfinalizados/all/${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else if (params?.fluxoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusfinalizados/estado/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusfinalizados/${params?.fluxoId}/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          }
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/tarefas/situacao/${params?.perfilId}?pagina=${params?.pagina}&situacao=finalizado`,
+            options
+          );
+          dispatch(slice.actions.getProcessosSuccess(response.data));
           break;
         }
         case 'executados': {
-          if (params?.estadoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusexecutados/all/${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else if (params?.fluxoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusexecutados/estado/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusexecutados/${params?.fluxoId}/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          }
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/tarefas/situacao/${params?.perfilId}?pagina=${params?.pagina}&situacao=executado`,
+            options
+          );
+          dispatch(slice.actions.getProcessosSuccess(response.data));
           break;
         }
         case 'agendados': {
-          if (params?.estadoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusagendados/all/${params?.perfilId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else if (params?.fluxoId === -1) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusagendados/estado/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          } else {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/processos/meusagendados/${params?.fluxoId}/${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.getProcessosSuccess(response.data));
-          }
-          break;
-        }
-        case 'pesquisa': {
-          dispatch(slice.actions.resetItem('pesquisa'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/processos/search/${params?.perfilId}?chave=${params?.chave}`,
+            `${BASEURLDD}/v2/processos/tarefas/situacao/${params?.perfilId}?pagina=${params?.pagina}&situacao=agendado`,
             options
           );
-          dispatch(slice.actions.getPesquisaSuccess(response.data));
+          dispatch(slice.actions.getProcessosSuccess(response.data));
           break;
         }
-        case 'pesquisa v2': {
-          dispatch(slice.actions.resetItem('pesquisa'));
+        case 'pesquisa global': {
           const response = await axios.get(
-            `${BASEURLDD}/v2/processos/search/${params?.perfilId}?uoID=${params?.uoID}&chave=${params?.chave}`,
+            `${BASEURLDD}/v2/processos/pesquisa/base/${params?.perfilId}?pagina=${params?.pagina}&search_param=${params?.chave}`,
             options
           );
           dispatch(slice.actions.getPesquisaSuccess(response.data));
@@ -521,34 +454,64 @@ export function getAll(item, params) {
         case 'pesquisa avancada': {
           dispatch(slice.actions.resetItem('pesquisa'));
           const response = await axios.get(
-            `${BASEURLDD}/v2/processos/search/interno/${params?.perfilID}?uoID=${params?.uoID}${
-              params?.nentrada ? `&nentrada=${params?.nentrada}` : ''
+            `${BASEURLDD}/v2/processos/pesquisa/especifica/${params?.perfilId}?pagina=${params?.pagina}&em_arquivo=${
+              params?.arquivo
             }${params?.noperacao ? `&noperacao=${params?.noperacao}` : ''}${
               params?.conta ? `&conta=${params?.conta}` : ''
             }${params?.cliente ? `&cliente=${params?.cliente}` : ''}${
               params?.entidade ? `&entidade=${params?.entidade}` : ''
-            }${params?.perfilDono ? `&perfilDono=${params?.perfilDono}` : ''}${
-              params?.datai ? `&datai=${params?.datai}` : ''
-            }${params?.dataf ? `&dataf=${params?.dataf}` : ''}`,
+            }`,
             options
           );
           dispatch(slice.actions.getPesquisaSuccess(response.data));
           break;
         }
-        case 'visualizacoes': {
+        case 'htransicoes': {
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/ht_transicoes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoItemSuccess({ htransicoes: response.data.objeto }));
+          break;
+        }
+        case 'hretencoes': {
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/ht_retencoes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoItemSuccess({ hretencoes: response.data.objeto }));
+          break;
+        }
+        case 'hpendencias': {
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/ht_pendencias/${params?.id}?perfil_cc_id=${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoItemSuccess({ hpendencias: response.data.objeto }));
+          break;
+        }
+        case 'hatribuicoes': {
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/ht_atribuicoes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoItemSuccess({ hatribuicoes: response.data.objeto }));
+          break;
+        }
+        case 'hvisualizacoes': {
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/visualizacoes/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
-          dispatch(slice.actions.getVisualizacoesSuccess(response.data));
+          dispatch(slice.actions.getProcessoItemSuccess({ hvisualizacoes: response.data }));
           break;
         }
-        case 'versoes': {
+        case 'hversoes': {
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/versoes/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
-          dispatch(slice.actions.getVersoesSuccess(response.data));
+          dispatch(slice.actions.getProcessoItemSuccess({ hversoes: response.data }));
           break;
         }
         case 'destinosDesarquivamento': {
@@ -556,7 +519,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v1/arquivos/destinos/desarquivamento/${params?.processoId}`,
             options
           );
-          dispatch(slice.actions.getDestinosDesarquivamentoSuccess(response.data.objeto));
+          dispatch(slice.actions.getDestinosDesarquivamentoSuccess({ destinosDesarquivamento: response.data.objeto }));
           break;
         }
         case 'entradas': {
@@ -644,6 +607,14 @@ export function getAll(item, params) {
           dispatch(slice.actions.getPjfSuccess(response.data));
           break;
         }
+        case 'reconciliacao': {
+          const response = await axios.get(
+            `${BASEURLSLIM}/api/v1/temp/mensagem/swift/normalizada?perfil_cc_id=${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getReconciliacaoSuccess(response.data));
+          break;
+        }
 
         default:
           break;
@@ -668,11 +639,6 @@ export function getItem(item, params) {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
         case 'processo': {
-          // const response = await axios.get(
-          //   `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
-          //   options
-          // );
-          // dispatch(slice.actions.getProcessoSuccess(response.data));
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
             options
@@ -707,9 +673,6 @@ export function getItem(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      if (item === 'processo') {
-        dispatch(slice.actions.resetItem('processo'));
-      }
       if (item === 'prevnext') {
         dispatch(slice.actions.hasError(`Sem mais processos disponíveis no estado ${params?.estado}`));
       } else {
@@ -746,8 +709,8 @@ export function getAnexo(item, params) {
           break;
         }
         case 'anexoParecer': {
-          const response = await axios.get(`${BASEURLDD}/v1/processos/file/parecer/${params?.anexo}`, options);
-          dispatch(slice.actions.getAnexoParecerSuccess({ ...response.data, anexo: params?.anexo }));
+          const response = await axios.get(`${BASEURLDD}/v1/processos/file/parecer/${params?.anexo?.anexo}`, options);
+          dispatch(slice.actions.getAnexoParecerSuccess({ ...response.data, anexo: params?.anexo?.anexo }));
           break;
         }
 
@@ -789,13 +752,6 @@ export function createItem(item, dados, params) {
           await axios.post(`${BASEURLDD}/v1/arquivos/pedir/acesso/${params?.perfilId}/${params?.id}`, '', options);
           break;
         }
-        case 'arquivar': {
-          if (params?.haveA) {
-            await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${params?.id}`, params?.anexos, options1);
-          }
-          await axios.patch(`${BASEURLDD}/v1/processos/arquivar/${params?.id}`, dados, options);
-          break;
-        }
 
         default:
           break;
@@ -825,11 +781,12 @@ export function updateItem(item, dados, params) {
           await axios.put(`${BASEURLDD}/v2/processos/ei/${params?.perfilId}/${params?.id}`, dados, options1);
           break;
         }
-        case 'encaminhar': {
-          if (params?.haveAnexos) {
-            await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${params?.id}`, params?.anexos, options1);
-          }
-          await axios.patch(`${BASEURLDD}/v2/processos/encaminhar/${params?.perfilId}/${params?.id}`, dados, options);
+        case 'encaminhar serie': {
+          await axios.patch(
+            `${BASEURLDD}/v2/processos/encaminhar/serie/${params?.perfilId}/${params?.id}`,
+            dados,
+            options1
+          );
           if (params?.colocarPendente) {
             await axios.patch(
               `${BASEURLDD}/v2/processos/aceitar/${params?.perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
@@ -851,14 +808,37 @@ export function updateItem(item, dados, params) {
           }
           break;
         }
+        case 'encaminhar paralelo': {
+          await axios.patch(
+            `${BASEURLDD}/v2/processos/encaminhar/paralelo/${params?.perfilId}/${params?.id}`,
+            dados,
+            options
+          );
+          break;
+        }
+        case 'arquivar': {
+          if (params?.anexos?.get('anexos')) {
+            await axios.post(`${BASEURLDD}/v1/processos/adicionar/anexos/${params?.id}`, params?.anexos, options1);
+          }
+          await axios.patch(`${BASEURLDD}/v2/processos/arquivar/${params?.perfilId}/${params?.id}`, dados, options);
+          break;
+        }
+        case 'desarquivar': {
+          await axios.patch(`${BASEURLDD}/v2/processos/desarquivar/${params?.perfilId}/${params?.id}`, dados, options);
+          break;
+        }
         case 'parecer': {
-          await axios.patch(`${BASEURLDD}/v1/processos/parecer/${params?.processoId}`, dados, options1);
+          await axios.patch(
+            `${BASEURLDD}/v2/processos/parecer/${params?.perfilId}/${params?.processoId}/${params?.id}`,
+            dados,
+            options1
+          );
           dispatch(slice.actions.parecerSuccess());
           break;
         }
         case 'parecer estado': {
           await axios.patch(`${BASEURLDD}/v1/processos/dar_parecer/estado`, dados, options);
-          dispatch(slice.actions.parecerEstSuccess(params?.values));
+          dispatch(slice.actions.parecerEstaSuccess(params?.values));
           break;
         }
         case 'aceitar': {
@@ -876,7 +856,7 @@ export function updateItem(item, dados, params) {
         }
         case 'atribuir': {
           await axios.patch(
-            `${BASEURLDD}/v1/processos/afetar/${params?.processoID}?perfilID=${params?.perfilID}&perfilIDAfeto=${params?.perfilIDAfeto}&fluxo_id=${params?.fluxoId}`,
+            `${BASEURLDD}/v1/processos/afetar/${params?.id}?perfilID=${params?.perfilID}&perfilIDAfeto=${params?.perfilIDAfeto}&fluxo_id=${params?.fluxoId}`,
             '',
             options
           );
@@ -909,7 +889,7 @@ export function updateItem(item, dados, params) {
           break;
         }
         case 'finalizar': {
-          await axios.patch(`${BASEURLDD}/v1/processos/finalizar/${params?.id}`, dados, options);
+          await axios.patch(`${BASEURLDD}/v2/processos/finalizar/${params?.perfilId}/${params?.id}`, dados, options);
           break;
         }
         case 'abandonar': {
@@ -918,11 +898,6 @@ export function updateItem(item, dados, params) {
             null,
             options
           );
-          break;
-        }
-        case 'desarquivar': {
-          await axios.patch(`${BASEURLDD}/v1/processos/desarquivar/${params?.id}`, dados, options);
-          dispatch(slice.actions.desarquivarProcessoSuccess());
           break;
         }
         case 'pendencia': {

@@ -71,7 +71,7 @@ const TABLE_HEAD_ANEXO = [
 
 const TABLE_HEAD_REGRAS_ANEXOS = [
   { id: 'designacao', label: 'Designação', align: 'left' },
-  { id: 'assunto', label: 'Fluxo/Assunto/', align: 'left' },
+  { id: 'assunto', label: 'Assunto/', align: 'left' },
   { id: 'obrigatorio', label: 'Obrigatório', align: 'center' },
   { id: 'ativo', label: 'Ativo', align: 'center' },
   { id: '' },
@@ -92,7 +92,7 @@ const TABLE_HEAD_REGRAS_ESTADOS = [
 ];
 
 const TABLE_HEAD_REGRAS_TRANSICOES = [
-  { id: 'assunto', label: 'Fluxo/Assunto', align: 'left' },
+  { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'estado', label: 'Origem', align: 'left' },
   { id: 'estado_final', label: 'Destino', align: 'left' },
   { id: 'nome', label: 'Colaborador', align: 'left' },
@@ -532,14 +532,14 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                       {(item === 'notificacoes' || item === 'destinatarios') && (
                         <TableCell width={10}>
                           {row?.criado_em && <Criado caption tipo="time" value={ptDateTime(row.criado_em)} />}
-                          {row?.criador && <Criado caption tipo="user" value={row.criador} />}
+                          {row?.criador && <Criado caption tipo="user" value={row.criador} shuffle />}
                           {row?.modificado_em && row.modificador ? (
                             <Box sx={{ color: 'text.secondary' }}>
                               <Divider sx={{ my: 0.5 }} />
                               {row?.modificado_em && (
                                 <Criado caption tipo="time" value={ptDateTime(row.modificado_em)} />
                               )}
-                              {row?.modificador && <Criado caption tipo="user" value={row.modificador} />}
+                              {row?.modificador && <Criado caption tipo="user" value={row.modificador} shuffle />}
                             </Box>
                           ) : (
                             ''

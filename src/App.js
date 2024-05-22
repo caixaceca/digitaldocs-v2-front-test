@@ -17,24 +17,24 @@ import MotionLazyContainer from './components/animate/MotionLazyContainer';
 
 export default function App() {
   return (
-    <Worker workerUrl="/assets/pdf.worker.min.js">
-      <MotionLazyContainer>
-        <ThemeProvider>
-          <ThemeSettings>
-            <NotistackProvider>
-              <AuthenticatedTemplate>
-                <ProgressBarStyle />
-                <StyledChart />
-                <ScrollToTop />
+    <MotionLazyContainer>
+      <ThemeProvider>
+        <ThemeSettings>
+          <NotistackProvider>
+            <AuthenticatedTemplate>
+              <ProgressBarStyle />
+              <StyledChart />
+              <ScrollToTop />
+              <Worker workerUrl="/assets/pdf.worker.min.js">
                 <Router />
-              </AuthenticatedTemplate>
-              <UnauthenticatedTemplate>
-                <LoginPage />
-              </UnauthenticatedTemplate>
-            </NotistackProvider>
-          </ThemeSettings>
-        </ThemeProvider>
-      </MotionLazyContainer>
-    </Worker>
+              </Worker>
+            </AuthenticatedTemplate>
+            <UnauthenticatedTemplate>
+              <LoginPage />
+            </UnauthenticatedTemplate>
+          </NotistackProvider>
+        </ThemeSettings>
+      </ThemeProvider>
+    </MotionLazyContainer>
   );
 }

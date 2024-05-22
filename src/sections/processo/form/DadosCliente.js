@@ -2,14 +2,12 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
-import Fab from '@mui/material/Fab';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import InputAdornment from '@mui/material/InputAdornment';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 // components
-import SvgIconStyle from '../../../components/SvgIconStyle';
+import { DefaultAction } from '../../../components/Actions';
 import { RHFTextField, RHFNumberField, RHFDatePicker } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -21,7 +19,6 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
   const isPS = fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário';
-  const isPSC = fluxo?.assunto === 'Diário' || fluxo?.assunto === 'Receção de Cartões - DOP';
 
   const handleAdd = () => {
     append({ numero: '' });
@@ -47,7 +44,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                   fullWidth
                   size="large"
                   variant="soft"
-                  sx={{ py: 3.45 }}
+                  sx={{ py: 3.5 }}
                   onClick={handleAdd}
                   startIcon={<AddCircleIcon />}
                 >
@@ -63,17 +60,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title="Remover" arrow>
-                            <Fab
-                              size="small"
-                              variant="soft"
-                              color="inherit"
-                              sx={{ width: 30, height: 30 }}
-                              onClick={() => handleRemove(index)}
-                            >
-                              <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 18 }} />
-                            </Fab>
-                          </Tooltip>
+                          <DefaultAction small label="Remover" color="error" handleClick={() => handleRemove(index)} />
                         </InputAdornment>
                       ),
                       type: 'number',
@@ -89,14 +76,14 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
             </>
           ) : (
             <>
-              {!isPS && !isPSC && (
+              {!isPS && fluxo?.assunto !== 'Diário' && (
                 <Grid item xs={12} sm={6} xl={3}>
                   <RHFNumberField name="conta" label="Nº de conta" />
                 </Grid>
               )}
             </>
           )}
-          {fluxo?.limpo && !isPSC && !isPS && (
+          {fluxo?.limpo && fluxo?.assunto !== 'Diário' && !isPS && (
             <Grid item xs={12} xl={6}>
               <RHFTextField name="titular" label="Titular" required={!values?.conta} />
             </Grid>
@@ -152,28 +139,15 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
           {fields.map((item, index) => (
             <Grid item xs={12} sm={6} md={4} xl={3} key={index}>
               <RHFTextField
-                required
-                name={`entidades[${index}].numero`}
                 label="Nº de entidade"
-                max={600}
+                name={`entidades[${index}].numero`}
                 InputProps={{
+                  type: 'number',
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Tooltip title="Remover" arrow>
-                        <Fab
-                          size="small"
-                          variant="soft"
-                          color="inherit"
-                          sx={{ width: 30, height: 30 }}
-                          onClick={() => handleRemove(index)}
-                        >
-                          <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: 18 }} />
-                        </Fab>
-                      </Tooltip>
+                      <DefaultAction small label="Remover" color="error" handleClick={() => handleRemove(index)} />
                     </InputAdornment>
                   ),
-                  type: 'number',
-                  inputProps: { max: 9999999 },
                 }}
               />
             </Grid>

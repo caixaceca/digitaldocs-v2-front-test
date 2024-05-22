@@ -28,15 +28,14 @@ import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { UpdateItem, DefaultAction } from '../components/Actions';
 // sections
 import {
-  Views,
-  Transicoes,
   DadosGerais,
   TableDetalhes,
   PareceresEstado,
   EntidadesGarantias,
 } from '../sections/credito-colaborador/Detalhes';
-import { Abandonar, ColocarPendente, AtribuirForm } from '../sections/processo/IntervencaoForm';
+import { Views, Transicoes } from '../sections/processo/Detalhes';
 import { EncaminharForm, ArquivarForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
+import { Abandonar, ColocarPendente, AtribuirForm } from '../sections/processo/form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -52,9 +51,9 @@ export default function CreditoColaborador() {
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { pedidoCC, destinos, done, error, isLoading, isSaving } = useSelector((state) => state.cc);
-  const { meusAmbientes, iAmInGrpGerente, isAdmin, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
-  const isResponsavel = temNomeacao(cc) || iAmInGrpGerente;
+  const { pedidoCC, done, error, isLoading, isSaving } = useSelector((state) => state.cc);
+  const { meusAmbientes, isGerente, isAdmin, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
+  const isResponsavel = temNomeacao(cc) || isGerente;
   const colaboradoresList = findColaboradores(
     colaboradores,
     colaboradoresEstado?.map((row) => row?.perfil_id)
@@ -62,7 +61,7 @@ export default function CreditoColaborador() {
   const destinosList = useMemo(
     () => ({
       seguimentos:
-        destinos
+        pedidoCC?.destinos
           ?.filter((item) => item.modo === 'Seguimento')
           ?.map((row) => ({
             modo: row.modo,
@@ -71,7 +70,7 @@ export default function CreditoColaborador() {
             label: `${row?.modo} para ${row?.nome}`,
           })) || [],
       devolucoes:
-        destinos
+        pedidoCC?.destinos
           ?.filter((item) => item.modo !== 'Seguimento')
           ?.map((row) => ({
             modo: row.modo,
@@ -80,11 +79,11 @@ export default function CreditoColaborador() {
             label: `${row?.modo} para ${row?.nome}`,
           })) || [],
     }),
-    [destinos]
+    [pedidoCC?.destinos]
   );
 
   const fromArquivo = params?.get?.('from') === 'arquivo';
-  const fromProcurar = params?.get?.('from') === 'procurar';
+  const fromProcurar = params?.get?.('from') === 'Pesquisa';
   const fromEntradas = params?.get?.('from') === 'entradas';
   const fromPorConcluir = params?.get?.('from') === 'porconcluir';
   const fromTrabalhados = params?.get?.('from') === 'trabalhados';
@@ -131,13 +130,15 @@ export default function CreditoColaborador() {
       ...(pedidoCC?.outros_creditos?.length > 0
         ? [{ value: 'Responsabilidades', component: <TableDetalhes item="responsabilidades" /> }]
         : []),
+      ...(pedidoCC && pedidoCC?.htransicoes?.length > 0
+        ? [{ value: 'Transições', component: <Transicoes transicoes={pedidoCC?.htransicoes} /> }]
+        : []),
       ...(pedidoCC
         ? [
-            { value: 'Transições', component: <Transicoes /> },
             { value: 'Visualizações', component: <Views id={pedidoCC?.id} from="cc" isLoading={isLoading} /> },
-            { value: 'Retenções', component: <TableDetalhes item="retencoes" /> },
-            { value: 'Atribuições', component: <TableDetalhes item="atribuicoes" /> },
-            { value: 'Pendências', component: <TableDetalhes item="pendencias" /> },
+            { value: 'Retenções', component: <TableDetalhes item="hretencoes" /> },
+            { value: 'Atribuições', component: <TableDetalhes item="hatribuicoes" /> },
+            { value: 'Pendências', component: <TableDetalhes item="hpendencias" /> },
           ]
         : []),
     ],
@@ -154,6 +155,18 @@ export default function CreditoColaborador() {
       dispatch(getFromCC('pedido cc', { id, perfilId: cc?.perfil_id, mail }));
     }
   }, [dispatch, id, cc?.perfil_id, mail]);
+
+  useEffect(() => {
+    if (mail && pedidoCC?.id) {
+      dispatch(getFromCC('htransicoes', { mail, id: pedidoCC?.id }));
+    }
+  }, [dispatch, pedidoCC?.id, mail]);
+
+  useEffect(() => {
+    if (mail && id && pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id) {
+      dispatch(getFromCC('destinos', { id, perfilId: cc?.perfil_id, mail }));
+    }
+  }, [dispatch, id, cc?.perfil_id, mail, pedidoCC?.preso, pedidoCC?.perfil_id]);
 
   useEffect(() => {
     if (mail && podeAtribuir() && pedidoCC?.ultimo_estado_id && cc?.perfil_id) {

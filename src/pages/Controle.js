@@ -45,12 +45,18 @@ export default function Controle() {
             ]
           : []),
         { value: 'trabalhados', label: 'Trabalhados', component: <TableControle from="trabalhados" /> },
-        ...(isAdmin || cc?.uo?.tipo === 'Agências' || cc?.uo?.label === 'DOP-CE'
+        ...(isAdmin ||
+        cc?.uo?.tipo === 'Agências' ||
+        cc?.uo?.label === 'DOP-CE' ||
+        temAcesso(['emissao-cartoes-100'], meusacessos)
           ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
-        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON isCon /> }] : []),
-        ...(isAdmin || temAcesso(['pjf-110'], meusacessos)
-          ? [{ value: 'pjf', label: 'Judiciais & Fiscais', component: <TableCON /> }]
+        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON /> }] : []),
+        ...(isAdmin || temAcesso(['pjf-100'], meusacessos)
+          ? [{ value: 'pjf', label: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
+          : []),
+        ...(isAdmin || temAcesso(['reconciliacao-100'], meusacessos)
+          ? [{ value: 'reconciliacao', label: 'Reconciliação', component: <TableCON item="reconciliacao" /> }]
           : []),
       ] || [],
     [meusAmbientes, meusacessos, isAdmin, cc?.uo]
@@ -59,6 +65,7 @@ export default function Controle() {
   useEffect(() => {
     if (currentTab !== selectTab(tabsList, currentTab)) {
       setCurrentTab(tabsList?.[0]?.value);
+      localStorage.setItem('tabControle', tabsList?.[0]?.value);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsList, currentTab]);

@@ -5,17 +5,21 @@ export const codacessos = [
 ];
 
 export const objetos = [
+  { id: 'Todo', label: 'Administrador' },
   { id: 'acesso', label: 'Acesso' },
-  // { id: 'arquivar-processo', label: 'Arquivar processo' },
   { id: 'arquivo', label: 'Arquivo' },
+  { id: 'arquivar-processo', label: 'Arquivar processo' },
+  { id: 'auditoria-processo', label: 'Auditoria processo' },
   { id: 'rececao-cartoes', label: 'Confirmar receção de cartões' },
   { id: 'estado', label: 'Estado' },
+  { id: 'entidades', label: 'Entidades' },
   { id: 'fluxo', label: 'Fluxo' },
   { id: 'origem', label: 'Origem' },
   { id: 'perfilestado', label: 'Perfil/Estado' },
-  { id: 'pjf', label: 'Processos Judiciais e Fiscais' },
+  { id: 'reconciliacao', label: 'Reconciliação' },
   { id: 'transicao', label: 'Transição' },
-  { id: 'Todo', label: 'Todos' },
+  { id: 'emissao-cartoes', label: 'Ver lista de receção de cartões' },
+  { id: 'pjf', label: 'Ver lista de processos Judiciais e Fiscais' },
 ];
 
 export const dis = [
@@ -86,3 +90,33 @@ export const segmentos = ['Empresa', 'Particular', 'Produtor Individual', 'Entid
 export const escaloes = ['1º Comitê', '2º Comitê', '3º Comitê'];
 
 export const situacoes = ['Em análise', 'Aprovado', 'Contratado', 'Indeferido', 'Desistido'];
+
+export const meses = [
+  { id: 1, label: 'Janeiro' },
+  { id: 2, label: 'Fevereiro' },
+  { id: 3, label: 'Março' },
+  { id: 4, label: 'Abril' },
+  { id: 5, label: 'Maio' },
+  { id: 6, label: 'Junho' },
+  { id: 7, label: 'Julho' },
+  { id: 8, label: 'Agosto' },
+  { id: 9, label: 'Setembro' },
+  { id: 10, label: 'Outubro' },
+  { id: 11, label: 'Novembro' },
+  { id: 12, label: 'Dezembro' },
+];
+
+export const mesesAbr = [
+  { id: 1, label: 'Jan' },
+  { id: 2, label: 'Fev' },
+  { id: 3, label: 'Mar' },
+  { id: 4, label: 'Abr' },
+  { id: 5, label: 'Mai' },
+  { id: 6, label: 'Jun' },
+  { id: 7, label: 'Jul' },
+  { id: 8, label: 'Ago' },
+  { id: 9, label: 'Set' },
+  { id: 10, label: 'Out' },
+  { id: 11, label: 'Nov' },
+  { id: 12, label: 'Dez' },
+];

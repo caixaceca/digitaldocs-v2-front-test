@@ -10,24 +10,25 @@ import Avatar from '@mui/material/Avatar';
 import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import { styled, useTheme } from '@mui/material/styles';
+// utils
+import { BASEURL } from '../../utils/axios';
+import cssStyles from '../../utils/cssStyles';
+import { isProduction } from '../../utils/normalizeText';
+// config
+import { NAVBAR } from '../../config';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 import useCollapseDrawer from '../../hooks/useCollapseDrawer';
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector } from '../../redux/store';
-// utils
-import { BASEURL } from '../../utils/axios';
-import cssStyles from '../../utils/cssStyles';
-// config
-import { NAVBAR } from '../../config';
 // components
 import Logo from '../../components/Logo';
+import Image from '../../components/Image';
 import Scrollbar from '../../components/Scrollbar';
 import { NavSectionVertical } from '../../components/nav-section';
 //
 import NavbarAcount from './NavbarAcount';
-import Certificados from '../Certificados';
 import CollapseButton from './CollapseButton';
 import navConfigDigitalDocs from './NavConfigDigitalDocs';
 
@@ -50,7 +51,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   const theme = useTheme();
   const { pathname } = useLocation();
   const isDesktop = useResponsive('up', 'lg');
-  const { myAplicacoes } = useSelector((state) => state.intranet);
+  const { myAplicacoes, certificacoes } = useSelector((state) => state.intranet);
   const appsOrder = applySort(myAplicacoes, getComparator('asc', 'nome'));
   const noApp = appsOrder.length === 0;
 
@@ -76,14 +77,9 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   }, [pathname]);
 
   const renderContent = (
-    <Scrollbar
-      sx={{
-        height: 1,
-        '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' },
-      }}
-    >
+    <Scrollbar sx={{ height: 1, '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' } }}>
       <Stack spacing={3} sx={{ p: 2.5, flexShrink: 0, ...(isCollapse && { alignItems: 'center' }) }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ minHeight: 55 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ height: 50 }}>
           {format(new Date(), 'MM') === '12' && (
             <Snowfall style={{ height: 90 }} snowflakeCount={30} changeFrequency={10} radius={[0.5, 1.5]} />
           )}
@@ -93,12 +89,15 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
             <>
               <Typography
                 to="/"
-                variant="h4"
                 component={RouterLink}
-                sx={{ color: (theme) => theme.palette.success.main, textDecoration: 'none', textAlign: 'center' }}
+                sx={{ textAlign: 'center', textDecoration: 'none', color: theme.palette.success.main }}
               >
-                <Typography variant="h5">IntraNet - Teste</Typography>
-                <Typography variant="subtitle2" sx={{ mt: -0.5 }}>
+                {isProduction() ? (
+                  <Typography variant="h3">IntraNet</Typography>
+                ) : (
+                  <Typography variant="h5">IntraNet - Teste</Typography>
+                )}
+                <Typography variant="subtitle2" sx={{ mt: isProduction() ? -1 : 0 }}>
                   DIGITALDOCS
                 </Typography>
               </Typography>
@@ -106,17 +105,25 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
             </>
           )}
         </Stack>
-
         <NavbarAcount isCollapse={isCollapse} />
       </Stack>
 
       <NavSectionVertical navConfig={navConfigDigitalDocs} isCollapse={isCollapse} />
-
       {!noApp && <NavSectionVertical navConfig={Apps} isCollapse={isCollapse} />}
-
       <Box sx={{ flexGrow: 1 }} />
 
-      {!isCollapse && <Certificados />}
+      {!isCollapse && (
+        <Stack spacing={3} alignItems="center" sx={{ px: 5.5, pb: 5, my: 10, width: 1, textAlign: 'center' }}>
+          {certificacoes.map((cert) => (
+            <Image
+              key={cert.designacao}
+              alt={cert.designacao}
+              src={`${BASEURL}/certificacao/file/certificacao/${cert?.imagem_disco}`}
+              sx={{ width: '100%', height: 'auto', borderRadius: 1.5, flexShrink: 0, px: 3 }}
+            />
+          ))}
+        </Stack>
+      )}
     </Scrollbar>
   );
 
@@ -149,14 +156,14 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
               ...(isCollapse && { width: NAVBAR.DASHBOARD_COLLAPSE_WIDTH }),
               ...(collapseHover && { ...cssStyles(theme).bgBlur(), boxShadow: (theme) => theme.customShadows.z24 }),
               '&:before': {
+                opacity: 0.1,
                 width: '100%',
                 content: "''",
                 height: '100%',
                 position: 'absolute',
-                backgroundImage: 'url(/assets/Shape.svg)',
-                backgroundPosition: 'center',
                 backgroundSize: 'cover',
-                opacity: 0.1,
+                backgroundPosition: 'center',
+                backgroundImage: 'url(/assets/Shape.svg)',
               },
             },
           }}

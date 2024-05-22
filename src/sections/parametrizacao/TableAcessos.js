@@ -69,7 +69,7 @@ export default function TableAcessos({ tab }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'nome' });
+  } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
   const { id } = useParams();
   const dispatch = useDispatch();

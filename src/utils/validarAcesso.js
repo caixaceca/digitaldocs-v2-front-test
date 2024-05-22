@@ -165,14 +165,14 @@ export function UosGerente(meusAmbientes) {
 export const podeArquivar = (
   meusAmbientes,
   fromAgencia,
-  iAmInGrpGerente,
+  isGerente,
   estadoAtualID,
   arquivoAtendimento,
   acessoArquivarProcesso
 ) => {
   const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoAtualID));
   return (
-    (estadoProcesso?.is_inicial && fromAgencia && iAmInGrpGerente) ||
+    (estadoProcesso?.is_inicial && fromAgencia && isGerente) ||
     (estadoProcesso?.is_inicial && fromAgencia && arquivoAtendimento) ||
     (estadoProcesso?.is_inicial && !fromAgencia) ||
     estadoProcesso?.is_final ||
@@ -196,6 +196,12 @@ export function podeSerAtribuido(assunto) {
     !assunto?.includes('Declarações') &&
     !assunto?.includes('Cheques - Requisição')
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function naGerencia(estado) {
+  return estado?.includes('Gerência') || estado?.includes('Caixa Principal');
 }
 
 // ----------------------------------------------------------------------

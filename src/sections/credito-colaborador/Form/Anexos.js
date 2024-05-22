@@ -14,7 +14,7 @@ import CardContent from '@mui/material/CardContent';
 import { deleteAnexo } from '../../../redux/slices/cc';
 import { useSelector, useDispatch } from '../../../redux/store';
 // components
-import { AddItem, DefaultAction, AnexosExistente } from '../../../components/Actions';
+import { DefaultAction, AnexosExistente } from '../../../components/Actions';
 import { RHFDatePicker, RHFUploadFileSimple, RHFAutocompleteObject } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -60,7 +60,7 @@ export default function Anexos({ anexos }) {
       <CardHeader
         title="2. Anexos do processo"
         sx={{ pb: fields?.length === 0 && anexosAtivos?.length === 0 && 3 }}
-        action={anexosFiltered?.length > 0 && <AddItem button label="Anexo" handleClick={handleAdd} />}
+        action={anexosFiltered?.length > 0 && <DefaultAction button label="Adicionar" handleClick={handleAdd} />}
       />
       {(fields?.length > 0 || anexosAtivos?.length > 0) && (
         <CardContent>
@@ -97,19 +97,14 @@ export default function Anexos({ anexos }) {
                       </Grid>
                     </Grid>
                   </Box>
-                  <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
+                  <DefaultAction small label="ELIMINAR" color="error" handleClick={() => handleRemove(index)} />
                 </Stack>
               );
             })}
             {anexosAtivos?.length > 0 && (
               <AnexosExistente
                 onOpen={handleDeleteAnexo}
-                anexos={anexosAtivos?.map((row) => ({
-                  id: row?.id,
-                  path: row?.anexo,
-                  name: row?.designacao,
-                  data_validade: row?.data_validade,
-                }))}
+                anexos={anexosAtivos?.map((row) => ({ ...row, path: row?.anexo, name: row?.designacao }))}
               />
             )}
           </Stack>
@@ -127,12 +122,12 @@ export function AnexosGarantias({ indexGarantia, garantiaId }) {
   const dispatch = useDispatch();
   const { control, watch, setValue } = useFormContext();
   const values = watch();
-  const { anexosAtivos, pedidoCC } = useSelector((state) => state.cc);
-  const anexosProcesso =
+  const { anexos, pedidoCC } = useSelector((state) => state.cc);
+  const anexosAtivos =
     pedidoCC?.garantias?.find((row) => row?.id === garantiaId)?.anexos?.filter((item) => item.ativo) || [];
   const { fields, append, remove } = useFieldArray({ control, name: `garantias[${indexGarantia}].anexos` });
-  const anexosFiltered = applyFilter(anexosAtivos, [
-    ...anexosProcesso?.map((row) => row?.designacao_id),
+  const anexosFiltered = applyFilter(anexos, [
+    ...anexosAtivos?.map((row) => row?.designacao_id),
     ...values?.garantias?.[indexGarantia]?.anexos?.map((row) => row?.descricao?.id),
   ]);
 
@@ -166,62 +161,58 @@ export function AnexosGarantias({ indexGarantia, garantiaId }) {
           title="Anexos"
           sx={{ pb: 1 }}
           titleTypographyProps={{ variant: 'subtitle1' }}
-          action={anexosFiltered?.length > 0 && <AddItem label="Anexo" handleClick={handleAdd} />}
+          action={
+            anexosFiltered?.length > 0 && <DefaultAction button small label="Adicionar" handleClick={handleAdd} />
+          }
         />
-        {(fields?.length > 0 || anexosProcesso?.length > 0) && (
-          <CardContent>
-            <Stack spacing={2}>
-              {fields.map((item, index) => {
-                const anexoSel = values?.garantias?.[indexGarantia]?.anexos?.[index]?.descricao;
-                return (
-                  <Stack spacing={2} key={item.id} direction="row" alignItems="center" justifyContent="center">
-                    <Box sx={{ width: 1 }}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} sm={anexoSel?.prazo ? 8 : 12} md={3}>
-                          <RHFAutocompleteObject
-                            small
-                            options={anexosFiltered}
-                            label={`Anexo ${index + 1}`}
-                            name={`garantias[${indexGarantia}].anexos[${index}].descricao`}
-                          />
-                        </Grid>
-                        {anexoSel?.prazo && (
-                          <Grid item xs={12} sm={4} md={2}>
-                            <RHFDatePicker
-                              small
-                              required
-                              disablePast
-                              label="Validade"
-                              name={`garantias[${indexGarantia}].anexos[${index}].data_validade`}
-                            />
-                          </Grid>
-                        )}
-                        <Grid item xs={12} md={anexoSel?.prazo ? 7 : 9}>
-                          <RHFUploadFileSimple
-                            name={`garantias[${indexGarantia}].anexos[${index}].anexo`}
-                            onDrop={(file) => handleDrop(`garantias[${indexGarantia}].anexos[${index}].anexo`, file)}
-                          />
-                        </Grid>
+        <Stack spacing={2} sx={{ p: 2 }}>
+          {fields.map((item, index) => {
+            const anexoSel = values?.garantias?.[indexGarantia]?.anexos?.[index]?.descricao;
+            return (
+              <Stack spacing={2} key={item.id} direction="row" alignItems="center" justifyContent="center">
+                <Box sx={{ width: 1 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={anexoSel?.prazo ? 8 : 12} md={3}>
+                      <RHFAutocompleteObject
+                        small
+                        options={anexosFiltered}
+                        label={`Anexo ${index + 1}`}
+                        name={`garantias[${indexGarantia}].anexos[${index}].descricao`}
+                      />
+                    </Grid>
+                    {anexoSel?.prazo && (
+                      <Grid item xs={12} sm={4} md={2}>
+                        <RHFDatePicker
+                          small
+                          required
+                          disablePast
+                          label="Validade"
+                          name={`garantias[${indexGarantia}].anexos[${index}].data_validade`}
+                        />
                       </Grid>
-                    </Box>
-                    <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
-                  </Stack>
-                );
-              })}
-              {anexosProcesso?.length > 0 && (
-                <AnexosExistente
-                  onOpen={handleDeleteAnexo}
-                  anexos={anexosProcesso?.map((row) => ({
-                    id: row?.id,
-                    path: row?.anexo,
-                    name: row?.designacao,
-                    data_validade: row?.data_validade,
-                  }))}
-                />
-              )}
+                    )}
+                    <Grid item xs={12} md={anexoSel?.prazo ? 7 : 9}>
+                      <RHFUploadFileSimple
+                        name={`garantias[${indexGarantia}].anexos[${index}].anexo`}
+                        onDrop={(file) => handleDrop(`garantias[${indexGarantia}].anexos[${index}].anexo`, file)}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+                <DefaultAction small label="ELIMINAR" color="error" handleClick={() => handleRemove(index)} />
+              </Stack>
+            );
+          })}
+          {anexosAtivos?.length > 0 && (
+            <Stack>
+              <AnexosExistente
+                mt={1}
+                onOpen={handleDeleteAnexo}
+                anexos={anexosAtivos?.map((row) => ({ ...row, path: row?.anexo, name: row?.designacao }))}
+              />
             </Stack>
-          </CardContent>
-        )}
+          )}
+        </Stack>
       </Card>
     </>
   );
@@ -277,7 +268,9 @@ export function AnexosEntidades({ indexEntidade, entidadeId }) {
           title="Anexos"
           sx={{ pb: 1 }}
           titleTypographyProps={{ variant: 'subtitle1' }}
-          action={anexosFiltered?.length > 0 && <AddItem button label="Anexo" handleClick={handleAdd} />}
+          action={
+            anexosFiltered?.length > 0 && <DefaultAction button small label="Adicionar" handleClick={handleAdd} />
+          }
         />
         {(fields?.length > 0 || anexosAtivos?.length > 0) && (
           <CardContent>
@@ -315,20 +308,18 @@ export function AnexosEntidades({ indexEntidade, entidadeId }) {
                         </Grid>
                       </Grid>
                     </Box>
-                    <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
+                    <DefaultAction small label="ELIMINAR" color="error" handleClick={() => handleRemove(index)} />
                   </Stack>
                 );
               })}
               {anexosAtivos?.length > 0 && (
-                <AnexosExistente
-                  onOpen={handleDeleteAnexo}
-                  anexos={anexosAtivos?.map((row) => ({
-                    id: row?.id,
-                    path: row?.anexo,
-                    name: row?.designacao,
-                    data_validade: row?.data_validade,
-                  }))}
-                />
+                <Stack>
+                  <AnexosExistente
+                    mt={1}
+                    onOpen={handleDeleteAnexo}
+                    anexos={anexosAtivos?.map((row) => ({ ...row, path: row?.anexo, name: row?.designacao }))}
+                  />
+                </Stack>
               )}
             </Stack>
           </CardContent>
@@ -340,7 +331,7 @@ export function AnexosEntidades({ indexEntidade, entidadeId }) {
 
 // ----------------------------------------------------------------------
 
-function applyFilter(anexos, anexosSelect) {
+export function applyFilter(anexos, anexosSelect) {
   return anexos
     ?.filter((item) => !anexosSelect.includes(item?.id))
     ?.map((row) => ({ id: row?.id, label: row?.designacao, prazo: row?.obriga_prazo_validade }));

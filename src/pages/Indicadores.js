@@ -14,7 +14,7 @@ import Page from '../components/Page';
 import TabsWrapper from '../components/TabsWrapper';
 // sections
 import EstatisticaCredito from '../sections/indicadores/EstatisticaCredito';
-import { TotalProcessos, Duracao, FileSystem, Execucao } from '../sections/indicadores/Indicadores';
+import { TotalProcessos, Duracao, SGQ, FileSystem } from '../sections/indicadores/Indicadores';
 
 // ----------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ export default function Indicadores() {
         : []),
       { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
       { value: 'duracao', label: 'Duração', component: <Duracao /> },
-      { value: 'execucao', label: 'Tempo execução', component: <Execucao /> },
+      { value: 'sgq', label: 'SGQ', component: <SGQ /> },
       { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
     ],
     [meusacessos]

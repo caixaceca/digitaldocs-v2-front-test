@@ -44,9 +44,29 @@ export function ptTime(date) {
 }
 
 export function fToNow(date) {
-  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: pt });
+  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: pt })?.includes('daqui a')
+    ? 'agora'
+    : formatDistanceToNow(new Date(date), { addSuffix: true, locale: pt })?.replace('aproximadamente', 'aprox.');
 }
 
 export function fDistance(date, date1) {
   return formatDistance(new Date(date), new Date(date1), { addSuffix: false, locale: pt });
+}
+
+export function dataMaior(date, date1) {
+  const x = new Date(date);
+  const y = new Date(date1);
+  return x.getTime() - y.getTime() > 0;
+}
+
+export function dataPadrao(data) {
+  return `${data?.toString()?.substr(0, 4)}-${data?.toString()?.substr(0, 6)?.substr(4)}-${data
+    ?.toString()
+    ?.substr(6)}`;
+}
+
+export function dataPadraoPt(data) {
+  return `${data?.toString()?.substr(6)}/${data?.toString()?.substr(0, 6)?.substr(4)}/${data
+    ?.toString()
+    ?.substr(0, 4)}`;
 }

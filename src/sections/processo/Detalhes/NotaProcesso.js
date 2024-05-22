@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 // utils
-import { newLineText } from '../../utils/normalizeText';
+import { newLineText } from '../../../utils/normalizeText';
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +18,11 @@ export default function NotaProcesso({ nota = '', segmento = '', motivo = '' }) 
           <Alert severity="error">
             Este entidade não possui nenhuma conta CVE elegivel para cativo/penhora no valor indicado!
           </Alert>
-        )) || <Alert severity="warning">{nota}</Alert>)}
+        )) || (
+          <Alert severity={nota === 'Saldo cativado é igual ao valor solicitado!' ? 'success' : 'warning'}>
+            {nota}
+          </Alert>
+        ))}
       {motivo ? (
         <Alert severity="warning" sx={{ lineHeight: 1.5 }}>
           <AlertTitle sx={{ typography: 'subtitle2' }}>Processo devolvido</AlertTitle>

@@ -35,14 +35,8 @@ export default function SettingContrast() {
           return (
             <Grid key={contrast} item xs={6}>
               <BoxStyle
-                sx={{
-                  ...(isSelected && {
-                    color: 'primary.main',
-                    boxShadow: (theme) => theme.customShadows.z20,
-                  }),
-                }}
+                sx={{ ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }) }}
               >
-                {/* <Iconify icon={index === 0 ? 'cil:contrast' : 'ion:contrast-outline'} width={28} height={28} /> */}
                 <SvgIconStyle
                   src={index === 0 ? '/assets/icons/contrast.svg' : '/assets/icons/contrast-outline.svg'}
                   sx={{ width: 28, height: 28 }}

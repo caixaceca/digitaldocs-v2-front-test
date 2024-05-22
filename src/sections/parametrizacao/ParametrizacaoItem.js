@@ -15,14 +15,14 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
+import { getFromParametrizacao, openModal, closeModal } from '../../redux/slices/parametrizacao';
 // Components
 import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { AddItem, UpdateItem, DefaultAction, CloneItem } from '../../components/Actions';
+import { AddItem, UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm, MotivoPendenciaForm } from './ParametrizacaoForm';
@@ -137,6 +137,13 @@ export default function ParametrizacaoItem({ item }) {
     );
   };
 
+  const handleClone = (id) => {
+    if (id && cc?.perfil_id && mail) {
+      dispatch(openModal('view'));
+      dispatch(getFromParametrizacao('fluxo', { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
+    }
+  };
+
   const dataFiltered = applySortFilter({
     dados:
       (item === 'fluxos' && fluxos) ||
@@ -249,7 +256,13 @@ export default function ParametrizacaoItem({ item }) {
                           {item === 'origens' && <UpdateItem item="origem" id={row?.id} />}
                           {item !== 'estados' && item !== 'fluxos' && item !== 'origens' && <UpdateItem dados={row} />}
                           {item === 'estados' && <UpdateItem item="estado" id={row?.id} />}
-                          {item === 'fluxos' && <CloneItem item="fluxo" id={row?.id} />}
+                          {item === 'fluxos' && (
+                            <DefaultAction
+                              color="inherit"
+                              label="Clonar fluxo"
+                              handleClick={() => handleClone(row?.id)}
+                            />
+                          )}
                           {(item === 'fluxos' || item === 'estados') && (
                             <DefaultAction
                               handleClick={() => handleView(row?.id)}

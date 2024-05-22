@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import RemoveIcon from '@mui/icons-material/Remove';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import BusinessIcon from '@mui/icons-material/Business';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
@@ -16,6 +18,7 @@ import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutli
 import Label from './Label';
 // utils
 import { getFile } from '../utils/getFile';
+import { isProduction, shuffleString } from '../utils/normalizeText';
 // components
 import MyAvatar from './MyAvatar';
 import { DefaultAction } from './Actions';
@@ -30,22 +33,23 @@ export default function Panel({ label, children, sx }) {
       direction="row"
       alignItems="stretch"
       sx={{
-        p: 0.35,
-        flexGrow: 1,
+        p: 0.25,
         borderRadius: 1,
         overflow: 'hidden',
         bgcolor: 'background.neutral',
-        border: (theme) => `dashed 1px ${theme.palette.divider}`,
+        border: (theme) => `dotted 1px ${theme.palette.divider}`,
         ...sx,
       }}
     >
-      <Stack component="span" direction="row" alignItems="center" sx={{ mr: 1, ml: 0.5, color: 'text.secondary' }}>
-        <Typography noWrap variant="body2">
-          {label}
-        </Typography>
-      </Stack>
+      {label && (
+        <Stack component="span" direction="row" alignItems="center" sx={{ mx: 1, color: 'text.secondary' }}>
+          <Typography noWrap variant="body2">
+            {label}
+          </Typography>
+        </Stack>
+      )}
 
-      <Label variant="filled" sx={{ textTransform: 'none', py: 1.75, width: 1 }}>
+      <Label variant="ghost" sx={{ textTransform: 'none', pt: 1.75, pb: 2, width: 1, color: 'text.secondary' }}>
         {children}
       </Label>
     </Stack>
@@ -54,22 +58,38 @@ export default function Panel({ label, children, sx }) {
 
 // ----------------------------------------------------------------------
 
-Criado.propTypes = { tipo: PropTypes.string, value: PropTypes.string, caption: PropTypes.bool, sx: PropTypes.object };
+Criado.propTypes = {
+  sx: PropTypes.object,
+  tipo: PropTypes.string,
+  value: PropTypes.string,
+  other: PropTypes.string,
+  caption: PropTypes.bool,
+  shuffle: PropTypes.bool,
+};
 
-export function Criado({ tipo = '', value, caption = false, sx }) {
-  const styles = { width: caption ? 12 : 15, height: caption ? 12 : 15, color: sx?.color || 'text.secondary' };
+export function Criado({ tipo = '', value, other = '', caption = false, shuffle = false, sx }) {
+  const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.secondary' };
   return (
-    <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" {...sx}>
+    <Stack direction="row" spacing={0.5} alignItems="center" {...sx}>
       {(tipo === 'uo' && <BusinessIcon sx={{ ...styles }} />) ||
         (tipo === 'date' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
+        (tipo === 'warning' && <WarningAmberIcon sx={{ ...styles }} />) ||
         (tipo === 'note' && <CommentOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'time' && <AccessTimeOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'company' && <BusinessOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'user' && <AccountCircleOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'done' && <TaskAltIcon sx={{ width: 15, height: 15, color: 'text.success' }} />)}
       <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
-        {value}
+        {shuffle ? shuffleString(value) : value}
       </Typography>
+      {other && (
+        <>
+          <RemoveIcon sx={{ width: 15, height: 20 }} />
+          <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
+            {other}
+          </Typography>
+        </>
+      )}
     </Stack>
   );
 }
@@ -77,33 +97,27 @@ export function Criado({ tipo = '', value, caption = false, sx }) {
 // ----------------------------------------------------------------------
 
 ColaboradorInfo.propTypes = {
-  ef: PropTypes.bool,
   sx: PropTypes.object,
-  pi: PropTypes.string,
   foto: PropTypes.string,
   nome: PropTypes.string,
+  caption: PropTypes.bool,
   label: PropTypes.string,
 };
 
-export function ColaboradorInfo({ nome, label, foto, pi = '', ef = false, sx = null }) {
+export function ColaboradorInfo({ nome, label, foto, caption = false, sx = null }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
-      <MyAvatar alt={nome} src={getFile('colaborador', foto)} />
+      <MyAvatar alt={nome} src={getFile('colaborador', isProduction() ? foto : '')} />
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>
-          {pi && (
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {pi} -
-            </Typography>
-          )}
           <Typography noWrap variant="subtitle2">
-            {nome}
+            {shuffleString(nome)}
           </Typography>
         </Stack>
         <Typography
-          noWrap={!ef}
-          variant={ef ? 'caption' : 'body2'}
-          sx={{ color: ef ? 'text.disabled' : 'text.secondary' }}
+          noWrap={!caption}
+          variant={caption ? 'caption' : 'body2'}
+          sx={{ color: caption ? 'text.disabled' : 'text.secondary' }}
         >
           {label}
         </Typography>

@@ -23,24 +23,19 @@ import { dis, estadosCivis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
-ProcessoInternoForm.propTypes = {
-  fluxo: PropTypes.object,
-  setCliente: PropTypes.func,
-  setAgendado: PropTypes.func,
-  selectedProcesso: PropTypes.object,
-};
+ProcessoInternoForm.propTypes = { fluxo: PropTypes.object, processo: PropTypes.object };
 
-export default function ProcessoInternoForm({ selectedProcesso, setAgendado, setCliente, fluxo }) {
+export default function ProcessoInternoForm({ processo, fluxo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
-  const hasAnexos = selectedProcesso?.anexos?.length > 0;
+  const hasAnexos = processo?.anexos?.length > 0;
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <DadosCliente isInterno noperacao={selectedProcesso?.noperacao} fluxo={fluxo} />
+            <DadosCliente isInterno noperacao={processo?.noperacao} fluxo={fluxo} />
           </CardContent>
         </Card>
       </Grid>
@@ -50,31 +45,24 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
             <CardContent>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <RHFSwitch
-                    name="agendado"
-                    onChange={(event, value) => {
-                      setValue('agendado', value);
-                      setAgendado(value);
-                    }}
-                    label="Agendar"
-                  />
+                  <RHFSwitch name="agendado" label="Agendar" />
                 </Grid>
                 {values.agendado && (
                   <>
-                    <Grid item xs={12} sm={6} xl={3}>
+                    <Grid item xs={6} md={3}>
                       <RHFAutocompleteSimple
                         name="periodicidade"
                         label="Periodicidade"
                         options={['Mensal', 'Trimestral', 'Semestral', 'Anual']}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} xl={3}>
+                    <Grid item xs={6} md={3}>
                       <RHFNumberField name="diadomes" label="Dia do mês" />
                     </Grid>
-                    <Grid item xs={12} sm={6} xl={3}>
+                    <Grid item xs={6} md={3}>
                       <RHFDatePicker name="data_inicio" label="Data de início" />
                     </Grid>
-                    <Grid item xs={12} sm={6} xl={3}>
+                    <Grid item xs={6} md={3}>
                       <RHFDatePicker name="data_arquivamento" label="Data de término" />
                     </Grid>
                   </>
@@ -95,21 +83,13 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                     onChange={(event, value) => {
                       setValue('is_cliente', value);
                       setValue('titular_ordenador', value);
-                      setCliente(value);
                     }}
                     label="Depositante é o próprio titular"
                   />
                 </Grid>
                 {!values?.titular_ordenador && (
                   <Grid item xs={12} sm={4}>
-                    <RHFSwitch
-                      name="is_cliente"
-                      label="Cliente da Caixa"
-                      onChange={(event, value) => {
-                        setValue('is_cliente', value);
-                        setCliente(value);
-                      }}
-                    />
+                    <RHFSwitch name="is_cliente" label="Cliente da Caixa" />
                   </Grid>
                 )}
                 <Grid item xs={12} sm={values?.titular_ordenador ? 6 : 4}>
@@ -119,12 +99,12 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                   <Grid item xs={12}>
                     <Grid container spacing={3} justifyContent="center">
                       <Grid item xs={12} sm={6} xl={3}>
-                        <RHFTextField name="entidade_con" label="Nº da entidade" />
+                        <RHFNumberField name="entidade_con" label="Nº da entidade" />
                       </Grid>
                     </Grid>
                   </Grid>
                 )}
-                {((!values?.titular_ordenador && !values?.is_cliente) || selectedProcesso) && (
+                {!values?.titular_ordenador && !values?.is_cliente && (
                   <>
                     <Grid item xs={12} sm={6}>
                       <RHFTextField name="ordenador" label="Nome" />
@@ -142,7 +122,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
                       <RHFAutocompleteObject name="estado_civil" label="Estado civil" options={estadosCivis} />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFDatePicker name="data_nascimento" label="Data de nascimento" />
+                      <RHFDatePicker name="data_nascimento" label="Data de nascimento" disableFuture />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
                       <RHFTextField name="telefone" label="Telefone" />
@@ -195,7 +175,7 @@ export default function ProcessoInternoForm({ selectedProcesso, setAgendado, set
               <ObsNovosAnexos />
               {hasAnexos && (
                 <Grid item xs={12}>
-                  <AnexosExistentes anexos={selectedProcesso.anexos} processoId={selectedProcesso.id} />
+                  <AnexosExistentes anexos={processo.anexos} processoId={processo.id} />
                 </Grid>
               )}
             </Grid>

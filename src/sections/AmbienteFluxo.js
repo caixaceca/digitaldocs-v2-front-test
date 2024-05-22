@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 // @mui
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -12,25 +11,21 @@ export function Ambiente() {
   const dispatch = useDispatch();
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
-  const handleChangeAmbiente = useCallback(
-    (newValue) => {
-      dispatch(changeMeuAmbiente(newValue));
-      localStorage.setItem('meuAmbiente', newValue?.id);
-    },
-    [dispatch]
-  );
+  const handleChangeAmbiente = (newValue) => {
+    dispatch(changeMeuAmbiente(newValue));
+    localStorage.setItem('meuAmbiente', newValue?.id);
+  };
 
   return (
     <Autocomplete
       fullWidth
-      disableClearable
       value={meuAmbiente}
+      options={meusAmbientes}
       sx={{ width: { md: 200, xl: 250 } }}
       getOptionLabel={(option) => option?.nome}
       onChange={(event, newValue) => handleChangeAmbiente(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      renderInput={(params) => <TextField {...params} label="Ambiente" margin="none" />}
-      options={[{ id: -1, nome: 'Todos' }, ...meusAmbientes?.filter((row) => row?.id !== -1)]}
+      renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
     />
   );
 }
@@ -41,24 +36,20 @@ export function Fluxo() {
   const dispatch = useDispatch();
   const { meusFluxos, meuFluxo } = useSelector((state) => state.parametrizacao);
 
-  const handleChangeFluxo = useCallback(
-    (newValue) => {
-      dispatch(changeMeuFluxo(newValue));
-    },
-    [dispatch]
-  );
+  const handleChangeFluxo = (newValue) => {
+    dispatch(changeMeuFluxo(newValue));
+  };
 
   return (
     <Autocomplete
       fullWidth
-      disableClearable
       value={meuFluxo}
+      options={meusFluxos}
       sx={{ width: { md: 200, xl: 250 } }}
       getOptionLabel={(option) => option?.assunto}
       onChange={(event, newValue) => handleChangeFluxo(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
       renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
-      options={[{ id: -1, assunto: 'Todos' }, ...meusFluxos?.filter((row) => row?.id !== -1)]}
     />
   );
 }

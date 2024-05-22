@@ -7,8 +7,8 @@ import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
 // components
-import Image from '../../components/Image';
-import LightboxModal from '../../components/LightboxModal';
+import Image from '../../../components/Image';
+import LightboxModal from '../../../components/LightboxModal';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +48,18 @@ export function ImagemPreview({ imagem }) {
 
   return (
     <Grid item xs={12}>
-      <Image src={imagem} sx={{ cursor: 'zoom-in', borderRadius: 2 }} onClick={() => handleOpenLightbox()} />
+      <Image
+        src={imagem}
+        sx={{
+          borderRadius: 2,
+          cursor: 'zoom-in',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+        }}
+        onClick={() => handleOpenLightbox()}
+      />
 
       <LightboxModal
         mainSrc={imagem}

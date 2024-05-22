@@ -87,7 +87,7 @@ export function colorLabel(value) {
     ((value === 'Retidos' || value === 'Pendente' || value === 'Favorável parcial') && 'warning') ||
     (value === 'Pendentes' && 'focus') ||
     ((value === 'Atribuídos' || value === 'Afeto') && 'info') ||
-    ((value === 'Em análise' || value === 'Entrada') && 'default') ||
+    ((value === 'Em análise' || value === 'Entrada' || value === 'Sem parecer') && 'default') ||
     ((value === 'Indeferido' || value === 'Desistido' || value === 'Não favorável') && 'error') ||
     'primary'
   );

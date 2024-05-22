@@ -9,22 +9,32 @@ import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 // utils
-import { emailCheck } from '../../utils/validarAcesso';
-import { findColaborador } from '../../utils/normalizeText';
-import { ptTime, ptDate, ptDateTime } from '../../utils/formatTime';
-import { getFileThumb, canPreview } from '../../utils/getFileFormat';
+import { emailCheck } from '../../../utils/validarAcesso';
+import { findColaborador } from '../../../utils/normalizeText';
+import { ptTime, ptDate, ptDateTime } from '../../../utils/formatTime';
+import { getFileThumb, canPreview } from '../../../utils/getFileFormat';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getAnexo, selectFile } from '../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../../redux/store';
+import { getAnexo, selectFile } from '../../../redux/slices/digitaldocs';
 // components
-import { Criado } from '../../components/Panel';
-import { SearchNotFound } from '../../components/table';
-import { Loading } from '../../components/LoadingScreen';
+import { Criado } from '../../../components/Panel';
+import { SearchNotFound } from '../../../components/table';
+import { Loading } from '../../../components/LoadingScreen';
 //
 import ModelosRespostas from './ModelosRespostas';
 import { PdfPreview, ImagemPreview } from './FilePreview';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import RoleBasedGuard from '../../../guards/RoleBasedGuard';
+
+// ----------------------------------------------------------------------
+
+const sx1 = {
+  borderRadius: 1,
+  borderTopLeftRadius: 0,
+  borderTopRightRadius: 0,
+  height: { xs: 400, lg: 650 },
+  bgcolor: 'background.neutral',
+};
 
 // ----------------------------------------------------------------------
 
@@ -32,10 +42,10 @@ Anexos.propTypes = { anexos: PropTypes.array };
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
-  const { mail } = useSelector((state) => state.intranet);
   const { fileDownload, filePreview, isLoadingAnexo, isLoadingP, processo } = useSelector((state) => state.digitaldocs);
-  const anexosAtivos = anexos?.filter((row) => row.ativo);
-  const anexosInativos = anexos?.filter((row) => !row.ativo);
+  const { mail } = useSelector((state) => state.intranet);
+  const anexosAtivos = anexos?.filter((row) => row.ativo && row?.anexo !== filePreview?.anexo);
+  const anexosInativos = anexos?.filter((row) => !row.ativo && row?.anexo !== filePreview?.anexo);
 
   useEffect(() => {
     if (fileDownload?.blob) {
@@ -75,12 +85,9 @@ export default function Anexos({ anexos }) {
           <Typography variant="subtitle1">Anexos</Typography>
         </ListItem>
       </List>
+      {!!filePreview && <AnexoItem eliminado anexo={filePreview} preview />}
       {isLoadingP || isLoadingAnexo ? (
-        <Stack
-          alignItems="center"
-          justifyContent="center"
-          sx={{ height: { xs: 400, lg: 650 }, bgcolor: 'background.neutral', borderRadius: 1 }}
-        >
+        <Stack alignItems="center" justifyContent="center" sx={sx1}>
           <Loading />
           <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>
         </Stack>
@@ -89,11 +96,7 @@ export default function Anexos({ anexos }) {
           {filePreview?.url && filePreview?.tipo === 'pdf' && <PdfPreview url={filePreview?.url} />}
           {filePreview?.url && filePreview?.tipo === 'image' && <ImagemPreview imagem={filePreview?.url} />}
           {filePreview && !filePreview?.url && (
-            <Stack
-              alignItems="center"
-              justifyContent="center"
-              sx={{ height: { xs: 400, lg: 620 }, bgcolor: 'background.neutral', borderRadius: 1 }}
-            >
+            <Stack alignItems="center" justifyContent="center" sx={sx1}>
               <SearchNotFound message="Ficheiro não encontrado..." height={200} />
             </Stack>
           )}
@@ -104,7 +107,7 @@ export default function Anexos({ anexos }) {
           <Stack key={row?.data} sx={{ pb: 1 }}>
             <Divider sx={{ pt: 0.5, px: 3 }}>{row?.data}</Divider>
             {row?.anexos?.map((row) => (
-              <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} filePreview={filePreview} />
+              <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
             ))}
           </Stack>
         ))}
@@ -114,14 +117,14 @@ export default function Anexos({ anexos }) {
               <Typography variant="subtitle1">Anexos eliminados</Typography>
             </Divider>
             {anexosInativos?.map((row) => (
-              <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} filePreview={filePreview} />
+              <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
             ))}
           </RoleBasedGuard>
         )}
         {((emailCheck(mail, 'vc.axiac@arove.ordnavi') && processo?.origem_id) ||
-          (!processo?.is_interno &&
-            processo?.estado_atual?.includes('Notas Externas') &&
-            processo?.estado_atual !== 'Arquivo')) && <ModelosRespostas />}
+          (processo?.estado_atual?.includes('Notas Externas') && processo?.estado_atual !== 'Arquivo')) && (
+          <ModelosRespostas />
+        )}
       </Stack>
     </>
   );
@@ -130,32 +133,50 @@ export default function Anexos({ anexos }) {
 // ----------------------------------------------------------------------
 
 AnexoItem.propTypes = {
+  preview: PropTypes.bool,
   anexo: PropTypes.object,
+  parecer: PropTypes.bool,
   viewAnexo: PropTypes.func,
   eliminado: PropTypes.bool,
-  filePreview: PropTypes.object,
 };
 
-function AnexoItem({ anexo, viewAnexo, filePreview, eliminado }) {
+export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false, parecer = false }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   return (
     <Button
       fullWidth
       variant="soft"
       color="inherit"
-      key={anexo?.anexo}
+      disabled={preview}
       onClick={() => viewAnexo(anexo)}
-      disabled={anexo?.anexo === filePreview?.anexo}
       startIcon={getFileThumb(false, null, anexo?.nome)}
-      sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, opacity: eliminado ? 0.75 : 1, boxShadow: 'none' }}
+      sx={{
+        mt: 0.75,
+        boxShadow: 'none',
+        textAlign: 'left',
+        marginTop: preview && 0,
+        border: preview && '1px solid',
+        borderColor: preview && 'divider',
+        borderBottom: preview && '0px solid',
+        borderBottomLeftRadius: preview && 0,
+        borderBottomRightRadius: preview && 0,
+        opacity: (preview && 1) || (eliminado && 0.75) || 1,
+        color: (theme) => preview && `${theme.palette.text.primary} !important`,
+      }}
     >
       <ListItemText
-        primary={`${anexo?.nome} ${anexo?.anexo === filePreview?.anexo ? '(Em pré-vizualização)' : ''}`}
+        primary={`${anexo?.nome} ${preview ? '(Em pré-vizualização)' : ''}`}
         secondary={
-          <Stack direction="row" spacing={1} sx={{ opacity: anexo?.anexo === filePreview?.anexo ? 0.5 : 1 }}>
-            {anexo?.criador && <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} />}
+          <Stack spacing={{ sm: 1 }} direction={{ xs: 'column', sm: 'row' }} sx={{ opacity: 1 }}>
+            {anexo?.criador && (
+              <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} shuffle />
+            )}
             {anexo?.criado_em && (
-              <Criado caption tipo="time" value={eliminado ? ptDateTime(anexo?.criado_em) : ptTime(anexo?.criado_em)} />
+              <Criado
+                caption
+                tipo="time"
+                value={eliminado || parecer ? ptDateTime(anexo?.criado_em) : ptTime(anexo?.criado_em)}
+              />
             )}
           </Stack>
         }

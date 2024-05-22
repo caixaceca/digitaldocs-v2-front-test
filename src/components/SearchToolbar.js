@@ -14,14 +14,23 @@ import { setItemValue } from '../utils/normalizeText';
 import { useSelector } from '../redux/store';
 // sections
 import { Ambiente, Fluxo } from '../sections/AmbienteFluxo';
+import { FilterSwitch } from '../sections/indicadores/Indicadores';
+// _mock_
+import { meses } from '../_mock';
 
 // ----------------------------------------------------------------------
 
-SearchToolbarSimple.propTypes = { filter: PropTypes.string, item: PropTypes.string, setFilter: PropTypes.func };
+SearchToolbarSimple.propTypes = {
+  item: PropTypes.string,
+  filter: PropTypes.string,
+  children: PropTypes.node,
+  setFilter: PropTypes.func,
+};
 
-export function SearchToolbarSimple({ filter, item = '', setFilter }) {
+export function SearchToolbarSimple({ filter, item = '', setFilter, children = null }) {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
+      {children}
       <SearchField item={item} filter={filter} setFilter={setFilter} />
       {filter && <RemoverFiltros removerFiltro={() => setItemValue('', setFilter, item, false)} />}
     </Stack>
@@ -138,47 +147,48 @@ export function SearchToolbarProcessos({
   colaboradoresList,
 }) {
   const { cc } = useSelector((state) => state.intranet);
-  const { meusAmbientes, meusFluxos } = useSelector((state) => state.parametrizacao);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-        {tab !== 'retidos' && tab !== 'atribuidos' && (
-          <>
-            {meusAmbientes?.length > 1 && <Ambiente />}
-            {meusFluxos?.length > 1 && <Fluxo />}
-          </>
-        )}
-        {cc?.uo?.tipo === 'Agências' && tab === 'pendentes' && (
-          <Autocomplete
-            fullWidth
-            value={motivo || null}
-            sx={{ width: { md: 150, xl: 200 } }}
-            options={['Levantamento do pedido', 'Outros']}
-            renderInput={(params) => <TextField {...params} label="Motivo" />}
-            onChange={(event, newValue) => setItemValue(newValue, setMotivo, 'motivoP')}
-          />
-        )}
-        {colaboradoresList?.length > 0 && (
-          <Autocomplete
-            fullWidth
-            value={colaborador || null}
-            options={colaboradoresList}
-            sx={{ width: { md: 250, xl: 300 } }}
-            renderInput={(params) => <TextField {...params} label="Colaborador" />}
-            onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP')}
-          />
-        )}
-        {tab === 'tarefas' && (
-          <Autocomplete
-            fullWidth
-            value={segmento || null}
-            sx={{ width: { md: 170 } }}
-            options={['Particulares', 'Empresas']}
-            renderInput={(params) => <TextField {...params} label="Segmento" />}
-            onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}
-          />
-        )}
-      </Stack>
+      {tab !== 'agendados' && tab !== 'finalizados' && tab !== 'executados' && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          {(tab === 'tarefas' || tab === 'pendentes') && (
+            <>
+              <Ambiente />
+              <Fluxo />
+            </>
+          )}
+          {cc?.uo?.tipo === 'Agências' && tab === 'pendentes' && (
+            <Autocomplete
+              fullWidth
+              value={motivo || null}
+              sx={{ width: { md: 150, xl: 200 } }}
+              options={['Levantamento do pedido', 'Outros']}
+              renderInput={(params) => <TextField {...params} label="Motivo" />}
+              onChange={(event, newValue) => setItemValue(newValue, setMotivo, 'motivoP')}
+            />
+          )}
+          {tab === 'tarefas' && (
+            <Autocomplete
+              fullWidth
+              value={segmento || null}
+              sx={{ width: { md: 170 } }}
+              options={['Particulares', 'Empresas']}
+              renderInput={(params) => <TextField {...params} label="Segmento" />}
+              onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}
+            />
+          )}
+          {(tab === 'retidos' || tab === 'atribuidos') && (
+            <Autocomplete
+              fullWidth
+              value={colaborador || null}
+              options={colaboradoresList}
+              sx={{ width: { md: 250, xl: 300 } }}
+              renderInput={(params) => <TextField {...params} label="Colaborador" />}
+              onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP')}
+            />
+          )}
+        </Stack>
+      )}
       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
         <SearchField item="filterP" filter={filter} setFilter={setFilter} />
         {(filter || segmento) && (
@@ -354,6 +364,98 @@ export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
           </Tooltip>
         )}
       </Stack>
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SearchIndicadores.propTypes = {
+  mes: PropTypes.object,
+  item: PropTypes.string,
+  setMes: PropTypes.func,
+  detalhes: PropTypes.bool,
+  assunto: PropTypes.string,
+  setAssunto: PropTypes.func,
+  setDetalhes: PropTypes.func,
+  viewEntrada: PropTypes.bool,
+  assuntosList: PropTypes.array,
+  colaborador: PropTypes.object,
+  setColaborador: PropTypes.func,
+  setViewEntrada: PropTypes.func,
+  colaboradoresList: PropTypes.array,
+};
+
+export function SearchIndicadores({
+  mes,
+  item,
+  setMes,
+  detalhes,
+  setDetalhes,
+  assunto = null,
+  assuntosList = [],
+  setAssunto = null,
+  colaborador = null,
+  viewEntrada = false,
+  setColaborador = null,
+  setViewEntrada = null,
+  colaboradoresList = [],
+}) {
+  return (
+    <Stack
+      spacing={1}
+      sx={{ p: 1 }}
+      alignItems="center"
+      justifyContent="center"
+      direction={{ xs: 'column', sm: 'row' }}
+    >
+      <Stack spacing={1} alignItems="center" justifyContent="center" direction="row">
+        {item === 'Colaboradores' && (
+          <FilterSwitch value={viewEntrada} localS="viewEntrada" setValue={setViewEntrada} label="Dados entrada" />
+        )}
+        <FilterSwitch value={detalhes} localS="detalhes" setValue={setDetalhes} label="Dados mensais" />
+      </Stack>
+      <Autocomplete
+        fullWidth
+        options={meses}
+        value={mes || null}
+        sx={{ width: { sm: 180 } }}
+        getOptionLabel={(option) => option?.label}
+        isOptionEqualToValue={(option, value) => option?.id === value?.id}
+        onChange={(event, newValue) => setItemValue(newValue, setMes, '', '')}
+        renderInput={(params) => <TextField {...params} label="Mês" size="small" />}
+      />
+      {item === 'Trabalhados' && (
+        <Autocomplete
+          fullWidth
+          value={assunto || null}
+          options={assuntosList?.sort()}
+          sx={{ width: { sm: 250, md: 350 } }}
+          onChange={(event, newValue) => setItemValue(newValue, setAssunto, '', '')}
+          renderInput={(params) => <TextField {...params} label="Assunto" size="small" />}
+        />
+      )}
+      {item === 'Colaboradores' && (
+        <Autocomplete
+          fullWidth
+          value={colaborador}
+          options={colaboradoresList}
+          sx={{ width: { sm: 250, md: 350 } }}
+          getOptionLabel={(option) => option?.label}
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          onChange={(event, newValue) => setItemValue(newValue, setColaborador, '', '')}
+          renderInput={(params) => <TextField {...params} label="Colaborador" size="small" />}
+        />
+      )}
+      {(mes || assunto || colaborador) && (
+        <RemoverFiltros
+          removerFiltro={() => {
+            setItemValue(null, setMes, '', '');
+            setItemValue(null, setAssunto, '', '');
+            setItemValue(null, setColaborador, '', '');
+          }}
+        />
+      )}
     </Stack>
   );
 }

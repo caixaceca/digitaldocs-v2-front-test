@@ -115,7 +115,7 @@ export default function EstatisticaCredito() {
     const dataF = dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '';
     if (mail && uo?.id && dataI && currentTab === 'Resumo') {
       if (uo?.id === -1 || uo?.id === -2 || uo?.id === -3) {
-        dispatch(getIndicadores('resumoEstCredCaixa', { mail, dataI, dataF }));
+        dispatch(getIndicadores('resumoEstCredCaixa', { mail, dataI, dataF, uoID: uo?.label }));
       } else {
         dispatch(getIndicadores('resumoEstCredAg', { mail, uoID: uo?.id, dataI, dataF }));
       }
@@ -577,20 +577,20 @@ Segmento.propTypes = {
 };
 
 function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2Dados, linha3Dados }) {
-  const lenghtLinha1 = linha1Dados?.length > 1 ? linha1Dados?.length : 0;
-  const lenghtLinha2 = linha2Dados?.length > 1 ? linha2Dados?.length : 0;
-  const lenghtLinha3 = linha3Dados?.length > 1 ? linha3Dados?.length : 0;
+  const lengthLinha1 = linha1Dados?.length > 1 ? linha1Dados?.length : 0;
+  const lengthLinha2 = linha2Dados?.length > 1 ? linha2Dados?.length : 0;
+  const lengthLinha3 = linha3Dados?.length > 1 ? linha3Dados?.length : 0;
   return (
     <>
       <FirstRowSegmento
         from={from}
         linha={linha1}
         segmento={segmento}
-        lenght1={lenghtLinha1}
+        length1={lengthLinha1}
         dados={linha1Dados?.[0]}
-        lenght={lenghtLinha1 + lenghtLinha2 + lenghtLinha3 + 4}
+        length={lengthLinha1 + lengthLinha2 + lengthLinha3 + 4}
       />
-      {lenghtLinha1 > 1 && (
+      {lengthLinha1 > 1 && (
         <>
           {linha1Dados.map(
             (row, index) =>
@@ -610,8 +610,8 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
       )}
 
       {/* LINHA 2 */}
-      <FirstRowLinha linha={linha2} dados={linha2Dados?.[0]} lenght={lenghtLinha2} from={from} />
-      {lenghtLinha2 > 1 && (
+      <FirstRowLinha linha={linha2} dados={linha2Dados?.[0]} length={lengthLinha2} from={from} />
+      {lengthLinha2 > 1 && (
         <>
           {linha2Dados.map(
             (row, index) =>
@@ -631,8 +631,8 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
       )}
 
       {/* LINHA 3 */}
-      <FirstRowLinha linha={linha3} dados={linha3Dados?.[0]} lenght={lenghtLinha3} from={from} />
-      {lenghtLinha3 > 1 && (
+      <FirstRowLinha linha={linha3} dados={linha3Dados?.[0]} length={lengthLinha3} from={from} />
+      {lengthLinha3 > 1 && (
         <>
           {linha3Dados.map(
             (row, index) =>
@@ -673,17 +673,17 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
 SegmentoStd.propTypes = { from: PropTypes.string, segmento: PropTypes.string, dados: PropTypes.array };
 
 function SegmentoStd({ from, segmento, dados }) {
-  const lenght = dados?.length;
+  const length = dados?.length;
   return (
     <>
       <FirstRowSegmento
         from={from}
         dados={dados?.[0]}
         segmento={segmento}
-        total={lenght === 0}
-        lenght={lenght > 0 ? lenght + 1 : 1}
+        total={length === 0}
+        length={length > 0 ? length + 1 : 1}
       />
-      {lenght > 1 &&
+      {length > 1 &&
         dados.map(
           (row, index) =>
             index !== 0 && (
@@ -693,7 +693,7 @@ function SegmentoStd({ from, segmento, dados }) {
               </TableRow>
             )
         )}
-      {lenght > 0 && (
+      {length > 0 && (
         <TableRowTotal
           nivel={2}
           from={from}
@@ -758,21 +758,21 @@ FirstRowSegmento.propTypes = {
   from: PropTypes.string,
   dados: PropTypes.object,
   linha: PropTypes.string,
-  lenght: PropTypes.number,
-  lenght1: PropTypes.number,
+  length: PropTypes.number,
+  length1: PropTypes.number,
   segmento: PropTypes.string,
 };
 
-function FirstRowSegmento({ segmento, linha, dados, total = false, lenght, from, lenght1 }) {
+function FirstRowSegmento({ segmento, linha, dados, total = false, length, from, length1 }) {
   return (
     <TableRow hover sx={{ ...borderStyle }}>
-      <TableCell rowSpan={lenght} sx={{ ...frSegmentoStyle, backgroundColor: 'background.neutral' }}>
+      <TableCell rowSpan={length} sx={{ ...frSegmentoStyle, backgroundColor: 'background.neutral' }}>
         <b>{segmento}</b>
       </TableCell>
       {segmento === 'Entidades Públicas' || segmento === 'Garantias Bancárias' ? (
         <TableCell sx={{ backgroundColor: total && 'background.neutral' }}> </TableCell>
       ) : (
-        <TableCell rowSpan={lenght1 > 1 ? lenght1 + 1 : 1} sx={{ ...frSegmentoStyle }}>
+        <TableCell rowSpan={length1 > 1 ? length1 + 1 : 1} sx={{ ...frSegmentoStyle }}>
           <b>{linha}</b>
         </TableCell>
       )}
@@ -787,13 +787,13 @@ FirstRowLinha.propTypes = {
   from: PropTypes.string,
   dados: PropTypes.object,
   linha: PropTypes.string,
-  lenght: PropTypes.number,
+  length: PropTypes.number,
 };
 
-function FirstRowLinha({ linha, dados, lenght, from }) {
+function FirstRowLinha({ linha, dados, length, from }) {
   return (
     <TableRow hover>
-      <TableCell rowSpan={lenght > 1 ? lenght + 1 : 1} sx={{ ...frSegmentoStyle }}>
+      <TableCell rowSpan={length > 1 ? length + 1 : 1} sx={{ ...frSegmentoStyle }}>
         <b>{linha}</b>
       </TableCell>
       <DadosCell dados={dados} from={from} />

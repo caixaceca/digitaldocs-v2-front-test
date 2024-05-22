@@ -12,12 +12,13 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime, ptDate, fYear } from '../utils/formatTime';
+import { ptDateTime, fYear } from '../utils/formatTime';
 import { normalizeText, entidadesParse, noDados } from '../utils/normalizeText';
 // hooks
 import useTable, { getComparator, applySort } from '../hooks/useTable';
 // redux
-import { useSelector } from '../redux/store';
+import { getAll } from '../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../redux/store';
 // hooks
 import useSettings from '../hooks/useSettings';
 // routes
@@ -25,9 +26,9 @@ import { PATH_DIGITALDOCS } from '../routes/paths';
 // components
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
-import Panel, { Criado } from '../components/Panel';
 import { DefaultAction } from '../components/Actions';
 import { SkeletonTable } from '../components/skeleton';
+import Panel, { Criado, Registos } from '../components/Panel';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
@@ -35,7 +36,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../com
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'nentrada', label: 'Nº', align: 'left' },
+  { id: 'entrada', label: 'Nº', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
@@ -48,13 +49,14 @@ const TABLE_HEAD = [
 
 export default function Procura() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const [uo, setUo] = useState(localStorage.getItem('uoFSearch') || null);
   const [search, setSearch] = useState(localStorage.getItem('filterSearch') || '');
   const [estado, setEstado] = useState(localStorage.getItem('estadoSearch') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoSearch') || null);
-  const { pesquisa, isLoading } = useSelector((state) => state.digitaldocs);
-  const { colaboradores, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
+  const { pesquisa, pesquisaInfo, isLoading } = useSelector((state) => state.digitaldocs);
   const fromAgencia = cc?.uo?.tipo === 'Agências';
 
   const {
@@ -76,11 +78,7 @@ export default function Procura() {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uo, search, assunto, estado]);
-
-  const handleViewRow = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Pesquisa`);
-  };
+  }, [uo, search, assunto, estado, pesquisa]);
 
   const newPesquisa = [];
   const estadosList = [];
@@ -108,48 +106,63 @@ export default function Procura() {
   });
 
   const dataFiltered = applySortFilter({
-    newPesquisa,
-    comparator: getComparator(order, orderBy),
     uo,
     search,
     estado,
     assunto,
+    newPesquisa,
+    comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
+
+  const handleView = (id, isCC) => {
+    if (isCC) {
+      navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${id}?from=Pesquisa`);
+    } else {
+      navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Pesquisa`);
+    }
+  };
+
+  const verMais = () => {
+    if (mail && cc?.perfil_id) {
+      if (localStorage.getItem('tipoPesquisa') === 'avancada') {
+        dispatch(
+          getAll('pesquisa avancada', {
+            mail,
+            perfilId: cc?.perfil_id,
+            pagina: pesquisaInfo?.proxima_pagina,
+            conta: localStorage.getItem('conta') || '',
+            cliente: localStorage.getItem('cliente') || '',
+            entidade: localStorage.getItem('entidade') || '',
+            arquivo: localStorage.getItem('procArquivo') || '',
+            noperacao: localStorage.getItem('noperacao') || '',
+          })
+        );
+      } else if (cc?.uo_id) {
+        dispatch(
+          getAll('pesquisa global', {
+            mail,
+            uoID: cc?.uo_id,
+            perfilId: cc?.perfil_id,
+            pagina: pesquisaInfo?.proxima_pagina,
+            chave: localStorage.getItem('search'),
+          })
+        );
+      }
+    }
+  };
 
   return (
     <Page title="Pesquisa | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
+          sx={{ color: 'text.secondary' }}
+          action={<Registos info={pesquisaInfo} total={pesquisa?.length} handleClick={verMais} />}
           heading={
             <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
               <Typography variant="h4">Resultado da procura [{pesquisa?.length || 0}]:</Typography>
               {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-                  {localStorage.getItem('uoSearch') && (
-                    <Panel
-                      label="Agência/U.O"
-                      children={
-                        <Typography noWrap>
-                          {uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
-                        </Typography>
-                      }
-                    />
-                  )}
-                  {localStorage.getItem('colaboradorSearch') && (
-                    <Panel
-                      label="Criado por"
-                      children={
-                        <Typography noWrap>
-                          {
-                            colaboradores?.find(
-                              (row) => row?.perfil_id === Number(localStorage.getItem('colaboradorSearch'))
-                            )?.perfil?.displayName
-                          }
-                        </Typography>
-                      }
-                    />
-                  )}
                   {localStorage.getItem('conta') && (
                     <Panel
                       label="Nº conta"
@@ -168,26 +181,10 @@ export default function Procura() {
                       children={<Typography noWrap>{localStorage.getItem('entidade')}</Typography>}
                     />
                   )}
-                  {localStorage.getItem('nentrada') && (
-                    <Panel
-                      label="Nº entrada"
-                      children={<Typography noWrap>{localStorage.getItem('nentrada')}</Typography>}
-                    />
-                  )}
                   {localStorage.getItem('noperacao') && (
                     <Panel
                       label="Nº operação"
                       children={<Typography noWrap>{localStorage.getItem('noperacao')}</Typography>}
-                    />
-                  )}
-                  {localStorage.getItem('dataISearch') && localStorage.getItem('dataFSearch') && (
-                    <Panel
-                      label="Data"
-                      children={
-                        <Typography noWrap>
-                          {ptDate(localStorage.getItem('dataISearch'))} - {ptDate(localStorage.getItem('dataFSearch'))}
-                        </Typography>
-                      }
                     />
                   )}
                 </Stack>
@@ -203,8 +200,6 @@ export default function Procura() {
             { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
             { name: 'Procurar' },
           ]}
-          action=""
-          sx={{ color: 'text.secondary' }}
         />
 
         <Card sx={{ p: 1 }}>
@@ -231,7 +226,7 @@ export default function Procura() {
                   ) : (
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow hover key={row.id}>
-                        <TableCell>{`${row.nentrada}${row.criado_em ? `/${fYear(row.criado_em)}` : ''}`}</TableCell>
+                        <TableCell>{`${row.entrada}${row.criado_em ? `/${fYear(row.criado_em)}` : ''}`}</TableCell>
                         <TableCell>{row.assunto}</TableCell>
                         <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
@@ -241,10 +236,13 @@ export default function Procura() {
                           {row?.uo && (
                             <Criado tipo="company" value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo} />
                           )}
-                          {row?.colaborador && <Criado tipo="user" value={row.colaborador} />}
+                          {row?.colaborador && <Criado tipo="user" value={row.colaborador} shuffle />}
                         </TableCell>
                         <TableCell align="center" width={50}>
-                          <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
+                          <DefaultAction
+                            label="DETALHES"
+                            handleClick={() => handleView(row?.id, row?.credito_colaborador)}
+                          />
                         </TableCell>
                       </TableRow>
                     ))
@@ -292,7 +290,7 @@ function applySortFilter({ newPesquisa, comparator, uo, search, estado, assunto 
   if (search) {
     newPesquisa = newPesquisa.filter(
       (row) =>
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(search)) !== -1) ||
+        (row?.entrada && normalizeText(row?.entrada).indexOf(normalizeText(search)) !== -1) ||
         (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
         (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(search)) !== -1) ||
         (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(search)) !== -1) ||

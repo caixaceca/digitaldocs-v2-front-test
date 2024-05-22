@@ -8,6 +8,8 @@ import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
 import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
@@ -20,7 +22,6 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ListItemButton from '@mui/material/ListItemButton';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -39,14 +40,16 @@ import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
-import { ptDate } from '../utils/formatTime';
 import { getFileThumb } from '../utils/getFileFormat';
+import { ptDate, ptDateTime } from '../utils/formatTime';
+import { findColaborador } from '../utils/normalizeText';
 // hooks
 import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
 import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/parametrizacao';
 //
+import { Criado } from './Panel';
 import SvgIconStyle from './SvgIconStyle';
 import DialogConfirmar from './DialogConfirmar';
 
@@ -83,9 +86,9 @@ export function DefaultAction({
         size={small ? 'small' : 'medium'}
         startIcon={
           (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
-          (label === 'Mostrar detalhes' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
-          (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />)
+          (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+          ((label === 'Mostrar detalhes' || label === 'Adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />)
         }
       >
         {label}
@@ -94,7 +97,13 @@ export function DefaultAction({
   ) : (
     <Stack>
       <Tooltip title={label} arrow>
-        <Fab size="small" variant={variant} color={color} onClick={handleClick} sx={{ ...(small ? whsmall : wh) }}>
+        <Fab
+          size="small"
+          color={color}
+          variant={variant}
+          onClick={handleClick}
+          sx={{ ...(small ? whsmall : wh), boxShadow: label === 'Remover' && 'none' }}
+        >
           {(icon === 'parecer' && <NotesIcon />) ||
             (icon === 'back' && <ArrowBackIcon />) ||
             (icon === 'cancelar' && <ClearIcon />) ||
@@ -113,15 +122,18 @@ export function DefaultAction({
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
             (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'Clonar fluxo' && <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (label === 'Mostrar mais processos' && <TableRowsIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (icon === 'abandonar' && <SvgIconStyle src="/assets/icons/abandonar.svg" sx={{ width: 22 }} />) ||
             (icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" sx={{ width: 22 }} />) ||
             (label === 'EDITAR' && <SvgIconStyle src="/assets/icons/editar.svg" sx={{ width: small ? 18 : 22 }} />) ||
-            (label === 'ELIMINAR' && <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <SvgIconStyle src="/assets/icons/view.svg" />) ||
             (icon === 'devolver' && <SvgIconStyle src="/assets/icons/resgatar.svg" />) ||
             (label === 'ARQUIVAR' && <SvgIconStyle src="/assets/icons/archive.svg" />) ||
+            ((label === 'ELIMINAR' || label === 'Remover') && (
+              <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: small ? 18 : 22 }} />
+            )) ||
             (icon === 'finalizar' && <SvgIconStyle src="/assets/icons/stop.svg" />)}
         </Fab>
       </Tooltip>
@@ -206,32 +218,6 @@ export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null
 
 // ----------------------------------------------------------------------
 
-CloneItem.propTypes = { item: PropTypes.string, id: PropTypes.number };
-
-export function CloneItem({ item, id }) {
-  const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
-
-  const handleClone = () => {
-    if (id && cc?.perfil_id && mail) {
-      dispatch(openModal('view'));
-      dispatch(getFromParametrizacao(item, { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
-    }
-  };
-
-  return (
-    <Stack>
-      <Tooltip title="Clonar fluxo" arrow>
-        <Fab color="inherit" size="small" variant="soft" onClick={() => handleClone()} sx={{ ...wh }}>
-          <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />
-        </Fab>
-      </Tooltip>
-    </Stack>
-  );
-}
-
-// ----------------------------------------------------------------------
-
 Fechar.propTypes = { button: PropTypes.bool, large: PropTypes.bool, handleClick: PropTypes.func };
 
 export function Fechar({ button = false, large = false, handleClick }) {
@@ -300,33 +286,42 @@ export function DialogButons({
 
 AnexosExistente.propTypes = { mt: PropTypes.number, anexos: PropTypes.array, onOpen: PropTypes.func };
 
-export function AnexosExistente({ mt = 4, anexos, onOpen }) {
+export function AnexosExistente({ mt = 3, anexos, onOpen }) {
+  const { colaboradores } = useSelector((state) => state.intranet);
   return (
     <>
-      <Typography variant="body2" sx={{ mt, color: 'text.secondary' }}>
-        Anexos existentes
-      </Typography>
-      <List component="nav" sx={{ mt: 1 }}>
-        {anexos.map((row, index) => (
-          <ListItemButton
-            key={`${row.name}_${index}`}
-            sx={{
-              mb: 1,
-              p: 1.5,
-              borderRadius: 1,
-              bgcolor: 'background.paper',
-              border: (theme) => `dotted 1px ${theme.palette.divider}`,
-            }}
-          >
+      <Divider sx={{ mt }}>Anexos existentes</Divider>
+      <List>
+        {anexos.map((row) => (
+          <ListItem key={row?.name} sx={{ py: 0.5, px: 1, mt: 0.75, borderRadius: 1, bgcolor: 'background.neutral' }}>
             <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
             <ListItemText
-              primary={row.name}
-              secondary={row?.data_validade ? `Validade: ${ptDate(row?.data_validade)}` : ''}
+              primary={
+                <>
+                  {row.name}
+                  {row?.data_validade && (
+                    <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary' }}>
+                      &nbsp;(Validade: {ptDate(row?.data_validade)})
+                    </Typography>
+                  )}
+                </>
+              }
+              primaryTypographyProps={{ variant: 'subtitle2', pb: 0.25 }}
+              secondary={
+                (row?.criado_em || row?.criador) && (
+                  <Stack direction={{ sx: 'column', sm: 'row' }} spacing={1}>
+                    {row?.criador && (
+                      <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} shuffle />
+                    )}
+                    {row?.criado_em && <Criado caption tipo="date" value={ptDateTime(row?.criado_em)} />}
+                  </Stack>
+                )
+              }
             />
             <ListItemSecondaryAction>
               <DefaultAction color="error" label="ELIMINAR" small handleClick={() => onOpen(row.id)} />
             </ListItemSecondaryAction>
-          </ListItemButton>
+          </ListItem>
         ))}
       </List>
     </>

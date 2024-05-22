@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados } from '../../utils/normalizeText';
+import { entidadesParse, noDados, shuffleString } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -110,9 +110,9 @@ export default function TableArquivo({ tab }) {
         <Card sx={{ mb: 3 }}>
           <Scrollbar>
             <Stack
+              sx={{ py: 2 }}
               direction="row"
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-              sx={{ py: 2 }}
             >
               <ArquivoAnalytic
                 title="Total"
@@ -159,8 +159,10 @@ export default function TableArquivo({ tab }) {
                       {tab === 'arquivos' ? (
                         <TableRow hover key={`${tab}_${index}`}>
                           <TableCell>{row.referencia}</TableCell>
-                          <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
-                          <TableCell>{entidadesParse(row?.entidades) || noDados()}</TableCell>
+                          <TableCell>{row?.titular ? shuffleString(row.titular) : noDados()}</TableCell>
+                          <TableCell>
+                            {(row?.entidades && shuffleString(entidadesParse(row?.entidades))) || noDados()}
+                          </TableCell>
                           <TableCell align="center">
                             {row?.data_last_transicao && (
                               <Typography variant="body2" noWrap>
@@ -174,7 +176,7 @@ export default function TableArquivo({ tab }) {
                         </TableRow>
                       ) : (
                         <TableRow hover key={`${tab}_${index}`}>
-                          <TableCell>{row?.nome}</TableCell>
+                          <TableCell>{shuffleString(row?.nome)}</TableCell>
                           <TableCell>{row?.processo_id}</TableCell>
                           <TableCell align="center" width={50}>
                             {row?.criado_em && (

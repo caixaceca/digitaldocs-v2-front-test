@@ -8,12 +8,12 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
-import { fDate } from '../../utils/formatTime';
-import { fCurrency } from '../../utils/formatNumber';
-import { getFileThumb } from '../../utils/getFileFormat';
-import { valorPorExtenso } from '../../utils/numeroPorExtenso';
+import { fDate } from '../../../utils/formatTime';
+import { fCurrency } from '../../../utils/formatNumber';
+import { getFileThumb } from '../../../utils/getFileFormat';
+import { valorPorExtenso } from '../../../utils/numeroPorExtenso';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '../../../redux/store';
 
 // ----------------------------------------------------------------------
 
@@ -102,6 +102,7 @@ export default function ModelosRespostas() {
                 new TextRun({ text: processo?.conta || 'xxxxxxxxxxxx', bold: true }),
                 new TextRun({ text: ', titulada pela entidade ' }),
                 new TextRun({ text: processo?.titular || 'Xxxxxxxx Xxxxx Xxxxxx', bold: true }),
+                new TextRun({ text: '.' }),
               ],
             }),
           ]
@@ -294,7 +295,7 @@ export default function ModelosRespostas() {
 
   return (
     <Grid item xs={12}>
-      <Divider sx={{ mt: 1 }}>
+      <Divider sx={{ mt: 1.5 }}>
         <Typography variant="subtitle1">Modelos de resposta</Typography>
       </Divider>
       {(processo?.operacao === 'Pedido de Informação' && (
@@ -304,7 +305,10 @@ export default function ModelosRespostas() {
         </>
       )) ||
         (processo?.operacao === 'Cancelamento/Levantamento de Cativo/Penhora' && (
-          <ButtonModelo modelo="1: Levantamento penhora.docx" evento={() => exportToWord('Levantamento Penhora')} />
+          <ButtonModelo
+            modelo="1: Cancelamento/Levantamento de Cativo/Penhora.docx"
+            evento={() => exportToWord('Levantamento Penhora')}
+          />
         )) ||
         (processo?.operacao === 'Cativo/Penhora' && (
           <>

@@ -24,7 +24,7 @@ const Loadable = (Component) => (props) => (
 export default function Router() {
   const dispatch = useDispatch();
   const { instance, accounts } = useMsal();
-  const { perfil, msalProfile, accessToken } = useSelector((state) => state.intranet);
+  const { cc, perfil, mail, msalProfile, accessToken } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (!msalProfile?.mail) {
@@ -39,33 +39,30 @@ export default function Router() {
   }, [dispatch, accessToken, msalProfile]);
 
   useEffect(() => {
-    if (perfil?.mail) {
+    if (mail && perfil?.colaborador?.id) {
+      dispatch(getFromIntranet('colaborador', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
+    }
+  }, [dispatch, perfil?.colaborador?.id, mail, perfil?.mail]);
+
+  useEffect(() => {
+    if (perfil?.mail && perfil?.id && cc?.id) {
       dispatch(getFromIntranet('uos', { mail: perfil?.mail }));
       dispatch(getFromIntranet('links', { mail: perfil?.mail }));
       dispatch(getFromIntranet('frase', { mail: perfil?.mail }));
       dispatch(getFromIntranet('aplicacoes', { mail: perfil?.mail }));
       dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
       dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
-      if (perfil?.id) {
-        dispatch(getFromParametrizacao('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getFromParametrizacao('origens', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getFromParametrizacao('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getFromParametrizacao('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getFromParametrizacao('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
-        dispatch(getFromParametrizacao('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
-      }
-      if (perfil?.colaborador?.id) {
-        dispatch(getFromIntranet('colaborador', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
-        dispatch(
-          getFromIntranet('disposicao', {
-            mail: perfil?.mail,
-            idColaborador: perfil?.colaborador?.id,
-            data: format(new Date(), 'yyyy-MM-dd'),
-          })
-        );
-      }
+      dispatch(getFromParametrizacao('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('origens', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(
+        getFromIntranet('disposicao', { mail: perfil?.mail, id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') })
+      );
     }
-  }, [dispatch, perfil]);
+  }, [dispatch, cc?.id, perfil?.mail, perfil?.id]);
 
   return useRoutes([
     {
@@ -75,6 +72,7 @@ export default function Router() {
         // { element: <Navigate to="indicadores" replace />, index: true },
         { element: <Navigate to="processos" replace />, index: true },
         { path: 'indicadores', element: <Indicadores /> },
+        { path: 'entidade', element: <Entidade /> },
         {
           path: 'parametrizacao',
           children: [
@@ -131,6 +129,7 @@ const NotFound = Loadable(lazy(() => import('../pages/excecoes/Page404')));
 const Fluxo = Loadable(lazy(() => import('../pages/Fluxo')));
 const Arquivo = Loadable(lazy(() => import('../pages/Arquivo')));
 const Procura = Loadable(lazy(() => import('../pages/Procura')));
+const Entidade = Loadable(lazy(() => import('../pages/Entidade')));
 const Controle = Loadable(lazy(() => import('../pages/Controle')));
 const Processo = Loadable(lazy(() => import('../pages/Processo')));
 const Processos = Loadable(lazy(() => import('../pages/Processos')));

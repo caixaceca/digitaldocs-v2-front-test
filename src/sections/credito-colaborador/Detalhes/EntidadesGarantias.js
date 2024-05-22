@@ -100,7 +100,7 @@ export default function EntidadesGarantias({ item, dados }) {
                           title="Adicionado:"
                           text={
                             <>
-                              <Criado value={row?.criador} />
+                              <Criado value={row?.criador} shuffle />
                               <Criado tipo="data" value={ptDateTime(row?.criado_em)} />
                             </>
                           }
@@ -110,7 +110,7 @@ export default function EntidadesGarantias({ item, dados }) {
                             title="Modificado:"
                             text={
                               <>
-                                {row?.modificador && <Criado value={row?.modificador} />}
+                                {row?.modificador && <Criado value={row?.modificador} shuffle />}
                                 {row?.modificado_em && <Criado tipo="data" value={ptDateTime(row?.modificado_em)} />}
                               </>
                             }

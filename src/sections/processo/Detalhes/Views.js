@@ -23,11 +23,15 @@ import { ColaboradorInfo } from '../../../components/Panel';
 
 Views.propTypes = { id: PropTypes.number, from: PropTypes.string, isLoading: PropTypes.bool };
 
-export default function Views({ id, isLoading, from = '' }) {
+export default function Views({ id, from = '', isLoading }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { visualizacoes } = useSelector((state) => state.digitaldocs);
-  const viewsGroupByColaborador = groupByColaborador(visualizacoes, 'perfil_id');
+  const { pedidoCC } = useSelector((state) => state.cc);
+  const { processo } = useSelector((state) => state.digitaldocs);
+  const viewsGroupByColaborador = groupByColaborador(
+    from === 'cc' ? pedidoCC?.hvisualizacoes || [] : processo?.hvisualizacoes || [],
+    'perfil_id'
+  );
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
@@ -36,9 +40,9 @@ export default function Views({ id, isLoading, from = '' }) {
 
   useEffect(() => {
     if (mail && id && from === 'cc') {
-      dispatch(getFromCC('visualizacoes', { mail, id }));
+      dispatch(getFromCC('hvisualizacoes', { mail, id }));
     } else if (mail && id) {
-      dispatch(getAll('visualizacoes', { mail, id, perfilId: cc?.perfil_id }));
+      dispatch(getAll('hvisualizacoes', { mail, id, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, id, from, mail, cc?.perfil_id]);
 

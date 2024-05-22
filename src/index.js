@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 // i18n
 import './locales/i18n';
 
@@ -25,6 +26,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 import 'react-lazy-load-image-component/src/effects/black-and-white.css';
 
+import { setLocale } from 'yup';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -50,6 +52,30 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
 // ----------------------------------------------------------------------
+
+setLocale({
+  mixed: { required: '${label} não pode ficar vazio', notType: 'Introduza ${label} válido' },
+  string: {
+    email: 'Introduza um email válido',
+    min: '${label} deve conter no mínimo ${min} caracteres',
+    max: '${label} deve conter no máximo ${max} caracteres',
+  },
+  number: {
+    positive: '${label} deve ser maior que zero',
+    integer: '${label} deve ser um número inteiro',
+    min: '${label} deve ser igual ou maior a ${min}',
+    max: '${label} deve ser igual ou menor a ${max}',
+  },
+  array: {
+    required: '${label} é obrigatório',
+    min: '${label} deve conter no mínimo ${min} item',
+    max: '${label} deve conter no máximo ${max} item',
+  },
+  date: {
+    min: '${path} deve ser posterior a ${min}',
+    max: '${path} deve ser anterior a ${max}',
+  },
+});
 
 const msalInstance = new PublicClientApplication(msalConfig);
 const root = ReactDOM.createRoot(document.getElementById('root'));

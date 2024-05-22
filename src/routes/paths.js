@@ -13,6 +13,7 @@ export const PATH_DIGITALDOCS = {
   general: {
     noPath: path(ROOTS_DIGITALDOCS, '/'),
     indicadores: path(ROOTS_DIGITALDOCS, '/indicadores'),
+    entidade: path(ROOTS_DIGITALDOCS, '/entidade'),
   },
   parametrizacao: {
     root: path(ROOTS_DIGITALDOCS, '/parametrizacao'),

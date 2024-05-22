@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
-import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
@@ -27,24 +27,30 @@ import BlockIcon from '@mui/icons-material/Block';
 import Typography from '@mui/material/Typography';
 import CircleIcon from '@mui/icons-material/Circle';
 import DialogTitle from '@mui/material/DialogTitle';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TableContainer from '@mui/material/TableContainer';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 // utils
 import { format, add } from 'date-fns';
-import { podeSerAtribuido } from '../../utils/validarAcesso';
-import { fNumber, fCurrency } from '../../utils/formatNumber';
+import { fNumber, fCurrency } from '../../../utils/formatNumber';
+import { podeSerAtribuido, naGerencia } from '../../../utils/validarAcesso';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem, deleteItem, closeModal } from '../../redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '../../../redux/store';
+import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
+import {
+  getAll,
+  updateItem,
+  deleteItem,
+  closeModal,
+  selectAnexo,
+  closeModalAnexo,
+} from '../../../redux/slices/digitaldocs';
 // hooks
-import useAnexos from '../../hooks/useAnexos';
-import useToggle, { useToggle1 } from '../../hooks/useToggle';
-import { getComparator, applySort } from '../../hooks/useTable';
+import useAnexos from '../../../hooks/useAnexos';
+import useToggle from '../../../hooks/useToggle';
+import { getComparator, applySort } from '../../../hooks/useTable';
 // components
 import {
   RHFSwitch,
@@ -52,13 +58,12 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
-  RHFAutocomplete,
   RHFUploadMultiFile,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
-} from '../../components/hook-form';
-import DialogConfirmar from '../../components/DialogConfirmar';
-import { DefaultAction, DialogButons, AnexosExistente } from '../../components/Actions';
+} from '../../../components/hook-form';
+import DialogConfirmar from '../../../components/DialogConfirmar';
+import { DefaultAction, DialogButons, AnexosExistente } from '../../../components/Actions';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,7 +71,6 @@ IntervencaoForm.propTypes = {
   title: PropTypes.string,
   onCancel: PropTypes.func,
   destinos: PropTypes.array,
-  processo: PropTypes.object,
   isOpenModal: PropTypes.bool,
   colaboradoresList: PropTypes.array,
 };
@@ -75,27 +79,19 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [pendente, setPendente] = useState(false);
+  const destinosParalelo = destinos?.filter((row) => row?.paralelo);
+  const destinosSingulares = destinos?.filter((row) => !row?.paralelo);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { motivosPendencias } = useSelector((state) => state.parametrizacao);
+  const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
 
-  const destinosSingulares = [];
-  const destinosParalelo = [];
-  destinos?.forEach((row) => {
-    if (row?.paralelo) {
-      destinosParalelo.push(row);
-    } else {
-      destinosSingulares.push(row);
-    }
-  });
-  const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
-
   const formSchema = Yup.object().shape({
-    destinos_par: inParalelo && Yup.array().min(1, 'Escolhe os destinos'),
     mpendencia: pendente && Yup.mixed().required('Motivo de pendência não pode ficar vazio'),
     observacao: title === 'Devolver' && Yup.string().required('Observação não pode ficar vazio'),
-    estado: !inParalelo && Yup.mixed().nullable('Estado não pode ficar vazio').required('Escolhe um estado'),
+    estado: !inParalelo && Yup.mixed().nullable('Estado não pode ficar vazio').required('Escolhe o estado'),
+    destinos_par: inParalelo && Yup.array(Yup.object({ estado: Yup.mixed().required('Escolhe o estado') })),
   });
 
   const defaultValues = useMemo(
@@ -106,25 +102,30 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
       pender: false,
       noperacao: '',
       observacao: '',
-      destinos_par: [],
       mpendencia: null,
       pendenteLevantamento: false,
-      estado: destinos?.length === 1 ? destinos?.[0] : null,
+      destinos_par: [{ estado: null, noperacao: '', observacao: '' }],
+      estado: destinosSingulares?.length === 1 ? destinosSingulares?.[0] : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [processo]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, setValue, handleSubmit } = methods;
+  const { reset, watch, control, setValue, handleSubmit } = methods;
   const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'destinos_par' });
+  const destinosFiltered = applyFilter(
+    destinosParalelo,
+    values?.destinos_par?.map((row) => row?.estado?.id)
+  );
 
   const aberturaSemEntidadeGerencia =
     values?.estado &&
     !processo?.entidade &&
     title === 'Encaminhar' &&
+    naGerencia(processo?.estado_atual) &&
     processo?.assunto === 'Abertura de conta' &&
-    processo?.estado_atual?.includes('Gerência') &&
     !values?.estado?.label?.includes('Atendimento');
 
   useEffect(() => {
@@ -136,235 +137,258 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
 
   const onSubmit = async () => {
     try {
-      const formData = [];
-      let haveAnexos = false;
-      let formPendencia = null;
-      const atribuir =
-        values?.perfil?.id ||
-        (values?.estado?.label?.includes('Atendimento') && podeSerAtribuido(processo?.assunto) && criador?.perfil_id) ||
-        '';
-      if (values?.pendenteLevantamento || values?.pender) {
-        formPendencia = {
-          pender: true,
-          fluxo_id: processo?.fluxo_id,
-          mobs: values?.pendenteLevantamento ? 'Para levantamento do pedido' : values?.mobs,
-          mpendencia: values?.pendenteLevantamento
-            ? motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id
-            : values?.mpendencia?.id,
-        };
-      }
-      const colocarPendente = (values?.pendenteLevantamento || values?.pender) && formPendencia?.mpendencia;
-
       if (inParalelo) {
+        const formData = [];
         values?.destinos_par?.forEach((row) => {
-          const destino = destinosParalelo?.find((item) => item?.label === row);
-          if (destino) {
-            formData?.push({
-              perfil_afeto_id: '',
-              transicao_id: destino?.id,
-              observacao: values.observacao || '',
-              noperacao: values.numero_operacao || '',
-            });
-          }
+          formData?.push({ transicao_id: row?.estado?.id, noperacao: row?.noperacao, observacao: row?.observacao });
         });
+        dispatch(
+          updateItem('encaminhar paralelo', JSON.stringify(formData), {
+            mail,
+            id: processo.id,
+            msg: 'encaminhada',
+            perfilId: cc?.perfil_id,
+          })
+        );
       } else {
-        formData?.push({
-          transicao_id: values?.estado?.id,
-          observacao: values.observacao || '',
-          noperacao: values.numero_operacao || '',
-          perfil_afeto_id: colocarPendente ? '' : atribuir,
-        });
-      }
-      const anexos = new FormData();
-      if (values?.anexos?.length > 0) {
-        haveAnexos = true;
-        anexos.append('perfilID', cc?.perfil_id);
-        const listaanexo = values.anexos;
-        for (let i = 0; i < listaanexo.length; i += 1) {
-          anexos.append('anexos', listaanexo[i]);
-        }
-      }
+        const atribuir =
+          values?.perfil?.id ||
+          (values?.estado?.label?.includes('Atendimento') &&
+            podeSerAtribuido(processo?.assunto) &&
+            criador?.perfil_id) ||
+          '';
+        const formPendencia =
+          values?.pendenteLevantamento || values?.pender
+            ? {
+                pender: true,
+                fluxo_id: processo?.fluxo_id,
+                mobs: values?.pendenteLevantamento ? 'Para levantamento do pedido' : values?.mobs,
+                mpendencia: values?.pendenteLevantamento
+                  ? motivosPendencias?.find((row) => row?.motivo === 'Cliente')?.id
+                  : values?.mpendencia?.id,
+              }
+            : null;
+        const colocarPendente = (values?.pendenteLevantamento || values?.pender) && formPendencia?.mpendencia;
 
-      dispatch(
-        updateItem('encaminhar', JSON.stringify(formData), {
-          mail,
-          anexos,
-          haveAnexos,
-          colocarPendente,
-          id: processo.id,
-          perfilId: cc?.perfil_id,
-          fluxoId: processo?.fluxo_id,
-          pendencia: JSON.stringify(formPendencia),
-          atribuir: colocarPendente ? atribuir : '',
-          estadoId: values?.estado?.estado_final_id,
-          msg: title === 'Devolver' ? 'devolvida' : 'encaminhada',
-        })
-      );
+        const formData = new FormData();
+        formData.append('noperacao', values?.noperacao);
+        formData.append('observacao', values?.observacao);
+        formData.append('transicao_id ', values?.estado?.id);
+        formData.append('perfil_afeto_id ', colocarPendente ? '' : atribuir);
+        values?.anexos?.forEach((row) => {
+          formData.append('anexos', row);
+        });
+
+        dispatch(
+          updateItem('encaminhar serie', formData, {
+            mail,
+            colocarPendente,
+            id: processo.id,
+            perfilId: cc?.perfil_id,
+            fluxoId: processo?.fluxo_id,
+            pendencia: JSON.stringify(formPendencia),
+            atribuir: colocarPendente ? atribuir : '',
+            estadoId: values?.estado?.estado_final_id,
+            msg: title === 'Devolver' ? 'devolvida' : 'encaminhada',
+          })
+        );
+      }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
 
   const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
+  const podeAtribuir =
+    (naGerencia(processo?.estado_atual) && values?.estado?.label?.includes('Atendimento')) ||
+    processo?.estado_atual === 'Devolução AN' ||
+    processo?.estado_atual === 'Diário';
+  const podeColocarPendente = naGerencia(processo?.estado_atual) && values?.estado?.label?.includes('Atendimento');
 
-  const setValueForm = (fild, newValue) => {
-    setValue('perfil', null);
-    setValue('estado', fild === 'estado' ? newValue : null);
-    setValue('destinos_par', fild === 'destinos_par' ? newValue : []);
+  useEffect(() => {
+    if (mail && cc?.perfil_id && values?.estado?.estado_final_id && podeAtribuir) {
+      setValue('perfil', null);
+      dispatch(
+        getFromParametrizacao('colaboradoresEstado', {
+          mail,
+          perfilId: cc?.perfil_id,
+          id: values?.estado?.estado_final_id,
+        })
+      );
+    }
+  }, [mail, dispatch, cc?.perfil_id, values?.estado, podeAtribuir, setValue]);
+
+  const handleAdd = () => {
+    append({ estado: null, noperacao: '', observacao: '' });
   };
 
-  const segAt = values?.estado?.label?.includes('Atendimento');
-  const onGerencia =
-    processo?.estado_atual?.includes('Gerência') || processo?.estado_atual?.includes('Caixa Principal');
-
-  const podeAtribuir =
-    ((onGerencia && segAt) ||
-      (processo?.estado_atual === 'Devolução AN' && values?.estado?.modo === 'Seguimento' && !segAt) ||
-      processo?.estado_atual === 'Diário') &&
-    colaboradoresList?.length > 0;
-
-  const podeColocarPendente = onGerencia && segAt;
-
-  const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-  const checkedIcon = <CheckBoxIcon fontSize="small" />;
+  const handleRemove = (index) => {
+    remove(index);
+  };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{title}</DialogTitle>
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+      <DialogTitle sx={{ pb: 2 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
+          {title}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
+            {destinosParalelo?.length > 0 && destinosSingulares?.length > 0 && (
+              <FormControlLabel
+                label="Envio em paralelo"
+                sx={{ justifyContent: 'center' }}
+                control={<Switch checked={inParalelo} />}
+                onChange={(event, newValue) => {
+                  reset(defaultValues);
+                  setInParalelo(newValue);
+                }}
+              />
+            )}
+            {destinosFiltered?.length > 0 && inParalelo && <DefaultAction label="Adicionar" handleClick={handleAdd} />}
+          </Stack>
+        </Stack>
+      </DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            {destinosParalelo?.length > 0 && destinosSingulares?.length > 0 && (
-              <Grid item xs={12} sx={{ mt: -2 }}>
-                <FormControlLabel
-                  control={<Switch checked={inParalelo} />}
-                  label="Envio em paralelo"
-                  onChange={(event, newValue) => {
-                    setInParalelo(newValue);
-                    setValueForm();
-                  }}
-                  sx={{ width: 1, justifyContent: 'center' }}
-                />
-              </Grid>
-            )}
+          <Grid container spacing={3} sx={{ pt: 1 }}>
             {inParalelo ? (
-              <Grid item xs={12}>
-                <RHFAutocomplete
-                  multiple
-                  freeSolo
-                  label="Destinos"
-                  name="destinos_par"
-                  disableCloseOnSelect
-                  options={destinosParalelo.map((option) => option.label)}
-                  onChange={(event, newValue) => setValueForm('destinos_par', newValue)}
-                  renderOption={(props, option, { selected }) => (
-                    <li {...props}>
-                      <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginLeft: -8 }} checked={selected} />
-                      {option}
-                    </li>
-                  )}
-                />
-              </Grid>
-            ) : (
-              <Grid item xs={12}>
-                <RHFAutocompleteObject
-                  name="estado"
-                  label="Estado"
-                  options={destinosSingulares}
-                  onChange={(event, newValue) => {
-                    setPendente(false);
-                    setValue('pender', false);
-                    setValueForm('estado', newValue);
-                  }}
-                />
-              </Grid>
-            )}
-            {aberturaSemEntidadeGerencia ? (
-              <Grid item xs={12}>
-                <Typography>
-                  Processo de <b>Abertura de Conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
-                </Typography>
-                <Typography>
-                  Por favor edita o processo, adicionando a(s) entidade(s) e depois prossiga com o devido
-                  encaminhamento.
-                </Typography>
-              </Grid>
+              fields.map((item, index) => {
+                const hasopnumero = values?.destinos_par?.find((row, _index) => _index === index)?.estado?.hasopnumero;
+                return (
+                  <>
+                    <Grid item xs={12} sm={hasopnumero ? 6 : 4} md={hasopnumero ? 3 : 4}>
+                      <RHFAutocompleteObject
+                        label="Estado"
+                        disableClearable
+                        options={destinosFiltered}
+                        name={`destinos_par[${index}].estado`}
+                      />
+                    </Grid>
+                    {hasopnumero && (
+                      <Grid item xs={12} sm={6} md={3}>
+                        <RHFNumberField required label="Nº de operação" name={`destinos_par[${index}].noperacao`} />
+                      </Grid>
+                    )}
+                    <Grid item xs={12} sm={hasopnumero ? 12 : 8} md={hasopnumero ? 6 : 8}>
+                      <Stack spacing={2} key={item.id} direction="row" alignItems="center" justifyContent="center">
+                        <RHFTextField
+                          multiline
+                          minRows={1}
+                          maxRows={2}
+                          label="Observação"
+                          name={`destinos_par[${index}].observacao`}
+                        />
+                        {fields?.length > 1 && (
+                          <DefaultAction small color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
+                        )}
+                      </Stack>
+                    </Grid>
+                  </>
+                );
+              })
             ) : (
               <>
-                {podeAtribuir && (
-                  <Grid item xs={12}>
-                    <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
-                  </Grid>
-                )}
-                {values?.estado?.hasopnumero && (
-                  <Grid item xs={12}>
-                    <RHFNumberField name="noperacao" required label="Nº de operação" />
-                  </Grid>
-                )}
-                <Grid item xs={12}>
-                  <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
+                <Grid item xs={12} sm={values?.estado?.hasopnumero ? 8 : 12}>
+                  <RHFAutocompleteObject
+                    name="estado"
+                    label="Estado"
+                    disableClearable
+                    options={destinosSingulares}
+                    onChange={(event, newValue) => {
+                      setPendente(false);
+                      setValue('perfil', null);
+                      setValue('pender', false);
+                      setValue('estado', newValue);
+                    }}
+                  />
                 </Grid>
-                <Grid item xs={12}>
-                  <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
-                </Grid>
-                {(podeColocarPendente && !podeSerAtribuido(processo?.assunto) && title === 'Encaminhar' && (
+                {aberturaSemEntidadeGerencia ? (
                   <Grid item xs={12}>
-                    <Card sx={{ p: 0.5, pb: 1 }}>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                          <RHFSwitch
-                            name="pendenteLevantamento"
-                            label="Pendente de levantamento"
-                            onChange={(event, value) => {
-                              setPendente(false);
-                              setValue('mobs', '');
-                              setValue('pender', false);
-                              setValue('mpendencia', null);
-                              setValue('pendenteLevantamento', value);
-                            }}
-                          />
-                        </Grid>
+                    <Typography>
+                      Processo de <b>Abertura de Conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
+                    </Typography>
+                    <Typography>
+                      Por favor edita o processo, adicionando a(s) entidade(s) e depois prossiga com o devido
+                      encaminhamento.
+                    </Typography>
+                  </Grid>
+                ) : (
+                  <>
+                    {values?.estado?.hasopnumero && (
+                      <Grid item xs={12} sm={4}>
+                        <RHFNumberField name="noperacao" required label="Nº de operação" />
                       </Grid>
-                    </Card>
-                  </Grid>
-                )) ||
-                  (podeColocarPendente && podeSerAtribuido(processo?.assunto) && (
+                    )}
+                    {podeAtribuir && colaboradoresList?.length > 0 && (
+                      <Grid item xs={12}>
+                        <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
+                      </Grid>
+                    )}
                     <Grid item xs={12}>
-                      <Card sx={{ p: values.pender ? 1.5 : 0.5 }}>
-                        <Grid container spacing={3}>
-                          <Grid item xs={values.pender ? 4 : 12}>
-                            <RHFSwitch
-                              name="pender"
-                              label="Pendente"
-                              onChange={(event, value) => {
-                                setPendente(value);
-                                setValue('mobs', '');
-                                setValue('pender', value);
-                                setValue('mpendencia', null);
-                              }}
-                            />
+                      <RHFTextField name="observacao" multiline minRows={5} maxRows={10} label="Observação" />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+                    </Grid>
+                    {(podeColocarPendente && !podeSerAtribuido(processo?.assunto) && title === 'Encaminhar' && (
+                      <Grid item xs={12}>
+                        <Card sx={{ p: 0.5, pb: 1 }}>
+                          <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                              <RHFSwitch
+                                name="pendenteLevantamento"
+                                label="Pendente de levantamento"
+                                onChange={(event, newValue) => {
+                                  setPendente(false);
+                                  setValue('mobs', '');
+                                  setValue('pender', false);
+                                  setValue('mpendencia', null);
+                                  setValue('pendenteLevantamento', newValue);
+                                }}
+                              />
+                            </Grid>
                           </Grid>
-                          {values.pender && (
-                            <>
-                              <Grid item xs={8}>
-                                <RHFAutocompleteObject
-                                  label="Motivo"
-                                  name="mpendencia"
-                                  options={applySort(
-                                    motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
-                                    getComparator('asc', 'label')
-                                  )}
+                        </Card>
+                      </Grid>
+                    )) ||
+                      (podeColocarPendente && podeSerAtribuido(processo?.assunto) && (
+                        <Grid item xs={12}>
+                          <Card sx={{ p: values.pender ? 1.5 : 0.5 }}>
+                            <Grid container spacing={3}>
+                              <Grid item xs={values.pender ? 4 : 12}>
+                                <RHFSwitch
+                                  name="pender"
+                                  label="Pendente"
+                                  onChange={(event, newValue) => {
+                                    setValue('mobs', '');
+                                    setPendente(newValue);
+                                    setValue('pender', newValue);
+                                    setValue('mpendencia', null);
+                                  }}
                                 />
                               </Grid>
-                              <Grid item xs={12}>
-                                <RHFTextField name="mobs" label="Observação pendência" />
-                              </Grid>
-                            </>
-                          )}
+                              {values.pender && (
+                                <>
+                                  <Grid item xs={8}>
+                                    <RHFAutocompleteObject
+                                      label="Motivo"
+                                      name="mpendencia"
+                                      options={applySort(
+                                        motivosPendencias?.map((row) => ({ id: row?.id, label: row?.motivo })),
+                                        getComparator('asc', 'label')
+                                      )}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={12}>
+                                    <RHFTextField name="mobs" label="Observação pendência" />
+                                  </Grid>
+                                </>
+                              )}
+                            </Grid>
+                          </Card>
                         </Grid>
-                      </Card>
-                    </Grid>
-                  ))}
+                      ))}
+                  </>
+                )}
               </>
             )}
           </Grid>
@@ -373,7 +397,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
             <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
             </LoadingButton>
-            {aberturaSemEntidadeGerencia ? (
+            {aberturaSemEntidadeGerencia || (inParalelo && values?.destinos_par?.length === 0) ? (
               ''
             ) : (
               <LoadingButton type="submit" variant="contained" loading={isSaving}>
@@ -403,45 +427,34 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
 
-  const deveInformarNConta = () => {
-    if (
-      processo?.is_interno &&
+  const informarConta = useMemo(
+    () =>
+      !processo?.limpo &&
+      !processo?.origem_id &&
       processo?.assunto !== 'Encerramento de conta' &&
-      (!processo?.limpo || processo?.assunto === 'Receção de faturas / Pagamento de fornecedor')
-    ) {
-      let i = 0;
-      while (i < meusAmbientes?.length) {
-        if (meusAmbientes[i]?.id === processo?.estado_atual_id && meusAmbientes[i]?.is_final) {
-          return true;
-        }
-        i += 1;
-      }
-    }
-    return false;
-  };
+      meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id)?.is_final,
+    [meusAmbientes, processo]
+  );
 
   const formSchema = Yup.object().shape({
+    entidades: informarConta && Yup.string().required('Nº de entidade(s) não pode ficar vazio'),
     conta:
-      deveInformarNConta() &&
+      informarConta &&
       Yup.number().typeError('Introduza o nº de conta do titular').positive('Introduza um nº de conta válido'),
     data_entrada: Yup.date()
-      .typeError('Data de entrada não pode ficar vazio')
-      .required('Data de entrada não pode ficar vazio'),
+      .required('Data de entrada não pode ficar vazio')
+      .typeError('Data de entrada não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
       anexos: [],
       observacao: '',
-      perfilID: cc?.perfil?.id,
-      fluxoID: processo?.fluxo_id,
       conta: processo?.conta || '',
       entidades: processo?.entidade,
-      estadoID: processo?.estado_atual_id,
       noperacao: processo?.numero_operacao || '',
       data_entrada: processo?.data_entrada ? add(new Date(processo?.data_entrada), { hours: 2 }) : null,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [processo]
   );
 
@@ -460,26 +473,27 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
     try {
       const formData = {
         conta: values?.conta,
-        fluxoID: values?.fluxoID,
-        estadoID: values?.estadoID,
-        perfilID: values?.perfilID,
         entidades: values?.entidade,
+        fluxo_id: processo?.fluxo_id,
         observacao: values?.observacao,
         noperacao: values?.numero_operacao,
         data_entrada: format(values.data_entrada, 'yyyy-MM-dd'),
       };
-      let haveA = false;
       const anexos = new FormData();
       if (values?.anexos?.length > 0) {
-        haveA = true;
         anexos.append('perfilID', cc?.perfil_id);
-        const listaanexo = values.anexos;
-        for (let i = 0; i < listaanexo.length; i += 1) {
-          anexos.append('anexos', listaanexo[i]);
-        }
+        values.anexos?.forEach((row) => {
+          anexos.append('anexos', row);
+        });
       }
       dispatch(
-        createItem('arquivar', JSON.stringify(formData), { mail, haveA, anexos, id: processo.id, msg: 'arquivado' })
+        updateItem('arquivar', JSON.stringify(formData), {
+          mail,
+          anexos,
+          msg: 'arquivado',
+          id: processo?.id,
+          perfilId: cc?.perfil_id,
+        })
       );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -514,16 +528,15 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
             <Grid item xs={12} sm={processo?.assunto !== 'Encerramento de conta' ? 6 : 12}>
               <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
-            {processo?.assunto !== 'Encerramento de conta' && (
-              <Grid item xs={12} sm={6}>
-                <RHFNumberField name="noperacao" label="Nº de operação" />
-              </Grid>
-            )}
-            {deveInformarNConta() && (
-              <Grid item xs={12}>
-                <RHFNumberField name="conta" label="Nº de conta" />
-              </Grid>
-            )}
+            <Grid item xs={12} sm={6}>
+              <RHFNumberField name="noperacao" label="Nº de operação" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <RHFTextField name="entidades" label="Nº entidade(s)" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <RHFNumberField name="conta" label="Nº de conta" />
+            </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
             </Grid>
@@ -548,79 +561,93 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DesarquivarForm.propTypes = {
-  open: PropTypes.bool,
-  onCancel: PropTypes.func,
-  fluxoID: PropTypes.object,
-  processoID: PropTypes.object,
-};
+DesarquivarForm.propTypes = { onCancel: PropTypes.func, id: PropTypes.number, colaboradoresList: PropTypes.array };
 
-export function DesarquivarForm({ open, onCancel, processoID, fluxoID }) {
+export function DesarquivarForm({ onCancel, id, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving, destinosDesarquivamento } = useSelector((state) => state.digitaldocs);
+  const { isOpenModalDesariquivar, isSaving, processo } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
+    estado: Yup.mixed().required('Estado não pode ficar vazio'),
+    perfil: Yup.mixed().required('Colaborador não pode ficar vazio'),
     observacao: Yup.string().required('Observação não pode ficar vazio'),
-    estadoID: Yup.mixed().nullable('Estado não pode ficar vazio').required('Estado não pode ficar vazio'),
   });
-  const defaultValues = useMemo(() => ({ estadoID: null, observacao: '' }), []);
+  const defaultValues = useMemo(() => ({ estado: null, perfil: null, observacao: '' }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [isOpenModalDesariquivar]);
+
+  useEffect(() => {
+    if (mail && cc?.perfil_id && values?.estado?.id) {
+      setValue('perfil', null);
+      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId: cc?.perfil_id, id: values?.estado?.id }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mail, dispatch, cc?.perfil_id, values?.estado?.id]);
 
   const onSubmit = async () => {
     try {
       const dados = {
-        fluxoID,
-        perfilID: null,
-        perfilIDCC: cc?.perfil_id,
-        estadoID: values?.estadoID?.id,
+        fluxo_id: processo?.fluxo_id,
+        perfil_id: values?.perfil?.id,
+        estado_id: values?.estado?.id,
         observacao: values?.observacao,
       };
-      dispatch(updateItem('desarquivar', JSON.stringify(dados), { id: processoID, mail, msg: 'desarquivado' }));
+      dispatch(
+        updateItem('desarquivar', JSON.stringify(dados), { id, mail, perfilId: cc?.perfil_id, msg: 'desarquivado' })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
 
+  const handleDesarquivar = () => {
+    dispatch(getAll('destinosDesarquivamento', { mail, processoId: id }));
+  };
+
   return (
     <>
-      <DialogTitle>Desarquivar</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteObject
-                name="estadoID"
-                label="Estado"
-                options={applySort(
-                  destinosDesarquivamento?.map((row) => ({ id: row?.id, label: row?.nome })),
-                  getComparator('asc', 'nome')
-                )}
-              />
+      <DefaultAction color="error" label="DESARQUIVAR" handleClick={handleDesarquivar} />
+      <Dialog open={isOpenModalDesariquivar} onClose={onCancel} fullWidth maxWidth="sm">
+        <DialogTitle>Desarquivar</DialogTitle>
+        <DialogContent>
+          <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <RHFAutocompleteObject
+                  name="estado"
+                  label="Estado"
+                  options={processo?.destinosDesarquivamento?.map((row) => ({ id: row?.id, label: row?.nome }))}
+                />
+              </Grid>
+              {values?.estado?.id && (
+                <Grid item xs={12}>
+                  <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
-            </Grid>
-          </Grid>
-          <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-            <Box sx={{ flexGrow: 1 }} />
-            <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
-              Cancelar
-            </LoadingButton>
-            <LoadingButton type="submit" variant="soft" color="error" loading={isSaving}>
-              Desarquivar
-            </LoadingButton>
-          </DialogActions>
-        </FormProvider>
-      </DialogContent>
+            <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
+              <Box sx={{ flexGrow: 1 }} />
+              <LoadingButton variant="outlined" color="inherit" onClick={onCancel}>
+                Cancelar
+              </LoadingButton>
+              <LoadingButton type="submit" variant="soft" color="error" loading={isSaving}>
+                Desarquivar
+              </LoadingButton>
+            </DialogActions>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -642,26 +669,10 @@ export function FinalizarForm({ open, onCancel }) {
     }
   }, [open]);
 
-  const defaultValues = useMemo(
-    () => ({
-      cativos: [],
-      perfil_id: cc?.perfil_id,
-      fluxoID: processo?.fluxo_id,
-      estado_id: processo?.estado_atual_id,
-    }),
-    [processo, cc]
-  );
-
+  const defaultValues = useMemo(() => ({ cativos: [] }), []);
   const methods = useForm({ defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { watch, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    if (processo && open) {
-      reset(defaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processo, open]);
 
   const onSubmit = async () => {
     try {
@@ -669,7 +680,14 @@ export function FinalizarForm({ open, onCancel }) {
         enqueueSnackbar('Por favor selecionar as contas a serem cativadas', { variant: 'error' });
       } else {
         values.cativos = selecionados.map((row) => row?.id);
-        dispatch(updateItem('finalizar', JSON.stringify(values), { id: processo?.id, mail, msg: 'finalizado' }));
+        dispatch(
+          updateItem('finalizar', JSON.stringify({ cativos: [selecionados.map((row) => row?.id)] }), {
+            mail,
+            id: processo?.id,
+            msg: 'finalizado',
+            perfilId: cc?.perfil_id,
+          })
+        );
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -702,14 +720,14 @@ export function FinalizarForm({ open, onCancel }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {!processo?.contasEleitosCativo ? (
+                {!processo?.cativos ? (
                   <TableRow hover>
                     <TableCell colSpan={3} sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                       Não foi encontrado nenhuma conta disponível para cativo...
                     </TableCell>
                   </TableRow>
                 ) : (
-                  processo?.contasEleitosCativo?.map((row) => {
+                  processo?.cativos?.map((row) => {
                     const labelId = `checkbox-list-label-${row}`;
                     return (
                       <TableRow hover key={labelId} onClick={handleToggle(row)}>
@@ -759,35 +777,22 @@ ParecerForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, proces
 export function ParecerForm({ open, onCancel, processoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const [idAnexo, setIdAnexo] = useState('');
-  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, done, isSaving } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (done === 'anexo parecer eliminado') {
-      enqueueSnackbar('Anexo eliminado com sucesso', { variant: 'success' });
-      setIdAnexo('');
-      onClose1();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
+  const { selectedItem, selectedAnexoId, isOpenModalAnexo, isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
-    descricao: Yup.string().required('Descrição não pode ficar vazio'),
-    parecer: Yup.string().nullable('Parecer não pode ficar vazio').required('Parecer não pode ficar vazio'),
+    parecer: Yup.string().required('Parecer não pode ficar vazio'),
+    descritivo: Yup.string().required('Descrição não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
     () => ({
       anexos: [],
-      parecerID: selectedItem?.id || '',
       parecer: selectedItem?.parecer || null,
       validado: selectedItem?.validado || false,
-      descricao: selectedItem?.parecer_obs || '',
-      perfilID: selectedItem?.perfil_id || cc?.perfil_id,
+      descritivo: selectedItem?.parecer_obs || '',
     }),
-    [selectedItem, cc?.perfil_id]
+    [selectedItem]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -804,18 +809,21 @@ export function ParecerForm({ open, onCancel, processoId }) {
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-      formData.append('parecer', values.parecer);
       formData.append('validado', values.validado);
-      formData.append('perfilID', values.perfilID);
-      formData.append('descricao', values.descricao);
-      formData.append('parecerID', values.parecerID);
-      if (values.anexos) {
-        const listaanexo = values.anexos;
-        for (let i = 0; i < listaanexo.length; i += 1) {
-          formData.append('anexos', listaanexo[i]);
-        }
-      }
-      dispatch(updateItem('parecer', formData, { mail, id: selectedItem.id, processoId, msg: 'Parecer enviado' }));
+      formData.append('descritivo', values.descritivo);
+      formData.append('parecer_favoravel ', values.parecer === 'Favorável');
+      values?.anexos?.forEach((row) => {
+        formData.append('anexos', row);
+      });
+      dispatch(
+        updateItem('parecer', formData, {
+          mail,
+          processoId,
+          id: selectedItem.id,
+          msg: 'Parecer enviado',
+          perfilId: cc?.perfil_id,
+        })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -824,51 +832,48 @@ export function ParecerForm({ open, onCancel, processoId }) {
   const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
 
   const handleEliminar = (id) => {
-    setIdAnexo(id);
-    onOpen1();
+    dispatch(selectAnexo(id));
   };
 
-  const handleCloseEliminar = () => {
-    setIdAnexo('');
-    onClose1();
+  const cancelEliminar = () => {
+    dispatch(closeModalAnexo());
   };
 
-  const handleConfirmeEliminar = () => {
+  const confirmeEliminar = () => {
     dispatch(
       deleteItem('anexoParecer', {
         mail,
-        id: idAnexo,
+        msg: 'Anexo eliminado',
         perfilId: cc?.perfil_id,
-        parecerId: selectedItem?.id,
-        msg: 'anexo parecer eliminado',
+        id: Number(selectedAnexoId),
+        parecerId: Number(selectedItem?.id),
       })
     );
   };
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>Parecer - {selectedItem?.estado_atual?.replace(' - P/S/P', '')}</DialogTitle>
+      <DialogTitle>Parecer - {selectedItem?.nome?.replace(' - P/S/P', '')}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteSimple
-                name="parecer"
-                label="Parecer"
-                options={['Favorável', 'Não favorável', 'Favorável parcial']}
-              />
+            <Grid item xs={12} sm={6}>
+              <RHFAutocompleteSimple name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <RHFSwitch name="validado" label="Parecer final" />
             </Grid>
             <Grid item xs={12}>
-              <RHFTextField name="descricao" multiline minRows={5} maxRows={10} label="Descrição" />
+              <RHFTextField name="descritivo" multiline minRows={5} maxRows={10} label="Descrição" />
             </Grid>
             <Grid item xs={12}>
               <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
-              {selectedItem?.anexos?.filter((row) => row?.is_ativo)?.length > 0 && (
+              {selectedItem?.anexos?.filter((row) => row?.ativo)?.length > 0 && (
                 <AnexosExistente
                   onOpen={handleEliminar}
                   anexos={selectedItem?.anexos
-                    ?.filter((item) => item?.is_ativo)
-                    .map((row) => ({ id: row?.id, name: row?.nome }))}
+                    ?.filter((item) => item?.ativo)
+                    ?.map((row) => ({ ...row, name: row?.nome }))}
                 />
               )}
             </Grid>
@@ -876,10 +881,10 @@ export function ParecerForm({ open, onCancel, processoId }) {
           <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
         <DialogConfirmar
-          open={open1}
           isSaving={isSaving}
-          onClose={handleCloseEliminar}
-          handleOk={handleConfirmeEliminar}
+          open={isOpenModalAnexo}
+          onClose={cancelEliminar}
+          handleOk={confirmeEliminar}
           color="error"
           title="Eliminar"
           desc="eliminar este anexo"
@@ -1027,26 +1032,21 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-AtribuirForm.propTypes = {
-  fluxoId: PropTypes.number,
-  perfilId: PropTypes.number,
-  processoID: PropTypes.number,
-  colaboradoresList: PropTypes.array,
-};
+AtribuirForm.propTypes = { colaboradoresList: PropTypes.array };
 
-export function AtribuirForm({ processoID, perfilId, fluxoId, colaboradoresList }) {
+export function AtribuirForm({ colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { processo, isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
     perfil: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),
   });
   const defaultValues = useMemo(
-    () => ({ perfil: perfilId ? colaboradoresList?.find((row) => row?.id === perfilId) : null }),
-    [colaboradoresList, perfilId]
+    () => ({ perfil: colaboradoresList?.find((row) => row?.id === processo?.perfil_id) || null }),
+    [colaboradoresList, processo]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
@@ -1055,17 +1055,17 @@ export function AtribuirForm({ processoID, perfilId, fluxoId, colaboradoresList 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [colaboradoresList]);
 
   const onSubmit = async () => {
     try {
       dispatch(
         updateItem('atribuir', '', {
           mail,
-          fluxoId,
-          processoID,
+          id: processo?.id,
           perfilID: cc?.perfil_id,
           msg: 'Processo atribuído',
+          fluxoId: processo?.fluxo_id,
           perfilIDAfeto: values?.perfil?.id,
         })
       );
@@ -1079,11 +1079,11 @@ export function AtribuirForm({ processoID, perfilId, fluxoId, colaboradoresList 
       dispatch(
         updateItem('atribuir', '', {
           mail,
-          fluxoId,
-          processoID,
+          id: processo?.id,
           perfilIDAfeto: '',
           perfilID: cc?.perfil_id,
           msg: 'Atribuição eliminada',
+          fluxoId: processo?.fluxo_id,
         })
       );
     } catch (error) {
@@ -1091,10 +1091,19 @@ export function AtribuirForm({ processoID, perfilId, fluxoId, colaboradoresList 
     }
   };
 
+  const onAtribuir = () => {
+    onOpen();
+    if (mail && cc?.perfil_id && processo?.estado_atual_id) {
+      dispatch(
+        getFromParametrizacao('colaboradoresEstado', { mail, perfilId: cc?.perfil_id, id: processo?.estado_atual_id })
+      );
+    }
+  };
+
   return (
     <>
       <Tooltip title="ATRIBUIR" arrow>
-        <Fab color="info" size="small" variant="soft" onClick={onOpen}>
+        <Fab color="info" size="small" variant="soft" onClick={() => onAtribuir()}>
           <PersonAddIcon />
         </Fab>
       </Tooltip>
@@ -1117,7 +1126,7 @@ export function AtribuirForm({ processoID, perfilId, fluxoId, colaboradoresList 
               isSaving={isSaving}
               onCancel={onClose}
               handleDelete={handleDelete}
-              desc={perfilId ? 'eliminar esta atribuição' : ''}
+              desc={processo?.perfil_id ? 'eliminar esta atribuição' : ''}
             />
           </FormProvider>
         </DialogContent>
@@ -1151,7 +1160,7 @@ export function ColocarPendente({ from }) {
       pendenteLevantamento: false,
       mobs: selectedItem?.mobs || '',
       mpendencia: pendencia ? { id: pendencia?.id, label: pendencia?.motivo } : null,
-      atribuir: !selectedItem?.estado_atual?.includes('Gerência') && podeSerAtribuido(selectedItem?.assunto),
+      atribuir: !naGerencia(selectedItem?.estado_atual) && podeSerAtribuido(selectedItem?.assunto),
     }),
     [selectedItem, pendencia]
   );
@@ -1273,4 +1282,10 @@ export function Abandonar({ isSaving, processo }) {
       />
     </>
   );
+}
+
+// ----------------------------------------------------------------------
+
+function applyFilter(destinos, detinosSelct) {
+  return destinos?.filter((item) => !detinosSelct.includes(Number(item?.id)));
 }

@@ -27,6 +27,32 @@ export function newLineText(text) {
 
 // ----------------------------------------------------------------------
 
+export function shuffleString(str = '') {
+  if (isProduction()) {
+    return str;
+  }
+
+  const regexLetras = /[a-zA-Z]/;
+  const regexNumeros = /[0-9]/;
+  const chars = str?.split('') || [];
+  for (let i = 0; i < chars?.length; i += 1) {
+    if (regexLetras.test(chars[i])) {
+      chars[i] = 'X';
+    }
+    if (regexNumeros.test(chars[i])) {
+      chars[i] = '#';
+    }
+  }
+  return chars?.join('') || [];
+}
+
+export function isProduction() {
+  return true;
+  // return window.location.origin?.includes('digitaldocs.caixa.cv');
+}
+
+// ----------------------------------------------------------------------
+
 export function entidadesParse(entidades) {
   let _entidades = '';
   entidades?.split(';')?.forEach((row, index) => {
@@ -55,7 +81,9 @@ export function noDados(vazio) {
 // ----------------------------------------------------------------------
 
 export function setItemValue(newValue, setItem, localS, id) {
-  setItem(newValue);
+  if (setItem) {
+    setItem(newValue);
+  }
   if (localS) {
     localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
   }

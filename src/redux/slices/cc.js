@@ -11,7 +11,7 @@ import { getComparator, applySort } from '../../hooks/useTable';
 
 const initialState = {
   done: '',
-  error: false,
+  error: '',
   isSaving: false,
   isLoading: false,
   isOpenModal: false,
@@ -20,23 +20,19 @@ const initialState = {
   tipoItem: '',
   garantiaId: '',
   entidadeId: '',
+  activeStep: 0,
   anexo: null,
   pedidoCC: null,
+  pedidoForm: null,
   selectedAnexo: null,
   despesas: [],
-  destinos: [],
-  retencoes: [],
-  transicoes: [],
-  pendencias: [],
-  atribuicoes: [],
   anexosAtivos: [],
-  visualizacoes: [],
   anexosProcesso: [],
   anexosNecessarios: [],
 };
 
 const slice = createSlice({
-  name: 'digitaldocs',
+  name: 'cc',
   initialState,
   reducers: {
     startLoading(state) {
@@ -69,7 +65,7 @@ const slice = createSlice({
       state.isSaving = false;
       state.isLoading = false;
       state.isLoadingAnexo = false;
-      state.error = false;
+      state.error = '';
     },
 
     done(state, action) {
@@ -92,18 +88,9 @@ const slice = createSlice({
           state.anexo = null;
           state.pedidoCC = null;
           state.selectedAnexo = null;
-          state.destinos = [];
-          state.retencoes = [];
-          state.pendencias = [];
-          state.transicoes = [];
-          state.atribuicoes = [];
           state.anexosAtivos = [];
-          state.visualizacoes = [];
           state.anexosProcesso = [];
           state.anexosNecessarios = [];
-          break;
-        case 'processos':
-          state.processos = [];
           break;
 
         default:
@@ -130,28 +117,13 @@ const slice = createSlice({
     },
 
     getPedidoCreditoSuccess(state, action) {
-      state.pedidoCC = action?.payload?.processo || null;
-      state.destinos = action?.payload?.destinos || null;
+      state.activeStep = 0;
+      state.pedidoForm = null;
+      state.pedidoCC = action?.payload || null;
     },
 
-    getTransicoesSuccess(state, action) {
-      state.transicoes = action?.payload || [];
-    },
-
-    getVisualizacoesSuccess(state, action) {
-      state.visualizacoes = action?.payload || [];
-    },
-
-    getRetencoesSuccess(state, action) {
-      state.retencoes = action?.payload || [];
-    },
-
-    getAtribuicoesSuccess(state, action) {
-      state.atribuicoes = action?.payload || [];
-    },
-
-    getPendenciasSuccess(state, action) {
-      state.pendencias = action?.payload || [];
+    getPedidoCCItemSuccess(state, action) {
+      state.pedidoCC = { ...state.pedidoCC, ...action.payload };
     },
 
     getDespesasSuccess(state, action) {
@@ -160,21 +132,33 @@ const slice = createSlice({
         : [];
     },
 
+    updatePedidoForm(state, action) {
+      state.pedidoForm = { ...state.pedidoForm, ...action.payload };
+      state.activeStep += 1;
+    },
+
+    backStep(state) {
+      state.activeStep -= 1;
+    },
+
+    gotoStep(state, action) {
+      state.activeStep = action.payload;
+    },
+
     updatePedidoCCSucess(state, action) {
       state.pedidoCC = action.payload;
     },
 
     aceitarProcessoSuccess(state, action) {
       state.pedidoCC.preso = true;
-      state.pedidoCC.estados[0].perfil_id = action.payload?.dados?.perfilId;
-      state.destinos = action.payload?.destinos || [];
+      state.pedidoCC.estados[0].perfil_id = action.payload?.perfilId;
     },
 
     parecerSuccess(state, action) {
       const index = state?.pedidoCC?.estados?.[0]?.pareceres?.findIndex(
         (row) => Number(row.id) === Number(action.payload.id)
       );
-      if (index === 0 || index) {
+      if (index > -1) {
         state.pedidoCC.estados[0].pareceres[index].validado = action.payload.validado;
         state.pedidoCC.estados[0].pareceres[index].descritivo = action.payload.descritivo;
         state.pedidoCC.estados[0].pareceres[index].validado_em = action.payload.validado ? new Date() : null;
@@ -186,21 +170,21 @@ const slice = createSlice({
 
     deleteAnexoProcessoSuccess(state, action) {
       const index = state?.pedidoCC?.anexos?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      if (index === 0 || index) {
+      if (index > -1) {
         state.pedidoCC.anexos[index].ativo = false;
       }
     },
 
     deleteDespesaSuccess(state, action) {
       const index = state?.pedidoCC?.despesas?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      if (index === 0 || index) {
+      if (index > -1) {
         state.pedidoCC.despesas[index].ativo = false;
       }
     },
 
     deleteGarantiaSuccess(state, action) {
       const index = state?.pedidoCC?.garantias?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      if (index === 0 || index) {
+      if (index > -1) {
         state.pedidoCC.garantias[index].ativo = false;
       }
     },
@@ -283,7 +267,17 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, closeModal, closeModalAnexo, deleteAnexo, selectItem, parecerEstadoSuccess } = slice.actions;
+export const {
+  backStep,
+  gotoStep,
+  openModal,
+  closeModal,
+  selectItem,
+  deleteAnexo,
+  closeModalAnexo,
+  updatePedidoForm,
+  parecerEstadoSuccess,
+} = slice.actions;
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -299,21 +293,11 @@ export function getFromCC(item, params) {
       switch (item) {
         case 'pedido cc': {
           dispatch(slice.actions.resetItem('pedido cc'));
-          const processo = await axios.get(
+          const response = await axios.get(
             `${BASEURLCC}/v1/creditos/funcionario/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
-          if (processo.data.objeto?.preso && processo.data.objeto?.perfil_id === params?.perfilId) {
-            const destinos = await axios.get(
-              `${BASEURLCC}/v1/creditos/funcionario/destinos/${params?.perfilId}?processoID=${params?.id}`,
-              options
-            );
-            dispatch(
-              slice.actions.getPedidoCreditoSuccess({ processo: processo.data.objeto, destinos: destinos.data.objeto })
-            );
-          } else {
-            dispatch(slice.actions.getPedidoCreditoSuccess({ processo: processo.data.objeto, destinos: [] }));
-          }
+          dispatch(slice.actions.getPedidoCreditoSuccess(response.data.objeto));
           break;
         }
         case 'anexo': {
@@ -330,29 +314,37 @@ export function getFromCC(item, params) {
           );
           break;
         }
-        case 'transicoes': {
+        case 'destinos': {
+          const response = await axios.get(
+            `${BASEURLCC}/v1/creditos/funcionario/destinos/${params?.perfilId}?processoID=${params?.id}`,
+            options
+          );
+          dispatch(slice.actions.getPedidoCCItemSuccess({ destinos: response.data.objeto }));
+          break;
+        }
+        case 'htransicoes': {
           const response = await axios.get(`${BASEURLCC}/v1/creditos/historico/transicoes/${params?.id}`, options);
-          dispatch(slice.actions.getTransicoesSuccess(response.data.objeto));
+          dispatch(slice.actions.getPedidoCCItemSuccess({ htransicoes: response.data.objeto }));
           break;
         }
-        case 'visualizacoes': {
+        case 'hvisualizacoes': {
           const response = await axios.get(`${BASEURLCC}/v1/creditos/historico/visualizacoes/${params?.id}`, options);
-          dispatch(slice.actions.getVisualizacoesSuccess(response.data.objeto));
+          dispatch(slice.actions.getPedidoCCItemSuccess({ hvisualizacoes: response.data.objeto }));
           break;
         }
-        case 'retencoes': {
+        case 'hretencoes': {
           const response = await axios.get(`${BASEURLCC}/v1/creditos/historico/retencoes/${params?.id}`, options);
-          dispatch(slice.actions.getRetencoesSuccess(response.data.objeto));
+          dispatch(slice.actions.getPedidoCCItemSuccess({ hretencoes: response.data.objeto }));
           break;
         }
-        case 'pendencias': {
+        case 'hpendencias': {
           const response = await axios.get(`${BASEURLCC}/v1/creditos/historico/pendencias/${params?.id}`, options);
-          dispatch(slice.actions.getPendenciasSuccess(response.data.objeto));
+          dispatch(slice.actions.getPedidoCCItemSuccess({ hpendencias: response.data.objeto }));
           break;
         }
-        case 'atribuicoes': {
+        case 'hatribuicoes': {
           const response = await axios.get(`${BASEURLCC}/v1/creditos/historico/atribuicoes/${params?.id}`, options);
-          dispatch(slice.actions.getAtribuicoesSuccess(response.data.objeto));
+          dispatch(slice.actions.getPedidoCCItemSuccess({ hatribuicoes: response.data.objeto }));
           break;
         }
         case 'despesas': {
@@ -540,11 +532,7 @@ export function updateItemCC(item, dados, params) {
         }
         case 'aceitar': {
           await axios.patch(`${BASEURLDD}/v1/processos/aceitar/${params?.id}`, dados, options);
-          const destinos = await axios.get(
-            `${BASEURLCC}/v1/creditos/funcionario/destinos/${params?.perfilId}?processoID=${params?.id}`,
-            options
-          );
-          dispatch(slice.actions.aceitarProcessoSuccess({ dados: params, destinos: destinos.data.objeto }));
+          dispatch(slice.actions.aceitarProcessoSuccess(params));
           break;
         }
         case 'abandonar': {
@@ -557,13 +545,7 @@ export function updateItemCC(item, dados, params) {
             dados,
             options
           );
-          const destinos = await axios.get(
-            `${BASEURLCC}/v1/creditos/funcionario/destinos/${params?.perfilId}?processoID=${params?.id}`,
-            options
-          );
-          dispatch(
-            slice.actions.getPedidoCreditoSuccess({ processo: processo.data.objeto, destinos: destinos.data.objeto })
-          );
+          dispatch(slice.actions.getPedidoCreditoSuccess(processo.data.objeto));
           break;
         }
 

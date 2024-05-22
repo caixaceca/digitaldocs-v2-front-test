@@ -28,6 +28,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
+import { shuffleString } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable from '../../hooks/useTable';
@@ -129,13 +130,13 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
                           <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                             Nº cartão:&nbsp;
                           </Typography>
-                          {item?.numero}
+                          {shuffleString(item?.numero)}
                         </Typography>
                         <Typography variant="subtitle2" noWrap>
                           <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                             {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
                           </Typography>
-                          {fase === 'Emissão' ? item?.tipo : item.nome}
+                          {fase === 'Emissão' ? item?.tipo : shuffleString(item.nome)}
                         </Typography>
                       </Stack>
                     </TableCell>
@@ -499,7 +500,7 @@ export function Detalhes({ closeModal }) {
                   </ListItem>
                   {selectedItem?.tipo && <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />}
                   {selectedItem?.numero && (
-                    <TextItem title="Nº do cartão:" text={selectedItem?.numero?.substring(9, 15)} />
+                    <TextItem title="Nº do cartão:" text={shuffleString(selectedItem?.numero?.substring(9, 15))} />
                   )}
                   {selectedItem?.data_emissao && (
                     <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
@@ -523,8 +524,8 @@ export function Detalhes({ closeModal }) {
                       }
                     />
                   )}
-                  {selectedItem?.cliente && <TextItem title="Nº cliente:" text={selectedItem.cliente} />}
-                  {selectedItem?.nome && <TextItem title="Nome:" text={selectedItem.nome} />}
+                  {selectedItem?.cliente && <TextItem title="Nº cliente:" text={shuffleString(selectedItem.cliente)} />}
+                  {selectedItem?.nome && <TextItem title="Nome:" text={shuffleString(selectedItem.nome)} />}
                 </List>
                 <List>
                   <ListItem disableGutters divider sx={{ pb: 0.5 }}>
@@ -548,7 +549,7 @@ export function Detalhes({ closeModal }) {
                       selectedItem?.emissao_validado ? (
                         <Stack spacing={0.5} sx={{ mt: 1 }}>
                           {selectedItem?.emissao_validado_por && (
-                            <Criado tipo="user" value={selectedItem?.emissao_validado_por} />
+                            <Criado tipo="user" value={selectedItem?.emissao_validado_por} shuffle />
                           )}
                           {selectedItem?.emissao_validado_em && (
                             <Criado tipo="date" value={ptDateTime(selectedItem?.emissao_validado_em)} />
@@ -573,7 +574,7 @@ export function Detalhes({ closeModal }) {
                       selectedItem?.rececao_validado ? (
                         <Stack spacing={0.5} sx={{ mt: 1 }}>
                           {selectedItem?.rececao_validado_por && (
-                            <Criado tipo="user" value={selectedItem?.rececao_validado_por} />
+                            <Criado tipo="user" value={selectedItem?.rececao_validado_por} shuffle />
                           )}
                           {selectedItem?.rececao_validado_em && (
                             <Criado tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />

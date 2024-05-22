@@ -11,10 +11,10 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { emailCheck } from '../../utils/validarAcesso';
 // hooks
@@ -31,6 +31,7 @@ import {
   RHFDatePicker,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
+  RHFNumberField,
 } from '../../components/hook-form';
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
@@ -53,8 +54,8 @@ export function FluxoForm({ onCancel }) {
   const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    modelo: Yup.mixed().required('Modelo não pode ficar vazio'),
-    assunto: Yup.string().required('Assunto não pode ficar vazio'),
+    modelo: Yup.mixed().required().label('Modelo'),
+    assunto: Yup.string().required().label('Assunto'),
   });
 
   const defaultValues = useMemo(
@@ -161,10 +162,7 @@ export function ClonarFluxoForm({ onCancel }) {
   const { mail, cc } = useSelector((state) => state.intranet);
   const { isSaving, selectedItem, isOpenView } = useSelector((state) => state.parametrizacao);
 
-  const formSchema = Yup.object().shape({
-    modelo: Yup.string().required('Modelo não pode ficar vazio'),
-    assunto: Yup.string().required('Assunto não pode ficar vazio'),
-  });
+  const formSchema = Yup.object().shape({ assunto: Yup.string().required().label('Assunto') });
 
   const defaultValues = useMemo(
     () => ({
@@ -246,8 +244,8 @@ export function EstadoForm({ onCancel }) {
   const uosList = uos?.map((row) => ({ id: row?.id, balcao: row?.balcao, label: row?.label }));
 
   const formSchema = Yup.object().shape({
-    nome: Yup.string().required('Nome não pode ficar vazio'),
-    uo_id: Yup.mixed().required('Unidade orgânica não pode ficar vazio'),
+    nome: Yup.string().required().label('Nome'),
+    uo_id: Yup.mixed().required().label('Unidade orgânica'),
   });
 
   const defaultValues = useMemo(
@@ -273,6 +271,7 @@ export function EstadoForm({ onCancel }) {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem, isOpenModal]);
+
   const onSubmit = async () => {
     try {
       values.balcao = values?.uo_id?.balcao;
@@ -347,8 +346,8 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    objeto: Yup.mixed().required('Objeto pode ficar vazio'),
-    acesso: Yup.mixed().required('Acesso não pode ficar vazio'),
+    objeto: Yup.mixed().required().label('Objeto'),
+    acesso: Yup.mixed().required().label('Acesso'),
   });
 
   const defaultValues = useMemo(
@@ -435,7 +434,7 @@ export function MotivoPendenciaForm({ onCancel }) {
   const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
   const perfilId = cc?.perfil_id;
 
-  const formSchema = Yup.object().shape({ motivo: Yup.string().required('Motivo não pode ficar vazio') });
+  const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Motivo') });
   const defaultValues = useMemo(
     () => ({ motivo: selectedItem?.motivo || '', obs: selectedItem?.obs || '' }),
     [selectedItem]
@@ -511,15 +510,15 @@ OrigemForm.propTypes = { onCancel: PropTypes.func };
 export function OrigemForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const [findConcelhos, setFindConcelhos] = useState([]);
+  const [Concelhos, setConcelhos] = useState([]);
   const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    tipo: Yup.mixed().required('Tipo não pode ficar vazio'),
-    ilha: Yup.mixed().required('Ilha não pode ficar vazio'),
-    cidade: Yup.mixed().required('Concelho não pode ficar vazio'),
-    designacao: Yup.string().required('Designação não pode ficar vazio'),
+    tipo: Yup.mixed().required().label('Tipo'),
+    ilha: Yup.mixed().required().label('Ilha'),
+    cidade: Yup.mixed().required().label('Concelho'),
+    designacao: Yup.string().required().label('Designação'),
   });
 
   const defaultValues = useMemo(
@@ -539,7 +538,7 @@ export function OrigemForm({ onCancel }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
@@ -568,7 +567,9 @@ export function OrigemForm({ onCancel }) {
   };
 
   useEffect(() => {
-    setFindConcelhos(_concelhos.filter((_concelho) => _concelho?.ilha === values?.ilha));
+    setValue('cidade', null);
+    setConcelhos(_concelhos.filter((row) => row?.ilha === values?.ilha));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values?.ilha]);
 
   return (
@@ -601,7 +602,8 @@ export function OrigemForm({ onCancel }) {
                 <RHFAutocompleteSimple
                   name="cidade"
                   label="Concelho"
-                  options={[...new Set(findConcelhos.map((obj) => obj.concelho))]}
+                  disabled={!values.ilha}
+                  options={[...new Set(Concelhos?.map((obj) => obj.concelho))]}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -639,8 +641,8 @@ export function LinhaForm({ onCancel }) {
   const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    descricao: Yup.mixed().required('Escolhe o segmento'),
-    linha: Yup.string().required('Linha não pode ficar vazio'),
+    linha: Yup.string().required().label('Linha'),
+    descricao: Yup.mixed().required().label('Segmento'),
   });
   const defaultValues = useMemo(
     () => ({ linha: selectedItem?.linha || '', descricao: selectedItem?.descricao || null }),
@@ -730,10 +732,10 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
 
   const formSchema = Yup.object().shape({
-    modo: Yup.mixed().required('Modo não pode ficar vazio'),
-    prazoemdias: Yup.string().required('Prazo não pode ficar vazio'),
-    estado_final_id: Yup.mixed().required('Estado final não pode ficar vazio'),
-    estado_inicial_id: Yup.mixed().required('Estado inicial não pode ficar vazio'),
+    modo: Yup.mixed().required().label('Modo'),
+    prazoemdias: Yup.number().typeError().label('Prazo'),
+    estado_final_id: Yup.mixed().required().label('Estado final'),
+    estado_inicial_id: Yup.mixed().required().label('Estado inicial'),
   });
 
   const defaultValues = useMemo(
@@ -815,14 +817,10 @@ export function TransicaoForm({ onCancel, fluxoId }) {
                 <RHFAutocompleteSimple name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <RHFTextField
-                  label="Prazo"
-                  name="prazoemdias"
-                  InputProps={{ endAdornment: <InputAdornment position="end">dias</InputAdornment>, type: 'number' }}
-                />
+                <RHFNumberField label="Prazo" name="prazoemdias" tipo="dia" />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <RHFSwitch name="is_after_devolucao" label="Depois devolução" />
+                <RHFSwitch name="is_after_devolucao" label="Depois de devolução" />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <RHFSwitch name="is_paralelo" label="Paralelo" />
@@ -867,13 +865,15 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
   const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
   const estado = estadosList.find((row) => row.id === selectedItem?.estado_id) || null;
 
-  const formSchema = Yup.object().shape({ estado_id: Yup.mixed().required('Estado orgânica não pode ficar vazio') });
+  const formSchema = Yup.object().shape({ estado: Yup.mixed().required().label('Estado') });
 
   const defaultValues = useMemo(
     () => ({
-      estado_id: estado,
+      estado,
       perfil_id: Number(perfilId),
       perfil_id_cc: cc?.perfil?.id,
+      gestor: selectedItem?.gestor || false,
+      padrao: selectedItem?.padrao || false,
       observador: selectedItem?.observador || false,
       data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
       data_inicial: selectedItem?.data_inicial ? new Date(selectedItem?.data_inicial) : null,
@@ -892,7 +892,7 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
 
   const onSubmit = async () => {
     try {
-      values.estado_id = values?.estado_id?.id;
+      values.estado_id = values?.estado?.id;
       if (isEdit) {
         dispatch(
           updateItem('estadoPerfil', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' })
@@ -916,7 +916,7 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -924,19 +924,26 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
             <Grid container spacing={3} sx={{ mt: 0 }}>
               <Grid item xs={12}>
                 <RHFAutocompleteObject
-                  name="estado_id"
+                  name="estado"
                   label="Estado"
+                  disabled={isEdit}
                   options={applySort(estadosList, getComparator('asc', 'label'))}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <RHFDatePicker dateTime name="data_inicial" label="Data de início" />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <RHFDatePicker dateTime name="data_limite" label="Data de término" />
               </Grid>
-              <Grid item xs={12}>
-                <RHFSwitch name="observador" label="Somente observador" />
+              <Grid item xs={4}>
+                <RHFSwitch name="observador" label="Observador" />
+              </Grid>
+              <Grid item xs={4}>
+                <RHFSwitch name="gestor" label="Gestor" />
+              </Grid>
+              <Grid item xs={4}>
+                <RHFSwitch name="padrao" label="Padrão" />
               </Grid>
               {isEdit && (
                 <Grid item xs={12}>
@@ -971,12 +978,18 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, done, error } = useSelector((state) => state.parametrizacao);
 
-  const defaultValues = useMemo(() => ({ perfis: [{ perfil: null, data_limite: null, data_inicial: null }] }), []);
+  const defaultValues = useMemo(
+    () => ({
+      perfis: [
+        { perfil: null, gestor: false, padrao: false, observador: false, data_limite: null, data_inicial: null },
+      ],
+    }),
+    []
+  );
   const formSchema = Yup.object().shape({
-    perfis: Yup.array(Yup.object({ perfil: Yup.mixed().required('Estado final não pode ficar vazio') })),
+    perfis: Yup.array(Yup.object({ perfil: Yup.mixed().required().label('Colaborador') })),
   });
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  // const methods = useForm({ defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
@@ -996,6 +1009,8 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
       values?.perfis?.forEach((row) => {
         formData?.perfis?.push({
           perfil_id: row?.perfil?.id,
+          gestor: row?.gestor || false,
+          padrao: row?.padrao || false,
           data_limite: row?.data_limite,
           data_inicial: row?.data_inicial,
           observador: row?.observador || false,
@@ -1016,7 +1031,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="lg">
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {`Adicionar colaborador ao estado » ${estado?.nome}`}
@@ -1026,35 +1041,35 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
       <DialogContent>
         <Notificacao done={done} error={error} afterSuccess={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
+          <Stack direction="column" divider={<Divider sx={{ borderStyle: 'dashed' }} />} spacing={2} sx={{ mt: 3 }}>
             {fields.map((item, index) => (
-              <Grid item xs={12} key={item.id}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={5}>
-                    <RHFAutocompleteObject
-                      label="Colaborador"
-                      options={perfisFilter}
-                      name={`perfis[${index}].perfil`}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={9} md={5}>
-                    <Stack direction="row" spacing={1}>
-                      <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Data de início" />
-                      <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Data de término" />
+              <Stack direction="row" key={item.id} spacing={2} alignItems="center">
+                <Stack sx={{ width: 1 }} spacing={1}>
+                  <Stack direction={{ xs: 'column', md: 'row' }} key={item.id} spacing={1} alignItems="center">
+                    <Stack direction="row" sx={{ width: { xs: 1, md: '50%' } }}>
+                      <RHFAutocompleteObject
+                        label="Colaborador"
+                        options={perfisFilter}
+                        name={`perfis[${index}].perfil`}
+                      />
                     </Stack>
-                  </Grid>
-                  <Grid item xs={12} sm={3} md={2}>
                     <Stack direction="row" spacing={1}>
-                      <RHFSwitch name={`perfis[${index}].observador`} label="Somente observador" />
-                      {values.perfis.length > 1 && (
-                        <DefaultAction color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
-                      )}
+                      <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Início" />
+                      <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Término" />
                     </Stack>
-                  </Grid>
-                </Grid>
-              </Grid>
+                  </Stack>
+                  <Stack direction="row" spacing={1}>
+                    <RHFSwitch name={`perfis[${index}].observador`} label="Observador" />
+                    <RHFSwitch name={`perfis[${index}].gestor`} label="Gestor" />
+                    <RHFSwitch name={`perfis[${index}].padrao`} label="Padrão" />
+                  </Stack>
+                </Stack>
+                {values.perfis.length > 1 && (
+                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
+                )}
+              </Stack>
             ))}
-          </Grid>
+          </Stack>
           <DialogButons isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
@@ -1072,7 +1087,7 @@ export function AnexoDespesaForm({ item, onCancel }) {
   const { mail } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
 
-  const formSchema = Yup.object().shape({ designacao: Yup.string().required('Designação não pode ficar vazio') });
+  const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
   const defaultValues = useMemo(
     () => ({
       designacao: selectedItem?.designacao || '',
@@ -1169,7 +1184,7 @@ export function RegraAnexoForm({ onCancel }) {
     [anexos]
   );
 
-  const formSchema = Yup.object().shape({ designacao: Yup.mixed().required('Anexo não pode ficar vazio') });
+  const formSchema = Yup.object().shape({ designacao: Yup.mixed().required().label('Anexo') });
 
   const defaultValues = useMemo(
     () => ({
@@ -1264,8 +1279,8 @@ export function RegraEstadoForm({ onCancel }) {
   const formSchema = Yup.object().shape({
     pesos: Yup.array(
       Yup.object({
-        perfil: Yup.mixed().required('Seleciona o colaborador'),
-        percentagem: Yup.number().typeError('Introduza o valor'),
+        perfil: Yup.mixed().required().label('Colaborador'),
+        percentagem: Yup.number().positive().typeError().label('Percentagem'),
       })
     ),
   });
@@ -1346,8 +1361,8 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
   const formSchema = Yup.object().shape({
     pesos: Yup.array(
       Yup.object({
-        perfil: Yup.mixed().required('Seleciona o colaborador'),
-        percentagem: Yup.number().typeError('Introduza o valor'),
+        perfil: Yup.mixed().required().label('Colaborador'),
+        percentagem: Yup.number().positive().typeError().label('Percentagem'),
       })
     ),
   });
@@ -1407,9 +1422,9 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
   const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    corpo: Yup.string().required('Corpo não pode ficar vazio'),
-    via: Yup.mixed().required('Seleciona a via de notificação'),
-    assunto: Yup.string().required('Assunto não pode ficar vazio'),
+    via: Yup.mixed().required().label('Via'),
+    corpo: Yup.string().required().label('Corpo'),
+    assunto: Yup.string().required().label('Assunto'),
   });
 
   const defaultValues = useMemo(
@@ -1501,8 +1516,8 @@ export function DestinatarioForm({ onCancel }) {
   );
 
   const formSchema = Yup.object().shape({
-    perfil: isEdit && Yup.mixed().required('Seleciona o colaborador'),
-    destinatarios: !isEdit && Yup.array(Yup.object({ perfil: Yup.mixed().required('Seleciona o colaborador') })),
+    perfil: isEdit && Yup.mixed().required().label('Colaborador'),
+    destinatarios: !isEdit && Yup.array(Yup.object({ perfil: Yup.mixed().required().label('Colaborador') })),
   });
 
   const defaultValues = useMemo(

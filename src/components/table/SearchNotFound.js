@@ -53,7 +53,7 @@ export function SearchNotFound404({ message, noShadow = false }) {
         sx={{ py: { md: 7, xs: 3 }, fontStyle: 'italic', color: 'text.secondary' }}
       >
         <DocIllustration404 sx={{ height: 450 }} />
-        <Typography variant="h6">{message}</Typography>
+        <Typography variant="subtitle1">{message}</Typography>
       </Stack>
     </Card>
   );
