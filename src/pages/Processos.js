@@ -61,24 +61,24 @@ export default function Processos() {
   const VIEW_TABS = useMemo(
     () =>
       [
-        { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="tarefas" /> },
-        { value: 'Retidos', num: totalP?.total_retido || 0, component: <TableProcessos from="retidos" /> },
-        { value: 'Atribuídos', num: totalP?.total_afeto || 0, component: <TableProcessos from="atribuidos" /> },
-        { value: 'Pendentes', num: totalP?.total_pendente || 0, component: <TableProcessos from="pendentes" /> },
+        { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="Tarefas" /> },
+        { value: 'Retidos', num: totalP?.total_retido || 0, component: <TableProcessos from="Retidos" /> },
+        { value: 'Atribuídos', num: totalP?.total_afeto || 0, component: <TableProcessos from="Atribuídos" /> },
+        { value: 'Pendentes', num: totalP?.total_pendente || 0, component: <TableProcessos from="Pendentes" /> },
         ...(pertencoAoEstado(meusAmbientes, ['Validação OPE', 'Execução OPE'])
-          ? [{ value: 'Agendados', num: totalP?.total_agendado || 0, component: <TableProcessos from="agendados" /> }]
+          ? [{ value: 'Agendados', num: totalP?.total_agendado || 0, component: <TableProcessos from="Agendados" /> }]
           : []),
         ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas'])
           ? [
               {
                 value: 'Finalizados',
                 num: totalP?.total_finalizado || 0,
-                component: <TableProcessos from="finalizados" />,
+                component: <TableProcessos from="Finalizados" />,
               },
               {
                 value: 'Executados',
                 num: totalP?.total_executado || 0,
-                component: <TableProcessos from="executados" />,
+                component: <TableProcessos from="Executados" />,
               },
             ]
           : []),

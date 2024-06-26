@@ -1,9 +1,11 @@
+import { m } from 'framer-motion';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Dialog from '@mui/material/Dialog';
@@ -11,6 +13,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import { alpha, styled } from '@mui/material/styles';
 import DialogContent from '@mui/material/DialogContent';
@@ -20,6 +23,7 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import cssStyles from '../../utils/cssStyles';
+import { formatDate } from '../../utils/formatTime';
 import { validarAcesso } from '../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../redux/store';
@@ -31,6 +35,7 @@ import useToggle, { useToggle1, useToggle2, useToggle3 } from '../../hooks/useTo
 import { HEADER, NAVBAR } from '../../config';
 // components
 import Logo from '../../components/Logo';
+import Image from '../../components/Image';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 // sections
@@ -99,7 +104,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
         {format(new Date(), 'MM') === '12' && (
           <Snowfall snowflakeCount={100} changeFrequency={10} radius={[0.5, 1.5]} />
         )}
-        <Toolbar sx={{ minHeight: '100% !important', px: { lg: 5 } }}>
+        <Toolbar sx={{ minHeight: '100% !important', px: { lg: 3 } }}>
           {isDesktop && verticalLayout && <Logo sx={{ mr: 2.5 }} />}
 
           {!isDesktop && (
@@ -111,7 +116,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <ProcuraAvancada />
           <Box sx={{ flexGrow: 1 }} />
 
-          <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>
+          <Stack direction="row" alignItems="center" spacing={{ xs: 0.25, sm: 1 }}>
             {acessoValidarDoc && (
               <>
                 <IconButtonHead
@@ -156,6 +161,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
                 <Ajuda />
               </DialogContent>
             </Dialog>
+            <Parabens />
           </Stack>
         </Toolbar>
       </RootStyle>
@@ -219,5 +225,91 @@ function IconButtonHead({ open, title, icon, onOpen, ...sx }) {
         {icon}
       </IconButtonAnimate>
     </Tooltip>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function Parabens() {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { cc, aniversariantes, tempoServico } = useSelector((state) => state.intranet);
+  const aniversarianteHoje = aniversariantes
+    ?.filter((row) => formatDate(row.data_cel_aniv, 'dd') === formatDate(new Date(), 'dd'))
+    ?.find((item) => item?.id === cc.id);
+  const tempoServicoHoje = tempoServico
+    ?.filter((row) => formatDate(row.data_admissao, 'dd') === formatDate(new Date(), 'dd'))
+    ?.find((item) => item?.id === cc.id);
+
+  return (
+    <>
+      {!!aniversarianteHoje || !!tempoServicoHoje ? (
+        <>
+          <Tooltip arrow title="Parabéns">
+            <IconButtonAnimate size="small" onClick={onOpen}>
+              <m.div animate={{ rotate: [0, -20, 0, 20, 0] }} transition={{ duration: 1, repeat: Infinity }}>
+                <Image src="/assets/icons/gift.svg" sx={{ width: 36, height: 36 }} />
+              </m.div>
+            </IconButtonAnimate>
+          </Tooltip>
+          <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <Image
+              src="/assets/icons/gift.svg"
+              sx={{ opacity: 0.15, height: 1, width: 1, objectFit: 'cover', position: 'absolute' }}
+            />
+            <Box sx={{ p: { xs: 3, sm: 5 }, textAlign: 'center', backgroundColor: 'success.main' }}>
+              <Stack direction="row" justifyContent="center" alignItems="center" sx={{ pb: { xs: 3, sm: 4 } }}>
+                <Image src="/assets/icons/party.svg" sx={{ width: 40, height: 40, color: '#fff' }} />
+                <Typography variant="h4" sx={{ color: 'common.white', px: 2, zIndex: 2 }}>
+                  Parabéns: {cc?.perfil?.displayName}
+                </Typography>
+                <Image src="/assets/icons/party.svg" sx={{ width: 40, height: 40, color: '#fff' }} />
+              </Stack>
+              <Card sx={{ p: { xs: 3, sm: 5 } }}>
+                <Typography variant="h6" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                  {aniversarianteHoje ? (
+                    <>
+                      Trouxemos este bolo para comemorar o seu aniversário.
+                      <br />
+                      <br />
+                      <Stack direction="row" justifyContent="center">
+                        <Image src="/assets/icons/cake.svg" sx={{ width: 150, height: 150 }} />
+                      </Stack>
+                      <br />
+                      A CAIXA deseja-lhe um dia cheio de abraços, afetos e principalmente muita saúde.
+                      <br />
+                    </>
+                  ) : (
+                    ''
+                  )}
+                  {tempoServicoHoje ? (
+                    <>
+                      {aniversarianteHoje ? <br /> : ''}
+                      <Typography variant="h5" sx={{ color: 'success.main' }}>
+                        {formatDate(new Date(), 'yyyy') - formatDate(tempoServicoHoje?.data_admissao, 'yyyy')}
+                        &nbsp;anos de serviço
+                      </Typography>
+                      <br />
+                      É com enorme prazer e estima que a CAIXA comemora consigo, mais um ano de parceria, aprendizado,
+                      empenho e dedicação.
+                      <br />
+                      <br />
+                      Obrigado por fazer parte desta Família.
+                      <br />
+                    </>
+                  ) : (
+                    ''
+                  )}
+                </Typography>
+              </Card>
+              <Stack direction="row" justifyContent="center" sx={{ mt: { xs: 3, sm: 4 } }}>
+                <Image src="/assets/Caixa_Logo_Branco_sem_fundo.png" sx={{ width: 130 }} />
+              </Stack>
+            </Box>
+          </Dialog>
+        </>
+      ) : (
+        ''
+      )}
+    </>
   );
 }

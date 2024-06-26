@@ -1,4 +1,5 @@
 import { sumBy } from 'lodash';
+import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -38,10 +39,12 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 
-export function Execucao() {
+Execucao.propTypes = { indicadores: PropTypes.array };
+
+export function Execucao({ indicadores }) {
+  const { isLoading } = useSelector((state) => state.indicadores);
   const { colaboradores } = useSelector((state) => state.intranet);
   const { fluxos, estados } = useSelector((state) => state.parametrizacao);
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const fluxo = localStorage.getItem('fluxoIndic')
     ? fluxos?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic')))
     : '';
@@ -197,9 +200,11 @@ export function Execucao() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function Conclusao() {
+Conclusao.propTypes = { indicadores: PropTypes.array };
+
+export function Conclusao({ indicadores }) {
   const { uos } = useSelector((state) => state.intranet);
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
+  const { isLoading } = useSelector((state) => state.indicadores);
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const conclusaoByItem = useMemo(() => conclusaoP(indicadores, uos), [indicadores, uos]);
   const isNotFound = !conclusaoByItem?.filter((row) => row?.dias).length;
@@ -243,11 +248,17 @@ export function Conclusao() {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={4}>
-                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} conclusao />
-              </Grid>
-            ))}
+            <Grid item xs={12}>
+              <Card sx={{ p: 1, boxShadow: 'none', bgcolor: 'background.neutral' }}>
+                <Grid container spacing={1}>
+                  {resumo?.map((row) => (
+                    <Grid key={row?.label} item xs={12} sm={4}>
+                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} conclusao />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Card>
+            </Grid>
             <Grid item xs={12}>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="bar" series={series} options={chartOptions} height={500} />
@@ -264,8 +275,10 @@ export function Conclusao() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function DuracaoEquipa() {
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
+DuracaoEquipa.propTypes = { indicadores: PropTypes.array };
+
+export function DuracaoEquipa({ indicadores }) {
+  const { isLoading } = useSelector((state) => state.indicadores);
   const duracao = useMemo(() => duracaoGroup(indicadores, 'mes'), [indicadores]);
   const isNotFound = !indicadores.length;
 

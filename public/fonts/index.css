@@ -1,6 +1,24 @@
 @font-face {
+  font-family: 'NeoSansLight';
+  font-weight: 100;
+  font-style: normal;
+  src: local('NeoSansLight'), url('neo-sans-td-light.otf') format('opentype');
+}
+@font-face {
   font-family: 'NeoSansStd';
-  font-weight: 400;
+  font-weight: 300;
   font-style: normal;
   src: local('NeoSansStd'), url('neo-sans-std.otf') format('opentype');
+}
+@font-face {
+  font-family: 'NeoSansMed';
+  font-weight: 400;
+  font-style: normal;
+  src: local('NeoSansMed'), url('neo-sans-std-medium.otf') format('opentype');
+}
+@font-face {
+  font-family: 'NeoSansBold';
+  font-weight: 600;
+  font-style: normal;
+  src: local('NeoSansBold'), url('neo-sans-std-bold.otf') format('opentype');
 }

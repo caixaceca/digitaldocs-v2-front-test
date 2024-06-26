@@ -7,7 +7,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import useSettings from '../../../hooks/useSettings';
 //
 import BoxMask from './BoxMask';
-import SvgIconStyle from '../../SvgIconStyle';
+import { Contraste, ContrasteAlt } from '../../../assets';
 
 // ----------------------------------------------------------------------
 
@@ -37,10 +37,7 @@ export default function SettingContrast() {
               <BoxStyle
                 sx={{ ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }) }}
               >
-                <SvgIconStyle
-                  src={index === 0 ? '/assets/icons/contrast.svg' : '/assets/icons/contrast-outline.svg'}
-                  sx={{ width: 28, height: 28 }}
-                />
+                {index === 0 ? <ContrasteAlt sx={{ width: 28 }} /> : <Contraste sx={{ width: 30 }} />}
                 <BoxMask value={contrast} />
               </BoxStyle>
             </Grid>

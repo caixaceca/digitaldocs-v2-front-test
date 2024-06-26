@@ -102,8 +102,6 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
     }),
   });
 
-  console.log('Renderizou');
-
   const defaultValues = useMemo(
     () => ({
       conta: '',

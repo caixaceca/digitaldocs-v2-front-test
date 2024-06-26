@@ -1,5 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { format, add } from 'date-fns';
+import { createSlice } from '@reduxjs/toolkit';
 //
 import { callMsGraph } from '../../graph';
 import { loginRequest } from '../../config';
@@ -30,10 +31,12 @@ const initialState = {
   perfis: [],
   myGroups: [],
   perguntas: [],
+  anosServico: [],
   myAplicacoes: [],
   notificacoes: [],
   certificacoes: [],
   colaboradores: [],
+  aniversariantes: [],
 };
 
 const slice = createSlice({
@@ -112,6 +115,20 @@ const slice = createSlice({
       state.colaboradores = applySort(
         action.payload?.filter((row) => row?.is_active)?.map((row) => ({ ...row, nome: row?.perfil?.displayName })),
         getComparator('asc', 'nome')
+      );
+      state.aniversariantes = action?.payload?.filter(
+        (colaborador) =>
+          colaborador?.is_active &&
+          colaborador?.data_cel_aniv &&
+          format(add(new Date(colaborador.data_cel_aniv), { hours: 2 }), 'MM') ===
+            format(add(new Date(), { hours: 2 }), 'MM')
+      );
+      state.anosServico = action?.payload?.filter(
+        (colaborador) =>
+          colaborador?.is_active &&
+          colaborador?.data_admissao &&
+          format(add(new Date(colaborador.data_admissao), { hours: 2 }), 'MM') ===
+            format(add(new Date(), { hours: 2 }), 'MM')
       );
     },
 

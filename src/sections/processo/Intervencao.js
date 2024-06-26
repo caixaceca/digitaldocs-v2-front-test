@@ -53,10 +53,10 @@ export default function Intervencao({ colaboradoresList }) {
       destinosFora.push(row?.nome);
     }
     const destino = {
-      // paralelo: row?.nome !== 'Gerência Sede',
       modo: row.modo,
       label: row?.nome,
       id: row.transicao_id,
+      paralelo: row?.paralelo,
       hasopnumero: row.hasopnumero,
       estado_final_id: row.estado_id,
       requer_parecer: row?.requer_parecer,
@@ -74,7 +74,12 @@ export default function Intervencao({ colaboradoresList }) {
 
   const handleFinalizar = () => {
     dispatch(
-      updateItem('finalizar', JSON.stringify({ cativos: [] }), { id: processo?.id, mail, perfilId, msg: 'finalizado' })
+      updateItem('finalizar', JSON.stringify({ cativos: [] }), {
+        id: processo?.id,
+        mail,
+        perfilId,
+        msg: 'Processo finalizado',
+      })
     );
   };
 

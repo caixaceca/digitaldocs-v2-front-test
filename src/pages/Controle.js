@@ -21,7 +21,7 @@ export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
   const { isAdmin, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabControle') || 'trabalhados');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabControle') || 'Trabalhados');
 
   useEffect(() => {
     if (cc?.uo?.id && !localStorage.getItem('uoSearch')) {
@@ -40,23 +40,23 @@ export default function Controle() {
       [
         ...(isAdmin || estadoInicial(meusAmbientes)
           ? [
-              { value: 'entradas', label: 'Entradas', component: <TableControle from="entradas" /> },
-              { value: 'porconcluir', label: 'Por concluir', component: <TableControle from="porconcluir" /> },
+              { value: 'Entradas', component: <TableControle from="Entradas" /> },
+              { value: 'Por concluir', component: <TableControle from="Por concluir" /> },
             ]
           : []),
-        { value: 'trabalhados', label: 'Trabalhados', component: <TableControle from="trabalhados" /> },
+        { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
         ...(isAdmin ||
         cc?.uo?.tipo === 'Agências' ||
         cc?.uo?.label === 'DOP-CE' ||
         temAcesso(['emissao-cartoes-100'], meusacessos)
-          ? [{ value: 'cartoes', label: 'Receção de cartões', component: <TableCartoes /> }]
+          ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
-        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'con', label: 'CON', component: <TableCON /> }] : []),
+        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'CON', component: <TableCON /> }] : []),
         ...(isAdmin || temAcesso(['pjf-100'], meusacessos)
-          ? [{ value: 'pjf', label: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
+          ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
           : []),
         ...(isAdmin || temAcesso(['reconciliacao-100'], meusacessos)
-          ? [{ value: 'reconciliacao', label: 'Reconciliação', component: <TableCON item="reconciliacao" /> }]
+          ? [{ value: 'Reconciliação', component: <TableCON item="reconciliacao" /> }]
           : []),
       ] || [],
     [meusAmbientes, meusacessos, isAdmin, cc?.uo]
@@ -67,7 +67,6 @@ export default function Controle() {
       setCurrentTab(tabsList?.[0]?.value);
       localStorage.setItem('tabControle', tabsList?.[0]?.value);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsList, currentTab]);
 
   return (

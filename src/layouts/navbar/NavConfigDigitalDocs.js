@@ -1,45 +1,48 @@
-// @mui
-import ContactsOutlinedIcon from '@mui/icons-material/ContactsOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
-// components
-import SvgIconStyle from '../../components/SvgIconStyle';
+// assets
+import {
+  Home,
+  Dashboard,
+  Processos,
+  Controle,
+  Arquivo,
+  Entidade,
+  Parametrizacao,
+  Portal,
+  Contrato,
+} from '../../assets';
 
 // ----------------------------------------------------------------------
-
-const getIcon = (name) => <SvgIconStyle src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />;
-
-const ICONS = {
-  in: getIcon('in'),
-  home: getIcon('home'),
-  process: getIcon('process'),
-  meu_perfil: getIcon('meu_perfil'),
-  indicadores: getIcon('indicadores'),
-};
 
 const navConfig = [
   {
     subheader: 'Menu',
     items: [
-      { title: 'Indicadores', path: PATH_DIGITALDOCS.general.indicadores, icon: ICONS.indicadores },
-      { title: 'Processos', path: PATH_DIGITALDOCS.processos.root, icon: ICONS.process },
-      { title: 'Controle', path: PATH_DIGITALDOCS.controle.root, icon: ICONS.in },
+      { title: 'Indicadores', path: PATH_DIGITALDOCS.general.indicadores, icon: <Dashboard /> },
+      { title: 'Processos', path: PATH_DIGITALDOCS.processos.root, icon: <Processos /> },
+      { title: 'Controle', path: PATH_DIGITALDOCS.controle.root, icon: <Controle /> },
       {
         title: 'Arquivo',
         path: PATH_DIGITALDOCS.arquivo.root,
         roles: ['arquivo-100', 'arquivo-110', 'arquivo-111'],
-        icon: <SvgIconStyle src={`/assets/icons/archive.svg`} sx={{ width: 1, height: 1 }} />,
+        icon: <Arquivo />,
       },
       {
         title: 'Entidades',
         path: PATH_DIGITALDOCS.general.entidade,
         roles: ['entidades-100', 'entidades-110'],
-        icon: <ContactsOutlinedIcon />,
+        icon: <Entidade />,
+      },
+      {
+        title: 'Contratos',
+        path: PATH_DIGITALDOCS.general.contratos,
+        roles: ['contratos-100', 'contratos-110'],
+        icon: <Contrato />,
       },
       {
         title: 'Parametrização',
-        icon: <SettingsOutlinedIcon />,
+        icon: <Parametrizacao />,
         path: PATH_DIGITALDOCS.parametrizacao.root,
         roles: [
           'Todo-111',
@@ -59,9 +62,9 @@ const navConfig = [
   {
     subheader: 'Módulos',
     items: [
-      { title: 'Intranet - Teste', path: 'https://intraneteste.caixa.cv', icon: ICONS.home },
+      { title: 'Intranet - Teste', path: 'https://intraneteste.caixa.cv', icon: <Home /> },
       {
-        icon: ICONS.meu_perfil,
+        icon: <Portal />,
         title: 'Portal do colaborador - Teste',
         path: 'https://intraneteste.caixa.cv/portal/perfil',
       },

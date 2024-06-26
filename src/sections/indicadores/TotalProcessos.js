@@ -61,10 +61,10 @@ const chartOptionsCommon = (theme) => ({
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Criacao.propTypes = { periodo: PropTypes.string };
+Criacao.propTypes = { periodo: PropTypes.string, indicadores: PropTypes.array };
 
-export function Criacao({ periodo }) {
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
+export function Criacao({ periodo, indicadores }) {
+  const { isLoading } = useSelector((state) => state.indicadores);
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const isNotFound = !indicadores?.filter((row) => row?.criado_em).length;
   const total = sumBy(indicadores, 'total');
@@ -84,20 +84,23 @@ export function Criacao({ periodo }) {
     tooltip: { y: { formatter: (value) => fNumber(value) } },
   });
 
-  const resumo = [
-    { label: 'Total', valor: total, desc: '' },
-    { label: 'Média', valor: total / indicadores?.length, desc: periodo.charAt(0).toUpperCase() + periodo.slice(1) },
-    {
-      label: 'Mais processos',
-      valor: Math.max(...indicadores?.map((row) => row.total)),
-      desc: indicadores?.find((row) => row.total === Math.max(...indicadores?.map((row) => row.total)))?.criado_em,
-    },
-    {
-      label: 'Menos processos',
-      valor: Math.min(...indicadores?.map((row) => row.total)),
-      desc: indicadores?.find((row) => row.total === Math.min(...indicadores?.map((row) => row.total)))?.criado_em,
-    },
-  ];
+  const resumo = useMemo(
+    () => [
+      { label: 'Total', valor: total, desc: '' },
+      { label: 'Média', valor: total / indicadores?.length, desc: periodo.charAt(0).toUpperCase() + periodo.slice(1) },
+      {
+        label: 'Mais processos',
+        valor: Math.max(...indicadores?.map((row) => row.total)),
+        desc: indicadores?.find((row) => row.total === Math.max(...indicadores?.map((row) => row.total)))?.criado_em,
+      },
+      {
+        label: 'Menos processos',
+        valor: Math.min(...indicadores?.map((row) => row.total)),
+        desc: indicadores?.find((row) => row.total === Math.min(...indicadores?.map((row) => row.total)))?.criado_em,
+      },
+    ],
+    [indicadores, periodo, total]
+  );
 
   return (
     <Card sx={{ p: 1 }}>
@@ -144,36 +147,41 @@ export function Criacao({ periodo }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function EntradasTrabalhados() {
+EntradasTrabalhados.propTypes = { indicadores: PropTypes.array };
+
+export function EntradasTrabalhados({ indicadores }) {
   const [colaborador1, setColaborador1] = useState(null);
   const [colaborador2, setColaborador2] = useState(null);
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { isLoading } = useSelector((state) => state.indicadores);
   const { cc, colaboradores } = useSelector((state) => state.intranet);
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
   const { isAdmin, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const [detail, setDetail] = useState(localStorage.getItem('detail') === 'true');
 
-  const colaboradoresAcesso = ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.map((row) => row?.id);
-  const dadosByColaborador = indicadoresGroupBy(
-    indicadores?.filter((row) => colaboradoresAcesso?.includes(row?.perfil_id)),
-    'perfil_id'
+  const colaboradoresAcesso = useMemo(
+    () => ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.map((row) => row?.id),
+    [cc, colaboradores, isAdmin, meusAmbientes]
   );
-  const dadosByAssunto = indicadoresGroupBy(indicadores, 'assunto');
+  const dadosByColaborador = useMemo(
+    () =>
+      indicadoresGroupBy(
+        indicadores?.filter((row) => colaboradoresAcesso?.includes(row?.perfil_id)),
+        'perfil_id'
+      ),
+    [colaboradoresAcesso, indicadores]
+  );
+  const dadosByAssunto = useMemo(() => indicadoresGroupBy(indicadores, 'assunto'), [indicadores]);
+  const total = useMemo(() => sumBy(indicadores, 'total'), [indicadores]);
   const isNotFound = !dadosByColaborador.length;
-  const total = sumBy(indicadores, 'total');
-  const colaboradoresList = [];
-  dadosByColaborador?.forEach((row) => {
-    const colaborador = colaboradores?.find((colaborador) => colaborador.perfil_id === row?.item);
-    if (colaborador) {
-      colaboradoresList.push({
-        id: colaborador?.perfil_id,
-        foto: colaborador?.foto_disk,
-        label: colaborador?.perfil?.displayName,
-      });
-    }
-  });
-  const totalC1 = sumBy(dadosByColaborador?.find((row) => row?.item === colaborador1?.id)?.processos, 'total');
-  const totalC2 = sumBy(dadosByColaborador?.find((row) => row?.item === colaborador2?.id)?.processos, 'total');
+  const colaboradoresList = useMemo(() => colaboradoresFilter(colaboradores), [colaboradores]);
+  const totalC1 = useMemo(
+    () => sumBy(dadosByColaborador?.find((row) => row?.item === colaborador1?.id)?.processos, 'total'),
+    [colaborador1?.id, dadosByColaborador]
+  );
+  const totalC2 = useMemo(
+    () => sumBy(dadosByColaborador?.find((row) => row?.item === colaborador2?.id)?.processos, 'total'),
+    [colaborador2?.id, dadosByColaborador]
+  );
 
   const handleClose = () => {
     onClose1();
@@ -338,30 +346,33 @@ export function EntradasTrabalhados() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function DevolvidosTipos() {
+DevolvidosTipos.propTypes = { indicadores: PropTypes.array };
+
+export function DevolvidosTipos({ indicadores }) {
   const theme = useTheme();
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
+  const { isLoading } = useSelector((state) => state.indicadores);
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const isNotFound = !indicadores?.filter((row) => row.total)?.length;
-  const total = sumBy(indicadores, 'total');
-  const labels = indicadores?.map((row) => row?.assunto);
-  const quantidades = indicadores?.map((row) => row?.total);
-  const percentagem = indicadores?.map((row) => (row?.total * 100) / total);
-
-  const resumo = [
-    { label: 'Total', valor: sumBy(indicadores, 'total'), desc: '' },
-    {
-      label: 'Mais processos',
-      valor: Math.max(...indicadores?.map((row) => row.total)),
-      desc: indicadores?.find((row) => row.total === Math.max(...indicadores?.map((row) => row.total)))?.assunto,
-    },
-    {
-      label: 'Menos processos',
-      valor: Math.min(...indicadores?.map((row) => row.total)),
-      desc: indicadores?.find((row) => row.total === Math.min(...indicadores?.map((row) => row.total)))?.assunto,
-    },
-  ];
-
+  const total = useMemo(() => sumBy(indicadores, 'total'), [indicadores]);
+  const labels = useMemo(() => indicadores?.map((row) => row?.assunto), [indicadores]);
+  const quantidades = useMemo(() => indicadores?.map((row) => row?.total), [indicadores]);
+  const percentagem = useMemo(() => indicadores?.map((row) => (row?.total * 100) / total), [indicadores, total]);
+  const resumo = useMemo(
+    () => [
+      { label: 'Total', valor: sumBy(indicadores, 'total'), desc: '' },
+      {
+        label: 'Mais processos',
+        valor: Math.max(...indicadores?.map((row) => row.total)),
+        desc: indicadores?.find((row) => row.total === Math.max(...indicadores?.map((row) => row.total)))?.assunto,
+      },
+      {
+        label: 'Menos processos',
+        valor: Math.min(...indicadores?.map((row) => row.total)),
+        desc: indicadores?.find((row) => row.total === Math.min(...indicadores?.map((row) => row.total)))?.assunto,
+      },
+    ],
+    [indicadores]
+  );
   const series = useMemo(
     () => [
       { name: 'Quantidade', type: 'bar', data: quantidades },
@@ -383,11 +394,17 @@ export function DevolvidosTipos() {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={4}>
-                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
-              </Grid>
-            ))}
+            <Grid item xs={12}>
+              <Card sx={{ p: 1, boxShadow: 'none', bgcolor: 'background.neutral' }}>
+                <Grid container spacing={1}>
+                  {resumo?.map((row) => (
+                    <Grid key={row?.label} item xs={12} sm={4}>
+                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Card>
+            </Grid>
             <Grid item xs={12}>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
@@ -404,54 +421,42 @@ export function DevolvidosTipos() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Origem.propTypes = { top: PropTypes.string };
+Origem.propTypes = { top: PropTypes.string, indicadores: PropTypes.array };
 
-export function Origem({ top }) {
+export function Origem({ top, indicadores }) {
   const theme = useTheme();
   const agrupamento = localStorage.getItem('agrupamento') || 'Unidade orgânica';
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const topNumb = (top === 'Top 5' && 5) || (top === 'Top 10' && 10) || (top === 'Top 20' && 20) || 'Todos';
-  const { isLoading, indicadores } = useSelector((state) => state.indicadores);
+  const { isLoading } = useSelector((state) => state.indicadores);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
-  const origemByItem = [];
-  indicadores?.forEach((row, index) => {
-    if (agrupamento === 'Unidade orgânica') {
-      const uo = uos?.find((uo) => uo.id === row?.objeto_id);
-      if (topNumb !== 'Todos' && index < topNumb) {
-        origemByItem.push({ total: row?.total, label: uo?.label || row?.objeto_id });
-      } else if (topNumb === 'Todos') {
-        origemByItem.push({ total: row?.total, label: uo?.label || row?.objeto_id });
-      }
-    } else if (agrupamento === 'Colaborador') {
-      const colaborador = colaboradores?.find((colaborador) => colaborador.perfil_id === row?.objeto_id);
-      if (topNumb !== 'Todos' && index < topNumb) {
-        origemByItem.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
-      } else if (topNumb === 'Todos') {
-        origemByItem.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
-      }
-    }
-  });
+  const origemByItem = useMemo(
+    () => origensItem(indicadores, uos, colaboradores, agrupamento, topNumb),
+    [agrupamento, colaboradores, indicadores, topNumb, uos]
+  );
   const isNotFound = !origemByItem?.filter((row) => row?.total).length;
-  const total = sumBy(origemByItem, 'total');
-  const labels = origemByItem?.map((row) => row?.label);
-  const quantidades = origemByItem?.map((row) => row?.total);
-  const percentagem = origemByItem?.map((row) => (row?.total * 100) / total);
-  const resumo = [
-    { label: 'Total', valor: sumBy(origemByItem, 'total'), desc: '' },
-    { label: 'Média', valor: sumBy(origemByItem, 'total') / origemByItem?.length, desc: '' },
-    {
-      label: 'Mais processos',
-      valor: Math.max(...origemByItem?.map((row) => row.total)),
-      desc: origemByItem?.find((row) => row.total === Math.max(...origemByItem?.map((row) => row.total)))?.label,
-    },
-    {
-      label: 'Menos processos',
-      valor: Math.min(...origemByItem?.map((row) => row.total)),
-      desc: origemByItem?.find((row) => row.total === Math.min(...origemByItem?.map((row) => row.total)))?.label,
-    },
-  ];
-
+  const total = useMemo(() => sumBy(origemByItem, 'total'), [origemByItem]);
+  const labels = useMemo(() => origemByItem?.map((row) => row?.label), [origemByItem]);
+  const quantidades = useMemo(() => origemByItem?.map((row) => row?.total), [origemByItem]);
+  const percentagem = useMemo(() => origemByItem?.map((row) => (row?.total * 100) / total), [origemByItem, total]);
+  const resumo = useMemo(
+    () => [
+      { label: 'Total', valor: sumBy(origemByItem, 'total'), desc: '' },
+      { label: 'Média', valor: sumBy(origemByItem, 'total') / origemByItem?.length, desc: '' },
+      {
+        label: 'Mais processos',
+        valor: Math.max(...origemByItem?.map((row) => row.total)),
+        desc: origemByItem?.find((row) => row.total === Math.max(...origemByItem?.map((row) => row.total)))?.label,
+      },
+      {
+        label: 'Menos processos',
+        valor: Math.min(...origemByItem?.map((row) => row.total)),
+        desc: origemByItem?.find((row) => row.total === Math.min(...origemByItem?.map((row) => row.total)))?.label,
+      },
+    ],
+    [origemByItem]
+  );
   const series = useMemo(
     () => [
       { name: 'Nº de processos', type: 'bar', data: quantidades },
@@ -473,11 +478,17 @@ export function Origem({ top }) {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={6} md={3}>
-                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
-              </Grid>
-            ))}
+            <Grid item xs={12}>
+              <Card sx={{ p: 1, boxShadow: 'none', bgcolor: 'background.neutral' }}>
+                <Grid container spacing={1}>
+                  {resumo?.map((row) => (
+                    <Grid key={row?.label} item xs={12} sm={6} md={3}>
+                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Card>
+            </Grid>
             <Grid item xs={12}>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
@@ -507,4 +518,43 @@ function indicadoresGroupBy(dados, item) {
   }, {});
 
   return dadosGrouped;
+}
+
+// ----------------------------------------------------------------------
+
+function colaboradoresFilter(colaboradores) {
+  const dados = [];
+  colaboradores?.forEach((row) => {
+    const colab = colaboradores?.find((item) => item.perfil_id === row?.item);
+    if (colab) {
+      dados.push({ id: colab?.perfil_id, foto: colab?.foto_disk, label: colab?.perfil?.displayName });
+    }
+  });
+
+  return dados;
+}
+
+// ----------------------------------------------------------------------
+
+function origensItem(indicadores, uos, colaboradores, agrupamento, topNumb) {
+  const dados = [];
+  indicadores?.forEach((row, index) => {
+    if (agrupamento === 'Unidade orgânica') {
+      const uo = uos?.find((uo) => uo.id === row?.objeto_id);
+      if (topNumb !== 'Todos' && index < topNumb) {
+        dados.push({ total: row?.total, label: uo?.label || row?.objeto_id });
+      } else if (topNumb === 'Todos') {
+        dados.push({ total: row?.total, label: uo?.label || row?.objeto_id });
+      }
+    } else if (agrupamento === 'Colaborador') {
+      const colaborador = colaboradores?.find((colaborador) => colaborador.perfil_id === row?.objeto_id);
+      if (topNumb !== 'Todos' && index < topNumb) {
+        dados.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
+      } else if (topNumb === 'Todos') {
+        dados.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
+      }
+    }
+  });
+
+  return dados;
 }

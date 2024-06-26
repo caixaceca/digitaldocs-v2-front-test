@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -16,8 +17,8 @@ import { Criado } from '../../../components/Panel';
 import Scrollbar from '../../../components/Scrollbar';
 import { SearchNotFoundSmall } from '../../../components/table';
 //
+import Anexos from './Anexos';
 import { TextItem } from './DadosGerais';
-import TableDetalhes from './TableDetalhes';
 
 // ----------------------------------------------------------------------
 
@@ -56,7 +57,7 @@ export default function EntidadesGarantias({ item, dados }) {
               </AccordionSummary>
               <AccordionDetails>
                 <Grid container spacing={3}>
-                  <Grid item xs={12} md={row?.anexos?.length > 0 ? 5 : 12}>
+                  <Grid item xs={12} md={row?.anexos?.length > 0 ? 6 : 12}>
                     {item === 'entidades' ? (
                       <>
                         {row?.titularidade && <TextItem title="Titularidade:" text={row?.titularidade} />}
@@ -99,20 +100,32 @@ export default function EntidadesGarantias({ item, dados }) {
                         <TextItem
                           title="Adicionado:"
                           text={
-                            <>
-                              <Criado value={row?.criador} shuffle />
+                            <Stack
+                              useFlexGap
+                              spacing={1}
+                              flexWrap="wrap"
+                              direction="row"
+                              divider={<Divider orientation="vertical" flexItem />}
+                            >
+                              <Criado tipo="user" value={row?.criador} />
                               <Criado tipo="data" value={ptDateTime(row?.criado_em)} />
-                            </>
+                            </Stack>
                           }
                         />
                         {(row?.modificador || row?.modificado_em) && (
                           <TextItem
                             title="Modificado:"
                             text={
-                              <>
-                                {row?.modificador && <Criado value={row?.modificador} shuffle />}
+                              <Stack
+                                useFlexGap
+                                spacing={1}
+                                flexWrap="wrap"
+                                direction="row"
+                                divider={<Divider orientation="vertical" flexItem />}
+                              >
+                                {row?.modificador && <Criado tipo="user" value={row?.modificador} />}
                                 {row?.modificado_em && <Criado tipo="data" value={ptDateTime(row?.modificado_em)} />}
-                              </>
+                              </Stack>
                             }
                           />
                         )}
@@ -120,8 +133,9 @@ export default function EntidadesGarantias({ item, dados }) {
                     )}
                   </Grid>
                   {row?.anexos?.length > 0 && (
-                    <Grid item xs={12} md={7}>
-                      <TableDetalhes item={`anexos ${item}`} anexosList={row?.anexos} />
+                    <Grid item xs={12} md={6}>
+                      <Divider>Anexos</Divider>
+                      <Anexos item={`anexos ${item}`} anexos={row?.anexos} />
                     </Grid>
                   )}
                 </Grid>

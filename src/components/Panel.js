@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import RemoveIcon from '@mui/icons-material/Remove';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import BusinessIcon from '@mui/icons-material/Business';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -62,17 +61,16 @@ Criado.propTypes = {
   sx: PropTypes.object,
   tipo: PropTypes.string,
   value: PropTypes.string,
-  other: PropTypes.string,
   caption: PropTypes.bool,
   shuffle: PropTypes.bool,
 };
 
-export function Criado({ tipo = '', value, other = '', caption = false, shuffle = false, sx }) {
+export function Criado({ tipo = '', value, caption = false, shuffle = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.secondary' };
   return (
     <Stack direction="row" spacing={0.5} alignItems="center" {...sx}>
       {(tipo === 'uo' && <BusinessIcon sx={{ ...styles }} />) ||
-        (tipo === 'date' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
+        (tipo === 'data' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'warning' && <WarningAmberIcon sx={{ ...styles }} />) ||
         (tipo === 'note' && <CommentOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'time' && <AccessTimeOutlinedIcon sx={{ ...styles }} />) ||
@@ -82,14 +80,6 @@ export function Criado({ tipo = '', value, other = '', caption = false, shuffle 
       <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
         {shuffle ? shuffleString(value) : value}
       </Typography>
-      {other && (
-        <>
-          <RemoveIcon sx={{ width: 15, height: 20 }} />
-          <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
-            {other}
-          </Typography>
-        </>
-      )}
     </Stack>
   );
 }

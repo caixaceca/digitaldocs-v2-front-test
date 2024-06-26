@@ -1,8 +1,14 @@
 import { add } from 'date-fns';
 import PropTypes from 'prop-types';
-import { Page, View, Text, Image, Document } from '@react-pdf/renderer';
+import { Page, View, Text, Document } from '@react-pdf/renderer';
 // utils
 import { ptDate } from '../../../utils/formatTime';
+// components
+import {
+  // styles,
+  RodapeAlt,
+  CabecalhoAlt,
+} from '../../../components/ExportDados';
 //
 import styles from '../../Style';
 
@@ -16,22 +22,7 @@ export default function ParecerExport({ dados }) {
     <>
       <Document>
         <Page size="A4" style={styles.page}>
-          {/* Cabeçalho */}
-          <View style={[styles.header]} fixed>
-            <View style={[styles.gridContainer]}>
-              <View style={[styles.bodyHeader]}>{}</View>
-              <View style={[styles.headerLogo]}>
-                <Image
-                  src="/assets/Caixa_Logo_Branco_Transparente.png"
-                  style={{ marginBottom: '7mm', marginLeft: '7mm', width: '31mm' }}
-                />
-              </View>
-            </View>
-            <View style={[styles.bodyHeaderInfo]}>
-              <Text> </Text>
-              <Text style={{ width: '51mm' }}>o banco que combina comigo</Text>
-            </View>
-          </View>
+          <CabecalhoAlt cabecalho />
 
           {/* Body */}
           <View style={[styles.body]}>
@@ -75,29 +66,7 @@ export default function ParecerExport({ dados }) {
               </View>
             )}
           </View>
-
-          {/* Rodapé */}
-          <View style={[styles.footer]} fixed>
-            <View style={[styles.footerQrCode]}> </View>
-            <View style={[styles.footerText]}>
-              <Text>Caixa Económica de Cabo Verde, S.A.</Text>
-              <Text>Capital social nominal de 1.392.000.000$00, Conser. do Reg. Comerc. da Praia nº 336</Text>
-              <Text>Sede: Av. Cidade de Lisboa, C.P. 199, Praia, Ilha de Santiago, Cabo Verde</Text>
-              <Text>Tel. +238 260 36 00, fax +238 361 55 60, e-mail: caixa@caixa.cv</Text>
-              <Text>NIF: 200131753, Swift: CXEC CV CV</Text>
-              <Text>O único banco em Cabo Verde certificado ISO 9001 e ISO 27001</Text>
-            </View>
-            <View style={[styles.footerCertificacoes]}>
-              <Image
-                src="https://intranet.caixa.cv:5000/sobre/file/sobre_caixa/f04888bab00447b38549d9bf54431af3.png"
-                style={{ marginBottom: '3mm', width: '20mm' }}
-              />
-              <Image
-                src="https://intranet.caixa.cv:5000/sobre/file/sobre_caixa/43ac8cad72994f8681a2cd0a210f5a31.png"
-                style={{ width: '20mm' }}
-              />
-            </View>
-          </View>
+          <RodapeAlt rodape />
         </Page>
       </Document>
     </>

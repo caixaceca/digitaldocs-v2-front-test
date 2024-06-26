@@ -73,6 +73,7 @@ export default function Router() {
         { element: <Navigate to="processos" replace />, index: true },
         { path: 'indicadores', element: <Indicadores /> },
         { path: 'entidade', element: <Entidade /> },
+        { path: 'contratos', element: <Contrato /> },
         {
           path: 'parametrizacao',
           children: [
@@ -129,6 +130,7 @@ const NotFound = Loadable(lazy(() => import('../pages/excecoes/Page404')));
 const Fluxo = Loadable(lazy(() => import('../pages/Fluxo')));
 const Arquivo = Loadable(lazy(() => import('../pages/Arquivo')));
 const Procura = Loadable(lazy(() => import('../pages/Procura')));
+const Contrato = Loadable(lazy(() => import('../pages/Contrato')));
 const Entidade = Loadable(lazy(() => import('../pages/Entidade')));
 const Controle = Loadable(lazy(() => import('../pages/Controle')));
 const Processo = Loadable(lazy(() => import('../pages/Processo')));

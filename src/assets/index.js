@@ -1,3 +1,26 @@
+export {
+  Home,
+  Todos,
+  Editar,
+  Portal,
+  Arquivo,
+  Eliminar,
+  Detalhes,
+  Atribuir,
+  Controle,
+  Entidade,
+  Contrato,
+  Resgatar,
+  Contraste,
+  Dashboard,
+  Processos,
+  Abandonar,
+  Definicoes,
+  Seguimento,
+  ContrasteAlt,
+  Parametrizacao,
+} from './icons';
+
 export { default as DocIllustration } from './illustration_doc';
 export { default as UploadIllustration } from './illustration_upload';
 export { default as ForbiddenIllustration } from './illustration_403';

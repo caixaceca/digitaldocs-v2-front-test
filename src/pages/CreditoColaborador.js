@@ -28,6 +28,7 @@ import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { UpdateItem, DefaultAction } from '../components/Actions';
 // sections
 import {
+  Anexos,
   DadosGerais,
   TableDetalhes,
   PareceresEstado,
@@ -112,7 +113,19 @@ export default function CreditoColaborador() {
       ...(pedidoCC?.entidades?.length > 0
         ? [{ value: 'Entidades', component: <EntidadesGarantias item="entidades" dados={pedidoCC?.entidades} /> }]
         : []),
-      ...(pedidoCC?.anexos?.length > 0 ? [{ value: 'Anexos', component: <TableDetalhes item="anexos" /> }] : []),
+      {
+        value: 'Anexos',
+        component: (
+          <Anexos
+            item="anexos"
+            anexos={[
+              { designacao: 'CCRD.FM.P.001.00', ativo: true, anexo: 'anexo.pdf', criador: 'Gerado pelo sistema' },
+              { designacao: 'CCRD.FM.P.003.00', ativo: true, anexo: 'anexo.pdf', criador: 'Gerado pelo sistema' },
+              ...(pedidoCC?.anexos || []),
+            ]}
+          />
+        ),
+      },
       ...(pedidoCC?.garantias?.length > 0
         ? [
             {
@@ -135,10 +148,10 @@ export default function CreditoColaborador() {
         : []),
       ...(pedidoCC
         ? [
-            { value: 'Visualizações', component: <Views id={pedidoCC?.id} from="cc" isLoading={isLoading} /> },
             { value: 'Retenções', component: <TableDetalhes item="hretencoes" /> },
             { value: 'Atribuições', component: <TableDetalhes item="hatribuicoes" /> },
             { value: 'Pendências', component: <TableDetalhes item="hpendencias" /> },
+            { value: 'Visualizações', component: <Views id={pedidoCC?.id} from="cc" isLoading={isLoading} /> },
           ]
         : []),
     ],

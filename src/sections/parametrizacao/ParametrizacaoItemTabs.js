@@ -258,7 +258,7 @@ export default function ParametrizacaoItemTabs({ item }) {
           currentTab
         }
         action={
-          <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
+          <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
             <Stack direction="row" alignItems="center" spacing={1}>
               {(currentTab === 'Regras' || currentTab === 'Transições' || currentTab === 'Notificações') && (
                 <Autocomplete

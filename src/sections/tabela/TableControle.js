@@ -26,13 +26,12 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
+import ItemAnalytic from '../../components/ItemAnalytic';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { DefaultAction, ExportExcel } from '../../components/Actions';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-// sections
-import ArquivoAnalytic from '../arquivo/ArquivoAnalytic';
 //
 import { UoData, RowItem } from './Dados';
 import applySortFilter, { dadosList } from './applySortFilter';
@@ -114,8 +113,8 @@ export default function TableControle({ from }) {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrder: from === 'trabalhados' ? 'asc' : 'desc',
-    defaultOrderBy: from === 'trabalhados' ? 'trabalhado_em' : 'nentrada',
+    defaultOrder: from === 'Trabalhados' ? 'asc' : 'desc',
+    defaultOrderBy: from === 'Trabalhados' ? 'trabalhado_em' : 'nentrada',
     defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
   });
 
@@ -130,7 +129,7 @@ export default function TableControle({ from }) {
   }, [uosList, uo, cc?.uo?.id]);
 
   useEffect(() => {
-    if (mail && perfilId && uo?.id && from === 'entradas') {
+    if (mail && perfilId && uo?.id && from === 'Entradas') {
       dispatch(
         getAll(from, {
           mail,
@@ -144,23 +143,23 @@ export default function TableControle({ from }) {
   }, [dispatch, perfilId, uo?.id, mail, datai, dataf, from]);
 
   useEffect(() => {
-    if (mail && data && uo?.id && from === 'trabalhados') {
+    if (mail && data && uo?.id && from === 'Trabalhados') {
       dispatch(getAll(from, { mail, uoId: uo?.id, data: dataValido(data) ? format(data, 'yyyy-MM-dd') : '' }));
     }
   }, [dispatch, uo?.id, data, from, mail]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && from === 'porconcluir') {
+    if (mail && cc?.perfil_id && from === 'Por concluir') {
       dispatch(getAll(from, { perfilId: cc?.perfil_id, mail }));
     }
   }, [dispatch, cc?.perfil_id, from, mail]);
 
   const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=${from}`);
+    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Controle`);
   };
 
   const dados = dadosList(
-    (from === 'entradas' && entradas) || (from === 'trabalhados' && trabalhados) || porConcluir,
+    (from === 'Entradas' && entradas) || (from === 'Trabalhados' && trabalhados) || porConcluir,
     colaboradores,
     from
   );
@@ -181,21 +180,21 @@ export default function TableControle({ from }) {
 
   const totalUo = dados?.dados?.length || 0;
   const totalAssunto =
-    from === 'trabalhados' && assunto ? dados?.dados?.filter((row) => row?.assunto === assunto)?.length : 0;
+    from === 'Trabalhados' && assunto ? dados?.dados?.filter((row) => row?.assunto === assunto)?.length : 0;
   const totalColab =
-    (from === 'trabalhados' &&
+    (from === 'Trabalhados' &&
       colaborador &&
       assunto &&
       dados?.dados?.filter((row) => row?.perfil_id === colaborador && row?.colaborador === assunto)?.length) ||
-    (from === 'trabalhados' &&
+    (from === 'Trabalhados' &&
       colaborador &&
       dados?.dados?.filter((row) => row?.colaborador === colaborador)?.length) ||
     0;
 
   const title =
-    (from === 'entradas' && 'Entradas') ||
-    (from === 'trabalhados' && 'Processos trabalhados') ||
-    (from === 'porconcluir' && 'Processos por concluir');
+    (from === 'Trabalhados' && 'Processos trabalhados') ||
+    (from === 'Por concluir' && 'Processos por concluir') ||
+    from;
 
   return (
     <>
@@ -205,7 +204,7 @@ export default function TableControle({ from }) {
         sx={{ color: 'text.secondary', px: 1 }}
         action={
           <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
-            {from !== 'porconcluir' && (
+            {from !== 'Por concluir' && (
               <UoData
                 uo={uo}
                 data={data}
@@ -216,7 +215,7 @@ export default function TableControle({ from }) {
                 setData={setData}
                 setDatai={setDatai}
                 setDataf={setDataf}
-                entradas={from === 'entradas'}
+                entradas={from === 'Entradas'}
               />
             )}
             {isAdmin && !isNotFound && <ExportExcel table="entradas" filename={title} icon />}
@@ -224,7 +223,7 @@ export default function TableControle({ from }) {
         }
       />
 
-      {from === 'trabalhados' && (
+      {from === 'Trabalhados' && (
         <Card sx={{ mb: 3 }}>
           <Scrollbar>
             <Stack
@@ -232,21 +231,16 @@ export default function TableControle({ from }) {
               direction="row"
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
             >
-              <ArquivoAnalytic
-                total={totalUo}
-                color="success.main"
-                icon="/assets/icons/navbar/dashboard.svg"
-                title={`Total: ${uo?.label ? uo?.label : ''}`}
-              />
+              <ItemAnalytic total={totalUo} color="success.main" title={`Total: ${uo?.label ? uo?.label : ''}`} />
               {assunto && (
-                <ArquivoAnalytic
+                <ItemAnalytic
                   title={assunto}
                   total={totalAssunto}
                   percent={totalAssunto === 0 || totalUo === 0 ? 0 : (totalAssunto * 100) / totalUo}
                 />
               )}
               {colaborador && (
-                <ArquivoAnalytic
+                <ItemAnalytic
                   total={totalColab}
                   title={colaborador}
                   percent={totalColab === 0 || totalUo === 0 ? 0 : (totalColab * 100) / totalUo}
@@ -259,7 +253,6 @@ export default function TableControle({ from }) {
 
       <Card sx={{ p: 1 }}>
         <SearchToolbarEntradas
-          from={from}
           filter={filter}
           estado={estado}
           assunto={assunto}
@@ -271,7 +264,7 @@ export default function TableControle({ from }) {
           estadosList={dados?.estadosList}
           assuntosList={dados?.assuntosList}
           colaboradoresList={
-            ((from === 'entradas' || from === 'porconcluir') && dados?.colaboradoresList) ||
+            ((from === 'Entradas' || from === 'Por concluir') && dados?.colaboradoresList) ||
             ColaboradoresAcesso(dados?.colaboradoresList, cc, isAdmin, meusAmbientes)?.map((row) => row?.label)
           }
         />
@@ -283,18 +276,18 @@ export default function TableControle({ from }) {
                 onSort={onSort}
                 orderBy={orderBy}
                 headLabel={
-                  (from === 'entradas' && TABLE_HEAD_ENTRADAS) ||
-                  (from === 'trabalhados' && TABLE_HEAD_TRABALHADOS) ||
-                  (from === 'porconcluir' && TABLE_HEAD_PORCONCLUIR)
+                  (from === 'Entradas' && TABLE_HEAD_ENTRADAS) ||
+                  (from === 'Trabalhados' && TABLE_HEAD_TRABALHADOS) ||
+                  (from === 'Por concluir' && TABLE_HEAD_PORCONCLUIR)
                 }
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={from === 'porconcluir' ? 8 : 7} row={10} />
+                  <SkeletonTable column={from === 'Por concluir' ? 8 : 7} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <>
-                      {from === 'porconcluir' ? (
+                      {from === 'Por concluir' ? (
                         <TableRow hover key={`${from}_${index}`}>
                           <TableCell>{row.nentrada}</TableCell>
                           <TableCell>{row?.titular ? shuffleString(row.titular) : noDados()}</TableCell>

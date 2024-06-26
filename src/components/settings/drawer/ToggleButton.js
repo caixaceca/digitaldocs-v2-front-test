@@ -5,8 +5,9 @@ import { alpha, styled } from '@mui/material/styles';
 // utils
 import cssStyles from '../../../utils/cssStyles';
 //
-import SvgIconStyle from '../../SvgIconStyle';
 import { IconButtonAnimate } from '../../animate';
+// assets
+import { Definicoes } from '../../../assets';
 
 // ----------------------------------------------------------------------
 
@@ -37,17 +38,12 @@ const DotStyle = styled('span')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-ToggleButton.propTypes = {
-  notDefault: PropTypes.bool,
-  onToggle: PropTypes.func,
-  open: PropTypes.bool,
-};
+ToggleButton.propTypes = { notDefault: PropTypes.bool, onToggle: PropTypes.func, open: PropTypes.bool };
 
 export default function ToggleButton({ notDefault, open, onToggle }) {
   return (
     <RootStyle>
       {notDefault && !open && <DotStyle />}
-
       <Tooltip title="Definições" placement="left" arrow>
         <IconButtonAnimate
           color="inherit"
@@ -61,7 +57,7 @@ export default function ToggleButton({ notDefault, open, onToggle }) {
             },
           }}
         >
-          <SvgIconStyle src={'/assets/icons/navbar/gestao.svg'} sx={{ width: 20 }} />
+          <Definicoes />
         </IconButtonAnimate>
       </Tooltip>
     </RootStyle>

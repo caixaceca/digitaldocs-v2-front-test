@@ -3,13 +3,17 @@ import { applySort } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
-export function applySortFilter({ dados, assunto, colaborador, mes, comparator }) {
+export function applySortFilter({ dados, item, acao, colaborador, mes, comparator }) {
   if (comparator) {
     dados = applySort(dados, comparator);
   }
 
-  if (assunto) {
-    dados = dados.filter((row) => row?.tipo === assunto);
+  if (item && !acao) {
+    dados = dados.filter((row) => row?.tipo === item);
+  }
+
+  if (item && acao) {
+    dados = dados.filter((row) => row?.forma === item);
   }
 
   if (mes?.id) {

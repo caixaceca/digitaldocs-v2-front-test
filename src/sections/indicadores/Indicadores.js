@@ -211,16 +211,21 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   ]);
 
   const haveColaborador =
-    tab === 'data' || tab === 'tipos' || tab === 'conclusao' || tab === 'execucao' || tab === 'totalTrabalhados';
+    tab === 'acao' ||
+    tab === 'data' ||
+    tab === 'tipos' ||
+    tab === 'execucao' ||
+    tab === 'conclusao' ||
+    tab === 'totalTrabalhados';
   const haveEstado =
     tab === 'execucao' ||
     tab === 'devolucoes' ||
     tab === 'trabalhados' ||
     (tab === 'equipa' && agrEntradas === 'Estado') ||
     (tab === 'entradas' && agrEntradas === 'Estado') ||
-    (tab === 'entradaTrabalhado' && agrEntradas === 'Estado') ||
     (tab === 'colaboradores' && agrEntradas === 'Estado') ||
-    (tab === 'totalTrabalhados' && agrEntradas === 'Estado');
+    (tab === 'entradaTrabalhado' && agrEntradas === 'Estado') ||
+    ((tab === 'totalTrabalhados' || tab === 'acao') && agrEntradas === 'Estado');
   const havePeriodo =
     tab === 'criacao' ||
     tab === 'entradas' ||
@@ -245,10 +250,10 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
       </Box>
 
       {currentTab && (
-        <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={changeTab} sx={{ mb: 2 }} />
+        <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={changeTab} sx={{ mb: 1.5 }} />
       )}
 
-      <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
+      <Stack direction="row" justifyContent="center" sx={{ mb: 1.5 }}>
         <Stack direction="row" alignItems="center" justifyContent="center" flexWrap="wrap" gap={1}>
           {tab === 'conclusao' && momento && (
             <Panel label="Momento" children={<Typography noWrap>{momento}</Typography>} />
@@ -269,13 +274,19 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
               }
             />
           )}
-          {(tab === 'equipa' || tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'colaboradores') &&
+          {(tab === 'acao' ||
+            tab === 'equipa' ||
+            tab === 'colaboradores' ||
+            tab === 'totalTrabalhados' ||
+            tab === 'entradaTrabalhado') &&
             ano &&
             dataValido(ano) && <Panel label="Ano" children={<Typography noWrap>{format(ano, 'yyyy')}</Typography>} />}
+
           {(tab === 'data' ||
             tab === 'tipos' ||
             tab === 'criacao' ||
-            ((tab === 'equipa' ||
+            ((tab === 'acao' ||
+              tab === 'equipa' ||
               tab === 'entradaTrabalhado' ||
               tab === 'totalTrabalhados' ||
               tab === 'colaboradores') &&
@@ -284,11 +295,11 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
           {tab === 'entradas' && balcao?.label && agrEntradas === 'Balcão' && (
             <Panel label="Balcão" children={<Typography noWrap>{balcao?.label}</Typography>} />
           )}
-          {haveColaborador && perfil?.label && (
-            <Panel label="Colaborador" children={<Typography noWrap>{perfil?.label}</Typography>} />
-          )}
           {haveEstado && estado?.label && (
             <Panel label="Estado" children={<Typography noWrap>{estado?.label}</Typography>} />
+          )}
+          {haveColaborador && perfil?.label && (
+            <Panel label="Colaborador" children={<Typography noWrap>{perfil?.label}</Typography>} />
           )}
           {tab === 'devolucoes' && origem && (
             <Panel label="Origem" children={<Typography noWrap>{origem}</Typography>} />
@@ -296,7 +307,7 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
           {(tab === 'conclusao' || tab === 'execucao') && fluxo?.label && (
             <Panel label="Assunto" children={<Typography noWrap>{fluxo?.label}</Typography>} />
           )}
-          {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados') && entrada && (
+          {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'acao') && entrada && (
             <Panel children={<Typography noWrap>{tab === 'entradaTrabalhado' ? 'Distinto' : 'Entrada'}</Typography>} />
           )}
           {havePeriodo && (datai || dataf) && (
@@ -334,11 +345,12 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
                 options={['Criação no sistema', 'Data de entrada']}
               />
             )}
-            {(tab === 'entradas' ||
+            {(tab === 'acao' ||
               tab === 'equipa' ||
-              tab === 'entradaTrabalhado' ||
+              tab === 'entradas' ||
+              tab === 'colaboradores' ||
               tab === 'totalTrabalhados' ||
-              tab === 'colaboradores') && (
+              tab === 'entradaTrabalhado') && (
               <FilterRG
                 localS="agrEntradas"
                 value={agrEntradas}
@@ -366,10 +378,11 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
                 options={['mensal', 'anual']}
               />
             )}
-            {(tab === 'equipa' ||
-              tab === 'entradaTrabalhado' ||
+            {(tab === 'acao' ||
+              tab === 'equipa' ||
+              tab === 'colaboradores' ||
               tab === 'totalTrabalhados' ||
-              tab === 'colaboradores') && (
+              tab === 'entradaTrabalhado') && (
               <DatePicker
                 value={ano}
                 label="Ano"
@@ -379,12 +392,13 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
               />
             )}
             {(tab === 'data' ||
-              tab === 'criacao' ||
               tab === 'tipos' ||
-              ((tab === 'equipa' ||
-                tab === 'entradaTrabalhado' ||
+              tab === 'criacao' ||
+              ((tab === 'acao' ||
+                tab === 'equipa' ||
+                tab === 'colaboradores' ||
                 tab === 'totalTrabalhados' ||
-                tab === 'colaboradores') &&
+                tab === 'entradaTrabalhado') &&
                 agrEntradas === 'Balcão')) && (
               <FilterAutocomplete
                 value={uo}
@@ -403,15 +417,6 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
                 options={balcoesList}
               />
             )}
-            {haveColaborador && (
-              <FilterAutocomplete
-                value={perfil}
-                label="Colaborador"
-                setValue={setPerfil}
-                options={colaboradoresList}
-                disableClearable={tab === 'execucao' && !estado && !fluxo}
-              />
-            )}
             {haveEstado && (
               <FilterAutocomplete
                 label="Estado"
@@ -419,6 +424,15 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
                 setValue={setEstado}
                 options={estadosList}
                 disableClearable={haveEstado && !perfil && !fluxo}
+              />
+            )}
+            {haveColaborador && (
+              <FilterAutocomplete
+                value={perfil}
+                label="Colaborador"
+                setValue={setPerfil}
+                options={colaboradoresList}
+                disableClearable={tab === 'execucao' && !estado && !fluxo}
               />
             )}
             {(tab === 'conclusao' || tab === 'execucao') && (
@@ -430,7 +444,7 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
                 disableClearable={tab === 'execucao' && !perfil && !estado}
               />
             )}
-            {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados') && (
+            {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'acao') && (
               <FilterSwitch
                 value={entrada}
                 localS="entrada"
@@ -615,18 +629,20 @@ export function FileSystem() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function TotalProcessos() {
+  const { indicadores } = useSelector((state) => state.indicadores);
   const [top, setTop] = useState(localStorage.getItem('top') || 'Todos');
   const [periodo, setPeriodo] = useState(localStorage.getItem('periodo') || 'mensal');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabTotal') || 'data');
+  const indicadoresList = useMemo(() => (Array.isArray(indicadores) ? indicadores : []), [indicadores]);
 
   const tabsList = [
-    { value: 'data', label: 'Data', component: <Criacao periodo={periodo} /> },
-    { value: 'entradas', label: 'Entradas', component: <DevolvidosTipos /> },
-    { value: 'criacao', label: 'Criação', component: <EntradasTrabalhados /> },
-    { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados /> },
-    { value: 'devolucoes', label: 'Devoluções', component: <DevolvidosTipos /> },
-    { value: 'origem', label: 'Origem', component: <Origem top={top} /> },
-    { value: 'tipos', label: 'Fluxos', component: <DevolvidosTipos /> },
+    { value: 'data', label: 'Data', component: <Criacao periodo={periodo} indicadores={indicadoresList} /> },
+    { value: 'entradas', label: 'Entradas', component: <DevolvidosTipos indicadores={indicadoresList} /> },
+    { value: 'criacao', label: 'Criação', component: <EntradasTrabalhados indicadores={indicadoresList} /> },
+    { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados indicadores={indicadoresList} /> },
+    { value: 'devolucoes', label: 'Devoluções', component: <DevolvidosTipos indicadores={indicadoresList} /> },
+    { value: 'origem', label: 'Origem', component: <Origem top={top} indicadores={indicadoresList} /> },
+    { value: 'tipos', label: 'Fluxos', component: <DevolvidosTipos indicadores={indicadoresList} /> },
   ];
 
   const handleChangeTab = async (event, newValue) => {
@@ -658,12 +674,14 @@ export function TotalProcessos() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Duracao() {
+  const { indicadores } = useSelector((state) => state.indicadores);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tadDuracao') || 'conclusao');
+  const indicadoresList = useMemo(() => (Array.isArray(indicadores) ? indicadores : []), [indicadores]);
 
   const tabsList = [
-    { value: 'equipa', label: 'Estado/U.O', component: <DuracaoEquipa /> },
-    { value: 'execucao', label: 'Tempo de execução', component: <Execucao /> },
-    { value: 'conclusao', label: 'Conclusão', component: <Conclusao /> },
+    { value: 'equipa', label: 'Estado/U.O', component: <DuracaoEquipa indicadores={indicadoresList} /> },
+    { value: 'execucao', label: 'Tempo de execução', component: <Execucao indicadores={indicadoresList} /> },
+    { value: 'conclusao', label: 'Conclusão', component: <Conclusao indicadores={indicadoresList} /> },
   ];
 
   const handleChangeTab = async (event, newValue) => {
@@ -691,12 +709,39 @@ export function Duracao() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function SGQ() {
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabSgq') || 'entradaTrabalhado');
+  const { indicadores } = useSelector((state) => state.indicadores);
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabSgq') || 'totalTrabalhados');
+  const entradas = useMemo(
+    () => (Array.isArray(indicadores?.objeto_entrada) ? indicadores?.objeto_entrada : []),
+    [indicadores?.objeto_entrada]
+  );
+  const saidas = useMemo(
+    () => (Array.isArray(indicadores?.objeto_saida) ? indicadores?.objeto_saida : []),
+    [indicadores?.objeto_saida]
+  );
+  const indicadoresList = useMemo(() => (Array.isArray(indicadores) ? indicadores : []), [indicadores]);
 
   const tabsList = [
-    { value: 'entradaTrabalhado', label: 'Entrada/Trabalhado', component: <EntradaTrabalhado /> },
-    { value: 'totalTrabalhados', label: 'Trabalhados', component: <ProcessosTrabalhados /> },
-    { value: 'colaboradores', label: 'Colaboradores', component: <Colaboradores /> },
+    {
+      value: 'totalTrabalhados',
+      label: 'Trabalhados',
+      component: <ProcessosTrabalhados indicadores={indicadoresList} />,
+    },
+    {
+      value: 'acao',
+      label: 'Ação',
+      component: <ProcessosTrabalhados indicadores={indicadoresList} acao />,
+    },
+    {
+      value: 'entradaTrabalhado',
+      label: 'Entrada/Trabalhado',
+      component: <EntradaTrabalhado entradas={entradas} saidas={saidas} />,
+    },
+    {
+      value: 'colaboradores',
+      label: 'Colaboradores',
+      component: <Colaboradores entradas={entradas} saidas={saidas} />,
+    },
   ];
 
   const handleChangeTab = async (event, newValue) => {
@@ -757,7 +802,6 @@ export function CardInfo({ title, label, total, conclusao }) {
         textAlign: 'center',
         pt: { xs: 2, md: label ? 2 : 4 },
         '&:hover': { bgcolor: 'background.neutral' },
-        border: (theme) => theme.palette.mode === 'dark' && `solid 1px ${theme.palette.divider}`,
       }}
     >
       <Typography variant="subtitle1">{title}</Typography>

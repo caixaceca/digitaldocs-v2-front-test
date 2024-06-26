@@ -23,12 +23,12 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
+import ItemAnalytic from '../../components/ItemAnalytic';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import ArquivoAnalytic from './ArquivoAnalytic';
 import { applySortFilter } from '../parametrizacao/applySortFilter';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -114,23 +114,18 @@ export default function TableArquivo({ tab }) {
               direction="row"
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
             >
-              <ArquivoAnalytic
-                title="Total"
-                total={indicadoresArquivo?.total}
-                icon="/assets/icons/archive.svg"
-                color="success.main"
-              />
-              <ArquivoAnalytic
+              <ItemAnalytic title="Total" color="success.main" total={indicadoresArquivo?.total} />
+              <ItemAnalytic
                 title="Últimos 24H"
                 total={indicadoresArquivo?.totallast24}
                 percent={(indicadoresArquivo?.totallast24 * 100) / indicadoresArquivo?.total}
               />
-              <ArquivoAnalytic
+              <ItemAnalytic
                 title="Neste mês"
                 total={indicadoresArquivo?.totalmes}
                 percent={(indicadoresArquivo?.totalmes * 100) / indicadoresArquivo?.total}
               />
-              <ArquivoAnalytic
+              <ItemAnalytic
                 title="Neste ano"
                 total={indicadoresArquivo?.totalano}
                 percent={(indicadoresArquivo?.totalano * 100) / indicadoresArquivo?.total}

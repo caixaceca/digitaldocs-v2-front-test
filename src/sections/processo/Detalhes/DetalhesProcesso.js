@@ -107,7 +107,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
                   </Typography>
                   {processo?.data_ultima_transicao && (
                     <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
-                      <Criado caption tipo="date" value={ptDateTime(processo?.data_ultima_transicao)} />
+                      <Criado caption tipo="data" value={ptDateTime(processo?.data_ultima_transicao)} />
                       {processo?.estado_atual !== 'Arquivo' && (
                         <Criado
                           caption
@@ -197,6 +197,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
           {processo?.numero_operacao && <TextItem title="Nº da operação:" text={processo?.numero_operacao} />}
+          {con && processo?.valor && <TextItem title="Valor:" text={fCurrency(processo?.valor)} />}
           {processo?.operacao && <TextItem title="Descrição:" text={processo?.operacao} />}
           {origem && origem?.id === processo?.origem_id && (
             <TextItem
@@ -430,7 +431,7 @@ function ValorItem({ title, valor, cativos }) {
                           {row?.executado ? (
                             <>
                               {row?.cativador && <Criado tipo="user" value={row?.cativador} shuffle />}
-                              {row.data_cativo && <Criado tipo="date" value={ptDate(row.data_cativo)} />}
+                              {row.data_cativo && <Criado tipo="data" value={ptDate(row.data_cativo)} />}
                             </>
                           ) : (
                             <Checked check={row?.executado} />

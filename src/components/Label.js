@@ -66,16 +66,16 @@ const RootStyle = styled('span')(({ theme, ownerState }) => {
 // ----------------------------------------------------------------------
 
 Label.propTypes = {
+  sx: PropTypes.object,
+  endIcon: PropTypes.node,
   children: PropTypes.node,
   startIcon: PropTypes.node,
-  endIcon: PropTypes.node,
-  color: PropTypes.oneOf(['default', 'primary', 'secondary', 'info', 'success', 'warning', 'error']),
   variant: PropTypes.oneOf(['filled', 'outlined', 'ghost']),
-  sx: PropTypes.object,
+  color: PropTypes.oneOf(['default', 'primary', 'secondary', 'info', 'success', 'warning', 'error']),
 };
 
 export default function Label({ children, color = 'default', variant = 'ghost', startIcon, endIcon, sx }) {
-  const style = { width: 16, height: 16, '& svg, img': { width: 1, height: 1, objectFit: 'cover' } };
+  const style = { width: 18, height: 18, '& svg, img': { width: 1, height: 1, objectFit: 'cover' } };
 
   return (
     <RootStyle

@@ -552,7 +552,7 @@ export function Detalhes({ closeModal }) {
                             <Criado tipo="user" value={selectedItem?.emissao_validado_por} shuffle />
                           )}
                           {selectedItem?.emissao_validado_em && (
-                            <Criado tipo="date" value={ptDateTime(selectedItem?.emissao_validado_em)} />
+                            <Criado tipo="data" value={ptDateTime(selectedItem?.emissao_validado_em)} />
                           )}
                           {selectedItem?.nota_emissao && <Criado tipo="note" value={selectedItem?.nota_emissao} />}
                         </Stack>
@@ -577,7 +577,7 @@ export function Detalhes({ closeModal }) {
                             <Criado tipo="user" value={selectedItem?.rececao_validado_por} shuffle />
                           )}
                           {selectedItem?.rececao_validado_em && (
-                            <Criado tipo="date" value={ptDateTime(selectedItem?.rececao_validado_em)} />
+                            <Criado tipo="data" value={ptDateTime(selectedItem?.rececao_validado_em)} />
                           )}
                           {selectedItem?.nota_rececao && <Criado tipo="note" value={selectedItem?.nota_rececao} />}
                         </Stack>

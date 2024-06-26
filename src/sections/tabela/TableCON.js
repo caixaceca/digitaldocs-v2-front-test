@@ -57,15 +57,19 @@ const TABLE_HEAD_RECONCILIACAO = [
   { id: 'cdg_swift', label: 'Código SWIFT', align: 'left' },
   { id: 'numero_sequencia_msg', label: 'Nº seq. msg.', align: 'left' },
   { id: 'referencia', label: 'Referência', align: 'left' },
-  { id: 'chave', label: 'Chave', align: 'left' },
-  { id: 'indice', label: 'Índice', align: 'left' },
-  { id: 'valor', label: 'Valor', align: 'left' },
+  { id: 'campo', label: 'Campo', align: 'left' },
+  { id: 'indice_ocorrencia', label: 'Índice', align: 'left' },
   { id: 'comprimento', label: 'Comprimento', align: 'left' },
   { id: 'valor_numerico', label: 'Valor numérico', align: 'left' },
   { id: 'moeda', label: 'Moeda', align: 'left' },
   { id: 'tipo_operacao', label: 'Tipo operação', align: 'left' },
   { id: 'data_valor', label: 'Data valor', align: 'left' },
   { id: 'data_registo', label: 'Data registo', align: 'left' },
+  { id: 'ref1', label: 'Ref. 1', align: 'left' },
+  { id: 'ref2', label: 'Ref. 2', align: 'left' },
+  { id: 'descritivo', label: 'Descritivo', align: 'left' },
+  { id: 'nota', label: 'Nota', align: 'left' },
+  { id: 'saldo_apos_movimento', label: 'Saldo após', align: 'left' },
 ];
 
 // ----------------------------------------------------------------------
@@ -201,7 +205,7 @@ export default function TableCON({ item = 'con' }) {
             />
             <TableBody>
               {isLoading && isNotFound ? (
-                <SkeletonTable column={(item === 'reconciliacao' && 12) || (item === 'pjf' && 8) || 7} row={10} />
+                <SkeletonTable column={(item === 'reconciliacao' && 16) || (item === 'pjf' && 8) || 7} row={10} />
               ) : (
                 dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                   <TableRow
@@ -214,15 +218,19 @@ export default function TableCON({ item = 'con' }) {
                         <TableCell sx={{ typography: 'caption' }}>{shuffleString(row?.cdg_swift)}</TableCell>
                         <TableCell>{shuffleString(row?.numero_sequencia_msg)}</TableCell>
                         <TableCell>{shuffleString(row?.referencia)}</TableCell>
-                        <TableCell>{shuffleString(row?.chave)}</TableCell>
-                        <TableCell>{shuffleString(row?.indice)}</TableCell>
-                        <TableCell>{shuffleString(row?.valor)}</TableCell>
+                        <TableCell>{shuffleString(row?.campo)}</TableCell>
+                        <TableCell>{shuffleString(row?.indice_ocorrencia)}</TableCell>
                         <TableCell>{shuffleString(row?.comprimento)}</TableCell>
                         <TableCell>{shuffleString(row?.valor_numerico)}</TableCell>
                         <TableCell>{shuffleString(row?.moeda)}</TableCell>
                         <TableCell>{shuffleString(row?.tipo_operacao)}</TableCell>
                         <TableCell>{shuffleString(row?.data_valor)}</TableCell>
                         <TableCell>{shuffleString(row?.data_registo)}</TableCell>
+                        <TableCell>{shuffleString(row?.ref1)}</TableCell>
+                        <TableCell>{shuffleString(row?.ref2)}</TableCell>
+                        <TableCell>{shuffleString(row?.descritivo)}</TableCell>
+                        <TableCell>{shuffleString(row?.nota)}</TableCell>
+                        <TableCell>{shuffleString(row?.saldo_apos_movimento)}</TableCell>
                       </>
                     )) ||
                       (item === 'pjf' && (
@@ -240,7 +248,7 @@ export default function TableCON({ item = 'con' }) {
                           </TableCell>
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
-                            {row?.data_entrada && <Criado tipo="date" value={ptDate(row.data_entrada)} />}
+                            {row?.data_entrada && <Criado tipo="data" value={ptDate(row.data_entrada)} />}
                             {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
                           </TableCell>
                         </>
@@ -292,7 +300,6 @@ export default function TableCON({ item = 'con' }) {
                   <TableCell>Nº seq, msg.</TableCell>
                   <TableCell>Referência</TableCell>
                   <TableCell>Chave</TableCell>
-                  <TableCell>Valor</TableCell>
                   <TableCell>Comprimento</TableCell>
                   <TableCell>Valor numérico</TableCell>
                   <TableCell>Moeda</TableCell>
@@ -300,6 +307,11 @@ export default function TableCON({ item = 'con' }) {
                   <TableCell>Tipo operação</TableCell>
                   <TableCell>Data valor</TableCell>
                   <TableCell>Data registo</TableCell>
+                  <TableCell>Referência 1</TableCell>
+                  <TableCell>Referência 2</TableCell>
+                  <TableCell>Descritivo</TableCell>
+                  <TableCell>Nota</TableCell>
+                  <TableCell>Saldo após</TableCell>
                 </TableRow>
               )) ||
                 (item === 'pjf' && (
@@ -348,15 +360,19 @@ export default function TableCON({ item = 'con' }) {
                       <TableCell>{shuffleString(row?.cdg_swift)}</TableCell>
                       <TableCell>{shuffleString(row?.numero_sequencia_msg)}</TableCell>
                       <TableCell>{shuffleString(row?.referencia)}</TableCell>
-                      <TableCell>{shuffleString(row?.chave)}</TableCell>
-                      <TableCell>{shuffleString(row?.indice)}</TableCell>
-                      <TableCell>{shuffleString(row?.valor)}</TableCell>
+                      <TableCell>{shuffleString(row?.campo)}</TableCell>
+                      <TableCell>{shuffleString(row?.indice_ocorrencia)}</TableCell>
                       <TableCell>{shuffleString(row?.comprimento)}</TableCell>
                       <TableCell>{shuffleString(row?.valor_numerico)}</TableCell>
                       <TableCell>{shuffleString(row?.moeda)}</TableCell>
                       <TableCell>{shuffleString(row?.tipo_operacao)}</TableCell>
                       <TableCell>{shuffleString(row?.data_valor)}</TableCell>
                       <TableCell>{shuffleString(row?.data_registo)}</TableCell>
+                      <TableCell>{shuffleString(row?.ref1)}</TableCell>
+                      <TableCell>{shuffleString(row?.ref2)}</TableCell>
+                      <TableCell>{shuffleString(row?.descritivo)}</TableCell>
+                      <TableCell>{shuffleString(row?.nota)}</TableCell>
+                      <TableCell>{shuffleString(row?.saldo_apos_movimento)}</TableCell>
                     </TableRow>
                   )) ||
                   (item === 'pjf' && (

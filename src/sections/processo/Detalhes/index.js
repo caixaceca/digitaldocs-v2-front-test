@@ -1,5 +1,6 @@
 export { default as Views } from './Views';
 export { default as Anexos } from './Anexos';
+export { default as Estados } from './Estados';
 export { default as Versoes } from './Versoes';
 export { default as Pareceres } from './Pareceres';
 export { default as Transicoes } from './Transicoes';

@@ -182,7 +182,7 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
       entidades,
       anexos: [],
       fluxo_id: fluxo?.id,
-      valor: processo?.valor || 0,
+      valor: processo?.valor || '',
       conta: processo?.conta || '',
       email: processo?.email || '',
       obs: processo?.observacao || '',

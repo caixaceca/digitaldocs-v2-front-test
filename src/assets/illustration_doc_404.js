@@ -1,22 +1,113 @@
 import { memo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
 
 // ----------------------------------------------------------------------
 
 function DocIllustration({ ...other }) {
+  const theme = useTheme();
+  const { paper, neutral } = theme.palette.background;
   return (
     <Box {...other}>
       <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 691 508">
         <g transform="translate(-478 -425)">
           <g transform="translate(478 425)">
-            <image
-              width="691"
-              height="508"
-              x="0"
-              y="0"
-              xlinkHref="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MDAgNTAwIj48ZyBpZD0iZnJlZXBpay0tYmFja2dyb3VuZC1jb21wbGV0ZS0taW5qZWN0LTIiPjxyZWN0IHk9IjM4Mi40IiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjAuMjUiIHN0eWxlPSJmaWxsOiM1YWFhMjgiPjwvcmVjdD48cGF0aCBkPSJNMjM3LDMzNy44SDQzLjkxYTUuNzEsNS43MSwwLDAsMS01LjctNS43MVY2MC42NkE1LjcxLDUuNzEsMCwwLDEsNDMuOTEsNTVIMjM3YTUuNzEsNS43MSwwLDAsMSw1LjcxLDUuNzFWMzMyLjA5QTUuNzEsNS43MSwwLDAsMSwyMzcsMzM3LjhaTTQzLjkxLDU1LjJhNS40Niw1LjQ2LDAsMCwwLTUuNDUsNS40NlYzMzIuMDlhNS40Niw1LjQ2LDAsMCwwLDUuNDUsNS40NkgyMzdhNS40Nyw1LjQ3LDAsMCwwLDUuNDYtNS40NlY2MC42NkE1LjQ3LDUuNDcsMCwwLDAsMjM3LDU1LjJaIiBzdHlsZT0iZmlsbDojNWFhYTI4Ij48L3BhdGg+PHBhdGggZD0iTTQ1My4zMSwzMzcuOEgyNjAuMjFhNS43Miw1LjcyLDAsMCwxLTUuNzEtNS43MVY2MC42NkE1LjcyLDUuNzIsMCwwLDEsMjYwLjIxLDU1aDE5My4xQTUuNzEsNS43MSwwLDAsMSw0NTksNjAuNjZWMzMyLjA5QTUuNzEsNS43MSwwLDAsMSw0NTMuMzEsMzM3LjhaTTI2MC4yMSw1NS4yYTUuNDcsNS40NywwLDAsMC01LjQ2LDUuNDZWMzMyLjA5YTUuNDcsNS40NywwLDAsMCw1LjQ2LDUuNDZoMTkzLjFhNS40Nyw1LjQ3LDAsMCwwLDUuNDYtNS40NlY2MC42NmE1LjQ3LDUuNDcsMCwwLDAtNS40Ni01LjQ2WiIgc3R5bGU9ImZpbGw6IzVhYWEyOCI+PC9wYXRoPjxyZWN0IHg9IjQxOC4zMyIgeT0iMzkxLjkyIiB3aWR0aD0iMzEuNTciIGhlaWdodD0iMC4yNSIgc3R5bGU9ImZpbGw6IzVhYWEyOCI+PC9yZWN0PjxyZWN0IHg9IjMwMS45MyIgeT0iMzg5LjIxIiB3aWR0aD0iMzMuNDEiIGhlaWdodD0iMC4yNSIgc3R5bGU9ImZpbGw6IzVhYWEyOCI+PC9yZWN0PjxyZWN0IHg9IjM5Ni41OSIgeT0iNDAxLjIxIiB3aWR0aD0iNjIuNDMiIGhlaWdodD0iMC4yNSIgc3R5bGU9ImZpbGw6IzVhYWEyOCI+PC9yZWN0PjxyZWN0IHg9IjUyLjQ2IiB5PSIzOTkuNTMiIHdpZHRoPSIxOS4yMyIgaGVpZ2h0PSIwLjI1IiBzdHlsZT0iZmlsbDojNWFhYTI4Ij48L3JlY3Q+PHJlY3QgeD0iODAuNiIgeT0iMzk5LjUzIiB3aWR0aD0iMzAuMjkiIGhlaWdodD0iMC4yNSIgc3R5bGU9ImZpbGw6IzVhYWEyOCI+PC9yZWN0PjxyZWN0IHg9IjE4OS41OCIgeT0iMzk1LjMxIiB3aWR0aD0iNTQuNTYiIGhlaWdodD0iMC4yNSIgc3R5bGU9ImZpbGw6IzVhYWEyOCI+PC9yZWN0Pjxwb2x5Z29uIHBvaW50cz0iMjcyLjI2IDExOC4xMyAyMTUuMjggMTc1LjEyIDIxNS4yOCAzNjQuOTEgNDE1LjI3IDM2NC45MSA0MTUuMjcgMTE4LjEzIDI3Mi4yNiAxMTguMTMiIHN0eWxlPSJmaWxsOiNmZmYiPjwvcG9seWdvbj48cGF0aCBkPSJNNDE1LjI3LDM2NS40NWgtMjAwYS41NC41NCwwLDAsMS0uNTQtLjU0VjE3NS4xMmEuNTMuNTMsMCwwLDEsLjE2LS4zOGw1Ny01N2EuNTcuNTcsMCwwLDEsLjM4LS4xNmgxNDNhLjU0LjU0LDAsMCwxLC41NC41NFYzNjQuOTFBLjU0LjU0LDAsMCwxLDQxNS4yNywzNjUuNDVabS0xOTkuNDUtMS4wN0g0MTQuNzNWMTE4LjY3SDI3Mi40OWwtNTYuNjcsNTYuNjdaIiBzdHlsZT0iZmlsbDojZTBlMGUwIj48L3BhdGg+PHBvbHlnb24gcG9pbnRzPSIyMTUuMjggMTc1LjEyIDI3NS4wNyAxODIuODMgMjcyLjI2IDExOC4xMyAyMTUuMjggMTc1LjEyIiBzdHlsZT0iZmlsbDojZTZlNmU2Ij48L3BvbHlnb24+PHBvbHlnb24gcG9pbnRzPSIyMTUuMjggMTc1LjEyIDI3Mi4yNiAxNzUuMTIgMjcyLjI2IDExOC4xMyAyMTUuMjggMTc1LjEyIiBzdHlsZT0iZmlsbDojZmZmIj48L3BvbHlnb24+PHBhdGggZD0iTTI3Mi4yNiwxNzUuNjVoLTU3YS41NC41NCwwLDAsMS0uNS0uMzMuNTIuNTIsMCwwLDEsLjEyLS41OGw1Ny01N2EuNTYuNTYsMCwwLDEsLjU5LS4xMi41NS41NSwwLDAsMSwuMzMuNXY1N0EuNTQuNTQsMCwwLDEsMjcyLjI2LDE3NS42NVptLTU1LjY4LTEuMDdoNTUuMTVWMTE5LjQzWiIgc3R5bGU9ImZpbGw6I2UwZTBlMCI+PC9wYXRoPjxwYXRoIGQ9Ik0zMjYuODQsMjU3LjE5bDM0LTM0YTguMTgsOC4xOCwwLDEsMC0xMS41Ny0xMS41N2wtMzQsMzQtMzQtMzRhOC4xOCw4LjE4LDAsMCwwLTExLjU3LDExLjU3bDM0LDM0LTM0LDM0YTguMTgsOC4xOCwwLDAsMCwxMS41NywxMS41N2wzNC0zNCwzNCwzNGE4LjE4LDguMTgsMCwxLDAsMTEuNTctMTEuNTdaIiBzdHlsZT0iZmlsbDojNWFhYTI4Ij48L3BhdGg+PHBhdGggZD0iTTIyMywyMjloMGExMC4yMywxMC4yMywwLDAsMS0xNC40NiwwbC0zMi44MS0zMi44MiwxNC40Ni0xNC40NkwyMjMsMjE0LjU4QTEwLjIzLDEwLjIzLDAsMCwxLDIyMywyMjlaIiBzdHlsZT0iZmlsbDojZjBmMGYwIj48L3BhdGg+PHBhdGggZD0iTTE3NiwxODcuNjNoMjAuNDVhMCwwLDAsMCwxLDAsMHYxLjg5YTcuMzksNy4zOSwwLDAsMS03LjM5LDcuMzloLTUuNjdhNy4zOSw3LjM5LDAsMCwxLTcuMzktNy4zOXYtMS44OUEwLDAsMCwwLDEsMTc2LDE4Ny42M1oiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC04MS40IDE4OC4wMikgcm90YXRlKC00NSkiIHN0eWxlPSJmaWxsOiNlMGUwZTAiPjwvcGF0aD48cGF0aCBkPSJNODQuNzEsOTAuNzFhNzEsNzEsMCwxLDAsMTAwLjQ2LDBBNzEsNzEsMCwwLDAsODQuNzEsOTAuNzFabTk2LjM2LDk2LjM2YTY1LjIzLDY1LjIzLDAsMSwxLDAtOTIuMjVBNjUuMjMsNjUuMjMsMCwwLDEsMTgxLjA3LDE4Ny4wN1oiIHN0eWxlPSJmaWxsOiNlMGUwZTAiPjwvcGF0aD48cGF0aCBkPSJNMTcyLjI2LDE4MC42NWEyLjM4LDIuMzgsMCwwLDEtMS42OC00LjA2LDUwLjQ4LDUwLjQ4LDAsMCwwLDAtNzEuMjksMi4zOCwyLjM4LDAsMSwxLDMuMzYtMy4zNiw1NS4yMiw1NS4yMiwwLDAsMSwwLDc4QTIuMzgsMi4zOCwwLDAsMSwxNzIuMjYsMTgwLjY1WiIgc3R5bGU9ImZpbGw6I2UwZTBlMCI+PC9wYXRoPjxwYXRoIGQ9Ik04My41OCwxNTUuNTNhMi4zNywyLjM3LDAsMCwxLTIuMzEtMS44Myw1NS4zNyw1NS4zNywwLDAsMSw3LjYtNDMuMTEsMi4zOCwyLjM4LDAsMCwxLDQsMi42Miw1MC42NSw1MC42NSwwLDAsMC03LDM5LjQsMi4zNiwyLjM2LDAsMCwxLTEuNzYsMi44NkEyLjY0LDIuNjQsMCwwLDEsODMuNTgsMTU1LjUzWiIgc3R5bGU9ImZpbGw6I2UwZTBlMCI+PC9wYXRoPjxwYXRoIGQ9Ik05Ny42MiwxODAuNjVhMi4zOCwyLjM4LDAsMCwxLTEuNjgtLjcsNTQuOCw1NC44LDAsMCwxLTEwLjUtMTQuNjQsMi4zNywyLjM3LDAsMCwxLDQuMjYtMi4xLDUwLjUxLDUwLjUxLDAsMCwwLDkuNiwxMy4zOCwyLjM4LDIuMzgsMCwwLDEsMCwzLjM2QTIuNDEsMi40MSwwLDAsMSw5Ny42MiwxODAuNjVaIiBzdHlsZT0iZmlsbDojZTBlMGUwIj48L3BhdGg+PHBhdGggZD0iTTE5Ni4xNSwzMTkuNzJoMTMuMjJhMCwwLDAsMCwxLDAsMHYzMC43YTUuOTIsNS45MiwwLDAsMS01LjkyLDUuOTJoLTEuMzlhNS45Miw1LjkyLDAsMCwxLTUuOTItNS45MnYtMzAuN2EwLDAsMCwwLDEsMCwwWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjk4LjQxIC00NC4zNykgcm90YXRlKDQ1KSIgc3R5bGU9ImZpbGw6I2YwZjBmMCI+PC9wYXRoPjxwYXRoIGQ9Ik0yMDcsMzI0LjJIMjIwLjJhMCwwLDAsMCwxLDAsMHYuNjNhNS4zNyw1LjM3LDAsMCwxLTUuMzcsNS4zN2gtMi40OGE1LjM3LDUuMzcsMCwwLDEtNS4zNy01LjM3di0uNjNBMCwwLDAsMCwxLDIwNywzMjQuMloiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI5My45MiAtNTUuMTkpIHJvdGF0ZSg0NSkiIHN0eWxlPSJmaWxsOiNlMGUwZTAiPjwvcGF0aD48cGF0aCBkPSJNMjg0LjM1LDI2OS43bC0yMS45LDIxLjg5QTEzLjc0LDEzLjc0LDAsMCwwLDI4MS44OCwzMTFsOC44Ni04Ljg1QTQ3LjA3LDQ3LjA3LDAsMCwwLDI4NC4zNSwyNjkuN1oiIHN0eWxlPSJmaWxsOiM1YWFhMjgiPjwvcGF0aD48cGF0aCBkPSJNMjkyLjYsMjkwLjgyYTQ1Ljk0LDQ1Ljk0LDAsMSwwLTQyLjY0LDQ5QTQ1Ljk0LDQ1Ljk0LDAsMCwwLDI5Mi42LDI5MC44MlptLTg3LjkxLDYuMTJhNDIuMTgsNDIuMTgsMCwxLDEsNDUsMzkuMTVBNDIuMTgsNDIuMTgsMCwwLDEsMjA0LjY5LDI5Ni45NFoiIHN0eWxlPSJmaWxsOiNlMGUwZTAiPjwvcGF0aD48cGF0aCBkPSJNMjIzLjM4LDMyMC45MWEzNS41OCwzNS41OCwwLDAsMS0xMi4xOS0yNC40MiwxLjU0LDEuNTQsMCwxLDEsMy4wNy0uMjFBMzIuNjQsMzIuNjQsMCwwLDAsMjQ5LDMyNi41M2ExLjUzLDEuNTMsMCwxLDEsLjIxLDMuMDZBMzUuNTMsMzUuNTMsMCwwLDEsMjIzLjM4LDMyMC45MVoiIHN0eWxlPSJmaWxsOiNlMGUwZTAiPjwvcGF0aD48cGF0aCBkPSJNMjc4LjY0LDI4NmExLjUxLDEuNTEsMCwwLDEtLjQ3LS43NSwzMi43MiwzMi43MiwwLDAsMC0xNi4yNy0yMC4xLDEuNTQsMS41NCwwLDAsMSwxLjQyLTIuNzMsMzUuODIsMzUuODIsMCwwLDEsMTcuODEsMjIsMS41MywxLjUzLDAsMCwxLTEuMDcsMS44OUExLjU2LDEuNTYsMCwwLDEsMjc4LjY0LDI4NloiIHN0eWxlPSJmaWxsOiNlMGUwZTAiPjwvcGF0aD48cGF0aCBkPSJNMjQzLjM5LDI2MS4xM2ExLjU2LDEuNTYsMCwwLDEtLjUyLTEuMDYsMS41NCwxLjU0LDAsMCwxLDEuNDItMS42NCwzNS44OCwzNS44OCwwLDAsMSwxMS42LDEuMDksMS41NCwxLjU0LDAsMSwxLS43OSwzLDMyLjQ4LDMyLjQ4LDAsMCwwLTEwLjU5LTFBMS41OCwxLjU4LDAsMCwxLDI0My4zOSwyNjEuMTNaIiBzdHlsZT0iZmlsbDojZTBlMGUwIj48L3BhdGg+PC9nPjxnIGlkPSJmcmVlcGlrLS1TaGFkb3ctLWluamVjdC0yIj48ZWxsaXBzZSBpZD0iZnJlZXBpay0tcGF0aC0taW5qZWN0LTIiIGN4PSIyNTAiIGN5PSI0MTYuMjQiIHJ4PSIxOTMuODkiIHJ5PSIxMS4zMiIgc3R5bGU9ImZpbGw6I2Y1ZjVmNSI+PC9lbGxpcHNlPjwvZz48L3N2Zz4="
-            />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 490">
+              <g id="freepik--background-complete--inject-2">
+                <rect y="382.4" width="500" height="0.25" style={{ fill: '#5aaa28' }} />
+                <path
+                  d="M237,337.8H43.91a5.71,5.71,0,0,1-5.7-5.71V60.66A5.71,5.71,0,0,1,43.91,55H237a5.71,5.71,0,0,1,5.71,5.71V332.09A5.71,5.71,0,0,1,237,337.8ZM43.91,55.2a5.46,5.46,0,0,0-5.45,5.46V332.09a5.46,5.46,0,0,0,5.45,5.46H237a5.47,5.47,0,0,0,5.46-5.46V60.66A5.47,5.47,0,0,0,237,55.2Z"
+                  style={{ fill: '#5aaa28' }}
+                />
+                <path
+                  d="M453.31,337.8H260.21a5.72,5.72,0,0,1-5.71-5.71V60.66A5.72,5.72,0,0,1,260.21,55h193.1A5.71,5.71,0,0,1,459,60.66V332.09A5.71,5.71,0,0,1,453.31,337.8ZM260.21,55.2a5.47,5.47,0,0,0-5.46,5.46V332.09a5.47,5.47,0,0,0,5.46,5.46h193.1a5.47,5.47,0,0,0,5.46-5.46V60.66a5.47,5.47,0,0,0-5.46-5.46Z"
+                  style={{ fill: '#5aaa28' }}
+                />
+                <rect x="418.33" y="391.92" width="31.57" height="0.25" style={{ fill: '#5aaa28' }} />
+                <rect x="301.93" y="389.21" width="33.41" height="0.25" style={{ fill: '#5aaa28' }} />
+                <rect x="396.59" y="401.21" width="62.43" height="0.25" style={{ fill: '#5aaa28' }} />
+                <rect x="52.46" y="399.53" width="19.23" height="0.25" style={{ fill: '#5aaa28' }} />
+                <rect x="80.6" y="399.53" width="30.29" height="0.25" style={{ fill: '#5aaa28' }} />
+                <rect x="189.58" y="395.31" width="54.56" height="0.25" style={{ fill: '#5aaa28' }} />
+                <polygon
+                  points="272.26 118.13 215.28 175.12 215.28 364.91 415.27 364.91 415.27 118.13 272.26 118.13"
+                  style={{ fill: paper }}
+                />
+                <path
+                  d="M415.27,365.45h-200a.54.54,0,0,1-.54-.54V175.12a.53.53,0,0,1,.16-.38l57-57a.57.57,0,0,1,.38-.16h143a.54.54,0,0,1,.54.54V364.91A.54.54,0,0,1,415.27,365.45Zm-199.45-1.07H414.73V118.67H272.49l-56.67,56.67Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <polygon points="215.28 175.12 275.07 182.83 272.26 118.13 215.28 175.12" style={{ fill: '#e6e6e6' }} />
+                <polygon points="215.28 175.12 272.26 175.12 272.26 118.13 215.28 175.12" style={{ fill: neutral }} />
+                <path
+                  d="M272.26,175.65h-57a.54.54,0,0,1-.5-.33.52.52,0,0,1,.12-.58l57-57a.56.56,0,0,1,.59-.12.55.55,0,0,1,.33.5v57A.54.54,0,0,1,272.26,175.65Zm-55.68-1.07h55.15V119.43Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M326.84,257.19l34-34a8.18,8.18,0,1,0-11.57-11.57l-34,34-34-34a8.18,8.18,0,0,0-11.57,11.57l34,34-34,34a8.18,8.18,0,0,0,11.57,11.57l34-34,34,34a8.18,8.18,0,1,0,11.57-11.57Z"
+                  style={{ fill: '#5aaa28' }}
+                />
+                <path
+                  d="M223,229h0a10.23,10.23,0,0,1-14.46,0l-32.81-32.82,14.46-14.46L223,214.58A10.23,10.23,0,0,1,223,229Z"
+                  style={{ fill: '#f0f0f0' }}
+                />
+                <path
+                  d="M176,187.63h20.45a0,0,0,0,1,0,0v1.89a7.39,7.39,0,0,1-7.39,7.39h-5.67a7.39,7.39,0,0,1-7.39-7.39v-1.89A0,0,0,0,1,176,187.63Z"
+                  transform="translate(-81.4 188.02) rotate(-45)"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M84.71,90.71a71,71,0,1,0,100.46,0A71,71,0,0,0,84.71,90.71Zm96.36,96.36a65.23,65.23,0,1,1,0-92.25A65.23,65.23,0,0,1,181.07,187.07Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M172.26,180.65a2.38,2.38,0,0,1-1.68-4.06,50.48,50.48,0,0,0,0-71.29,2.38,2.38,0,1,1,3.36-3.36,55.22,55.22,0,0,1,0,78A2.38,2.38,0,0,1,172.26,180.65Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M83.58,155.53a2.37,2.37,0,0,1-2.31-1.83,55.37,55.37,0,0,1,7.6-43.11,2.38,2.38,0,0,1,4,2.62,50.65,50.65,0,0,0-7,39.4,2.36,2.36,0,0,1-1.76,2.86A2.64,2.64,0,0,1,83.58,155.53Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M97.62,180.65a2.38,2.38,0,0,1-1.68-.7,54.8,54.8,0,0,1-10.5-14.64,2.37,2.37,0,0,1,4.26-2.1,50.51,50.51,0,0,0,9.6,13.38,2.38,2.38,0,0,1,0,3.36A2.41,2.41,0,0,1,97.62,180.65Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M196.15,319.72h13.22a0,0,0,0,1,0,0v30.7a5.92,5.92,0,0,1-5.92,5.92h-1.39a5.92,5.92,0,0,1-5.92-5.92v-30.7a0,0,0,0,1,0,0Z"
+                  transform="translate(298.41 -44.37) rotate(45)"
+                  style={{ fill: '#f0f0f0' }}
+                />
+                <path
+                  d="M207,324.2H220.2a0,0,0,0,1,0,0v.63a5.37,5.37,0,0,1-5.37,5.37h-2.48a5.37,5.37,0,0,1-5.37-5.37v-.63A0,0,0,0,1,207,324.2Z"
+                  transform="translate(293.92 -55.19) rotate(45)"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M284.35,269.7l-21.9,21.89A13.74,13.74,0,0,0,281.88,311l8.86-8.85A47.07,47.07,0,0,0,284.35,269.7Z"
+                  style={{ fill: '#5aaa28' }}
+                />
+                <path
+                  d="M292.6,290.82a45.94,45.94,0,1,0-42.64,49A45.94,45.94,0,0,0,292.6,290.82Zm-87.91,6.12a42.18,42.18,0,1,1,45,39.15A42.18,42.18,0,0,1,204.69,296.94Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M223.38,320.91a35.58,35.58,0,0,1-12.19-24.42,1.54,1.54,0,1,1,3.07-.21A32.64,32.64,0,0,0,249,326.53a1.53,1.53,0,1,1,.21,3.06A35.53,35.53,0,0,1,223.38,320.91Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M278.64,286a1.51,1.51,0,0,1-.47-.75,32.72,32.72,0,0,0-16.27-20.1,1.54,1.54,0,0,1,1.42-2.73,35.82,35.82,0,0,1,17.81,22,1.53,1.53,0,0,1-1.07,1.89A1.56,1.56,0,0,1,278.64,286Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+                <path
+                  d="M243.39,261.13a1.56,1.56,0,0,1-.52-1.06,1.54,1.54,0,0,1,1.42-1.64,35.88,35.88,0,0,1,11.6,1.09,1.54,1.54,0,1,1-.79,3,32.48,32.48,0,0,0-10.59-1A1.58,1.58,0,0,1,243.39,261.13Z"
+                  style={{ fill: '#e0e0e0' }}
+                />
+              </g>
+              <g id="freepik--Shadow--inject-2">
+                <ellipse id="freepik--path--inject-2" cx="250" cy="430" rx="220" ry="25" style={{ fill: neutral }} />
+              </g>
+            </svg>
           </g>
         </g>
       </svg>

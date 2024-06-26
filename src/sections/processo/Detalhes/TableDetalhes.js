@@ -124,9 +124,9 @@ export default function TableDetalhes({ id, item }) {
                         <TableCell align="center">{ptDateTime(row?.preso_em)}</TableCell>
                         <TableCell align={row?.solto_em ? 'left' : 'center'}>
                           {row?.solto_em ? (
-                            <Criado tipo="date" value={ptDateTime(row?.solto_em)} />
+                            <Criado tipo="data" value={ptDateTime(row?.solto_em)} />
                           ) : (
-                            <Criado sx={{ color: 'text.success' }} caption value="Ainda esta a trabalhar no processo" />
+                            <Criado sx={{ color: 'text.success' }} caption value="Ainda está a trabalhar no processo" />
                           )}
                           {row?.solto_em && row?.por && <Criado tipo="user" value={row?.por} shuffle />}
                         </TableCell>
@@ -139,7 +139,7 @@ export default function TableDetalhes({ id, item }) {
                           </TableCell>
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
-                            {row?.atribuido_em && <Criado tipo="date" value={ptDateTime(row?.atribuido_em)} />}
+                            {row?.atribuido_em && <Criado tipo="data" value={ptDateTime(row?.atribuido_em)} />}
                             {row?.atribuidor && <Criado tipo="user" value={row?.atribuidor} shuffle />}
                           </TableCell>
                         </>
@@ -149,8 +149,8 @@ export default function TableDetalhes({ id, item }) {
                           <TableCell>{row?.motivo}</TableCell>
                           <TableCell>{row?.observacao || noDados(true)}</TableCell>
                           <TableCell>
-                            {row?.data_pendente && <Criado tipo="date" value={ptDateTime(row?.data_pendente)} />}
-                            {row?.data_libertado && <Criado tipo="date" value={ptDateTime(row?.data_libertado)} />}
+                            {row?.data_pendente && <Criado tipo="data" value={ptDateTime(row?.data_pendente)} />}
+                            {row?.data_libertado && <Criado tipo="data" value={ptDateTime(row?.data_libertado)} />}
                           </TableCell>
                         </>
                       ))}

@@ -76,8 +76,6 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
   const { watch, reset, handleSubmit } = methods;
   const values = watch();
 
-  console.log(values.valor);
-
   useEffect(() => {
     if (isEdit && processo) {
       reset(defaultValues);

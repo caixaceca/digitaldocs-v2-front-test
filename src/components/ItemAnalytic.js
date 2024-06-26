@@ -1,29 +1,31 @@
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 // utils
-import { fNumber, fPercent } from '../../utils/formatNumber';
+import { fNumber, fPercent } from '../utils/formatNumber';
 // components
-import SvgIconStyle from '../../components/SvgIconStyle';
+import { Todos } from '../assets';
 
 // ----------------------------------------------------------------------
 
-ArquivoAnalytic.propTypes = {
+ItemAnalytic.propTypes = {
   title: PropTypes.string,
   color: PropTypes.string,
-  icon: PropTypes.string,
-  percent: PropTypes.number,
   total: PropTypes.number,
+  percent: PropTypes.number,
 };
 
-export default function ArquivoAnalytic({ title, total, icon = '', color = 'focus.main', percent = 100 }) {
+export default function ItemAnalytic({ title, total, color = 'focus.main', percent = 100 }) {
   return (
     <Stack direction="row" alignItems="center" justifyContent="center" sx={{ width: 1, minWidth: 200 }}>
       <Stack alignItems="center" justifyContent="center" sx={{ position: 'relative' }}>
         {title?.includes('Total') ? (
-          <SvgIconStyle src={icon} sx={{ color, width: 25, height: 25, position: 'absolute' }} />
+          <Box sx={{ color, width: 24, height: 24, position: 'absolute', '& svg': { width: '100%', height: '100%' } }}>
+            <Todos />
+          </Box>
         ) : (
           <Typography variant="caption" sx={{ position: 'absolute' }}>
             {fPercent(percent)}

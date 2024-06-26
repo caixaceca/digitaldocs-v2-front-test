@@ -64,113 +64,13 @@ const chartOptionsCommon = (theme) => ({
 
 // ----------------------------------------------------------------------
 
-export function EntradaTrabalhado() {
+EntradaTrabalhado.propTypes = { entradas: PropTypes.bool, saidas: PropTypes.string };
+
+export function EntradaTrabalhado({ entradas, saidas }) {
   const theme = useTheme();
   const { isLoading } = useSelector((state) => state.indicadores);
-  const indicadores = {
-    objeto_entrada: [
-      {
-        ano: 2023,
-        mes: 2,
-        total: 4,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 16,
-      },
-      {
-        ano: 2023,
-        mes: 6,
-        total: 10,
-      },
-      {
-        ano: 2023,
-        mes: 7,
-        total: 33,
-      },
-      {
-        ano: 2023,
-        mes: 8,
-        total: 13,
-      },
-      {
-        ano: 2023,
-        mes: 7,
-        total: 2,
-      },
-      {
-        ano: 2023,
-        mes: 8,
-        total: 4,
-      },
-      {
-        ano: 2023,
-        mes: 9,
-        total: 7,
-      },
-      {
-        ano: 2023,
-        mes: 10,
-        total: 9,
-      },
-    ],
-    objeto_saida: [
-      {
-        ano: 2023,
-        mes: 1,
-        total: 3,
-      },
-      {
-        ano: 2023,
-        mes: 2,
-        total: 14,
-      },
-      {
-        ano: 2023,
-        mes: 3,
-        total: 2,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 26,
-      },
-      {
-        ano: 2023,
-        mes: 5,
-        total: 3,
-      },
-      {
-        ano: 2023,
-        mes: 6,
-        total: 20,
-      },
-      {
-        ano: 2023,
-        mes: 7,
-        total: 95,
-      },
-      {
-        ano: 2023,
-        mes: 8,
-        total: 5,
-      },
-      {
-        ano: 2023,
-        mes: 9,
-        total: 6,
-      },
-      {
-        ano: 2023,
-        mes: 10,
-        total: 21,
-      },
-    ],
-  };
-
-  const dados = useMemo(() => entradaTrabalhado(indicadores), [indicadores]);
-  const isNotFound = !indicadores?.objeto_entrada.length && !indicadores?.objeto_saida.length;
+  const dados = useMemo(() => entradaTrabalhado(entradas, saidas), [entradas, saidas]);
+  const isNotFound = !entradas?.length && !saidas?.length;
 
   const series = useMemo(
     () => [
@@ -259,276 +159,46 @@ export function EntradaTrabalhado() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function ProcessosTrabalhados() {
+ProcessosTrabalhados.propTypes = { indicadores: PropTypes.string, acao: PropTypes.bool };
+
+export function ProcessosTrabalhados({ indicadores, acao = false }) {
   const [mes, setMes] = useState(null);
-  const [assunto, setAssunto] = useState(null);
-  const [detalhes, setDetalhes] = useState(localStorage.getItem('detalhes') === 'true');
+  const [item, setItem] = useState(null);
   const { isLoading } = useSelector((state) => state.indicadores);
-  const indicadores = [
-    {
-      ano: 2023,
-      mes: 1,
-      total: 2,
-      tipo: 'Abertura de conta',
-    },
-    {
-      ano: 2023,
-      mes: 1,
-      total: 1,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 2,
-      total: 9,
-      tipo: 'Abertura de conta',
-    },
-    {
-      ano: 2023,
-      mes: 2,
-      total: 3,
-      tipo: 'Atualização/Manutenção de conta',
-    },
-    {
-      ano: 2023,
-      mes: 2,
-      total: 2,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 3,
-      total: 1,
-      tipo: 'Atualização/Manutenção de conta',
-    },
-    {
-      ano: 2023,
-      mes: 3,
-      total: 1,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 4,
-      total: 4,
-      tipo: 'Abertura de conta',
-    },
-    {
-      ano: 2023,
-      mes: 4,
-      total: 11,
-      tipo: 'Atualização/Manutenção de conta',
-    },
-    {
-      ano: 2023,
-      mes: 4,
-      total: 2,
-      tipo: 'Encerramento de conta',
-    },
-    {
-      ano: 2023,
-      mes: 4,
-      total: 4,
-      tipo: 'Pedido de crédito',
-    },
-    {
-      ano: 2023,
-      mes: 4,
-      total: 5,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 5,
-      total: 1,
-      tipo: 'Abertura de conta',
-    },
-    {
-      ano: 2023,
-      mes: 5,
-      total: 1,
-      tipo: 'Atualização/Manutenção de conta',
-    },
-    {
-      ano: 2023,
-      mes: 5,
-      total: 1,
-      tipo: 'Encerramento de conta',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 7,
-      tipo: 'Abertura de conta',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 3,
-      tipo: 'Atualização/Manutenção de conta',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 2,
-      tipo: 'Encerramento de conta',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 2,
-      tipo: 'Nº operação',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 1,
-      tipo: 'Pedido de crédito',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 3,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 1,
-      tipo: 'Receção de faturas / Pagamento de fornecedor',
-    },
-    {
-      ano: 2023,
-      mes: 6,
-      total: 1,
-      tipo: 'Transferência Nacional',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 17,
-      tipo: 'Abertura de conta',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 27,
-      tipo: 'Atualização/Manutenção de conta',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 10,
-      tipo: 'Cartão Vinti4 - Adesão',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 1,
-      tipo: 'Encerramento de conta',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 24,
-      tipo: 'Pedido de crédito',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 9,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 1,
-      tipo: 'Receção de Cartões - DOP',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 5,
-      tipo: 'Receção de faturas / Pagamento de fornecedor',
-    },
-    {
-      ano: 2023,
-      mes: 7,
-      total: 1,
-      tipo: 'Transferência Internacional',
-    },
-    {
-      ano: 2023,
-      mes: 8,
-      total: 2,
-      tipo: 'Comunicação Operação Numerário',
-    },
-    {
-      ano: 2023,
-      mes: 8,
-      total: 2,
-      tipo: 'Pedido de crédito',
-    },
-    {
-      ano: 2023,
-      mes: 8,
-      total: 1,
-      tipo: 'Processos Judiciais e Fiscais',
-    },
-    {
-      ano: 2023,
-      mes: 9,
-      total: 3,
-      tipo: 'Comunicação Operação Numerário',
-    },
-    {
-      ano: 2023,
-      mes: 9,
-      total: 1,
-      tipo: 'Encerramento de conta',
-    },
-    {
-      ano: 2023,
-      mes: 9,
-      total: 2,
-      tipo: 'Pedido de crédito',
-    },
-    {
-      ano: 2023,
-      mes: 10,
-      total: 1,
-      tipo: 'Cartão Vinti4 - Adesão',
-    },
-    {
-      ano: 2023,
-      mes: 10,
-      total: 20,
-      tipo: 'Comunicação Operação Numerário',
-    },
-  ];
-  const totalTrabalhado = useMemo(() => sumBy(indicadores, 'total'), [indicadores]);
-  const assuntosList = useMemo(() => [...new Set(indicadores?.map((item) => item.tipo))], [indicadores]);
-  const dadosFilter = applySortFilter({ mes, assunto, dados: indicadores, comparator: getComparator('asc', 'mes') });
+  const [detalhes, setDetalhes] = useState(localStorage.getItem('detalhes') === 'true');
+  const totalTrabalhado = useMemo(() => sumBy(indicadores || [], 'total'), [indicadores]);
+  const itemsList = useMemo(
+    () =>
+      acao ? [...new Set(indicadores?.map((item) => item.forma))] : [...new Set(indicadores?.map((item) => item.tipo))],
+    [acao, indicadores]
+  );
+  const dadosFilter = useMemo(
+    () => applySortFilter({ mes, acao, item, dados: indicadores, comparator: getComparator('asc', 'mes') }),
+    [item, acao, indicadores, mes]
+  );
   const indicadoresAgrupados = useMemo(() => agruparIndicadores(dadosFilter, [], 'mes'), [dadosFilter]);
-  const indicadoresPorAssunto = useMemo(() => agruparIndicadores(dadosFilter, [], 'tipo'), [dadosFilter]);
+  const indicadoresPorAssunto = useMemo(
+    () => agruparIndicadores(dadosFilter, [], acao ? 'forma' : 'tipo'),
+    [acao, dadosFilter]
+  );
   const isNotFound = !dadosFilter.length;
 
   return (
     <>
-      {!!indicadores.length && (
+      {!!indicadores?.length && (
         <Card sx={{ mb: 3, pb: 1 }}>
           <Stack sx={{ p: 2 }}>
             <TotalItem assunto="Total trabalhado" totalTrabalhado={totalTrabalhado} />
           </Stack>
           <SearchIndicadores
             mes={mes}
+            item={item}
             setMes={setMes}
-            assunto={assunto}
-            item="Trabalhados"
+            setItem={setItem}
             detalhes={detalhes}
-            setAssunto={setAssunto}
+            itemsList={itemsList}
             setDetalhes={setDetalhes}
-            assuntosList={assuntosList}
+            indicador={acao ? 'Ação' : 'Trabalhados'}
           />
         </Card>
       )}
@@ -540,8 +210,8 @@ export function ProcessosTrabalhados() {
         <Grid container spacing={3} justifyContent="center">
           <DadosMes
             item="Total"
-            detalhes={!assunto}
-            mp={!assunto && !mes}
+            detalhes={!item}
+            mp={!item && !mes}
             totalTrabalhado={totalTrabalhado}
             indicadores={indicadoresPorAssunto}
             trabalhado={sumBy(indicadoresPorAssunto, 'total')}
@@ -555,7 +225,7 @@ export function ProcessosTrabalhados() {
                   trabalhado={total}
                   key={`mes__${index}`}
                   indicadores={row?.indicadores}
-                  detalhes={detalhes && !assunto}
+                  detalhes={detalhes && !item}
                   totalTrabalhado={totalTrabalhado}
                   item={meses?.find((item) => item?.id === row?.item)?.label}
                 />
@@ -569,213 +239,20 @@ export function ProcessosTrabalhados() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function Colaboradores() {
+Colaboradores.propTypes = { entradas: PropTypes.bool, saidas: PropTypes.string };
+
+export function Colaboradores({ entradas, saidas }) {
   const [mes, setMes] = useState(null);
   const [colaborador, setColaborador] = useState(null);
   const [detalhes, setDetalhes] = useState(localStorage.getItem('detalhes') === 'true');
   const [viewEntrada, setViewEntrada] = useState(localStorage.getItem('viewEntrada') === 'true');
-  const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoading } = useSelector((state) => state.indicadores);
-  const indicadores = {
-    objeto_entrada: [
-      {
-        ano: 2023,
-        mes: 2,
-        total: 1,
-      },
-      {
-        ano: 2023,
-        mes: 2,
-        total: 3,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 15,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 1,
-      },
-      {
-        ano: 2023,
-        mes: 6,
-        total: 10,
-      },
-      {
-        ano: 2023,
-        mes: 7,
-        total: 33,
-      },
-      {
-        ano: 2023,
-        mes: 8,
-        total: 13,
-      },
-      {
-        ano: 2023,
-        mes: 7,
-        total: 2,
-      },
-      {
-        ano: 2023,
-        mes: 8,
-        total: 4,
-      },
-      {
-        ano: 2023,
-        mes: 9,
-        total: 5,
-      },
-      {
-        ano: 2023,
-        mes: 9,
-        total: 2,
-      },
-      {
-        ano: 2023,
-        mes: 10,
-        total: 3,
-      },
-      {
-        ano: 2023,
-        mes: 10,
-        total: 6,
-      },
-    ],
-    objeto_saida: [
-      {
-        ano: 2023,
-        mes: 1,
-        total: 3,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 2,
-        total: 4,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 2,
-        total: 3,
-        perfil_id: 2,
-      },
-      {
-        ano: 2023,
-        mes: 2,
-        total: 7,
-        perfil_id: 13,
-      },
-      {
-        ano: 2023,
-        mes: 3,
-        total: 1,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 3,
-        total: 1,
-        perfil_id: 13,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 19,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 4,
-        perfil_id: 2,
-      },
-      {
-        ano: 2023,
-        mes: 4,
-        total: 3,
-        perfil_id: 13,
-      },
-      {
-        ano: 2023,
-        mes: 5,
-        total: 1,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 5,
-        total: 2,
-        perfil_id: 13,
-      },
-      {
-        ano: 2023,
-        mes: 6,
-        total: 14,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 6,
-        total: 6,
-        perfil_id: 13,
-      },
-      {
-        ano: 2023,
-        mes: 7,
-        total: 95,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 8,
-        total: 5,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 9,
-        total: 1,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 9,
-        total: 5,
-        perfil_id: 13,
-      },
-      {
-        ano: 2023,
-        mes: 10,
-        total: 1,
-        perfil_id: 1,
-      },
-      {
-        ano: 2023,
-        mes: 10,
-        total: 20,
-        perfil_id: 13,
-      },
-    ],
-    erro: null,
-  };
-  const entradasFilter = applySortFilter({
-    mes,
-    dados: indicadores?.objeto_entrada || [],
-    comparator: getComparator('asc', 'mes'),
-  });
-  const dadosFilter = applySortFilter({
-    mes,
-    colaborador,
-    dados: indicadores?.objeto_saida || [],
-    comparator: getComparator('asc', 'mes'),
-  });
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const entradasFilter = applySortFilter({ mes, dados: entradas || [], comparator: getComparator('asc', 'mes') });
+  const dadosFilter = applySortFilter({ mes, colaborador, dados: saidas, comparator: getComparator('asc', 'mes') });
   const isNotFound = !dadosFilter.length;
-  const totalEntrada = sumBy(indicadores?.objeto_entrada, 'total');
-  const totalTrabalhado = sumBy(indicadores?.objeto_saida, 'total');
+  const totalEntrada = sumBy(entradas, 'total');
+  const totalTrabalhado = sumBy(saidas, 'total');
   const indicadoresPorColaborador = useMemo(
     () => agruparIndicadores(dadosFilter, colaboradores, 'perfil_id'),
     [colaboradores, dadosFilter]
@@ -788,7 +265,7 @@ export function Colaboradores() {
 
   return (
     <>
-      {!!indicadores?.objeto_saida?.length && (
+      {!!saidas?.length && (
         <Card sx={{ mb: 3, pb: 1 }}>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} justifyContent="center" sx={{ p: 2 }}>
             {viewEntrada && <TotalItem assunto="Total entrada" totalTrabalhado={totalEntrada} />}
@@ -803,7 +280,7 @@ export function Colaboradores() {
             mes={mes}
             setMes={setMes}
             detalhes={detalhes}
-            item="Colaboradores"
+            indicador="Colaboradores"
             viewEntrada={viewEntrada}
             setDetalhes={setDetalhes}
             colaborador={colaborador}
@@ -990,11 +467,11 @@ export function DadosMes({
 
 // ----------------------------------------------------------------------
 
-function entradaTrabalhado(dados) {
+function entradaTrabalhado(entradas, saidas) {
   const dadosCompletos = [];
   mesesAbr?.forEach((row) => {
-    const entrada = dados?.objeto_entrada?.find((item) => item?.mes === row?.id);
-    const saida = dados?.objeto_saida?.find((item) => item?.mes === row?.id);
+    const entrada = entradas?.find((item) => item?.mes === row?.id);
+    const saida = saidas?.find((item) => item?.mes === row?.id);
     dadosCompletos?.push({
       mes: row?.label,
       saida: saida?.total || 0,
@@ -1007,6 +484,8 @@ function entradaTrabalhado(dados) {
   return dadosCompletos;
 }
 
+// ----------------------------------------------------------------------
+
 function agruparIndicadores(dados, colaboradores, item) {
   const dadosGrouped = [];
   dados.reduce((res, value) => {
@@ -1014,21 +493,25 @@ function agruparIndicadores(dados, colaboradores, item) {
       if (item === 'mes') {
         res[value[item]] = { item: value[item], indicadores: [] };
       } else if (item === 'perfil_id') {
-        const colaborador = colaboradores?.find((colab) => colab?.id === value[item]);
+        const colaborador = colaboradores?.find((colab) => colab?.perfil_id === value[item]);
         res[value[item]] = { id: value[item], label: colaborador?.perfil?.displayName || value[item], total: 0 };
       } else if (item === 'tipo') {
         res[value[item]] = { label: value?.tipo || value[item], total: 0 };
+      } else if (item === 'forma') {
+        res[value[item]] = { label: value?.forma || value[item], total: 0 };
       }
       dadosGrouped.push(res[value[item]]);
     }
     if (item === 'mes') {
       const colaborador =
-        'perfil_id' in value ? colaboradores?.find((colab) => colab?.id === value?.perfil_id) || value?.perfil_id : '';
+        'perfil_id' in value
+          ? colaboradores?.find((colab) => colab?.perfil_id === value?.perfil_id) || value?.perfil_id
+          : '';
       res[value[item]].indicadores.push({
         total: value?.total,
-        label: colaborador?.perfil?.displayName || colaborador || value?.tipo,
+        label: colaborador?.perfil?.displayName || colaborador || value?.tipo || value?.forma,
       });
-    } else if (item === 'perfil_id' || item === 'tipo') {
+    } else if (item === 'perfil_id' || item === 'tipo' || item === 'forma') {
       res[value[item]].total += value?.total;
     }
     return res;
@@ -1036,6 +519,8 @@ function agruparIndicadores(dados, colaboradores, item) {
 
   return dadosGrouped;
 }
+
+// ----------------------------------------------------------------------
 
 function agruparPorMes(dados, item) {
   const dadosGrouped = [];

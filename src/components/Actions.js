@@ -14,21 +14,23 @@ import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import SearchIcon from '@mui/icons-material/Search';
 import RemoveIcon from '@mui/icons-material/Remove';
 import HistoryIcon from '@mui/icons-material/History';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
-import TableRowsIcon from '@mui/icons-material/TableRows';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import InputAdornment from '@mui/material/InputAdornment';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
@@ -37,7 +39,6 @@ import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
 import { getFileThumb } from '../utils/getFileFormat';
@@ -48,6 +49,8 @@ import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
 import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/parametrizacao';
+// assets
+import { Editar, Arquivo, Seguimento, Abandonar, Resgatar, Detalhes, Eliminar } from '../assets';
 //
 import { Criado } from './Panel';
 import SvgIconStyle from './SvgIconStyle';
@@ -116,24 +119,23 @@ export function DefaultAction({
             (label === 'VALIDAR' && <SpellcheckOutlinedIcon />) ||
             (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
+            (label === 'EDITAR' && <Editar sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
+            (icon === 'abandonar' && <Abandonar sx={{ width: 24, height: 24 }} />) ||
+            (icon === 'encaminhar' && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'INFO. DAS CONTAS' && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'Adicionar' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
-            (icon === 'resgatar' && <SettingsBackupRestoreIcon sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'resgatar' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Clonar fluxo' && <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
-            (label === 'Mostrar mais processos' && <TableRowsIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
-            (icon === 'abandonar' && <SvgIconStyle src="/assets/icons/abandonar.svg" sx={{ width: 22 }} />) ||
-            (icon === 'encaminhar' && <SvgIconStyle src="/assets/icons/seguimento.svg" sx={{ width: 22 }} />) ||
-            (label === 'EDITAR' && <SvgIconStyle src="/assets/icons/editar.svg" sx={{ width: small ? 18 : 22 }} />) ||
-            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <SvgIconStyle src="/assets/icons/view.svg" />) ||
-            (icon === 'devolver' && <SvgIconStyle src="/assets/icons/resgatar.svg" />) ||
-            (label === 'ARQUIVAR' && <SvgIconStyle src="/assets/icons/archive.svg" />) ||
-            ((label === 'ELIMINAR' || label === 'Remover') && (
-              <SvgIconStyle src="/assets/icons/trash.svg" sx={{ width: small ? 18 : 22 }} />
-            )) ||
+            (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
+            (icon === 'devolver' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
+            ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'finalizar' && <SvgIconStyle src="/assets/icons/stop.svg" />)}
         </Fab>
       </Tooltip>
@@ -209,7 +211,7 @@ export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null
           }}
           sx={{ ...wh }}
         >
-          <SvgIconStyle src="/assets/icons/editar.svg" />
+          <Editar sx={{ width: 22 }} />
         </Fab>
       </Tooltip>
     </Stack>
@@ -275,7 +277,12 @@ export function DialogButons({
       <Button variant="outlined" color="inherit" onClick={onCancel}>
         Cancelar
       </Button>
-      <LoadingButton type="submit" variant={color === 'error' ? 'soft' : 'contained'} color={color} loading={isSaving}>
+      <LoadingButton
+        type="submit"
+        color={color}
+        loading={isSaving}
+        variant={color === 'error' || color === 'warning' ? 'soft' : 'contained'}
+      >
         {(label && label) || (edit && 'Guardar') || 'Adicionar'}
       </LoadingButton>
     </DialogActions>
@@ -309,11 +316,18 @@ export function AnexosExistente({ mt = 3, anexos, onOpen }) {
               primaryTypographyProps={{ variant: 'subtitle2', pb: 0.25 }}
               secondary={
                 (row?.criado_em || row?.criador) && (
-                  <Stack direction={{ sx: 'column', sm: 'row' }} spacing={1}>
+                  <Stack
+                    useFlexGap
+                    flexWrap="wrap"
+                    direction="row"
+                    sx={{ mt: 0.25 }}
+                    spacing={{ xs: 0.5, sm: 1 }}
+                    divider={<Divider orientation="vertical" flexItem />}
+                  >
                     {row?.criador && (
                       <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} shuffle />
                     )}
-                    {row?.criado_em && <Criado caption tipo="date" value={ptDateTime(row?.criado_em)} />}
+                    {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
                   </Stack>
                 )
               }
@@ -359,5 +373,42 @@ export function ExportExcel({ filename, sheet = '', table, icon = false }) {
         )
       }
     />
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SearchAdornment.propTypes = { handleClick: PropTypes.func, small: PropTypes.bool };
+
+export function SearchAdornment({ handleClick, small = false }) {
+  return (
+    <InputAdornment position="end">
+      <Fab
+        size="small"
+        variant="soft"
+        onClick={() => handleClick()}
+        sx={{ ...(small ? whsmall : wh), boxShadow: 'none' }}
+      >
+        <SearchIcon sx={{ width: small ? 18 : 24 }} />
+      </Fab>
+    </InputAdornment>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+ButtonDocx.propTypes = { handleClick: PropTypes.func, label: PropTypes.string };
+
+export function ButtonDocx({ label, handleClick }) {
+  return (
+    <Button
+      variant="soft"
+      color="inherit"
+      onClick={handleClick}
+      startIcon={getFileThumb(false, null, 'file.docx')}
+      sx={{ justifyContent: 'left', textAlign: 'left', mt: 0.5, boxShadow: 'none' }}
+    >
+      {label}
+    </Button>
   );
 }

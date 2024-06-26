@@ -3,6 +3,20 @@ import PropTypes from 'prop-types';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+
+// ----------------------------------------------------------------------
+
+SkeletonContainer.propTypes = { height: PropTypes.object };
+
+export function SkeletonContainer({ height = { xs: 400, sm: 760 } }) {
+  return (
+    <Grid item xs={12}>
+      <Skeleton variant="rectangular" sx={{ height, borderRadius: 2, transform: 'scale(1)' }} />
+    </Grid>
+  );
+}
 
 // ----------------------------------------------------------------------
 
@@ -23,6 +37,8 @@ export function SkeletonBar({ column, height = 50 }) {
 export function PieChart() {
   return <Skeleton variant="circular" sx={{ width: 280, height: 280 }} />;
 }
+
+// ----------------------------------------------------------------------
 
 export function BarChart() {
   return (
@@ -100,6 +116,53 @@ export function SkeletonEntidade() {
         <Grid item xs={12} sm={6} key={`SkeletonEntidade_${index}`}>
           <Skeleton variant="text" height={500} sx={{ transform: 'none' }} />
         </Grid>
+      ))}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+export function SkeletonProcesso() {
+  return (
+    <Grid container spacing={5} sx={{ pt: 2 }}>
+      <Grid item xs={12} md={5}>
+        <Skeleton variant="text" sx={{ width: 0.5, height: 50 }} />
+        <Skeleton variant="text" sx={{ width: 0.75, height: 50 }} />
+        <Skeleton variant="text" sx={{ width: 0.85, height: 50 }} />
+        <Skeleton variant="text" sx={{ width: 0.5, height: 50 }} />
+        <Skeleton variant="text" sx={{ width: 0.25, height: 50 }} />
+        <Skeleton variant="text" sx={{ height: 50 }} />
+        <Skeleton variant="text" sx={{ height: 50 }} />
+        <Skeleton variant="text" sx={{ height: 130, transform: 'scale(1)', mb: 3, mt: 2 }} />
+        <Skeleton variant="text" sx={{ height: 130, transform: 'scale(1)' }} />
+      </Grid>
+
+      <Grid item xs={12} md={7}>
+        <Skeleton variant="text" sx={{ height: 500, transform: 'scale(1)', mb: 1 }} />
+        <Skeleton variant="text" sx={{ height: 50 }} />
+        <Skeleton variant="text" sx={{ height: 50 }} />
+        <Skeleton variant="text" sx={{ height: 50 }} />
+      </Grid>
+    </Grid>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SkeletonTable.propTypes = { column: PropTypes.number, row: PropTypes.number };
+
+export function SkeletonTable({ column, row }) {
+  return (
+    <>
+      {[...Array(row)].map((x, i) => (
+        <TableRow key={i}>
+          {[...Array(column)].map((z, y) => (
+            <TableCell key={y}>
+              <Skeleton variant="text" height={35} />
+            </TableCell>
+          ))}
+        </TableRow>
       ))}
     </>
   );

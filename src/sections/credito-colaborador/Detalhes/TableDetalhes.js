@@ -3,16 +3,14 @@ import { useEffect, useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { getFileThumb } from '../../../utils/getFileFormat';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 import { normalizeText, noDados } from '../../../utils/normalizeText';
-import { ptDateTime, ptDate, fDistance, fToNow } from '../../../utils/formatTime';
+import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
 // hooks
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
@@ -25,17 +23,8 @@ import { SkeletonTable } from '../../../components/skeleton';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { Checked, Criado, ColaboradorInfo } from '../../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
-//
-import Anexo from './Anexo';
 
 // ----------------------------------------------------------------------
-
-const TABLE_HEAD_ANEXOS = [
-  { id: 'designacao', label: 'Anexo', align: 'left' },
-  { id: 'data_validade', label: 'Data de validade', align: 'center' },
-  { id: 'ativo', label: 'Estado', align: 'center' },
-  { id: 'criador', label: 'Criado', align: 'left' },
-];
 
 const TABLE_HEAD_DESPESAS = [
   { id: 'designacao', label: 'Designação', align: 'left' },
@@ -78,9 +67,9 @@ const TABLE_HEAD_PENDENCIAS = [
 
 // ----------------------------------------------------------------------
 
-TableDetalhes.propTypes = { item: PropTypes.string, anexosList: PropTypes.array };
+TableDetalhes.propTypes = { item: PropTypes.string };
 
-export default function TableDetalhes({ item, anexosList = [] }) {
+export default function TableDetalhes({ item }) {
   const {
     page,
     dense,
@@ -122,26 +111,12 @@ export default function TableDetalhes({ item, anexosList = [] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const viewAnexo = (anexo) => {
-    if (mail && anexo) {
-      dispatch(
-        getFromCC('anexo', {
-          mail,
-          anexo,
-          processo: item === 'anexos' || item === 'anexos entidades' ? 'true' : 'false',
-        })
-      );
-    }
-  };
-
   const dataFiltered = applySortFilter({
     dados:
-      (item === 'anexos' && pedidoCC?.anexos) ||
       (item === 'despesas' && pedidoCC?.despesas) ||
       (item === 'responsabilidades' && pedidoCC?.outros_creditos) ||
       (item === 'hretencoes' && dadosComColaboradores(pedidoCC?.hretencoes, colaboradores)) ||
       (item === 'hpendencias' && dadosComColaboradores(pedidoCC?.hpendencias, colaboradores)) ||
-      ((item === 'anexos entidades' || item === 'anexos garantias') && anexosList) ||
       (item === 'hatribuicoes' && dadosComColaboradores(pedidoCC?.hatribuicoes, colaboradores)) ||
       [],
     comparator: getComparator(order, orderBy),
@@ -150,19 +125,17 @@ export default function TableDetalhes({ item, anexosList = [] }) {
   const isNotFound = !dataFiltered.length;
 
   return (
-    <Box sx={{ p: item !== 'anexos entidades' && item !== 'anexos garantias' && 1 }}>
-      {item !== 'anexos entidades' && item !== 'anexos garantias' && (
-        <SearchToolbarSimple filter={filter} setFilter={setFilter} />
-      )}
+    <Box sx={{ p: 1 }}>
+      <SearchToolbarSimple filter={filter} setFilter={setFilter} />
       <Scrollbar>
         <TableContainer
           sx={{
             overflow: 'hidden',
             position: 'relative',
-            minWidth: item === 'anexos entidades' || item === 'anexos garantias' ? 500 : 800,
+            minWidth: 800,
           }}
         >
-          <Table size={dense || item?.includes('anexo') ? 'small' : 'medium'}>
+          <Table size={dense ? 'small' : 'medium'}>
             <TableHeadCustom
               order={order}
               orderBy={orderBy}
@@ -171,8 +144,7 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                 (item === 'hretencoes' && TABLE_HEAD_RETENCOES) ||
                 (item === 'hpendencias' && TABLE_HEAD_PENDENCIAS) ||
                 (item === 'hatribuicoes' && TABLE_HEAD_ATRIBUICOES) ||
-                (item === 'responsabilidades' && TABLE_HEAD_RESPONSABILIDADES) ||
-                ((item === 'anexos' || item === 'anexos entidades' || item === 'anexos garantias') && TABLE_HEAD_ANEXOS)
+                (item === 'responsabilidades' && TABLE_HEAD_RESPONSABILIDADES)
               }
               onSort={onSort}
             />
@@ -190,31 +162,12 @@ export default function TableDetalhes({ item, anexosList = [] }) {
               ) : (
                 dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                   <TableRow hover key={`table_detalhes_${index}`}>
-                    {((item === 'anexos' || item === 'anexos entidades' || item === 'anexos garantias') && (
+                    {(item === 'despesas' && (
                       <>
-                        <TableCell>
-                          <Button
-                            fullWidth
-                            variant="soft"
-                            color="inherit"
-                            onClick={() => viewAnexo(row)}
-                            startIcon={getFileThumb(false, null, row?.anexo)}
-                            sx={{ justifyContent: 'left', textAlign: 'left' }}
-                          >
-                            {row?.designacao}
-                          </Button>
-                        </TableCell>
-                        <TableCell align="center">
-                          {row?.data_validade ? ptDate(row?.data_validade) : noDados(true)}
-                        </TableCell>
+                        <TableCell>{row?.designacao}</TableCell>
+                        <TableCell align="right">{fCurrency(row?.valor)}</TableCell>
                       </>
                     )) ||
-                      (item === 'despesas' && (
-                        <>
-                          <TableCell>{row?.designacao}</TableCell>
-                          <TableCell align="right">{fCurrency(row?.valor)}</TableCell>
-                        </>
-                      )) ||
                       (item === 'responsabilidades' && (
                         <>
                           <TableCell align="center" width={10}>
@@ -267,14 +220,14 @@ export default function TableDetalhes({ item, anexosList = [] }) {
                     {item !== 'hretencoes' && (
                       <TableCell width={10}>
                         {(row?.criado_em || row?.atribuido_em) && (
-                          <Criado tipo="date" value={ptDateTime(row?.criado_em || row?.atribuido_em)} />
+                          <Criado tipo="data" value={ptDateTime(row?.criado_em || row?.atribuido_em)} />
                         )}
                         {(row?.criador || row?.atribuidor || row?.nome) && (
                           <Criado tipo="user" value={row?.criador || row?.atribuidor || row?.nome} shuffle />
                         )}
                         {row?.data_pendente && (
                           <Criado
-                            tipo="date"
+                            tipo="data"
                             value={`${ptDateTime(row?.data_pendente)}${
                               row?.data_libertado ? ` | ${ptDateTime(row?.data_libertado)}` : ''
                             }`}
@@ -305,7 +258,6 @@ export default function TableDetalhes({ item, anexosList = [] }) {
           onChangeRowsPerPage={onChangeRowsPerPage}
         />
       )}
-      {(item === 'anexos' || item === 'anexos entidades' || item === 'anexos garantias') && <Anexo />}
     </Box>
   );
 }

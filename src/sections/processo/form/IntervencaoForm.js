@@ -30,7 +30,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TableContainer from '@mui/material/TableContainer';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { format, add } from 'date-fns';
@@ -62,6 +61,7 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
+import { Atribuir } from '../../../assets';
 import DialogConfirmar from '../../../components/DialogConfirmar';
 import { DefaultAction, DialogButons, AnexosExistente } from '../../../components/Actions';
 
@@ -103,6 +103,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
       noperacao: '',
       observacao: '',
       mpendencia: null,
+      parecer_favoravel: null,
       pendenteLevantamento: false,
       destinos_par: [{ estado: null, noperacao: '', observacao: '' }],
       estado: destinosSingulares?.length === 1 ? destinosSingulares?.[0] : null,
@@ -119,6 +120,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
     destinosParalelo,
     values?.destinos_par?.map((row) => row?.estado?.id)
   );
+  const temNumOperacao = values?.estado?.hasopnumero;
 
   const aberturaSemEntidadeGerencia =
     values?.estado &&
@@ -175,6 +177,12 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
         formData.append('observacao', values?.observacao);
         formData.append('transicao_id ', values?.estado?.id);
         formData.append('perfil_afeto_id ', colocarPendente ? '' : atribuir);
+        if (values?.parecer_favoravel === 'Favorável') {
+          formData.append('parecer_favoravel', true);
+        }
+        if (values?.parecer_favoravel === 'Não favorável') {
+          formData.append('parecer_favoravel', false);
+        }
         values?.anexos?.forEach((row) => {
           formData.append('anexos', row);
         });
@@ -189,7 +197,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
             pendencia: JSON.stringify(formPendencia),
             atribuir: colocarPendente ? atribuir : '',
             estadoId: values?.estado?.estado_final_id,
-            msg: title === 'Devolver' ? 'devolvida' : 'encaminhada',
+            msg: title === 'Devolver' ? 'Processo devolvida' : 'Processo encaminhada',
           })
         );
       }
@@ -287,7 +295,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
               })
             ) : (
               <>
-                <Grid item xs={12} sm={values?.estado?.hasopnumero ? 8 : 12}>
+                <Grid item xs={12} md={temNumOperacao ? 6 : 8}>
                   <RHFAutocompleteObject
                     name="estado"
                     label="Estado"
@@ -313,11 +321,18 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                   </Grid>
                 ) : (
                   <>
-                    {values?.estado?.hasopnumero && (
-                      <Grid item xs={12} sm={4}>
+                    {temNumOperacao && (
+                      <Grid item xs={12} sm={6} md={3}>
                         <RHFNumberField name="noperacao" required label="Nº de operação" />
                       </Grid>
                     )}
+                    <Grid item xs={12} sm={temNumOperacao ? 6 : 12} md={temNumOperacao ? 3 : 4}>
+                      <RHFAutocompleteSimple
+                        label="Parecer"
+                        name="parecer_favoravel"
+                        options={['Favorável', 'Não favorável']}
+                      />
+                    </Grid>
                     {podeAtribuir && colaboradoresList?.length > 0 && (
                       <Grid item xs={12}>
                         <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
@@ -490,9 +505,9 @@ export function ArquivarForm({ open, onCancel, processo, arquivoAg }) {
         updateItem('arquivar', JSON.stringify(formData), {
           mail,
           anexos,
-          msg: 'arquivado',
           id: processo?.id,
           perfilId: cc?.perfil_id,
+          msg: 'Processo arquivado',
         })
       );
     } catch (error) {
@@ -601,7 +616,12 @@ export function DesarquivarForm({ onCancel, id, colaboradoresList }) {
         observacao: values?.observacao,
       };
       dispatch(
-        updateItem('desarquivar', JSON.stringify(dados), { id, mail, perfilId: cc?.perfil_id, msg: 'desarquivado' })
+        updateItem('desarquivar', JSON.stringify(dados), {
+          id,
+          mail,
+          perfilId: cc?.perfil_id,
+          msg: 'Processo desarquivado',
+        })
       );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -684,8 +704,8 @@ export function FinalizarForm({ open, onCancel }) {
           updateItem('finalizar', JSON.stringify({ cativos: [selecionados.map((row) => row?.id)] }), {
             mail,
             id: processo?.id,
-            msg: 'finalizado',
             perfilId: cc?.perfil_id,
+            msg: 'Processo finalizado',
           })
         );
       }
@@ -772,9 +792,14 @@ export function FinalizarForm({ open, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ParecerForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processoId: PropTypes.number };
+ParecerForm.propTypes = {
+  open: PropTypes.bool,
+  estado: PropTypes.bool,
+  onCancel: PropTypes.func,
+  processoId: PropTypes.number,
+};
 
-export function ParecerForm({ open, onCancel, processoId }) {
+export function ParecerForm({ open, onCancel, processoId, estado = false }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
@@ -782,7 +807,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
 
   const formSchema = Yup.object().shape({
     parecer: Yup.string().required('Parecer não pode ficar vazio'),
-    descritivo: Yup.string().required('Descrição não pode ficar vazio'),
+    observacao: Yup.string().required('Descrição não pode ficar vazio'),
   });
 
   const defaultValues = useMemo(
@@ -790,7 +815,7 @@ export function ParecerForm({ open, onCancel, processoId }) {
       anexos: [],
       parecer: selectedItem?.parecer || null,
       validado: selectedItem?.validado || false,
-      descritivo: selectedItem?.parecer_obs || '',
+      observacao: selectedItem?.observacao || '',
     }),
     [selectedItem]
   );
@@ -808,15 +833,23 @@ export function ParecerForm({ open, onCancel, processoId }) {
 
   const onSubmit = async () => {
     try {
-      const formData = new FormData();
-      formData.append('validado', values.validado);
-      formData.append('descritivo', values.descritivo);
-      formData.append('parecer_favoravel ', values.parecer === 'Favorável');
-      values?.anexos?.forEach((row) => {
-        formData.append('anexos', row);
-      });
+      const formData = estado
+        ? JSON.stringify({
+            observacao: values.observacao,
+            estado_id: selectedItem?.estado_id,
+            parecer_favoravel: values.parecer === 'Favorável',
+          })
+        : new FormData();
+      if (!estado) {
+        formData.append('validado', values?.validado);
+        formData.append('descritivo', values.observacao);
+        formData.append('parecer_favoravel', values.parecer === 'Favorável');
+        values?.anexos?.forEach((row) => {
+          formData.append('anexos', row);
+        });
+      }
       dispatch(
-        updateItem('parecer', formData, {
+        updateItem(estado ? 'parecer estado' : 'parecer individual', formData, {
           mail,
           processoId,
           id: selectedItem.id,
@@ -853,30 +886,36 @@ export function ParecerForm({ open, onCancel, processoId }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>Parecer - {selectedItem?.nome?.replace(' - P/S/P', '')}</DialogTitle>
+      <DialogTitle>
+        Parecer - {selectedItem?.nome?.replace(' - P/S/P', '') || selectedItem?.estado?.replace(' - P/S/P', '')}
+      </DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={estado ? 12 : 6}>
               <RHFAutocompleteSimple name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFSwitch name="validado" label="Parecer final" />
-            </Grid>
+            {!estado && (
+              <Grid item xs={12} sm={6}>
+                <RHFSwitch name="validado" label="Parecer final" />
+              </Grid>
+            )}
             <Grid item xs={12}>
-              <RHFTextField name="descritivo" multiline minRows={5} maxRows={10} label="Descrição" />
+              <RHFTextField name="observacao" multiline minRows={5} maxRows={10} label="Descrição" />
             </Grid>
-            <Grid item xs={12}>
-              <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
-              {selectedItem?.anexos?.filter((row) => row?.ativo)?.length > 0 && (
-                <AnexosExistente
-                  onOpen={handleEliminar}
-                  anexos={selectedItem?.anexos
-                    ?.filter((item) => item?.ativo)
-                    ?.map((row) => ({ ...row, name: row?.nome }))}
-                />
-              )}
-            </Grid>
+            {!estado && (
+              <Grid item xs={12}>
+                <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+                {selectedItem?.anexos?.filter((row) => row?.ativo)?.length > 0 && (
+                  <AnexosExistente
+                    onOpen={handleEliminar}
+                    anexos={selectedItem?.anexos
+                      ?.filter((item) => item?.ativo)
+                      ?.map((row) => ({ ...row, name: row?.nome }))}
+                  />
+                )}
+              </Grid>
+            )}
           </Grid>
           <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
@@ -905,8 +944,16 @@ export function Resgatar({ fluxoId, estadoId, processoId }) {
   const { mail, cc } = useSelector((state) => state.intranet);
 
   const handleResgatar = () => {
-    const formData = { estado_id: estadoId, fluxoID: fluxoId, perfil_id: cc?.perfil_id };
-    dispatch(updateItem('resgatar', JSON.stringify(formData), { id: processoId, mail, msg: 'Processo resgatado' }));
+    dispatch(
+      updateItem('resgatar', null, {
+        mail,
+        fluxoId,
+        estadoId,
+        id: processoId,
+        perfilId: cc?.perfil_id,
+        msg: 'Processo resgatado',
+      })
+    );
     onClose();
   };
 
@@ -942,10 +989,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
   const { mail, cc } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
-  const defaultValues = useMemo(
-    () => ({ descricao: '', perfilID: cc?.perfil?.id, estado_colaborador_id: estadoId }),
-    [cc?.perfil?.id, estadoId]
-  );
+  const defaultValues = useMemo(() => ({ descricao: '', estado_id: estadoId }), [estadoId]);
   const methods = useForm({ defaultValues });
   const { reset, watch, handleSubmit } = methods;
   const values = watch();
@@ -963,7 +1007,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
             mail,
             id: processoId,
             perfilId: cc?.perfil_id,
-            msg: cancelar ? 'Envio cancelado' : 'Pareceres fechado',
+            msg: 'Pareceres fechado',
           })
         );
       }
@@ -978,7 +1022,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
         mail,
         id: processoId,
         perfilId: cc?.perfil_id,
-        msg: cancelar ? 'Envio cancelado' : 'Pareceres fechado',
+        msg: 'Envio cancelado',
       })
     );
     onClose();
@@ -1013,15 +1057,7 @@ export function Cancelar({ cancelar = false, fluxoId, estadoId, processoId }) {
                   <RHFTextField name="descricao" multiline minRows={4} maxRows={6} label="Observação" />
                 </Grid>
               </Grid>
-              <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
-                <Box sx={{ flexGrow: 1 }} />
-                <LoadingButton variant="outlined" color="inherit" onClick={onClose}>
-                  Cancelar
-                </LoadingButton>
-                <LoadingButton type="submit" variant="soft" color="warning" loading={isSaving}>
-                  Fechar
-                </LoadingButton>
-              </DialogActions>
+              <DialogButons color="warning" label="Fechar" isSaving={isSaving} onCancel={onClose} />
             </FormProvider>
           </DialogContent>
         </Dialog>
@@ -1104,7 +1140,7 @@ export function AtribuirForm({ colaboradoresList }) {
     <>
       <Tooltip title="ATRIBUIR" arrow>
         <Fab color="info" size="small" variant="soft" onClick={() => onAtribuir()}>
-          <PersonAddIcon />
+          <Atribuir sx={{ width: 22, height: 22 }} />
         </Fab>
       </Tooltip>
 

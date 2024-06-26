@@ -95,6 +95,9 @@ const slice = createSlice({
 // Reducer
 export default slice.reducer;
 
+// Actions
+export const { resetItem } = slice.actions;
+
 // ----------------------------------------------------------------------
 
 export function getIndicadores(item, params) {
@@ -276,6 +279,48 @@ export function getIndicadores(item, params) {
             options
           );
           dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
+          break;
+        }
+        case 'entradaTrabalhado': {
+          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
+          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
+          const response = await axios.get(
+            `${BASEURLDD}/v2/indicadores/racio/es/anual/default/${params?.perfilId}?ano=${params?.ano}&distinto=${params?.entrada}${uo}${estado}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
+          break;
+        }
+        case 'totalTrabalhados': {
+          const perfil = params?.perfil ? `&perfil_id=${params?.perfil}` : '';
+          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
+          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
+          const response = await axios.get(
+            `${BASEURLDD}/v2/indicadores/racio/unidirecional/fluxo/anual/${params?.perfilId}?ano=${params?.ano}&entrada=${params?.entrada}${uo}${estado}${perfil}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          break;
+        }
+        case 'acao': {
+          const perfil = params?.perfil ? `&perfil_id=${params?.perfil}` : '';
+          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
+          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
+          const response = await axios.get(
+            `${BASEURLDD}/v2/indicadores/racio/unidirecional/anual/${params?.perfilId}?ano=${params?.ano}&entrada=${params?.entrada}${uo}${estado}${perfil}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
+          break;
+        }
+        case 'colaboradores': {
+          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
+          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
+          const response = await axios.get(
+            `${BASEURLDD}/v2/indicadores/racio/es/anual/individual/${params?.perfilId}?ano=${params?.ano}${uo}${estado}`,
+            options
+          );
+          dispatch(slice.actions.getIndicadoresSuccess(response.data));
           break;
         }
 

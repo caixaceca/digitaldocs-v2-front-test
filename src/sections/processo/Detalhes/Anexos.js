@@ -155,8 +155,6 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
         boxShadow: 'none',
         textAlign: 'left',
         marginTop: preview && 0,
-        border: preview && '1px solid',
-        borderColor: preview && 'divider',
         borderBottom: preview && '0px solid',
         borderBottomLeftRadius: preview && 0,
         borderBottomRightRadius: preview && 0,
@@ -167,7 +165,14 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
       <ListItemText
         primary={`${anexo?.nome} ${preview ? '(Em pré-vizualização)' : ''}`}
         secondary={
-          <Stack spacing={{ sm: 1 }} direction={{ xs: 'column', sm: 'row' }} sx={{ opacity: 1 }}>
+          <Stack
+            useFlexGap
+            flexWrap="wrap"
+            direction="row"
+            sx={{ mt: 0.25 }}
+            spacing={{ xs: 0.5, sm: 1 }}
+            divider={<Divider orientation="vertical" flexItem />}
+          >
             {anexo?.criador && (
               <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} shuffle />
             )}

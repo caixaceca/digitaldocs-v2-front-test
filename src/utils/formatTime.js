@@ -1,7 +1,12 @@
-import { format, formatDistanceToNow, formatDistance, add } from 'date-fns';
+import { format, formatDistanceToNow, formatDistance, formatDistanceStrict, add } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 // ----------------------------------------------------------------------
+
+export function formatDate(date, newFormat) {
+  const fm = newFormat || 'dd MMM yyyy';
+  return date ? format(add(new Date(date), { hours: 2 }), fm, { locale: pt }) : '';
+}
 
 export function fDate(date) {
   return format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: pt });
@@ -9,10 +14,6 @@ export function fDate(date) {
 
 export function padraoDate(date) {
   return format(add(new Date(date), { hours: 2 }), 'yyyy-MM-dd', { locale: pt });
-}
-
-export function padraoMYDate(date) {
-  return format(add(new Date(date), { hours: 2 }), 'yyyy-MM', { locale: pt });
 }
 
 export function fMShortYear(date) {
@@ -69,4 +70,8 @@ export function dataPadraoPt(data) {
   return `${data?.toString()?.substr(6)}/${data?.toString()?.substr(0, 6)?.substr(4)}/${data
     ?.toString()
     ?.substr(0, 4)}`;
+}
+
+export function formatDistanceStrict_(date, date1) {
+  return formatDistanceStrict(new Date(date), new Date(date1), { unit: 'year', locale: pt });
 }

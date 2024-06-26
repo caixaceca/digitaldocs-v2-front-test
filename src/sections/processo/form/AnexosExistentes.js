@@ -62,7 +62,7 @@ export default function AnexosExistentes({ anexos, processoId }) {
               secondary={
                 <Stack direction="row" spacing={1}>
                   <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} shuffle />
-                  {anexo?.criado_em && <Criado caption tipo="date" value={ptDateTime(anexo?.criado_em)} />}
+                  {anexo?.criado_em && <Criado caption tipo="data" value={ptDateTime(anexo?.criado_em)} />}
                 </Stack>
               }
             />

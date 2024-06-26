@@ -1,0 +1,420 @@
+
+[
+  {
+    "tipo": "Contrato particular de crédito",
+    "modelo": "Credicaixa garantido por fiança",
+    "clausulas": [
+      {
+        "ordem": 1,
+        "clausula": "Capital mutuado e finalidade",
+        "parametros":["valor_solicitado","valor_solicitado_extenso", "meses_vencimento"],
+        "descricao": "A CAIXA concede ao(s) MUTUARIO(S) um crédito sob a forma de mútuo, no montante de «valor_solicitado» («valor_solicitado_extenso»), correspondente a «meses_vencimento» meses de vencimento."
+      },
+      {
+        "ordem": 2,
+        "clausula": "Prazo",
+        "parametros":["prazo_reembolso"],
+        "descricao": "Este contrato é celebrado pelo prazo de «prazo_reembolso» meses a contar da presente data."
+      },
+      {
+        "ordem": 3,
+        "clausula": "Taxa de Juros",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["taxa", "taxa_por_extenso"],
+            "descricao": "O capital emprestado vence juros à taxa anual de «taxa»% («taxa_por_extenso» porcento), ajustável durante a vigência do contrato;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "Sem prejuízo do disposto no número anterior, a taxa de juros poderá ser alterada pela Caixa em virtude de imposições legais ou em função de alterações significativas no contexto macroeconómico do país, com forte impacto no sector financeiro, de que resultem alterações de taxas de juro do sistema financeiro cabo-verdiano. Porém, se o crédito estiver em mora, não se aplicará a nova taxa se esta se modificar no sentido da baixa;"
+          },
+          {
+            "inciso": 3,
+            "descricao": "Qualquer alteração da taxa será comunicada pela CAIXA ao(s) MUTUARIO(S), para o endereço indicado na clausula da comunicação do presente contrato, com uma antecedência mínima de 60 (sessenta) dias relativamente à data pretendida para a sua aplicação;"
+          },
+          {
+            "inciso": 4,
+            "descricao": "Os juros serão contados sobre o capital utilizado e efectivamente em dívida e pagos mensalmente sendo incluídos nas prestações de reembolso;"
+          },
+          {
+            "inciso": 5,
+            "descricao": "Sobre os juros incide imposto de selo à taxa em vigor no respectivo Código, que nesta data é de 3,5% (três vírgula cinco porcento), Verba n.º 2, da Tabela de imposto de selo, devendo ser liquidada no momento do pagamento dos juros."
+          }
+        ]
+      },
+      {
+        "ordem": 4,
+        "clausula": "TAEG",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["taeg", "taeg_por_extenso"],
+            "descricao": "A taxa anual de encargos efetiva global TAEG, nesta data e com referência à taxa declarada na cláusula anterior, é de «taeg»% («taeg_por_extenso» porcento);"
+          },
+          {
+            "inciso": 2,
+            "parametros":["total_despesas", "total_despesas_por_extenso"],
+            "descricao": "O valor total dos encargos incluidos na TAEG é calculada considerando o custo total do crédito para o (s) Mutuario (s) no valor de «total_despesas» («total_despesas_por_extenso»), tendo em conta os seguintes elementos:",
+            "alineas": [
+              {
+                "alinea": "a",
+                "parametros":["juros"],
+                "descricao": "Juros: «juros»;"
+              },
+              {
+                "alinea": "b",
+                "parametros":["imposto_fiscal"],
+                "descricao": "Imposto de selo (sobre utilização, juros e comissões): «imposto_fiscal»;"
+              },
+              {
+                "alinea": "c",
+                "parametros":["comissoes_iniciais"],
+                "descricao": "Comissões (de abertura, de imobilização, de avaliação): «comissoes_iniciais»."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ordem": 5,
+        "clausula": "Utilização do empréstimo",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["conta_credito"],
+            "descricao": "O montante do crédito será creditado na conta n.º «conta_credito» do(s) MUTUARIO(S) e utilizado de imediato;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "O(s) MUTUARIO(S) confessa(m)-se desde já, devedor(es) do valor mutuado e dos que forem debitados na conta do crédito nos termos deste contrato;"
+          },
+          {
+            "inciso": 3,
+            "parametros":["imposto_selo_utilizacao"],
+            "descricao": "A utilização do crédito está sujeita a imposto de selo à taxa em vigor no respectivo código, que nesta data é de 0,5% (zero virgula cinco porcento), Verba n.º 1, da Tabela e «imposto_selo_utilizacao», devendo ser liquidado no momento de cada desembolso."
+          }
+        ]
+      },
+      {
+        "ordem": 6,
+        "clausula": "Comissão de abertura",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["comissao_abertura","comissao_abertura_por_extenso"],
+            "descricao": "Sobre o montante do crédito incide uma Comissão de Abertura de «comissao_abertura»% («comissao_abertura_por_extenso» porcento), a liquidar na data de assinatura do presente contrato;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "Sobre a comissão incide imposto de selo, à taxa de 3,5% (três vírgula cinco porcento), Verba n.º 2, da Tabela de imposto de selo, sendo liquidada na data do pagamento das referidas comissões."
+          }
+        ]
+      },
+      {
+        "ordem": 7,
+        "clausula": "Reembolso",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["prazo_reembolso","prazo_reembolso_por_extenso"],
+            "descricao": "O presente empréstimo será reembolsado em «prazo_reembolso» («prazo_reembolso_por_extenso») prestações mensais, constantes e consecutivas de capital e juros;"
+          },
+          {
+            "inciso": 2,
+            "parametros":["data_vencimento_prestacao"],
+            "descricao": "A primeira das referidas prestações vence-se em «data_vencimento_prestacao» e as restantes em igual dia dos meses seguintes;"
+          },
+          {
+            "inciso": 3,
+            "parametros":["renda","renda_por_extenso"],
+            "descricao": "Sem prejuízo do disposto nas cláusulas relativas às alterações da taxa de juros, cada uma das prestações será no montante de «renda» («renda_por_extenso»), acrescido do imposto de selo sobre os juros;"
+          },
+          {
+            "inciso": 4,
+            "descricao": "Durante a vigência do presente contrato o(s) Mutuário(s) poderá(ão), em qualquer altura, receber a seu pedido e sem quaisquer encargos, uma cópia do plano financeiro do crédito no endereço eletrónico convencionado."
+          }
+        ]
+      },
+      {
+        "ordem": 8,
+        "clausula": "Reembolso antecipado",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "O(s) MUTUARIO(S) te(ê)m o direito de efetuar:",
+            "alineas": [
+              {
+                "alinea": "a",
+                "descricao": "Reembolso parcial antecipado em qualquer momento do contrato, desde que em data coincidente com o vencimento da prestação, e mediante comunicação escrita feita à Caixa com um pré-aviso de, pelo menos, 07 (sete) dias úteis;"
+              },
+              {
+                "alinea": "b",
+                "descricao": "Reembolso total antecipado em qualquer momento da vigência do presente contrato, mediante comunicação escrita feita à Caixa com um pré-aviso de pelo menos 30 (trinta) dias corridos."
+              }
+            ]
+          },
+          {
+            "inciso": 2,
+            "descricao": "Em caso de reembolso parcial, a CAIXA acordará com o(s) MUTUARIO(S) um novo plano de amortização;"
+          },
+          {
+            "inciso": 3,
+            "descricao": "O reembolso antecipado, total ou parcial, está sujeito ao pagamento de uma comissão de antecipação de 2% (dois porcento), a incidir sobre o capital reembolsado."
+          }
+        ]
+      },
+      {
+        "ordem": 9,
+        "clausula": "Mora",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "O(s) Mutuário(s) fica(m) constituído(s) em mora caso não faça o pagamento de qualquer prestação na data do respetivo pagamento;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "No caso de mora em quaisquer pagamentos, e durante o período em que ela se verificar, além das prestações vencidas e não pagas, serão ainda cobrados juros sobre o referido montante à taxa estabelecida na clausula relativa à taxa de juros agravada com a sobretaxa de 2 p.p. (dois pontos percentuais) ao ano;"
+          },
+          {
+            "inciso": 3,
+            "descricao": "Sobre os juros de mora incidirá imposto de selo, à taxa em vigor no respetivo Código, que nesta data é de 3,5% (três vírgula cinco porcento), Verba n.º 2, da Tabela de imposto de selo, devendo ser liquidada no momento do pagamento dos juros;"
+          },
+          {
+            "inciso": 4,
+            "descricao": "Se resultar de disposição legal, a possibilidade de aplicação de uma cláusula penal mais elevada, fica a CAIXA desde já autorizada a aplicá-la de imediato."
+          }
+        ]
+      },
+      {
+        "ordem": 10,
+        "clausula": "Autorização de débitos",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["conta_debito"],
+            "descricao": "Todos os pagamentos a que o(s) MUTUARIO(S) fica(m) obrigado(s) pelo presente contrato serão efectuados através da conta de depósito à ordem número «conta_debito» constituída na CAIXA em nome do(s) MUTUARIO(S), obrigando-se este(s) a manter a citada conta com provisão suficiente para o efeito;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "A CAIXA fica desde já autorizada a debitar na citada conta de depósito à ordem as quantias correspondentes às prestações mensais referidas na cláusula relativa ao reembolso e quaisquer outras despesas decorrentes deste contrato;"
+          },
+          {
+            "inciso": 3,
+            "descricao": "As importâncias despendidas pela CAIXA para pagamento das despesas mencionadas no número anterior, não reembolsadas por insuficiência de provisão na referida conta de depósito à ordem, vencem desde o desembolso, juros à taxa em vigor na CAIXA para descobertos em conta de depósito à ordem;"
+          },
+          {
+            "inciso": 4,
+            "descricao": "A CAIXA fica desde já autorizada a proceder à compensação, total ou parcial, da quantia em dívida emergente deste contrato, com valores existentes em quaisquer contas que o(s) MUTUARIO(S) seja(m) titular(es), ou co-titular(es) em conta de depósito sem necessidade de prévia excussão de qualquer garantia, e independentemente desta;"
+          },
+          {
+            "inciso": 5,
+            "descricao": "A conta de depósito à ordem indicada no número um da presente cláusula pode ser alterada por acordo escrito entre as partes."
+          }
+        ]
+      },
+      {
+        "ordem": 11,
+        "clausula": "Garantia",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "Em garantia do integral cumprimento das obrigações pecuniárias assumidas no presente contrato pelo(S) MUTUÁRIO(S), os TERCEIRO OUTORGANTES acima identificados, constituem-se fiadores e principais pagadores, declarando que renunciam expressamente ao benefício de excussão prévia e assumem solidariamente o pagamento de tudo quanto constituir crédito da CAIXA, em razão do clausulado no presente contrato, nomeadamente capital, juros remuneratórios, juros de mora, custas judiciais incluindo procuradoria, encargos fiscais e outros que sejam devidos;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "Para cumprimento das obrigações ora assumidas, os TERCEIRO OUTORGANTES autorizam desde já a CAIXA, a reter e utilizar todos os saldos de contas e ou valores que tenham ou venham a ter, a qualquer título depositados na CAIXA ou em qualquer outro BANCO da praça."
+          }
+        ]
+      },
+      {
+        "ordem": 12,
+        "clausula": "Comunicações",
+        "incisos": [
+          {
+            "inciso": 1,
+            "parametros":["email","morada"],
+            "descricao": "Na vigência do presente contrato, o(s) MUTUARIO(S) declara(m) expressamente que pretende(m) receber todas as informações relativas ao presente crédito, preferencialmente em formato digital no endereço electrónico «email». Em alternativa, o(s) Mutuário(s) autoriza a CAIXA a remeter tais informações para o seguinte endereço postal «morada»;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "Para todas as comunicações que se mostrarem necessárias, o TERCEIRO OUTORGANTE indica os seguintes endereços:"
+          },
+          {
+            "inciso": 3,
+            "descricao": "Quaisquer comunicações escritas que a CAIXA remeta ao(s) MUTUARIO(S) e/ou aos TERCEIRO OUTORGANTES para os endereços postal indicados, será por meio de carta simples e sem aviso de recepção, que se obrigam desde já a manter actualizado, o qual, para efeitos das referidas comunicações, incluindo citação ou notificação judicial, se considera ser o domicílio convencionado;"
+          },
+          {
+            "inciso": 4,
+            "descricao": "Qualquer alteração ao domicílio convencionado deverá ser prontamente comunicado pelas PARTES, por escrito, à CAIXA."
+          }
+        ]
+      },
+      {
+        "ordem": 13,
+        "clausula": "Obrigações",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "O(S) MUTUARIO(S) obriga(m)-se para com a CAIXA a:",
+            "alineas": [
+              {
+                "alinea": "a",
+                "descricao": "Ter pagas e em dia todas as taxas, contribuições e impostos que sejam devido em razão de quaisquer bens que lhe pertença ou dos seus negócios;"
+              },
+              {
+                "alinea": "b",
+                "descricao": "Reforçar a garantia se a CAIXA o exigir;"
+              },
+              {
+                "alinea": "c",
+                "descricao": "Comunicar imediatamente à CAIXA qualquer evento ou situação susceptível de prejudicar ou impedir o cumprimento das obrigações por si assumidas no presente contrato."
+              }
+            ]
+          },
+          {
+            "inciso": 2,
+            "descricao": "O(s) MUTUARIO(S) E TERCEIROS OUTORGANTES obrigam-se a manter os respectivos salários/pensão de reforma domiciliados na CAIXA, enquanto perdurarem na CAIXA responsabilidades relativas ao presente crédito."
+          }
+        ]
+      },
+      {
+        "ordem": 14,
+        "clausula": "Novação",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "Fica expressamente convencionado que qualquer alteração das garantias prestadas, ou das cláusulas do presente contrato, que resultem de acordo entre a Caixa e o(s) MUTUARIO(S), não constituirá novação;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "Fica, também, expressamente convencionado que, em caso de eventual reprogramação do presente contrato por acordo entre as partes, as garantias referidas no presente contrato ou nele constituídas, manter-se-ão vigentes até ao integral cumprimento das obrigações que asseguram, sempre que isso for contratual e legalmente admissível."
+          }
+        ]
+      },
+      {
+        "ordem": 15,
+        "clausula": "Autorização de acesso à informação",
+        "descricao": "O(s) MUTUARIO(S) e os TERCEIRO OUTORGANTES autorizam a CAIXA a obter todas as informações que considere necessárias, junto do sistema financeiro, nomeadamente junto da Central de Riscos do Banco de Cabo Verde."
+      },
+      {
+        "ordem": 16,
+        "clausula": "Tratamento de dados",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "Na relação com os seus clientes, a CAIXA procede ao tratamento de dados pessoais tendo como finalidades, nomeadamente, a identificação e conhecimento (“know your customer”) dos clientes, a análise da sua capacidade económico-financeira e postura no mercado, a avaliação comercial e de risco de operações contratadas ou a contratar, a prevenção e controlo da fraude e a prossecução da atividade bancária;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "Os tratamentos de dados são necessários para a execução do contrato celebrado com os titulares dos dados, para as diligências pré-contratuais realizadas a pedido dos titulares, bem como para o cumprimento de obrigações legais que regem o exercício da atividade da CAIXA, em particular as decorrentes da regulação nacional emitida pelo BCV, da Lei do Combate ao Branqueamento de Capitais e ao Financiamento do Terrorismo, do Código de Valores Mobiliários e do Regime Jurídico do Cheque sem Provisão;"
+          },
+          {
+            "inciso": 3,
+            "descricao": "Se necessário, os dados serão tratados para salvaguarda de interesses legítimos da CAIXA e de terceiros, nomeadamente na consulta e intercâmbio de dados com a Central de Risco de Crédito para avaliação de solvabilidade e para determinar riscos de incumprimento na concessão de crédito;"
+          },
+          {
+            "inciso": 4,
+            "descricao": "A CAIXA poderá subcontratar o tratamento de dados pessoais, apenas recorrendo a entidades que apresentem garantias suficientes de execução de medidas técnicas e organizativas adequadas que assegurem o cumprimento dos requisitos legais aplicáveis e a defesa dos direitos do titular dos dados. A CAIXA poderá recorrer a subcontratantes quando entenda que, atendendo nomeadamente à especificidade ou ao carácter rotineiro das tarefas, com tal procedimento melhor prossegue a prestação aos seus clientes de um serviço com elevados padrões de eficiência;"
+          },
+          {
+            "inciso": 5,
+            "descricao": "Nos casos previstos na lei, a CAIXA poderá fornecer dados a autoridades de supervisão e de fiscalização, judiciais, fiscais e administrativas;"
+          },
+          {
+            "inciso": 6,
+            "descricao": "A CAIXA observa as normas legais relativas aos prazos de conservação de dados pessoais e de documentos;"
+          },
+          {
+            "inciso": 7,
+            "descricao": "Os interessados poderão aceder às informações que lhes digam respeito, constantes da respetiva base de dados, bem como solicitar a sua correção ou atualização;"
+          },
+          {
+            "inciso": 8,
+            "descricao": "O titular dos dados pessoais tem ainda o direito de apresentar reclamação à autoridade de controlo;"
+          },
+          {
+            "inciso": 9,
+            "descricao": "O(s) MUTUARIO(S) compromete(m)-se a manter permanentemente atualizados os seus dados pessoais, através do envio célere da referida informação à CAIXA."
+          }
+        ]
+      },
+      {
+        "ordem": 17,
+        "clausula": "Despesas",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "São da inteira responsabilidade do(s) MUTUARIO(S) e serão por ele(s) pagas todas e quaisquer despesas e encargos que resultarem da celebração e execução do presente contrato, e bem assim, nos limites legais, de acordo com a nota de débito apresentada pela CAIXA, todas as despesas judiciais e extra judiciais incluindo honorário de advogado a que a CAIXA haja de fazer face, para garantia e cobrança do que lhe venha a ser devido;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "São ainda da responsabilidade do(s) Mutuário(s) todos os custos notariais relativos à celebração do presente contrato, nomeadamente reconhecimento das assinaturas."
+          }
+        ]
+      },
+      {
+        "ordem": 18,
+        "clausula": "Direito de livre revogação do contrato",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "O(s) MUTUARIO(S) pode(m) revogar o presente contrato, sem necessidade de indicar o motivo justificativo, no prazo de 14 (catorze) dias corridos a contar da data de celebração do presente crédito mediante declaração escrita entregue na Caixa;"
+          },
+          {
+            "inciso": 2,
+            "descricao": "O exercício do direito referido no número anterior obriga o(s) Mutuário(s) à restituição do valor integral do capital mutuado bem como dos juros vencidos desde a data da disponibilização do capital até à data do efetivo pagamento dos referidos valores. A restituição deverá ser feita no prazo máximo de 30 dias a contar da data da entrega/expedição da declaração a que se refere o número anterior."
+          }
+        ]
+      },
+      {
+        "ordem": 19,
+        "clausula": "Incumprimento",
+        "incisos": [
+          {
+            "inciso": 1,
+            "descricao": "A Caixa poderá considerar antecipadamente vencida toda a dívida e exigir o seu imediato pagamento no caso de incumprimento do contrato pelo(s) MUTUARIO(S) se, cumulativamente:",
+            "alineas": [
+              {
+                "alinea": "a",
+                "descricao": "O(s) MUTUARIO(S) faltar(em) ao pagamento de pelo menos duas prestações sucessivas que exceda 10% do montante total do crédito;"
+              },
+              {
+                "alinea": "b",
+                "descricao": "A falta se mantiver decorrido o prazo adicional concedido pela Caixa para proceder ao pagamento das prestações em atraso, acrescidas dos respetivos juros de mora, com expressa advertência da perda do benefício do prazo."
+              }
+            ]
+          },
+          {
+            "inciso": 2,
+            "descricao": "Para efeito do disposto no número anterior, a Caixa concederá, por escrito, ao(s) Mutuário(s) um prazo adicional de 15 dias a contar da receção da comunicação para proceder ao pagamento das prestações em atraso, acrescido da taxa de mora calculada de acordo com o estabelecido na cláusula relativa à clausula penal;"
+          },
+          {
+            "inciso": 3,
+            "descricao": "Para além das situações referidas no número um da presente cláusula, o incumprimento contratual pode importar ainda:",
+            "alineas": [
+              {
+                "alinea": "a",
+                "descricao": "A inclusão do(s) Mutuário(s) na Central de Risco de Crédito;"
+              },
+              {
+                "alinea": "b",
+                "descricao": "A instauração de processo executivo junto dos tribunais e subsequente penhora ou venda judiciais do património do(s) Mutuário(s)/Garantes."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ordem": 20,
+        "clausula": "Reclamação",
+        "descricao": "Assiste ao(s) Mutuário(s), nos termos legalmente estipulados, o direito de apresentar reclamação no Livro de Reclamações disponível em qualquer Agência/Serviços da Caixa, ou através do serviço Caixanet, para os clientes aderentes, ou ainda através do correio eletrónico: caixa@caixa.cv. As reclamações podem ainda ser dirigidas diretamente ao Banco de Cabo Verde, através do site www.bcv.cv, correio eletrónico do Gabinete de Supervisão Comportamental: gsc@bcv.cv."
+      },
+      {
+        "ordem": 21,
+        "clausula": "Autoridade de Supervisão",
+        "descricao": "A Caixa, enquanto instituição de crédito está sujeita à supervisão do Banco de Cabo Verde, (www.bcv.cv) com sede na Avenida OUA, n.º2, CP n.º 7954, Praia, Cabo Verde."
+      }
+    ]
+  }
+]

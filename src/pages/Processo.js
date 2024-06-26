@@ -32,10 +32,18 @@ import { TabCard } from '../components/TabsWrapper';
 import { DefaultAction } from '../components/Actions';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
+import {
+  Views,
+  Estados,
+  Versoes,
+  Pareceres,
+  Transicoes,
+  DadosGerais,
+  TableDetalhes,
+} from '../sections/processo/Detalhes';
 import AtribuirAcessoForm from '../sections/arquivo/AtribuirAcessoForm';
 import Intervencao, { Libertar } from '../sections/processo/Intervencao';
 import { DesarquivarForm, Resgatar, Cancelar, AtribuirForm } from '../sections/processo/form/IntervencaoForm';
-import { Views, Versoes, Pareceres, Transicoes, DadosGerais, TableDetalhes } from '../sections/processo/Detalhes';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -60,9 +68,6 @@ export default function Processo() {
   const perfilP = processo?.perfil_id;
   const estado = processo?.estado_atual;
   const estadoId = processo?.estado_atual_id;
-  const fromEntradas = params?.get?.('from') === 'entradas';
-  const fromPorConcluir = params?.get?.('from') === 'porconcluir';
-  const fromTrabalhados = params?.get?.('from') === 'trabalhados';
   const uo = uos?.find((row) => row?.id === processo?.uoIdEstadoAtual);
   const uoOrigem = uos?.find((row) => row?.id === processo?.uo_origem_id);
   const estadoAtual = meusAmbientes?.find((row) => row?.id === estadoId);
@@ -72,7 +77,7 @@ export default function Processo() {
   const linkNavigate =
     (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
     (params?.get?.('from') === 'Pesquisa' && `${PATH_DIGITALDOCS.processos.procurar}`) ||
-    ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
+    (params?.get?.('from') === 'Controle' && `${PATH_DIGITALDOCS.controle.lista}`) ||
     `${PATH_DIGITALDOCS.processos.lista}`;
 
   const colaboradoresList = useMemo(
@@ -87,6 +92,20 @@ export default function Processo() {
   const tabsList = useMemo(
     () => [
       { value: 'Dados gerais', component: <DadosGerais /> },
+      ...(processo && processo?.estados?.filter((row) => row?.estado_id !== processo?.estado_atual_id)?.length > 0
+        ? [
+            {
+              value: 'Estados',
+              component: (
+                <Estados
+                  id={id}
+                  assunto={processo?.titular}
+                  pareceres={processo?.estados?.filter((row) => row?.estado_id !== processo?.estado_atual_id)}
+                />
+              ),
+            },
+          ]
+        : []),
       ...(processo && processo?.pareceres_estado?.length > 0
         ? [
             {
@@ -111,7 +130,7 @@ export default function Processo() {
     [id, isAdmin, auditoriaProcesso, processo]
   );
 
-  const handlePrevNext = (next) => {
+  const proximoAnterior = (next) => {
     if (mail && perfilId && id && estadoId) {
       dispatch(getItem('prevnext', { mail, next, perfilId, estadoId, processoId: id, estado }));
     } else {
@@ -120,41 +139,28 @@ export default function Processo() {
   };
 
   useEffect(() => {
-    if (done === 'aceitado') {
-      enqueueSnackbar('Processo aceitado com sucesso', { variant: 'success' });
-    } else if (done === 'arquivado') {
-      enqueueSnackbar('Processo arquivado com sucesso', { variant: 'success' });
-      handlePrevNext(true);
-    } else if (done === 'devolvida' || done === 'encaminhada') {
-      enqueueSnackbar(`Processo ${done} com sucesso`, { variant: 'success' });
-      handlePrevNext(true);
-    } else if (done === 'Processo adicionado a listagem de pendentes') {
-      enqueueSnackbar('Processo adicionado a listagem de pendentes', { variant: 'success' });
-      handlePrevNext(true);
-    } else if (done === 'Parecer enviado') {
-      enqueueSnackbar('Parecer enviado com sucesso', { variant: 'success' });
+    if (done) {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
+    }
+    if (done === 'Parecer enviado') {
       dispatch(parecerEstadoSuccess());
-      handlePrevNext(true);
-    } else if (done === 'finalizado') {
-      enqueueSnackbar('Processo finalizado com sucesso', { variant: 'success' });
-      handlePrevNext(true);
-    } else if (done === 'desarquivado') {
-      enqueueSnackbar('Processo desarquivado com sucesso', { variant: 'success' });
+    }
+    if (done === 'Processo desarquivado') {
       handleClose();
-      navigate(linkNavigate);
-    } else if (
-      done === 'Pedido enviado' ||
-      done === 'Envio cancelado' ||
-      done === 'Anexo eliminado' ||
-      done === 'Pareceres fechado' ||
-      done === 'Processo aceitado' ||
-      done === 'Processo libertado' ||
-      done === 'Processo resgatado'
+    }
+    if (
+      done === 'Parecer enviado' ||
+      done === 'Processo atribuído' ||
+      done === 'Processo arquivado' ||
+      done === 'Processo devolvida' ||
+      done === 'Processo finalizado' ||
+      done === 'Processo abandonado' ||
+      done === 'Processo encaminhada' ||
+      done === 'Atribuição eliminada' ||
+      done === 'Processo desarquivado' ||
+      done === 'Processo adicionado a listagem de pendentes'
     ) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-    } else if (done === 'Processo abandonado' || done === 'Atribuição eliminada' || done === 'Processo atribuído') {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      navigate(linkNavigate);
+      proximoAnterior(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -223,16 +229,7 @@ export default function Processo() {
           }
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-            {
-              name:
-                (fromEntradas && 'Entradas') ||
-                (fromTrabalhados && 'Trabalhados') ||
-                (fromPorConcluir && 'Por concluir') ||
-                (params?.get?.('from') &&
-                  params?.get?.('from')?.charAt(0)?.toUpperCase() + params?.get?.('from')?.slice(1)) ||
-                'Processos',
-              href: linkNavigate,
-            },
+            { name: params?.get?.('from') || 'Processos', href: linkNavigate },
             {
               name: processo
                 ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
@@ -251,13 +248,13 @@ export default function Processo() {
                         icon="back"
                         color="inherit"
                         label={`ANTERIOR (${estadoAtual?.nome})`}
-                        handleClick={() => handlePrevNext(false)}
+                        handleClick={() => proximoAnterior(false)}
                       />
                       <DefaultAction
                         icon="forward"
                         color="inherit"
                         label={`PRÓXIMO (${estadoAtual?.nome})`}
-                        handleClick={() => handlePrevNext(true)}
+                        handleClick={() => proximoAnterior(true)}
                       />
                     </>
                   )}

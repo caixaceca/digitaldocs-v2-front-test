@@ -128,7 +128,7 @@ export function RowItem({ row, handleViewRow }) {
       <TableCell>{row?.nome}</TableCell>
       <TableCell>
         {(row?.criado_em || row?.trabalhado_em) && (
-          <Criado tipo="date" value={ptDateTime(row.criado_em || row?.trabalhado_em)} />
+          <Criado tipo="data" value={ptDateTime(row.criado_em || row?.trabalhado_em)} />
         )}
         {row?.colaborador && <Criado tipo="user" value={row.colaborador} shuffle />}
       </TableCell>

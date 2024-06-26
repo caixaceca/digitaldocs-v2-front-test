@@ -137,7 +137,7 @@ export function Detalhes({ item, closeModal }) {
                   <Stack spacing={0.5} sx={{ mt: 1 }}>
                     {selectedItem?.criador && <Criado tipo="user" value={selectedItem?.criador} shuffle />}
                     {selectedItem?.criado_em && (
-                      <Criado tipo="date" value={ptDateTime(selectedItem?.criado_em)} shuffle />
+                      <Criado tipo="data" value={ptDateTime(selectedItem?.criado_em)} shuffle />
                     )}
                   </Stack>
                 }
@@ -152,7 +152,7 @@ export function Detalhes({ item, closeModal }) {
                         <Criado tipo="user" value={selectedItem?.modificado_por} shuffle />
                       )}
                       {selectedItem?.modificado_em && (
-                        <Criado tipo="date" value={ptDateTime(selectedItem?.modificado_em)} />
+                        <Criado tipo="data" value={ptDateTime(selectedItem?.modificado_em)} />
                       )}
                     </Stack>
                   }

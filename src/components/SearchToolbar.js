@@ -149,15 +149,15 @@ export function SearchToolbarProcessos({
   const { cc } = useSelector((state) => state.intranet);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {tab !== 'agendados' && tab !== 'finalizados' && tab !== 'executados' && (
+      {tab !== 'Agendados' && tab !== 'Finalizados' && tab !== 'Executados' && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {(tab === 'tarefas' || tab === 'pendentes') && (
+          {(tab === 'Tarefas' || tab === 'Pendentes') && (
             <>
               <Ambiente />
               <Fluxo />
             </>
           )}
-          {cc?.uo?.tipo === 'Agências' && tab === 'pendentes' && (
+          {cc?.uo?.tipo === 'Agências' && tab === 'Pendentes' && (
             <Autocomplete
               fullWidth
               value={motivo || null}
@@ -167,7 +167,7 @@ export function SearchToolbarProcessos({
               onChange={(event, newValue) => setItemValue(newValue, setMotivo, 'motivoP')}
             />
           )}
-          {tab === 'tarefas' && (
+          {tab === 'Tarefas' && (
             <Autocomplete
               fullWidth
               value={segmento || null}
@@ -177,7 +177,7 @@ export function SearchToolbarProcessos({
               onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}
             />
           )}
-          {(tab === 'retidos' || tab === 'atribuidos') && (
+          {(tab === 'Retidos' || tab === 'Atribuídos') && (
             <Autocomplete
               fullWidth
               value={colaborador || null}
@@ -207,7 +207,6 @@ export function SearchToolbarProcessos({
 // ----------------------------------------------------------------------
 
 SearchToolbarEntradas.propTypes = {
-  tab: PropTypes.string,
   filter: PropTypes.string,
   estado: PropTypes.string,
   assunto: PropTypes.string,
@@ -372,14 +371,14 @@ export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
 
 SearchIndicadores.propTypes = {
   mes: PropTypes.object,
-  item: PropTypes.string,
   setMes: PropTypes.func,
+  item: PropTypes.string,
+  setItem: PropTypes.func,
   detalhes: PropTypes.bool,
-  assunto: PropTypes.string,
-  setAssunto: PropTypes.func,
+  itemsList: PropTypes.array,
   setDetalhes: PropTypes.func,
   viewEntrada: PropTypes.bool,
-  assuntosList: PropTypes.array,
+  indicador: PropTypes.string,
   colaborador: PropTypes.object,
   setColaborador: PropTypes.func,
   setViewEntrada: PropTypes.func,
@@ -388,13 +387,13 @@ SearchIndicadores.propTypes = {
 
 export function SearchIndicadores({
   mes,
-  item,
   setMes,
   detalhes,
+  indicador,
   setDetalhes,
-  assunto = null,
-  assuntosList = [],
-  setAssunto = null,
+  item = null,
+  itemsList = [],
+  setItem = null,
   colaborador = null,
   viewEntrada = false,
   setColaborador = null,
@@ -410,7 +409,7 @@ export function SearchIndicadores({
       direction={{ xs: 'column', sm: 'row' }}
     >
       <Stack spacing={1} alignItems="center" justifyContent="center" direction="row">
-        {item === 'Colaboradores' && (
+        {indicador === 'Colaboradores' && (
           <FilterSwitch value={viewEntrada} localS="viewEntrada" setValue={setViewEntrada} label="Dados entrada" />
         )}
         <FilterSwitch value={detalhes} localS="detalhes" setValue={setDetalhes} label="Dados mensais" />
@@ -425,17 +424,19 @@ export function SearchIndicadores({
         onChange={(event, newValue) => setItemValue(newValue, setMes, '', '')}
         renderInput={(params) => <TextField {...params} label="Mês" size="small" />}
       />
-      {item === 'Trabalhados' && (
+      {(indicador === 'Trabalhados' || indicador === 'Ação') && (
         <Autocomplete
           fullWidth
-          value={assunto || null}
-          options={assuntosList?.sort()}
+          value={item || null}
+          options={itemsList?.sort()}
           sx={{ width: { sm: 250, md: 350 } }}
-          onChange={(event, newValue) => setItemValue(newValue, setAssunto, '', '')}
-          renderInput={(params) => <TextField {...params} label="Assunto" size="small" />}
+          onChange={(event, newValue) => setItemValue(newValue, setItem, '', '')}
+          renderInput={(params) => (
+            <TextField {...params} label={indicador === 'Ação' ? 'Ação' : 'Assunto'} size="small" />
+          )}
         />
       )}
-      {item === 'Colaboradores' && (
+      {indicador === 'Colaboradores' && (
         <Autocomplete
           fullWidth
           value={colaborador}
@@ -447,16 +448,40 @@ export function SearchIndicadores({
           renderInput={(params) => <TextField {...params} label="Colaborador" size="small" />}
         />
       )}
-      {(mes || assunto || colaborador) && (
+      {(mes || item || colaborador) && (
         <RemoverFiltros
           removerFiltro={() => {
             setItemValue(null, setMes, '', '');
-            setItemValue(null, setAssunto, '', '');
+            setItemValue(null, setItem, '', '');
             setItemValue(null, setColaborador, '', '');
           }}
         />
       )}
     </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SearchAutocomplete.propTypes = {
+  dados: PropTypes.array,
+  value: PropTypes.string,
+  label: PropTypes.string,
+  valuel: PropTypes.string,
+  setValue: PropTypes.func,
+};
+
+export function SearchAutocomplete({ value = null, label, valuel = '', setValue, dados = [], ...others }) {
+  return (
+    <Autocomplete
+      fullWidth
+      value={value}
+      options={dados?.sort()}
+      sx={{ maxWidth: { md: 300 } }}
+      renderInput={(params) => <TextField {...params} label={label} />}
+      onChange={(event, newValue) => setItemValue(newValue, setValue, valuel)}
+      {...others}
+    />
   );
 }
 

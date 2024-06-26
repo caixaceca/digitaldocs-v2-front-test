@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
-import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
@@ -11,8 +10,6 @@ import Container from '@mui/material/Container';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
-import SearchIcon from '@mui/icons-material/Search';
-import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { dataPadraoPt } from '../utils/formatTime';
 // hooks
@@ -23,6 +20,7 @@ import { useDispatch, useSelector } from '../redux/store';
 import { getFromBanka, changeNumEntidade } from '../redux/slices/banka';
 // components
 import Page from '../components/Page';
+import { SearchAdornment } from '../components/Actions';
 import { SkeletonEntidade } from '../components/skeleton';
 import { TabsWrapperSimple } from '../components/TabsWrapper';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
@@ -81,15 +79,7 @@ export default function Entidade() {
                 }
               }}
               onChange={(event) => setNumero(event.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Fab size="small" variant="soft" sx={{ boxShadow: 'none' }} onClick={() => changeNumero()}>
-                      <SearchIcon />
-                    </Fab>
-                  </InputAdornment>
-                ),
-              }}
+              InputProps={{ endAdornment: numero && <SearchAdornment handleClick={changeNumero} /> }}
             />
           }
         />

@@ -62,15 +62,6 @@ export default function TableProcessos({ from }) {
   const perfilId = cc?.perfil_id;
   const estadoId = meuAmbiente?.id;
   const fromAgencia = cc?.uo?.tipo === 'Agências';
-  const title =
-    (from === 'tarefas' && 'Lista de tarefas') ||
-    (from === 'finalizados' && 'Finalizados') ||
-    (from === 'executados' && 'Executados') ||
-    (from === 'atribuidos' && 'Atribuídos') ||
-    (from === 'agendados' && 'Agendados') ||
-    (from === 'pendentes' && 'Pendentes') ||
-    (from === 'retidos' && 'Retidos') ||
-    from;
 
   const {
     page,
@@ -149,7 +140,7 @@ export default function TableProcessos({ from }) {
   return (
     <>
       <HeaderBreadcrumbs
-        heading={title}
+        heading={from}
         links={[{ name: '' }]}
         sx={{ color: 'text.secondary', px: 1 }}
         action={
@@ -204,7 +195,7 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.transitado_em && (
                           <>
-                            <Criado tipo="date" value={ptDateTime(row?.transitado_em)} />
+                            <Criado tipo="data" value={ptDateTime(row?.transitado_em)} />
                             <Criado
                               tipo="time"
                               value={fToNow(row?.transitado_em)}
