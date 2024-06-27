@@ -108,11 +108,11 @@ export function DefaultAction({
           sx={{ ...(small ? whsmall : wh), boxShadow: label === 'Remover' && 'none' }}
         >
           {(icon === 'parecer' && <NotesIcon />) ||
-            (icon === 'back' && <ArrowBackIcon />) ||
             (icon === 'cancelar' && <ClearIcon />) ||
             (icon === 'history' && <HistoryIcon />) ||
             (icon === 'confirmar' && <DoneAllIcon />) ||
-            (icon === 'forward' && <ArrowForwardIcon />) ||
+            (icon === 'ANTERIOR' && <ArrowBackIcon />) ||
+            (icon === 'PRÓXIMO' && <ArrowForwardIcon />) ||
             (label === 'PARECER' && <ChatOutlinedIcon />) ||
             (icon === 'views' && <PreviewOutlinedIcon />) ||
             (icon === 'acesso' && <TaskAltOutlinedIcon />) ||

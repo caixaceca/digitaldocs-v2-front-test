@@ -70,8 +70,8 @@ export function findColaborador(mail, colaboradores) {
 
 export function noDados(vazio) {
   return (
-    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-      {vazio ? '--' : 'Não identificado'}
+    <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+      {vazio ? '--' : '(Não identificado)'}
     </Typography>
   );
 }

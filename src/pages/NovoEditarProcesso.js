@@ -63,12 +63,12 @@ export default function NovoEditarProcesso() {
   useEffect(() => {
     dispatch(
       changeMeuAmbiente(
-        meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id) ||
+        meusAmbientes?.find((row) => row?.id === processo?.estados?.[0]?.estado_id) ||
           meusAmbientes?.find((row) => row?.id === meuAmbiente?.id) ||
           null
       )
     );
-  }, [dispatch, meuAmbiente?.id, meusAmbientes, processo?.estado_atual_id]);
+  }, [dispatch, meuAmbiente?.id, meusAmbientes, processo?.estados]);
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
@@ -147,7 +147,9 @@ export default function NovoEditarProcesso() {
           </CardContent>
         </Card>
         {(!isEdit && meuAmbiente?.is_inicial) ||
-        (processo?.preso && processo?.perfil_id === cc?.perfil_id && processo?.estado_atual_id === meuAmbiente?.id) ? (
+        (processo?.preso &&
+          processo?.perfil_id === cc?.perfil_id &&
+          processo?.estados?.[0]?.estado_id === meuAmbiente?.id) ? (
           <>
             {isEdit && isLoadingP ? (
               <Card sx={{ mb: 3 }}>

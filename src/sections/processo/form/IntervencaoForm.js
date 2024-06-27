@@ -79,12 +79,12 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [pendente, setPendente] = useState(false);
+  const [inParalelo, setInParalelo] = useState(false);
   const destinosParalelo = destinos?.filter((row) => row?.paralelo);
   const destinosSingulares = destinos?.filter((row) => !row?.paralelo);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { motivosPendencias } = useSelector((state) => state.parametrizacao);
-  const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
 
   const formSchema = Yup.object().shape({
@@ -105,11 +105,13 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
       mpendencia: null,
       parecer_favoravel: null,
       pendenteLevantamento: false,
-      destinos_par: [{ estado: null, noperacao: '', observacao: '' }],
       estado: destinosSingulares?.length === 1 ? destinosSingulares?.[0] : null,
+      destinos_par: [
+        { estado: null, noperacao: '', observacao: '' },
+        { estado: null, noperacao: '', observacao: '' },
+      ],
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [processo]
+    [destinosSingulares]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -148,8 +150,8 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
           updateItem('encaminhar paralelo', JSON.stringify(formData), {
             mail,
             id: processo.id,
-            msg: 'encaminhada',
             perfilId: cc?.perfil_id,
+            msg: 'Processo encaminhada',
           })
         );
       } else {
@@ -285,7 +287,7 @@ export function IntervencaoForm({ title, onCancel, destinos, isOpenModal, colabo
                           label="Observação"
                           name={`destinos_par[${index}].observacao`}
                         />
-                        {fields?.length > 1 && (
+                        {fields?.length > 2 && (
                           <DefaultAction small color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
                         )}
                       </Stack>
@@ -886,9 +888,7 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>
-        Parecer - {selectedItem?.nome?.replace(' - P/S/P', '') || selectedItem?.estado?.replace(' - P/S/P', '')}
-      </DialogTitle>
+      <DialogTitle>Parecer: {selectedItem?.nome || selectedItem?.estado}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -1285,21 +1285,26 @@ export function ColocarPendente({ from }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Abandonar.propTypes = { processo: PropTypes.object, isSaving: PropTypes.bool };
+Abandonar.propTypes = {
+  id: PropTypes.number,
+  isSaving: PropTypes.bool,
+  fluxoId: PropTypes.number,
+  estadoId: PropTypes.number,
+};
 
-export function Abandonar({ isSaving, processo }) {
+export function Abandonar({ id, fluxoId, estadoId, isSaving }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
   const handleAbandonar = () => {
     dispatch(
       updateItem('abandonar', null, {
-        id: processo?.id,
+        id,
         mail,
+        fluxoId,
+        estadoId,
         perfilId: cc?.perfil_id,
         msg: 'Processo abandonado',
-        fluxoId: processo?.fluxo_id,
-        estadoId: processo?.estado_atual_id || processo?.ultimo_estado_id,
       })
     );
   };
@@ -1317,6 +1322,65 @@ export function Abandonar({ isSaving, processo }) {
         desc="abandonar este processo"
       />
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+AtribuirAcessoForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func, processoId: PropTypes.number };
+
+export function AtribuirAcessoForm({ open, onCancel, processoId }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const colaboradoresList = colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
+
+  const formSchema = Yup.object().shape({
+    perfilID: Yup.mixed().nullable('Colaborador não pode ficar vazio').required('Colaborador não pode ficar vazio'),
+    datalimite: Yup.date().typeError('Introduza a data de término').required('Data de término não pode ficar vazio'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({ perfilID: null, datalimite: null, perfilIDCC: cc?.perfil_id }),
+    [cc?.perfil_id]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const onSubmit = async () => {
+    try {
+      values.perfilID = values?.perfilID?.id;
+      dispatch(updateItem('dar aceso', JSON.stringify(values), { id: processoId, mail, mensagem: 'Acesso atribuido' }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="xs">
+      <DialogTitle>Atribuir acesso</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12}>
+              <RHFAutocompleteObject name="perfilID" label="Colaborador" options={colaboradoresList} />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFDatePicker name="datalimite" label="Data de término" />
+            </Grid>
+          </Grid>
+          <DialogButons label="Atribuir" isSaving={isSaving} onCancel={onCancel} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
   );
 }
 

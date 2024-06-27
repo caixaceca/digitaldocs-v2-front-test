@@ -17,7 +17,6 @@ export const objetos = [
   { id: 'fluxo', label: 'Fluxo' },
   { id: 'origem', label: 'Origem' },
   { id: 'perfilestado', label: 'Perfil/Estado' },
-  { id: 'reconciliacao', label: 'Reconciliação' },
   { id: 'transicao', label: 'Transição' },
   { id: 'emissao-cartoes', label: 'Ver lista de receção de cartões' },
   { id: 'pjf', label: 'Ver lista de processos Judiciais e Fiscais' },

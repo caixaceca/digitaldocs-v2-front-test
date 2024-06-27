@@ -55,9 +55,6 @@ export default function Controle() {
         ...(isAdmin || temAcesso(['pjf-100'], meusacessos)
           ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
           : []),
-        ...(isAdmin || temAcesso(['reconciliacao-100'], meusacessos)
-          ? [{ value: 'Reconciliação', component: <TableCON item="reconciliacao" /> }]
-          : []),
       ] || [],
     [meusAmbientes, meusacessos, isAdmin, cc?.uo]
   );

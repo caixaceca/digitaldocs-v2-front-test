@@ -165,7 +165,7 @@ export default function Estados({ pareceres, id, assunto }) {
                   direction={{ xs: 'column', sm: 'row' }}
                 >
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    <Typography variant="subtitle1">{row?.estado?.replace(' - P/S/P', '')}</Typography>
+                    <Typography variant="subtitle1">{row?.estado}</Typography>
                     {row?.parecer && (
                       <Box>
                         <Label variant="ghost" sx={{ typography: 'subtitle2' }} color={colorLabel(row?.parecer)}>

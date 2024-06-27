@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // utils
@@ -152,7 +151,12 @@ export default function Intervencao({ colaboradoresList }) {
           </>
         )}
 
-      <Abandonar isSaving={isSaving} processo={processo} />
+      <Abandonar
+        id={processo?.id}
+        isSaving={isSaving}
+        fluxoId={processo?.fluxo_id}
+        estadoId={processo?.estados?.[0]?.estado_id}
+      />
 
       {!processo?.pendente && (
         <>
@@ -201,14 +205,7 @@ export function Libertar({ perfilID, processoID }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail } = useSelector((state) => state.intranet);
-  const { isSaving, done } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (done === 'Processo libertado') {
-      onClose();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const hanndleLibertar = () => {
     dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'Processo libertado' }));

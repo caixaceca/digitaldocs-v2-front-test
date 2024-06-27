@@ -231,7 +231,7 @@ export function estadoInicial(meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export function processoMePertence(meusAmbientes, estadoId) {
+export function pertencoEstadoId(meusAmbientes, estadoId) {
   return !!meusAmbientes?.find((row) => row?.id === estadoId);
 }
 

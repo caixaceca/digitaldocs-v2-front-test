@@ -2,8 +2,8 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
+import { BASEURLDD } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
-import { BASEURLDD, BASEURLSLIM } from '../../utils/axios';
 import { canPreview, b64toBlob } from '../../utils/getFileFormat';
 
 // ----------------------------------------------------------------------
@@ -41,7 +41,6 @@ const initialState = {
   porConcluir: [],
   trabalhados: [],
   pedidosAcesso: [],
-  reconciliacao: [],
 };
 
 const slice = createSlice({
@@ -175,11 +174,26 @@ const slice = createSlice({
       state.pjf = [...state.pjf, ...action.payload.objeto];
     },
 
-    getReconciliacaoSuccess(state, action) {
-      state.reconciliacao = action.payload;
-    },
-
     getProcessoSuccess(state, action) {
+      if (action.payload?.estados?.length === 0) {
+        action.payload.estados = [
+          {
+            _lock: action.payload?.preso,
+            perfil_id: action.payload?.perfil_id,
+            estado: action.payload?.estado_atual,
+            data_entrada: action.payload?.data_ultima_transicao,
+          },
+        ];
+      }
+      if (action.payload?.estados?.length > 1) {
+        action.payload = {
+          ...action.payload,
+          estado_envio: action.payload.estados?.find((row) => row?.estado_id === action.payload.estado_atual_id),
+        };
+        action.payload.estados = action.payload.estados?.filter(
+          (row) => row?.estado_id !== action.payload.estado_atual_id
+        );
+      }
       state.processo = action.payload;
       state.isLoadingP = false;
     },
@@ -189,7 +203,7 @@ const slice = createSlice({
       state.pesquisa = [...state.pesquisa, ...action.payload.objeto];
     },
 
-    getProcessoItemSuccess(state, action) {
+    addItemProcesso(state, action) {
       state.processo = { ...state.processo, ...action.payload };
     },
 
@@ -372,6 +386,7 @@ export const {
   closeParecer,
   selectParecer,
   closeModalAnexo,
+  addItemProcesso,
 } = slice.actions;
 
 // ----------------------------------------------------------------------
@@ -403,7 +418,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v2/processos/destinos/${params?.perfilId}/${params?.id}?estado_id=${params?.estadoId}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ destinos: response.data.objeto }));
+          dispatch(slice.actions.addItemProcesso({ destinos: response.data.objeto }));
           break;
         }
         case 'Tarefas': {
@@ -478,7 +493,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v2/processos/ht_transicoes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ htransicoes: response.data.objeto }));
+          dispatch(slice.actions.addItemProcesso({ htransicoes: response.data.objeto }));
           break;
         }
         case 'hretencoes': {
@@ -486,7 +501,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v2/processos/ht_retencoes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ hretencoes: response.data.objeto }));
+          dispatch(slice.actions.addItemProcesso({ hretencoes: response.data.objeto }));
           break;
         }
         case 'hpendencias': {
@@ -494,7 +509,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v2/processos/ht_pendencias/${params?.id}?perfil_cc_id=${params?.perfilId}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ hpendencias: response.data.objeto }));
+          dispatch(slice.actions.addItemProcesso({ hpendencias: response.data.objeto }));
           break;
         }
         case 'hatribuicoes': {
@@ -502,7 +517,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v2/processos/ht_atribuicoes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ hatribuicoes: response.data.objeto }));
+          dispatch(slice.actions.addItemProcesso({ hatribuicoes: response.data.objeto }));
           break;
         }
         case 'hvisualizacoes': {
@@ -510,7 +525,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v1/processos/visualizacoes/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ hvisualizacoes: response.data }));
+          dispatch(slice.actions.addItemProcesso({ hvisualizacoes: response.data }));
           break;
         }
         case 'hversoes': {
@@ -518,7 +533,7 @@ export function getAll(item, params) {
             `${BASEURLDD}/v1/processos/versoes/${params?.perfilId}?processoID=${params?.id}`,
             options
           );
-          dispatch(slice.actions.getProcessoItemSuccess({ hversoes: response.data }));
+          dispatch(slice.actions.addItemProcesso({ hversoes: response.data }));
           break;
         }
         case 'destinosDesarquivamento': {
@@ -612,14 +627,6 @@ export function getAll(item, params) {
             options
           );
           dispatch(slice.actions.getPjfSuccess(response.data));
-          break;
-        }
-        case 'reconciliacao': {
-          const response = await axios.get(
-            `${BASEURLSLIM}/api/v1/temp/mensagem/swift/normalizada?perfil_cc_id=${params?.perfilId}`,
-            options
-          );
-          dispatch(slice.actions.getReconciliacaoSuccess(response.data));
           break;
         }
 
@@ -837,6 +844,7 @@ export function updateItem(item, dados, params) {
         }
         case 'desarquivar': {
           await axios.patch(`${BASEURLDD}/v2/processos/desarquivar/${params?.perfilId}/${params?.id}`, dados, options);
+          dispatch(slice.actions.closeModal());
           break;
         }
         case 'parecer individual': {

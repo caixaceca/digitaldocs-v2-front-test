@@ -34,7 +34,7 @@ export default function ParecerExport({ dados }) {
               Parecer: <Text style={[styles.caption]}>{dados?.parecer?.parecer}</Text>
             </Text>
             <Text>
-              Unidade orgânica: <Text style={[styles.caption]}>{dados?.parecer?.nome?.replace(' - P/S/P', '')}</Text>
+              Unidade orgânica: <Text style={[styles.caption]}>{dados?.parecer?.nome}</Text>
             </Text>
             <Text>
               Data parecer:{' '}
@@ -61,7 +61,7 @@ export default function ParecerExport({ dados }) {
                 {dados?.parecer?.anexos
                   ?.filter((item) => item?.ativo)
                   .map((row) => (
-                    <Text key={row?.nome}> - {row?.nome?.replace(' - P/S/P', '')}</Text>
+                    <Text key={row?.nome}> - {row?.nome}</Text>
                   ))}
               </View>
             )}

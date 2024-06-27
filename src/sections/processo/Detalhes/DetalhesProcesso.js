@@ -48,24 +48,12 @@ export default function DetalhesProcesso({ isPS, processo }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const origem = origens?.find((row) => row?.id === processo?.origem_id);
   const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
-  const colaboradorLock = colaboradores?.find((row) => row?.perfil_id === processo?.perfil_id);
   const docPLabel = dis?.find((row) => row.id === processo?.tipo_doc_idp)?.label || 'Doc. primário';
   const docSLabel = dis?.find((row) => row.id === processo?.tipo_doc_ids)?.label || 'Doc. secundário';
   const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
   const con = processo?.con || null;
   const credito = processo?.credito || null;
   const situacao = credito?.situacao_final_mes || '';
-
-  const pareceresNaoValidados = () => {
-    let pareceres = '';
-    const pnv = processo?.pareceres_estado?.filter((item) => !item?.validado);
-    pnv?.forEach((row, index) => {
-      pareceres +=
-        pnv?.length - 1 === index ? row?.nome?.replace(' - P/S/P', '') : `${row?.nome?.replace(' - P/S/P', '')} / `;
-      return pareceres;
-    });
-    return pareceres;
-  };
 
   return (
     <>
@@ -97,46 +85,41 @@ export default function DetalhesProcesso({ isPS, processo }) {
             />
           )}
           {processo?.referencia && <TextItem title="Referência:" text={processo?.referencia} />}
-          {(processo?.estado_atual || processo?.em_paralelo) && (
+          {processo?.estados?.length > 0 && (
             <TextItem
               title="Estado atual:"
               label={
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle1">
-                    {processo?.em_paralelo ? pareceresNaoValidados() : processo?.estado_atual?.replace(' - P/S/P', '')}
-                  </Typography>
-                  {processo?.data_ultima_transicao && (
-                    <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
-                      <Criado caption tipo="data" value={ptDateTime(processo?.data_ultima_transicao)} />
-                      {processo?.estado_atual !== 'Arquivo' && (
-                        <Criado
-                          caption
-                          tipo="time"
-                          sx={{ color: colorProcesso(processo?.cor) }}
-                          value={fToNow(processo?.data_ultima_transicao)}
-                        />
-                      )}
-                    </Stack>
-                  )}
-                  {colaboradorLock && (
-                    <>
-                      {processo?.preso ? (
-                        <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
-                          <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                            {shuffleString(colaboradorLock?.perfil?.displayName)}
+                <Stack spacing={0.75} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
+                  {processo?.estados?.map((row, index) => {
+                    const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+                    return (
+                      <Stack key={`estado_${row?.id}_${index}`} spacing={0.5}>
+                        <Typography variant="subtitle1">{row?.estado}</Typography>
+                        {row?.data_entrada && (
+                          <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
+                            <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
+                            {row?.estado !== 'Arquivo' && (
+                              <Criado
+                                caption
+                                tipo="time"
+                                value={fToNow(row?.data_entrada)}
+                                sx={{ color: colorProcesso(processo?.cor) }}
+                              />
+                            )}
+                          </Stack>
+                        )}
+                        {colaboradorAfeto && (
+                          <Typography sx={{ typography: 'caption', color: 'info.main' }}>
+                            {row?._lock ? '' : 'Atribuído a '}
+                            <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                              {shuffleString(colaboradorAfeto?.perfil?.displayName)}
+                            </Typography>
+                            {row?._lock ? ' está trabalhando neste processo' : ''}
                           </Typography>
-                          &nbsp;está trabalhando neste processo
-                        </Typography>
-                      ) : (
-                        <Typography sx={{ typography: 'body2', color: 'text.primary' }}>
-                          Este processo foi atribuído a&nbsp;
-                          <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                            {shuffleString(colaboradorLock?.perfil?.displayName)}
-                          </Typography>
-                        </Typography>
-                      )}
-                    </>
-                  )}
+                        )}
+                      </Stack>
+                    );
+                  })}
                 </Stack>
               }
             />

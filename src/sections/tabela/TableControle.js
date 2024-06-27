@@ -16,13 +16,13 @@ import TableContainer from '@mui/material/TableContainer';
 import { ptDateTime } from '../../utils/formatTime';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
 import { dataValido, entidadesParse, shuffleString, noDados } from '../../utils/normalizeText';
+// routes
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';

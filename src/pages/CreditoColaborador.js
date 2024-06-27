@@ -6,7 +6,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { temNomeacao, processoMePertence, findColaboradores, arquivarCC } from '../utils/validarAcesso';
+import { temNomeacao, pertencoEstadoId, findColaboradores, arquivarCC } from '../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -225,7 +225,7 @@ export default function CreditoColaborador() {
 
   function podeAtribuir() {
     return (
-      !pedidoCC?.preso && ((processoMePertence(meusAmbientes, pedidoCC?.ultimo_estado_id) && isResponsavel) || isAdmin)
+      !pedidoCC?.preso && ((pertencoEstadoId(meusAmbientes, pedidoCC?.ultimo_estado_id) && isResponsavel) || isAdmin)
     );
   }
   return (
@@ -256,7 +256,7 @@ export default function CreditoColaborador() {
               <Stack direction="row" spacing={0.5}>
                 {!pedidoCC?.preso && pedidoCC?.ultimo_estado !== 'Arquivo' && (
                   <>
-                    {processoMePertence(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
+                    {pertencoEstadoId(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
                       (!pedidoCC?.afeto || (pedidoCC?.afeto && pedidoCC?.estados?.[0]?.perfil_id === cc?.perfil_id)) &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
                         <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
@@ -308,7 +308,12 @@ export default function CreditoColaborador() {
                         <EncaminharForm open={open1} onCancel={onClose1} destinos={destinosList?.seguimentos} />
                       </>
                     )}
-                    <Abandonar isSaving={isSaving} processo={pedidoCC} />
+                    <Abandonar
+                      id={pedidoCC?.id}
+                      isSaving={isSaving}
+                      fluxoId={pedidoCC?.fluxo_id}
+                      estadoId={pedidoCC?.ultimo_estado_id}
+                    />
                     {!pedidoCC?.pendente &&
                       pedidoCC?.estados?.length === 1 &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (

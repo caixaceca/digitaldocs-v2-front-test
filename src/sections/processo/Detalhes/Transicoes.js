@@ -88,14 +88,12 @@ function Transicao({ transicao, addConector }) {
                     spacing={{ xs: -0.5, sm: 0.5 }}
                     direction={{ xs: 'column', sm: 'row' }}
                   >
-                    {acao !== 'Desarquivo' && (
-                      <Typography variant="body2">{transicao?.estado_inicial?.replace(' - P/S/P', '')}</Typography>
-                    )}
+                    {acao !== 'Desarquivo' && <Typography variant="body2">{transicao?.estado_inicial}</Typography>}
                     <DoubleArrowIcon
                       color={color}
                       sx={{ width: 20, transform: { xs: 'rotate(90deg)', sm: 'rotate(0deg)' } }}
                     />
-                    <Typography variant="body2">{transicao?.estado_final?.replace(' - P/S/P', '')}</Typography>
+                    <Typography variant="body2">{transicao?.estado_final}</Typography>
                   </Stack>
                 )}
               </Stack>
