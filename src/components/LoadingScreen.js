@@ -14,8 +14,8 @@ const RootStyle = styled('div')(({ theme }) => ({
   zIndex: 99999,
   width: '100%',
   height: '100%',
-  position: 'fixed',
   display: 'flex',
+  position: 'fixed',
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: theme.palette.background.default,
@@ -36,21 +36,21 @@ export default function LoadingScreen({ ...other }) {
 export function Loading() {
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-      <CircularProgress size={120} thickness={1} />
+      <CircularProgress size={120} thickness={2} />
       <Box
         sx={{
           top: 0,
           left: 0,
-          bottom: 0,
           right: 0,
-          position: 'absolute',
+          bottom: 0,
           display: 'flex',
           alignItems: 'center',
+          position: 'absolute',
           justifyContent: 'center',
         }}
       >
         <m.div
-          animate={{ scale: [1, 0.9, 0.9, 1, 1], opacity: [1, 0.48, 0.48, 1, 1] }}
+          animate={{ opacity: [1, 0.5, 0.75, 1, 1, 0.75, 0.5, 1] }}
           transition={{ duration: 2, ease: 'easeInOut', repeatDelay: 1, repeat: Infinity }}
         >
           <Logo disabledLink sx={{ width: 50, height: 50 }} />

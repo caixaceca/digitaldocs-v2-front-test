@@ -1,12 +1,14 @@
 export {
   Home,
   Todos,
+  Media,
   Editar,
   Portal,
+  Maximo,
   Arquivo,
+  Atribuir,
   Eliminar,
   Detalhes,
-  Atribuir,
   Controle,
   Entidade,
   Contrato,
@@ -20,7 +22,6 @@ export {
   ContrasteAlt,
   Parametrizacao,
 } from './icons';
-
 export { default as DocIllustration } from './illustration_doc';
 export { default as UploadIllustration } from './illustration_upload';
 export { default as ForbiddenIllustration } from './illustration_403';

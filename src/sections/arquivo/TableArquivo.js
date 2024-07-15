@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados, shuffleString } from '../../utils/normalizeText';
+import { entidadesParse, noDados, baralharString } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -73,7 +73,7 @@ export default function TableArquivo({ tab }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'data_last_transicao', defaultOrder: 'desc' });
+  } = useTable({ defaultOrderBy: tab === 'pedidos' ? 'criado_em' : 'data_last_transicao', defaultOrder: 'desc' });
 
   useEffect(() => {
     if (mail && cc?.perfil_id && tab === 'arquivos') {
@@ -154,9 +154,9 @@ export default function TableArquivo({ tab }) {
                       {tab === 'arquivos' ? (
                         <TableRow hover key={`${tab}_${index}`}>
                           <TableCell>{row.referencia}</TableCell>
-                          <TableCell>{row?.titular ? shuffleString(row.titular) : noDados()}</TableCell>
+                          <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
                           <TableCell>
-                            {(row?.entidades && shuffleString(entidadesParse(row?.entidades))) || noDados()}
+                            {(row?.entidades && baralharString(entidadesParse(row?.entidades))) || noDados()}
                           </TableCell>
                           <TableCell align="center">
                             {row?.data_last_transicao && (
@@ -171,7 +171,7 @@ export default function TableArquivo({ tab }) {
                         </TableRow>
                       ) : (
                         <TableRow hover key={`${tab}_${index}`}>
-                          <TableCell>{shuffleString(row?.nome)}</TableCell>
+                          <TableCell>{baralharString(row?.nome)}</TableCell>
                           <TableCell>{row?.processo_id}</TableCell>
                           <TableCell align="center" width={50}>
                             {row?.criado_em && (

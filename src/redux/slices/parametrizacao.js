@@ -650,6 +650,7 @@ export function createItem(item, dados, params) {
               estado_inicial_id: row?.estado_inicial_id,
               is_after_devolucao: row?.is_after_devolucao,
               arqhasopnumero: row?.arqhasopnumero || false,
+              requer_parecer: row?.requer_parecer || false,
             });
           });
           await axios.post(`${BASEURLDD}/v1/transicoes/multi`, JSON.stringify(transicoes), options);

@@ -1,6 +1,4 @@
 /* eslint-disable no-template-curly-in-string */
-// i18n
-import './locales/i18n';
 
 // styles
 import './style.css';
@@ -48,8 +46,9 @@ import { msalConfig } from './config';
 
 //
 import App from './App';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+
 import reportWebVitals from './reportWebVitals';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // ----------------------------------------------------------------------
 
@@ -99,5 +98,4 @@ root.render(
 );
 
 serviceWorkerRegistration.register();
-
 reportWebVitals();

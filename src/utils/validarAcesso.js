@@ -200,8 +200,14 @@ export function podeSerAtribuido(assunto) {
 
 // ----------------------------------------------------------------------
 
-export function naGerencia(estado) {
-  return estado?.includes('Gerência') || estado?.includes('Caixa Principal');
+export function deGmkt(assunto) {
+  return assunto === 'Preçário' || assunto === 'Formulário' || assunto === 'Produtos e Serviços';
+}
+
+// ----------------------------------------------------------------------
+
+export function noEstado(estado, labels) {
+  return !!labels?.find((row) => estado?.includes(row));
 }
 
 // ----------------------------------------------------------------------
@@ -258,6 +264,6 @@ export function podeDarParecer(meusAmbientes, pareceres) {
 
 export function findColaboradores(colaboradores, idsList) {
   return colaboradores
-    ?.filter((row) => idsList.includes(row?.perfil_id))
+    ?.filter((row) => idsList?.map((row) => row?.perfil_id)?.includes(row?.perfil_id))
     ?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
 }

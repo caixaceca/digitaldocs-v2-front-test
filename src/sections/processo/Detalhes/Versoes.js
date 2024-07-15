@@ -7,7 +7,6 @@ import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { fDateTime } from '../../../utils/formatTime';
 // redux
@@ -47,39 +46,22 @@ export default function Versoes({ id }) {
   }, [dispatch, id, mail, cc?.perfil_id]);
 
   return (
-    <>
+    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
       {isLoading ? (
-        <Stack sx={{ p: 2 }}>
-          <SkeletonBar column={3} height={150} />
-        </Stack>
+        <SkeletonBar column={3} height={150} />
       ) : (
         <>
-          {processo?.hversoes?.length === 0 ? (
+          {!processo?.hversoes || processo?.hversoes?.length === 0 ? (
             <SearchNotFound message="O processo ainda não foi modificado..." />
           ) : (
             processo?.hversoes?.map((row, index) => {
               const colaborador = colaboradores?.find((_row) => _row.perfil_id === row?.updated_by);
-              const getNew = (newObj, oldObj) => {
-                if (Object.keys(oldObj).length === 0 && Object.keys(newObj).length > 0) return newObj;
-                const diff = {};
-                // eslint-disable-next-line no-restricted-syntax
-                for (const key in oldObj) {
-                  if (newObj[key] && oldObj[key] !== newObj[key]) {
-                    diff[key] = newObj[key];
-                  }
-                }
-                if (Object.keys(diff).length > 0) return diff;
-                return oldObj;
-              };
 
               return (
-                <Stack key={row?.updated_in} sx={{ px: 3, py: 1.5 }}>
+                <Stack key={row?.updated_in}>
                   <Accordion expanded={accord === row?.updated_in} onChange={handleAccord(row?.updated_in)}>
-                    <AccordionSummary
-                      expandIcon={<KeyboardArrowDownIcon />}
-                      sx={{ backgroundColor: accord === row?.updated_in && 'background.neutral', borderRadius: 1 }}
-                    >
-                      <Stack spacing={3} direction="row" sx={{ flexGrow: 1, pr: 3 }} justifyContent="space-between">
+                    <AccordionSummary>
+                      <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
                         <Stack>
                           <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
                             Alterado em:
@@ -97,7 +79,11 @@ export default function Versoes({ id }) {
                     </AccordionSummary>
                     <AccordionDetails>
                       <DetalhesProcesso
-                        processo={index === 0 ? getNew(row, processo) : getNew(processo?.hversoes[index - 1], row)}
+                        processo={
+                          index === 0
+                            ? camposAterados(row, processo)
+                            : camposAterados(processo?.hversoes[index - 1], row)
+                        }
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -108,6 +94,21 @@ export default function Versoes({ id }) {
           )}
         </>
       )}
-    </>
+    </Stack>
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function camposAterados(newObj, oldObj) {
+  if (Object.keys(oldObj).length === 0 && Object.keys(newObj).length > 0) return newObj;
+  const chaves = Object.keys(oldObj);
+  const diff = {};
+  chaves?.forEach((key) => {
+    if (newObj[key] && oldObj[key] !== newObj[key]) {
+      diff[key] = newObj[key];
+    }
+  });
+  if (Object.keys(diff).length > 0) return diff;
+  return oldObj;
 }

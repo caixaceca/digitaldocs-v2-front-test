@@ -2,14 +2,15 @@ import { sumBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -27,9 +28,9 @@ import { useSelector } from '../../redux/store';
 // components
 import MyAvatar from '../../components/MyAvatar';
 import Chart, { useChart } from '../../components/chart';
-import { Fechar, DefaultAction } from '../../components/Actions';
+import { DTFechar, DefaultAction } from '../../components/Actions';
 //
-import { IndicadorItem, CardInfo, ColaboradorCard, TableExport, TabView, LineProgress } from './Indicadores';
+import { TabView, CardInfo, dadosResumo, TableExport, IndicadorItem, ColaboradorCard } from './Indicadores';
 
 // ----------------------------------------------------------------------
 
@@ -85,21 +86,8 @@ export function Criacao({ periodo, indicadores }) {
   });
 
   const resumo = useMemo(
-    () => [
-      { label: 'Total', valor: total, desc: '' },
-      { label: 'Média', valor: total / indicadores?.length, desc: periodo.charAt(0).toUpperCase() + periodo.slice(1) },
-      {
-        label: 'Mais processos',
-        valor: Math.max(...indicadores?.map((row) => row.total)),
-        desc: indicadores?.find((row) => row.total === Math.max(...indicadores?.map((row) => row.total)))?.criado_em,
-      },
-      {
-        label: 'Menos processos',
-        valor: Math.min(...indicadores?.map((row) => row.total)),
-        desc: indicadores?.find((row) => row.total === Math.min(...indicadores?.map((row) => row.total)))?.criado_em,
-      },
-    ],
-    [indicadores, periodo, total]
+    () => [{ label: 'Total', valor: total, desc: '' }, ...dadosResumo(indicadores, 'total', 'criado_em')],
+    [indicadores, total]
   );
 
   return (
@@ -115,18 +103,11 @@ export function Criacao({ periodo, indicadores }) {
                 <CardInfo
                   title={row?.label}
                   total={row?.valor}
+                  percentagem={row?.percentagem}
                   label={
-                    (row?.desc &&
-                      row?.label !== 'Total' &&
-                      row?.label !== 'Média' &&
-                      periodo === 'anual' &&
-                      fYear(row?.desc)?.toString()) ||
-                    (row?.desc &&
-                      row?.label !== 'Total' &&
-                      row?.label !== 'Média' &&
-                      periodo === 'mensal' &&
-                      fMonthYear(row?.desc)) ||
-                    row?.desc?.toString()
+                    (row?.desc && periodo === 'anual' && fYear(row?.desc)?.toString()) ||
+                    (row?.desc && periodo === 'mensal' && fMonthYear(row?.desc)) ||
+                    row?.desc
                   }
                 />
               </Grid>
@@ -173,7 +154,10 @@ export function EntradasTrabalhados({ indicadores }) {
   const dadosByAssunto = useMemo(() => indicadoresGroupBy(indicadores, 'assunto'), [indicadores]);
   const total = useMemo(() => sumBy(indicadores, 'total'), [indicadores]);
   const isNotFound = !dadosByColaborador.length;
-  const colaboradoresList = useMemo(() => colaboradoresFilter(colaboradores), [colaboradores]);
+  const colaboradoresList = useMemo(
+    () => colaboradoresFilter(colaboradores, dadosByColaborador),
+    [colaboradores, dadosByColaborador]
+  );
   const totalC1 = useMemo(
     () => sumBy(dadosByColaborador?.find((row) => row?.item === colaborador1?.id)?.processos, 'total'),
     [colaborador1?.id, dadosByColaborador]
@@ -216,56 +200,21 @@ export function EntradasTrabalhados({ indicadores }) {
                   <>
                     <DefaultAction small button handleClick={onOpen1} label="Comparar colaboradores" />
                     <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
-                      <DialogTitle sx={{ pr: 1 }}>
-                        <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ pr: 1.5 }}>
-                          <Typography variant="h6">Comparação colaboradores</Typography>
-                          <Fechar handleClick={handleClose} />
-                        </Stack>
-                      </DialogTitle>
+                      <DTFechar title="Comparação colaboradores" handleClick={() => handleClose()} />
                       <DialogContent>
                         <Grid container spacing={1.5} sx={{ mt: 1 }}>
-                          <Grid item xs={12} sm={6}>
-                            <Autocomplete
-                              fullWidth
-                              size="small"
-                              disableClearable
-                              value={colaborador1}
-                              onChange={(event, newValue) => setColaborador1(newValue)}
-                              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                              options={colaboradoresList?.filter((row) => row?.id !== colaborador2?.id)}
-                              renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
-                            />
-                            {colaborador1 && (
-                              <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                <MyAvatar
-                                  alt={colaborador1?.label}
-                                  src={getFile('colaborador', isProduction() ? colaborador1?.foto : '')}
-                                  sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
-                                />
-                              </Stack>
-                            )}
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <Autocomplete
-                              fullWidth
-                              size="small"
-                              disableClearable
-                              value={colaborador2}
-                              onChange={(event, newValue) => setColaborador2(newValue)}
-                              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                              options={colaboradoresList?.filter((row) => row?.id !== colaborador1?.id)}
-                              renderInput={(params) => <TextField {...params} label="Colaborador 2" />}
-                            />
-                            {colaborador2 && (
-                              <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
-                                <MyAvatar
-                                  alt={colaborador2?.label}
-                                  src={getFile('colaborador', isProduction() ? colaborador2?.foto : '')}
-                                  sx={{ width: 64, height: 64, boxShadow: (theme) => theme.customShadows.z8 }}
-                                />
-                              </Stack>
-                            )}
-                          </Grid>
+                          <ColaboradorComp
+                            colaborador={colaborador1}
+                            colaboradorComp={colaborador2}
+                            setColaborador={setColaborador1}
+                            colaboradoresList={colaboradoresList}
+                          />
+                          <ColaboradorComp
+                            colaborador={colaborador2}
+                            colaboradorComp={colaborador1}
+                            setColaborador={setColaborador2}
+                            colaboradoresList={colaboradoresList}
+                          />
                           {colaborador1 && colaborador2 && (
                             <>
                               <LineProgress
@@ -316,10 +265,17 @@ export function EntradasTrabalhados({ indicadores }) {
                           <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
                             {row?.item}
                           </Typography>
-                          <Typography variant="subtitle1">&nbsp;{fNumber(subtotal)}</Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            ({fPercent(percentagem)})
-                          </Typography>
+                          <Stack
+                            spacing={0.75}
+                            direction="row"
+                            alignItems="center"
+                            divider={<Divider orientation="vertical" flexItem />}
+                          >
+                            <Typography variant="subtitle1">&nbsp;{fNumber(subtotal)}</Typography>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              {fPercent(percentagem)}
+                            </Typography>
+                          </Stack>
                         </Stack>
                         <LinearProgress variant="determinate" value={percentagem} color="success" />
                       </Stack>
@@ -346,9 +302,9 @@ export function EntradasTrabalhados({ indicadores }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DevolvidosTipos.propTypes = { indicadores: PropTypes.array };
+DevolvidosTipos.propTypes = { indicadores: PropTypes.array, dev: PropTypes.bool };
 
-export function DevolvidosTipos({ indicadores }) {
+export function DevolvidosTipos({ dev, indicadores }) {
   const theme = useTheme();
   const { isLoading } = useSelector((state) => state.indicadores);
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
@@ -357,22 +313,7 @@ export function DevolvidosTipos({ indicadores }) {
   const labels = useMemo(() => indicadores?.map((row) => row?.assunto), [indicadores]);
   const quantidades = useMemo(() => indicadores?.map((row) => row?.total), [indicadores]);
   const percentagem = useMemo(() => indicadores?.map((row) => (row?.total * 100) / total), [indicadores, total]);
-  const resumo = useMemo(
-    () => [
-      { label: 'Total', valor: sumBy(indicadores, 'total'), desc: '' },
-      {
-        label: 'Mais processos',
-        valor: Math.max(...indicadores?.map((row) => row.total)),
-        desc: indicadores?.find((row) => row.total === Math.max(...indicadores?.map((row) => row.total)))?.assunto,
-      },
-      {
-        label: 'Menos processos',
-        valor: Math.min(...indicadores?.map((row) => row.total)),
-        desc: indicadores?.find((row) => row.total === Math.min(...indicadores?.map((row) => row.total)))?.assunto,
-      },
-    ],
-    [indicadores]
-  );
+  const resumo = useMemo(() => dadosResumo(indicadores, 'total', 'assunto'), [indicadores]);
   const series = useMemo(
     () => [
       { name: 'Quantidade', type: 'bar', data: quantidades },
@@ -394,17 +335,17 @@ export function DevolvidosTipos({ indicadores }) {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Card sx={{ p: 1, boxShadow: 'none', bgcolor: 'background.neutral' }}>
-                <Grid container spacing={1}>
-                  {resumo?.map((row) => (
-                    <Grid key={row?.label} item xs={12} sm={4}>
-                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
-                    </Grid>
-                  ))}
-                </Grid>
-              </Card>
-            </Grid>
+            {resumo?.map((row) => (
+              <Grid key={row?.label} item xs={12} sm={4}>
+                <CardInfo
+                  dev={dev}
+                  label={row?.desc}
+                  title={row?.label}
+                  total={row?.valor}
+                  percentagem={row?.percentagem}
+                />
+              </Grid>
+            ))}
             <Grid item xs={12}>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
@@ -443,17 +384,7 @@ export function Origem({ top, indicadores }) {
   const resumo = useMemo(
     () => [
       { label: 'Total', valor: sumBy(origemByItem, 'total'), desc: '' },
-      { label: 'Média', valor: sumBy(origemByItem, 'total') / origemByItem?.length, desc: '' },
-      {
-        label: 'Mais processos',
-        valor: Math.max(...origemByItem?.map((row) => row.total)),
-        desc: origemByItem?.find((row) => row.total === Math.max(...origemByItem?.map((row) => row.total)))?.label,
-      },
-      {
-        label: 'Menos processos',
-        valor: Math.min(...origemByItem?.map((row) => row.total)),
-        desc: origemByItem?.find((row) => row.total === Math.min(...origemByItem?.map((row) => row.total)))?.label,
-      },
+      ...dadosResumo(origemByItem, 'total', 'label'),
     ],
     [origemByItem]
   );
@@ -478,17 +409,11 @@ export function Origem({ top, indicadores }) {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Card sx={{ p: 1, boxShadow: 'none', bgcolor: 'background.neutral' }}>
-                <Grid container spacing={1}>
-                  {resumo?.map((row) => (
-                    <Grid key={row?.label} item xs={12} sm={6} md={3}>
-                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} />
-                    </Grid>
-                  ))}
-                </Grid>
-              </Card>
-            </Grid>
+            {resumo?.map((row) => (
+              <Grid key={row?.label} item xs={12} sm={6} md={3}>
+                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} percentagem={row?.percentagem} />
+              </Grid>
+            ))}
             <Grid item xs={12}>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
@@ -500,6 +425,86 @@ export function Origem({ top, indicadores }) {
         }
       />
     </Card>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+ColaboradorComp.propTypes = {
+  colaborador: PropTypes.object,
+  setColaborador: PropTypes.func,
+  colaboradorComp: PropTypes.object,
+  colaboradoresList: PropTypes.array,
+};
+
+export function ColaboradorComp({ colaborador, colaboradoresList = [], colaboradorComp, setColaborador }) {
+  return (
+    <Grid item xs={12} sm={6}>
+      <Stack
+        spacing={1}
+        direction="row"
+        alignItems="center"
+        sx={{ py: 1, px: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}
+      >
+        <MyAvatar
+          alt={colaborador?.label}
+          src={getFile('colaborador', isProduction() ? colaborador?.foto : '')}
+          sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
+        />
+        <Autocomplete
+          fullWidth
+          size="small"
+          disableClearable
+          value={colaborador}
+          onChange={(event, newValue) => setColaborador(newValue)}
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          options={colaboradoresList?.filter((row) => row?.id !== colaboradorComp?.id)}
+          renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
+        />
+      </Stack>
+    </Grid>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+LineProgress.propTypes = {
+  item: PropTypes.string,
+  isTotal: PropTypes.bool,
+  leftSuccess: PropTypes.bool,
+  trabalhadoC1: PropTypes.number,
+  trabalhadoC2: PropTypes.number,
+};
+
+export function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSuccess }) {
+  const theme = useTheme();
+  const colorLeft = leftSuccess ? theme.palette.success.main : theme.palette.focus.main;
+  const colorRight = leftSuccess ? theme.palette.focus.main : theme.palette.success.main;
+  const totalT = trabalhadoC1 > trabalhadoC2 ? trabalhadoC1 : trabalhadoC2;
+  return (
+    <>
+      <Grid item xs={12} sx={{ mt: 1.25 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Typography variant={isTotal ? 'h6' : 'subtitle1'}>{fNumber(trabalhadoC1)}</Typography>
+          <Typography variant={isTotal ? 'body1' : 'body2'} noWrap sx={{ textAlign: 'center' }}>
+            {item}
+          </Typography>
+          <Typography variant={isTotal ? 'h6' : 'subtitle1'}>{fNumber(trabalhadoC2)}</Typography>
+        </Stack>
+      </Grid>
+      <Grid item xs={6} sx={{ pt: '6px !important' }}>
+        <Stack direction="column" alignItems="flex-end">
+          <Box sx={{ width: `${(trabalhadoC1 * 100) / totalT}%`, border: `2px solid ${colorLeft}` }}> </Box>
+          <Box sx={{ width: '100%', border: `1px solid ${colorLeft}` }}> </Box>
+        </Stack>
+      </Grid>
+      <Grid item xs={6} sx={{ pt: '6px !important' }}>
+        <Stack direction="column" alignItems="flex-start">
+          <Box sx={{ width: `${(trabalhadoC2 * 100) / totalT}%`, border: `2px solid ${colorRight}` }}> </Box>
+          <Box sx={{ width: '100%', border: `1px solid ${colorRight}` }}> </Box>
+        </Stack>
+      </Grid>
+    </>
   );
 }
 
@@ -522,16 +527,16 @@ function indicadoresGroupBy(dados, item) {
 
 // ----------------------------------------------------------------------
 
-function colaboradoresFilter(colaboradores) {
-  const dados = [];
-  colaboradores?.forEach((row) => {
+function colaboradoresFilter(colaboradores, dados) {
+  const colaboradoresList = [];
+  dados?.forEach((row) => {
     const colab = colaboradores?.find((item) => item.perfil_id === row?.item);
     if (colab) {
-      dados.push({ id: colab?.perfil_id, foto: colab?.foto_disk, label: colab?.perfil?.displayName });
+      colaboradoresList.push({ id: colab?.perfil_id, foto: colab?.foto_disk, label: colab?.perfil?.displayName });
     }
   });
 
-  return dados;
+  return colaboradoresList;
 }
 
 // ----------------------------------------------------------------------

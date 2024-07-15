@@ -19,13 +19,13 @@ const initialState = {
   isOpenDisposicao: false,
   done: '',
   mail: '',
-  perfil: {},
-  msalProfile: {},
   cc: null,
   frase: null,
   ajuda: null,
+  perfil: null,
   documento: null,
   accessToken: null,
+  msalProfile: null,
   uos: [],
   links: [],
   perfis: [],
@@ -132,7 +132,7 @@ const slice = createSlice({
       );
     },
 
-    getCurrentColaboradorSuccess(state, action) {
+    getCcSuccess(state, action) {
       state.cc = action.payload;
     },
 
@@ -141,8 +141,8 @@ const slice = createSlice({
     },
 
     getMsalProfileSuccess(state, action) {
-      state.msalProfile = action.payload;
       state.mail = action.payload.mail;
+      state.msalProfile = action.payload;
     },
 
     getProfileSuccess(state, action) {
@@ -181,20 +181,15 @@ export const { closeDisposicao, resetItem } = slice.actions;
 
 // ----------------------------------------------------------------------
 
-export function AzureIntranetHandShake(instance, accounts) {
+export function acquireToken(instance, account) {
   return async (dispatch) => {
     try {
-      instance
-        .acquireTokenSilent({
-          ...loginRequest,
-          account: accounts[0],
-        })
-        .then((response) => {
-          dispatch(slice.actions.getAccessTokenSuccess(response.accessToken));
-          callMsGraph(response.accessToken).then((response) => {
-            dispatch(slice.actions.getMsalProfileSuccess(response));
-          });
+      instance.acquireTokenSilent({ ...loginRequest, account }).then((response) => {
+        dispatch(slice.actions.getAccessTokenSuccess(response.accessToken));
+        callMsGraph(response.accessToken).then((response) => {
+          dispatch(slice.actions.getMsalProfileSuccess(response));
         });
+      });
     } catch (error) {
       console.log(errorMsg(error));
     }
@@ -265,9 +260,9 @@ export function getFromIntranet(item, params) {
           dispatch(slice.actions.getPerguntasSuccess(response.data));
           break;
         }
-        case 'colaborador': {
+        case 'cc': {
           const response = await axios.get(`${BASEURL}/colaborador/${params?.id}`, options);
-          dispatch(slice.actions.getCurrentColaboradorSuccess(response.data));
+          dispatch(slice.actions.getCcSuccess(response.data));
           break;
         }
         case 'colaboradores': {

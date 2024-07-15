@@ -4,8 +4,6 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-// hooks
-import useLocales from '../../../hooks/useLocales';
 // guards
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
@@ -31,8 +29,6 @@ NavItem.propTypes = {
 };
 
 export default function NavItem({ item, depth, active, open, isCollapse, ...other }) {
-  const { translate } = useLocales();
-
   const { title, icon, info, children, disabled, caption, roles } = item;
 
   const renderContent = (
@@ -43,11 +39,11 @@ export default function NavItem({ item, depth, active, open, isCollapse, ...othe
 
       <ListItemTextStyle
         isCollapse={isCollapse}
-        primary={translate(title)}
+        primary={title}
         secondary={
           caption && (
-            <Tooltip title={translate(caption)} placement="top-start">
-              <span>{translate(caption)}</span>
+            <Tooltip title={caption} placement="top-start">
+              <span>{caption}</span>
             </Tooltip>
           )
         }

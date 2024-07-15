@@ -9,7 +9,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
 import { newLineText } from '../../../utils/normalizeText';
@@ -59,7 +58,7 @@ export default function PareceresEstado({ pareceres, estado, normal = false }) {
                 expanded={accord === `parecer_${row.id}`}
                 onChange={handleAccord(`parecer_${row.id}`)}
               >
-                <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+                <AccordionSummary>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1, pr: 2 }}>
                     <ColaboradorInfo
                       foto={colaborador?.foto_disk}

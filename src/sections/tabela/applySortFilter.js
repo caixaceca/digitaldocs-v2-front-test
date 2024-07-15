@@ -46,7 +46,7 @@ export function dadosList(array, colaboradores, tab) {
   const colaboradoresList = [];
   array?.forEach((row) => {
     let colaboradorNome = '';
-    if (tab === 'entradas' || tab === 'porconcluir') {
+    if (tab === 'Entradas' || tab === 'Por concluir') {
       const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.dono));
       if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
         colaboradoresList.push(colaborador?.perfil?.displayName);

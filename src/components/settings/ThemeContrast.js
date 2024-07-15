@@ -10,9 +10,7 @@ import componentsOverride from '../../theme/overrides';
 
 // ----------------------------------------------------------------------
 
-ThemeContrast.propTypes = {
-  children: PropTypes.node,
-};
+ThemeContrast.propTypes = { children: PropTypes.node };
 
 export default function ThemeContrast({ children }) {
   const defaultTheme = useTheme();
@@ -31,7 +29,7 @@ export default function ThemeContrast({ children }) {
       zIndex: 0,
       position: 'relative',
       borderRadius: Number(defaultTheme.shape.borderRadius) * 2,
-      boxShadow: `0 0 1px 0 ${alpha(shadowColor, 0.48)}, 0 2px 4px -1px ${alpha(shadowColor, 0.24)}`,
+      boxShadow: `0 0 1px 0 ${alpha(shadowColor, 0.6)}, 0 2px 4px -1px ${alpha(shadowColor, 0.36)}`,
     },
   };
 
@@ -47,9 +45,7 @@ export default function ThemeContrast({ children }) {
       },
       components: {
         MuiCard: {
-          styleOverrides: {
-            root: themeContrast === 'bold' ? styles.cardBold : styles.cardDefault,
-          },
+          styleOverrides: { root: themeContrast === 'bold' ? styles.cardBold : styles.cardDefault },
         },
       },
     }),
@@ -59,10 +55,7 @@ export default function ThemeContrast({ children }) {
 
   const theme = createTheme(themeOptions);
 
-  theme.components = {
-    ...componentsOverride(theme),
-    MuiCard: themeOptions.components?.MuiCard,
-  };
+  theme.components = { ...componentsOverride(theme), MuiCard: themeOptions.components?.MuiCard };
 
   return (
     <ThemeProvider theme={theme}>

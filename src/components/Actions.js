@@ -14,6 +14,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
 import SearchIcon from '@mui/icons-material/Search';
 import RemoveIcon from '@mui/icons-material/Remove';
 import HistoryIcon from '@mui/icons-material/History';
@@ -50,7 +51,7 @@ import useToggle from '../hooks/useToggle';
 import { useSelector, useDispatch } from '../redux/store';
 import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/parametrizacao';
 // assets
-import { Editar, Arquivo, Seguimento, Abandonar, Resgatar, Detalhes, Eliminar } from '../assets';
+import { Editar, Arquivo, Seguimento, Abandonar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
 //
 import { Criado } from './Panel';
 import SvgIconStyle from './SvgIconStyle';
@@ -121,8 +122,8 @@ export function DefaultAction({
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
             (label === 'EDITAR' && <Editar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
+            (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
             (icon === 'abandonar' && <Abandonar sx={{ width: 24, height: 24 }} />) ||
-            (icon === 'encaminhar' && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'INFO. DAS CONTAS' && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -132,10 +133,11 @@ export function DefaultAction({
             (icon === 'resgatar' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Clonar fluxo' && <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
-            (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
-            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'devolver' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+            ((label === 'Encaminhar' || label === 'Despacho') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
+            (label === 'Devolver' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
+            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'finalizar' && <SvgIconStyle src="/assets/icons/stop.svg" />)}
         </Fab>
       </Tooltip>
@@ -245,6 +247,21 @@ export function Fechar({ button = false, large = false, handleClick }) {
 
 // ----------------------------------------------------------------------
 
+DTFechar.propTypes = { title: PropTypes.string, handleClick: PropTypes.func };
+
+export function DTFechar({ title, handleClick }) {
+  return (
+    <DialogTitle>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+        {title}
+        <Fechar handleClick={handleClick} />
+      </Stack>
+    </DialogTitle>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 DialogButons.propTypes = {
   edit: PropTypes.bool,
   desc: PropTypes.string,
@@ -252,6 +269,7 @@ DialogButons.propTypes = {
   color: PropTypes.string,
   isSaving: PropTypes.bool,
   onCancel: PropTypes.func,
+  hideSubmit: PropTypes.bool,
   handleDelete: PropTypes.func,
 };
 
@@ -261,8 +279,9 @@ export function DialogButons({
   desc = '',
   label = '',
   edit = false,
-  handleDelete,
   color = 'primary',
+  hideSubmit = false,
+  handleDelete = null,
 }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
@@ -274,17 +293,21 @@ export function DialogButons({
         </>
       )}
       <Box sx={{ flexGrow: 1 }} />
-      <Button variant="outlined" color="inherit" onClick={onCancel}>
+      <Button variant="outlined" color="inherit" onClick={() => onCancel()}>
         Cancelar
       </Button>
-      <LoadingButton
-        type="submit"
-        color={color}
-        loading={isSaving}
-        variant={color === 'error' || color === 'warning' ? 'soft' : 'contained'}
-      >
-        {(label && label) || (edit && 'Guardar') || 'Adicionar'}
-      </LoadingButton>
+      {hideSubmit ? (
+        ''
+      ) : (
+        <LoadingButton
+          type="submit"
+          color={color}
+          loading={isSaving}
+          variant={color === 'error' || color === 'warning' ? 'soft' : 'contained'}
+        >
+          {(label && label) || (edit && 'Guardar') || 'Adicionar'}
+        </LoadingButton>
+      )}
     </DialogActions>
   );
 }
@@ -325,7 +348,7 @@ export function AnexosExistente({ mt = 3, anexos, onOpen }) {
                     divider={<Divider orientation="vertical" flexItem />}
                   >
                     {row?.criador && (
-                      <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} shuffle />
+                      <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} baralhar />
                     )}
                     {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
                   </Stack>

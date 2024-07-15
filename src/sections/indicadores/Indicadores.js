@@ -13,16 +13,16 @@ import Table from '@mui/material/Table';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
-import { useTheme } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
+import { useTheme } from '@mui/material/styles';
 import RadioGroup from '@mui/material/RadioGroup';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
-import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -35,21 +35,22 @@ import { getFile } from '../../utils/getFile';
 import { fYear, fMonthYear, ptDate } from '../../utils/formatTime';
 import { fNumber, fPercent, fNumber2, fData } from '../../utils/formatNumber';
 import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
-import { dataValido, setDataUtil, setItemValue, isProduction, shuffleString } from '../../utils/normalizeText';
+import { dataValido, setDataUtil, setItemValue, isProduction, baralharString } from '../../utils/normalizeText';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
 // components
-import Panel from '../../components/Panel';
 import MyAvatar from '../../components/MyAvatar';
 import { BarChart } from '../../components/skeleton';
+import Panel, { BoxMask } from '../../components/Panel';
 import { SearchNotFound } from '../../components/table';
 import Chart, { useChart } from '../../components/chart';
-import { Fechar, ExportExcel } from '../../components/Actions';
+import { DTFechar, ExportExcel } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
+import { Todos, Media, Maximo } from '../../assets';
 import { DuracaoEquipa, Conclusao, Execucao } from './Duracao';
 import { EntradaTrabalhado, ProcessosTrabalhados, Colaboradores } from './SGQ';
 import { Criacao, EntradasTrabalhados, DevolvidosTipos, Origem } from './TotalProcessos';
@@ -326,12 +327,7 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
       </Stack>
 
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-        <DialogTitle>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            Filtrar
-            <Fechar handleClick={onClose} />
-          </Stack>
-        </DialogTitle>
+        <DTFechar title="Filtrar" handleClick={() => onClose()} />
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 3 }}>
             {tab === 'devolucoes' && (
@@ -640,7 +636,7 @@ export function TotalProcessos() {
     { value: 'entradas', label: 'Entradas', component: <DevolvidosTipos indicadores={indicadoresList} /> },
     { value: 'criacao', label: 'Criação', component: <EntradasTrabalhados indicadores={indicadoresList} /> },
     { value: 'trabalhados', label: 'Trabalhados', component: <EntradasTrabalhados indicadores={indicadoresList} /> },
-    { value: 'devolucoes', label: 'Devoluções', component: <DevolvidosTipos indicadores={indicadoresList} /> },
+    { value: 'devolucoes', label: 'Devoluções', component: <DevolvidosTipos indicadores={indicadoresList} dev /> },
     { value: 'origem', label: 'Origem', component: <Origem top={top} indicadores={indicadoresList} /> },
     { value: 'tipos', label: 'Fluxos', component: <DevolvidosTipos indicadores={indicadoresList} /> },
   ];
@@ -787,30 +783,56 @@ export function IndicadorItem({ isLoading = false, isNotFound = false, children 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 CardInfo.propTypes = {
+  dev: PropTypes.bool,
   title: PropTypes.string,
   label: PropTypes.string,
   total: PropTypes.number,
   conclusao: PropTypes.bool,
+  percentagem: PropTypes.number,
 };
 
-export function CardInfo({ title, label, total, conclusao }) {
+export function CardInfo({ title, label, total, conclusao = false, dev = false, percentagem = -1 }) {
+  const iconOptions = { width: 50, height: 50, opacity: 0.48 };
+  const color =
+    (title === 'Média' && 'info') ||
+    (((title === 'Mais processos' && !dev) || (title === 'Menos processos' && dev) || title === 'Menor duração') &&
+      'success') ||
+    (((title === 'Menos processos' && !dev) || (title === 'Mais processos' && dev) || title === 'Maior duração') &&
+      'error') ||
+    'focus';
   return (
     <Card
       sx={{
-        p: 1,
+        p: 3,
         height: 1,
-        textAlign: 'center',
-        pt: { xs: 2, md: label ? 2 : 4 },
-        '&:hover': { bgcolor: 'background.neutral' },
+        display: 'flex',
+        boxShadow: 'none',
+        alignItems: 'center',
+        color: `${color}.darker`,
+        bgcolor: `${color}.lighter`,
+        justifyContent: 'space-between',
       }}
     >
-      <Typography variant="subtitle1">{title}</Typography>
-      <Typography variant="h5" sx={{ color: 'text.success', py: 0.5 }} noWrap>
-        {label}
-      </Typography>
-      <Typography variant="h3" sx={{ color: 'text.secondary' }}>
-        {conclusao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
-      </Typography>
+      <BoxMask sx={{ maskSize: 'revert', maskRepeat: 'no-repeat', maskPositionX: 'right', maskPositionY: 'bottom' }} />
+      <Stack>
+        <Typography variant="subtitle2">{title}</Typography>
+        {label && (
+          <Typography variant="subtitle1" sx={{ color: `${color}.main`, py: 0.5 }} noWrap>
+            {label}
+          </Typography>
+        )}
+        <Typography variant="h4">
+          {conclusao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
+        </Typography>
+      </Stack>
+      <Stack direction="column" sx={{ position: 'absolute', right: 10 }} justifyContent="center" alignItems="center">
+        {(title === 'Média' && <Media sx={iconOptions} />) ||
+          (color === 'success' && <Maximo sx={iconOptions} />) ||
+          (color === 'error' && <Maximo sx={{ ...iconOptions, transform: 'rotate(180deg)' }} />) || (
+            <Todos sx={iconOptions} />
+          )}
+        {percentagem > -1 && <Typography variant="caption">{fPercent(percentagem)}</Typography>}
+      </Stack>
     </Card>
   );
 }
@@ -831,8 +853,14 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
 
   return (
     <Grid item xs={12} md={6} lg={4}>
-      <Card sx={{ height: 1, p: 2 }}>
-        <Stack spacing={2} direction="row" alignItems="center" justifyContent="center" sx={{ py: 1 }}>
+      <Card sx={{ height: 1, p: 1 }}>
+        <Stack
+          spacing={2}
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          sx={{ py: 1.5, bgcolor: detail && 'background.neutral', borderRadius: 1 }}
+        >
           <MyAvatar
             alt={colaborador?.perfil?.displayName}
             src={getFile('colaborador', isProduction() ? colaborador?.foto_disk : '')}
@@ -840,7 +868,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           />
           <Stack>
             <Typography variant="subtitle1" noWrap>
-              {shuffleString(colaborador?.perfil?.displayName)}
+              {baralharString(colaborador?.perfil?.displayName)}
             </Typography>
             <Stack spacing={1} direction="row" alignItems="center" sx={{ color: 'text.success' }}>
               <Typography variant="h6">{fNumber(totalColaborador)}</Typography>
@@ -849,29 +877,36 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           </Stack>
         </Stack>
         {detail && (
-          <>
+          <Stack sx={{ p: 1 }}>
             {colaboradorDados?.processos?.map((row) => {
               const percentagem = (row?.total * 100) / totalColaborador;
               const totalAssunto = assuntos?.find((assunto) => assunto?.item === row?.assunto);
               return (
-                <Stack key={row.assunto} spacing={0.5} sx={{ width: 1, my: 3 }}>
+                <Stack key={row.assunto} spacing={0.5} sx={{ width: 1, mt: 3 }}>
                   <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" noWrap sx={{ flexGrow: 1 }}>
                       {row?.assunto}
                     </Typography>
-                    <Typography variant="subtitle1">&nbsp;{fNumber(row?.total)}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.success', opacity: 0.75 }}>
-                      ({fPercent(percentagem)})
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      ({fPercent((row?.total * 100) / sumBy(totalAssunto?.processos, 'total'))})
-                    </Typography>
+                    <Stack
+                      spacing={0.75}
+                      direction="row"
+                      alignItems="center"
+                      divider={<Divider orientation="vertical" flexItem />}
+                    >
+                      <Typography variant="subtitle1">&nbsp;{fNumber(row?.total)}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {fPercent((row?.total * 100) / sumBy(totalAssunto?.processos, 'total'))}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.success', opacity: 0.75 }}>
+                        {fPercent(percentagem)}
+                      </Typography>
+                    </Stack>
                   </Stack>
                   <LinearProgress variant="determinate" value={percentagem} color="success" />
                 </Stack>
               );
             })}
-          </>
+          </Stack>
         )}
       </Card>
     </Grid>
@@ -949,48 +984,6 @@ export function TabView({ vista, setVista }) {
       </Tabs>
       {vista === 'Tabela' && <ExportExcel icon filename="Indicadores" table="table-to-xls-tipo" />}
     </Stack>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-LineProgress.propTypes = {
-  item: PropTypes.string,
-  isTotal: PropTypes.bool,
-  leftSuccess: PropTypes.bool,
-  trabalhadoC1: PropTypes.number,
-  trabalhadoC2: PropTypes.number,
-};
-
-export function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSuccess }) {
-  const theme = useTheme();
-  const colorLeft = leftSuccess ? theme.palette.success.main : theme.palette.focus.main;
-  const colorRight = leftSuccess ? theme.palette.focus.main : theme.palette.success.main;
-  const totalT = trabalhadoC1 > trabalhadoC2 ? trabalhadoC1 : trabalhadoC2;
-  return (
-    <>
-      <Grid item xs={12} sx={{ mt: 1.25 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant={isTotal ? 'h6' : 'subtitle1'}>{fNumber(trabalhadoC1)}</Typography>
-          <Typography variant={isTotal ? 'body1' : 'body2'} noWrap sx={{ textAlign: 'center' }}>
-            {item}
-          </Typography>
-          <Typography variant={isTotal ? 'h6' : 'subtitle1'}>{fNumber(trabalhadoC2)}</Typography>
-        </Stack>
-      </Grid>
-      <Grid item xs={6} sx={{ pt: '6px !important' }}>
-        <Stack direction="column" alignItems="flex-end">
-          <Box sx={{ width: `${(trabalhadoC1 * 100) / totalT}%`, border: `2px solid ${colorLeft}` }}> </Box>
-          <Box sx={{ width: '100%', border: `1px solid ${colorLeft}` }}> </Box>
-        </Stack>
-      </Grid>
-      <Grid item xs={6} sx={{ pt: '6px !important' }}>
-        <Stack direction="column" alignItems="flex-start">
-          <Box sx={{ width: `${(trabalhadoC2 * 100) / totalT}%`, border: `2px solid ${colorRight}` }}> </Box>
-          <Box sx={{ width: '100%', border: `1px solid ${colorRight}` }}> </Box>
-        </Stack>
-      </Grid>
-    </>
   );
 }
 
@@ -1077,4 +1070,31 @@ export function FilterSwitch({ label, value, setValue, localS = '' }) {
       }
     />
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function dadosResumo(dados, item, label) {
+  const total = sumBy(dados, item);
+  const maximo = Math.max(...dados?.map((row) => row[item]));
+  const minimo = Math.min(...dados?.map((row) => row[item]));
+  return [
+    ...[
+      label === 'assunto'
+        ? { label: 'Total', valor: total, desc: '' }
+        : { label: 'Média', valor: total / dados?.length, desc: '' },
+    ],
+    {
+      valor: maximo,
+      percentagem: (maximo * 100) / total,
+      desc: dados?.find((row) => row[item] === maximo)?.[label],
+      label: item === 'dias' ? 'Maior duração' : 'Mais processos',
+    },
+    {
+      valor: minimo,
+      percentagem: (minimo * 100) / total,
+      desc: dados?.find((row) => row[item] === minimo)?.[label],
+      label: item === 'dias' ? 'Menor duração' : 'Menos processos',
+    },
+  ];
 }

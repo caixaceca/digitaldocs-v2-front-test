@@ -41,7 +41,7 @@ Transicao.propTypes = { transicao: PropTypes.object, addConector: PropTypes.bool
 function Transicao({ transicao, addConector }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const criador = colaboradores?.find((colab) => colab?.perfil?.id === transicao?.perfil_id);
-  const arqSistema = transicao?.observacao === 'Processo Arquivado por inatividade a pelo menos 6 meses';
+  const arqSistema = transicao?.observacao?.includes('por inatividade a pelo menos 6 meses');
   const acao =
     (transicao?.resgate && 'Resgate') ||
     (transicao?.transicao_paralelo && 'Seguimento em paralelo') ||
@@ -110,7 +110,7 @@ function Transicao({ transicao, addConector }) {
               <MyAvatar alt={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
             )}
             <Stack spacing={0.5}>
-              {(!!criador && !arqSistema && (
+              {!!criador && !arqSistema && (
                 <Stack direction="row" spacing={{ xs: 1, sm: 3 }} alignItems="center" useFlexGap flexWrap="wrap">
                   <Box>
                     <Stack direction="row" alignItems="center" spacing={0.5}>
@@ -132,34 +132,38 @@ function Transicao({ transicao, addConector }) {
                     </Label>
                   )}
                 </Stack>
-              )) ||
-                (arqSistema && (
-                  <Typography>
-                    <Label>Arquivado pelo sistema</Label>
-                  </Typography>
-                ))}
+              )}
               {acao !== 'Resgate' && (
                 <>
-                  {transicao?.observacao && <Typography>{newLineText(transicao.observacao)}</Typography>}
-                  {transicao?.data_parecer && (
-                    <Stack sx={{ pt: 2 }}>
-                      <Stack spacing={0.5} direction="row" alignItems="center">
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          Parecer:
-                        </Typography>
-                        <Label variant="ghost" color={(transicao?.parecer_favoravel && 'success') || 'error'}>
-                          {transicao?.parecer_favoravel ? 'Favorável' : 'Não favorável'}
-                        </Label>
-                      </Stack>
-                      <Stack
-                        spacing={0.5}
-                        direction="row"
-                        alignItems="center"
-                        justifyContent={{ xs: 'center', sm: 'left' }}
-                      >
-                        <Typography variant="caption">{ptDateTime(transicao?.data_parecer)}</Typography>
-                      </Stack>
-                    </Stack>
+                  {arqSistema ? (
+                    <Typography>
+                      O processo foi arquivado automaticamente pelo sistema devido a um período de inatividade contínua
+                      de, no mínimo, seis meses.
+                    </Typography>
+                  ) : (
+                    <>
+                      {transicao?.observacao && <Typography>{newLineText(transicao.observacao)}</Typography>}
+                      {transicao?.data_parecer && (
+                        <Stack sx={{ pt: 2 }}>
+                          <Stack spacing={0.5} direction="row" alignItems="center">
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                              Parecer:
+                            </Typography>
+                            <Label variant="ghost" color={(transicao?.parecer_favoravel && 'success') || 'error'}>
+                              {transicao?.parecer_favoravel ? 'Favorável' : 'Não favorável'}
+                            </Label>
+                          </Stack>
+                          <Stack
+                            spacing={0.5}
+                            direction="row"
+                            alignItems="center"
+                            justifyContent={{ xs: 'center', sm: 'left' }}
+                          >
+                            <Typography variant="caption">{ptDateTime(transicao?.data_parecer)}</Typography>
+                          </Stack>
+                        </Stack>
+                      )}
+                    </>
                   )}
                 </>
               )}

@@ -1,12 +1,12 @@
-// @mui
 import * as React from 'react';
 import PropTypes from 'prop-types';
+// @mui
 import Radio from '@mui/material/Radio';
 import Stack from '@mui/material/Stack';
+import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import RadioGroup from '@mui/material/RadioGroup';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import SentimentNeutralOutlinedIcon from '@mui/icons-material/SentimentNeutralOutlined';
@@ -17,8 +17,7 @@ import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVer
 import { useDispatch, useSelector } from '../redux/store';
 import { createItem, closeDisposicao } from '../redux/slices/intranet';
 // components
-import { Fechar } from '../components/Actions';
-import DialogAnimate from '../components/animate/DialogAnimate';
+import { DTFechar } from '../components/Actions';
 // sections
 import FraseContent from '../sections/home/FraseContent';
 
@@ -64,27 +63,13 @@ function BpRadio(props) {
 // ----------------------------------------------------------------------
 
 export default function Disposicao() {
-  return <DisposicaoDialog id="disposicao-dialog" keepMounted />;
-}
-
-// ----------------------------------------------------------------------
-
-function DisposicaoDialog() {
   const dispatch = useDispatch();
   const value = React.useState(null);
   const radioGroupRef = React.useRef(null);
   const { isOpenDisposicao, mail, frase } = useSelector((state) => state.intranet);
 
-  const handleEntering = () => {
-    if (radioGroupRef.current != null) {
-      radioGroupRef.current.focus();
-    }
-  };
-
   const handleChange = (event) => {
-    const values = { disposicao: event.target.value };
-    const formData = JSON.stringify(values);
-    dispatch(createItem('disposicao', formData, { mail, msg: 'disposicao' }));
+    dispatch(createItem('disposicao', JSON.stringify({ disposicao: event.target.value }), { mail, msg: 'disposicao' }));
   };
 
   const handleClose = () => {
@@ -92,13 +77,8 @@ function DisposicaoDialog() {
   };
 
   return (
-    <DialogAnimate maxWidth="sm" TransitionProps={{ onEntering: handleEntering }} open={isOpenDisposicao}>
-      <DialogTitle>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          Como te sentes hoje?
-          <Fechar handleClick={handleClose} />
-        </Stack>
-      </DialogTitle>
+    <Dialog fullWidth keepMounted maxWidth="sm" open={isOpenDisposicao}>
+      <DTFechar title="Como te sentes hoje?" handleClick={() => handleClose()} />
       <DialogContent sx={{ mt: 3 }}>
         <Stack direction="row" justifyContent="center" sx={{ pb: 5 }}>
           <RadioGroup
@@ -121,6 +101,6 @@ function DisposicaoDialog() {
           <FraseContent frase={frase} />
         </Stack>
       </DialogContent>
-    </DialogAnimate>
+    </Dialog>
   );
 }

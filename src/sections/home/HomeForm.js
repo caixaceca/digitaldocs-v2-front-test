@@ -29,7 +29,7 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { createItem, getFromIntranet, resetItem } from '../../redux/slices/intranet';
 // components
 import { Loading } from '../../components/LoadingScreen';
-import { Fechar, DialogButons } from '../../components/Actions';
+import { DTFechar, DialogButons } from '../../components/Actions';
 import { Notificacao } from '../../components/NotistackProvider';
 import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
 
@@ -220,12 +220,7 @@ export function ValidarDocForm({ open, onCancel }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-          Validação de documento
-          <Fechar handleClick={onCancel} />
-        </Stack>
-      </DialogTitle>
+      <DTFechar title="Validação de documento" handleClick={() => onCancel()} />
       <DialogContent sx={{ mt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 1 }}>

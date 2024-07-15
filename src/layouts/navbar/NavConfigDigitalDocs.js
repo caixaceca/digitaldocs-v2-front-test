@@ -3,14 +3,14 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // assets
 import {
   Home,
+  Portal,
+  Arquivo,
+  Controle,
+  Entidade,
+  Contrato,
   Dashboard,
   Processos,
-  Controle,
-  Arquivo,
-  Entidade,
   Parametrizacao,
-  Portal,
-  Contrato,
 } from '../../assets';
 
 // ----------------------------------------------------------------------

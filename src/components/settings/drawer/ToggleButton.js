@@ -5,9 +5,8 @@ import { alpha, styled } from '@mui/material/styles';
 // utils
 import cssStyles from '../../../utils/cssStyles';
 //
-import { IconButtonAnimate } from '../../animate';
-// assets
 import { Definicoes } from '../../../assets';
+import { IconButtonAnimate } from '../../animate';
 
 // ----------------------------------------------------------------------
 
@@ -44,7 +43,8 @@ export default function ToggleButton({ notDefault, open, onToggle }) {
   return (
     <RootStyle>
       {notDefault && !open && <DotStyle />}
-      <Tooltip title="Definições" placement="left" arrow>
+
+      <Tooltip arrow title="Definições" placement="left">
         <IconButtonAnimate
           color="inherit"
           onClick={onToggle}

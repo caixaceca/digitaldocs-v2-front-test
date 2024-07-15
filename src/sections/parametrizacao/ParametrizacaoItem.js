@@ -103,7 +103,7 @@ export default function ParametrizacaoItem({ item }) {
         done === 'Estado atualizado' ||
         done === 'Fluxo adicionado' ||
         done === 'Fluxo atualizado' ||
-        done === 'fluxo clonado'
+        done === 'Fluxo clonado'
       ) {
         navigate(
           item === 'fluxos'

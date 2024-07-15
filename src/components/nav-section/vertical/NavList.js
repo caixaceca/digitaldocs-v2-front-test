@@ -72,10 +72,7 @@ export default function NavList({ data, depth, hasChildren, isCollapse = false }
 
 // ----------------------------------------------------------------------
 
-NavSubList.propTypes = {
-  data: PropTypes.array,
-  depth: PropTypes.number,
-};
+NavSubList.propTypes = { data: PropTypes.array, depth: PropTypes.number };
 
 function NavSubList({ data, depth }) {
   return (

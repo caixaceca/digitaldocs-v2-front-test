@@ -13,7 +13,6 @@ import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
 import Autocomplete from '@mui/material/Autocomplete';
 import { alpha, useTheme } from '@mui/material/styles';
 import TableContainer from '@mui/material/TableContainer';
@@ -33,6 +32,7 @@ import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
 // components
+import { BoxMask } from '../../components/Panel';
 import { ExportExcel } from '../../components/Actions';
 import { TableSearchNotFound } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -877,38 +877,50 @@ function CardResumo({ total, label, qtd }) {
     'error';
   return (
     <Grid item xs={12} sm={6} lg={3}>
-      <Card sx={{ boxShadow: 0, color: theme.palette[color].darker, bgcolor: theme.palette[color].lighter }}>
-        <CardContent sx={{ textAlign: 'center' }}>
-          <Stack
-            sx={{
-              width: 60,
-              height: 60,
-              margin: 'auto',
-              borderRadius: '50%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: theme.palette[color].dark,
-              ...bgGradient({
-                direction: '135deg',
-                startColor: `${alpha(theme.palette[color].dark, 0)} 0%`,
-                endColor: `${alpha(theme.palette[color].dark, 0.24)} 100%`,
-              }),
-            }}
-          >
-            {(label === 'Entrada' && <AssignmentReturnedOutlinedIcon sx={{ width: 30, height: 30 }} />) ||
-              (label === 'Aprovado' && <TaskAltOutlinedIcon sx={{ width: 30, height: 30 }} />) ||
-              (label === 'Contratado' && <HandshakeOutlinedIcon sx={{ width: 30, height: 30 }} />) || (
-                <DoDisturbIcon sx={{ width: 30, height: 30 }} />
-              )}
-          </Stack>
-          <Typography variant="body2" sx={{ mt: 2 }}>
+      <Card
+        sx={{
+          p: 2.5,
+          height: 1,
+          display: 'flex',
+          boxShadow: 'none',
+          justifyContent: 'space-between',
+          color: theme.palette[color].darker,
+          bgcolor: theme.palette[color].lighter,
+        }}
+      >
+        <BoxMask sx={{ maskSize: 'revert', maskRepeat: 'no-repeat', maskPositionX: 'right' }} />
+        <Stack>
+          <Typography variant="subtitle2">{label}</Typography>
+          <Typography variant="body2" sx={{ color: theme.palette[color].main, py: 0.5 }}>
             <b>{fNumber(qtd)}</b> processo{qtd > 1 ? 's' : ''}
           </Typography>
           <Typography variant="h5">{fCurrency(total)}</Typography>
-          <Typography variant="subtitle1" sx={{ opacity: 0.64 }}>
-            {label}
-          </Typography>
-        </CardContent>
+        </Stack>
+        <Stack
+          sx={{
+            top: 10,
+            right: 10,
+            width: 45,
+            height: 45,
+            opacity: 0.64,
+            borderRadius: '50%',
+            alignItems: 'center',
+            position: 'absolute',
+            justifyContent: 'center',
+            color: theme.palette[color].dark,
+            ...bgGradient({
+              direction: '135deg',
+              startColor: `${alpha(theme.palette[color].dark, 0.05)} 0%`,
+              endColor: `${alpha(theme.palette[color].darker, 0.32)} 100%`,
+            }),
+          }}
+        >
+          {(label === 'Entrada' && <AssignmentReturnedOutlinedIcon sx={{ width: 30, height: 30 }} />) ||
+            (label === 'Aprovado' && <TaskAltOutlinedIcon sx={{ width: 30, height: 30 }} />) ||
+            (label === 'Contratado' && <HandshakeOutlinedIcon sx={{ width: 30, height: 30 }} />) || (
+              <DoDisturbIcon sx={{ width: 30, height: 30 }} />
+            )}
+        </Stack>
       </Card>
     </Grid>
   );

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
@@ -38,23 +38,23 @@ export default function NovoEditarProcesso() {
   const { pathname } = useLocation();
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
-  const { mail, cc } = useSelector((state) => state.intranet);
   const { linhas } = useSelector((state) => state.parametrizacao);
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { processo, isLoadingP, done, error } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
-  const perfilId = cc?.perfil_id;
+  const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getItem('processo', { id, mail, perfilId }));
+    if (mail && id && cc?.perfil_id) {
+      dispatch(getItem('processo', { id, mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, perfilId, mail, id]);
+  }, [dispatch, cc?.perfil_id, mail, id]);
 
   useEffect(() => {
-    if (mail && perfilId && linhas?.length === 0 && meuFluxo?.is_credito) {
-      dispatch(getFromParametrizacao('linhas', { mail, perfilId }));
+    if (mail && cc?.perfil_id && linhas?.length === 0 && meuFluxo?.is_credito) {
+      dispatch(getFromParametrizacao('linhas', { mail, perfilId: cc?.perfil_id }));
     }
-  }, [dispatch, linhas, meuFluxo, perfilId, mail]);
+  }, [dispatch, linhas, meuFluxo, cc?.perfil_id, mail]);
 
   useEffect(() => {
     dispatch(changeMeuFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null));
@@ -63,12 +63,12 @@ export default function NovoEditarProcesso() {
   useEffect(() => {
     dispatch(
       changeMeuAmbiente(
-        meusAmbientes?.find((row) => row?.id === processo?.estados?.[0]?.estado_id) ||
+        meusAmbientes?.find((row) => row?.id === processo?.estado_processo?.estado_id) ||
           meusAmbientes?.find((row) => row?.id === meuAmbiente?.id) ||
           null
       )
     );
-  }, [dispatch, meuAmbiente?.id, meusAmbientes, processo?.estados]);
+  }, [dispatch, meuAmbiente?.id, meusAmbientes, processo?.estado_processo?.estado_id]);
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
@@ -99,7 +99,7 @@ export default function NovoEditarProcesso() {
                   { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
                   {
                     name: processo
-                      ? `${processo?.numero_entrada}${processo?.uo_origem_id ? `/${processo?.uo_origem_id}` : ''}${
+                      ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
                           processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                         }`
                       : id,
@@ -147,9 +147,9 @@ export default function NovoEditarProcesso() {
           </CardContent>
         </Card>
         {(!isEdit && meuAmbiente?.is_inicial) ||
-        (processo?.preso &&
-          processo?.perfil_id === cc?.perfil_id &&
-          processo?.estados?.[0]?.estado_id === meuAmbiente?.id) ? (
+        (processo?.estado_processo?._lock &&
+          processo?.estado_processo?.perfil_id === cc?.perfil_id &&
+          processo?.estado_processo?.estado_id === meuAmbiente?.id) ? (
           <>
             {isEdit && isLoadingP ? (
               <Card sx={{ mb: 3 }}>

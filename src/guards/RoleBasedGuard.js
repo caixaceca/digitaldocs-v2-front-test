@@ -1,14 +1,12 @@
 import PropTypes from 'prop-types';
-import { m } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 // @mui
+import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
-// components
-import { MotionContainer, varBounce } from '../components/animate';
 // assets
 import { ForbiddenIllustration } from '../assets';
 // redux
@@ -26,40 +24,35 @@ RoleBasedGuard.propTypes = {
 export default function RoleBasedGuard({ hasContent, roles, children, apChild }) {
   const navigate = useNavigate();
   const { meusacessos } = useSelector((state) => state.parametrizacao);
-
-  let noRole = true;
-  roles?.forEach((row) => {
-    if (meusacessos.includes(row)) {
-      noRole = false;
-    }
-  });
+  const noRole = !roles?.find((row) => meusacessos.includes(row));
 
   if (typeof roles !== 'undefined' && noRole) {
     return hasContent ? (
       <Card>
         <CardContent>
-          <Container component={MotionContainer} sx={{ textAlign: 'center' }}>
-            <m.div variants={varBounce().in}>
-              <Typography variant="h3" paragraph>
-                Sem permissão
-              </Typography>
-            </m.div>
+          <Container sx={{ textAlign: 'center' }}>
+            <Typography variant="h3" paragraph>
+              Sem permissão
+            </Typography>
 
-            <m.div variants={varBounce().in}>
-              {apChild ? (
-                children
-              ) : (
+            {apChild ? (
+              children
+            ) : (
+              <>
+                <Typography sx={{ color: 'text.secondary' }}>Não tens permissão para aceder a este item.</Typography>
                 <Typography sx={{ color: 'text.secondary' }}>
-                  Não tens permissão para aceder a este item
-                  <br />
-                  Contactar o administrador de sistema (DICS)
+                  Por favor, contacte o administrador do sistema para mais informações (DICS).
                 </Typography>
-              )}
-            </m.div>
+                <Typography sx={{ color: 'text.secondary' }}>
+                  Cria um ticket no{' '}
+                  <Link href="http://helpdesk.caixa.cv/" variant="subtitle1" target="_blank" rel="noopener">
+                    GLPI
+                  </Link>
+                </Typography>
+              </>
+            )}
 
-            <m.div variants={varBounce().in}>
-              <ForbiddenIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
-            </m.div>
+            <ForbiddenIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
 
             <Button size="large" variant="contained" onClick={() => navigate(-1)}>
               Voltar

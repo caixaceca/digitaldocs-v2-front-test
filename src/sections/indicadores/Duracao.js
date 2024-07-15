@@ -25,7 +25,7 @@ import Chart, { useChart } from '../../components/chart';
 import { SkeletonTable } from '../../components/skeleton';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { IndicadorItem, CardInfo, TableExport, TabView } from './Indicadores';
+import { IndicadorItem, CardInfo, TableExport, TabView, dadosResumo } from './Indicadores';
 // _mock_
 import { meses } from '../../_mock';
 
@@ -209,23 +209,7 @@ export function Conclusao({ indicadores }) {
   const conclusaoByItem = useMemo(() => conclusaoP(indicadores, uos), [indicadores, uos]);
   const isNotFound = !conclusaoByItem?.filter((row) => row?.dias).length;
 
-  const resumo = useMemo(
-    () => [
-      { label: 'Média', valor: sumBy(conclusaoByItem, 'dias') / conclusaoByItem?.length, desc: '' },
-      {
-        label: 'Maior duração',
-        valor: Math.max(...conclusaoByItem?.map((row) => row.dias)),
-        desc: conclusaoByItem?.find((row) => row.dias === Math.max(...conclusaoByItem?.map((row) => row.dias)))?.label,
-      },
-      {
-        label: 'Menor duração',
-        valor: Math.min(...conclusaoByItem?.map((row) => row.dias)),
-        desc: conclusaoByItem?.find((row) => row.dias === Math.min(...conclusaoByItem?.map((row) => row.dias)))?.label,
-      },
-    ],
-    [conclusaoByItem]
-  );
-
+  const resumo = useMemo(() => dadosResumo(conclusaoByItem, 'dias', 'label'), [conclusaoByItem]);
   const series = useMemo(
     () => [{ name: 'Média em dias', data: conclusaoByItem?.map((row) => row?.dias) }],
     [conclusaoByItem]
@@ -248,17 +232,11 @@ export function Conclusao({ indicadores }) {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Card sx={{ p: 1, boxShadow: 'none', bgcolor: 'background.neutral' }}>
-                <Grid container spacing={1}>
-                  {resumo?.map((row) => (
-                    <Grid key={row?.label} item xs={12} sm={4}>
-                      <CardInfo title={row?.label} total={row?.valor} label={row?.desc} conclusao />
-                    </Grid>
-                  ))}
-                </Grid>
-              </Card>
-            </Grid>
+            {resumo?.map((row) => (
+              <Grid key={row?.label} item xs={12} sm={4}>
+                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} conclusao />
+              </Grid>
+            ))}
             <Grid item xs={12}>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="bar" series={series} options={chartOptions} height={500} />
@@ -307,8 +285,7 @@ export function DuracaoEquipa({ indicadores }) {
                         <TableRow key={`table_row_export_${index}`} hover>
                           <TableCell>{row?.fluxo}</TableCell>
                           <TableCell align="right">
-                            {row?.media} {row?.unidade}
-                            {row?.media > 1 ? 's' : ''}
+                            {row?.media} {row?.unidade} {row?.media > 1 ? 's' : ''}
                           </TableCell>
                         </TableRow>
                       ))}

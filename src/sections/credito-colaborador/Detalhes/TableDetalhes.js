@@ -223,7 +223,7 @@ export default function TableDetalhes({ item }) {
                           <Criado tipo="data" value={ptDateTime(row?.criado_em || row?.atribuido_em)} />
                         )}
                         {(row?.criador || row?.atribuidor || row?.nome) && (
-                          <Criado tipo="user" value={row?.criador || row?.atribuidor || row?.nome} shuffle />
+                          <Criado tipo="user" value={row?.criador || row?.atribuidor || row?.nome} baralhar />
                         )}
                         {row?.data_pendente && (
                           <Criado

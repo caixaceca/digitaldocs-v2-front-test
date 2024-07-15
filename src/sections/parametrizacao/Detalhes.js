@@ -6,7 +6,6 @@ import Dialog from '@mui/material/Dialog';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
@@ -17,7 +16,7 @@ import { useSelector } from '../../redux/store';
 import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
 import { TextItem } from '../tabela/CartoesForm';
-import { Fechar } from '../../components/Actions';
+import { DTFechar } from '../../components/Actions';
 
 // ----------------------------------------------------------------------
 
@@ -30,13 +29,8 @@ export function Detalhes({ item, closeModal }) {
 
   return (
     <Dialog open={isOpenView} onClose={closeModal} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ mb: 0.5 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-          Detalhes
-          <Fechar handleClick={closeModal} />
-        </Stack>
-      </DialogTitle>
-      <DialogContent>
+      <DTFechar title="Detalhes" handleClick={() => closeModal()} />
+      <DialogContent sx={{ mt: 0.5 }}>
         {isLoading ? (
           <Stack justifyContent="space-between" alignItems="center" spacing={3}>
             <Skeleton variant="text" sx={{ height: 300, width: 1, mt: 2, transform: 'scale(1)' }} />
@@ -135,9 +129,9 @@ export function Detalhes({ item, closeModal }) {
                 title="Adicionado:"
                 text1={
                   <Stack spacing={0.5} sx={{ mt: 1 }}>
-                    {selectedItem?.criador && <Criado tipo="user" value={selectedItem?.criador} shuffle />}
+                    {selectedItem?.criador && <Criado tipo="user" value={selectedItem?.criador} baralhar />}
                     {selectedItem?.criado_em && (
-                      <Criado tipo="data" value={ptDateTime(selectedItem?.criado_em)} shuffle />
+                      <Criado tipo="data" value={ptDateTime(selectedItem?.criado_em)} baralhar />
                     )}
                   </Stack>
                 }
@@ -147,9 +141,9 @@ export function Detalhes({ item, closeModal }) {
                   title="Modificado:"
                   text1={
                     <Stack spacing={0.5} sx={{ mt: 1 }}>
-                      {selectedItem?.modificador && <Criado tipo="user" value={selectedItem?.modificador} shuffle />}
+                      {selectedItem?.modificador && <Criado tipo="user" value={selectedItem?.modificador} baralhar />}
                       {selectedItem?.modificado_por && (
-                        <Criado tipo="user" value={selectedItem?.modificado_por} shuffle />
+                        <Criado tipo="user" value={selectedItem?.modificado_por} baralhar />
                       )}
                       {selectedItem?.modificado_em && (
                         <Criado tipo="data" value={ptDateTime(selectedItem?.modificado_em)} />

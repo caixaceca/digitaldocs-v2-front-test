@@ -174,7 +174,7 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
             divider={<Divider orientation="vertical" flexItem />}
           >
             {anexo?.criador && (
-              <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} shuffle />
+              <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} baralhar />
             )}
             {anexo?.criado_em && (
               <Criado

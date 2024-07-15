@@ -12,13 +12,13 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { estadoInicial } from '../../utils/validarAcesso';
-import { fToNow, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, entidadesParse, noDados, shuffleString } from '../../utils/normalizeText';
+import { fToNow, ptDateTime, formatDate } from '../../utils/formatTime';
+import { normalizeText, entidadesParse, noDados, baralharString } from '../../utils/normalizeText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem, selectItem } from '../../redux/slices/digitaldocs';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
@@ -30,8 +30,6 @@ import { AddItem, DefaultAction } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-//
-import { ColocarPendente } from '../processo/form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -133,10 +131,6 @@ export default function TableProcessos({ from }) {
     }
   };
 
-  const handlePendente = (item) => {
-    dispatch(selectItem(item));
-  };
-
   return (
     <>
       <HeaderBreadcrumbs
@@ -173,12 +167,15 @@ export default function TableProcessos({ from }) {
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${row?.id}_${index}`}>
-                      <TableCell>{row?.entrada}</TableCell>
-                      <TableCell>{row?.titular ? shuffleString(row?.titular) : noDados()}</TableCell>
                       <TableCell>
-                        {(row?.conta && shuffleString(row?.conta)) ||
-                          (row?.cliente && shuffleString(row?.cliente)) ||
-                          (row?.entidades && shuffleString(entidadesParse(row?.entidades))) ||
+                        {row?.entrada}
+                        {row?.criado_em ? `/${formatDate(row?.criado_em, 'yyyy')}` : ''}
+                      </TableCell>
+                      <TableCell>{row?.titular ? baralharString(row?.titular) : noDados()}</TableCell>
+                      <TableCell>
+                        {(row?.conta && baralharString(row?.conta)) ||
+                          (row?.cliente && baralharString(row?.cliente)) ||
+                          (row?.entidades && baralharString(entidadesParse(row?.entidades))) ||
                           noDados()}
                       </TableCell>
                       <TableCell>{row?.assunto ? row?.assunto : meuFluxo?.assunto}</TableCell>
@@ -190,7 +187,7 @@ export default function TableProcessos({ from }) {
                             {row?.observacao}
                           </Typography>
                         )}
-                        {row?.colaborador && <Label>{shuffleString(row?.colaborador)}</Label>}
+                        {row?.colaborador && <Label>{baralharString(row?.colaborador)}</Label>}
                       </TableCell>
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.transitado_em && (
@@ -206,9 +203,6 @@ export default function TableProcessos({ from }) {
                       </TableCell>
                       <TableCell align="center">
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {from === 'tarefas' && row?.estado?.includes('Atendimento') && (
-                            <DefaultAction color="inherit" label="PENDENTE" handleClick={() => handlePendente(row)} />
-                          )}
                           <DefaultAction
                             label="DETALHES"
                             handleClick={() => handleView(row?.id, row?.credito_colaborador)}
@@ -239,7 +233,6 @@ export default function TableProcessos({ from }) {
           />
         )}
       </Card>
-      <ColocarPendente />
     </>
   );
 }

@@ -8,7 +8,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { ptDateTime, fYear } from '../../utils/formatTime';
-import { entidadesParse, noDados, setDataUtil, setItemValue, shuffleString } from '../../utils/normalizeText';
+import { entidadesParse, noDados, setDataUtil, setItemValue, baralharString } from '../../utils/normalizeText';
 // components
 import { Criado } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
@@ -117,11 +117,11 @@ export function RowItem({ row, handleViewRow }) {
         {row.nentrada}
         {row?.criado_em ? `/${fYear(row?.criado_em)}` : ''}
       </TableCell>
-      <TableCell>{row?.titular ? shuffleString(row.titular) : noDados()}</TableCell>
+      <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
       <TableCell>
-        {(row?.conta && shuffleString(row?.conta)) ||
-          (row?.cliente && shuffleString(row?.cliente)) ||
-          (row?.entidades && shuffleString(entidadesParse(row?.entidades))) ||
+        {(row?.conta && baralharString(row?.conta)) ||
+          (row?.cliente && baralharString(row?.cliente)) ||
+          (row?.entidades && baralharString(entidadesParse(row?.entidades))) ||
           noDados()}
       </TableCell>
       <TableCell>{row?.assunto}</TableCell>
@@ -130,7 +130,7 @@ export function RowItem({ row, handleViewRow }) {
         {(row?.criado_em || row?.trabalhado_em) && (
           <Criado tipo="data" value={ptDateTime(row.criado_em || row?.trabalhado_em)} />
         )}
-        {row?.colaborador && <Criado tipo="user" value={row.colaborador} shuffle />}
+        {row?.colaborador && <Criado tipo="user" value={row.colaborador} baralhar />}
       </TableCell>
       <TableCell align="center">
         <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />

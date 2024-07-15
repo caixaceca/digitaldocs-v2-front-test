@@ -12,7 +12,6 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import DialogTitle from '@mui/material/DialogTitle';
 import CardContent from '@mui/material/CardContent';
 import ListItemText from '@mui/material/ListItemText';
 import DialogContent from '@mui/material/DialogContent';
@@ -25,7 +24,7 @@ import { getFromCC, closeModal } from '../../../redux/slices/cc';
 // components
 import Image from '../../../components/Image';
 import { Criado } from '../../../components/Panel';
-import { Fechar } from '../../../components/Actions';
+import { DTFechar } from '../../../components/Actions';
 import { SearchNotFound } from '../../../components/table';
 import { Loading } from '../../../components/LoadingScreen';
 //
@@ -164,13 +163,8 @@ function AnexoPreview() {
 
   return (
     <Dialog fullScreen open={isOpenModal}>
-      <DialogTitle sx={{ pb: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          {selectedAnexo?.designacao}
-          <Fechar large handleClick={() => handleCloseModal()} />
-        </Stack>
-      </DialogTitle>
-      <DialogContent sx={{ px: anexo?.preview === 'pdf' ? 0 : 3, pb: anexo?.preview === 'pdf' ? 0 : 3 }}>
+      <DTFechar title={selectedAnexo?.designacao} handleClick={() => handleCloseModal()} />
+      <DialogContent sx={{ mt: 2, px: anexo?.preview === 'pdf' ? 0 : 3, pb: anexo?.preview === 'pdf' ? 0 : 3 }}>
         <Box sx={{ flexGrow: 1, height: '100%' }}>
           {isLoadingAnexo ? (
             <Stack direction="column" alignItems="center" justifyContent="center" sx={{ height: 1 }}>
@@ -218,13 +212,8 @@ export function Formulario({ form, setForm }) {
   );
   return (
     <Dialog fullScreen open={!!form}>
-      <DialogTitle sx={{ pb: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          {form}
-          <Fechar large handleClick={() => setForm('')} />
-        </Stack>
-      </DialogTitle>
-      <DialogContent sx={{ p: 0 }}>
+      <DTFechar title={form} handleClick={() => setForm('')} />
+      <DialogContent sx={{ p: 0, mt: 2 }}>
         <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
           <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
             {(form === 'CCRD.FM.P.001.00' && (

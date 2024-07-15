@@ -37,12 +37,7 @@ export default function SettingLayout() {
           return (
             <Grid key={layout} item xs={6}>
               <BoxStyle
-                sx={{
-                  ...(isSelected && {
-                    color: 'primary.main',
-                    boxShadow: (theme) => theme.customShadows.z20,
-                  }),
-                }}
+                sx={{ ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }) }}
               >
                 {isVertical ? <VerticalBox isSelected={isSelected} /> : <HorizontalBox isSelected={isSelected} />}
                 <BoxMask value={layout} />
@@ -57,15 +52,9 @@ export default function SettingLayout() {
 
 // ----------------------------------------------------------------------
 
-VerticalBox.propTypes = {
-  isSelected: PropTypes.bool,
-};
+VerticalBox.propTypes = { isSelected: PropTypes.bool };
 
-const style = {
-  width: 1,
-  height: 32,
-  borderRadius: 0.5,
-};
+const style = { width: 1, height: 32, borderRadius: 0.5 };
 
 function VerticalBox({ isSelected }) {
   return (
@@ -76,9 +65,7 @@ function VerticalBox({ isSelected }) {
           mb: 0.75,
           height: 12,
           bgcolor: (theme) => alpha(theme.palette.text.disabled, 0.72),
-          ...(isSelected && {
-            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.72),
-          }),
+          ...(isSelected && { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.72) }),
         }}
       />
       <Box
@@ -96,9 +83,7 @@ function VerticalBox({ isSelected }) {
   );
 }
 
-HorizontalBox.propTypes = {
-  isSelected: PropTypes.bool,
-};
+HorizontalBox.propTypes = { isSelected: PropTypes.bool };
 
 function HorizontalBox({ isSelected }) {
   return (
@@ -109,9 +94,7 @@ function HorizontalBox({ isSelected }) {
           mb: 0.75,
           height: 12,
           bgcolor: (theme) => alpha(theme.palette.text.disabled, 0.72),
-          ...(isSelected && {
-            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.72),
-          }),
+          ...(isSelected && { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.72) }),
         }}
       />
       <Stack width={1} direction="row" justifyContent="space-between">
@@ -120,9 +103,7 @@ function HorizontalBox({ isSelected }) {
             ...style,
             width: 20,
             bgcolor: (theme) => alpha(theme.palette.text.disabled, 0.32),
-            ...(isSelected && {
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.32),
-            }),
+            ...(isSelected && { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.32) }),
           }}
         />
         <Box

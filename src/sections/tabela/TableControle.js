@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
-import { dataValido, entidadesParse, shuffleString, noDados } from '../../utils/normalizeText';
+import { dataValido, entidadesParse, baralharString, noDados } from '../../utils/normalizeText';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -290,11 +290,11 @@ export default function TableControle({ from }) {
                       {from === 'Por concluir' ? (
                         <TableRow hover key={`${from}_${index}`}>
                           <TableCell>{row.nentrada}</TableCell>
-                          <TableCell>{row?.titular ? shuffleString(row.titular) : noDados()}</TableCell>
+                          <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
                           <TableCell>
-                            {(row?.conta && shuffleString(row?.conta)) ||
-                              (row?.cliente && shuffleString(row?.cliente)) ||
-                              (row?.entidades && shuffleString(entidadesParse(row?.entidades))) ||
+                            {(row?.conta && baralharString(row?.conta)) ||
+                              (row?.cliente && baralharString(row?.cliente)) ||
+                              (row?.entidades && baralharString(entidadesParse(row?.entidades))) ||
                               noDados()}
                           </TableCell>
                           <TableCell>{row?.assunto}</TableCell>
@@ -306,7 +306,7 @@ export default function TableControle({ from }) {
                               </Label>
                             )}
                           </TableCell>
-                          <TableCell>{shuffleString(row?.colaborador)}</TableCell>
+                          <TableCell>{baralharString(row?.colaborador)}</TableCell>
                           <TableCell align="center" sx={{ width: 10 }}>
                             {row?.trabalhado_em && (
                               <Typography noWrap variant="body2">

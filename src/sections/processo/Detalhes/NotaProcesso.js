@@ -15,16 +15,19 @@ export default function NotaProcesso({ nota = '', segmento = '', motivo = '' }) 
     <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 1 }}>
       {nota &&
         ((nota === 'Essa Entidade não possui nenhuma conta CVE elegivel para cativo/penhora no valor indicado!' && (
-          <Alert severity="error">
+          <Alert sx={{ lineHeight: 1.2, py: 0, px: 1.5 }} severity="error">
             Este entidade não possui nenhuma conta CVE elegivel para cativo/penhora no valor indicado!
           </Alert>
         )) || (
-          <Alert severity={nota === 'Saldo cativado é igual ao valor solicitado!' ? 'success' : 'warning'}>
+          <Alert
+            sx={{ lineHeight: 1.2, py: 0, px: 1.5 }}
+            severity={nota === 'Saldo cativado é igual ao valor solicitado!' ? 'success' : 'warning'}
+          >
             {nota}
           </Alert>
         ))}
       {motivo ? (
-        <Alert severity="warning" sx={{ lineHeight: 1.5 }}>
+        <Alert severity="error" sx={{ lineHeight: 1.2, py: 0, px: 1.5 }}>
           <AlertTitle sx={{ typography: 'subtitle2' }}>Processo devolvido</AlertTitle>
           {newLineText(motivo)}
         </Alert>

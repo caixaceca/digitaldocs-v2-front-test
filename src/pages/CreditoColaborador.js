@@ -55,10 +55,7 @@ export default function CreditoColaborador() {
   const { pedidoCC, done, error, isLoading, isSaving } = useSelector((state) => state.cc);
   const { meusAmbientes, isGerente, isAdmin, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
   const isResponsavel = temNomeacao(cc) || isGerente;
-  const colaboradoresList = findColaboradores(
-    colaboradores,
-    colaboradoresEstado?.map((row) => row?.perfil_id)
-  );
+  const colaboradoresList = findColaboradores(colaboradores, colaboradoresEstado);
   const destinosList = useMemo(
     () => ({
       seguimentos:
@@ -85,13 +82,11 @@ export default function CreditoColaborador() {
 
   const fromArquivo = params?.get?.('from') === 'arquivo';
   const fromProcurar = params?.get?.('from') === 'Pesquisa';
-  const fromEntradas = params?.get?.('from') === 'entradas';
-  const fromPorConcluir = params?.get?.('from') === 'porconcluir';
-  const fromTrabalhados = params?.get?.('from') === 'trabalhados';
+  const fromControle = params?.get?.('from') === 'Controle';
   const linkNavigate =
     (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}`) ||
     (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
-    ((fromTrabalhados || fromPorConcluir || fromEntradas) && `${PATH_DIGITALDOCS.controle.lista}`) ||
+    (fromControle && `${PATH_DIGITALDOCS.controle.lista}`) ||
     `${PATH_DIGITALDOCS.processos.lista}`;
 
   const navigateToProcess = () => {
@@ -240,10 +235,8 @@ export default function CreditoColaborador() {
             {
               name:
                 (fromArquivo && 'Arquivos') ||
-                (fromEntradas && 'Entradas') ||
+                (fromControle && 'Controle') ||
                 (fromProcurar && 'Pesquisa') ||
-                (fromTrabalhados && 'Trabalhados') ||
-                (fromPorConcluir && 'Por concluir') ||
                 (params?.get?.('from') &&
                   params?.get?.('from')?.charAt(0)?.toUpperCase() + params?.get?.('from')?.slice(1)) ||
                 'Processos',
@@ -280,10 +273,13 @@ export default function CreditoColaborador() {
                       pedidoCC?.estados?.length === 1 &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
                         <AtribuirForm
-                          processoID={pedidoCC?.id}
-                          fluxoId={pedidoCC?.fluxo_id}
                           colaboradoresList={colaboradoresList}
-                          perfilId={pedidoCC?.estados?.[0]?.perfil_id}
+                          dados={{
+                            processoId: pedidoCC?.id,
+                            fluxoId: pedidoCC?.fluxoId,
+                            estadoId: pedidoCC?.estado_final_id,
+                            perfilId: pedidoCC?.estado_processo?.perfil_id,
+                          }}
                         />
                       )}
                   </>

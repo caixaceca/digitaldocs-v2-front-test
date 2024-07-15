@@ -15,7 +15,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { fCurrency } from '../../utils/formatNumber';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, dataValido, setDataUtil, noDados, shuffleString } from '../../utils/normalizeText';
+import { normalizeText, dataValido, setDataUtil, noDados, baralharString } from '../../utils/normalizeText';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -187,12 +187,12 @@ export default function TableCON({ item = 'con' }) {
                     {(item === 'pjf' && (
                       <>
                         <TableCell>{row?.referencia}</TableCell>
-                        <TableCell>{row?.titular ? shuffleString(row?.titular) : noDados()}</TableCell>
+                        <TableCell>{row?.titular ? baralharString(row?.titular) : noDados()}</TableCell>
                         <TableCell>{row?.origem || noDados()}</TableCell>
                         <TableCell>
                           {!row?.doc_1 && !row?.doc_2 && noDados()}
-                          {row?.doc_1 && <Criado value={row.doc_1} shuffle />}
-                          {row?.doc_2 && <Criado value={row.doc_2} shuffle />}
+                          {row?.doc_1 && <Criado value={row.doc_1} baralhar />}
+                          {row?.doc_2 && <Criado value={row.doc_2} baralhar />}
                         </TableCell>
                         <TableCell>
                           {!row?.operacao && !row?.valor && noDados()}
@@ -206,11 +206,11 @@ export default function TableCON({ item = 'con' }) {
                       </>
                     )) || (
                       <>
-                        <TableCell>{shuffleString(row?.nome_cliente)}</TableCell>
+                        <TableCell>{baralharString(row?.nome_cliente)}</TableCell>
                         <TableCell align="center" width={10}>
                           <Checked check={row.titular_ordenador} />
                         </TableCell>
-                        <TableCell align="right">{shuffleString(row?.conta_processo)}</TableCell>
+                        <TableCell align="right">{baralharString(row?.conta_processo)}</TableCell>
                         <TableCell align="right">{row?.valor ? fCurrency(row?.valor) : noDados()}</TableCell>
                         <TableCell align="right">{row?.cdg_operacao || noDados()}</TableCell>
                         <TableCell align="center">

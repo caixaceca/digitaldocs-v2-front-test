@@ -8,7 +8,6 @@ import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { ptDate, ptDateTime } from '../../../utils/formatTime';
 // components
@@ -45,7 +44,7 @@ export default function EntidadesGarantias({ item, dados }) {
               expanded={accord === `${item}_${index}`}
               onChange={handleAccord(`${item}_${index}`)}
             >
-              <AccordionSummary expandIcon={<KeyboardArrowDownIcon />} sx={{ py: 0.75 }}>
+              <AccordionSummary sx={{ minHeight: '64px !important' }}>
                 <Stack direction="row" justifyContent="left" alignItems="center" sx={{ pr: 2 }} spacing={1}>
                   <Typography variant="subtitle1">
                     {item === 'entidades' ? `${row?.nome} ${row?.entidade ? ` - ${row?.entidade}` : ''}` : row?.tipo}

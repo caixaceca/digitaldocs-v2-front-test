@@ -1,3 +1,5 @@
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+
 // ----------------------------------------------------------------------
 
 export default function Accordion(theme) {
@@ -5,33 +7,35 @@ export default function Accordion(theme) {
     MuiAccordion: {
       styleOverrides: {
         root: {
-          '&.Mui-expanded': {
-            boxShadow: theme.customShadows.z8,
-            borderRadius: theme.shape.borderRadius,
-          },
-          '&.Mui-disabled': {
-            backgroundColor: 'transparent',
-          },
+          '&.Mui-disabled': { backgroundColor: 'transparent' },
+          '&.Mui-expanded': { boxShadow: theme.customShadows.z8, borderRadius: theme.shape.borderRadius },
         },
       },
+      defaultProps: { slotProps: { transition: { unmountOnExit: true } } },
     },
     MuiAccordionSummary: {
       styleOverrides: {
         root: {
-          paddingLeft: theme.spacing(2),
+          flexDirection: 'row-reverse',
+          paddingLeft: theme.spacing(1),
           paddingRight: theme.spacing(1),
+          borderRadius: theme.spacing(1),
+          backgroundColor: theme.palette.background.neutral,
           '&.Mui-disabled': {
             opacity: 1,
             color: theme.palette.action.disabled,
-            '& .MuiTypography-root': {
-              color: 'inherit',
-            },
+            '& .MuiTypography-root': { color: 'inherit' },
+          },
+          '&.Mui-expanded': {
+            minHeight: '34px',
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+            '& .MuiAccordionSummary-content': { margin: '12px 0' },
           },
         },
-        expandIconWrapper: {
-          color: 'inherit',
-        },
+        expandIconWrapper: { color: 'inherit', marginRight: 5, '&.Mui-expanded': { transform: 'rotate(90deg)' } },
       },
+      defaultProps: { expandIcon: <KeyboardArrowRightIcon /> },
     },
   };
 }

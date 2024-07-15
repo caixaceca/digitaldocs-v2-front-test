@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { PDFViewer } from '@react-pdf/renderer';
@@ -13,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { b64toBlob } from '../../../utils/getFileFormat';
 import { newLineText } from '../../../utils/normalizeText';
@@ -47,19 +45,15 @@ import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
-Pareceres.propTypes = { pareceres: PropTypes.array, id: PropTypes.number, assunto: PropTypes.string };
-
-export default function Pareceres({ pareceres, id, assunto }) {
+export default function Pareceres() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [accord, setAccord] = useState(false);
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { fileDownload } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { anexoParecer, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { processo, fileDownload, anexoParecer, isOpenModal, itemSelected, isOpenParecer, done, isSaving } =
+    useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (anexoParecer?.ficheiro) {
@@ -119,7 +113,7 @@ export default function Pareceres({ pareceres, id, assunto }) {
     dispatch(
       updateItem('parecer', formData, {
         mail,
-        processoId: id,
+        processoId: processo?.id,
         id: itemSelected.id,
         msg: 'Parecer enviado',
         perfilId: cc?.perfil_id,
@@ -140,23 +134,14 @@ export default function Pareceres({ pareceres, id, assunto }) {
 
   return (
     <Box sx={{ pb: 3 }}>
-      {applySort(pareceres, getComparator('desc', 'id')).map((row) => {
+      {applySort(processo?.pareceres_estado, getComparator('desc', 'id')).map((row) => {
         const criador = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
         const anexosAtivos = row?.anexos?.filter((item) => item?.ativo);
         const anexosInativos = row?.anexos?.filter((item) => !item?.ativo);
         return (
           <Stack key={row?.id} sx={{ px: { xs: 1, sm: 3 }, pt: 2 }}>
             <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
-              <AccordionSummary
-                expandIcon={<KeyboardArrowDownIcon />}
-                sx={{
-                  borderRadius: 1,
-                  py: accord !== row?.id && 1,
-                  backgroundColor: 'background.neutral',
-                  borderBottomLeftRadius: accord === row?.id && 0,
-                  borderBottomRightRadius: accord === row?.id && 0,
-                }}
-              >
+              <AccordionSummary  sx={{ py: accord !== row?.id && 1 }}>
                 <Stack
                   spacing={1}
                   alignItems="center"
@@ -269,7 +254,7 @@ export default function Pareceres({ pareceres, id, assunto }) {
           </Stack>
         );
       })}
-      <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={id} />
+      <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} />
 
       <Dialog fullScreen open={isOpenParecer}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ pr: 1.5, py: 0.5 }}>
@@ -296,8 +281,8 @@ export default function Pareceres({ pareceres, id, assunto }) {
           <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
             <ParecerExport
               dados={{
-                assunto,
                 parecer: itemSelected,
+                assunto: processo?.titular,
                 nome: itemSelected?.validado
                   ? colaboradores?.find((row) => row?.perfil?.id === itemSelected?.perfil_id)?.perfil?.displayName
                   : cc?.perfil?.displayName,

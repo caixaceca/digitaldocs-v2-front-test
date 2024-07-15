@@ -40,8 +40,8 @@ const TABLE_HEAD_ATRIBUICOES = [
 const TABLE_HEAD_PENDENCIAS = [
   { id: 'motivo', label: 'Motivo', align: 'left' },
   { id: 'observacao', label: 'Observação', align: 'left' },
-  { id: '', label: 'Duração', align: 'center' },
-  { id: 'data_pendente', label: 'Registo', align: 'left' },
+  { id: '', label: 'Duração', align: 'left' },
+  { id: 'data_pendente', label: 'Registo', align: 'center', minWidth: 130, width: 10 },
 ];
 
 // ----------------------------------------------------------------------
@@ -89,6 +89,8 @@ export default function TableDetalhes({ id, item }) {
   });
   const isNotFound = !dataFiltered.length;
 
+  console.log(dataFiltered);
+
   return (
     <Box sx={{ p: 1 }}>
       <SearchToolbarSimple filter={filter} setFilter={setFilter} />
@@ -128,7 +130,9 @@ export default function TableDetalhes({ id, item }) {
                           ) : (
                             <Criado sx={{ color: 'text.success' }} caption value="Ainda está a trabalhar no processo" />
                           )}
-                          {row?.solto_em && row?.por && <Criado tipo="user" value={row?.por} shuffle />}
+                          {row?.solto_em && row?.por && (
+                            <Criado tipo="user" value={row?.por === 'system' ? 'Pelo sistema' : row?.por} baralhar />
+                          )}
                         </TableCell>
                       </>
                     )) ||
@@ -139,8 +143,8 @@ export default function TableDetalhes({ id, item }) {
                           </TableCell>
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
-                            {row?.atribuido_em && <Criado tipo="data" value={ptDateTime(row?.atribuido_em)} />}
-                            {row?.atribuidor && <Criado tipo="user" value={row?.atribuidor} shuffle />}
+                            {row?.atribuido_em && <Criado caption tipo="data" value={ptDateTime(row?.atribuido_em)} />}
+                            {row?.atribuidor && <Criado caption tipo="user" value={row?.atribuidor} baralhar />}
                           </TableCell>
                         </>
                       )) ||
@@ -149,8 +153,20 @@ export default function TableDetalhes({ id, item }) {
                           <TableCell>{row?.motivo}</TableCell>
                           <TableCell>{row?.observacao || noDados(true)}</TableCell>
                           <TableCell>
-                            {row?.data_pendente && <Criado tipo="data" value={ptDateTime(row?.data_pendente)} />}
-                            {row?.data_libertado && <Criado tipo="data" value={ptDateTime(row?.data_libertado)} />}
+                            {(row?.data_pendente &&
+                              row?.data_libertado &&
+                              fDistance(row?.data_pendente, row?.data_libertado)) ||
+                              (row?.data_pendente && !row?.data_libertado && fToNow(row?.data_pendente)) ||
+                              noDados(true)}
+                            {row?.data_libertado && (
+                              <Criado caption tipo="data" value={ptDateTime(row?.data_libertado)} />
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {row?.data_pendente && (
+                              <Criado caption tipo="data" value={ptDateTime(row?.data_pendente)} />
+                            )}
+                            {row?.nome && <Criado caption tipo="user" value={row?.nome} baralhar />}
                           </TableCell>
                         </>
                       ))}

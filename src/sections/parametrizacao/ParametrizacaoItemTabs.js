@@ -532,14 +532,14 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                       {(item === 'notificacoes' || item === 'destinatarios') && (
                         <TableCell width={10}>
                           {row?.criado_em && <Criado caption tipo="time" value={ptDateTime(row.criado_em)} />}
-                          {row?.criador && <Criado caption tipo="user" value={row.criador} shuffle />}
+                          {row?.criador && <Criado caption tipo="user" value={row.criador} baralhar />}
                           {row?.modificado_em && row.modificador ? (
                             <Box sx={{ color: 'text.secondary' }}>
                               <Divider sx={{ my: 0.5 }} />
                               {row?.modificado_em && (
                                 <Criado caption tipo="time" value={ptDateTime(row.modificado_em)} />
                               )}
-                              {row?.modificador && <Criado caption tipo="user" value={row.modificador} shuffle />}
+                              {row?.modificador && <Criado caption tipo="user" value={row.modificador} baralhar />}
                             </Box>
                           ) : (
                             ''

@@ -1,13 +1,11 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { fDateTime } from '../../../utils/formatTime';
 // redux
@@ -28,9 +26,10 @@ export default function Views({ id, from = '', isLoading }) {
   const [accord, setAccord] = useState(false);
   const { pedidoCC } = useSelector((state) => state.cc);
   const { processo } = useSelector((state) => state.digitaldocs);
-  const viewsGroupByColaborador = groupByColaborador(
-    from === 'cc' ? pedidoCC?.hvisualizacoes || [] : processo?.hvisualizacoes || [],
-    'perfil_id'
+  const viewsGroupByColaborador = useMemo(
+    () =>
+      groupByColaborador(from === 'cc' ? pedidoCC?.hvisualizacoes || [] : processo?.hvisualizacoes || [], 'perfil_id'),
+    [from, pedidoCC?.hvisualizacoes, processo?.hvisualizacoes]
   );
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
 
@@ -47,15 +46,13 @@ export default function Views({ id, from = '', isLoading }) {
   }, [dispatch, id, from, mail, cc?.perfil_id]);
 
   return (
-    <CardContent>
+    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
       {isLoading ? (
         <SkeletonBar column={5} height={75} />
       ) : (
         <>
           {viewsGroupByColaborador?.length === 0 ? (
-            <Stack sx={{ mt: 5 }}>
-              <SearchNotFound message="Sem histórico de visualização disponível..." />
-            </Stack>
+            <SearchNotFound message="Sem histórico de visualização disponível..." />
           ) : (
             viewsGroupByColaborador?.map((row, index) => {
               const colaborador = colaboradores?.find((colab) => colab.perfil_id === row.perfilId);
@@ -65,12 +62,12 @@ export default function Views({ id, from = '', isLoading }) {
                   expanded={accord === row.perfilId}
                   onChange={handleAccord(row.perfilId)}
                 >
-                  <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+                  <AccordionSummary>
                     <Stack
                       direction="row"
-                      justifyContent="space-between"
                       alignItems="center"
                       sx={{ flexGrow: 1, pr: 2 }}
+                      justifyContent="space-between"
                     >
                       <ColaboradorInfo
                         foto={colaborador?.foto_disk}
@@ -93,7 +90,7 @@ export default function Views({ id, from = '', isLoading }) {
           )}
         </>
       )}
-    </CardContent>
+    </Stack>
   );
 }
 

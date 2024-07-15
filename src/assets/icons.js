@@ -142,40 +142,57 @@ export function Definicoes() {
   );
 }
 
-export function Todos() {
+export function Todos({ ...other }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48">
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4">
-        <ellipse cx="24" cy="11" rx="20" ry="6" />
-        <path d="M10.77 15.5C6.62 16.6 4 18.208 4 20c0 3.314 8.954 6 20 6s20-2.686 20-6c0-1.792-2.619-3.4-6.77-4.5c-3.526.933-8.158 1.5-13.23 1.5c-5.072 0-9.703-.567-13.23-1.5" />
-        <path d="M10.77 24.5C6.62 25.6 4 27.208 4 29c0 3.314 8.954 6 20 6s20-2.686 20-6c0-1.792-2.619-3.4-6.77-4.5c-3.526.933-8.158 1.5-13.23 1.5c-5.072 0-9.703-.567-13.23-1.5" />
-        <path d="M10.77 33.5C6.62 34.6 4 36.208 4 38c0 3.314 8.954 6 20 6s20-2.686 20-6c0-1.792-2.619-3.4-6.77-4.5c-3.526.934-8.158 1.5-13.23 1.5c-5.072 0-9.703-.566-13.23-1.5" />
-      </g>
-    </svg>
+    <Icon {...other}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48">
+        <defs>
+          <mask id="ipTDataAll0">
+            <g fill="#555" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4">
+              <ellipse cx="24" cy="11" rx="20" ry="6" />
+              <path d="M10.77 15.5C6.62 16.6 4 18.208 4 20c0 3.314 8.954 6 20 6s20-2.686 20-6c0-1.792-2.619-3.4-6.77-4.5c-3.526.933-8.158 1.5-13.23 1.5c-5.072 0-9.703-.567-13.23-1.5" />
+              <path d="M10.77 24.5C6.62 25.6 4 27.208 4 29c0 3.314 8.954 6 20 6s20-2.686 20-6c0-1.792-2.619-3.4-6.77-4.5c-3.526.933-8.158 1.5-13.23 1.5c-5.072 0-9.703-.567-13.23-1.5" />
+              <path d="M10.77 33.5C6.62 34.6 4 36.208 4 38c0 3.314 8.954 6 20 6s20-2.686 20-6c0-1.792-2.619-3.4-6.77-4.5c-3.526.934-8.158 1.5-13.23 1.5c-5.072 0-9.703-.566-13.23-1.5" />
+            </g>
+          </mask>
+        </defs>
+        <path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ipTDataAll0)" />
+      </svg>
+    </Icon>
   );
 }
 
-export function Atribuir({ ...other }) {
+export function Media({ ...other }) {
   return (
     <Icon {...other}>
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36">
-        <circle cx="17.99" cy="10.36" r="6.81" fill="currentColor" className="clr-i-solid clr-i-solid-path-1" />
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
         <path
           fill="currentColor"
-          d="M12 26.65a2.8 2.8 0 0 1 4.85-1.8L20.71 29l6.84-7.63A16.8 16.8 0 0 0 18 18.55A16.13 16.13 0 0 0 5.5 24a1 1 0 0 0-.2.61V30a2 2 0 0 0 1.94 2h8.57l-3.07-3.3a2.8 2.8 0 0 1-.74-2.05"
-          className="clr-i-solid clr-i-solid-path-2"
+          d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12"
+          opacity="0.5"
         />
         <path
           fill="currentColor"
-          d="M28.76 32a2 2 0 0 0 1.94-2v-3.76L25.57 32Z"
-          className="clr-i-solid clr-i-solid-path-3"
+          d="M17.576 10.48a.75.75 0 0 0-1.152-.96l-1.797 2.156c-.37.445-.599.716-.786.885a.764.764 0 0 1-.163.122l-.011.005l-.008-.004l-.003-.001a.764.764 0 0 1-.164-.122c-.187-.17-.415-.44-.786-.885l-.292-.35c-.328-.395-.625-.75-.901-1c-.301-.272-.68-.514-1.18-.514c-.5 0-.878.242-1.18.514c-.276.25-.572.605-.9 1l-1.83 2.194a.75.75 0 0 0 1.153.96l1.797-2.156c.37-.445.599-.716.786-.885a.769.769 0 0 1 .163-.122l.007-.003l.004-.001c.003 0 .006.002.011.004a.768.768 0 0 1 .164.122c.187.17.415.44.786.885l.292.35c.329.395.625.75.901 1c.301.272.68.514 1.18.514c.5 0 .878-.242 1.18-.514c.276-.25.572-.605.9-1z"
+        />
+      </svg>
+    </Icon>
+  );
+}
+
+export function Maximo({ ...other }) {
+  return (
+    <Icon {...other}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12"
+          opacity="0.5"
         />
         <path
           fill="currentColor"
-          d="M33.77 18.62a1 1 0 0 0-1.42.08l-11.62 13l-5.2-5.59a1 1 0 0 0-1.41-.11a1 1 0 0 0 0 1.42l6.68 7.2L33.84 20a1 1 0 0 0-.07-1.38"
-          className="clr-i-solid clr-i-solid-path-4"
+          d="M22 5a3 3 0 1 1-6 0a3 3 0 0 1 6 0m-7.5 5.75a.75.75 0 0 1 0-1.5H17a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-.69l-2.013 2.013a1.75 1.75 0 0 1-2.474 0l-1.586-1.586a.25.25 0 0 0-.354 0L7.53 14.53a.75.75 0 0 1-1.06-1.06l2.293-2.293a1.75 1.75 0 0 1 2.474 0l1.586 1.586a.25.25 0 0 0 .354 0l2.012-2.013z"
         />
-        <path fill="none" d="M0 0h36v36H0z" />
       </svg>
     </Icon>
   );
@@ -241,6 +258,32 @@ export function Resgatar({ ...other }) {
           strokeWidth="2"
           d="M10 8H5V3m.291 13.357a8 8 0 1 0 .188-8.991"
         />
+      </svg>
+    </Icon>
+  );
+}
+
+export function Atribuir({ ...other }) {
+  return (
+    <Icon {...other}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36">
+        <circle cx="17.99" cy="10.36" r="6.81" fill="currentColor" className="clr-i-solid clr-i-solid-path-1" />
+        <path
+          fill="currentColor"
+          d="M12 26.65a2.8 2.8 0 0 1 4.85-1.8L20.71 29l6.84-7.63A16.8 16.8 0 0 0 18 18.55A16.13 16.13 0 0 0 5.5 24a1 1 0 0 0-.2.61V30a2 2 0 0 0 1.94 2h8.57l-3.07-3.3a2.8 2.8 0 0 1-.74-2.05"
+          className="clr-i-solid clr-i-solid-path-2"
+        />
+        <path
+          fill="currentColor"
+          d="M28.76 32a2 2 0 0 0 1.94-2v-3.76L25.57 32Z"
+          className="clr-i-solid clr-i-solid-path-3"
+        />
+        <path
+          fill="currentColor"
+          d="M33.77 18.62a1 1 0 0 0-1.42.08l-11.62 13l-5.2-5.59a1 1 0 0 0-1.41-.11a1 1 0 0 0 0 1.42l6.68 7.2L33.84 20a1 1 0 0 0-.07-1.38"
+          className="clr-i-solid clr-i-solid-path-4"
+        />
+        <path fill="none" d="M0 0h36v36H0z" />
       </svg>
     </Icon>
   );

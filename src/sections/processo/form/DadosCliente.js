@@ -6,6 +6,8 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+// utils
+import { deGmkt } from '../../../utils/validarAcesso';
 // components
 import { DefaultAction } from '../../../components/Actions';
 import { RHFTextField, RHFNumberField, RHFDatePicker } from '../../../components/hook-form';
@@ -18,7 +20,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
   const { watch, control } = useFormContext();
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
-  const isPS = fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário';
+  const isPS = deGmkt(fluxo?.assunto);
 
   const handleAdd = () => {
     append({ numero: '' });
@@ -89,9 +91,16 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
             </Grid>
           )}
           {isPS && (
-            <Grid item xs={12}>
-              <RHFTextField name="titular" label="Descrição" />
-            </Grid>
+            <>
+              <Grid item xs={12} sm={fluxo?.assunto === 'Formulário' ? 6 : 12}>
+                <RHFTextField name="titular" label="Descrição" />
+              </Grid>
+              {fluxo?.assunto === 'Formulário' && (
+                <Grid item xs={12} sm={6}>
+                  <RHFTextField name="email" label="Codificação/Nome" />
+                </Grid>
+              )}
+            </>
           )}
           {(fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') && (
             <Grid item xs={12} xl={6}>

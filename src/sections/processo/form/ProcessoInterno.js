@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
+import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useMemo, useEffect } from 'react';
 // form
@@ -9,7 +10,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Grid from '@mui/material/Grid';
 import { LoadingButton } from '@mui/lab';
 // utils
-import { format, add } from 'date-fns';
+import { deGmkt } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
@@ -38,12 +39,11 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
     entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
     data_entrada: fluxo?.modelo !== 'Paralelo' && Yup.date().typeError().required().label('Data de entrada'),
     noperacao: (processo?.numero_operacao || fluxo?.is_con) && Yup.number().positive().label('Nº de operação'),
-    titular:
-      (fluxo?.assunto === 'Produtos e Serviços' || fluxo?.assunto === 'Preçário') &&
-      Yup.string().required().label('Descriçãao'),
+    titular: deGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
     email:
-      (fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') &&
-      Yup.string().email().required().label('Email'),
+      ((fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') &&
+        Yup.string().email().required().label('Email')) ||
+      (fluxo?.assunto === 'Formulário' && Yup.string().required().label('Codificação/Nome')),
     conta:
       !fluxo?.limpo && fluxo?.assunto !== 'Abertura de conta' && Yup.number().positive().integer().label('Nº de conta'),
     // agendamento

@@ -6,8 +6,9 @@ import Divider from '@mui/material/Divider';
 import Backdrop from '@mui/material/Backdrop';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import CloseIcon from '@mui/icons-material/Close';
 import { alpha, styled } from '@mui/material/styles';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 // hooks
 import useSettings from '../../../hooks/useSettings';
 // utils
@@ -17,14 +18,12 @@ import { NAVBAR, defaultSettings } from '../../../config';
 //
 import Scrollbar from '../../Scrollbar';
 import { varFade } from '../../animate';
-import SvgIconStyle from '../../SvgIconStyle';
 //
 import ToggleButton from './ToggleButton';
 import SettingMode from './SettingMode';
 import SettingLayout from './SettingLayout';
 import SettingStretch from './SettingStretch';
 import SettingContrast from './SettingContrast';
-import SettingDirection from './SettingDirection';
 import SettingFullscreen from './SettingFullscreen';
 
 // ----------------------------------------------------------------------
@@ -52,8 +51,7 @@ const RootStyle = styled(m.div)(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export default function SettingsDrawer() {
-  const { themeMode, themeLayout, themeStretch, themeContrast, themeDirection, themeColorPresets, onResetSetting } =
-    useSettings();
+  const { themeMode, themeLayout, themeStretch, themeContrast, onResetSetting } = useSettings();
 
   const [open, setOpen] = useState(false);
 
@@ -61,22 +59,9 @@ export default function SettingsDrawer() {
     themeMode !== defaultSettings.themeMode ||
     themeLayout !== defaultSettings.themeLayout ||
     themeStretch !== defaultSettings.themeStretch ||
-    themeContrast !== defaultSettings.themeContrast ||
-    themeDirection !== defaultSettings.themeDirection ||
-    themeColorPresets !== defaultSettings.themeColorPresets;
+    themeContrast !== defaultSettings.themeContrast;
 
-  const varSidebar =
-    themeDirection !== 'rtl'
-      ? varFade({
-          distance: NAVBAR.BASE_WIDTH,
-          durationIn: 0.32,
-          durationOut: 0.32,
-        }).inRight
-      : varFade({
-          distance: NAVBAR.BASE_WIDTH,
-          durationIn: 0.32,
-          durationOut: 0.32,
-        }).inLeft;
+  const varSidebar = varFade({ distance: NAVBAR.BASE_WIDTH, durationIn: 0.32, durationOut: 0.32 }).inRight;
 
   useEffect(() => {
     if (open) {
@@ -114,11 +99,11 @@ export default function SettingsDrawer() {
                 </Typography>
 
                 <IconButton onClick={onResetSetting}>
-                  <SvgIconStyle src={'/assets/icons/round-refresh.svg'} sx={{ width: 20 }} />
+                  <RefreshOutlinedIcon sx={{ width: 20, height: 20 }} />
                 </IconButton>
 
                 <IconButton onClick={handleClose}>
-                  <CloseOutlinedIcon sx={{ width: 20 }} />
+                  <CloseIcon sx={{ width: 20, height: 20 }} />
                 </IconButton>
               </Stack>
 
@@ -134,11 +119,6 @@ export default function SettingsDrawer() {
                   <Stack spacing={1.5}>
                     <Typography variant="subtitle2">Contraste</Typography>
                     <SettingContrast />
-                  </Stack>
-
-                  <Stack spacing={1.5}>
-                    <Typography variant="subtitle2">Direção</Typography>
-                    <SettingDirection />
                   </Stack>
 
                   <Stack spacing={1.5}>

@@ -25,6 +25,7 @@ import useSettings from '../hooks/useSettings';
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // components
 import Page from '../components/Page';
+import Label from '../components/Label';
 import Scrollbar from '../components/Scrollbar';
 import { DefaultAction } from '../components/Actions';
 import { SkeletonTable } from '../components/skeleton';
@@ -131,10 +132,11 @@ export default function Procura() {
             mail,
             perfilId: cc?.perfil_id,
             pagina: pesquisaInfo?.proxima_pagina,
+            uo: localStorage.getItem('uoSearch') || '',
             conta: localStorage.getItem('conta') || '',
+            entrada: localStorage.getItem('entrada') || '',
             cliente: localStorage.getItem('cliente') || '',
             entidade: localStorage.getItem('entidade') || '',
-            arquivo: localStorage.getItem('procArquivo') || '',
             noperacao: localStorage.getItem('noperacao') || '',
           })
         );
@@ -145,7 +147,8 @@ export default function Procura() {
             uoID: cc?.uo_id,
             perfilId: cc?.perfil_id,
             pagina: pesquisaInfo?.proxima_pagina,
-            chave: localStorage.getItem('search'),
+            chave: localStorage.getItem('chave'),
+            historico: localStorage.getItem('procHistorico') === 'true',
           })
         );
       }
@@ -159,10 +162,26 @@ export default function Procura() {
           sx={{ color: 'text.secondary' }}
           action={<Registos info={pesquisaInfo} total={pesquisa?.length} handleClick={verMais} />}
           heading={
-            <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'start', md: 'center' }} spacing={1}>
               <Typography variant="h4">Resultado da procura [{pesquisa?.length || 0}]:</Typography>
               {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
+                  {localStorage.getItem('uoSearch') && (
+                    <Panel
+                      label="U.O"
+                      children={
+                        <Typography noWrap>
+                          {uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
+                        </Typography>
+                      }
+                    />
+                  )}
+                  {localStorage.getItem('entrada') && (
+                    <Panel
+                      label="Nº entrada"
+                      children={<Typography noWrap>{localStorage.getItem('entrada')}</Typography>}
+                    />
+                  )}
                   {localStorage.getItem('conta') && (
                     <Panel
                       label="Nº conta"
@@ -189,9 +208,12 @@ export default function Procura() {
                   )}
                 </Stack>
               ) : (
-                <Box component="span" sx={{ color: 'text.primary' }}>
-                  {localStorage.getItem('search')}
-                </Box>
+                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
+                  <Box component="span" sx={{ color: 'text.primary' }}>
+                    {localStorage.getItem('chave')}
+                  </Box>
+                  {localStorage.getItem('procHistorico') === 'true' && <Label>Histórico</Label>}
+                </Stack>
               )}
             </Stack>
           }
@@ -236,7 +258,7 @@ export default function Procura() {
                           {row?.uo && (
                             <Criado tipo="company" value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo} />
                           )}
-                          {row?.colaborador && <Criado tipo="user" value={row.colaborador} shuffle />}
+                          {row?.colaborador && <Criado tipo="user" value={row.colaborador} baralhar />}
                         </TableCell>
                         <TableCell align="center" width={50}>
                           <DefaultAction

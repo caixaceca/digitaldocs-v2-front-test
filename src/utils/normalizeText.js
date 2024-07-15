@@ -23,23 +23,19 @@ export function newLineText(text) {
 
 // ----------------------------------------------------------------------
 
-export function shuffleString(str = '') {
+export function baralharString(str = '') {
   if (isProduction()) {
     return str;
   }
 
-  const regexLetras = /[a-zA-Z]/;
-  const regexNumeros = /[0-9]/;
-  const chars = str?.split('') || [];
-  for (let i = 0; i < chars?.length; i += 1) {
-    if (regexLetras.test(chars[i])) {
-      chars[i] = 'X';
-    }
-    if (regexNumeros.test(chars[i])) {
-      chars[i] = '#';
-    }
+  const arr = str.split('');
+
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return chars?.join('') || [];
+
+  return arr.join('');
 }
 
 export function isProduction() {

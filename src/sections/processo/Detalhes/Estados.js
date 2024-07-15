@@ -1,205 +1,111 @@
 import PropTypes from 'prop-types';
-import { useSnackbar } from 'notistack';
-import { useEffect, useState } from 'react';
-import { PDFViewer } from '@react-pdf/renderer';
+import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
-import DialogTitle from '@mui/material/DialogTitle';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
-import { b64toBlob } from '../../../utils/getFileFormat';
-import { newLineText } from '../../../utils/normalizeText';
-import { colorLabel } from '../../../utils/getColorPresets';
+import { newLineText, baralharString } from '../../../utils/normalizeText';
+import { pertencoEstadoId, findColaboradores, temNomeacao } from '../../../utils/validarAcesso';
 import { padraoDate, ptDate, ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 // hooks
-import useToggle from '../../../hooks/useToggle';
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import {
-  getAnexo,
-  resetAnexo,
-  selectItem,
-  closeModal,
-  updateItem,
-  closeParecer,
-  selectParecer,
-} from '../../../redux/slices/digitaldocs';
+import { selectItem, closeModal } from '../../../redux/slices/digitaldocs';
 // components
-import Label from '../../../components/Label';
-import DialogConfirmar from '../../../components/DialogConfirmar';
+import { DefaultAction } from '../../../components/Actions';
 import { ColaboradorInfo, Criado } from '../../../components/Panel';
-import { DefaultAction, Fechar } from '../../../components/Actions';
 //
-import { AnexoItem } from './Anexos';
-import ParecerExport from './ParecerExport';
-import { ParecerForm } from '../form/IntervencaoForm';
-// guards
-import RoleBasedGuard from '../../../guards/RoleBasedGuard';
+import { Abandonar, ParecerForm, AtribuirForm } from '../form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
-Estados.propTypes = { pareceres: PropTypes.array, id: PropTypes.number, assunto: PropTypes.string };
+Estados.propTypes = { handleAceitar: PropTypes.func };
 
-export default function Estados({ pareceres, id, assunto }) {
+export default function Estados({ handleAceitar }) {
   const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
   const [accord, setAccord] = useState(false);
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const { fileDownload } = useSelector((state) => state.digitaldocs);
-  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { anexoParecer, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
-    (state) => state.digitaldocs
+  const { cc, colaboradores } = useSelector((state) => state.intranet);
+  const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, colaboradoresEstado, isAdmin } = useSelector((state) => state.parametrizacao);
+  const isResponsavel = temNomeacao(cc) || isAdmin;
+
+  const colaboradoresList = useMemo(
+    () => findColaboradores(colaboradores, colaboradoresEstado),
+    [colaboradores, colaboradoresEstado]
   );
-
-  useEffect(() => {
-    if (anexoParecer?.ficheiro) {
-      const blob = b64toBlob(anexoParecer?.ficheiro, anexoParecer?.anexo?.conteudo);
-      const link = document.createElement('a');
-      link.download = anexoParecer?.anexo?.nome;
-      link.href = window.URL.createObjectURL(blob);
-      dispatch(resetAnexo());
-      link.click();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anexoParecer?.ficheiro]);
-
-  useEffect(() => {
-    if (done === 'parecer validado') {
-      enqueueSnackbar('Parecer validado com sucesso', { variant: 'success' });
-      onClose();
-      dispatch(closeParecer());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
-  const viewAnexo = (anexo) => {
-    dispatch(getAnexo('anexoParecer', { anexo, mail }));
-  };
-
-  useEffect(() => {
-    if (fileDownload?.anexo && !fileDownload?.blob) {
-      dispatch(getAnexo('fileDownload', { mail, anexo: fileDownload }));
-    }
-  }, [dispatch, mail, fileDownload]);
 
   const handleEditar = (item) => {
     dispatch(selectItem(item));
   };
 
-  const handleValidar = (item) => {
-    dispatch(selectParecer(item));
-  };
-
-  const handleCloseValidar = () => {
-    dispatch(closeParecer());
-  };
-
   const handleClose = () => {
     dispatch(closeModal());
   };
+
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
   };
 
-  const handleConfirmValidar = () => {
-    const formData = new FormData();
-    formData.append('validado', true);
-    formData.append('descritivo', itemSelected.parecer_obs);
-    formData.append('parecer_favoravel ', itemSelected?.parecer === 'Favorável');
-    dispatch(
-      updateItem('parecer', formData, {
-        mail,
-        processoId: id,
-        id: itemSelected.id,
-        msg: 'Parecer enviado',
-        perfilId: cc?.perfil_id,
-      })
-    );
-  };
-
-  const podeDarParecer = (estadoId) => {
-    let i = 0;
-    while (i < meusAmbientes?.length) {
-      if (meusAmbientes[i]?.id === estadoId) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  };
-
   return (
     <Box sx={{ pb: { xs: 1, sm: 2 } }}>
-      {applySort(pareceres, getComparator('desc', 'id')).map((row) => {
+      {applySort(processo?.estados, getComparator('desc', 'id')).map((row) => {
         const criador = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
-        const anexosAtivos = row?.anexos?.filter((item) => item?.ativo);
-        const anexosInativos = row?.anexos?.filter((item) => !item?.ativo);
+        const afeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
         return (
           <Stack key={row?.id} sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
-            <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
-              <AccordionSummary
-                expandIcon={<KeyboardArrowDownIcon />}
-                sx={{
-                  borderRadius: 1,
-                  py: accord !== row?.id && 1,
-                  backgroundColor: 'background.neutral',
-                  borderBottomLeftRadius: accord === row?.id && 0,
-                  borderBottomRightRadius: accord === row?.id && 0,
-                }}
-              >
-                <Stack
-                  spacing={1}
-                  alignItems="center"
-                  sx={{ flexGrow: 1, pr: 3 }}
-                  justifyContent="space-between"
-                  direction={{ xs: 'column', sm: 'row' }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Typography variant="subtitle1">{row?.estado}</Typography>
-                    {row?.parecer && (
-                      <Box>
-                        <Label variant="ghost" sx={{ typography: 'subtitle2' }} color={colorLabel(row?.parecer)}>
-                          {row?.parecer}
-                        </Label>
-                        {!row?.validado && (
-                          <Criado caption tipo="warning" value="Parecer não validado" sx={{ color: 'warning.main' }} />
-                        )}
-                      </Box>
+            <Box sx={{ position: 'absolute', right: 15, p: 2 }}>
+              <Stack direction="row" justifyContent="right" alignItems="center" spacing={1} sx={{ zIndex: 2 }}>
+                {pertencoEstadoId(meusAmbientes, row?.estado_id) && (
+                  <>
+                    {!row?._lock && (isResponsavel || isAdmin) && (
+                      <AtribuirForm
+                        colaboradoresList={colaboradoresList}
+                        dados={{
+                          estadoId: row?.estado_id,
+                          processoId: processo?.id,
+                          perfilId: row?.perfil_id,
+                          fluxoId: processo?.fluxo_id,
+                        }}
+                      />
                     )}
-                  </Stack>
-                  <Stack direction="row" alignItems="center" spacing={3}>
-                    {podeDarParecer(row?.estado_id) && (
+                    {row?._lock && row?.perfil_id === cc?.perfil_id ? (
                       <>
-                        {!row?.parecer && (
-                          <DefaultAction button label="Adicionar" handleClick={() => handleEditar(row)} />
+                        {row?.parecer ? (
+                          <DefaultAction label="EDITAR" color="warning" handleClick={() => handleEditar(row)} />
+                        ) : (
+                          <DefaultAction label="Adicionar" handleClick={() => handleEditar(row)} />
                         )}
-                        {row?.parecer && !row?.validado && (
-                          <Stack direction="row" spacing={0.75}>
-                            <DefaultAction label="VALIDAR" handleClick={() => handleValidar(row)} />
-                            <DefaultAction label="EDITAR" color="warning" handleClick={() => handleEditar(row)} />
-                          </Stack>
-                        )}
+                        <Abandonar
+                          id={processo?.id}
+                          isSaving={isSaving}
+                          estadoId={row?.estado_id}
+                          fluxoId={processo?.fluxo_id}
+                        />
                       </>
+                    ) : (
+                      <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(row?.estado_id, 'paralelo')} />
                     )}
+                  </>
+                )}
+              </Stack>
+            </Box>
+            <Stack>
+              <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
+                <AccordionSummary sx={{ minHeight: '65px !important' }}>
+                  <Stack>
+                    <Typography variant="subtitle1">{row?.estado}</Typography>
                     {!!row?.parecer_data_limite && (
-                      <Box>
-                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            Data limite:
-                          </Typography>
-                          <Typography variant="body2">{ptDate(row?.parecer_data_limite)}</Typography>
-                        </Stack>
-                        {(!row?.parecer || (row?.parecer && !row?.validado)) && (
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          Data limite:
+                        </Typography>
+                        <Typography variant="caption">{ptDate(row?.parecer_data_limite)}</Typography>
+                        {!row?.parecer && (
                           <Criado
                             caption
                             tipo="time"
@@ -215,101 +121,49 @@ export default function Estados({ pareceres, id, assunto }) {
                             }}
                           />
                         )}
-                      </Box>
+                      </Stack>
+                    )}
+                    {afeto && (
+                      <Typography sx={{ typography: 'caption', color: 'info.main' }}>
+                        {row?._lock ? '' : 'Este processo foi tribuído a '}
+                        <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                          {baralharString(afeto?.perfil?.displayName)}
+                        </Typography>
+                        {row?._lock ? ' está trabalhando no processo' : ''} neste estado.
+                      </Typography>
                     )}
                   </Stack>
-                </Stack>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Stack sx={{ p: { sm: 1 } }}>
-                  {row?.parecer ? (
-                    <>
-                      {criador && (
-                        <ColaboradorInfo
-                          foto={criador?.foto_disk}
-                          nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
-                          label={row?.data_parecer ? `Data parecer: ${ptDateTime(row?.data_parecer)}` : ''}
-                        />
-                      )}
-                      {row?.parecer_obs && (
-                        <Typography sx={{ my: 2, mx: 0.5, textAlign: 'justify' }}>
-                          {newLineText(row.parecer_obs)}
-                        </Typography>
-                      )}
-                      {row?.validado && (
-                        <AnexoItem
-                          parecer
-                          viewAnexo={() => handleValidar(row)}
-                          anexo={{
-                            criado_em: row?.data_parecer,
-                            nome: 'Minuta de parecer.pdf',
-                            anexo: 'Minuta de parecer.pdf',
-                            criador: criador?.perfil?.mail,
-                          }}
-                        />
-                      )}
-                      {anexosAtivos?.map((item) => (
-                        <AnexoItem parecer anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
-                      ))}
-                      {anexosInativos?.length > 0 && (
-                        <RoleBasedGuard roles={['Todo-111']}>
-                          <Divider sx={{ mt: 1 }}>
-                            <Typography variant="subtitle1">Anexos eliminados</Typography>
-                          </Divider>
-                          {anexosInativos?.map((item) => (
-                            <AnexoItem eliminado anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
-                          ))}
-                        </RoleBasedGuard>
-                      )}
-                    </>
-                  ) : (
-                    <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                      Ainda não foi adicionado o parecer...
-                    </Typography>
-                  )}
-                </Stack>
-              </AccordionDetails>
-            </Accordion>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Stack sx={{ p: { sm: 1 } }}>
+                    {row?.parecer ? (
+                      <>
+                        {criador && (
+                          <ColaboradorInfo
+                            foto={criador?.foto_disk}
+                            nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
+                            label={row?.data_parecer ? `Data parecer: ${ptDateTime(row?.data_parecer)}` : ''}
+                          />
+                        )}
+                        {row?.parecer_obs && (
+                          <Typography sx={{ my: 2, mx: 0.5, textAlign: 'justify' }}>
+                            {newLineText(row.parecer_obs)}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                        Ainda não foi adicionado o parecer...
+                      </Typography>
+                    )}
+                  </Stack>
+                </AccordionDetails>
+              </Accordion>
+            </Stack>
           </Stack>
         );
       })}
-      <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={id} estado />
-
-      <Dialog fullScreen open={isOpenParecer}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ pr: 1.5, py: 0.5 }}>
-          <DialogTitle sx={{ pb: 2 }}>Minuta do parecer</DialogTitle>
-          {!itemSelected?.validado && (
-            <>
-              <Button variant="contained" size="large" onClick={onOpen}>
-                VALIDAR PARECER
-              </Button>
-              <DialogConfirmar
-                open={open}
-                color="success"
-                onClose={onClose}
-                isSaving={isSaving}
-                title="Validar parecer"
-                desc="validar este parecer"
-                handleOk={handleConfirmValidar}
-              />
-            </>
-          )}
-          <Fechar handleClick={handleCloseValidar} large />
-        </Stack>
-        <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
-          <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
-            <ParecerExport
-              dados={{
-                assunto,
-                parecer: itemSelected,
-                nome: itemSelected?.validado
-                  ? colaboradores?.find((row) => row?.perfil?.id === itemSelected?.perfil_id)?.perfil?.displayName
-                  : cc?.perfil?.displayName,
-              }}
-            />
-          </PDFViewer>
-        </Box>
-      </Dialog>
+      <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} estado />
     </Box>
   );
 }

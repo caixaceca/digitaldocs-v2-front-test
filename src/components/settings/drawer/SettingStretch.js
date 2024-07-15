@@ -2,8 +2,8 @@
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
+import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 // hooks
 import useSettings from '../../../hooks/useSettings';
 
@@ -21,17 +21,11 @@ const BoxStyle = styled(CardActionArea)(({ theme }) => ({
 
 export default function SettingStretch() {
   const { themeStretch, onToggleStretch } = useSettings();
-  const ICON_SIZE = { width: themeStretch ? 26 : 22, height: themeStretch ? 26 : 22 };
+
+  const ICON_SIZE = { width: themeStretch ? 20 : 16, height: themeStretch ? 20 : 16 };
 
   return (
-    <BoxStyle
-      onClick={onToggleStretch}
-      sx={{
-        ...(themeStretch && {
-          color: (theme) => theme.palette.primary.main,
-        }),
-      }}
-    >
+    <BoxStyle onClick={onToggleStretch} sx={{ ...(themeStretch && { color: (theme) => theme.palette.primary.main }) }}>
       <Stack
         direction="row"
         alignItems="center"
@@ -46,11 +40,22 @@ export default function SettingStretch() {
           bgcolor: 'background.default',
           boxShadow: (theme) => theme.customShadows.z12,
           transition: (theme) => theme.transitions.create('width'),
-          ...(themeStretch && { width: 1, color: 'primary.main' }),
+          ...(themeStretch && {
+            width: 1,
+            color: 'primary.main',
+          }),
         }}
       >
-        {themeStretch ? <ChevronRightIcon sx={{ ...ICON_SIZE }} /> : <ChevronLeftIcon sx={{ ...ICON_SIZE }} />}
-        {themeStretch ? <ChevronLeftIcon sx={{ ...ICON_SIZE }} /> : <ChevronRightIcon sx={{ ...ICON_SIZE }} />}
+        {themeStretch ? (
+          <ArrowForwardIosOutlinedIcon sx={{ ...ICON_SIZE }} />
+        ) : (
+          <ArrowBackIosNewOutlinedIcon sx={{ ...ICON_SIZE }} />
+        )}
+        {themeStretch ? (
+          <ArrowBackIosNewOutlinedIcon sx={{ ...ICON_SIZE }} />
+        ) : (
+          <ArrowForwardIosOutlinedIcon sx={{ ...ICON_SIZE }} />
+        )}
       </Stack>
     </BoxStyle>
   );

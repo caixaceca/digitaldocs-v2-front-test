@@ -1,9 +1,7 @@
 import PropTypes from 'prop-types';
-import { useEffect, createContext } from 'react';
+import { createContext } from 'react';
 // hooks
 import useLocalStorage from '../hooks/useLocalStorage';
-// utils
-import getColorPresets, { colorPresets, defaultPreset } from '../utils/getColorPresets';
 // config
 import { defaultSettings } from '../config';
 
@@ -28,11 +26,6 @@ const initialState = {
   onToggleContrast: () => {},
   onChangeContrast: () => {},
 
-  // Color
-  onChangeColor: () => {},
-  setColor: defaultPreset,
-  colorOption: [],
-
   // Stretch
   onToggleStretch: () => {},
 
@@ -44,9 +37,7 @@ const SettingsContext = createContext(initialState);
 
 // ----------------------------------------------------------------------
 
-SettingsProvider.propTypes = {
-  children: PropTypes.node,
-};
+SettingsProvider.propTypes = { children: PropTypes.node };
 
 function SettingsProvider({ children }) {
   const [settings, setSettings] = useLocalStorage('settings', {
@@ -54,106 +45,42 @@ function SettingsProvider({ children }) {
     themeLayout: initialState.themeLayout,
     themeStretch: initialState.themeStretch,
     themeContrast: initialState.themeContrast,
-    themeDirection: initialState.themeDirection,
-    themeColorPresets: initialState.themeColorPresets,
   });
-
-  const isArabic = localStorage.getItem('i18nextLng') === 'ar';
-
-  useEffect(() => {
-    if (isArabic) {
-      onChangeDirectionByLang('ar');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isArabic]);
 
   // Mode
 
   const onToggleMode = () => {
-    setSettings({
-      ...settings,
-      themeMode: settings.themeMode === 'light' ? 'dark' : 'light',
-    });
+    setSettings({ ...settings, themeMode: settings.themeMode === 'light' ? 'dark' : 'light' });
   };
 
   const onChangeMode = (event) => {
-    setSettings({
-      ...settings,
-      themeMode: event.target.value,
-    });
-  };
-
-  // Direction
-
-  const onToggleDirection = () => {
-    setSettings({
-      ...settings,
-      themeDirection: settings.themeDirection === 'rtl' ? 'ltr' : 'rtl',
-    });
-  };
-
-  const onChangeDirection = (event) => {
-    setSettings({
-      ...settings,
-      themeDirection: event.target.value,
-    });
-  };
-
-  const onChangeDirectionByLang = (lang) => {
-    setSettings({
-      ...settings,
-      themeDirection: lang === 'ar' ? 'rtl' : 'ltr',
-    });
+    setSettings({ ...settings, themeMode: event.target.value });
   };
 
   // Layout
 
   const onToggleLayout = () => {
-    setSettings({
-      ...settings,
-      themeLayout: settings.themeLayout === 'vertical' ? 'horizontal' : 'vertical',
-    });
+    setSettings({ ...settings, themeLayout: settings.themeLayout === 'vertical' ? 'horizontal' : 'vertical' });
   };
 
   const onChangeLayout = (event) => {
-    setSettings({
-      ...settings,
-      themeLayout: event.target.value,
-    });
+    setSettings({ ...settings, themeLayout: event.target.value });
   };
 
   // Contrast
 
   const onToggleContrast = () => {
-    setSettings({
-      ...settings,
-      themeContrast: settings.themeContrast === 'default' ? 'bold' : 'default',
-    });
+    setSettings({ ...settings, themeContrast: settings.themeContrast === 'default' ? 'bold' : 'default' });
   };
 
   const onChangeContrast = (event) => {
-    setSettings({
-      ...settings,
-      themeContrast: event.target.value,
-    });
-  };
-
-  // Color
-
-  const onChangeColor = (event) => {
-    setSettings({
-      ...settings,
-      themeColorPresets: event.target.value,
-    });
+    setSettings({ ...settings, themeContrast: event.target.value });
   };
 
   // Stretch
 
   const onToggleStretch = () => {
-    setSettings({
-      ...settings,
-      themeStretch: !settings.themeStretch,
-    });
+    setSettings({ ...settings, themeStretch: !settings.themeStretch });
   };
 
   // Reset
@@ -164,8 +91,6 @@ function SettingsProvider({ children }) {
       themeLayout: initialState.themeLayout,
       themeStretch: initialState.themeStretch,
       themeContrast: initialState.themeContrast,
-      themeDirection: initialState.themeDirection,
-      themeColorPresets: initialState.themeColorPresets,
     });
   };
 
@@ -178,11 +103,6 @@ function SettingsProvider({ children }) {
         onToggleMode,
         onChangeMode,
 
-        // Direction
-        onToggleDirection,
-        onChangeDirection,
-        onChangeDirectionByLang,
-
         // Layout
         onToggleLayout,
         onChangeLayout,
@@ -193,14 +113,6 @@ function SettingsProvider({ children }) {
 
         // Stretch
         onToggleStretch,
-
-        // Color
-        onChangeColor,
-        setColor: getColorPresets(settings.themeColorPresets),
-        colorOption: colorPresets.map((color) => ({
-          name: color.name,
-          value: color.main,
-        })),
 
         // Reset
         onResetSetting,

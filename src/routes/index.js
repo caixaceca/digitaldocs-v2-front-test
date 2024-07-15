@@ -1,13 +1,12 @@
+import { useMsal } from '@azure/msal-react';
 import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
-// authentication modules
-import { useMsal } from '@azure/msal-react';
 // utils
 import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, AzureIntranetHandShake, AuthenticateColaborador } from '../redux/slices/intranet';
+import { getFromIntranet, acquireToken, AuthenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -27,10 +26,10 @@ export default function Router() {
   const { cc, perfil, mail, msalProfile, accessToken } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (!msalProfile?.mail) {
-      dispatch(AzureIntranetHandShake(instance, accounts));
+    if (instance && accounts?.[0]) {
+      dispatch(acquireToken(instance, accounts[0]));
     }
-  }, [dispatch, instance, accounts, msalProfile]);
+  }, [accounts, dispatch, instance]);
 
   useEffect(() => {
     if (accessToken && msalProfile?.mail) {
@@ -40,7 +39,7 @@ export default function Router() {
 
   useEffect(() => {
     if (mail && perfil?.colaborador?.id) {
-      dispatch(getFromIntranet('colaborador', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
+      dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
     }
   }, [dispatch, perfil?.colaborador?.id, mail, perfil?.mail]);
 

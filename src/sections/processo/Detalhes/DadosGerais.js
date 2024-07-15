@@ -1,6 +1,8 @@
 // @mui
 import Grid from '@mui/material/Grid';
-import CardContent from '@mui/material/CardContent';
+import Stack from '@mui/material/Stack';
+// utils
+import { deGmkt } from '../../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../../redux/store';
 // hooks
@@ -20,13 +22,10 @@ export default function DadosGerais() {
   const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
   const devolvido = processo?.htransicoes?.[0]?.modo === 'Devolução';
   const isPS =
-    processo?.assunto === 'Diário' ||
-    processo?.assunto === 'Preçário' ||
-    processo?.assunto === 'Produtos e Serviços' ||
-    processo?.assunto === 'Receção de Cartões - DOP';
+    deGmkt(processo?.assunto) || processo?.assunto === 'Diário' || processo?.assunto === 'Receção de Cartões - DOP';
 
   return (
-    <CardContent sx={{ pt: 1 }}>
+    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
       {isLoadingP ? (
         <SkeletonProcesso />
       ) : (
@@ -51,6 +50,6 @@ export default function DadosGerais() {
           )}
         </>
       )}
-    </CardContent>
+    </Stack>
   );
 }

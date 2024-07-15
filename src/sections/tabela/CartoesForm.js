@@ -28,7 +28,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { shuffleString } from '../../utils/normalizeText';
+import { baralharString } from '../../utils/normalizeText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable from '../../hooks/useTable';
@@ -38,7 +38,7 @@ import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
-import { Fechar, DialogButons } from '../../components/Actions';
+import { DTFechar, DialogButons } from '../../components/Actions';
 import { TableHeadCustom, SearchNotFoundSmall } from '../../components/table';
 import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
 
@@ -130,13 +130,13 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
                           <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                             Nº cartão:&nbsp;
                           </Typography>
-                          {shuffleString(item?.numero)}
+                          {baralharString(item?.numero)}
                         </Typography>
                         <Typography variant="subtitle2" noWrap>
                           <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                             {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
                           </Typography>
-                          {fase === 'Emissão' ? item?.tipo : shuffleString(item.nome)}
+                          {fase === 'Emissão' ? item?.tipo : baralharString(item.nome)}
                         </Typography>
                       </Stack>
                     </TableCell>
@@ -477,13 +477,8 @@ export function Detalhes({ closeModal }) {
 
   return (
     <Dialog open={isOpenModalDesariquivar} onClose={closeModal} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ mb: 0.5 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-          Detalhes do cartão
-          <Fechar handleClick={closeModal} />
-        </Stack>
-      </DialogTitle>
-      <DialogContent>
+      <DTFechar title="Detalhes do cartão" handleClick={() => closeModal()} />
+      <DialogContent sx={{ mt: 0.5 }}>
         {isLoading ? (
           <Stack justifyContent="space-between" alignItems="center" spacing={3}>
             <Skeleton variant="text" sx={{ height: 300, width: 1, mt: 2, transform: 'scale(1)' }} />
@@ -500,7 +495,7 @@ export function Detalhes({ closeModal }) {
                   </ListItem>
                   {selectedItem?.tipo && <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />}
                   {selectedItem?.numero && (
-                    <TextItem title="Nº do cartão:" text={shuffleString(selectedItem?.numero?.substring(9, 15))} />
+                    <TextItem title="Nº do cartão:" text={baralharString(selectedItem?.numero?.substring(9, 15))} />
                   )}
                   {selectedItem?.data_emissao && (
                     <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
@@ -524,8 +519,10 @@ export function Detalhes({ closeModal }) {
                       }
                     />
                   )}
-                  {selectedItem?.cliente && <TextItem title="Nº cliente:" text={shuffleString(selectedItem.cliente)} />}
-                  {selectedItem?.nome && <TextItem title="Nome:" text={shuffleString(selectedItem.nome)} />}
+                  {selectedItem?.cliente && (
+                    <TextItem title="Nº cliente:" text={baralharString(selectedItem.cliente)} />
+                  )}
+                  {selectedItem?.nome && <TextItem title="Nome:" text={baralharString(selectedItem.nome)} />}
                 </List>
                 <List>
                   <ListItem disableGutters divider sx={{ pb: 0.5 }}>
@@ -549,7 +546,7 @@ export function Detalhes({ closeModal }) {
                       selectedItem?.emissao_validado ? (
                         <Stack spacing={0.5} sx={{ mt: 1 }}>
                           {selectedItem?.emissao_validado_por && (
-                            <Criado tipo="user" value={selectedItem?.emissao_validado_por} shuffle />
+                            <Criado tipo="user" value={selectedItem?.emissao_validado_por} baralhar />
                           )}
                           {selectedItem?.emissao_validado_em && (
                             <Criado tipo="data" value={ptDateTime(selectedItem?.emissao_validado_em)} />
@@ -574,7 +571,7 @@ export function Detalhes({ closeModal }) {
                       selectedItem?.rececao_validado ? (
                         <Stack spacing={0.5} sx={{ mt: 1 }}>
                           {selectedItem?.rececao_validado_por && (
-                            <Criado tipo="user" value={selectedItem?.rececao_validado_por} shuffle />
+                            <Criado tipo="user" value={selectedItem?.rececao_validado_por} baralhar />
                           )}
                           {selectedItem?.rececao_validado_em && (
                             <Criado tipo="data" value={ptDateTime(selectedItem?.rececao_validado_em)} />

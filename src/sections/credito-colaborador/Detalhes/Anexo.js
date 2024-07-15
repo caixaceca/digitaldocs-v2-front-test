@@ -8,7 +8,6 @@ import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { b64toBlob } from '../../../utils/getFileFormat';
@@ -17,7 +16,7 @@ import { closeModal } from '../../../redux/slices/cc';
 import { useDispatch, useSelector } from '../../../redux/store';
 // components
 import Image from '../../../components/Image';
-import { Fechar } from '../../../components/Actions';
+import { DTFechar } from '../../../components/Actions';
 import { SearchNotFound } from '../../../components/table';
 import { Loading } from '../../../components/LoadingScreen';
 
@@ -54,13 +53,8 @@ export default function Anexo() {
 
   return (
     <Dialog fullScreen open={isOpenModal}>
-      <DialogTitle sx={{ pb: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          {selectedAnexo?.designacao}
-          <Fechar large handleClick={() => handleCloseModal()} />
-        </Stack>
-      </DialogTitle>
-      <DialogContent sx={{ px: anexo?.preview === 'pdf' ? 0 : 3, pb: anexo?.preview === 'pdf' ? 0 : 3 }}>
+      <DTFechar title={selectedAnexo?.designacao} handleClick={() => handleCloseModal()} />
+      <DialogContent sx={{ mt: 2, px: anexo?.preview === 'pdf' ? 0 : 3, pb: anexo?.preview === 'pdf' ? 0 : 3 }}>
         <Box sx={{ flexGrow: 1, height: '100%' }}>
           {isLoadingAnexo ? (
             <Stack direction="column" alignItems="center" justifyContent="center" sx={{ height: 1 }}>

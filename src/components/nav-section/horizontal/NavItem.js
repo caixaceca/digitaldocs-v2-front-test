@@ -5,8 +5,6 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-// hooks
-import useLocales from '../../../hooks/useLocales';
 // guards
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 // config
@@ -18,8 +16,6 @@ import { ListItemStyle } from './style';
 // ----------------------------------------------------------------------
 
 const NavItem = forwardRef(({ item, depth, active, open, ...other }, ref) => {
-  const { translate } = useLocales();
-
   const { title, icon, info, children, disabled, caption, roles } = item;
 
   const renderContent = (
@@ -33,15 +29,12 @@ const NavItem = forwardRef(({ item, depth, active, open, ...other }, ref) => {
       )}
 
       <ListItemText
-        primary={translate(title)}
-        primaryTypographyProps={{
-          noWrap: true,
-          variant: active ? 'subtitle2' : 'body2',
-        }}
+        primary={title}
+        primaryTypographyProps={{ noWrap: true, variant: active ? 'subtitle2' : 'body2' }}
       />
 
       {caption && (
-        <Tooltip title={translate(caption)} arrow>
+        <Tooltip title={caption} arrow>
           <Box component="span" sx={{ ml: 0.5, lineHeight: 0 }}>
             <Iconify
               icon="eva:info-outline"

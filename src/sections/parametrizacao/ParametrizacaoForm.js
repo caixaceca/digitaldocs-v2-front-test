@@ -166,15 +166,16 @@ export function ClonarFluxoForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
+      is_ativo: true,
+      observacao: '',
       perfilID: cc?.perfil_id,
       is_con: selectedItem?.is_con,
       modelo: selectedItem?.modelo || '',
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
-      is_ativo: selectedItem?.is_ativo || true,
-      observacao: selectedItem?.observacao || '',
       is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
+      credito_funcionario: selectedItem?.credito_funcionario || false,
     }),
     [selectedItem, cc?.perfil_id]
   );
@@ -216,8 +217,8 @@ export function ClonarFluxoForm({ onCancel }) {
             <Grid container spacing={3} sx={{ mt: 0 }}>
               <Grid item xs={12}>
                 <Alert severity="info">
-                  Ao clonar este fluxo, será criado uma cópia deste, replicando o seu conteúdo e as transições
-                  associadas para um novo fluxo. Pondendo, posteriormente, editar o conteúdo e as transições.
+                  Ao clonar este fluxo, será criada uma cópia que replicará o seu conteúdo e as transições associadas
+                  para um novo fluxo. Posteriormente pode ser editado.
                 </Alert>
               </Grid>
               <Grid item xs={12}>
@@ -734,8 +735,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   const formSchema = Yup.object().shape({
     modo: Yup.mixed().required().label('Modo'),
     prazoemdias: Yup.number().typeError().label('Prazo'),
-    estado_final_id: Yup.mixed().required().label('Estado final'),
-    estado_inicial_id: Yup.mixed().required().label('Estado inicial'),
+    estado_final: Yup.mixed().required().label('Estado final'),
+    estado_inicial: Yup.mixed().required().label('Estado inicial'),
   });
 
   const defaultValues = useMemo(
@@ -750,8 +751,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
       requer_parecer: selectedItem?.requer_parecer || false,
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
       is_after_devolucao: selectedItem?.is_after_devolucao || false,
-      estado_final_id: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
-      estado_inicial_id: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
+      estado_final: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
+      estado_inicial: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
     }),
     [fluxoId, selectedItem, cc?.perfil_id, estadosList]
   );
@@ -767,8 +768,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
   const onSubmit = async () => {
     try {
-      values.estado_final_id = values?.estado_final_id?.id;
-      values.estado_inicial_id = values?.estado_inicial_id?.id;
+      values.estado_final_id = values?.estado_final?.id;
+      values.estado_inicial_id = values?.estado_inicial?.id;
       if (selectedItem) {
         dispatch(
           updateItem('transicao', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Transição atualizada' })
@@ -801,14 +802,14 @@ export function TransicaoForm({ onCancel, fluxoId }) {
             <Grid container spacing={3} sx={{ mt: 0 }}>
               <Grid item xs={12} sm={6}>
                 <RHFAutocompleteObject
-                  name="estado_inicial_id"
+                  name="estado_inicial"
                   label="Estado de origem"
                   options={applySort(estadosList, getComparator('asc', 'label'))}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <RHFAutocompleteObject
-                  name="estado_final_id"
+                  name="estado_final"
                   label="Estado de destino"
                   options={applySort(estadosList, getComparator('asc', 'label'))}
                 />

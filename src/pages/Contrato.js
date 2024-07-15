@@ -11,6 +11,8 @@ import { SkeletonContainer } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
 import { TolbarContrato, ContratoPdf, ContratoWord } from '../sections/contratos';
+// guards
+import RoleBasedGuard from '../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -22,17 +24,25 @@ export default function Contrato() {
     <Page title="Contrato | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
-          heading="Contrato"
+          heading="Contratos"
           sx={{ color: 'text.secondary' }}
           links={[{ name: '', href: '' }]}
-          action={!!contrato && <ContratoWord />}
+          action={
+            !!contrato && (
+              <RoleBasedGuard hasContent roles={['contratos-100', 'contratos-110']}>
+                <ContratoWord />
+              </RoleBasedGuard>
+            )
+          }
         />
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12}>
-            <TolbarContrato />
+        <RoleBasedGuard hasContent roles={['contratos-100', 'contratos-110']}>
+          <Grid container spacing={3} justifyContent="center">
+            <Grid item xs={12}>
+              <TolbarContrato />
+            </Grid>
+            {isLoading ? <SkeletonContainer /> : <ContratoPdf />}
           </Grid>
-          {isLoading ? <SkeletonContainer /> : <ContratoPdf />}
-        </Grid>
+        </RoleBasedGuard>
       </Container>
     </Page>
   );

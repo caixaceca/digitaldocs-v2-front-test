@@ -13,7 +13,6 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // utils
 import { BASEURL } from '../../utils/axios';
 import { getFileThumb } from '../../utils/getFileFormat';
@@ -41,23 +40,11 @@ export default function Ajuda() {
     }
   }, [dispatch, mail]);
 
-  const handleChangeControlled = (panel) => (event, isExpanded) => {
-    setControlled(isExpanded ? panel : false);
-  };
-
-  const handleViewVideo = () => {
-    setIsOpenVideo(true);
-  };
-
-  const handleCloseModalVideo = () => {
-    setIsOpenVideo(false);
-  };
-
   const isNotFound = !perguntas.length;
 
   return (
     <>
-      <Grid container spacing={5} sx={{ pt: 3 }}>
+      <Grid container spacing={3} sx={{ pt: 3 }}>
         <Grid item xs={12} sm={4}>
           <Card>
             <Button
@@ -69,17 +56,17 @@ export default function Ajuda() {
               sx={{ p: 0.5 }}
             >
               <Image
-                src="https://intranet.caixa.cv/assets/manual_utilizador.png"
-                sx={{ borderRadius: '10px !important' }}
+                sx={{ borderRadius: 1 }}
+                src="https://intranet.caixa.cv:5000/sobre/file/sobre_caixa/2f926dcfa9314540bc31c9e52fb327c1.png"
               />
             </Button>
           </Card>
           <Stack direction="row" justifyContent="center" spacing={2} sx={{ mt: 2 }}>
             {ajuda?.video_disco && (
               <Button
-                color="inherit"
                 size="medium"
-                onClick={() => handleViewVideo()}
+                color="inherit"
+                onClick={() => setIsOpenVideo(true)}
                 startIcon={getFileThumb(false, null, ajuda?.video_disco)}
               >
                 Video manual
@@ -107,22 +94,26 @@ export default function Ajuda() {
                   ) : (
                     <>
                       {perguntas.map((item) => (
-                        <Accordion
-                          key={item.pergunta}
-                          expanded={controlled === item.pergunta}
-                          onChange={handleChangeControlled(item.pergunta)}
-                        >
-                          <AccordionSummary expandIcon={<KeyboardArrowDownIcon sx={{ width: 20 }} />}>
-                            <Stack direction="row">
-                              <Typography variant="subtitle2" sx={{ py: 0.5, color: 'text.secondary' }}>
-                                {item.pergunta}
-                              </Typography>
-                            </Stack>
-                          </AccordionSummary>
-                          <AccordionDetails sx={{ typography: 'body2' }}>
-                            <Markdown own children={item.resposta} />
-                          </AccordionDetails>
-                        </Accordion>
+                        <Stack key={item.pergunta} sx={{ mb: 1, mx: 1 }}>
+                          <Accordion
+                            expanded={controlled === item.pergunta}
+                            sx={{ '&.Mui-expanded': { boxShadow: (theme) => theme.customShadows.z1 } }}
+                            onChange={(event, isExpanded) => {
+                              setControlled(isExpanded ? item.pergunta : false);
+                            }}
+                          >
+                            <AccordionSummary>
+                              <Stack direction="row">
+                                <Typography variant="subtitle2" sx={{ py: 0.5, color: 'text.secondary' }}>
+                                  {item.pergunta}
+                                </Typography>
+                              </Stack>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ typography: 'body2' }}>
+                              <Markdown own children={item.resposta} />
+                            </AccordionDetails>
+                          </Accordion>
+                        </Stack>
                       ))}
                     </>
                   )}
@@ -133,7 +124,7 @@ export default function Ajuda() {
         </Grid>
       </Grid>
 
-      <Dialog open={isOpenVideo} onClose={handleCloseModalVideo} fullWidth maxWidth="lg">
+      <Dialog open={isOpenVideo} onClose={() => setIsOpenVideo(false)} fullWidth maxWidth="lg">
         <video width="100%" controls="controls" loop autoPlay="autoplay">
           <source src={`${BASEURL}/help/ficheiro/${ajuda?.video_disco}`} type="video/mp4" />O seu navegador não suporta
           a tag vídeo

@@ -17,7 +17,7 @@ import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutli
 import Label from './Label';
 // utils
 import { getFile } from '../utils/getFile';
-import { isProduction, shuffleString } from '../utils/normalizeText';
+import { isProduction, baralharString } from '../utils/normalizeText';
 // components
 import MyAvatar from './MyAvatar';
 import { DefaultAction } from './Actions';
@@ -62,10 +62,10 @@ Criado.propTypes = {
   tipo: PropTypes.string,
   value: PropTypes.string,
   caption: PropTypes.bool,
-  shuffle: PropTypes.bool,
+  baralhar: PropTypes.bool,
 };
 
-export function Criado({ tipo = '', value, caption = false, shuffle = false, sx }) {
+export function Criado({ tipo = '', value, caption = false, baralhar = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.secondary' };
   return (
     <Stack direction="row" spacing={0.5} alignItems="center" {...sx}>
@@ -78,7 +78,7 @@ export function Criado({ tipo = '', value, caption = false, shuffle = false, sx 
         (tipo === 'user' && <AccountCircleOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'done' && <TaskAltIcon sx={{ width: 15, height: 15, color: 'text.success' }} />)}
       <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
-        {shuffle ? shuffleString(value) : value}
+        {baralhar ? baralharString(value) : value}
       </Typography>
     </Stack>
   );
@@ -101,7 +101,7 @@ export function ColaboradorInfo({ nome, label, foto, caption = false, sx = null 
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography noWrap variant="subtitle2">
-            {shuffleString(nome)}
+            {baralharString(nome)}
           </Typography>
         </Stack>
         <Typography
@@ -149,5 +149,30 @@ export function Checked({ check, color = '' }) {
     <CheckCircleOutlineOutlinedIcon sx={{ color: color || 'success.main', width: 20 }} />
   ) : (
     <CloseOutlinedIcon sx={{ color: color || 'focus.main', width: 20 }} />
+  );
+}
+
+// ----------------------------------------------------------------------
+
+BoxMask.propTypes = { sx: PropTypes.object };
+
+export function BoxMask({ sx = null }) {
+  return (
+    <Box
+      sx={{
+        zIndex: -1,
+        opacity: 0.2,
+        width: '100%',
+        height: '100%',
+        maskSize: 'cover',
+        position: 'absolute',
+        display: 'inline-flex',
+        maskPositionX: 'center',
+        maskPositionY: 'center',
+        backgroundColor: 'currentcolor',
+        maskImage: 'url(/assets/shape-square.svg)',
+        ...sx,
+      }}
+    />
   );
 }
