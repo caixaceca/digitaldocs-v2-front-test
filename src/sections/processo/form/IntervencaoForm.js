@@ -810,14 +810,15 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
 
   const onSubmit = async () => {
     try {
-      const formData = estado
-        ? JSON.stringify({
-            observacao: values.observacao,
-            estado_id: selectedItem?.estado_id,
-            parecer_favoravel: values.parecer === 'Favorável',
-          })
-        : new FormData();
-      if (!estado) {
+      const formData = new FormData();
+      if (estado) {
+        formData.append('estado_id ', selectedItem.id);
+        formData.append('observacao', values.observacao);
+        formData.append('parecer_favoravel', values.parecer === 'Favorável');
+        values?.anexos?.forEach((row) => {
+          formData.append('anexos', row);
+        });
+      } else {
         formData.append('validado', values?.validado);
         formData.append('descritivo', values.observacao);
         formData.append('parecer_favoravel', values.parecer === 'Favorável');
@@ -878,19 +879,17 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={5} maxRows={10} label="Descrição" />
             </Grid>
-            {!estado && (
-              <Grid item xs={12}>
-                <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
-                {selectedItem?.anexos?.filter((row) => row?.ativo)?.length > 0 && (
-                  <AnexosExistente
-                    onOpen={handleEliminar}
-                    anexos={selectedItem?.anexos
-                      ?.filter((item) => item?.ativo)
-                      ?.map((row) => ({ ...row, name: row?.nome }))}
-                  />
-                )}
-              </Grid>
-            )}
+            <Grid item xs={12}>
+              <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+              {selectedItem?.anexos?.filter((row) => row?.ativo)?.length > 0 && (
+                <AnexosExistente
+                  onOpen={handleEliminar}
+                  anexos={selectedItem?.anexos
+                    ?.filter((item) => item?.ativo)
+                    ?.map((row) => ({ ...row, name: row?.nome }))}
+                />
+              )}
+            </Grid>
           </Grid>
           <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>

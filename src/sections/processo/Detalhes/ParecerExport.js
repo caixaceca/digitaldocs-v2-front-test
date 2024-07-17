@@ -4,13 +4,7 @@ import { Page, View, Text, Document } from '@react-pdf/renderer';
 // utils
 import { ptDate } from '../../../utils/formatTime';
 // components
-import {
-  // styles,
-  RodapeAlt,
-  CabecalhoAlt,
-} from '../../../components/ExportDados';
-//
-import styles from '../../Style';
+import { styles, RodapeAlt, CabecalhoAlt } from '../../../components/ExportDados';
 
 // ----------------------------------------------------------------------
 

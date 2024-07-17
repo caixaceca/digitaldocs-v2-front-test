@@ -55,32 +55,20 @@ const slice = createSlice({
       state.isLoading = false;
     },
 
-    hasError(state, action) {
+    setDone(state, action) {
+      state.isSaving = false;
+      state.isLoading = false;
+      state.done = action.payload;
+    },
+
+    setError(state, action) {
       state.isSaving = false;
       state.isLoading = false;
       state.error = action.payload;
     },
 
-    resetError(state) {
-      state.isLoading = false;
-      state.isSaving = false;
-      state.error = '';
-    },
-
-    done(state, action) {
-      state.isSaving = false;
-      state.done = action.payload;
-    },
-
-    resetDone(state) {
-      state.isLoading = false;
-      state.done = '';
-    },
-
-    getCurrrentDisposicaoSuccess(state, action) {
-      if (action.payload === null) {
-        state.isOpenDisposicao = true;
-      }
+    getDisposicaoSuccess(state, action) {
+      state.isOpenDisposicao = !action.payload;
     },
 
     getCertificacoesSuccess(state, action) {
@@ -159,10 +147,6 @@ const slice = createSlice({
       state.documento = action.payload;
     },
 
-    createDisposicaoSuccess(state) {
-      state.isOpenDisposicao = false;
-    },
-
     closeDisposicao(state) {
       state.isOpenDisposicao = false;
     },
@@ -191,19 +175,19 @@ export function acquireToken(instance, account) {
         });
       });
     } catch (error) {
-      console.log(errorMsg(error));
+      hasError(error, dispatch);
     }
   };
 }
 
-export function AuthenticateColaborador(tokendeacesso, msalcolaborador) {
+export function authenticateColaborador(tokendeacesso, msalcolaborador) {
   return async (dispatch) => {
     try {
       const options = { headers: { Authorization: tokendeacesso }, withCredentials: true };
       const response = await axios.post(`${BASEURL}/perfil/msal`, msalcolaborador, options);
       dispatch(slice.actions.getProfileSuccess(response.data));
     } catch (error) {
-      console.log(errorMsg(error));
+      hasError(error, dispatch);
     }
   };
 }
@@ -217,12 +201,8 @@ export function getFromIntranet(item, params) {
       const options = { headers: { 'Current-Colaborador': params?.mail } };
       switch (item) {
         case 'disposicao': {
-          const response = await axios.get(
-            `${BASEURL}/disposicao/by_data/${params?.idColaborador}/${params?.data}`,
-            options
-          );
-          await new Promise((resolve) => setTimeout(resolve, 4000));
-          dispatch(slice.actions.getCurrrentDisposicaoSuccess(response.data));
+          const response = await axios.get(`${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`, options);
+          dispatch(slice.actions.getDisposicaoSuccess(response.data));
           break;
         }
         case 'certificacao': {
@@ -290,9 +270,7 @@ export function getFromIntranet(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -309,7 +287,7 @@ export function createItem(item, dados, params) {
       switch (item) {
         case 'disposicao': {
           await axios.post(`${BASEURL}/disposicao`, dados, options);
-          dispatch(slice.actions.createDisposicaoSuccess());
+          dispatch(slice.actions.closeDisposicao());
           break;
         }
         case 'denuncia': {
@@ -324,13 +302,25 @@ export function createItem(item, dados, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.msg));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
+}
+
+// ----------------------------------------------------------------------
+
+async function doneSucess(msg, dispatch) {
+  if (msg) {
+    dispatch(slice.actions.setDone(msg));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setDone(''));
+}
+
+async function hasError(error, dispatch) {
+  dispatch(slice.actions.setError(errorMsg(error)));
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setError(''));
 }

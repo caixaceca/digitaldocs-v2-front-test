@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { errorMsg } from '../../utils/normalizeText';
 import { BASEURLDD } from '../../utils/axios';
+import { errorMsg } from '../../utils/normalizeText';
 
 // ----------------------------------------------------------------------
 
@@ -122,27 +122,16 @@ const slice = createSlice({
       state.isLoading = false;
     },
 
-    hasError(state, action) {
+    setDone(state, action) {
       state.isSaving = false;
       state.isLoading = false;
-      state.error = action.payload;
-    },
-
-    resetError(state) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.error = '';
-    },
-
-    done(state, action) {
-      state.isSaving = false;
       state.done = action.payload;
     },
 
-    resetDone(state) {
-      state.done = '';
+    setError(state, action) {
       state.isSaving = false;
       state.isLoading = false;
+      state.error = action.payload;
     },
 
     resetItem(state, action) {
@@ -239,9 +228,7 @@ export function getFromBanka(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -263,15 +250,9 @@ export function createItem(item, dados, params) {
         default:
           break;
       }
-      if (params?.msg) {
-        dispatch(slice.actions.done(params?.msg));
-      }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -293,15 +274,9 @@ export function updateItem(item, dados, params) {
         default:
           break;
       }
-      if (params?.msg) {
-        dispatch(slice.actions.done(params?.msg));
-      }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -323,15 +298,25 @@ export function deleteItem(item, params) {
         default:
           break;
       }
-      if (params?.msg) {
-        dispatch(slice.actions.done(params?.msg));
-      }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
+}
+
+// ----------------------------------------------------------------------
+
+async function doneSucess(msg, dispatch) {
+  if (msg) {
+    dispatch(slice.actions.setDone(msg));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setDone(''));
+}
+
+async function hasError(error, dispatch) {
+  dispatch(slice.actions.setError(errorMsg(error)));
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setError(''));
 }

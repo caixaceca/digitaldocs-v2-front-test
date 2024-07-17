@@ -73,7 +73,7 @@ export default function Estados({ handleAceitar }) {
                         }}
                       />
                     )}
-                    {row?._lock && row?.perfil_id === cc?.perfil_id ? (
+                    {row?._lock && row?.perfil_id === cc?.perfil_id && (
                       <>
                         {row?.parecer ? (
                           <DefaultAction label="EDITAR" color="warning" handleClick={() => handleEditar(row)} />
@@ -87,7 +87,8 @@ export default function Estados({ handleAceitar }) {
                           fluxoId={processo?.fluxo_id}
                         />
                       </>
-                    ) : (
+                    )}
+                    {!row?._lock && (!row?.perfil_id || row?.perfil_id === cc?.perfil_id) && (
                       <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(row?.estado_id, 'paralelo')} />
                     )}
                   </>

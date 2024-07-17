@@ -54,28 +54,16 @@ const slice = createSlice({
       state.isSaving = true;
     },
 
-    hasError(state, action) {
+    setDone(state, action) {
       state.isSaving = false;
       state.isLoading = false;
-      state.isLoadingAnexo = false;
-      state.error = action.payload;
-    },
-
-    resetError(state) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.isLoadingAnexo = false;
-      state.error = '';
-    },
-
-    done(state, action) {
-      state.isSaving = false;
       state.done = action.payload;
     },
 
-    resetDone(state) {
+    setError(state, action) {
       state.isSaving = false;
-      state.done = '';
+      state.isLoading = false;
+      state.error = action.payload;
     },
 
     resetItem(state, action) {
@@ -385,9 +373,7 @@ export function getFromCC(item, params) {
         dispatch(slice.actions.stopLoading());
       }
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -417,13 +403,9 @@ export function createItemCC(item, dados, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.msg || ''));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -552,13 +534,25 @@ export function updateItemCC(item, dados, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.msg || ''));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
+}
+
+// ----------------------------------------------------------------------
+
+async function doneSucess(msg, dispatch) {
+  if (msg) {
+    dispatch(slice.actions.setDone(msg));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setDone(''));
+}
+
+async function hasError(error, dispatch) {
+  dispatch(slice.actions.setError(errorMsg(error)));
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setError(''));
 }

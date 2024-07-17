@@ -27,14 +27,10 @@ const slice = createSlice({
       state.isLoading = false;
     },
 
-    hasError(state, action) {
+    setError(state, action) {
+      state.isSaving = false;
       state.isLoading = false;
       state.error = action.payload;
-    },
-
-    resetError(state) {
-      state.isLoading = false;
-      state.error = '';
     },
 
     resetItem(state, action) {
@@ -329,9 +325,15 @@ export function getIndicadores(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
+}
+
+// ----------------------------------------------------------------------
+
+async function hasError(error, dispatch) {
+  dispatch(slice.actions.setError(errorMsg(error)));
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setError(''));
 }

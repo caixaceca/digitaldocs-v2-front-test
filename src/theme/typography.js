@@ -2,7 +2,7 @@ import { pxToRem, responsiveFontSizes } from '../utils/getFontValue';
 
 // ----------------------------------------------------------------------
 
-const FONT_PRIMARY = 'NeoSansStd';
+const FONT_PRIMARY = 'Neo Sans Std';
 
 const typography = {
   fontFamily: FONT_PRIMARY,

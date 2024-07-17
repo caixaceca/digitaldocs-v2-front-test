@@ -3,11 +3,11 @@ import { Font, StyleSheet } from '@react-pdf/renderer';
 // ----------------------------------------------------------------------
 
 Font.register({
-  family: 'NeoSansLight',
+  family: 'Neo Sans Std',
   fonts: [
-    { src: '/fonts/neo-sans-std.otf' },
-    { src: '/fonts/neo-sans-std-light.otf' },
-    { src: '/fonts/neo-sans-std-bold.otf' },
+    { src: '/fonts/neo-sans-std-regular.otf' },
+    { src: '/fonts/neo-sans-std-bold.otf', fontWeight: 'bold' },
+    { src: '/fonts/neo-sans-std-regular-italic.otf', fontStyle: 'italic' },
   ],
 });
 
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.8,
     paddingBottom: '5mm',
     backgroundColor: '#fff',
-    fontFamily: 'NeoSansLight',
+    fontFamily: 'Neo Sans Std',
   },
   pageAlt: { paddingBottom: '24mm' },
   pageDeclaracao: { paddingBottom: '15mm', backgroundColor: 'rgba(90,170,40, .075)' },
@@ -77,18 +77,11 @@ const styles = StyleSheet.create({
   tCell_80: { width: '80%', paddingRight: 5, paddingLeft: 5 },
   tCell_93: { width: '93%', paddingRight: 5, paddingLeft: 5 },
   tCell_100: { width: '100%', paddingRight: 5, paddingLeft: 5 },
-  textCell: {
-    paddingTop: 5,
-    paddingLeft: 5,
-    paddingRight: 5,
-    lineHeight: 1.5,
-    backgroundColor: '#fff',
-    fontWeight: 100,
-  },
-  tableHeader: { textAlign: 'center', fontSize: 9, fontWeight: 600 },
+  textCell: { paddingTop: 5, paddingLeft: 5, paddingRight: 5, lineHeight: 1.5, backgroundColor: '#fff' },
+  tableHeader: { textAlign: 'center', fontSize: 9, fontWeight: 'bold' },
   tableRow: { flexDirection: 'row', borderBottom: '1px solid #eee', paddingTop: 10, alignItems: 'center' },
   tableRow2: { paddingTop: 2, flexDirection: 'row', alignItems: 'center', borderBottom: '1px solid #eee' },
-  tableHeader_: { fontSize: 8, fontWeight: 600, backgroundColor: 'rgb(90,170,40)', borderRadius: 2, color: '#fff' },
+  tableHeader_: { fontSize: 8, fontWeight: 'bold', backgroundColor: 'rgb(90,170,40)', borderRadius: 2, color: '#fff' },
   noBorder: { borderBottom: '0px solid #fff !important' },
 
   text7: { fontSize: 7 },
@@ -96,7 +89,6 @@ const styles = StyleSheet.create({
   text9: { fontSize: 9 },
   text10: { fontSize: 10 },
   text11: { fontSize: 11 },
-  textBold: { fontWeight: 600 },
   text4: { fontSize: 9, color: '#888' },
   body1: { fontSize: 11, color: '#000' },
   text1: { fontSize: 10, color: '#444' },
@@ -104,16 +96,17 @@ const styles = StyleSheet.create({
   caption: { fontSize: 7, color: '#888' },
   caption1: { fontSize: 8, color: '#000' },
   caption2: { fontSize: 7, color: '#000' },
-  captionAlt: { color: '#000', fontWeight: 600 },
+  captionAlt: { color: '#000', fontWeight: 'bold' },
   textError: { color: '#FF4842' },
   uppercase: { textTransform: 'uppercase' },
   textSuccess: { color: 'rgb(90, 170, 40)' },
+  textBold: { fontFamily: 'Neo Sans Std', fontWeight: 'bold' },
 
-  title: { textAlign: 'center', fontWeight: 700, fontSize: 12 },
-  title1: { textAlign: 'center', fontWeight: 700, fontSize: 12 },
+  title: { textAlign: 'center', fontWeight: 'bold', fontSize: 12 },
+  title1: { textAlign: 'center', fontWeight: 'bold', fontSize: 12 },
   subtitle: { marginBottom: '0.5mm', marginTop: '0.5mm', fontSize: 12 },
-  subtitle1: { fontSize: 11, fontWeight: 500 },
-  subtitle2: { fontSize: 9, fontWeight: 700 },
+  subtitle1: { fontSize: 11, fontWeight: 'bold' },
+  subtitle2: { fontSize: 9, fontWeight: 'bold' },
 
   pr0: { paddingRight: 0 },
   pr10: { paddingRight: 10 },

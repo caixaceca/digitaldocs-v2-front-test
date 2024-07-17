@@ -39,11 +39,11 @@ export default function ContratoPdf() {
                     </View>
                     <Text style={[styles.textBold]}>OUTORGANTES:</Text>
                     <Text>
-                      <Text style={[styles.textBold]}>PRIMEIRO: CAIXA ECONÓMICA DE CABO VERDE S.A</Text>
-                      ., com sede na Av. Cidade de Lisboa, Praia, capital social de 1.392.000.000$00, matriculada na
-                      Conservatória do Registo Comercial da Praia sob o n.º 336, NIF 200131753, adiante designada
-                      abreviadamente por CAIXA, neste acto representada pelo(a) Dr.(ª){' '}
-                      <Interveniente dados={infoContrato?.dadosGerente} />, na qualidade de Gerente da Agência
+                      <Text style={[styles.textBold]}>PRIMEIRO: CAIXA ECONÓMICA DE CABO VERDE S.A.</Text>, com sede na
+                      Av. Cidade de Lisboa, Praia, capital social de 1.392.000.000$00, matriculada na Conservatória do
+                      Registo Comercial da Praia sob o n.º 336, NIF 200131753, adiante designada abreviadamente por
+                      CAIXA, neste acto representada pelo(a) Dr.(ª) <Interveniente dados={infoContrato?.dadosGerente} />
+                      , na qualidade de Gerente da Agência
                       {cc?.uo?.label}.
                     </Text>
                     <Text style={[styles.mt10]}>
@@ -52,12 +52,10 @@ export default function ContratoPdf() {
                     </Text>
                     <Text style={[styles.mt10]}>
                       <Text style={[styles.textBold]}>TERCEIRO: </Text>
-                      {infoContrato?.fiadores?.map((row) => (
-                        <>
-                          <Interveniente dados={row} />,{' '}
-                        </>
+                      {infoContrato?.fiadores?.map((row, index) => (
+                        <Interveniente dados={row} key={`fiador_${index}`} />
                       ))}
-                      adiante designado TERCEIRO OUTORGANTE.
+                      , adiante designado TERCEIRO OUTORGANTE.
                     </Text>
                   </View>
                 </Page>

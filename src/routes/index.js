@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, acquireToken, AuthenticateColaborador } from '../redux/slices/intranet';
+import { getFromIntranet, acquireToken, authenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -33,7 +33,7 @@ export default function Router() {
 
   useEffect(() => {
     if (accessToken && msalProfile?.mail) {
-      dispatch(AuthenticateColaborador(accessToken, msalProfile));
+      dispatch(authenticateColaborador(accessToken, msalProfile));
     }
   }, [dispatch, accessToken, msalProfile]);
 

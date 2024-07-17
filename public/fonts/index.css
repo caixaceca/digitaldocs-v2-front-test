@@ -1,24 +1,36 @@
 @font-face {
-  font-family: 'NeoSansLight';
-  font-weight: 100;
+  font-family: 'Neo Sans Std';
+  font-weight: lighter;
   font-style: normal;
-  src: local('NeoSansLight'), url('neo-sans-td-light.otf') format('opentype');
+  src: local('Neo Sans Std'), url('neo-sans-std-light.otf') format('opentype');
 }
 @font-face {
-  font-family: 'NeoSansStd';
-  font-weight: 300;
-  font-style: normal;
-  src: local('NeoSansStd'), url('neo-sans-std.otf') format('opentype');
+  font-family: 'Neo Sans Std';
+  font-weight: lighter;
+  font-style: italic;
+  src: local('Neo Sans Std'), url('neo-sans-std-light-italic.otf') format('opentype');
 }
 @font-face {
-  font-family: 'NeoSansMed';
-  font-weight: 400;
+  font-family: 'Neo Sans Std';
+  font-weight: normal;
   font-style: normal;
-  src: local('NeoSansMed'), url('neo-sans-std-medium.otf') format('opentype');
+  src: local('Neo Sans Std'), url('neo-sans-std-regular.otf') format('opentype');
 }
 @font-face {
-  font-family: 'NeoSansBold';
-  font-weight: 600;
+  font-family: 'Neo Sans Std';
+  font-weight: normal;
+  font-style: italic;
+  src: local('Neo Sans Std'), url('neo-sans-std-regular-italic.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Neo Sans Std';
+  font-weight: bold;
   font-style: normal;
-  src: local('NeoSansBold'), url('neo-sans-std-bold.otf') format('opentype');
+  src: local('Neo Sans Std'), url('neo-sans-std-bold.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Neo Sans Std';
+  font-weight: bold;
+  font-style: italic;
+  src: local('Neo Sans Std'), url('neo-sans-std-bold-italic.otf') format('opentype');
 }

@@ -5,7 +5,7 @@
   },
   "entryFiles": [
     {
-      "file": "src/index.tsx",
+      "file": "src/index.js",
       "aliases": {
         "src/*": ["./src", "./src/*"]
       },

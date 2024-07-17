@@ -67,31 +67,21 @@ const slice = createSlice({
       state.isLoading = false;
     },
 
-    hasError(state, action) {
+    setDone(state, action) {
+      console.log(action.payload);
       state.isSaving = false;
       state.isLoading = false;
+      state.isLoadingP = false;
+      state.isLoadingAnexo = false;
+      state.done = action.payload;
+    },
+
+    setError(state, action) {
+      state.isSaving = false;
+      state.isLoading = false;
+      state.isLoadingP = false;
       state.isLoadingAnexo = false;
       state.error = action.payload;
-    },
-
-    resetError(state) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.isLoadingP = false;
-      state.error = '';
-    },
-
-    done(state, action) {
-      state.isSaving = false;
-      state.done = action.payload;
-      state.isLoadingAnexo = false;
-    },
-
-    resetDone(state) {
-      state.done = '';
-      state.isSaving = false;
-      state.isLoading = false;
-      state.isLoadingP = false;
     },
 
     resetItem(state, action) {
@@ -645,9 +635,7 @@ export function getAll(item, params) {
       }
       dispatch(slice.actions.stopLoading());
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -703,12 +691,12 @@ export function getItem(item, params) {
       dispatch(slice.actions.stopLoading());
     } catch (error) {
       if (item === 'prevnext') {
-        dispatch(slice.actions.hasError(`Sem mais processos disponíveis no estado ${params?.estado}`));
+        dispatch(slice.actions.setError(`Sem mais processos disponíveis no estado ${params?.estado}`));
       } else {
-        dispatch(slice.actions.hasError(errorMsg(error)));
+        dispatch(slice.actions.setError(errorMsg(error)));
       }
       await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      dispatch(slice.actions.setError());
     }
   };
 }
@@ -750,9 +738,7 @@ export function getAnexo(item, params) {
       if (item === 'filePreview') {
         dispatch(slice.actions.resetItem('filePreview'));
       }
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -785,13 +771,9 @@ export function createItem(item, dados, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.msg));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -868,9 +850,9 @@ export function updateItem(item, dados, params) {
         }
         case 'parecer estado': {
           await axios.patch(
-            `${BASEURLDD}/v2/processos/parecer/estado/paralelo/${params?.perfilId}?processo_id=${params?.id}`,
+            `${BASEURLDD}/v2/processos/parecer/estado/paralelo/${params?.perfilId}?processo_id=${params?.processoId}`,
             dados,
-            options
+            options1
           );
           dispatch(slice.actions.parecerSuccess());
           break;
@@ -989,13 +971,9 @@ export function updateItem(item, dados, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.msg));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
 }
@@ -1032,13 +1010,25 @@ export function deleteItem(item, params) {
         default:
           break;
       }
-      dispatch(slice.actions.done(params?.msg));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetDone());
+      doneSucess(params?.msg, dispatch);
     } catch (error) {
-      dispatch(slice.actions.hasError(errorMsg(error)));
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.resetError());
+      hasError(error, dispatch);
     }
   };
+}
+
+// ----------------------------------------------------------------------
+
+async function doneSucess(msg, dispatch) {
+  if (msg) {
+    dispatch(slice.actions.setDone(msg));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setDone(''));
+}
+
+async function hasError(error, dispatch) {
+  dispatch(slice.actions.setError(errorMsg(error)));
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  dispatch(slice.actions.setError(''));
 }

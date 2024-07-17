@@ -81,15 +81,7 @@ export default function Disposicao() {
       <DTFechar title="Como te sentes hoje?" handleClick={() => handleClose()} />
       <DialogContent sx={{ mt: 3 }}>
         <Stack direction="row" justifyContent="center" sx={{ pb: 5 }}>
-          <RadioGroup
-            row
-            value={value}
-            name="disposicao"
-            ref={radioGroupRef}
-            justifyContent="center"
-            aria-label="disposicao"
-            onChange={handleChange}
-          >
+          <RadioGroup row value={value} name="disposicao" ref={radioGroupRef} onChange={handleChange}>
             {disposicoes.map((option) => (
               <Tooltip key={option.value} title={option.value.toUpperCase()} arrow>
                 <FormControlLabel value={option.value} control={<BpRadio icon1={option.icon} cor={option.cor} />} />

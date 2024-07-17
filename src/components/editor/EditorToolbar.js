@@ -7,7 +7,7 @@ import EditorToolbarStyle from './EditorToolbarStyle';
 
 // ----------------------------------------------------------------------
 
-const FONT_FAMILY = ['NeoSansStd', 'Arial', 'Tahoma', 'Georgia', 'Impact', 'Verdana'];
+const FONT_FAMILY = ['Neo Sans Std', 'Arial', 'Tahoma', 'Georgia', 'Impact', 'Verdana'];
 
 const FONT_SIZE = [
   '8px',
