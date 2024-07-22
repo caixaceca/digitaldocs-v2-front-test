@@ -1,5 +1,5 @@
 // utils
-import { normalizeText } from '../../utils/normalizeText';
+import { normalizeText } from '../../utils/formatText';
 // hooks
 import { applySort } from '../../hooks/useTable';
 

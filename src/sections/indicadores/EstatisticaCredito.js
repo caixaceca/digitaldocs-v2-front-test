@@ -27,7 +27,7 @@ import { bgGradient } from '../../utils/cssStyles';
 import { UosAcesso } from '../../utils/validarAcesso';
 import { ptDate, fMonthYear } from '../../utils/formatTime';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
-import { dataValido, setDataUtil, setItemValue } from '../../utils/normalizeText';
+import { dataValido, setDataUtil, setItemValue } from '../../utils/formatText';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';

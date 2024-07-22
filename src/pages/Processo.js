@@ -154,10 +154,10 @@ export default function Processo() {
       done === 'Processo encaminhado' ||
       done === 'Processo colocado pendente'
     ) {
-      proximoAnterior(true);
+      proximoAnterior('true');
+      setCurrentTab('Dados gerais');
     }
     if (
-      done === 'Pareceres fechado' ||
       done === 'Processo atribuído' ||
       done === 'Processo abandonado' ||
       done === 'Atribuição eliminada' ||
@@ -248,7 +248,7 @@ export default function Processo() {
                         icon={row}
                         color="inherit"
                         label={`${row} (${podeVerProxAnt?.nome})`}
-                        handleClick={() => proximoAnterior(false)}
+                        handleClick={() => proximoAnterior(row === 'PRÓXIMO' ? 'true' : 'false')}
                       />
                     ))}
                   {processo?.status === 'Arquivado' ? (

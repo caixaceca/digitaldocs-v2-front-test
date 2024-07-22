@@ -3,9 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import selectTab from '../utils/selectTab';
 import { temAcesso } from '../utils/validarAcesso';
-import { setItemValue } from '../utils/normalizeText';
+import { setItemValue } from '../utils/formatText';
 // routes
 import useSettings from '../hooks/useSettings';
 // hooks
@@ -30,7 +29,6 @@ export default function Parametrizacao() {
   const { themeStretch } = useSettings();
   const { handleCloseModal } = useModal(closeModal());
   const { done, error, meusacessos, isAdmin } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabParams') || 'Acessos');
 
   const tabsList = useMemo(
     () =>
@@ -60,8 +58,12 @@ export default function Parametrizacao() {
     [isAdmin, meusacessos]
   );
 
+  const [currentTab, setCurrentTab] = useState(
+    tabsList?.map((row) => row?.value)?.find((item) => item === localStorage.getItem('tabParams')) || 'Acessos'
+  );
+
   useEffect(() => {
-    if (!currentTab || currentTab !== selectTab(tabsList, currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabParams');
     }
   }, [tabsList, currentTab]);

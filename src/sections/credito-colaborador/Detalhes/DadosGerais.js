@@ -18,7 +18,7 @@ import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // utils
-import { newLineText } from '../../../utils/normalizeText';
+import { newLineText } from '../../../utils/formatText';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../../utils/formatTime';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';

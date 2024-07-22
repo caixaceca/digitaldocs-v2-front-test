@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
-import { errorMsg } from '../../utils/normalizeText';
+import { errorMsg } from '../../utils/formatText';
 
 // ----------------------------------------------------------------------
 
@@ -15,17 +15,15 @@ const initialState = {
   isLoading: false,
   isLoadingP: false,
   isOpenModal: false,
-  isOpenParecer: false,
+  isOpenModal1: false,
   isLoadingAnexo: false,
-  isOpenModalAnexo: false,
-  isOpenModalDesariquivar: false,
   pjfInfo: null,
   processo: null,
   filePreview: null,
   pesquisaInfo: null,
   selectedItem: null,
-  itemSelected: null,
   processosInfo: null,
+  parecerSelected: null,
   selectedAnexoId: null,
   indicadoresArquivo: null,
   con: [],
@@ -193,7 +191,7 @@ const slice = createSlice({
     },
 
     getDestinosDesarquivamentoSuccess(state, action) {
-      state.isOpenModalDesariquivar = true;
+      state.isOpenModal1 = true;
       state.processo = { ...state.processo, ...action.payload };
     },
 
@@ -261,27 +259,25 @@ const slice = createSlice({
     },
 
     deleteAnexoProcessoSuccess(state, action) {
-      const index = state?.processo?.anexos?.findIndex((row) => row.id === action.payload);
-      if (index === 0 || index) {
+      const index = state?.processo?.anexos?.findIndex((row) => row.anexo === action.payload);
+      if (index > -1) {
         state.processo.anexos[index].ativo = false;
-        state.isOpenModalAnexo = false;
         state.selectedAnexoId = null;
       }
     },
 
-    deleteAnexoParecerSuccess(state, action) {
-      const index = state.processo.pareceres_estado.findIndex((row) => row.id === action.payload.parecerId);
-      if (index) {
-        const index1 = state.processo.pareceres_estado[index].anexos.findIndex((row) => row.id === action.payload.id);
+    deleteAnexoEstadoSuccess(state, action) {
+      const index = state.processo.estados.findIndex((row) => row.id === action.payload.estadoId);
+      if (index > -1) {
+        const index1 = state.processo.estados[index].anexos.findIndex((row) => row.anexo === action.payload.anexo);
         if (index1) {
-          state.processo.pareceres_estado[index].anexos[index1].ativo = false;
+          state.processo.estados[index].anexos[index1].ativo = false;
+        }
+        const index2 = state.selectedItem.anexos.findIndex((row) => row.anexo === action.payload.anexo);
+        if (index2) {
+          state.selectedItem.anexos[index2].ativo = false;
         }
       }
-      const index2 = state.selectedItem.anexos.findIndex((row) => row.id === action.payload.id);
-      if (index2) {
-        state.selectedItem.anexos[index2].ativo = false;
-      }
-      state.isOpenModalAnexo = false;
       state.selectedAnexoId = null;
     },
 
@@ -296,33 +292,25 @@ const slice = createSlice({
     },
 
     openDetalhes(state) {
-      state.isOpenModalDesariquivar = true;
+      state.isOpenModal1 = true;
     },
 
     closeModal(state) {
       state.isOpenModal = false;
-      state.isOpenModalDesariquivar = false;
+      state.isOpenModal1 = false;
       state.selectedItem = null;
     },
 
     selectAnexo(state, action) {
-      state.isOpenModalAnexo = true;
       state.selectedAnexoId = action.payload;
     },
 
     closeModalAnexo(state) {
-      state.isOpenModalAnexo = false;
       state.selectedAnexoId = null;
     },
 
     selectParecer(state, action) {
-      state.itemSelected = action.payload;
-      state.isOpenParecer = true;
-    },
-
-    closeParecer(state) {
-      state.isOpenParecer = false;
-      state.itemSelected = null;
+      state.parecerSelected = action.payload;
     },
   },
 });
@@ -338,7 +326,6 @@ export const {
   selectItem,
   selectAnexo,
   openDetalhes,
-  closeParecer,
   selectParecer,
   closeModalAnexo,
   addItemProcesso,
@@ -631,10 +618,10 @@ export function getProcesso(item, params) {
         }
         case 'prevnext': {
           const response = await axios.get(
-            `${BASEURLDD}/v1/processos/prev/next/${params?.perfilId}/${params?.estadoId}/${params?.processoId}?next=${params?.next}`,
+            `${BASEURLDD}/v2/processos/next/prev/${params?.perfilId}?processo_id=${params?.processoId}&estado_id=${params?.estadoId}&next=${params?.next}`,
             options
           );
-          dispatch(slice.actions.getProcessoSuccess(response.data));
+          dispatch(slice.actions.getProcessoSuccess(response.data?.objeto));
           break;
         }
 
@@ -841,6 +828,11 @@ export function updateItem(item, dados, params) {
             dados,
             options
           );
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
+            options
+          );
+          dispatch(slice.actions.getProcessoSuccess(response.data?.objeto));
           break;
         }
         case 'finalizar': {
@@ -908,47 +900,17 @@ export function updateItem(item, dados, params) {
           );
           break;
         }
-
-        default:
-          break;
-      }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function deleteItem(item, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { cc: params?.mail } };
-      switch (item) {
-        case 'processo': {
-          await axios.delete(`${BASEURLDD}/v1/processos/delete/${params?.perfilId}/${params?.processoId}`, options);
-          break;
-        }
-        case 'anexoParecer': {
-          await axios.delete(
-            `${BASEURLDD}/v1/processos/parecer/remover/anexos/${params?.perfilId}/${params?.parecerId}/${params?.id}`,
+        case 'anexo': {
+          await axios.patch(
+            `${BASEURLDD}/v2/processos/remover/anexo/${params?.perfilId}?processo_id=${params?.processoId}&anexo=${params?.anexo}`,
+            dados,
             options
           );
-          // await axios.delete(
-          //   `${BASEURLDD}/v1/processos/remover/anexos/${params?.perfilId}/${params?.processoId}/${params?.id}`,
-          //   options
-          // );
-          dispatch(slice.actions.deleteAnexoParecerSuccess({ id: params?.id, parecerId: params?.parecerId }));
-          break;
-        }
-        case 'anexo processo': {
-          await axios.delete(
-            `${BASEURLDD}/v1/processos/remover/anexos/${params?.perfilId}/${params?.processoId}/${params?.id}`,
-            options
-          );
-          dispatch(slice.actions.deleteAnexoProcessoSuccess(params?.id));
+          if (params?.processo) {
+            dispatch(slice.actions.deleteAnexoProcessoSuccess(params?.id));
+          } else {
+            dispatch(slice.actions.deleteAnexoEstadoSuccess(params));
+          }
           break;
         }
 

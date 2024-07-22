@@ -3,12 +3,7 @@ import { alpha } from '@mui/material/styles';
 // ----------------------------------------------------------------------
 
 function getDirection(value = 'bottom') {
-  return {
-    top: 'to top',
-    right: 'to right',
-    bottom: 'to bottom',
-    left: 'to left',
-  }[value];
+  return { top: 'to top', right: 'to right', bottom: 'to bottom', left: 'to left' }[value];
 }
 
 // ----------------------------------------------------------------------
@@ -22,7 +17,7 @@ export default function cssStyles(theme) {
 
       return {
         backdropFilter: `blur(${blur}px)`,
-        WebkitBackdropFilter: `blur(${blur}px)`, // Fix on Mobile
+        WebkitBackdropFilter: `blur(${blur}px)`,
         backgroundColor: alpha(color, opacity),
       };
     },
@@ -121,11 +116,7 @@ export function textGradient(value) {
 // ----------------------------------------------------------------------
 
 export function filterStyles(value) {
-  return {
-    filter: value,
-    WebkitFilter: value,
-    MozFilter: value,
-  };
+  return { filter: value, WebkitFilter: value, MozFilter: value };
 }
 
 // ----------------------------------------------------------------------
@@ -134,9 +125,7 @@ export const hideScrollbarY = {
   msOverflowStyle: 'none',
   scrollbarWidth: 'none',
   overflowY: 'scroll',
-  '&::-webkit-scrollbar': {
-    display: 'none',
-  },
+  '&::-webkit-scrollbar': { display: 'none' },
 };
 
 // ----------------------------------------------------------------------
@@ -145,7 +134,5 @@ export const hideScrollbarX = {
   msOverflowStyle: 'none',
   scrollbarWidth: 'none',
   overflowX: 'scroll',
-  '&::-webkit-scrollbar': {
-    display: 'none',
-  },
+  '&::-webkit-scrollbar': { display: 'none' },
 };

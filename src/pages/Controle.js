@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import selectTab from '../utils/selectTab';
+import { setItemValue } from '../utils/formatText';
 import { temAcesso, estadoInicial } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';
@@ -21,7 +21,6 @@ export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
   const { isAdmin, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabControle') || 'Trabalhados');
 
   useEffect(() => {
     if (cc?.uo?.id && !localStorage.getItem('uoSearch')) {
@@ -59,10 +58,13 @@ export default function Controle() {
     [meusAmbientes, meusacessos, isAdmin, cc?.uo]
   );
 
+  const [currentTab, setCurrentTab] = useState(
+    tabsList?.map((row) => row?.value)?.find((item) => item === localStorage.getItem('tabControle')) || 'Trabalhados'
+  );
+
   useEffect(() => {
-    if (currentTab !== selectTab(tabsList, currentTab)) {
-      setCurrentTab(tabsList?.[0]?.value);
-      localStorage.setItem('tabControle', tabsList?.[0]?.value);
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabControle');
     }
   }, [tabsList, currentTab]);
 

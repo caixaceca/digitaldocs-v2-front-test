@@ -6,7 +6,7 @@ import Card from '@mui/material/Card';
 // utils
 // import { fDate, ptDate } from '../../utils/formatTime';
 // import { fNumber, fCurrency } from '../../utils/formatNumber';
-import { converterParaOrdinal, substituirTexto } from '../../utils/normalizeText';
+import { converterParaOrdinal, substituirTexto } from '../../utils/formatText';
 // redux
 import { useSelector } from '../../redux/store';
 // components

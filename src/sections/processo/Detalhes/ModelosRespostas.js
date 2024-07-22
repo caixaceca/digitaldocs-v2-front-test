@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import { fDate } from '../../../utils/formatTime';
 import { fCurrency } from '../../../utils/formatNumber';
 import { getFileThumb } from '../../../utils/getFileFormat';
-import { valorPorExtenso } from '../../../utils/numeroPorExtenso';
+import { numeroPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';
 
@@ -38,7 +38,7 @@ export default function ModelosRespostas() {
               bullet: { level: 0 },
               children: [
                 new TextRun({
-                  text: `${row?.conta}, com saldo de ${fCurrency(row?.saldo_cve)} (${valorPorExtenso(
+                  text: `${row?.conta}, com saldo de ${fCurrency(row?.saldo_cve)} (${numeroPorExtenso(
                     row?.saldo_cve
                   )}) à ${row?.tipo || 'ordem/prazo'};`,
                 }),

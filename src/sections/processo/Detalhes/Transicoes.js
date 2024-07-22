@@ -9,7 +9,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
 import { getFile } from '../../../utils/getFile';
-import { newLineText } from '../../../utils/normalizeText';
+import { newLineText } from '../../../utils/formatText';
 import { ptDateTime, fDistance } from '../../../utils/formatTime';
 // hooks
 import { getComparator, applySort } from '../../../hooks/useTable';

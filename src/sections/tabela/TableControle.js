@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
-import { dataValido, entidadesParse, baralharString, noDados } from '../../utils/normalizeText';
+import { dataValido, entidadesParse, baralharString, noDados } from '../../utils/formatText';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks

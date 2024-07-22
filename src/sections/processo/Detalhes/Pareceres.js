@@ -13,7 +13,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { newLineText } from '../../../utils/normalizeText';
+import { newLineText } from '../../../utils/formatText';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { padraoDate, ptDate, ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 // hooks
@@ -21,14 +21,7 @@ import useToggle from '../../../hooks/useToggle';
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import {
-  getAnexo,
-  selectItem,
-  closeModal,
-  updateItem,
-  closeParecer,
-  selectParecer,
-} from '../../../redux/slices/digitaldocs';
+import { getAnexo, selectItem, closeModal, updateItem, selectParecer } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import DialogConfirmar from '../../../components/DialogConfirmar';
@@ -50,15 +43,13 @@ export default function Pareceres() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { processo, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { processo, isOpenModal, parecerSelected, done, isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (done === 'parecer validado') {
       enqueueSnackbar('Parecer validado com sucesso', { variant: 'success' });
       onClose();
-      dispatch(closeParecer());
+      dispatch(selectParecer(null));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -75,13 +66,10 @@ export default function Pareceres() {
     dispatch(selectParecer(item));
   };
 
-  const handleCloseValidar = () => {
-    dispatch(closeParecer());
-  };
-
   const handleClose = () => {
     dispatch(closeModal());
   };
+
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
   };
@@ -89,15 +77,15 @@ export default function Pareceres() {
   const handleConfirmValidar = () => {
     const formData = new FormData();
     formData.append('validado', true);
-    formData.append('descritivo', itemSelected.parecer_obs);
-    formData.append('parecer_favoravel ', itemSelected?.parecer === 'Favorável');
+    formData.append('descritivo', parecerSelected.parecer_obs);
+    formData.append('parecer_favoravel ', parecerSelected?.parecer === 'Favorável');
     dispatch(
       updateItem('parecer', formData, {
         mail,
-        processoId: processo?.id,
-        id: itemSelected.id,
         msg: 'Parecer enviado',
+        id: parecerSelected.id,
         perfilId: cc?.perfil_id,
+        processoId: processo?.id,
       })
     );
   };
@@ -235,12 +223,12 @@ export default function Pareceres() {
           </Stack>
         );
       })}
-      <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} />
+      <ParecerForm openModal={isOpenModal} onCancel={handleClose} processoId={processo?.id} />
 
-      <Dialog fullScreen open={isOpenParecer}>
+      <Dialog fullScreen open={!!parecerSelected}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ pr: 1.5, py: 0.5 }}>
           <DialogTitle sx={{ pb: 2 }}>Minuta do parecer</DialogTitle>
-          {!itemSelected?.validado && (
+          {!parecerSelected?.validado && (
             <>
               <Button variant="contained" size="large" onClick={onOpen}>
                 VALIDAR PARECER
@@ -256,16 +244,16 @@ export default function Pareceres() {
               />
             </>
           )}
-          <Fechar handleClick={handleCloseValidar} large />
+          <Fechar handleClick={dispatch(selectParecer(null))} large />
         </Stack>
         <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
           <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
             <ParecerExport
               dados={{
-                parecer: itemSelected,
+                parecer: parecerSelected,
                 assunto: processo?.titular,
-                nome: itemSelected?.validado
-                  ? colaboradores?.find((row) => row?.perfil?.id === itemSelected?.perfil_id)?.perfil?.displayName
+                nome: parecerSelected?.validado
+                  ? colaboradores?.find((row) => row?.perfil?.id === parecerSelected?.perfil_id)?.perfil?.displayName
                   : cc?.perfil?.displayName,
               }}
             />

@@ -16,7 +16,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { setItemValue } from '../../utils/normalizeText';
+import { setItemValue } from '../../utils/formatText';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getAll, resetItem } from '../../redux/slices/digitaldocs';

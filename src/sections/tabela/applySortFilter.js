@@ -1,5 +1,5 @@
 // utils
-import { normalizeText } from '../../utils/normalizeText';
+import { normalizeText } from '../../utils/formatText';
 // hooks
 import { applySort } from '../../hooks/useTable';
 
@@ -26,10 +26,10 @@ export default function applySortFilter({ dados, comparator, filter, colaborador
   if (filter) {
     dados = dados.filter(
       (row) =>
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filter)) !== -1) ||
         (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filter)) !== -1) ||
         (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filter)) !== -1) ||
         (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(filter)) !== -1)
     );
   }

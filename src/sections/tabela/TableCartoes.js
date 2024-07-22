@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDate } from '../../utils/formatTime';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { normalizeText, setItemValue, dataValido, baralharString } from '../../utils/normalizeText';
+import { normalizeText, setItemValue, dataValido, baralharString } from '../../utils/formatText';
 // hooks
 import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';

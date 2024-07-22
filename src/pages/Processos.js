@@ -9,7 +9,7 @@ import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // utils
-import selectTab from '../utils/selectTab';
+import { setItemValue } from '../utils/formatText';
 import { colorLabel } from '../utils/getColorPresets';
 import { pertencoAoEstado } from '../utils/validarAcesso';
 // routes
@@ -45,20 +45,8 @@ export default function Processos() {
   const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabProcessos') || 'Tarefas');
 
-  useEffect(() => {
-    if (mail && cc?.perfil_id) {
-      dispatch(getIndicadores('totalP', { mail, perfilId: cc?.perfil_id }));
-    }
-  }, [dispatch, mail, currentTab, cc?.perfil_id]);
-
-  const handleChangeTab = (event, newValue) => {
-    setCurrentTab(newValue);
-    localStorage.setItem('tabProcessos', newValue);
-  };
-
-  const VIEW_TABS = useMemo(
+  const tabsList = useMemo(
     () =>
       [
         { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="Tarefas" /> },
@@ -86,12 +74,25 @@ export default function Processos() {
     [totalP, meusAmbientes]
   );
 
+  const [currentTab, setCurrentTab] = useState(
+    tabsList?.map((row) => row?.value)?.find((item) => item === localStorage.getItem('tabProcessos')) || 'Tarefas'
+  );
+
   useEffect(() => {
-    if (currentTab !== selectTab(VIEW_TABS, currentTab)) {
-      setCurrentTab(VIEW_TABS?.[0]?.value);
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabProcessos');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [VIEW_TABS]);
+  }, [tabsList, currentTab]);
+
+  useEffect(() => {
+    if (mail && cc?.perfil_id) {
+      dispatch(getIndicadores('totalP', { mail, perfilId: cc?.perfil_id }));
+    }
+  }, [dispatch, mail, currentTab, cc?.perfil_id]);
+
+  const handleChangeTab = (event, newValue) => {
+    setItemValue(newValue, setCurrentTab, 'tabProcessos');
+  };
 
   return (
     <Page title="Processos | DigitalDocs">
@@ -110,7 +111,7 @@ export default function Processos() {
               allowScrollButtonsMobile
               onChange={handleChangeTab}
             >
-              {VIEW_TABS.map((tab) => (
+              {tabsList.map((tab) => (
                 <Tab
                   disableRipple
                   key={tab.value}
@@ -141,7 +142,7 @@ export default function Processos() {
           </TabsWrapperStyle>
         </Card>
 
-        {VIEW_TABS.map((tab) => {
+        {tabsList.map((tab) => {
           const isMatched = tab.value === currentTab;
           return isMatched && <Box key={tab.value}>{tab.component}</Box>;
         })}

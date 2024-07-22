@@ -13,12 +13,13 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-//
-import Label from './Label';
+// config
+// import { ambiente } from '../config';
 // utils
 import { getFile } from '../utils/getFile';
-import { isProduction, baralharString } from '../utils/normalizeText';
+import { baralharString } from '../utils/formatText';
 // components
+import Label from './Label';
 import MyAvatar from './MyAvatar';
 import { DefaultAction } from './Actions';
 
@@ -97,7 +98,7 @@ ColaboradorInfo.propTypes = {
 export function ColaboradorInfo({ nome, label, foto, caption = false, sx = null }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
-      <MyAvatar alt={nome} src={getFile('colaborador', isProduction() ? foto : '')} />
+      <MyAvatar alt={nome} src={getFile('colaborador', foto)} />
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography noWrap variant="subtitle2">

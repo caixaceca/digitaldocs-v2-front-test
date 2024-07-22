@@ -71,9 +71,9 @@ export default function Intervencao({ colaboradoresList }) {
   const handleFinalizar = () => {
     dispatch(
       updateItem('finalizar', JSON.stringify({ cativos: [] }), {
-        id: processo?.id,
         mail,
         perfilId,
+        id: processo?.id,
         msg: 'Processo finalizado',
       })
     );
@@ -86,14 +86,14 @@ export default function Intervencao({ colaboradoresList }) {
   return (
     <>
       {devolucoes?.length > 0 && (
-        <IntervencaoForm title="Devolver" destinos={devolucoes} colaboradoresList={colaboradoresList} />
+        <IntervencaoForm title="DEVOLVER" destinos={devolucoes} colaboradoresList={colaboradoresList} />
       )}
 
       {seguimentos?.length > 0 && (
         <IntervencaoForm
           destinos={seguimentos}
           colaboradoresList={colaboradoresList}
-          title={processo?.estado_atual === 'Comissão Executiva' ? 'Despacho' : 'Encaminhar'}
+          title={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
         />
       )}
 
@@ -119,7 +119,9 @@ export default function Intervencao({ colaboradoresList }) {
       {processo?.status === 'Em andamento' &&
         processo?.operacao === 'Cativo/Penhora' &&
         processo?.estado_atual === 'DOP - Validação Notas Externas' &&
-        pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && <FinalizarForm />}
+        pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && (
+          <FinalizarForm id={processo?.id} cativos={processo?.cativos} />
+        )}
 
       <Abandonar
         id={processo?.id}

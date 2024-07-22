@@ -35,7 +35,7 @@ import { getFile } from '../../utils/getFile';
 import { fYear, fMonthYear, ptDate } from '../../utils/formatTime';
 import { fNumber, fPercent, fNumber2, fData } from '../../utils/formatNumber';
 import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
-import { dataValido, setDataUtil, setItemValue, isProduction, baralharString } from '../../utils/normalizeText';
+import { dataValido, setDataUtil, setItemValue, baralharString } from '../../utils/formatText';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // redux
@@ -863,7 +863,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
         >
           <MyAvatar
             alt={colaborador?.perfil?.displayName}
-            src={getFile('colaborador', isProduction() ? colaborador?.foto_disk : '')}
+            src={getFile('colaborador', colaborador?.foto_disk)}
             sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
           />
           <Stack>

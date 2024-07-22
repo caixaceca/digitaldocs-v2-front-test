@@ -1,7 +1,7 @@
 import { saveAs } from 'file-saver';
 import { Packer, TextRun, Document, Paragraph, AlignmentType, BorderStyle } from 'docx';
 // utils
-import { converterParaOrdinal, substituirTexto } from '../../utils/normalizeText';
+import { converterParaOrdinal, substituirTexto } from '../../utils/formatText';
 // redux
 import { useSelector } from '../../redux/store';
 // components

@@ -15,7 +15,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { fCurrency } from '../../utils/formatNumber';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, dataValido, setDataUtil, noDados, baralharString } from '../../utils/normalizeText';
+import { normalizeText, dataValido, setDataUtil, noDados, baralharString } from '../../utils/formatText';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks

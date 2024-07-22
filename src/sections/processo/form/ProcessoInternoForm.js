@@ -176,7 +176,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
               <ObsNovosAnexos />
               {anexosAtivos?.length > 0 && (
                 <Grid item xs={12}>
-                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} />
+                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} anexo />
                 </Grid>
               )}
             </Grid>

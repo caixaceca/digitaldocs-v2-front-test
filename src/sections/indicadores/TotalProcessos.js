@@ -17,10 +17,10 @@ import LinearProgress from '@mui/material/LinearProgress';
 // utils
 import { getFile } from '../../utils/getFile';
 import { useToggle1 } from '../../hooks/useToggle';
+import { setItemValue } from '../../utils/formatText';
 import { fNumber, fPercent } from '../../utils/formatNumber';
-import { fMShortYear, fYear, fMonthYear } from '../../utils/formatTime';
 import { ColaboradoresAcesso } from '../../utils/validarAcesso';
-import { setItemValue, isProduction } from '../../utils/normalizeText';
+import { fMShortYear, fYear, fMonthYear } from '../../utils/formatTime';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -448,7 +448,7 @@ export function ColaboradorComp({ colaborador, colaboradoresList = [], colaborad
       >
         <MyAvatar
           alt={colaborador?.label}
-          src={getFile('colaborador', isProduction() ? colaborador?.foto : '')}
+          src={getFile('colaborador', colaborador?.foto)}
           sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
         />
         <Autocomplete

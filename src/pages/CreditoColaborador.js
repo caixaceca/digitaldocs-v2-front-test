@@ -294,7 +294,7 @@ export default function CreditoColaborador() {
                   <>
                     {destinosList?.devolucoes?.length > 0 && (
                       <>
-                        <DefaultAction color="warning" icon="devolver" label="Devolver" handleClick={onOpen2} />
+                        <DefaultAction color="warning" icon="devolver" label="DEVOLVER" handleClick={onOpen2} />
                         <EncaminharForm dev open={open2} onCancel={onClose2} destinos={destinosList?.devolucoes} />
                       </>
                     )}

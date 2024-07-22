@@ -9,7 +9,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 // utils
-import { setItemValue } from '../utils/normalizeText';
+import { setItemValue } from '../utils/formatText';
 // redux
 import { useSelector } from '../redux/store';
 // sections
@@ -130,6 +130,7 @@ SearchToolbarProcessos.propTypes = {
   segmento: PropTypes.string,
   setSegmento: PropTypes.func,
   colaborador: PropTypes.string,
+  meuAmbiente: PropTypes.object,
   setColaborador: PropTypes.func,
   colaboradoresList: PropTypes.array,
 };
@@ -145,6 +146,7 @@ export function SearchToolbarProcessos({
   setSegmento,
   setColaborador,
   colaboradoresList,
+  meuAmbiente = null,
 }) {
   const { cc } = useSelector((state) => state.intranet);
   return (
@@ -154,7 +156,7 @@ export function SearchToolbarProcessos({
           {(tab === 'Tarefas' || tab === 'Pendentes') && (
             <>
               <Ambiente />
-              <Fluxo />
+              {!!meuAmbiente && <Fluxo />}
             </>
           )}
           {cc?.uo?.tipo === 'Agências' && tab === 'Pendentes' && (

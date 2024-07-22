@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 // utils
 import { emailCheck } from '../../../utils/validarAcesso';
-import { findColaborador } from '../../../utils/normalizeText';
+import { findColaborador } from '../../../utils/formatText';
 import { ptTime, ptDate, ptDateTime } from '../../../utils/formatTime';
 import { getFileThumb, canPreview } from '../../../utils/getFileFormat';
 // redux
@@ -91,7 +91,7 @@ export default function Anexos({ anexos }) {
         {anexosPorData(anexosAtivos)?.map((row) => (
           <Stack key={row?.data} sx={{ pb: 1 }}>
             <Divider sx={{ py: 0.5, px: 3 }}>{row?.data}</Divider>
-            <Stack direction="column" alignItems="center" spacing={0.75}>
+            <Stack direction="column" alignItems="center" spacing={1}>
               {row?.anexos?.map((row) => (
                 <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
               ))}
@@ -103,7 +103,7 @@ export default function Anexos({ anexos }) {
             <Divider sx={{ mt: 1, pb: 0.5 }}>
               <Typography variant="subtitle1">Anexos eliminados</Typography>
             </Divider>
-            <Stack direction="column" alignItems="center" spacing={0.75}>
+            <Stack direction="column" alignItems="center" spacing={1}>
               {anexosInativos?.map((row) => (
                 <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
               ))}

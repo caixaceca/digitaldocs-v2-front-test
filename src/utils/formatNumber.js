@@ -2,22 +2,12 @@ import { replace } from 'lodash';
 import numeral from 'numeral';
 
 numeral.register('locale', 'cv-cv', {
-  delimiters: {
-    thousands: ' ',
-    decimal: ',',
-  },
-  abbreviations: {
-    thousand: 'm',
-    million: 'M',
-    billion: 'b',
-    trillion: 't',
-  },
+  delimiters: { thousands: ' ', decimal: ',' },
+  abbreviations: { thousand: 'm', million: 'M', billion: 'b', trillion: 't' },
   ordinal() {
     return 'º';
   },
-  currency: {
-    symbol: ' CVE',
-  },
+  currency: { symbol: ' CVE' },
 });
 
 // ----------------------------------------------------------------------

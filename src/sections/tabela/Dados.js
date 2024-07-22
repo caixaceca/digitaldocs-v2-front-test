@@ -8,7 +8,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { ptDateTime, fYear } from '../../utils/formatTime';
-import { entidadesParse, noDados, setDataUtil, setItemValue, baralharString } from '../../utils/normalizeText';
+import { entidadesParse, noDados, setDataUtil, setItemValue, baralharString } from '../../utils/formatText';
 // components
 import { Criado } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';

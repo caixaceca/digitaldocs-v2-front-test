@@ -8,12 +8,11 @@ import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
-import CardContent from '@mui/material/CardContent';
 // utils
 import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getProcesso, closeModalAnexo, deleteItem } from '../redux/slices/digitaldocs';
+import { getProcesso, closeModalAnexo, updateItem } from '../redux/slices/digitaldocs';
 import { getFromParametrizacao, changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
@@ -42,9 +41,7 @@ export default function NovoEditarProcesso() {
   const { linhas } = useSelector((state) => state.parametrizacao);
   const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
-  const { processo, isLoadingP, selectedAnexoId, isOpenModalAnexo, isSaving, done, error } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { processo, isLoadingP, selectedAnexoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
@@ -94,12 +91,12 @@ export default function NovoEditarProcesso() {
 
   const eliminarAnexo = () => {
     dispatch(
-      deleteItem('anexo processo', {
+      updateItem('anexo', null, {
         mail,
         processoId: id,
+        anexo: selectedAnexoId,
         msg: 'Anexo eliminado',
         perfilId: cc?.perfil_id,
-        id: Number(selectedAnexoId),
       })
     );
   };
@@ -133,37 +130,35 @@ export default function NovoEditarProcesso() {
                 ]
           }
         />
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Grid container spacing={3} justifyContent="center">
+        <Card sx={{ mb: 3, p: 3 }}>
+          <Grid container spacing={3} justifyContent="center">
+            <Grid item xs={12} sm={6} lg={4}>
+              <Autocomplete
+                fullWidth
+                disableClearable
+                readOnly={isEdit}
+                value={meuAmbiente}
+                getOptionLabel={(option) => option?.nome}
+                onChange={(event, newValue) => changeAmbiente(newValue)}
+                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                renderInput={(params) => <TextField {...params} label="Estado" />}
+                options={isEdit ? meusAmbientes : meusAmbientes?.filter((row) => row?.is_inicial)}
+              />
+            </Grid>
+            {(isEdit || (!isEdit && meuAmbiente?.is_inicial)) && (
               <Grid item xs={12} sm={6} lg={4}>
                 <Autocomplete
-                  fullWidth
+                  value={meuFluxo}
                   disableClearable
-                  readOnly={isEdit}
-                  value={meuAmbiente}
-                  getOptionLabel={(option) => option?.nome}
-                  onChange={(event, newValue) => changeAmbiente(newValue)}
+                  getOptionLabel={(option) => option?.assunto}
+                  onChange={(event, newValue) => changeFluxo(newValue)}
                   isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                  renderInput={(params) => <TextField {...params} label="Estado" />}
-                  options={isEdit ? meusAmbientes : meusAmbientes?.filter((row) => row?.is_inicial)}
+                  renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
+                  options={meusFluxos?.filter((option) => option?.assunto !== 'Crédito Colaborador')}
                 />
               </Grid>
-              {(isEdit || (!isEdit && meuAmbiente?.is_inicial)) && (
-                <Grid item xs={12} sm={6} lg={4}>
-                  <Autocomplete
-                    value={meuFluxo}
-                    disableClearable
-                    getOptionLabel={(option) => option?.assunto}
-                    onChange={(event, newValue) => changeFluxo(newValue)}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
-                    options={meusFluxos?.filter((option) => option?.assunto !== 'Crédito Colaborador')}
-                  />
-                </Grid>
-              )}
-            </Grid>
-          </CardContent>
+            )}
+          </Grid>
         </Card>
         {(!isEdit && meuAmbiente?.is_inicial) ||
         (processo?.estado_processo?._lock &&
@@ -171,20 +166,16 @@ export default function NovoEditarProcesso() {
           processo?.estado_processo?.estado_id === meuAmbiente?.id) ? (
           <>
             {isEdit && isLoadingP ? (
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Skeleton sx={{ height: 150, transform: 'scale(1)', mb: 3 }} />
-                  <Skeleton sx={{ height: 170, transform: 'scale(1)', mb: 3 }} />
-                  <Skeleton sx={{ height: 200, transform: 'scale(1)' }} />
-                </CardContent>
+              <Card sx={{ p: 3 }}>
+                <Skeleton sx={{ height: 150, transform: 'scale(1)', mb: 3 }} />
+                <Skeleton sx={{ height: 170, transform: 'scale(1)', mb: 3 }} />
+                <Skeleton sx={{ height: 200, transform: 'scale(1)' }} />
               </Card>
             ) : (
               <>
                 {!meuFluxo ? (
-                  <Card sx={{ mb: 3 }}>
-                    <CardContent>
-                      <SearchNotFound message="Seleciona o assunto do processo que pretendes criar..." />
-                    </CardContent>
+                  <Card sx={{ p: 3 }}>
+                    <SearchNotFound message="Seleciona o assunto do processo que pretendes adicionar..." />
                   </Card>
                 ) : (
                   <>
@@ -206,11 +197,9 @@ export default function NovoEditarProcesso() {
 
             <DialogConfirmar
               isSaving={isSaving}
-              open={isOpenModalAnexo}
+              open={!!selectedAnexoId}
               onClose={cancelEliminar}
               handleOk={eliminarAnexo}
-              color="error"
-              title="Eliminar"
               desc="eliminar este anexo"
             />
           </>
@@ -226,7 +215,9 @@ export default function NovoEditarProcesso() {
                 </Typography>
               ) : (
                 <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  Seleciona um estado válido para criar um processo...
+                  {meuAmbiente
+                    ? 'Este estado não possui nenhum assunto para criação de processo...'
+                    : 'Seleciona um estado para adicionar um novo processo...'}
                 </Typography>
               )
             }

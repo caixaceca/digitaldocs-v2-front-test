@@ -11,7 +11,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
-import { newLineText } from '../../../utils/normalizeText';
+import { newLineText } from '../../../utils/formatText';
 // hooks
 import useToggle from '../../../hooks/useToggle';
 // redux

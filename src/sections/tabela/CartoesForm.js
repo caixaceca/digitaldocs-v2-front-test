@@ -28,7 +28,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { baralharString } from '../../utils/normalizeText';
+import { baralharString } from '../../utils/formatText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable from '../../hooks/useTable';
@@ -469,14 +469,14 @@ Detalhes.propTypes = { closeModal: PropTypes.func };
 
 export function Detalhes({ closeModal }) {
   const { uos } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenModalDesariquivar, isLoading } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, isOpenModal1, isLoading } = useSelector((state) => state.digitaldocs);
   const bEntrega = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_entrega));
   const bEmissao = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_emissao));
   const bDomicilio = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_cliente));
   const bEntregaOriginal = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_entrega_original));
 
   return (
-    <Dialog open={isOpenModalDesariquivar} onClose={closeModal} fullWidth maxWidth="sm">
+    <Dialog open={isOpenModal1} onClose={closeModal} fullWidth maxWidth="sm">
       <DTFechar title="Detalhes do cartão" handleClick={() => closeModal()} />
       <DialogContent sx={{ mt: 0.5 }}>
         {isLoading ? (

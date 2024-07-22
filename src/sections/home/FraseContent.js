@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // utils
+import { newLineText } from '../../utils/formatText';
 import { emailCheck } from '../../utils/validarAcesso';
-import { newLineText } from '../../utils/normalizeText';
 // redux
 import { useSelector } from '../../redux/store';
 

@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime, fYear } from '../utils/formatTime';
-import { normalizeText, entidadesParse, noDados } from '../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados } from '../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../hooks/useTable';
 // redux

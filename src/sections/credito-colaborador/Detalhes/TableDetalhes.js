@@ -9,7 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
-import { normalizeText, noDados } from '../../../utils/normalizeText';
+import { normalizeText, noDados } from '../../../utils/formatText';
 import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
 // hooks
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';

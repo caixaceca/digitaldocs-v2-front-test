@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 // utils
-import { setItemValue } from '../utils/normalizeText';
+import { setItemValue } from '../utils/formatText';
 
 // ----------------------------------------------------------------------
 
@@ -63,8 +63,8 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
               key={tab?.value}
               icon={tab?.icon}
               value={tab?.value}
-              label={tab?.label || tab?.value}
               sx={{ px: 0.5, mt: 0.5 }}
+              label={tab?.label || tab?.value}
             />
           ))}
         </Tabs>

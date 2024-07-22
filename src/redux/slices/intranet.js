@@ -5,7 +5,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { callMsGraph } from '../../graph';
 import { loginRequest } from '../../config';
 // utils
-import { errorMsg } from '../../utils/normalizeText';
+import { errorMsg } from '../../utils/formatText';
 import { BASEURL, BASEURLSLIM } from '../../utils/axios';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';

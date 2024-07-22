@@ -18,10 +18,9 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
 import { colorLabel } from '../../../utils/getColorPresets';
-import { valorPorExtenso } from '../../../utils/numeroPorExtenso';
 import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
 import { fNumber, fCurrency, fPercent } from '../../../utils/formatNumber';
-import { newLineText, entidadesParse, baralharString } from '../../../utils/normalizeText';
+import { newLineText, entidadesParse, baralharString, numeroPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';
 // hooks
@@ -417,7 +416,7 @@ function ValorItem({ title, valor, cativos }) {
       <Typography>
         {fCurrency(valor)}
         <Typography variant="spam" sx={{ typography: 'body2' }}>
-          &nbsp;({valorPorExtenso(valor)})
+          &nbsp;({numeroPorExtenso(valor)})
         </Typography>
       </Typography>
       {cativos?.length > 0 && (

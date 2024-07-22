@@ -2,7 +2,7 @@ import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
-import { errorMsg } from '../../utils/normalizeText';
+import { errorMsg } from '../../utils/formatText';
 
 // ----------------------------------------------------------------------
 

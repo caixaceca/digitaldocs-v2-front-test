@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Neo Sans Std',
   },
   pageAlt: { paddingBottom: '24mm' },
-  pageDeclaracao: { paddingBottom: '15mm', backgroundColor: 'rgba(90,170,40, .075)' },
   pageClean: { padding: '24mm', textAlign: 'justify' },
+  pageDeclaracao: { paddingBottom: '15mm', backgroundColor: 'rgba(90,170,40, .075)' },
 
   /// HEADER
   header: {

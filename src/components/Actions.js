@@ -43,8 +43,8 @@ import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
 import { getFileThumb } from '../utils/getFileFormat';
+import { findColaborador } from '../utils/formatText';
 import { ptDate, ptDateTime } from '../utils/formatTime';
-import { findColaborador } from '../utils/normalizeText';
 // hooks
 import useToggle from '../hooks/useToggle';
 // redux
@@ -136,8 +136,8 @@ export function DefaultAction({
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
-            ((label === 'Encaminhar' || label === 'Despacho') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
-            (label === 'Devolver' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
+            ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
+            (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
             ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'finalizar' && <SvgIconStyle src="/assets/icons/stop.svg" />)}
         </Fab>
@@ -315,9 +315,14 @@ export function DialogButons({
 
 // ----------------------------------------------------------------------
 
-AnexosExistente.propTypes = { mt: PropTypes.number, anexos: PropTypes.array, onOpen: PropTypes.func };
+AnexosExistente.propTypes = {
+  mt: PropTypes.number,
+  anexo: PropTypes.bool,
+  onOpen: PropTypes.func,
+  anexos: PropTypes.array,
+};
 
-export function AnexosExistente({ mt = 3, anexos, onOpen = null }) {
+export function AnexosExistente({ mt = 3, anexos, onOpen = null, anexo = false }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   return (
@@ -325,7 +330,7 @@ export function AnexosExistente({ mt = 3, anexos, onOpen = null }) {
       <Divider sx={{ mt }}>Anexos existentes</Divider>
       <List>
         {anexos.map((row) => (
-          <ListItem key={row?.id} sx={{ py: 0.5, px: 1, mt: 0.75, borderRadius: 1, bgcolor: 'background.neutral' }}>
+          <ListItem key={row?.id} sx={{ py: 0.5, px: 1, mt: 1, borderRadius: 1, bgcolor: 'background.neutral' }}>
             <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
             <ListItemText
               primary={
@@ -366,7 +371,7 @@ export function AnexosExistente({ mt = 3, anexos, onOpen = null }) {
                   if (onOpen) {
                     onOpen(row.id);
                   } else {
-                    dispatch(selectAnexo(row.id));
+                    dispatch(selectAnexo(anexo ? row.anexo : row.id));
                   }
                 }}
               />

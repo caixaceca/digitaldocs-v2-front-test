@@ -13,7 +13,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { estadoInicial } from '../../utils/validarAcesso';
 import { fToNow, ptDateTime, formatDate } from '../../utils/formatTime';
-import { normalizeText, entidadesParse, noDados, baralharString } from '../../utils/normalizeText';
+import { normalizeText, entidadesParse, noDados, baralharString } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -51,11 +51,11 @@ export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
   const { isLoading, processosInfo, processos } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
   const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
-  const { meuAmbiente, meusAmbientes, meuFluxo } = useSelector((state) => state.parametrizacao);
   const fluxoId = meuFluxo?.id;
   const perfilId = cc?.perfil_id;
   const estadoId = meuAmbiente?.id;
@@ -85,25 +85,18 @@ export default function TableProcessos({ from }) {
     }
   }, [dispatch, estadoId, fluxoId, perfilId, segmento, from, mail]);
 
-  const newList = [];
-  const colaboradoresList = [];
-  processos?.forEach((row) => {
-    const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.perfil_id));
-    if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
-      colaboradoresList.push(colaborador?.perfil?.displayName);
-    }
-    newList.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
-  });
+  const dados = dadosList(processos, colaboradores);
+
   const [colaborador, setColaborador] = useState(
-    colaboradoresList?.find((row) => row === localStorage.getItem('colaboradorP')) || null
+    dados?.colaboradoresList?.find((row) => row === localStorage.getItem('colaboradorP')) || null
   );
 
   const dataFiltered = applySortFilter({
     from,
     motivo,
     filter,
-    newList,
     colaborador,
+    dados: dados?.dados,
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
@@ -140,7 +133,7 @@ export default function TableProcessos({ from }) {
         action={
           <Stack direction="row" spacing={1.5}>
             <Registos info={processosInfo} total={processos?.length} handleClick={verMais} />
-            {estadoInicial(meusAmbientes) && <AddItem button handleClick={handleAdd} />}
+            {estadoInicial([meuAmbiente]) && <AddItem button handleClick={handleAdd} />}
           </Stack>
         }
       />
@@ -152,10 +145,11 @@ export default function TableProcessos({ from }) {
           segmento={segmento}
           setMotivo={setMotivo}
           setFilter={setFilter}
+          meuAmbiente={meuAmbiente}
           setSegmento={setSegmento}
           colaborador={colaborador}
           setColaborador={setColaborador}
-          colaboradoresList={colaboradoresList}
+          colaboradoresList={dados?.colaboradoresList}
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -239,15 +233,28 @@ export default function TableProcessos({ from }) {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newList, comparator, filter, colaborador, motivo, from }) {
-  newList = applySort(newList, comparator);
+export function dadosList(processos, colaboradores) {
+  const dados = [];
+  const colaboradoresList = [];
+  processos?.forEach((row) => {
+    const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.perfil_id));
+    if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
+      colaboradoresList.push(colaborador?.perfil?.displayName);
+    }
+    dados.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
+  });
+  return { dados, colaboradoresList };
+}
+
+function applySortFilter({ dados, comparator, filter, colaborador, motivo, from }) {
+  dados = applySort(dados, comparator);
 
   if ((from === 'atribuidos' || from === 'retidos') && colaborador) {
-    newList = newList.filter((row) => row?.colaborador === colaborador);
+    dados = dados.filter((row) => row?.colaborador === colaborador);
   }
 
   if (from === 'pendentes' && motivo === 'Levantamento do pedido') {
-    newList = newList.filter(
+    dados = dados.filter(
       (row) =>
         row?.assunto?.includes('Cartão') ||
         row?.assunto?.includes('Extrato') ||
@@ -257,7 +264,7 @@ function applySortFilter({ newList, comparator, filter, colaborador, motivo, fro
   }
 
   if (from === 'pendentes' && motivo === 'Outros') {
-    newList = newList.filter(
+    dados = dados.filter(
       (row) =>
         !row?.assunto?.includes('Cartão') &&
         !row?.assunto?.includes('Extrato') &&
@@ -267,7 +274,7 @@ function applySortFilter({ newList, comparator, filter, colaborador, motivo, fro
   }
 
   if (filter) {
-    newList = newList.filter(
+    dados = dados.filter(
       (row) =>
         (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filter)) !== -1) ||
         (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
@@ -279,7 +286,7 @@ function applySortFilter({ newList, comparator, filter, colaborador, motivo, fro
     );
   }
 
-  return newList;
+  return dados;
 }
 
 export function colorProcesso(cor) {

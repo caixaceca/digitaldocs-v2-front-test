@@ -34,14 +34,7 @@ import { podeSerAtribuido, noEstado } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
-import {
-  getAll,
-  selectItem,
-  updateItem,
-  deleteItem,
-  closeModal,
-  closeModalAnexo,
-} from '../../../redux/slices/digitaldocs';
+import { getAll, selectItem, updateItem, closeModal, closeModalAnexo } from '../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../hooks/useAnexos';
 import useToggle from '../../../hooks/useToggle';
@@ -66,7 +59,7 @@ IntervencaoForm.propTypes = { title: PropTypes.string, destinos: PropTypes.array
 
 export function IntervencaoForm({ title, destinos, colaboradoresList }) {
   const dispatch = useDispatch();
-  const devolucao = title === 'Devolver';
+  const devolucao = title === 'DEVOLVER';
   const { enqueueSnackbar } = useSnackbar();
   const [pendente, setPendente] = useState(false);
   const { toggle: open, onOpen, onClose } = useToggle();
@@ -124,7 +117,7 @@ export function IntervencaoForm({ title, destinos, colaboradoresList }) {
     gerencia &&
     values?.estado &&
     !processo?.entidade &&
-    title === 'Encaminhar' &&
+    title === 'ENCAMINHAR' &&
     processo?.assunto === 'Abertura de conta' &&
     !values?.estado?.label?.includes('Atendimento');
 
@@ -237,7 +230,7 @@ export function IntervencaoForm({ title, destinos, colaboradoresList }) {
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
         <DialogTitle sx={{ pb: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-            {title} processo
+            {title?.charAt(0).toUpperCase() + title?.slice(1)?.toLowerCase()} processo
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
               {destinosParalelo?.length > 0 && destinosSingulares?.length > 0 && (
                 <FormControlLabel
@@ -356,7 +349,7 @@ export function IntervencaoForm({ title, destinos, colaboradoresList }) {
                       </Grid>
                       {gerencia && values?.estado?.label?.includes('Atendimento') && (
                         <>
-                          {(!podeSerAtribuido(processo?.assunto) && title === 'Encaminhar' && (
+                          {(!podeSerAtribuido(processo?.assunto) && title === 'ENCAMINHAR' && (
                             <Grid item xs={12}>
                               <RHFSwitch
                                 name="pendenteLevantamento"
@@ -574,7 +567,7 @@ export function DesarquivarForm({ onCancel, id, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isOpenModalDesariquivar, isSaving, processo } = useSelector((state) => state.digitaldocs);
+  const { isOpenModal1, isSaving, processo } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
     estado: Yup.mixed().required('Estado não pode ficar vazio'),
@@ -589,7 +582,7 @@ export function DesarquivarForm({ onCancel, id, colaboradoresList }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModalDesariquivar]);
+  }, [isOpenModal1]);
 
   useEffect(() => {
     if (mail && cc?.perfil_id && values?.estado?.id) {
@@ -627,7 +620,7 @@ export function DesarquivarForm({ onCancel, id, colaboradoresList }) {
   return (
     <>
       <DefaultAction color="error" label="DESARQUIVAR" handleClick={handleDesarquivar} />
-      <Dialog open={isOpenModalDesariquivar} onClose={onCancel} fullWidth maxWidth="sm">
+      <Dialog open={isOpenModal1} onClose={onCancel} fullWidth maxWidth="sm">
         <DialogTitle>Desarquivar</DialogTitle>
         <DialogContent>
           <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -658,13 +651,15 @@ export function DesarquivarForm({ onCancel, id, colaboradoresList }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-export function FinalizarForm() {
+FinalizarForm.propTypes = { id: PropTypes.number, cativos: PropTypes.array };
+
+export function FinalizarForm({ id, cativos = [] }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
   const { toggle: open, onOpen, onClose } = useToggle();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving, processo } = useSelector((state) => state.digitaldocs);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (open) {
@@ -685,8 +680,8 @@ export function FinalizarForm() {
         values.cativos = selecionados.map((row) => row?.id);
         dispatch(
           updateItem('finalizar', JSON.stringify({ cativos: [selecionados.map((row) => row?.id)] }), {
+            id,
             mail,
-            id: processo?.id,
             perfilId: cc?.perfil_id,
             msg: 'Processo finalizado',
           })
@@ -725,14 +720,14 @@ export function FinalizarForm() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!processo?.cativos ? (
+                  {cativos?.length === 0 ? (
                     <TableRow hover>
                       <TableCell colSpan={3} sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                         Não foi encontrado nenhuma conta disponível para cativo...
                       </TableCell>
                     </TableRow>
                   ) : (
-                    processo?.cativos?.map((row) => {
+                    cativos?.map((row) => {
                       const labelId = `checkbox-list-label-${row}`;
                       return (
                         <TableRow hover key={labelId} onClick={handleToggle(row)}>
@@ -769,18 +764,20 @@ export function FinalizarForm() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 ParecerForm.propTypes = {
-  open: PropTypes.bool,
   estado: PropTypes.bool,
   onCancel: PropTypes.func,
+  openModal: PropTypes.bool,
   processoId: PropTypes.number,
 };
 
-export function ParecerForm({ open, onCancel, processoId, estado = false }) {
+export function ParecerForm({ openModal, onCancel, processoId, estado = false }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, selectedAnexoId, isOpenModalAnexo, isSaving } = useSelector((state) => state.digitaldocs);
-  const anexosAtivos = selectedItem?.anexos?.filter((row) => row?.ativo);
+  const { selectedItem, selectedAnexoId, isSaving } = useSelector((state) => state.digitaldocs);
+  const anexosAtivos = useMemo(() => selectedItem?.anexos?.filter((row) => row?.ativo), [selectedItem?.anexos]);
+  const isEdit =
+    selectedItem?.parecer_em && (selectedItem?.parecer_favoravel === true || selectedItem?.parecer_favoravel === false);
 
   const formSchema = Yup.object().shape({
     parecer: Yup.string().required('Parecer não pode ficar vazio'),
@@ -793,11 +790,11 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
       validado: selectedItem?.validado || false,
       observacao: selectedItem?.observacao || '',
       parecer:
-        (selectedItem?.parecer_favoravel === true && 'Favorável') ||
-        (selectedItem?.parecer_favoravel === false && 'Não favorável') ||
+        (isEdit && selectedItem?.parecer_favoravel === true && 'Favorável') ||
+        (isEdit && selectedItem?.parecer_favoravel === false && 'Não favorável') ||
         null,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -809,61 +806,56 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
       reset(defaultValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, open]);
+  }, [selectedItem, openModal]);
+
+  const enviarParecer = async (formData) => {
+    dispatch(
+      updateItem(estado ? 'parecer estado' : 'parecer individual', formData, {
+        mail,
+        processoId,
+        id: selectedItem.id,
+        msg: 'Parecer enviado',
+        perfilId: cc?.perfil_id,
+      })
+    );
+  };
 
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-      if (estado) {
-        await formData.append('observacao', values.observacao);
-        await formData.append('estado_id ', selectedItem.estado_id);
-        await formData.append('parecer_favoravel', values.parecer === 'Favorável');
-        await values?.anexos?.forEach((row) => {
-          formData.append('anexos', row);
-        });
-      } else {
-        await formData.append('validado', values?.validado);
-        await formData.append('descritivo', values.observacao);
-        await formData.append('parecer_favoravel', values.parecer === 'Favorável');
-        await values?.anexos?.forEach((row) => {
-          formData.append('anexos', row);
-        });
-      }
-      dispatch(
-        updateItem(estado ? 'parecer estado' : 'parecer individual', formData, {
-          mail,
-          processoId,
-          id: selectedItem.id,
-          msg: 'Parecer enviado',
-          perfilId: cc?.perfil_id,
-        })
-      );
+      await values?.anexos?.forEach((row) => formData.append('anexos', row));
+      await formData.append('parecer_favoravel', values.parecer === 'Favorável');
+      await formData.append(estado ? 'observacao' : 'descritivo', values.observacao);
+      await formData.append(estado ? 'estado_id' : 'validado', estado ? selectedItem.estado_id : values.validado);
+      enviarParecer(formData);
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
 
-  const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
-
-  const cancelEliminar = () => {
-    dispatch(closeModalAnexo());
+  const eliminarParecer = async () => {
+    const formData = new FormData();
+    await formData.append('estado_id ', selectedItem.estado_id);
+    enviarParecer(formData);
   };
 
-  const confirmeEliminar = () => {
+  const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
+
+  const eliminarAnexo = () => {
     dispatch(
-      deleteItem('anexoParecer', {
+      updateItem('anexo', null, {
         mail,
         processoId,
         msg: 'Anexo eliminado',
+        anexo: selectedAnexoId,
         perfilId: cc?.perfil_id,
-        id: Number(selectedAnexoId),
-        parecerId: Number(selectedItem?.id),
+        estadoId: selectedItem?.id,
       })
     );
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open={openModal} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle sx={{ pb: 2 }}>Parecer: {selectedItem?.nome || selectedItem?.estado}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -882,20 +874,26 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
             <Grid item xs={12}>
               <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
               {anexosAtivos?.length > 0 && (
-                <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} />
+                <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} anexo />
               )}
             </Grid>
           </Grid>
-          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons
+            edit={isEdit}
+            label="Enviar"
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={() => eliminarParecer()}
+            desc={isEdit ? 'eliminar o parecer' : ''}
+          />
         </FormProvider>
+
         <DialogConfirmar
           isSaving={isSaving}
-          open={isOpenModalAnexo}
-          onClose={cancelEliminar}
-          handleOk={confirmeEliminar}
-          color="error"
-          title="Eliminar"
+          open={!!selectedAnexoId}
+          handleOk={eliminarAnexo}
           desc="eliminar este anexo"
+          onClose={() => dispatch(closeModalAnexo())}
         />
       </DialogContent>
     </Dialog>

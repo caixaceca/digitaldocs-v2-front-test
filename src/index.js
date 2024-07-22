@@ -3,9 +3,6 @@
 // styles
 import './style.css';
 
-// highlight
-import './utils/highlight';
-
 // scroll bar
 import 'simplebar-react/dist/simplebar.min.css';
 

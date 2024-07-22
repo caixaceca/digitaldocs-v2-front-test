@@ -1,6 +1,8 @@
 import { format } from 'date-fns';
 // @mui
 import Typography from '@mui/material/Typography';
+// config
+import { ambiente } from '../config';
 
 const numero = require('numero-por-extenso');
 
@@ -24,103 +26,44 @@ export function newLineText(text) {
 // ----------------------------------------------------------------------
 
 export function baralharString(str = '') {
-  if (isProduction()) {
+  if (ambiente === 'producao') {
     return str;
   }
+  return str;
 
-  const arr = str.split('');
+  // const arr = str.split('');
 
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
+  // for (let i = arr.length - 1; i > 0; i -= 1) {
+  //   const j = Math.floor(Math.random() * (i + 1));
+  //   [arr[i], arr[j]] = [arr[j], arr[i]];
+  // }
 
-  return arr.join('');
-}
-
-export function isProduction() {
-  return true;
-  // return window.location.origin?.includes('digitaldocs.caixa.cv');
+  // return arr.join('');
 }
 
 // ----------------------------------------------------------------------
 
 export function entidadesParse(entidades) {
-  let _entidades = '';
+  let entidadesList = '';
   entidades?.split(';')?.forEach((row, index) => {
-    _entidades += entidades?.split(';')?.length - 1 === index ? row : `${row} / `;
+    entidadesList += entidades?.split(';')?.length - 1 === index ? row : `${row} / `;
   });
-  return _entidades;
-}
-
-// ----------------------------------------------------------------------
-
-export function findColaborador(mail, colaboradores) {
-  const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
-  return colaborador
-    ? `${colaborador?.perfil?.displayName} ${colaborador?.uo?.label ? `(${colaborador?.uo?.label})` : ''}`
-    : mail;
-}
-
-// ----------------------------------------------------------------------
-
-export function noDados(vazio) {
-  return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-      {vazio ? '--' : '(Não identificado)'}
-    </Typography>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-export function setItemValue(newValue, setItem, localS, id) {
-  if (setItem) {
-    setItem(newValue);
-  }
-  if (localS) {
-    localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
-  }
-}
-
-export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, valueF) {
-  setData(newValue);
-  if (localSI) {
-    localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
-  }
-  if (resetDate) {
-    if (newValue && dataValido(newValue) && newValue > valueF) {
-      resetDate(new Date());
-      if (localSIF) {
-        localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
-      }
-    } else if (!newValue) {
-      resetDate(null);
-      if (localSIF) {
-        localStorage.setItem(localSIF, '');
-      }
-    }
-  }
-}
-
-export function dataValido(data) {
-  return !!(data && data?.toString() !== 'Invalid Date');
+  return entidadesList;
 }
 
 // ----------------------------------------------------------------------
 
 export function errorMsg(error) {
   return (
+    error?.response?.data?.erro ||
     error?.response?.data?.error ||
     error?.response?.data?.errot ||
     error?.response?.data?.errop ||
+    error?.response?.data?.mensagem ||
     error?.error?.[0]?.message ||
     error?.error?.[1]?.message ||
-    error?.response?.data?.error ||
-    error?.response?.data?.mensagem ||
-    error?.response?.data?.erro ||
     error?.response?.mensagem ||
-    error.response?.data ||
+    error?.response?.data ||
     error?.mensagem ||
     error?.[0]?.msg ||
     error?.message ||
@@ -131,7 +74,16 @@ export function errorMsg(error) {
 
 // ----------------------------------------------------------------------
 
-export function valorPorExtenso(valor) {
+export function substituirTexto(string, parametros, valores) {
+  parametros?.forEach((row) => {
+    string = string?.replace(`«${row}»`, valores?.[row] || 'NÃO DEFINIDO');
+  });
+  return string;
+}
+
+// ----------------------------------------------------------------------
+
+export function numeroPorExtenso(valor) {
   let _valor = '';
   if (valor > 1999 || valor < 1000) {
     _valor = numero.porExtenso(valor, numero.estilo.monetario);
@@ -202,9 +154,54 @@ export function converterParaOrdinal(numero, f) {
 
 // ----------------------------------------------------------------------
 
-export function substituirTexto(string, parametros, valores) {
-  parametros?.forEach((row) => {
-    string = string?.replace(`«${row}»`, valores?.[row] || 'NÃO DEFINIDO');
-  });
-  return string;
+export function findColaborador(mail, colaboradores) {
+  const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
+  return colaborador
+    ? `${colaborador?.perfil?.displayName} ${colaborador?.uo?.label ? `(${colaborador?.uo?.label})` : ''}`
+    : mail;
+}
+
+// ----------------------------------------------------------------------
+
+export function noDados(vazio) {
+  return (
+    <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+      {vazio ? '--' : '(Não identificado)'}
+    </Typography>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+export function setItemValue(newValue, setItem, localS, id) {
+  if (setItem) {
+    setItem(newValue);
+  }
+  if (localS) {
+    localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
+  }
+}
+
+export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, valueF) {
+  setData(newValue);
+  if (localSI) {
+    localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
+  }
+  if (resetDate) {
+    if (newValue && dataValido(newValue) && newValue > valueF) {
+      resetDate(new Date());
+      if (localSIF) {
+        localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
+      }
+    } else if (!newValue) {
+      resetDate(null);
+      if (localSIF) {
+        localStorage.setItem(localSIF, '');
+      }
+    }
+  }
+}
+
+export function dataValido(data) {
+  return !!(data && data?.toString() !== 'Invalid Date');
 }

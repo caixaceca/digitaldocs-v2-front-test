@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -10,7 +11,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { getFile } from '../../../utils/getFile';
-import { newLineText, baralharString } from '../../../utils/normalizeText';
+import { newLineText, baralharString } from '../../../utils/formatText';
 import { pertencoEstadoId, findColaboradores, temNomeacao } from '../../../utils/validarAcesso';
 import { padraoDate, ptDate, ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 // hooks
@@ -27,6 +28,7 @@ import { DefaultAction } from '../../../components/Actions';
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
 import { AnexoItem } from './Anexos';
+import MinutaParecer from './MinutaParecer';
 import { Abandonar, ParecerForm, AtribuirForm } from '../form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
@@ -39,7 +41,7 @@ export default function Estados({ handleAceitar }) {
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, colaboradoresEstado, isAdmin } = useSelector((state) => state.parametrizacao);
-  const isResponsavel = temNomeacao(cc) || isAdmin;
+  const isResponsavel = useMemo(() => temNomeacao(cc) || isAdmin, [cc, isAdmin]);
 
   const colaboradoresList = useMemo(
     () => findColaboradores(colaboradores, colaboradoresEstado),
@@ -146,7 +148,7 @@ export default function Estados({ handleAceitar }) {
                             src={getFile('colaborador', criador?.foto_disk)}
                           />
                         )}
-                        <Stack>
+                        <Stack sx={{ flexGrow: 1 }}>
                           {!!criador && (
                             <Stack direction="row" alignItems="center" spacing={0.5}>
                               <Typography noWrap variant="subtitle2">
@@ -170,19 +172,51 @@ export default function Estados({ handleAceitar }) {
                           {row?.observacao && (
                             <Typography sx={{ textAlign: 'justify', pt: 1 }}>{newLineText(row.observacao)}</Typography>
                           )}
-                          {anexosAtivos?.length > 0 && (
-                            <Stack spacing={0.75} direction="column" sx={{ mt: 1.5 }} alignItems="center">
-                              {anexosAtivos?.map((item) => (
-                                <AnexoItem parecer anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
-                              ))}
-                            </Stack>
-                          )}
+
+                          <Stack spacing={1} direction="column" sx={{ mt: 1.5 }} alignItems="center">
+                            {temParecer && (
+                              <Stack sx={{ width: 1 }}>
+                                <PDFDownloadLink
+                                  fileName={`Minuta do parecer - ${row?.estado}.pdf`}
+                                  document={
+                                    <MinutaParecer
+                                      dados={{
+                                        ...row,
+                                        assunto: processo?.titular,
+                                        nome: colaboradores?.find((item) => item?.perfil_id === row?.perfil_id)?.perfil
+                                          ?.displayName,
+                                      }}
+                                    />
+                                  }
+                                >
+                                  {({ loading }) =>
+                                    loading ? (
+                                      'Carregando minuta...'
+                                    ) : (
+                                      <AnexoItem
+                                        parecer
+                                        viewAnexo={() => null}
+                                        anexo={{
+                                          criado_em: row?.parecer_em,
+                                          nome: 'Minuta do parecer.pdf',
+                                          criador: criador?.perfil?.mail,
+                                        }}
+                                      />
+                                    )
+                                  }
+                                </PDFDownloadLink>
+                              </Stack>
+                            )}
+                            {anexosAtivos?.map((item) => (
+                              <AnexoItem parecer anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
+                            ))}
+                          </Stack>
                           {anexosInativos?.length > 0 && (
                             <RoleBasedGuard roles={['Todo-111']}>
-                              <Divider sx={{ mt: 1 }}>
+                              <Divider sx={{ my: 1 }}>
                                 <Typography variant="subtitle1">Anexos eliminados</Typography>
                               </Divider>
-                              <Stack direction="column" alignItems="center" spacing={0.75}>
+                              <Stack direction="column" alignItems="center" spacing={1}>
                                 {anexosInativos?.map((item) => (
                                   <AnexoItem eliminado anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
                                 ))}
@@ -203,7 +237,7 @@ export default function Estados({ handleAceitar }) {
           </Stack>
         );
       })}
-      <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} estado />
+      <ParecerForm openModal={isOpenModal} onCancel={handleClose} processoId={processo?.id} estado />
     </Box>
   );
 }

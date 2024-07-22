@@ -15,7 +15,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { setItemValue, noDados } from '../../utils/normalizeText';
+import { setItemValue, noDados } from '../../utils/formatText';
 // hooks
 import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';

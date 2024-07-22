@@ -16,7 +16,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 // utils
 import { ptDate } from '../../../utils/formatTime';
-import { newLineText } from '../../../utils/normalizeText';
+import { newLineText } from '../../../utils/formatText';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 // hooks
 import useResponsive from '../../../hooks/useResponsive';

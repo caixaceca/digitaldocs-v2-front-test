@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
-import { entidadesParse, noDados, baralharString } from '../../utils/normalizeText';
+import { entidadesParse, noDados, baralharString } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
