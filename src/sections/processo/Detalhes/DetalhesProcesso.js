@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
@@ -13,6 +14,7 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
 import { colorLabel } from '../../../utils/getColorPresets';
@@ -42,17 +44,21 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object };
 
 export default function DetalhesProcesso({ isPS, processo }) {
-  const entidadesList = entidadesParse(processo?.entidade);
   const { origens } = useSelector((state) => state.parametrizacao);
+  const con = useMemo(() => processo?.con || null, [processo?.con]);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const origem = origens?.find((row) => row?.id === processo?.origem_id);
-  const uo = uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id));
-  const docPLabel = dis?.find((row) => row.id === processo?.tipo_doc_idp)?.label || 'Doc. primário';
-  const docSLabel = dis?.find((row) => row.id === processo?.tipo_doc_ids)?.label || 'Doc. secundário';
-  const criador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase());
-  const con = processo?.con || null;
-  const credito = processo?.credito || null;
-  const situacao = credito?.situacao_final_mes || '';
+  const credito = useMemo(() => processo?.credito || null, [processo?.credito]);
+  const entidadesList = useMemo(() => entidadesParse(processo?.entidade), [processo?.entidade]);
+  const devolvido = useMemo(() => processo?.htransicoes?.[0]?.modo === 'Devolução', [processo?.htransicoes]);
+  const origem = useMemo(() => origens?.find((row) => row?.id === processo?.origem_id), [origens, processo?.origem_id]);
+  const uo = useMemo(
+    () => uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id)),
+    [processo?.uo_origem_id, uos]
+  );
+  const criador = useMemo(
+    () => colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
+    [colaboradores, processo?.criador]
+  );
 
   return (
     <>
@@ -100,7 +106,16 @@ export default function DetalhesProcesso({ isPS, processo }) {
                       const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
                       return (
                         <Stack key={`estado_${row?.id}_${index}`} spacing={0.5}>
-                          <Typography variant="subtitle1">{row?.estado}</Typography>
+                          <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
+                            <Typography variant="subtitle1" sx={{ pr: 1 }}>
+                              {row?.estado}
+                            </Typography>
+                            {devolvido && (
+                              <Label color="error" startIcon={<ErrorOutlineIcon />}>
+                                Devolvido
+                              </Label>
+                            )}
+                          </Stack>
                           {row?.data_entrada && (
                             <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
                               <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
@@ -174,8 +189,20 @@ export default function DetalhesProcesso({ isPS, processo }) {
               title={processo?.assunto === 'Formulário' ? 'Codificação/Nome:' : 'Email:'}
             />
           )}
-          {processo?.doc_idp && <TextItem title={`${docPLabel}:`} text={processo?.doc_idp?.toString()} baralhar />}
-          {processo?.doc_ids && <TextItem title={`${docSLabel}:`} text={processo?.doc_ids?.toString()} baralhar />}
+          {processo?.doc_idp && (
+            <TextItem
+              baralhar
+              text={processo?.doc_idp?.toString()}
+              title={`${dis?.find((row) => row.id === processo?.tipo_doc_idp)?.label || 'Doc. primário'}:`}
+            />
+          )}
+          {processo?.doc_ids && (
+            <TextItem
+              baralhar
+              text={processo?.doc_ids?.toString()}
+              title={`${dis?.find((row) => row.id === processo?.tipo_doc_ids)?.label || 'Doc. secundário'}:`}
+            />
+          )}
           {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} baralhar />}
           {processo?.cliente && <TextItem title="Nº de cliente:" text={processo?.cliente?.toString()} baralhar />}
           {processo?.conta && <TextItem title="Nº de conta:" text={processo?.conta?.toString()} baralhar />}
@@ -258,7 +285,12 @@ export default function DetalhesProcesso({ isPS, processo }) {
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Info. crédito</Typography>
           </ListItem>
-          {situacao && <TextItem title="Situação:" label={<Label color={colorLabel(situacao)}>{situacao}</Label>} />}
+          {credito?.situacao_final_mes && (
+            <TextItem
+              title="Situação:"
+              label={<Label color={colorLabel(credito?.situacao_final_mes)}>{credito?.situacao_final_mes}</Label>}
+            />
+          )}
           {credito?.nproposta && <TextItem title="Nº de proposta:" text={credito?.nproposta} />}
           {/* {credito?.segmento && <TextItem title="Segmento:" text={credito?.segmento} />} */}
           {credito?.linha && <TextItem title="Linha de crédito:" text={credito?.linha} />}

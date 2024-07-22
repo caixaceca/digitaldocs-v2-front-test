@@ -12,8 +12,8 @@ import CardContent from '@mui/material/CardContent';
 // utils
 import { fYear } from '../utils/formatTime';
 // redux
-import { getItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
+import { getProcesso, closeModalAnexo, deleteItem } from '../redux/slices/digitaldocs';
 import { getFromParametrizacao, changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
@@ -22,6 +22,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
+import DialogConfirmar from '../components/DialogConfirmar';
 import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
@@ -40,13 +41,15 @@ export default function NovoEditarProcesso() {
   const isEdit = pathname.includes('edit');
   const { linhas } = useSelector((state) => state.parametrizacao);
   const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { processo, isLoadingP, done, error } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
+  const { processo, isLoadingP, selectedAnexoId, isOpenModalAnexo, isSaving, done, error } = useSelector(
+    (state) => state.digitaldocs
+  );
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
     if (mail && id && cc?.perfil_id) {
-      dispatch(getItem('processo', { id, mail, perfilId: cc?.perfil_id }));
+      dispatch(getProcesso('processo', { id, mail, perfilId: cc?.perfil_id }));
     }
   }, [dispatch, cc?.perfil_id, mail, id]);
 
@@ -83,6 +86,22 @@ export default function NovoEditarProcesso() {
 
   const changeFluxo = (newValue) => {
     dispatch(changeMeuFluxo(newValue));
+  };
+
+  const cancelEliminar = () => {
+    dispatch(closeModalAnexo());
+  };
+
+  const eliminarAnexo = () => {
+    dispatch(
+      deleteItem('anexo processo', {
+        mail,
+        processoId: id,
+        msg: 'Anexo eliminado',
+        perfilId: cc?.perfil_id,
+        id: Number(selectedAnexoId),
+      })
+    );
   };
 
   return (
@@ -184,6 +203,16 @@ export default function NovoEditarProcesso() {
                 )}
               </>
             )}
+
+            <DialogConfirmar
+              isSaving={isSaving}
+              open={isOpenModalAnexo}
+              onClose={cancelEliminar}
+              handleOk={eliminarAnexo}
+              color="error"
+              title="Eliminar"
+              desc="eliminar este anexo"
+            />
           </>
         ) : (
           <RoleBasedGuard

@@ -4,7 +4,6 @@ import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
 import { errorMsg } from '../../utils/normalizeText';
-import { canPreview, b64toBlob } from '../../utils/getFileFormat';
 
 // ----------------------------------------------------------------------
 
@@ -24,9 +23,7 @@ const initialState = {
   processo: null,
   filePreview: null,
   pesquisaInfo: null,
-  fileDownload: null,
   selectedItem: null,
-  anexoParecer: null,
   itemSelected: null,
   processosInfo: null,
   selectedAnexoId: null,
@@ -51,16 +48,16 @@ const slice = createSlice({
       state.isLoading = true;
     },
 
-    startLoadingP(state) {
-      state.isLoadingP = true;
+    loadingProcesso(state, action) {
+      state.isLoadingP = action.payload;
     },
 
     startSaving(state) {
       state.isSaving = true;
     },
 
-    startLoadingAnexo(state) {
-      state.isLoadingAnexo = true;
+    loadingAnexo(state, action) {
+      state.isLoadingAnexo = action.payload;
     },
 
     stopLoading(state) {
@@ -68,7 +65,6 @@ const slice = createSlice({
     },
 
     setDone(state, action) {
-      console.log(action.payload);
       state.isSaving = false;
       state.isLoading = false;
       state.isLoadingP = false;
@@ -89,7 +85,6 @@ const slice = createSlice({
         case 'processo':
           state.processo = null;
           state.filePreview = null;
-          state.fileDownload = null;
           state.isLoadingAnexo = false;
           break;
         case 'processos':
@@ -210,10 +205,6 @@ const slice = createSlice({
       state.selectedItem = action.payload;
     },
 
-    getAnexoParecerSuccess(state, action) {
-      state.anexoParecer = action.payload;
-    },
-
     resgatarSuccess(state, action) {
       state.isLoadingP = false;
       state.processo.preso = true;
@@ -231,26 +222,8 @@ const slice = createSlice({
       });
     },
 
-    selectFile(state, action) {
-      switch (action?.payload?.item) {
-        case 'infoPreview':
-          state.filePreview = { ...action?.payload?.dados };
-          break;
-        case 'infoDownload':
-          state.fileDownload = action?.payload?.dados;
-          break;
-        case 'filePreview':
-          state.isLoadingAnexo = false;
-          state.filePreview = { ...action?.payload?.dados, ...state.filePreview };
-          break;
-        case 'fileDownload':
-          state.isLoadingAnexo = false;
-          state.fileDownload = { ...action?.payload?.dados, ...state.fileDownload };
-          break;
-
-        default:
-          break;
-      }
+    getFilePreviewSuccess(state, action) {
+      state.filePreview = action?.payload;
     },
 
     aceitarSuccess(state, action) {
@@ -351,10 +324,6 @@ const slice = createSlice({
       state.isOpenParecer = false;
       state.itemSelected = null;
     },
-
-    resetAnexo(state) {
-      state.anexoParecer = null;
-    },
   },
 });
 
@@ -365,10 +334,8 @@ export default slice.reducer;
 export const {
   resetItem,
   openModal,
-  selectFile,
   closeModal,
   selectItem,
-  resetAnexo,
   selectAnexo,
   openDetalhes,
   closeParecer,
@@ -629,6 +596,11 @@ export function getAll(item, params) {
           dispatch(slice.actions.getPjfSuccess(response.data));
           break;
         }
+        case 'cartao': {
+          const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
+          dispatch(slice.actions.getCartaoSuccess(response.data));
+          break;
+        }
 
         default:
           break;
@@ -642,10 +614,9 @@ export function getAll(item, params) {
 
 // ----------------------------------------------------------------------
 
-export function getItem(item, params) {
+export function getProcesso(item, params) {
   return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
-    dispatch(slice.actions.startLoadingP());
+    dispatch(slice.actions.loadingProcesso(true));
     dispatch(slice.actions.resetItem('processo'));
     try {
       const options = { headers: { cc: params?.mail } };
@@ -655,16 +626,7 @@ export function getItem(item, params) {
             `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${params?.perfilId}`,
             options
           );
-          // const response = await axios.get(
-          //   `${BASEURLDD}/v1/processos/byref/${params?.perfilId}/?processoID=${params?.id}`,
-          //   options
-          // );
-          // dispatch(slice.actions.getProcessoSuccess(response.data));
           dispatch(slice.actions.getProcessoSuccess(response.data?.objeto));
-          const dados = response?.data?.objeto?.anexos?.filter((item) => item?.ativo)?.find((row) => !!canPreview(row));
-          if (dados) {
-            dispatch(slice.actions.selectFile({ item: 'infoPreview', dados: { ...dados, tipo: canPreview(dados) } }));
-          }
           break;
         }
         case 'prevnext': {
@@ -673,22 +635,13 @@ export function getItem(item, params) {
             options
           );
           dispatch(slice.actions.getProcessoSuccess(response.data));
-          const dados = response?.data?.anexos?.filter((item) => item?.ativo)?.find((row) => !!canPreview(row));
-          if (dados) {
-            dispatch(slice.actions.selectFile({ item: 'infoPreview', dados: { ...dados, tipo: canPreview(dados) } }));
-          }
-          break;
-        }
-        case 'cartao': {
-          const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
-          dispatch(slice.actions.getCartaoSuccess(response.data));
           break;
         }
 
         default:
           break;
       }
-      dispatch(slice.actions.stopLoading());
+      dispatch(slice.actions.loadingProcesso(false));
     } catch (error) {
       if (item === 'prevnext') {
         dispatch(slice.actions.setError(`Sem mais processos disponíveis no estado ${params?.estado}`));
@@ -705,39 +658,31 @@ export function getItem(item, params) {
 
 export function getAnexo(item, params) {
   return async (dispatch) => {
-    if (item !== 'anexoParecer' && item !== 'fileDownload') {
-      dispatch(slice.actions.startLoadingAnexo());
+    if (item === 'filePreview') {
+      dispatch(slice.actions.loadingAnexo(true));
     }
     try {
       const options = { headers: { cc: params?.mail } };
-      switch (item) {
-        case 'filePreview': {
-          const response = await axios.get(`${BASEURLDD}/v1/processos/file/${params?.anexo?.anexo}`, options);
-          const url = URL?.createObjectURL(b64toBlob(response?.data?.ficheiro));
-          dispatch(slice.actions.selectFile({ item: 'filePreview', dados: { url } }));
-          break;
-        }
-        case 'fileDownload': {
-          const response = await axios.get(`${BASEURLDD}/v1/processos/file/${params?.anexo?.anexo}`, options);
-          const blob = b64toBlob(response?.data?.ficheiro, params?.anexo?.conteudo);
-          dispatch(slice.actions.selectFile({ item: 'fileDownload', dados: { blob } }));
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          dispatch(slice.actions.selectFile({ item: 'infoDownload', dados: null }));
-          break;
-        }
-        case 'anexoParecer': {
-          const response = await axios.get(`${BASEURLDD}/v1/processos/file/parecer/${params?.anexo?.anexo}`, options);
-          dispatch(slice.actions.getAnexoParecerSuccess({ ...response.data, anexo: params?.anexo?.anexo }));
-          break;
-        }
-
-        default:
-          break;
+      const response = await axios.get(
+        `${BASEURLDD}/v2/processos/anexo/file/${params?.perfilId}?anexo=${params?.anexo?.anexo}`,
+        { ...options, responseType: 'arraybuffer' }
+      );
+      const blob = await new Blob([response.data], { type: params?.anexo?.conteudo });
+      const url = await URL.createObjectURL(blob);
+      if (item === 'filePreview') {
+        await dispatch(slice.actions.getFilePreviewSuccess({ ...params?.anexo, url }));
+      } else {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = params?.anexo?.nome;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      if (item === 'filePreview') {
+        dispatch(slice.actions.loadingAnexo(false));
       }
     } catch (error) {
-      if (item === 'filePreview') {
-        dispatch(slice.actions.resetItem('filePreview'));
-      }
       hasError(error, dispatch);
     }
   };
@@ -872,10 +817,6 @@ export function updateItem(item, dados, params) {
             options
           );
           dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
-          const dados = response?.data?.objeto?.anexos?.filter((item) => item?.ativo)?.find((row) => !!canPreview(row));
-          if (dados) {
-            dispatch(slice.actions.selectFile({ item: 'infoPreview', dados: { ...dados, tipo: canPreview(dados) } }));
-          }
           break;
         }
         case 'dar aceso': {
@@ -995,6 +936,10 @@ export function deleteItem(item, params) {
             `${BASEURLDD}/v1/processos/parecer/remover/anexos/${params?.perfilId}/${params?.parecerId}/${params?.id}`,
             options
           );
+          // await axios.delete(
+          //   `${BASEURLDD}/v1/processos/remover/anexos/${params?.perfilId}/${params?.processoId}/${params?.id}`,
+          //   options
+          // );
           dispatch(slice.actions.deleteAnexoParecerSuccess({ id: params?.id, parecerId: params?.parecerId }));
           break;
         }

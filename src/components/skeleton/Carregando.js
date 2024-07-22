@@ -159,7 +159,7 @@ export function SkeletonTable({ column, row }) {
         <TableRow key={i}>
           {[...Array(column)].map((z, y) => (
             <TableCell key={y}>
-              <Skeleton variant="text" height={35} />
+              <Skeleton variant="rectangular" sx={{ height: 25, borderRadius: 1, transform: 'scale(1)' }} />
             </TableCell>
           ))}
         </TableRow>

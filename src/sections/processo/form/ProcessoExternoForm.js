@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // form
 import { useFormContext } from 'react-hook-form';
@@ -15,10 +16,10 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
+import { AnexosExistente } from '../../../components/Actions';
 //
 import DadosCliente from './DadosCliente';
 import { ObsNovosAnexos } from './Outros';
-import AnexosExistentes from './AnexosExistentes';
 
 // ----------------------------------------------------------------------
 
@@ -27,7 +28,7 @@ ProcessoExternoForm.propTypes = { origensList: PropTypes.array, processo: PropTy
 export default function ProcessoExternoForm({ processo, origensList }) {
   const { watch } = useFormContext();
   const values = watch();
-  const hasAnexos = processo?.anexos?.length > 0;
+  const anexosAtivos = useMemo(() => processo?.anexos?.filter((row) => row?.ativo), [processo?.anexos]);
 
   return (
     <Grid container spacing={3}>
@@ -95,9 +96,9 @@ export default function ProcessoExternoForm({ processo, origensList }) {
           <CardContent>
             <Grid container spacing={3}>
               <ObsNovosAnexos />
-              {hasAnexos && (
+              {anexosAtivos?.length > 0 && (
                 <Grid item xs={12}>
-                  <AnexosExistentes anexos={processo.anexos} processoId={processo.id} />
+                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} />
                 </Grid>
               )}
             </Grid>

@@ -352,7 +352,7 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
           formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
         }
       }
-      values?.anexos?.forEach((row) => {
+      await values?.anexos?.forEach((row) => {
         formData.append('anexos', row);
       });
 

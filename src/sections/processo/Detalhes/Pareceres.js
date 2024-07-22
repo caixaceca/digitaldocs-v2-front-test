@@ -13,7 +13,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { b64toBlob } from '../../../utils/getFileFormat';
 import { newLineText } from '../../../utils/normalizeText';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { padraoDate, ptDate, ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
@@ -24,7 +23,6 @@ import { getComparator, applySort } from '../../../hooks/useTable';
 import { useDispatch, useSelector } from '../../../redux/store';
 import {
   getAnexo,
-  resetAnexo,
   selectItem,
   closeModal,
   updateItem,
@@ -52,20 +50,9 @@ export default function Pareceres() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { processo, fileDownload, anexoParecer, isOpenModal, itemSelected, isOpenParecer, done, isSaving } =
-    useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (anexoParecer?.ficheiro) {
-      const blob = b64toBlob(anexoParecer?.ficheiro, anexoParecer?.anexo?.conteudo);
-      const link = document.createElement('a');
-      link.download = anexoParecer?.anexo?.nome;
-      link.href = window.URL.createObjectURL(blob);
-      dispatch(resetAnexo());
-      link.click();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anexoParecer?.ficheiro]);
+  const { processo, isOpenModal, itemSelected, isOpenParecer, done, isSaving } = useSelector(
+    (state) => state.digitaldocs
+  );
 
   useEffect(() => {
     if (done === 'parecer validado') {
@@ -77,14 +64,8 @@ export default function Pareceres() {
   }, [done]);
 
   const viewAnexo = (anexo) => {
-    dispatch(getAnexo('anexoParecer', { anexo, mail }));
+    dispatch(getAnexo('fileDownload', { mail, perfilId: cc?.perfil_id, anexo }));
   };
-
-  useEffect(() => {
-    if (fileDownload?.anexo && !fileDownload?.blob) {
-      dispatch(getAnexo('fileDownload', { mail, anexo: fileDownload }));
-    }
-  }, [dispatch, mail, fileDownload]);
 
   const handleEditar = (item) => {
     dispatch(selectItem(item));
@@ -141,7 +122,7 @@ export default function Pareceres() {
         return (
           <Stack key={row?.id} sx={{ px: { xs: 1, sm: 3 }, pt: 2 }}>
             <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
-              <AccordionSummary  sx={{ py: accord !== row?.id && 1 }}>
+              <AccordionSummary sx={{ py: accord !== row?.id && 1 }}>
                 <Stack
                   spacing={1}
                   alignItems="center"

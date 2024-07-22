@@ -8,11 +8,12 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { fYear } from '../utils/formatTime';
+import { canPreview } from '../utils/getFileFormat';
 import { temAcesso, temNomeacao, findColaboradores, pertencoEstadoId } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { parecerEstadoSuccess } from '../redux/slices/cc';
-import { getAll, getItem, createItem, updateItem, closeModal } from '../redux/slices/digitaldocs';
+import { getAll, getProcesso, getAnexo, createItem, updateItem, closeModal } from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -115,9 +116,24 @@ export default function Processo() {
     [id, isAdmin, auditoriaProcesso, processo]
   );
 
+  useEffect(() => {
+    const anexoPreview = processo?.anexos?.filter((item) => item?.ativo)?.find((row) => !!canPreview(row));
+    if (anexoPreview) {
+      dispatch(
+        getAnexo('filePreview', {
+          mail,
+          perfilId: cc?.perfil_id,
+          anexo: { ...anexoPreview, tipo: canPreview(anexoPreview) },
+        })
+      );
+    }
+  }, [dispatch, mail, cc?.perfil_id, processo?.anexos]);
+
   const proximoAnterior = (next) => {
     if (mail && perfilId && id && estadoId) {
-      dispatch(getItem('prevnext', { mail, next, perfilId, estadoId, processoId: id, estado: processo?.estado_atual }));
+      dispatch(
+        getProcesso('prevnext', { mail, next, perfilId, estadoId, processoId: id, estado: processo?.estado_atual })
+      );
     } else {
       navigate(linkNavigate);
     }
@@ -153,7 +169,7 @@ export default function Processo() {
   }, [done]);
 
   useEffect(() => {
-    if (error) {
+    if (error && typeof error === 'string') {
       const noMoreProcess = error?.includes('Sem mais processos disponíveis no estado');
       if (noMoreProcess && error?.includes('Atendimento')) {
         //
@@ -174,7 +190,7 @@ export default function Processo() {
 
   useEffect(() => {
     if (mail && id && perfilId) {
-      dispatch(getItem('processo', { id, mail, perfilId }));
+      dispatch(getProcesso('processo', { id, mail, perfilId }));
     }
   }, [dispatch, perfilId, mail, id]);
 

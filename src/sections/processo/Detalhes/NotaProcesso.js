@@ -2,16 +2,13 @@ import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-// utils
-import { newLineText } from '../../../utils/normalizeText';
 
 // ----------------------------------------------------------------------
 
-NotaProcesso.propTypes = { nota: PropTypes.string, segmento: PropTypes.string, motivo: PropTypes.string };
+NotaProcesso.propTypes = { nota: PropTypes.string, segmento: PropTypes.string };
 
-export default function NotaProcesso({ nota = '', segmento = '', motivo = '' }) {
-  return !(segmento === 'E' && nota === 'Entidade primária com apenas o documento primário em vigor!') || motivo ? (
+export default function NotaProcesso({ nota = '', segmento = '' }) {
+  return !(segmento === 'E' && nota === 'Entidade primária com apenas o documento primário em vigor!') ? (
     <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 1 }}>
       {nota &&
         ((nota === 'Essa Entidade não possui nenhuma conta CVE elegivel para cativo/penhora no valor indicado!' && (
@@ -26,14 +23,6 @@ export default function NotaProcesso({ nota = '', segmento = '', motivo = '' }) 
             {nota}
           </Alert>
         ))}
-      {motivo ? (
-        <Alert severity="error" sx={{ lineHeight: 1.2, py: 0, px: 1.5 }}>
-          <AlertTitle sx={{ typography: 'subtitle2' }}>Processo devolvido</AlertTitle>
-          {newLineText(motivo)}
-        </Alert>
-      ) : (
-        ''
-      )}
     </Stack>
   ) : (
     ''

@@ -129,7 +129,7 @@ const slice = createSlice({
     },
 
     getMsalProfileSuccess(state, action) {
-      state.mail = action.payload.mail;
+      state.mail = action.payload?.mail;
       state.msalProfile = action.payload;
     },
 
@@ -180,11 +180,13 @@ export function acquireToken(instance, account) {
   };
 }
 
-export function authenticateColaborador(tokendeacesso, msalcolaborador) {
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+export function authenticateColaborador(accessToken, msalProfile) {
   return async (dispatch) => {
     try {
-      const options = { headers: { Authorization: tokendeacesso }, withCredentials: true };
-      const response = await axios.post(`${BASEURL}/perfil/msal`, msalcolaborador, options);
+      const options = { headers: { Authorization: accessToken }, withCredentials: true };
+      const response = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, options);
       dispatch(slice.actions.getProfileSuccess(response.data));
     } catch (error) {
       hasError(error, dispatch);

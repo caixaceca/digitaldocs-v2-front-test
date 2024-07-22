@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useEffect, useMemo } from 'react';
 // form
 import { useFormContext } from 'react-hook-form';
 // @mui
@@ -18,9 +18,9 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../../components/hook-form';
+import { AnexosExistente } from '../../../components/Actions';
 //
 import { ObsNovosAnexos } from './Outros';
-import AnexosExistentes from './AnexosExistentes';
 // _mock
 import { segmentos, escaloes, situacoes } from '../../../_mock';
 
@@ -31,8 +31,8 @@ ProcessoCreditoForm.propTypes = { isEdit: PropTypes.bool, processo: PropTypes.ob
 export default function ProcessoCreditoForm({ isEdit, processo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
-  const hasAnexos = processo?.anexos?.length > 0;
   const { linhas } = useSelector((state) => state.parametrizacao);
+  const anexosAtivos = useMemo(() => processo?.anexos?.filter((row) => row?.ativo), [processo?.anexos]);
 
   useEffect(() => {
     setValue('linha_id', null);
@@ -158,9 +158,9 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
           <CardContent>
             <Grid container spacing={3}>
               <ObsNovosAnexos />
-              {hasAnexos && (
+              {anexosAtivos?.length > 0 && (
                 <Grid item xs={12}>
-                  <AnexosExistentes anexos={processo.anexos} processoId={processo.id} />
+                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} />
                 </Grid>
               )}
             </Grid>

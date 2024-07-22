@@ -49,6 +49,7 @@ import { findColaborador } from '../utils/normalizeText';
 import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
+import { selectAnexo } from '../redux/slices/digitaldocs';
 import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/parametrizacao';
 // assets
 import { Editar, Arquivo, Seguimento, Abandonar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
@@ -316,14 +317,15 @@ export function DialogButons({
 
 AnexosExistente.propTypes = { mt: PropTypes.number, anexos: PropTypes.array, onOpen: PropTypes.func };
 
-export function AnexosExistente({ mt = 3, anexos, onOpen }) {
+export function AnexosExistente({ mt = 3, anexos, onOpen = null }) {
+  const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   return (
     <>
       <Divider sx={{ mt }}>Anexos existentes</Divider>
       <List>
         {anexos.map((row) => (
-          <ListItem key={row?.name} sx={{ py: 0.5, px: 1, mt: 0.75, borderRadius: 1, bgcolor: 'background.neutral' }}>
+          <ListItem key={row?.id} sx={{ py: 0.5, px: 1, mt: 0.75, borderRadius: 1, bgcolor: 'background.neutral' }}>
             <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
             <ListItemText
               primary={
@@ -356,7 +358,18 @@ export function AnexosExistente({ mt = 3, anexos, onOpen }) {
               }
             />
             <ListItemSecondaryAction>
-              <DefaultAction color="error" label="ELIMINAR" small handleClick={() => onOpen(row.id)} />
+              <DefaultAction
+                color="error"
+                label="ELIMINAR"
+                small
+                handleClick={() => {
+                  if (onOpen) {
+                    onOpen(row.id);
+                  } else {
+                    dispatch(selectAnexo(row.id));
+                  }
+                }}
+              />
             </ListItemSecondaryAction>
           </ListItem>
         ))}

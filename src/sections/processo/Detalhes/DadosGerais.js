@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
@@ -19,13 +20,15 @@ import DetalhesProcesso from './DetalhesProcesso';
 
 export default function DadosGerais() {
   const { isLoadingP, processo } = useSelector((state) => state.digitaldocs);
-  const hasAnexos = processo?.anexos && processo?.anexos?.length > 0;
-  const devolvido = processo?.htransicoes?.[0]?.modo === 'Devolução';
-  const isPS =
-    deGmkt(processo?.assunto) || processo?.assunto === 'Diário' || processo?.assunto === 'Receção de Cartões - DOP';
+  const hasAnexos = useMemo(() => processo?.anexos && processo?.anexos?.length > 0, [processo?.anexos]);
+  const isPS = useMemo(
+    () =>
+      deGmkt(processo?.assunto) || processo?.assunto === 'Diário' || processo?.assunto === 'Receção de Cartões - DOP',
+    [processo?.assunto]
+  );
 
   return (
-    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
+    <Stack sx={{ p: { xs: 1, sm: 3 }, mt: { xs: 0, sm: -2 } }}>
       {isLoadingP ? (
         <SkeletonProcesso />
       ) : (
@@ -34,7 +37,6 @@ export default function DadosGerais() {
             <Grid container spacing={3}>
               <Grid item xs={12} lg={hasAnexos && 5}>
                 <Grid id="detalhes">
-                  {devolvido && <NotaProcesso motivo={processo?.htransicoes?.[0]?.observacao} />}
                   {!isPS && processo?.nota && <NotaProcesso nota={processo?.nota} segmento={processo?.segmento} />}
                   <DetalhesProcesso isPS={isPS} processo={processo} />
                 </Grid>

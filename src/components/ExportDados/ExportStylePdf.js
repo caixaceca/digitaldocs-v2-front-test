@@ -5,9 +5,8 @@ import { Font, StyleSheet } from '@react-pdf/renderer';
 Font.register({
   family: 'Neo Sans Std',
   fonts: [
-    { src: '/fonts/neo-sans-std-regular.otf' },
+    { src: '/fonts/neo-sans-std.otf', fontWeight: 'normmal' },
     { src: '/fonts/neo-sans-std-bold.otf', fontWeight: 'bold' },
-    { src: '/fonts/neo-sans-std-regular-italic.otf', fontStyle: 'italic' },
   ],
 });
 
@@ -100,7 +99,8 @@ const styles = StyleSheet.create({
   textError: { color: '#FF4842' },
   uppercase: { textTransform: 'uppercase' },
   textSuccess: { color: 'rgb(90, 170, 40)' },
-  textBold: { fontFamily: 'Neo Sans Std', fontWeight: 'bold' },
+  textBold: { fontWeight: 'bold' },
+  textSpan: { display: 'inline' },
 
   title: { textAlign: 'center', fontWeight: 'bold', fontSize: 12 },
   title1: { textAlign: 'center', fontWeight: 'bold', fontSize: 12 },

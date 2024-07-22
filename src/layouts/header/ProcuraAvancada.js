@@ -75,10 +75,9 @@ export default function ProcuraAvancada() {
     <>
       <Button
         size="large"
-        variant="text"
         onClick={onOpen}
-        sx={{ fontSize: { md: 20 }, pr: { md: 10 } }}
-        startIcon={<SearchIcon sx={{ width: 30, height: 30 }} />}
+        sx={{ fontSize: { md: 18 } }}
+        startIcon={<SearchIcon sx={{ width: 28, height: 28 }} />}
       >
         Procurar...
       </Button>

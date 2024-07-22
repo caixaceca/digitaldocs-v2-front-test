@@ -28,7 +28,13 @@ export default function ContratoPdf() {
         <Grid item xs={12}>
           <Card>
             <PDFViewer width="100%" height="100%" style={{ border: 'none', minHeight: '100vh' }}>
-              <Document title={`${contrato?.tipo} - ${contrato?.modelo}`}>
+              <Document
+                pdfVersion="1.7"
+                author="Caixa Económica de Cabo Verde"
+                creator="Caixa Económica de Cabo Verde"
+                subject="Minutas de contratos de crédito"
+                title={`${contrato?.tipo} - ${contrato?.modelo}`}
+              >
                 {/* PRIMEIRA PÁGINA */}
                 <Page size="A4" style={[styles.page]}>
                   <CabecalhoAlt codificacao="JRDC.FM.C.001.01 | 2013/11/15" cabecalho />

@@ -13,9 +13,8 @@ import { styled, useTheme } from '@mui/material/styles';
 // utils
 import { BASEURL } from '../../utils/axios';
 import cssStyles from '../../utils/cssStyles';
-import { isProduction } from '../../utils/normalizeText';
 // config
-import { NAVBAR } from '../../config';
+import { NAVBAR, ambiente } from '../../config';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 import useCollapseDrawer from '../../hooks/useCollapseDrawer';
@@ -92,12 +91,11 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
                 component={RouterLink}
                 sx={{ textAlign: 'center', textDecoration: 'none', color: theme.palette.success.main }}
               >
-                {isProduction() ? (
-                  <Typography variant="h3">IntraNet</Typography>
-                ) : (
-                  <Typography variant="h5">IntraNet - Teste</Typography>
-                )}
-                <Typography variant="subtitle2" sx={{ mt: isProduction() ? -1 : 0 }}>
+                {(ambiente === 'local' && <Typography variant="h5">IntraNet - Local</Typography>) ||
+                  (ambiente === 'teste' && <Typography variant="h5">IntraNet - Teste</Typography>) || (
+                    <Typography variant="h3">IntraNet</Typography>
+                  )}
+                <Typography variant="subtitle2" sx={{ mt: ambiente === 'teste' || ambiente === 'local' ? 0 : -1 }}>
                   DIGITALDOCS
                 </Typography>
               </Typography>

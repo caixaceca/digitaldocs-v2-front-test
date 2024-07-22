@@ -89,8 +89,6 @@ export default function TableDetalhes({ id, item }) {
   });
   const isNotFound = !dataFiltered.length;
 
-  console.log(dataFiltered);
-
   return (
     <Box sx={{ p: 1 }}>
       <SearchToolbarSimple filter={filter} setFilter={setFilter} />

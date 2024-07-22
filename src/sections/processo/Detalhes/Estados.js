@@ -3,11 +3,13 @@ import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
+import { getFile } from '../../../utils/getFile';
 import { newLineText, baralharString } from '../../../utils/normalizeText';
 import { pertencoEstadoId, findColaboradores, temNomeacao } from '../../../utils/validarAcesso';
 import { padraoDate, ptDate, ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
@@ -15,11 +17,16 @@ import { padraoDate, ptDate, ptDateTime, fDistance, dataMaior } from '../../../u
 import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { selectItem, closeModal } from '../../../redux/slices/digitaldocs';
+import { getAnexo, selectItem, closeModal } from '../../../redux/slices/digitaldocs';
 // components
+import Label from '../../../components/Label';
+import { Criado } from '../../../components/Panel';
+import MyAvatar from '../../../components/MyAvatar';
 import { DefaultAction } from '../../../components/Actions';
-import { ColaboradorInfo, Criado } from '../../../components/Panel';
+// guards
+import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
+import { AnexoItem } from './Anexos';
 import { Abandonar, ParecerForm, AtribuirForm } from '../form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
@@ -29,7 +36,7 @@ Estados.propTypes = { handleAceitar: PropTypes.func };
 export default function Estados({ handleAceitar }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { cc, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, colaboradoresEstado, isAdmin } = useSelector((state) => state.parametrizacao);
   const isResponsavel = temNomeacao(cc) || isAdmin;
@@ -51,11 +58,19 @@ export default function Estados({ handleAceitar }) {
     setAccord(isExpanded ? panel : false);
   };
 
+  const viewAnexo = (anexo) => {
+    dispatch(getAnexo('fileDownload', { mail, perfilId: cc?.perfil_id, anexo }));
+  };
+
   return (
     <Box sx={{ pb: { xs: 1, sm: 2 } }}>
       {applySort(processo?.estados, getComparator('desc', 'id')).map((row) => {
-        const criador = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+        const anexosAtivos = row?.anexos?.filter((item) => item?.ativo);
+        const anexosInativos = row?.anexos?.filter((item) => !item?.ativo);
         const afeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+        const criador = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+        const temParecer = row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false);
+
         return (
           <Stack key={row?.id} sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
             <Box sx={{ position: 'absolute', right: 15, p: 2 }}>
@@ -75,7 +90,7 @@ export default function Estados({ handleAceitar }) {
                     )}
                     {row?._lock && row?.perfil_id === cc?.perfil_id && (
                       <>
-                        {row?.parecer ? (
+                        {temParecer ? (
                           <DefaultAction label="EDITAR" color="warning" handleClick={() => handleEditar(row)} />
                         ) : (
                           <DefaultAction label="Adicionar" handleClick={() => handleEditar(row)} />
@@ -99,31 +114,17 @@ export default function Estados({ handleAceitar }) {
               <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
                 <AccordionSummary sx={{ minHeight: '65px !important' }}>
                   <Stack>
-                    <Typography variant="subtitle1">{row?.estado}</Typography>
-                    {!!row?.parecer_data_limite && (
-                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Data limite:
-                        </Typography>
-                        <Typography variant="caption">{ptDate(row?.parecer_data_limite)}</Typography>
-                        {!row?.parecer && (
-                          <Criado
-                            caption
-                            tipo="time"
-                            value={
-                              dataMaior(row?.parecer_data_limite, padraoDate(new Date()))
-                                ? fDistance(new Date(), row?.parecer_data_limite)
-                                : `${fDistance(row?.parecer_data_limite, new Date())} (Atrasado)`
-                            }
-                            sx={{
-                              color: dataMaior(row?.parecer_data_limite, padraoDate(new Date()))
-                                ? 'success.main'
-                                : 'error.main',
-                            }}
-                          />
-                        )}
-                      </Stack>
-                    )}
+                    <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
+                      <Typography variant="subtitle1" sx={{ pr: 1 }}>
+                        {row?.estado}
+                      </Typography>
+                      {temParecer && (
+                        <Label color={row?.parecer_favoravel ? 'success' : 'error'}>
+                          {row?.parecer_favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
+                        </Label>
+                      )}
+                    </Stack>
+                    {!!row?.parecer_data_limite && !temParecer && <DataLimite data1={row?.parecer_data_limite} />}
                     {afeto && (
                       <Typography sx={{ typography: 'caption', color: 'info.main' }}>
                         {row?._lock ? '' : 'Este processo foi tribuído a '}
@@ -136,22 +137,60 @@ export default function Estados({ handleAceitar }) {
                   </Stack>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Stack sx={{ p: { sm: 1 } }}>
-                    {row?.parecer ? (
-                      <>
-                        {criador && (
-                          <ColaboradorInfo
-                            foto={criador?.foto_disk}
-                            nome={`${criador?.perfil?.displayName} (${criador?.uo?.label})`}
-                            label={row?.data_parecer ? `Data parecer: ${ptDateTime(row?.data_parecer)}` : ''}
+                  <Stack sx={{ pt: 1 }}>
+                    {temParecer ? (
+                      <Stack direction="row" spacing={1.5}>
+                        {!!criador && (
+                          <MyAvatar
+                            alt={criador?.perfil?.displayName}
+                            src={getFile('colaborador', criador?.foto_disk)}
                           />
                         )}
-                        {row?.parecer_obs && (
-                          <Typography sx={{ my: 2, mx: 0.5, textAlign: 'justify' }}>
-                            {newLineText(row.parecer_obs)}
-                          </Typography>
-                        )}
-                      </>
+                        <Stack>
+                          {!!criador && (
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                              <Typography noWrap variant="subtitle2">
+                                {criador?.perfil?.displayName}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                ({criador?.uo?.label})
+                              </Typography>
+                            </Stack>
+                          )}
+                          {!!row?.parecer_em && (
+                            <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap" spacing={0.5}>
+                              <DataLimite data1={row?.parecer_em} parecer />
+                              {!!row?.parecer_data_limite && (
+                                <Stack direction="row">
+                                  [<DataLimite data1={row?.parecer_data_limite} data2={row?.parecer_em} />]
+                                </Stack>
+                              )}
+                            </Stack>
+                          )}
+                          {row?.observacao && (
+                            <Typography sx={{ textAlign: 'justify', pt: 1 }}>{newLineText(row.observacao)}</Typography>
+                          )}
+                          {anexosAtivos?.length > 0 && (
+                            <Stack spacing={0.75} direction="column" sx={{ mt: 1.5 }} alignItems="center">
+                              {anexosAtivos?.map((item) => (
+                                <AnexoItem parecer anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
+                              ))}
+                            </Stack>
+                          )}
+                          {anexosInativos?.length > 0 && (
+                            <RoleBasedGuard roles={['Todo-111']}>
+                              <Divider sx={{ mt: 1 }}>
+                                <Typography variant="subtitle1">Anexos eliminados</Typography>
+                              </Divider>
+                              <Stack direction="column" alignItems="center" spacing={0.75}>
+                                {anexosInativos?.map((item) => (
+                                  <AnexoItem eliminado anexo={item} key={item?.anexo} viewAnexo={viewAnexo} />
+                                ))}
+                              </Stack>
+                            </RoleBasedGuard>
+                          )}
+                        </Stack>
+                      </Stack>
                     ) : (
                       <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
                         Ainda não foi adicionado o parecer...
@@ -166,5 +205,32 @@ export default function Estados({ handleAceitar }) {
       })}
       <ParecerForm open={isOpenModal} onCancel={handleClose} processoId={processo?.id} estado />
     </Box>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DataLimite.propTypes = { data1: PropTypes.string, data2: PropTypes.string, parecer: PropTypes.bool };
+
+function DataLimite({ data1, data2 = '', parecer = false }) {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
+      <Typography variant={parecer ? 'body2' : 'caption'} sx={{ color: 'text.secondary' }}>
+        Data {parecer ? 'parecer' : 'limite'}:
+      </Typography>
+      <Typography variant={parecer ? 'body2' : 'caption'}>{parecer ? ptDateTime(data1) : ptDate(data1)}</Typography>
+      {!parecer && (
+        <Criado
+          caption
+          tipo="time"
+          value={
+            dataMaior(data1, padraoDate(data2 || new Date()))
+              ? fDistance(data2 || new Date(), data1)
+              : `${fDistance(data1, data2 || new Date())} Atrasado`
+          }
+          sx={{ color: dataMaior(data1, padraoDate(data2 || new Date())) ? 'success.main' : 'error.main' }}
+        />
+      )}
+    </Stack>
   );
 }

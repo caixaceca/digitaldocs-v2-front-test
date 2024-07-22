@@ -40,7 +40,6 @@ import {
   updateItem,
   deleteItem,
   closeModal,
-  selectAnexo,
   closeModalAnexo,
 } from '../../../redux/slices/digitaldocs';
 // hooks
@@ -781,6 +780,7 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
   const { enqueueSnackbar } = useSnackbar();
   const { mail, cc } = useSelector((state) => state.intranet);
   const { selectedItem, selectedAnexoId, isOpenModalAnexo, isSaving } = useSelector((state) => state.digitaldocs);
+  const anexosAtivos = selectedItem?.anexos?.filter((row) => row?.ativo);
 
   const formSchema = Yup.object().shape({
     parecer: Yup.string().required('Parecer não pode ficar vazio'),
@@ -790,9 +790,12 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
   const defaultValues = useMemo(
     () => ({
       anexos: [],
-      parecer: selectedItem?.parecer || null,
       validado: selectedItem?.validado || false,
       observacao: selectedItem?.observacao || '',
+      parecer:
+        (selectedItem?.parecer_favoravel === true && 'Favorável') ||
+        (selectedItem?.parecer_favoravel === false && 'Não favorável') ||
+        null,
     }),
     [selectedItem]
   );
@@ -812,17 +815,17 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
     try {
       const formData = new FormData();
       if (estado) {
-        formData.append('estado_id ', selectedItem.id);
-        formData.append('observacao', values.observacao);
-        formData.append('parecer_favoravel', values.parecer === 'Favorável');
-        values?.anexos?.forEach((row) => {
+        await formData.append('observacao', values.observacao);
+        await formData.append('estado_id ', selectedItem.estado_id);
+        await formData.append('parecer_favoravel', values.parecer === 'Favorável');
+        await values?.anexos?.forEach((row) => {
           formData.append('anexos', row);
         });
       } else {
-        formData.append('validado', values?.validado);
-        formData.append('descritivo', values.observacao);
-        formData.append('parecer_favoravel', values.parecer === 'Favorável');
-        values?.anexos?.forEach((row) => {
+        await formData.append('validado', values?.validado);
+        await formData.append('descritivo', values.observacao);
+        await formData.append('parecer_favoravel', values.parecer === 'Favorável');
+        await values?.anexos?.forEach((row) => {
           formData.append('anexos', row);
         });
       }
@@ -842,10 +845,6 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
 
   const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
 
-  const handleEliminar = (id) => {
-    dispatch(selectAnexo(id));
-  };
-
   const cancelEliminar = () => {
     dispatch(closeModalAnexo());
   };
@@ -854,6 +853,7 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
     dispatch(
       deleteItem('anexoParecer', {
         mail,
+        processoId,
         msg: 'Anexo eliminado',
         perfilId: cc?.perfil_id,
         id: Number(selectedAnexoId),
@@ -864,10 +864,10 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>Parecer: {selectedItem?.nome || selectedItem?.estado}</DialogTitle>
+      <DialogTitle sx={{ pb: 2 }}>Parecer: {selectedItem?.nome || selectedItem?.estado}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
+          <Grid container spacing={3} sx={{ pt: 1 }}>
             <Grid item xs={12} sm={estado ? 12 : 6}>
               <RHFAutocompleteSimple name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
             </Grid>
@@ -881,13 +881,8 @@ export function ParecerForm({ open, onCancel, processoId, estado = false }) {
             </Grid>
             <Grid item xs={12}>
               <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
-              {selectedItem?.anexos?.filter((row) => row?.ativo)?.length > 0 && (
-                <AnexosExistente
-                  onOpen={handleEliminar}
-                  anexos={selectedItem?.anexos
-                    ?.filter((item) => item?.ativo)
-                    ?.map((row) => ({ ...row, name: row?.nome }))}
-                />
+              {anexosAtivos?.length > 0 && (
+                <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} />
               )}
             </Grid>
           </Grid>

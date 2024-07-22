@@ -128,7 +128,7 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
           values.entidades.map((row) => row?.numero)
         );
       }
-      values?.anexos?.forEach((row) => {
+      await values?.anexos?.forEach((row) => {
         formData.append('anexos', row);
       });
 

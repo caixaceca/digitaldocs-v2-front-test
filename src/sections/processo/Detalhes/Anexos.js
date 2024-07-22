@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
@@ -14,8 +14,8 @@ import { findColaborador } from '../../../utils/normalizeText';
 import { ptTime, ptDate, ptDateTime } from '../../../utils/formatTime';
 import { getFileThumb, canPreview } from '../../../utils/getFileFormat';
 // redux
+import { getAnexo } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, selectFile } from '../../../redux/slices/digitaldocs';
 // components
 import { Criado } from '../../../components/Panel';
 import { SearchNotFound } from '../../../components/table';
@@ -42,41 +42,26 @@ Anexos.propTypes = { anexos: PropTypes.array };
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
-  const { fileDownload, filePreview, isLoadingAnexo, isLoadingP, processo } = useSelector((state) => state.digitaldocs);
-  const { mail } = useSelector((state) => state.intranet);
-  const anexosAtivos = anexos?.filter((row) => row.ativo && row?.anexo !== filePreview?.anexo);
-  const anexosInativos = anexos?.filter((row) => !row.ativo && row?.anexo !== filePreview?.anexo);
-
-  useEffect(() => {
-    if (fileDownload?.blob) {
-      const link = document.createElement('a');
-      link.download = fileDownload?.nome;
-      link.href = window.URL.createObjectURL(fileDownload?.blob);
-      link.click();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileDownload?.blob]);
+  const { mail, cc } = useSelector((state) => state.intranet);
+  const { filePreview, isLoadingAnexo, isLoadingP, processo } = useSelector((state) => state.digitaldocs);
+  const anexosAtivos = useMemo(
+    () => anexos?.filter((row) => row.ativo && row?.anexo !== filePreview?.anexo),
+    [anexos, filePreview?.anexo]
+  );
+  const anexosInativos = useMemo(
+    () => anexos?.filter((row) => !row.ativo && row?.anexo !== filePreview?.anexo),
+    [anexos, filePreview?.anexo]
+  );
 
   const viewAnexo = (anexo) => {
     dispatch(
-      selectFile({
-        item: canPreview(anexo) ? 'infoPreview' : 'infoDownload',
-        dados: { ...anexo, tipo: canPreview(anexo) },
+      getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', {
+        mail,
+        perfilId: cc?.perfil_id,
+        anexo: { ...anexo, tipo: canPreview(anexo) },
       })
     );
   };
-
-  useEffect(() => {
-    if (filePreview?.anexo && !filePreview?.url) {
-      dispatch(getAnexo('filePreview', { mail, anexo: filePreview }));
-    }
-  }, [dispatch, mail, filePreview]);
-
-  useEffect(() => {
-    if (fileDownload?.anexo && !fileDownload?.blob) {
-      dispatch(getAnexo('fileDownload', { mail, anexo: fileDownload }));
-    }
-  }, [dispatch, mail, fileDownload]);
 
   return (
     <>
@@ -105,20 +90,24 @@ export default function Anexos({ anexos }) {
       <Stack id="anexos" sx={{ mt: 1 }}>
         {anexosPorData(anexosAtivos)?.map((row) => (
           <Stack key={row?.data} sx={{ pb: 1 }}>
-            <Divider sx={{ pt: 0.5, px: 3 }}>{row?.data}</Divider>
-            {row?.anexos?.map((row) => (
-              <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
-            ))}
+            <Divider sx={{ py: 0.5, px: 3 }}>{row?.data}</Divider>
+            <Stack direction="column" alignItems="center" spacing={0.75}>
+              {row?.anexos?.map((row) => (
+                <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
+              ))}
+            </Stack>
           </Stack>
         ))}
         {anexosInativos?.length > 0 && (
           <RoleBasedGuard roles={['Todo-111']}>
-            <Divider sx={{ mt: 1 }}>
+            <Divider sx={{ mt: 1, pb: 0.5 }}>
               <Typography variant="subtitle1">Anexos eliminados</Typography>
             </Divider>
-            {anexosInativos?.map((row) => (
-              <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
-            ))}
+            <Stack direction="column" alignItems="center" spacing={0.75}>
+              {anexosInativos?.map((row) => (
+                <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
+              ))}
+            </Stack>
           </RoleBasedGuard>
         )}
         {((emailCheck(mail, 'vc.axiac@arove.ordnavi') && processo?.origem_id) ||
@@ -151,7 +140,6 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
       onClick={() => viewAnexo(anexo)}
       startIcon={getFileThumb(false, null, anexo?.nome)}
       sx={{
-        mt: 0.75,
         boxShadow: 'none',
         textAlign: 'left',
         marginTop: preview && 0,
@@ -163,6 +151,7 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
       }}
     >
       <ListItemText
+        primaryTypographyProps={{ variant: 'subtitle2' }}
         primary={`${anexo?.nome} ${preview ? '(Em pré-vizualização)' : ''}`}
         secondary={
           <Stack
@@ -185,7 +174,6 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
             )}
           </Stack>
         }
-        primaryTypographyProps={{ variant: 'subtitle2' }}
       />
     </Button>
   );

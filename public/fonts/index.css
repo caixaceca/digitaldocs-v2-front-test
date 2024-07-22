@@ -1,36 +1,12 @@
 @font-face {
   font-family: 'Neo Sans Std';
-  font-weight: lighter;
-  font-style: normal;
-  src: local('Neo Sans Std'), url('neo-sans-std-light.otf') format('opentype');
-}
-@font-face {
-  font-family: 'Neo Sans Std';
-  font-weight: lighter;
-  font-style: italic;
-  src: local('Neo Sans Std'), url('neo-sans-std-light-italic.otf') format('opentype');
-}
-@font-face {
-  font-family: 'Neo Sans Std';
   font-weight: normal;
   font-style: normal;
-  src: local('Neo Sans Std'), url('neo-sans-std-regular.otf') format('opentype');
-}
-@font-face {
-  font-family: 'Neo Sans Std';
-  font-weight: normal;
-  font-style: italic;
-  src: local('Neo Sans Std'), url('neo-sans-std-regular-italic.otf') format('opentype');
+  src: local('Neo Sans Std'), url('neo-sans-std.otf') format('opentype');
 }
 @font-face {
   font-family: 'Neo Sans Std';
   font-weight: bold;
   font-style: normal;
   src: local('Neo Sans Std'), url('neo-sans-std-bold.otf') format('opentype');
-}
-@font-face {
-  font-family: 'Neo Sans Std';
-  font-weight: bold;
-  font-style: italic;
-  src: local('Neo Sans Std'), url('neo-sans-std-bold-italic.otf') format('opentype');
 }
