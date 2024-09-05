@@ -38,7 +38,7 @@ EncaminharForm.propTypes = {
 export function EncaminharForm({ open, destinos, onCancel, dev }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { pedidoCC, isSaving } = useSelector((state) => state.cc);
 
   const formSchema = Yup.object().shape({ acao: Yup.mixed().required('Introduza o destino') });
@@ -60,7 +60,7 @@ export function EncaminharForm({ open, destinos, onCancel, dev }) {
     try {
       const formData = [
         {
-          perfilID: cc?.perfil_id,
+          perfilID: perfilId,
           modo: values?.acao?.modo,
           observacao: values.observacao,
           transicao_id: values?.acao?.id,
@@ -71,8 +71,8 @@ export function EncaminharForm({ open, destinos, onCancel, dev }) {
       dispatch(
         createItemCC('encaminhar', JSON.stringify(formData), {
           mail,
+          perfilId,
           id: pedidoCC.id,
-          perfilId: cc?.perfil_id,
           msg: 'Processo encaminhado',
           fluxoId: pedidoCC?.fluxo_id,
         })
@@ -224,17 +224,17 @@ ArquivarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
 export function ArquivarForm({ open, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
   const { pedidoCC, isSaving } = useSelector((state) => state.cc);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
 
   const defaultValues = useMemo(
     () => ({
       observacao: '',
-      perfilID: cc?.perfil?.id,
+      perfilID: perfilId,
       fluxoID: pedidoCC?.fluxo_id,
       estadoID: pedidoCC?.ultimo_estado_id,
     }),
-    [cc?.perfil?.id, pedidoCC?.fluxo_id, pedidoCC?.ultimo_estado_id]
+    [perfilId, pedidoCC?.fluxo_id, pedidoCC?.ultimo_estado_id]
   );
 
   const methods = useForm({ defaultValues });

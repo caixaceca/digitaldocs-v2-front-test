@@ -7,8 +7,8 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { ptDateTime, fYear } from '../../utils/formatTime';
-import { entidadesParse, noDados, setDataUtil, setItemValue, baralharString } from '../../utils/formatText';
+import { ptDateTime, fYear, setDataUtil } from '../../utils/formatTime';
+import { entidadesParse, noDados, setItemValue, baralharString } from '../../utils/formatText';
 // components
 import { Criado } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
@@ -46,32 +46,30 @@ export function UoData({
 }) {
   return (
     <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
-      {uosList?.length > 0 && (
-        <Autocomplete
-          fullWidth
-          size="small"
-          options={uosList}
-          value={uo || null}
-          disableClearable={!cartoes}
-          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          onChange={(event, newValue) => {
-            if (cartoes) {
-              setSelected([]);
-            }
-            setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true);
-          }}
-          renderInput={(params) => (
-            <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
-          )}
-        />
-      )}
+      <Autocomplete
+        fullWidth
+        size="small"
+        options={uosList}
+        value={uo || null}
+        disableClearable={!cartoes}
+        isOptionEqualToValue={(option, value) => option?.id === value?.id}
+        onChange={(event, newValue) => {
+          if (cartoes) {
+            setSelected([]);
+          }
+          setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true);
+        }}
+        renderInput={(params) => (
+          <TextField {...params} label={cartoes ? 'Balcão' : 'Agência/U.O'} sx={{ width: { md: 200 } }} />
+        )}
+      />
       {entradas || cartoes ? (
         <Stack direction="row" alignItems="center" spacing={1}>
           <DatePicker
-            disableFuture
             value={datai}
             label="Data inicial"
-            slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
+            maxDate={new Date()}
+            slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 155 } } }}
             onChange={(newValue) => {
               if (cartoes) {
                 setSelected([]);
@@ -80,12 +78,12 @@ export function UoData({
             }}
           />
           <DatePicker
-            disableFuture
             value={dataf}
             minDate={datai}
             disabled={!datai}
             label="Data final"
-            slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
+            maxDate={new Date()}
+            slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 155 } } }}
             onChange={(newValue) => {
               if (cartoes) {
                 setSelected([]);
@@ -98,6 +96,7 @@ export function UoData({
         <DatePicker
           label="Data"
           value={data}
+          maxDate={new Date()}
           onChange={(newValue) => setDataUtil(newValue, setData, 'dataC', '', '', '')}
           slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 170 } } }}
         />

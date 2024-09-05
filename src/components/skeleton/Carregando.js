@@ -42,7 +42,7 @@ export function PieChart() {
 
 export function BarChart() {
   return (
-    <Stack direction="row" alignItems="end" sx={{ py: 10 }}>
+    <Stack direction="row" alignItems="end" justifyContent="center" sx={{ py: 10 }}>
       <Skeleton variant="rectangular" sx={{ width: 40, height: 100, borderRadius: 0.75, mr: 2 }} />
       <Skeleton variant="rectangular" sx={{ width: 40, height: 160, borderRadius: 0.75, mr: 2 }} />
       <Skeleton variant="rectangular" sx={{ width: 40, height: 200, borderRadius: 0.75, mr: 2 }} />
@@ -153,17 +153,13 @@ export function SkeletonProcesso() {
 SkeletonTable.propTypes = { column: PropTypes.number, row: PropTypes.number };
 
 export function SkeletonTable({ column, row }) {
-  return (
-    <>
-      {[...Array(row)].map((x, i) => (
-        <TableRow key={i}>
-          {[...Array(column)].map((z, y) => (
-            <TableCell key={y}>
-              <Skeleton variant="rectangular" sx={{ height: 25, borderRadius: 1, transform: 'scale(1)' }} />
-            </TableCell>
-          ))}
-        </TableRow>
+  return [...Array(row)].map((x, i) => (
+    <TableRow key={i}>
+      {[...Array(column)].map((z, y) => (
+        <TableCell key={y} sx={{ minWidth: 80 }}>
+          <Skeleton variant="rectangular" sx={{ height: 25, borderRadius: 1, transform: 'scale(1)' }} />
+        </TableCell>
       ))}
-    </>
-  );
+    </TableRow>
+  ));
 }

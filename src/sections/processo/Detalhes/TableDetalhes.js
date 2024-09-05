@@ -65,13 +65,13 @@ export default function TableDetalhes({ id, item }) {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { processo, isLoading } = useSelector((state) => state.digitaldocs);
-  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (mail && id && item && cc?.perfil_id) {
-      dispatch(getAll(item, { mail, id, perfilId: cc?.perfil_id }));
+    if (mail && id && item && perfilId) {
+      dispatch(getAll(item, { mail, id, perfilId }));
     }
-  }, [dispatch, mail, item, cc?.perfil_id, id]);
+  }, [dispatch, mail, item, perfilId, id]);
 
   useEffect(() => {
     setPage(0);
@@ -151,20 +151,22 @@ export default function TableDetalhes({ id, item }) {
                           <TableCell>{row?.motivo}</TableCell>
                           <TableCell>{row?.observacao || noDados(true)}</TableCell>
                           <TableCell>
-                            {(row?.data_pendente &&
-                              row?.data_libertado &&
-                              fDistance(row?.data_pendente, row?.data_libertado)) ||
-                              (row?.data_pendente && !row?.data_libertado && fToNow(row?.data_pendente)) ||
+                            {(row?.data_pendente && row?.data_libertado && (
+                              <Criado caption tipo="time" value={fDistance(row?.data_pendente, row?.data_libertado)} />
+                            )) ||
+                              (row?.data_pendente && !row?.data_libertado && (
+                                <Criado caption tipo="time" value={fToNow(row?.data_pendente)} />
+                              )) ||
                               noDados(true)}
                             {row?.data_libertado && (
                               <Criado caption tipo="data" value={ptDateTime(row?.data_libertado)} />
                             )}
                           </TableCell>
                           <TableCell>
+                            {row?.nome && <Criado caption tipo="user" value={row?.nome} baralhar />}
                             {row?.data_pendente && (
                               <Criado caption tipo="data" value={ptDateTime(row?.data_pendente)} />
                             )}
-                            {row?.nome && <Criado caption tipo="user" value={row?.nome} baralhar />}
                           </TableCell>
                         </>
                       ))}

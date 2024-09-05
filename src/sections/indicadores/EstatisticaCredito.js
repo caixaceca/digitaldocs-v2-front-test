@@ -25,14 +25,15 @@ import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturn
 import { format, add } from 'date-fns';
 import { bgGradient } from '../../utils/cssStyles';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { ptDate, fMonthYear } from '../../utils/formatTime';
+import { setItemValue } from '../../utils/formatText';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
-import { dataValido, setDataUtil, setItemValue } from '../../utils/formatText';
+import { ptDate, fMonthYear, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/indicadores';
+import { getIndicadores, resetItem } from '../../redux/slices/indicadores';
 // components
 import { BoxMask } from '../../components/Panel';
+import { RHFDateIF } from '../../components/hook-form';
 import { ExportExcel } from '../../components/Actions';
 import { TableSearchNotFound } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -51,19 +52,13 @@ const borderStyle = { borderTop: '4px solid transparent', borderColor: 'backgrou
 
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
-  const [data, setData] = useState(
-    localStorage.getItem('dataEst') ? add(new Date(localStorage.getItem('dataEst')), { hours: 2 }) : new Date()
-  );
+  const [data, setData] = useState(getDataLS('dataEst', new Date()));
+  const [dataf, setDataf] = useState(getDataLS('dataFEst', new Date()));
   const [datai, setDatai] = useState(
-    localStorage.getItem('dataIEst')
-      ? add(new Date(localStorage.getItem('dataIEst')), { hours: 2 })
-      : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-  );
-  const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFEst') ? add(new Date(localStorage.getItem('dataFEst')), { hours: 2 }) : new Date()
+    getDataLS('dataIEst', new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   );
   const uosList = useMemo(
     () =>
@@ -76,7 +71,6 @@ export default function EstatisticaCredito() {
       ),
     [cc, isAdmin, meusAmbientes, uos]
   );
-  const perfilId = cc?.perfil_id;
   const [uo, setUo] = useState(null);
 
   useEffect(() => {
@@ -103,6 +97,7 @@ export default function EstatisticaCredito() {
   };
 
   useEffect(() => {
+    dispatch(resetItem('estatisticaCredito'));
     if (mail && perfilId && uo?.id && data && currentTab !== 'Resumo') {
       const mes = format(add(data, { hours: 2 }), 'M');
       const ano = format(add(data, { hours: 2 }), 'yyyy');
@@ -111,9 +106,10 @@ export default function EstatisticaCredito() {
   }, [dispatch, currentTab, perfilId, data, uo, mail]);
 
   useEffect(() => {
+    dispatch(resetItem('estatisticaCredito'));
     const dataI = dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '';
     const dataF = dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '';
-    if (mail && uo?.id && dataI && currentTab === 'Resumo') {
+    if (mail && uo?.id && currentTab === 'Resumo') {
       if (uo?.id === -1 || uo?.id === -2 || uo?.id === -3) {
         dispatch(getIndicadores('resumoEstCredCaixa', { mail, dataI, dataF, uoID: uo?.label }));
       } else {
@@ -125,9 +121,8 @@ export default function EstatisticaCredito() {
   return (
     <>
       <HeaderBreadcrumbs
-        links={[{ name: '' }]}
+        sx={{ px: 1 }}
         heading="Estatística de crédito"
-        sx={{ color: 'text.secondary', px: 1 }}
         action={
           <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
             <Autocomplete
@@ -140,26 +135,18 @@ export default function EstatisticaCredito() {
               isOptionEqualToValue={(option, value) => option?.id === value?.id}
               renderInput={(params) => <TextField {...params} fullWidth label="Agência/U.O" />}
               options={[{ id: -1, label: 'Caixa' }, { id: -2, label: 'DCN' }, { id: -3, label: 'DCS' }, ...uosList]}
-              onChange={(event, newValue) => setItemValue(newValue, setUo, 'tuoEst')}
+              onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoEst', true)}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
               {currentTab === 'Resumo' ? (
-                <>
-                  <DatePicker
-                    value={datai}
-                    label="Data inicial"
-                    slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIEst', setDataf, 'dataFEst', dataf)}
-                  />
-                  <DatePicker
-                    value={dataf}
-                    minDate={datai}
-                    disabled={!datai}
-                    label="Data final"
-                    slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFEst', '', '', '')}
-                  />
-                </>
+                <RHFDateIF
+                  datai={datai}
+                  dataf={dataf}
+                  labeli="dataIEst"
+                  labelf="dataFEst"
+                  setDatai={setDatai}
+                  setDataf={setDataf}
+                />
               ) : (
                 <DatePicker
                   label="Data"
@@ -195,31 +182,12 @@ export default function EstatisticaCredito() {
 export function Totais() {
   const { isLoading, estatisticaCredito } = useSelector((state) => state.indicadores);
 
-  // Particular
-  const empConst = dadosResumo(estatisticaCredito, 'Empresa', 'Construção', false);
-  const empTeso = dadosResumo(estatisticaCredito, 'Empresa', 'Tesouraria', false);
-  const empInvest = dadosResumo(estatisticaCredito, 'Empresa', 'Investimento', false);
-  // Particular
-  const partHabit = dadosResumo(estatisticaCredito, 'Particular', 'Habitação', false);
-  const partCredi = dadosResumo(estatisticaCredito, 'Particular', 'CrediCaixa', false);
-  const partOutros = dadosResumo(estatisticaCredito, 'Particular', 'Outros', false);
-  // Particular
-  const piTeso = dadosResumo(estatisticaCredito, 'Produtor Individual', 'Tesouraria', false);
-  const piInvest = dadosResumo(estatisticaCredito, 'Produtor Individual', 'Investimento', false);
-  const piMicro = dadosResumo(estatisticaCredito, 'Produtor Individual', 'Micro-Crédito', false);
-  // Entidades Públicas
-  const entPub = dadosResumo(estatisticaCredito, 'Entidade Pública', '', true);
-  // Garantias Bancárias
-  const garantias = dadosResumo(estatisticaCredito, '', 'Garantia Bancária', true);
-
   return (
     <Grid container spacing={3}>
       {isLoading ? (
         <Grid item xs={12}>
           <Card>
-            <Stack direction="row" justifyContent="center">
-              <BarChart />
-            </Stack>
+            <BarChart />
           </Card>
         </Grid>
       ) : (
@@ -286,72 +254,21 @@ export function Totais() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* Empresa */}
-                    <TableRow hover sx={{ ...borderStyle }}>
-                      <TableCell rowSpan={3} sx={{ ...linhaStyle }}>
-                        Empresa
-                      </TableCell>
-                      <TableCell sx={{ ...frResumoStyle }}>Construção</TableCell>
-                      <TableRowTotais dados={empConst} />
-                    </TableRow>
-                    <TableRow hover>
-                      <TableCell sx={{ ...frResumoStyle }}>Tesouraria</TableCell>
-                      <TableRowTotais dados={empTeso} />
-                    </TableRow>
-                    <TableRow hover>
-                      <TableCell sx={{ ...frResumoStyle }}>Investimento</TableCell>
-                      <TableRowTotais dados={empInvest} />
-                    </TableRow>
-                    {/* Particular */}
-                    <TableRow hover sx={{ ...borderStyle }}>
-                      <TableCell rowSpan={3} sx={{ ...linhaStyle }}>
-                        Particular
-                      </TableCell>
-                      <TableCell sx={{ ...frResumoStyle }}>Habitação</TableCell>
-                      <TableRowTotais dados={partHabit} />
-                    </TableRow>
-                    <TableRow hover>
-                      <TableCell sx={{ ...frResumoStyle }}>CrediCaixa</TableCell>
-                      <TableRowTotais dados={partCredi} />
-                    </TableRow>
-                    <TableRow hover>
-                      <TableCell sx={{ ...frResumoStyle }}>Outros</TableCell>
-                      <TableRowTotais dados={partOutros} />
-                    </TableRow>
-                    {/* Produtor Individual  */}
-                    <TableRow hover sx={{ ...borderStyle }}>
-                      <TableCell rowSpan={3} sx={{ ...linhaStyle }}>
-                        Produtor Individual
-                      </TableCell>
-                      <TableCell sx={{ ...frResumoStyle }}>Tesouraria</TableCell>
-                      <TableRowTotais dados={piTeso} />
-                    </TableRow>
-                    <TableRow hover>
-                      <TableCell sx={{ ...frResumoStyle }}>Investimento</TableCell>
-                      <TableRowTotais dados={piInvest} />
-                    </TableRow>
-                    <TableRow hover>
-                      <TableCell sx={{ ...frResumoStyle }}>Microcrédito</TableCell>
-                      <TableRowTotais dados={piMicro} />
-                    </TableRow>
-                    {/* Entidades Públicas  */}
-                    <TableRow hover sx={{ ...borderStyle }}>
-                      <TableCell sx={{ ...linhaStyle }}>Entidades Públicas</TableCell>
-                      <TableCell> </TableCell>
-                      <TableRowTotais dados={entPub} />
-                    </TableRow>
-                    {/* Garantias Bancárias  */}
-                    <TableRow hover sx={{ ...borderStyle }}>
-                      <TableCell sx={{ ...linhaStyle }}>Garantias Bancárias</TableCell>
-                      <TableCell> </TableCell>
-                      <TableRowTotais dados={garantias} />
-                    </TableRow>
+                    <TotaisLinha first segmento="Empresa" linha="Construção" dados={estatisticaCredito} />
+                    <TotaisLinha segmento="Empresa" linha="Tesouraria" dados={estatisticaCredito} />
+                    <TotaisLinha segmento="Empresa" linha="Investimento" dados={estatisticaCredito} />
+                    <TotaisLinha first segmento="Particular" linha="Habitação" dados={estatisticaCredito} />
+                    <TotaisLinha segmento="Particular" linha="CrediCaixa" dados={estatisticaCredito} />
+                    <TotaisLinha segmento="Particular" linha="Outros" dados={estatisticaCredito} />
+                    <TotaisLinha first segmento="Produtor Individual" linha="Tesouraria" dados={estatisticaCredito} />
+                    <TotaisLinha segmento="Produtor Individual" linha="Investimento" dados={estatisticaCredito} />
+                    <TotaisLinha segmento="Produtor Individual" linha="Microcrédito" dados={estatisticaCredito} />
+                    <TotaisLinha first segmento="Entidade Pública" dados={estatisticaCredito} />
+                    <TotaisLinha first segmento="Garantia Bancária" dados={estatisticaCredito} />
                   </TableBody>
                   <TableHead>
                     <TableRow sx={{ ...borderStyle }}>
-                      <TableCell colSpan={2} align="right">
-                        TOTAL ACUMULADO
-                      </TableCell>
+                      <TableCell colSpan={2}>TOTAL ACUMULADO</TableCell>
                       <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.entrada, 'total'))}</TableCell>
                       <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.entrada, 'montantes'))}</TableCell>
                       <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.aprovado, 'total'))}</TableCell>
@@ -804,10 +721,10 @@ function FirstRowLinha({ linha, dados, length, from }) {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 DadosCell.propTypes = {
-  dados: PropTypes.object,
+  total: PropTypes.bool,
   from: PropTypes.string,
   index: PropTypes.number,
-  total: PropTypes.bool,
+  dados: PropTypes.object,
 };
 
 function DadosCell({ dados, from, index = 1, total }) {
@@ -928,6 +845,29 @@ function CardResumo({ total, label, qtd }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+TotaisLinha.propTypes = {
+  first: PropTypes.bool,
+  dados: PropTypes.array,
+  linha: PropTypes.string,
+  segmento: PropTypes.string,
+};
+
+function TotaisLinha({ first = false, segmento, linha = '', dados }) {
+  return (
+    <TableRow hover sx={first ? borderStyle : null}>
+      {first && (
+        <TableCell rowSpan={linha ? 3 : 1} sx={{ ...linhaStyle }}>
+          {segmento}
+        </TableCell>
+      )}
+      <TableCell sx={{ ...frResumoStyle }}>{linha}</TableCell>
+      <TableRowTotais dados={dadosResumo(dados, segmento, linha, !linha)} />
+    </TableRow>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 TableRowTotais.propTypes = { dados: PropTypes.object };
 
 function TableRowTotais({ dados }) {
@@ -948,39 +888,18 @@ function TableRowTotais({ dados }) {
 // ----------------------------------------------------------------------
 
 function filterDados(dados) {
-  // Empresas
-  const empresaConstrucao = dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Construção');
-  const empresaTesouraria = dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Tesouraria');
-  const empresaInvestimento = dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Investimento');
-  // Particulares
-  const particularHabitacao = dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'Habitação');
-  const particularCrediCaixa = dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'CrediCaixa');
-  const particularOutros = dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'Outros');
-  // Produtores Individuais
-  const piTesouraria = dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Tesouraria');
-  const piInvestimento = dados?.filter(
-    (row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Investimento'
-  );
-  const piMicrocredito = dados?.filter(
-    (row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Micro-Crédito'
-  );
-  // Entidades Públicas
-  const entidadesPublicas = dados?.filter((row) => row?.segmento === 'Entidade Pública');
-  // Entidades Públicas
-  const garantiaBancaria = dados?.filter((row) => row?.linha === 'Garantia Bancária');
-
   return {
-    empresaConstrucao,
-    empresaTesouraria,
-    empresaInvestimento,
-    particularHabitacao,
-    particularCrediCaixa,
-    particularOutros,
-    piTesouraria,
-    piInvestimento,
-    piMicrocredito,
-    entidadesPublicas,
-    garantiaBancaria,
+    empresaConstrucao: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Construção'),
+    empresaTesouraria: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Tesouraria'),
+    empresaInvestimento: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Investimento'),
+    particularHabitacao: dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'Habitação'),
+    particularCrediCaixa: dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'CrediCaixa'),
+    particularOutros: dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'Outros'),
+    piTesouraria: dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Tesouraria'),
+    piInvestimento: dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Investimento'),
+    piMicrocredito: dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Micro-Crédito'),
+    entidadesPublicas: dados?.filter((row) => row?.segmento === 'Entidade Pública'),
+    garantiaBancaria: dados?.filter((row) => row?.linha === 'Garantia Bancária'),
   };
 }
 

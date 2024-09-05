@@ -6,7 +6,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { temNomeacao, pertencoEstadoId, findColaboradores, arquivarCC } from '../utils/validarAcesso';
+import { pertencoEstadoId, arquivarCC, gestorEstado } from '../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -15,7 +15,6 @@ import useSettings from '../hooks/useSettings';
 import { getComparator, applySort } from '../hooks/useTable';
 import useToggle, { useToggle1, useToggle2, useToggle3 } from '../hooks/useToggle';
 // redux
-import { selectItem } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromCC, updateItemCC } from '../redux/slices/cc';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
@@ -35,8 +34,8 @@ import {
   EntidadesGarantias,
 } from '../sections/credito-colaborador/Detalhes';
 import { Views, Transicoes } from '../sections/processo/Detalhes';
+import { Abandonar, ColocarPendente, Atribuir } from '../sections/processo/form/IntervencaoForm';
 import { EncaminharForm, ArquivarForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
-import { Abandonar, ColocarPendente, AtribuirForm } from '../sections/processo/form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -51,11 +50,9 @@ export default function CreditoColaborador() {
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
-  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { pedidoCC, done, error, isLoading, isSaving } = useSelector((state) => state.cc);
-  const { meusAmbientes, isGerente, isAdmin, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
-  const isResponsavel = temNomeacao(cc) || isGerente;
-  const colaboradoresList = findColaboradores(colaboradores, colaboradoresEstado);
   const destinosList = useMemo(
     () => ({
       seguimentos:
@@ -139,7 +136,17 @@ export default function CreditoColaborador() {
         ? [{ value: 'Responsabilidades', component: <TableDetalhes item="responsabilidades" /> }]
         : []),
       ...(pedidoCC && pedidoCC?.htransicoes?.length > 0
-        ? [{ value: 'Transições', component: <Transicoes transicoes={pedidoCC?.htransicoes} /> }]
+        ? [
+            {
+              value: 'Transições',
+              component: (
+                <Transicoes
+                  transicoes={pedidoCC?.htransicoes}
+                  assunto={`${pedidoCC?.assunto} - ${pedidoCC?.titular}`}
+                />
+              ),
+            },
+          ]
         : []),
       ...(pedidoCC
         ? [
@@ -159,10 +166,10 @@ export default function CreditoColaborador() {
   };
 
   useEffect(() => {
-    if (mail && id && cc?.perfil_id) {
-      dispatch(getFromCC('pedido cc', { id, perfilId: cc?.perfil_id, mail }));
+    if (mail && id && perfilId) {
+      dispatch(getFromCC('pedido cc', { id, perfilId, mail }));
     }
-  }, [dispatch, id, cc?.perfil_id, mail]);
+  }, [dispatch, id, perfilId, mail]);
 
   useEffect(() => {
     if (mail && pedidoCC?.id) {
@@ -171,16 +178,14 @@ export default function CreditoColaborador() {
   }, [dispatch, pedidoCC?.id, mail]);
 
   useEffect(() => {
-    if (mail && id && pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id) {
-      dispatch(getFromCC('destinos', { id, perfilId: cc?.perfil_id, mail }));
+    if (mail && id && pedidoCC?.preso && pedidoCC?.perfil_id === perfilId) {
+      dispatch(getFromCC('destinos', { id, perfilId, mail }));
     }
-  }, [dispatch, id, cc?.perfil_id, mail, pedidoCC?.preso, pedidoCC?.perfil_id]);
+  }, [dispatch, id, perfilId, mail, pedidoCC?.preso, pedidoCC?.perfil_id]);
 
   useEffect(() => {
-    if (mail && podeAtribuir() && pedidoCC?.ultimo_estado_id && cc?.perfil_id) {
-      dispatch(
-        getFromParametrizacao('colaboradoresEstado', { mail, id: pedidoCC?.ultimo_estado_id, perfilId: cc?.perfil_id })
-      );
+    if (mail && podeAtribuir() && pedidoCC?.ultimo_estado_id && perfilId) {
+      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, id: pedidoCC?.ultimo_estado_id, perfilId }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mail, dispatch, pedidoCC]);
@@ -189,12 +194,8 @@ export default function CreditoColaborador() {
     dispatch(
       updateItemCC(
         'aceitar',
-        JSON.stringify({
-          perfilID: cc?.perfil_id,
-          fluxoID: pedidoCC?.fluxo_id,
-          estadoID: pedidoCC?.ultimo_estado_id,
-        }),
-        { id, perfilId: cc?.perfil_id, mail, msg: 'Processo aceitado' }
+        JSON.stringify({ perfilID: perfilId, fluxoID: pedidoCC?.fluxo_id, estadoID: pedidoCC?.ultimo_estado_id }),
+        { id, perfilId, mail, msg: 'Processo aceitado' }
       )
     );
   };
@@ -203,26 +204,21 @@ export default function CreditoColaborador() {
     dispatch(
       updateItemCC(
         'resgatar',
-        JSON.stringify({
-          perfil_id: cc?.perfil_id,
-          fluxo_id: pedidoCC?.fluxo_id,
-          estado_id: pedidoCC?.ultimo_estado_id,
-        }),
-        { id: pedidoCC?.id, perfilId: cc?.perfil_id, mail, msg: 'Processo resgatado' }
+        JSON.stringify({ perfil_id: perfilId, fluxo_id: pedidoCC?.fluxo_id, estado_id: pedidoCC?.ultimo_estado_id }),
+        { id: pedidoCC?.id, perfilId, mail, msg: 'Processo resgatado' }
       )
     );
     onClose();
   };
 
-  const handlePendente = (item) => {
-    dispatch(selectItem(item));
-  };
-
   function podeAtribuir() {
     return (
-      !pedidoCC?.preso && ((pertencoEstadoId(meusAmbientes, pedidoCC?.ultimo_estado_id) && isResponsavel) || isAdmin)
+      !pedidoCC?.preso &&
+      pertencoEstadoId(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
+      gestorEstado(meusAmbientes, pedidoCC?.ultimo_estado_id)
     );
   }
+
   return (
     <Page title="Detalhes do pedido">
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -250,13 +246,13 @@ export default function CreditoColaborador() {
                 {!pedidoCC?.preso && pedidoCC?.ultimo_estado !== 'Arquivo' && (
                   <>
                     {pertencoEstadoId(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
-                      (!pedidoCC?.afeto || (pedidoCC?.afeto && pedidoCC?.estados?.[0]?.perfil_id === cc?.perfil_id)) &&
+                      (!pedidoCC?.afeto || (pedidoCC?.afeto && pedidoCC?.estados?.[0]?.perfil_id === perfilId)) &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
                         <DefaultAction label="ACEITAR" handleClick={handleAceitar} />
                       )}
                     {!pedidoCC?.pendente && pedidoCC?.estados?.length === 1 && (
                       <>
-                        <DefaultAction icon="resgatar" label="Resgatar" color="warning" handleClick={onOpen} />
+                        <DefaultAction label="RESGATAR" color="warning" handleClick={onOpen} />
                         <DialogConfirmar
                           open={open}
                           onClose={onClose}
@@ -272,11 +268,10 @@ export default function CreditoColaborador() {
                     {podeAtribuir() &&
                       pedidoCC?.estados?.length === 1 &&
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
-                        <AtribuirForm
-                          colaboradoresList={colaboradoresList}
+                        <Atribuir
                           dados={{
                             processoId: pedidoCC?.id,
-                            fluxoId: pedidoCC?.fluxoId,
+                            fluxoIdA: pedidoCC?.fluxoId,
                             estadoId: pedidoCC?.estado_final_id,
                             perfilId: pedidoCC?.estado_processo?.perfil_id,
                           }}
@@ -290,7 +285,7 @@ export default function CreditoColaborador() {
                     pareceres={pedidoCC?.estados?.[0]?.pareceres}
                   />
                 )}
-                {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id && (
+                {pedidoCC?.preso && pedidoCC?.perfil_id === perfilId && (
                   <>
                     {destinosList?.devolucoes?.length > 0 && (
                       <>
@@ -312,16 +307,8 @@ export default function CreditoColaborador() {
                     />
                     {!pedidoCC?.pendente &&
                       pedidoCC?.estados?.length === 1 &&
-                      pedidoCC?.estados?.[0]?.pareceres?.length === 0 && (
-                        <>
-                          <DefaultAction
-                            color="inherit"
-                            label="PENDENTE"
-                            handleClick={() => handlePendente(pedidoCC)}
-                          />
-                          <ColocarPendente />
-                        </>
-                      )}
+                      pedidoCC?.estados?.[0]?.pareceres?.length === 0 && <ColocarPendente />}
+
                     <UpdateItem handleClick={handleEdit} />
                     {arquivarCC(meusAmbientes, pedidoCC?.ultimo_estado_id) && (
                       <>

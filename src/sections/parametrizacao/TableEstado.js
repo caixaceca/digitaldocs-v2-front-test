@@ -71,7 +71,7 @@ export default function TableEstado({ tab }) {
   });
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(localStorage.getItem('filterEstado') || '');
-  const { fluxo, estados, isLoading } = useSelector((state) => state.parametrizacao);
+  const { fluxo, estados, isOpenModal, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     setPage(0);
@@ -95,6 +95,7 @@ export default function TableEstado({ tab }) {
   return (
     <>
       <HeaderBreadcrumbs
+        sx={{ px: 1 }}
         heading={tab === 'transicoes' ? 'Transições' : 'Estados'}
         links={[
           { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
@@ -104,12 +105,11 @@ export default function TableEstado({ tab }) {
         action={
           tab === 'transicoes' &&
           fluxo?.is_ativo && (
-            <RoleBasedGuard roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}>
+            <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
               <AddItem />
             </RoleBasedGuard>
           )
         }
-        sx={{ color: 'text.secondary', px: 1 }}
       />
       <Card sx={{ p: 1 }}>
         <SearchToolbarSimple item="filterEstado" filter={filter} setFilter={setFilter} />
@@ -148,10 +148,7 @@ export default function TableEstado({ tab }) {
                             <Checked check={row.is_paralelo} />
                           </TableCell>
                           <TableCell align="center" width={50}>
-                            <RoleBasedGuard
-                              hasContent
-                              roles={['transicao-110', 'transicao-111', 'Todo-110', 'Todo-111']}
-                            >
+                            <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
                               {fluxo?.is_ativo && <UpdateItem item="transicao" id={row?.id} />}
                             </RoleBasedGuard>
                           </TableCell>
@@ -190,7 +187,7 @@ export default function TableEstado({ tab }) {
         )}
       </Card>
 
-      <TransicaoForm onCancel={handleCloseModal} fluxoId={fluxo?.id} />
+      {isOpenModal && <TransicaoForm onCancel={handleCloseModal} fluxoId={fluxo?.id} />}
     </>
   );
 }

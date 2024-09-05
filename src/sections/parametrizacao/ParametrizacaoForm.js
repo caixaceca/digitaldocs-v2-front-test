@@ -29,9 +29,9 @@ import {
   FormProvider,
   RHFTextField,
   RHFDatePicker,
+  RHFNumberField,
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
-  RHFNumberField,
 } from '../../components/hook-form';
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
@@ -50,8 +50,8 @@ FluxoForm.propTypes = { onCancel: PropTypes.func };
 export function FluxoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     modelo: Yup.mixed().required().label('Modelo'),
@@ -60,7 +60,7 @@ export function FluxoForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      perfilID: cc?.perfil_id,
+      perfilID: perfilId,
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
       modelo: selectedItem?.modelo || null,
@@ -71,7 +71,7 @@ export function FluxoForm({ onCancel }) {
       is_ativo: selectedItem ? selectedItem?.is_ativo : true,
       credito_funcionario: selectedItem?.credito_funcionario || false,
     }),
-    [selectedItem, cc?.perfil_id]
+    [selectedItem, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -81,7 +81,7 @@ export function FluxoForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -95,16 +95,8 @@ export function FluxoForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('fluxo', { mail, id: selectedItem?.id, msg: 'Fluxo eliminado', perfilId: cc?.perfil_id }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
-  };
-
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -138,13 +130,7 @@ export function FluxoForm({ onCancel }) {
                 <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
               </Grid>
             </Grid>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? 'eliminar este fluxo' : ''}
-            />
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -159,8 +145,8 @@ ClonarFluxoForm.propTypes = { onCancel: PropTypes.func };
 export function ClonarFluxoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { isSaving, selectedItem, isOpenView } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({ assunto: Yup.string().required().label('Assunto') });
 
@@ -168,7 +154,7 @@ export function ClonarFluxoForm({ onCancel }) {
     () => ({
       is_ativo: true,
       observacao: '',
-      perfilID: cc?.perfil_id,
+      perfilID: perfilId,
       is_con: selectedItem?.is_con,
       modelo: selectedItem?.modelo || '',
       limpo: selectedItem?.limpo || false,
@@ -177,7 +163,7 @@ export function ClonarFluxoForm({ onCancel }) {
       is_credito: selectedItem?.is_credito || false,
       credito_funcionario: selectedItem?.credito_funcionario || false,
     }),
-    [selectedItem, cc?.perfil_id]
+    [selectedItem, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -197,8 +183,8 @@ export function ClonarFluxoForm({ onCancel }) {
         dispatch(
           createItem('clonar fluxo', JSON.stringify(values), {
             mail,
+            perfilId,
             msg: 'Fluxo clonado',
-            perfilId: cc?.perfil_id,
             transicoes: selectedItem?.transicoes?.filter((option) => option?.modo !== 'desarquivamento'),
           })
         );
@@ -209,7 +195,7 @@ export function ClonarFluxoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenView} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>Clonar fluxo</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -240,9 +226,9 @@ EstadoForm.propTypes = { onCancel: PropTypes.func };
 export function EstadoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const { isEdit, isOpenModal, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
-  const uosList = uos?.map((row) => ({ id: row?.id, balcao: row?.balcao, label: row?.label }));
+  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
+  const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, balcao: row?.balcao, label: row?.label })), [uos]);
 
   const formSchema = Yup.object().shape({
     nome: Yup.string().required().label('Nome'),
@@ -251,7 +237,7 @@ export function EstadoForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      perfilID: cc?.perfil_id,
+      perfilID: perfilId,
       nome: selectedItem?.nome || '',
       email: selectedItem?.email || '',
       balcao: selectedItem?.balcao || '',
@@ -261,7 +247,7 @@ export function EstadoForm({ onCancel }) {
       is_inicial: selectedItem?.is_inicial || false,
       uo_id: uosList?.find((row) => row.id === selectedItem?.uo_id) || null,
     }),
-    [selectedItem, cc, uosList]
+    [selectedItem, perfilId, uosList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -271,7 +257,7 @@ export function EstadoForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, isOpenModal]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -287,16 +273,12 @@ export function EstadoForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('estado', { mail, id: selectedItem?.id, perfilId: cc?.perfil_id, msg: 'Estado eliminado' }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('estado', { mail, id: selectedItem?.id, perfilId, msg: 'Estado eliminado' }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -338,12 +320,12 @@ export function EstadoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-AcessoForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number, isOpenModal: PropTypes.bool };
+AcessoForm.propTypes = { onCancel: PropTypes.func, perfilIdA: PropTypes.string };
 
-export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
+export function AcessoForm({ perfilIdA, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
@@ -353,13 +335,13 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      perfilID: Number(perfilId),
-      perfilIDCC: cc?.perfil?.id,
+      perfilIDCC: perfilId,
+      perfilID: Number(perfilIdA),
       datalimite: selectedItem?.datalimite ? new Date(selectedItem?.datalimite) : null,
       objeto: selectedItem?.objeto ? objetos?.find((row) => row?.id === selectedItem?.objeto) : null,
       acesso: selectedItem?.acesso ? codacessos?.find((row) => row?.id === selectedItem?.acesso) : null,
     }),
-    [selectedItem, cc?.perfil?.id, perfilId]
+    [selectedItem, perfilIdA, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -369,7 +351,7 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, isOpenModal]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -385,16 +367,12 @@ export function AcessoForm({ isOpenModal, perfilId, onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('acesso', { mail, id: selectedItem.id, msg: 'Acesso eliminado', perfilId: cc?.perfil_id }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('acesso', { mail, id: selectedItem.id, msg: 'Acesso eliminado', perfilId }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
       <DialogTitle>{selectedItem ? 'Editar acesso' : 'Adicionar acesso'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -431,9 +409,8 @@ MotivoPendenciaForm.propTypes = { onCancel: PropTypes.func };
 export function MotivoPendenciaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
-  const perfilId = cc?.perfil_id;
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Motivo') });
   const defaultValues = useMemo(
@@ -447,7 +424,7 @@ export function MotivoPendenciaForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -468,16 +445,12 @@ export function MotivoPendenciaForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem?.id, msg: 'Motivo eliminado' }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem?.id, msg: 'Motivo eliminado' }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -512,8 +485,8 @@ export function OrigemForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [Concelhos, setConcelhos] = useState([]);
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     tipo: Yup.mixed().required().label('Tipo'),
@@ -524,7 +497,7 @@ export function OrigemForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      perfilID: cc?.perfil_id,
+      perfilID: perfilId,
       email: selectedItem?.email || '',
       tipo: selectedItem?.tipo || null,
       ilha: selectedItem?.ilha || null,
@@ -535,7 +508,7 @@ export function OrigemForm({ onCancel }) {
       observacao: selectedItem?.observacao || '',
       designacao: selectedItem?.designacao || '',
     }),
-    [selectedItem, cc?.perfil_id]
+    [selectedItem, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -545,7 +518,7 @@ export function OrigemForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -559,12 +532,8 @@ export function OrigemForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('origem', { mail, id: selectedItem.id, msg: 'Origem eliminada', perfilId: cc?.perfil_id }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('origem', { mail, id: selectedItem.id, msg: 'Origem eliminada', perfilId }));
   };
 
   useEffect(() => {
@@ -574,7 +543,7 @@ export function OrigemForm({ onCancel }) {
   }, [values?.ilha]);
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -638,8 +607,8 @@ LinhaForm.propTypes = { onCancel: PropTypes.func };
 export function LinhaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, isEdit, isOpenModal, isSaving } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     linha: Yup.string().required().label('Linha'),
@@ -656,7 +625,7 @@ export function LinhaForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, isOpenModal]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -672,23 +641,19 @@ export function LinhaForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(
-        deleteItem('linha', {
-          mail,
-          perfilID: cc?.perfil_id,
-          linhaID: selectedItem.id,
-          msg: 'Linha de crédito eliminada',
-        })
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(
+      deleteItem('linha', {
+        mail,
+        perfilID: perfilId,
+        linhaID: selectedItem?.id,
+        msg: 'Linha de crédito eliminada',
+      })
+    );
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -726,11 +691,9 @@ TransicaoForm.propTypes = { onCancel: PropTypes.func, fluxoId: PropTypes.number 
 export function TransicaoForm({ onCancel, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { selectedItem, estados, done, error, isEdit, isSaving, isOpenModal } = useSelector(
-    (state) => state.parametrizacao
-  );
-  const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { selectedItem, estados, done, error, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
+  const estadosList = useMemo(() => estados.map((row) => ({ id: row?.id, label: row?.nome })), [estados]);
 
   const formSchema = Yup.object().shape({
     modo: Yup.mixed().required().label('Modo'),
@@ -741,7 +704,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
   const defaultValues = useMemo(
     () => ({
-      perfilIDCC: cc?.perfil_id,
+      perfilIDCC: perfilId,
       modo: selectedItem?.modo || null,
       to_alert: selectedItem?.to_alert || false,
       fluxo_id: selectedItem?.fluxo_id || fluxoId,
@@ -754,7 +717,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
       estado_final: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
       estado_inicial: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
     }),
-    [fluxoId, selectedItem, cc?.perfil_id, estadosList]
+    [fluxoId, selectedItem, perfilId, estadosList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -764,7 +727,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, isOpenModal]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -782,18 +745,12 @@ export function TransicaoForm({ onCancel, fluxoId }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(
-        deleteItem('transicao', { mail, id: selectedItem.id, msg: 'Transição eliminada', perfilId: cc?.perfil_id })
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('transicao', { mail, id: selectedItem.id, msg: 'Transição eliminada', perfilId }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
         <Notificacao done={done} error={error} afterSuccess={onCancel} />
@@ -821,13 +778,13 @@ export function TransicaoForm({ onCancel, fluxoId }) {
                 <RHFNumberField label="Prazo" name="prazoemdias" tipo="dia" />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <RHFSwitch name="is_after_devolucao" label="Depois de devolução" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
                 <RHFSwitch name="is_paralelo" label="Paralelo" />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <RHFSwitch name="requer_parecer" label="Requer parecer" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <RHFSwitch name="is_after_devolucao" label="Depois de devolução" />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <RHFSwitch name="to_alert" label="Notificar" />
@@ -855,31 +812,28 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilId: PropTypes.number };
+EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.string };
 
-export function EstadosPerfilForm({ perfilId, onCancel }) {
+export function EstadosPerfilForm({ perfilIdE, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { estados, isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
-
-  const estadosList = estados.map((row) => ({ id: row?.id, label: row?.nome }));
-  const estado = estadosList.find((row) => row.id === selectedItem?.estado_id) || null;
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { estados, isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
+  const estadosList = useMemo(() => estados?.map((row) => ({ id: row?.id, label: row?.nome })), [estados]);
 
   const formSchema = Yup.object().shape({ estado: Yup.mixed().required().label('Estado') });
-
   const defaultValues = useMemo(
     () => ({
-      estado,
-      perfil_id: Number(perfilId),
-      perfil_id_cc: cc?.perfil?.id,
+      perfil_id_cc: perfilId,
+      perfil_id: Number(perfilIdE),
       gestor: selectedItem?.gestor || false,
       padrao: selectedItem?.padrao || false,
       observador: selectedItem?.observador || false,
+      estado: estadosList.find((row) => row.id === selectedItem?.estado_id) || null,
       data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
       data_inicial: selectedItem?.data_inicial ? new Date(selectedItem?.data_inicial) : null,
     }),
-    [selectedItem, cc?.perfil?.id, estado, perfilId]
+    [selectedItem, perfilId, estadosList, perfilIdE]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -889,35 +843,27 @@ export function EstadosPerfilForm({ perfilId, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, isOpenModal]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
       values.estado_id = values?.estado?.id;
       if (isEdit) {
-        dispatch(
-          updateItem('estadoPerfil', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Estado atualizado' })
-        );
+        dispatch(updateItem('estadoPerfil', values, { mail, id: selectedItem.id, msg: 'Estado atualizado' }));
       } else {
-        dispatch(createItem('estadoPerfil', JSON.stringify(values), { mail, msg: 'Estado adicionado' }));
+        dispatch(createItem('estadoPerfil', values, { mail, msg: 'Estado adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(
-        deleteItem('estadoPerfil', { mail, id: selectedItem.id, msg: 'Estado eliminado', perfilId: cc?.perfil_id })
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('estadoPerfil', { mail, id: selectedItem.id, msg: 'Estado eliminado', perfilId }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -976,8 +922,8 @@ PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.objec
 export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, done, error } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
 
   const defaultValues = useMemo(
     () => ({
@@ -1006,7 +952,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
 
   const onSubmit = async () => {
     try {
-      const formData = { estado_id: estado?.id, perfil_id_cc: cc?.perfil?.id, perfis: [] };
+      const formData = { estado_id: estado?.id, perfil_id_cc: perfilId, perfis: [] };
       values?.perfis?.forEach((row) => {
         formData?.perfis?.push({
           perfil_id: row?.perfil?.id,
@@ -1086,7 +1032,7 @@ export function AnexoDespesaForm({ item, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
   const defaultValues = useMemo(
@@ -1104,7 +1050,7 @@ export function AnexoDespesaForm({ item, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -1118,16 +1064,12 @@ export function AnexoDespesaForm({ item, onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem(item, { mail, id: selectedItem?.id, msg: `${item} eliminado` }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem(item, { mail, id: selectedItem?.id, msg: `${item} eliminado` }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>
         {isEdit
           ? `Editar ${item === 'Despesa' ? 'despesa' : 'anexo'}`
@@ -1172,10 +1114,8 @@ RegraAnexoForm.propTypes = { onCancel: PropTypes.func };
 export function RegraAnexoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem, fluxo, estados, anexos } = useSelector(
-    (state) => state.parametrizacao
-  );
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, selectedItem, fluxo, estados, anexos } = useSelector((state) => state.parametrizacao);
   const transicoesList = useMemo(
     () => listaTransicoes(fluxo?.transicoes || [], estados || []),
     [estados, fluxo?.transicoes]
@@ -1203,7 +1143,7 @@ export function RegraAnexoForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -1225,18 +1165,12 @@ export function RegraAnexoForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(
-        deleteItem('regra anexo', { mail, id: selectedItem?.id, msg: 'Regra eliminado', perfilId: cc?.perfil_id })
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('regra anexo', { mail, id: selectedItem?.id, msg: 'Regra eliminado', perfilId }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regra'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -1274,7 +1208,7 @@ export function RegraEstadoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem, estado } = useSelector((state) => state.parametrizacao);
+  const { isEdit, isSaving, selectedItem, estado } = useSelector((state) => state.parametrizacao);
   const perfisList = useMemo(() => listaPerfis(estado?.perfis, colaboradores), [colaboradores, estado?.perfis]);
 
   const formSchema = Yup.object().shape({
@@ -1294,7 +1228,7 @@ export function RegraEstadoForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -1314,7 +1248,7 @@ export function RegraEstadoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regra'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -1356,7 +1290,7 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem, estado } = useSelector((state) => state.parametrizacao);
+  const { isEdit, isSaving, selectedItem, estado } = useSelector((state) => state.parametrizacao);
   const perfisList = useMemo(() => listaPerfis(estado?.perfis, colaboradores), [colaboradores, estado?.perfis]);
 
   const formSchema = Yup.object().shape({
@@ -1376,7 +1310,7 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -1393,7 +1327,7 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar regras' : 'Adicionar regras'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -1420,7 +1354,7 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem } = useSelector((state) => state.parametrizacao);
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
     via: Yup.mixed().required().label('Via'),
@@ -1444,7 +1378,7 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -1464,16 +1398,12 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('notificacao', { mail, id: selectedItem?.id, msg: 'Notificação eliminada' }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('notificacao', { mail, id: selectedItem?.id, msg: 'Notificação eliminada' }));
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>{isEdit ? 'Editar notificação' : 'Adicionar notificação'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -1510,7 +1440,7 @@ export function DestinatarioForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, isOpenModal, selectedItem, notificacaoId } = useSelector((state) => state.parametrizacao);
+  const { isEdit, isSaving, selectedItem, notificacaoId } = useSelector((state) => state.parametrizacao);
   const perfisList = useMemo(
     () => colaboradores?.map((row) => ({ id: row?.id, label: row?.perfil?.displayName, email: row?.perfil?.mail })),
     [colaboradores]
@@ -1541,7 +1471,7 @@ export function DestinatarioForm({ onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal, selectedItem]);
+  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -1579,12 +1509,8 @@ export function DestinatarioForm({ onCancel }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      dispatch(deleteItem('destinatario', { mail, id: selectedItem?.id, msg: 'Destinatário eliminado' }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao eliminar este item', { variant: 'error' });
-    }
+  const handleDelete = () => {
+    dispatch(deleteItem('destinatario', { mail, id: selectedItem?.id, msg: 'Destinatário eliminado' }));
   };
 
   const handleAdd = () => {
@@ -1596,7 +1522,7 @@ export function DestinatarioForm({ onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
+    <Dialog open onClose={onCancel} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {isEdit ? 'Editar destinatário' : 'Adicionar destinatários'}

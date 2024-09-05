@@ -14,11 +14,12 @@ import TableArquivo from '../sections/arquivo/TableArquivo';
 
 export default function Arquivo() {
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabArquivo') || 'arquivos');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabArquivo') || 'Arquivos');
 
   const tabsList = [
-    { value: 'arquivos', label: 'Arquivos', component: <TableArquivo tab="arquivos" /> },
-    { value: 'pedidos', label: 'Pedidos', component: <TableArquivo tab="pedidos" /> },
+    { value: 'Arquivos', component: <TableArquivo tab="arquivos" /> },
+    { value: 'Pedidos', component: <TableArquivo tab="pedidosAcesso" /> },
+    { value: 'Restauros', component: <TableArquivo tab="restauros" /> },
   ];
 
   return (

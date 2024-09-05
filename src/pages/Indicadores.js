@@ -1,12 +1,12 @@
+import { add } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-// utils
-import { temAcesso } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
+import { getFromIntranet, getMyStatus } from '../redux/slices/intranet';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
@@ -21,32 +21,32 @@ import { TotalProcessos, Duracao, SGQ, FileSystem } from '../sections/indicadore
 export default function Indicadores() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { meusacessos } = useSelector((state) => state.parametrizacao);
+  const { isAdmin } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId, dateUpdate, accessToken } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState(
-    localStorage.getItem('tabIndicadores') || (temAcesso(['Todo-111'], meusacessos) && 'files') || 'total'
+    localStorage.getItem('tabIndicadores') || (isAdmin && 'files') || 'total'
   );
 
   const tabsList = useMemo(
     () => [
-      ...(temAcesso(['Todo-111'], meusacessos)
-        ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }]
-        : []),
+      ...(isAdmin ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }] : []),
       { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
       { value: 'duracao', label: 'Duração', component: <Duracao /> },
       { value: 'sgq', label: 'SGQ', component: <SGQ /> },
       { value: 'estatistica', label: 'Estatística de crédito', component: <EstatisticaCredito /> },
     ],
-    [meusacessos]
+    [isAdmin]
   );
 
   useEffect(() => {
-    if (mail && cc?.perfil_id) {
-      dispatch(getFromParametrizacao('motivos', { mail, perfilId: cc?.perfil_id }));
-      dispatch(getFromParametrizacao('ambientes', { mail, perfilId: cc?.perfil_id }));
-      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId: cc?.perfil_id }));
+    if (mail && perfilId && (!dateUpdate || add(new Date(dateUpdate), { minutes: 5 }) < new Date())) {
+      dispatch(getMyStatus(accessToken));
+      dispatch(getFromIntranet('cc', { id: perfilId, mail }));
+      dispatch(getFromParametrizacao('motivos', { mail, perfilId }));
+      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId }));
+      dispatch(getFromParametrizacao('meusambientes', { mail, perfilId }));
     }
-  }, [dispatch, cc, mail]);
+  }, [dispatch, perfilId, dateUpdate, accessToken, mail]);
 
   // const handleNotificationClick = () => {
   //   if (Notification.permission === 'granted') {

@@ -15,6 +15,7 @@ import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Switch from '@mui/material/Switch';
+import Divider from '@mui/material/Divider';
 import Checkbox from '@mui/material/Checkbox';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
@@ -55,22 +56,21 @@ const TABLE_HEAD = [
 
 ValidarMultiploForm.propTypes = {
   open: PropTypes.bool,
-  dense: PropTypes.bool,
   fase: PropTypes.string,
   balcao: PropTypes.number,
   cartoes: PropTypes.array,
   onCancel: PropTypes.func,
 };
 
-export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCancel }) {
+export function ValidarMultiploForm({ fase, open, cartoes = [], balcao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
-  const cartoesList = useMemo(
-    () =>
-      cartoes?.map((row) => ({
+  const defaultValues = useMemo(
+    () => ({
+      cartoes: cartoes?.map((row) => ({
         nota: '',
         idItem: row?.id,
         nome: row?.nome,
@@ -78,10 +78,9 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
         numero: row?.numero,
         dataSisp: new Date(),
       })),
+    }),
     [cartoes]
   );
-
-  const defaultValues = useMemo(() => ({ cartoes: cartoesList }), [cartoesList]);
   const methods = useForm({ defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
   const { fields } = useFieldArray({ control, name: 'cartoes' });
@@ -117,52 +116,57 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle sx={{ mb: 2 }}>Confirmar receção de cartões</DialogTitle>
-      <DialogContent sx={{ p: 0 }}>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-            <Table size={dense ? 'small' : 'medium'}>
-              <TableBody>
-                {fields.map((item, index) => (
-                  <TableRow hover key={`cartao__${index}`}>
-                    <TableCell>
-                      <Stack>
-                        <Typography variant="subtitle1" noWrap>
-                          <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                            Nº cartão:&nbsp;
-                          </Typography>
-                          {baralharString(item?.numero)}
-                        </Typography>
-                        <Typography variant="subtitle2" noWrap>
-                          <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                            {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
-                          </Typography>
-                          {fase === 'Emissão' ? item?.tipo : baralharString(item.nome)}
-                        </Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell width={'100%'}>
-                      <Stack direction="row" spacing={1}>
-                        {fase === 'Emissão' && (
-                          <RHFDatePicker
-                            disableFuture
-                            label="Data de recessão"
-                            name={`cartoes[${index}].dataSisp`}
-                            slotProps={{ textField: { fullWidth: true, sx: { width: 220 } } }}
-                          />
-                        )}
-                        <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Stack sx={{ pb: 3, pr: 3 }}>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
-          </Stack>
-        </FormProvider>
-      </DialogContent>
+      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+        <Stack divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
+          {fields.map((item, index) => (
+            <Stack
+              spacing={1}
+              key={`cartao__${index}`}
+              direction={{ xs: 'column', sm: 'row' }}
+              sx={{ py: 1, px: 3, '&:hover': { backgroundColor: (theme) => theme.palette.action.hover } }}
+            >
+              <Stack direction="row" spacing={1}>
+                <Stack
+                  direction="column"
+                  justifyContent="center"
+                  sx={{
+                    py: 0.5,
+                    px: 1.5,
+                    borderRadius: 1,
+                    bgcolor: 'background.neutral',
+                    width: { xs: 1, sm: fase === 'Receção' ? 300 : 150 },
+                  }}
+                >
+                  <Typography variant="subtitle1" noWrap sx={{ color: 'success.main' }}>
+                    <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                      Nº cartão:&nbsp;
+                    </Typography>
+                    {baralharString(item?.numero)}
+                  </Typography>
+                  <Typography variant="subtitle2" noWrap sx={{ color: 'info.main' }}>
+                    <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                      {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
+                    </Typography>
+                    {fase === 'Emissão' ? item?.tipo : baralharString(item?.nome)}
+                  </Typography>
+                </Stack>
+                {fase === 'Emissão' && (
+                  <RHFDatePicker
+                    disableFuture
+                    label="Data recessão"
+                    name={`cartoes[${index}].dataSisp`}
+                    slotProps={{ textField: { fullWidth: true, sx: { width: { sm: 160 } } } }}
+                  />
+                )}
+              </Stack>
+              <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
+            </Stack>
+          ))}
+        </Stack>
+        <Stack sx={{ pb: 3, pr: 3 }}>
+          <DialogButons isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
+        </Stack>
+      </FormProvider>
     </Dialog>
   );
 }
@@ -172,12 +176,13 @@ export function ValidarMultiploForm({ fase, dense, open, cartoes, balcao, onCanc
 ConfirmarPorDataForm.propTypes = {
   open: PropTypes.bool,
   fase: PropTypes.string,
-  data: PropTypes.object,
+  datai: PropTypes.object,
+  dataf: PropTypes.object,
   balcao: PropTypes.object,
   onCancel: PropTypes.func,
 };
 
-export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date(), { days: 1 }), onCancel }) {
+export function ConfirmarPorDataForm({ open, balcao, fase, datai = null, dataf = null, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
@@ -188,8 +193,8 @@ export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date()
     dataSisp: Yup.date().typeError('Introduza uma data válida').required('Data de receção não pode ficar vazio'),
   });
   const defaultValues = useMemo(
-    () => ({ data, balcao: balcao?.id, dataSisp: add(data, { days: 1 }), nota: '' }),
-    [balcao?.id, data]
+    () => ({ data: datai, balcao: balcao?.id, dataSisp: add(datai, { days: 1 }), nota: '' }),
+    [balcao?.id, datai]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, handleSubmit } = methods;
@@ -225,14 +230,14 @@ export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date()
       <DialogContent>
         <Stack direction="row" spacing={1} justifyContent="center" sx={{ py: 3 }}>
           <Typography sx={{ color: 'text.secondary' }}>Balcão de entrega:</Typography>
-          <Typography variant="subtitle1">
+          <Typography variant="subtitle1" sx={{ color: 'success.main' }}>
             {balcao?.id} ({balcao?.label})
           </Typography>
         </Stack>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={fase === 'Emissão' ? 6 : 12}>
-              <RHFDatePicker name="data" label="Data de emissão" disableFuture />
+              <RHFDatePicker name="data" label="Data de emissão" minDate={datai} maxDate={dataf} disableFuture />
             </Grid>
             {fase === 'Emissão' && (
               <Grid item xs={12} sm={6}>
@@ -252,13 +257,13 @@ export function ConfirmarPorDataForm({ open, balcao, fase, data = sub(new Date()
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-BalcaoEntregaForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
+BalcaoEntregaForm.propTypes = { onCancel: PropTypes.func };
 
-export function BalcaoEntregaForm({ open, onCancel }) {
+export function BalcaoEntregaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, uos } = useSelector((state) => state.intranet);
-  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
+  const { isSaving, isOpenModal, selectedItem } = useSelector((state) => state.digitaldocs);
   const uosList = uos
     ?.filter((row) => row?.tipo === 'Agências')
     ?.map((uo) => ({ id: uo?.balcao, label: `${uo?.balcao} - ${uo?.label}` }));
@@ -299,7 +304,7 @@ export function BalcaoEntregaForm({ open, onCancel }) {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="xs">
       <DialogTitle>Alterar balão de entrega</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -432,7 +437,7 @@ export function AnularForm({ fase, open, cartoes, uo, uosList, onCancel }) {
               <TableBody>
                 {cartoes.map((row, index) => (
                   <TableRow key={`${row.id}_${index}`} hover>
-                    <TableCell padding="checkbox">
+                    <TableCell padding="checkbox" sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}>
                       <Checkbox checked={selected.includes(row.id)} onClick={() => onSelectRow(row.id)} />
                     </TableCell>
                     <TableCell>{ptDate(row.data_emissao)}</TableCell>
@@ -478,21 +483,18 @@ export function Detalhes({ closeModal }) {
   return (
     <Dialog open={isOpenModal1} onClose={closeModal} fullWidth maxWidth="sm">
       <DTFechar title="Detalhes do cartão" handleClick={() => closeModal()} />
-      <DialogContent sx={{ mt: 0.5 }}>
+      <DialogContent>
         {isLoading ? (
-          <Stack justifyContent="space-between" alignItems="center" spacing={3}>
-            <Skeleton variant="text" sx={{ height: 300, width: 1, mt: 2, transform: 'scale(1)' }} />
-            <Skeleton variant="text" sx={{ height: 200, width: 1, transform: 'scale(1)' }} />
-            <Skeleton variant="text" sx={{ height: 150, width: 1, transform: 'scale(1)' }} />
+          <Stack justifyContent="space-between" alignItems="center" spacing={3} sx={{ mt: 1 }}>
+            <Skeleton variant="text" sx={{ height: 200, width: 1, mt: 2, transform: 'scale(1)' }} />
+            <Skeleton variant="text" sx={{ height: 125, width: 1, transform: 'scale(1)' }} />
+            <Skeleton variant="text" sx={{ height: 125, width: 1, transform: 'scale(1)' }} />
           </Stack>
         ) : (
           <>
             {selectedItem ? (
               <>
                 <List>
-                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                    <Typography variant="subtitle1">Dados</Typography>
-                  </ListItem>
                   {selectedItem?.tipo && <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />}
                   {selectedItem?.numero && (
                     <TextItem title="Nº do cartão:" text={baralharString(selectedItem?.numero?.substring(9, 15))} />

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -17,8 +17,8 @@ import { normalizeText, entidadesParse, noDados } from '../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../hooks/useTable';
 // redux
-import { getAll } from '../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../redux/store';
+import { getAll, resetItem } from '../redux/slices/digitaldocs';
 // hooks
 import useSettings from '../hooks/useSettings';
 // routes
@@ -38,12 +38,12 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../com
 
 const TABLE_HEAD = [
   { id: 'entrada', label: 'Nº', align: 'left' },
-  { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
+  { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'estado', label: 'Estado', align: 'left' },
   { id: 'criado_em', label: 'Criado' },
-  { id: 'empty' },
+  { id: '', width: 10 },
 ];
 
 // ----------------------------------------------------------------------
@@ -56,9 +56,8 @@ export default function Procura() {
   const [search, setSearch] = useState(localStorage.getItem('filterSearch') || '');
   const [estado, setEstado] = useState(localStorage.getItem('estadoSearch') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoSearch') || null);
-  const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
-  const { pesquisa, pesquisaInfo, isLoading } = useSelector((state) => state.digitaldocs);
-  const fromAgencia = cc?.uo?.tipo === 'Agências';
+  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { pesquisa, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
     page,
@@ -73,45 +72,26 @@ export default function Procura() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
-    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
+    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
+
+  useEffect(() => {
+    dispatch(resetItem('processo'));
+  }, [dispatch]);
 
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uo, search, assunto, estado, pesquisa]);
 
-  const newPesquisa = [];
-  const estadosList = [];
-  const assuntosList = [];
-  const uosorigemList = [];
-  pesquisa?.forEach((row) => {
-    const uo = uos?.find((uo) => uo?.id === row?.uo_origem_id);
-    const colaborador = colaboradores?.find((colaborador) => colaborador?.perfil_id === row?.dono);
-    if (uo && !uosorigemList.includes(uo?.label)) {
-      uosorigemList.push(uo?.label);
-    }
-    if (!estadosList.includes(row?.estado)) {
-      estadosList.push(row?.estado);
-    }
-    if (!assuntosList.includes(row?.assunto)) {
-      assuntosList.push(row?.assunto);
-    }
-    newPesquisa?.push({
-      ...row,
-      uo: uo?.label,
-      tipo: uo?.tipo,
-      entidades: entidadesParse(row?.entidades),
-      colaborador: colaborador?.perfil?.displayName,
-    });
-  });
+  const dados = useMemo(() => setDados({ pesquisa, uos }), [pesquisa, uos]);
 
   const dataFiltered = applySortFilter({
     uo,
     search,
     estado,
     assunto,
-    newPesquisa,
+    dados: dados?.dados,
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
@@ -125,28 +105,28 @@ export default function Procura() {
   };
 
   const verMais = () => {
-    if (mail && cc?.perfil_id) {
+    if (mail && perfilId) {
       if (localStorage.getItem('tipoPesquisa') === 'avancada') {
         dispatch(
           getAll('pesquisa avancada', {
             mail,
-            perfilId: cc?.perfil_id,
-            pagina: pesquisaInfo?.proxima_pagina,
+            perfilId,
+            pagina: processosInfo?.proxima_pagina,
             uo: localStorage.getItem('uoSearch') || '',
             conta: localStorage.getItem('conta') || '',
             entrada: localStorage.getItem('entrada') || '',
             cliente: localStorage.getItem('cliente') || '',
             entidade: localStorage.getItem('entidade') || '',
             noperacao: localStorage.getItem('noperacao') || '',
+            historico: localStorage.getItem('procHistorico') === 'true',
           })
         );
-      } else if (cc?.uo_id) {
+      } else {
         dispatch(
           getAll('pesquisa global', {
             mail,
-            uoID: cc?.uo_id,
-            perfilId: cc?.perfil_id,
-            pagina: pesquisaInfo?.proxima_pagina,
+            perfilId,
+            pagina: processosInfo?.proxima_pagina,
             chave: localStorage.getItem('chave'),
             historico: localStorage.getItem('procHistorico') === 'true',
           })
@@ -160,59 +140,28 @@ export default function Procura() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
-          action={<Registos info={pesquisaInfo} total={pesquisa?.length} handleClick={verMais} />}
+          action={<Registos info={processosInfo} total={pesquisa?.length} handleClick={() => verMais()} />}
           heading={
-            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'start', md: 'center' }} spacing={1}>
-              <Typography variant="h4">Resultado da procura [{pesquisa?.length || 0}]:</Typography>
+            <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+              <Typography variant="h4">Procura:</Typography>
+              {localStorage.getItem('procHistorico') === 'true' && <Label sx={{ mt: 0.5 }}>Histórico</Label>}
               {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
-                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-                  {localStorage.getItem('uoSearch') && (
-                    <Panel
-                      label="U.O"
-                      children={
-                        <Typography noWrap>
-                          {uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
-                        </Typography>
-                      }
-                    />
-                  )}
-                  {localStorage.getItem('entrada') && (
-                    <Panel
-                      label="Nº entrada"
-                      children={<Typography noWrap>{localStorage.getItem('entrada')}</Typography>}
-                    />
-                  )}
-                  {localStorage.getItem('conta') && (
-                    <Panel
-                      label="Nº conta"
-                      children={<Typography noWrap>{localStorage.getItem('conta')}</Typography>}
-                    />
-                  )}
-                  {localStorage.getItem('cliente') && (
-                    <Panel
-                      label="Nº cliente"
-                      children={<Typography noWrap>{localStorage.getItem('cliente')}</Typography>}
-                    />
-                  )}
-                  {localStorage.getItem('entidade') && (
-                    <Panel
-                      label="Nº entidade"
-                      children={<Typography noWrap>{localStorage.getItem('entidade')}</Typography>}
-                    />
-                  )}
-                  {localStorage.getItem('noperacao') && (
-                    <Panel
-                      label="Nº operação"
-                      children={<Typography noWrap>{localStorage.getItem('noperacao')}</Typography>}
-                    />
-                  )}
+                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+                  <Panel
+                    label="U.O"
+                    value={uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
+                  />
+                  <Panel label="Nº entrada" value={localStorage.getItem('entrada')} />
+                  <Panel label="Nº operação" value={localStorage.getItem('noperacao')} />
+                  <Panel label="Nº entidade" value={localStorage.getItem('entidade')} />
+                  <Panel label="Nº cliente" value={localStorage.getItem('cliente')} />
+                  <Panel label="Nº conta" value={localStorage.getItem('conta')} />
                 </Stack>
               ) : (
-                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
+                <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
                   <Box component="span" sx={{ color: 'text.primary' }}>
                     {localStorage.getItem('chave')}
                   </Box>
-                  {localStorage.getItem('procHistorico') === 'true' && <Label>Histórico</Label>}
                 </Stack>
               )}
             </Stack>
@@ -234,9 +183,9 @@ export default function Procura() {
             setSearch={setSearch}
             setEstado={setEstado}
             setAssunto={setAssunto}
-            estadosList={estadosList}
-            assuntosList={assuntosList}
-            uosorigemList={uosorigemList}
+            estadosList={dados?.estados}
+            assuntosList={dados?.assuntos}
+            uosorigemList={dados?.uosOrigem}
           />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -249,18 +198,19 @@ export default function Procura() {
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow hover key={row.id}>
                         <TableCell>{`${row.entrada}${row.criado_em ? `/${fYear(row.criado_em)}` : ''}`}</TableCell>
-                        <TableCell>{row.assunto}</TableCell>
                         <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
-                        <TableCell>{row.estado}</TableCell>
+                        <TableCell>{row.assunto}</TableCell>
+                        <TableCell>
+                          {localStorage.getItem('procHistorico') === 'true' ? 'Histórico' : row.estado}
+                        </TableCell>
                         <TableCell sx={{ width: 10 }}>
                           {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.uo && (
                             <Criado tipo="company" value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo} />
                           )}
-                          {row?.colaborador && <Criado tipo="user" value={row.colaborador} baralhar />}
                         </TableCell>
-                        <TableCell align="center" width={50}>
+                        <TableCell align="center">
                           <DefaultAction
                             label="DETALHES"
                             handleClick={() => handleView(row?.id, row?.credito_colaborador)}
@@ -297,30 +247,54 @@ export default function Procura() {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ newPesquisa, comparator, uo, search, estado, assunto }) {
-  newPesquisa = applySort(newPesquisa, comparator);
+function setDados({ pesquisa, uos }) {
+  const dados = [];
+  const estados = [];
+  const assuntos = [];
+  const uosOrigem = [];
+  pesquisa?.forEach((row) => {
+    const uo = uos?.find((uo) => uo?.id === row?.uo_origem_id);
+    if (uo && !uosOrigem.includes(uo?.label)) {
+      uosOrigem.push(uo?.label);
+    }
+    if (!estados.includes(row?.estado)) {
+      estados.push(row?.estado);
+    }
+    if (!assuntos.includes(row?.assunto)) {
+      assuntos.push(row?.assunto);
+    }
+    dados?.push({ ...row, uo: uo?.label, tipo: uo?.tipo, entidades: entidadesParse(row?.entidades) });
+  });
+
+  return { dados, assuntos, estados, uosOrigem };
+}
+
+// ----------------------------------------------------------------------
+
+function applySortFilter({ dados, comparator, uo, search, estado, assunto }) {
+  dados = applySort(dados, comparator);
 
   if (assunto) {
-    newPesquisa = newPesquisa.filter((row) => row?.assunto === assunto);
+    dados = dados.filter((row) => row?.assunto === assunto);
   }
   if (estado) {
-    newPesquisa = newPesquisa.filter((row) => row?.estado === estado);
+    dados = dados.filter((row) => row?.estado === estado);
   }
   if (uo) {
-    newPesquisa = newPesquisa.filter((row) => row?.uo === uo);
+    dados = dados.filter((row) => row?.uo === uo);
   }
   if (search) {
-    newPesquisa = newPesquisa.filter(
+    dados = dados.filter(
       (row) =>
+        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(search)) !== -1) ||
         (row?.entrada && normalizeText(row?.entrada).indexOf(normalizeText(search)) !== -1) ||
         (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(search)) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(search)) !== -1) ||
         (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(search)) !== -1) ||
         (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
-        (row?.noperacao && normalizeText(row?.noperacao).indexOf(normalizeText(search)) !== -1)
+        (row?.noperacao && normalizeText(row?.noperacao).indexOf(normalizeText(search)) !== -1) ||
+        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(search)) !== -1)
     );
   }
 
-  return newPesquisa;
+  return dados;
 }

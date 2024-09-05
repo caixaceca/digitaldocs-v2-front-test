@@ -12,7 +12,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { fYear } from '../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getProcesso, closeModalAnexo, updateItem } from '../redux/slices/digitaldocs';
+import { getProcesso, selectAnexo, updateItem, resetItem } from '../redux/slices/digitaldocs';
 import { getFromParametrizacao, changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
@@ -39,22 +39,22 @@ export default function NovoEditarProcesso() {
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
   const { linhas } = useSelector((state) => state.parametrizacao);
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
   const { processo, isLoadingP, selectedAnexoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
-    if (mail && id && cc?.perfil_id) {
-      dispatch(getProcesso('processo', { id, mail, perfilId: cc?.perfil_id }));
+    if (mail && id && perfilId) {
+      dispatch(getProcesso('processo', { id, mail, perfilId, historico: false }));
     }
-  }, [dispatch, cc?.perfil_id, mail, id]);
+  }, [dispatch, perfilId, mail, id]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && linhas?.length === 0 && meuFluxo?.is_credito) {
-      dispatch(getFromParametrizacao('linhas', { mail, perfilId: cc?.perfil_id }));
+    if (mail && perfilId && linhas?.length === 0 && meuFluxo?.iscredito) {
+      dispatch(getFromParametrizacao('linhas', { mail, perfilId }));
     }
-  }, [dispatch, linhas, meuFluxo, cc?.perfil_id, mail]);
+  }, [dispatch, linhas, meuFluxo, perfilId, mail]);
 
   useEffect(() => {
     dispatch(changeMeuFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null));
@@ -72,6 +72,7 @@ export default function NovoEditarProcesso() {
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
+      dispatch(resetItem('processo'));
       navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     }
   };
@@ -81,22 +82,16 @@ export default function NovoEditarProcesso() {
     localStorage.setItem('meuAmbiente', newValue?.id);
   };
 
-  const changeFluxo = (newValue) => {
-    dispatch(changeMeuFluxo(newValue));
-  };
-
-  const cancelEliminar = () => {
-    dispatch(closeModalAnexo());
-  };
-
   const eliminarAnexo = () => {
     dispatch(
       updateItem('anexo', null, {
         mail,
+        perfilId,
+        processo: true,
         processoId: id,
+        individual: 'false',
         anexo: selectedAnexoId,
         msg: 'Anexo eliminado',
-        perfilId: cc?.perfil_id,
       })
     );
   };
@@ -142,27 +137,27 @@ export default function NovoEditarProcesso() {
                 onChange={(event, newValue) => changeAmbiente(newValue)}
                 isOptionEqualToValue={(option, value) => option?.id === value?.id}
                 renderInput={(params) => <TextField {...params} label="Estado" />}
-                options={isEdit ? meusAmbientes : meusAmbientes?.filter((row) => row?.is_inicial)}
+                options={isEdit ? meusAmbientes : meusAmbientes?.filter((row) => row?.isinicial && !row?.observador)}
               />
             </Grid>
-            {(isEdit || (!isEdit && meuAmbiente?.is_inicial)) && (
+            {(isEdit || (!isEdit && meuAmbiente?.isinicial)) && (
               <Grid item xs={12} sm={6} lg={4}>
                 <Autocomplete
                   value={meuFluxo}
                   disableClearable
                   getOptionLabel={(option) => option?.assunto}
-                  onChange={(event, newValue) => changeFluxo(newValue)}
+                  onChange={(event, newValue) => dispatch(changeMeuFluxo(newValue))}
                   isOptionEqualToValue={(option, value) => option?.id === value?.id}
                   renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
-                  options={meusFluxos?.filter((option) => option?.assunto !== 'Crédito Colaborador')}
+                  options={meusFluxos?.filter((option) => option?.ativo && !option?.credito_funcionario)}
                 />
               </Grid>
             )}
           </Grid>
         </Card>
-        {(!isEdit && meuAmbiente?.is_inicial) ||
+        {(!isEdit && meuAmbiente?.isinicial) ||
         (processo?.estado_processo?._lock &&
-          processo?.estado_processo?.perfil_id === cc?.perfil_id &&
+          processo?.estado_processo?.perfil_id === perfilId &&
           processo?.estado_processo?.estado_id === meuAmbiente?.id) ? (
           <>
             {isEdit && isLoadingP ? (
@@ -179,11 +174,11 @@ export default function NovoEditarProcesso() {
                   </Card>
                 ) : (
                   <>
-                    {meuFluxo?.is_credito ? (
+                    {meuFluxo?.iscredito ? (
                       <ProcessoCredito isEdit={isEdit} processo={isEdit ? processo : null} fluxo={meuFluxo} />
                     ) : (
                       <>
-                        {meuFluxo?.is_interno ? (
+                        {meuFluxo?.isinterno ? (
                           <ProcessoInterno isEdit={isEdit} processo={isEdit ? processo : null} fluxo={meuFluxo} />
                         ) : (
                           <ProcessoExterno isEdit={isEdit} processo={isEdit ? processo : null} fluxo={meuFluxo} />
@@ -198,9 +193,9 @@ export default function NovoEditarProcesso() {
             <DialogConfirmar
               isSaving={isSaving}
               open={!!selectedAnexoId}
-              onClose={cancelEliminar}
               handleOk={eliminarAnexo}
               desc="eliminar este anexo"
+              onClose={() => dispatch(selectAnexo(null))}
             />
           </>
         ) : (

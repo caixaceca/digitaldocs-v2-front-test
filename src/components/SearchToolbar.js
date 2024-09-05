@@ -129,7 +129,8 @@ SearchToolbarProcessos.propTypes = {
   setFilter: PropTypes.func,
   segmento: PropTypes.string,
   setSegmento: PropTypes.func,
-  colaborador: PropTypes.string,
+  motivosList: PropTypes.array,
+  colaborador: PropTypes.object,
   meuAmbiente: PropTypes.object,
   setColaborador: PropTypes.func,
   colaboradoresList: PropTypes.array,
@@ -144,11 +145,12 @@ export function SearchToolbarProcessos({
   setFilter,
   colaborador,
   setSegmento,
+  motivosList,
   setColaborador,
   colaboradoresList,
   meuAmbiente = null,
 }) {
-  const { cc } = useSelector((state) => state.intranet);
+  // const { cc } = useSelector((state) => state.intranet);
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       {tab !== 'Agendados' && tab !== 'Finalizados' && tab !== 'Executados' && (
@@ -159,12 +161,12 @@ export function SearchToolbarProcessos({
               {!!meuAmbiente && <Fluxo />}
             </>
           )}
-          {cc?.uo?.tipo === 'Agências' && tab === 'Pendentes' && (
+          {tab === 'Pendentes' && (
             <Autocomplete
               fullWidth
               value={motivo || null}
+              options={motivosList?.sort()}
               sx={{ width: { md: 150, xl: 200 } }}
-              options={['Levantamento do pedido', 'Outros']}
               renderInput={(params) => <TextField {...params} label="Motivo" />}
               onChange={(event, newValue) => setItemValue(newValue, setMotivo, 'motivoP')}
             />
@@ -182,11 +184,14 @@ export function SearchToolbarProcessos({
           {(tab === 'Retidos' || tab === 'Atribuídos') && (
             <Autocomplete
               fullWidth
+              disableClearable
               value={colaborador || null}
               options={colaboradoresList}
               sx={{ width: { md: 250, xl: 300 } }}
+              getOptionLabel={(option) => option?.label}
+              isOptionEqualToValue={(option, value) => option?.id === value?.id}
               renderInput={(params) => <TextField {...params} label="Colaborador" />}
-              onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP')}
+              onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorP', true)}
             />
           )}
         </Stack>
@@ -301,16 +306,14 @@ SearchToolbarCartoes.propTypes = {
 export function SearchToolbarCartoes({ filter, setFilter, tipoCartao, tiposCartao, setTipoCartao }) {
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      {tiposCartao?.length > 0 && (
-        <Autocomplete
-          fullWidth
-          value={tipoCartao || null}
-          sx={{ width: { md: 230 } }}
-          options={tiposCartao?.sort()}
-          renderInput={(params) => <TextField {...params} label="Tipo de cartão" />}
-          onChange={(event, newValue) => setItemValue(newValue, setTipoCartao, 'tipoCartao')}
-        />
-      )}
+      <Autocomplete
+        fullWidth
+        value={tipoCartao || null}
+        sx={{ width: { md: 230 } }}
+        options={tiposCartao?.sort()}
+        renderInput={(params) => <TextField {...params} label="Tipo de cartão" />}
+        onChange={(event, newValue) => setItemValue(newValue, setTipoCartao, 'tipoCartao')}
+      />
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <SearchField item="filterCartao" filter={filter} setFilter={setFilter} />
         {(filter || tipoCartao) && (

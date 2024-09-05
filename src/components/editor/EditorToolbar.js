@@ -68,10 +68,7 @@ export const formats = [
   'video',
 ];
 
-EditorToolbar.propTypes = {
-  id: PropTypes.string.isRequired,
-  isSimple: PropTypes.bool,
-};
+EditorToolbar.propTypes = { id: PropTypes.string.isRequired, isSimple: PropTypes.bool };
 
 export default function EditorToolbar({ id, isSimple, ...other }) {
   return (
@@ -108,10 +105,20 @@ export default function EditorToolbar({ id, isSimple, ...other }) {
         </div>
 
         <div className="ql-formats">
-          <button type="button" className="ql-bold" />
-          <button type="button" className="ql-italic" />
-          <button type="button" className="ql-underline" />
-          <button type="button" className="ql-strike" />
+          <button type="button" className="ql-bold">
+            {' '}
+          </button>
+          <button type="button" className="ql-italic">
+            {' '}
+          </button>
+          <button type="button" className="ql-underline">
+            {' '}
+          </button>
+          {!isSimple && (
+            <button type="button" className="ql-strike">
+              {' '}
+            </button>
+          )}
         </div>
 
         <div className="ql-formats">
@@ -120,43 +127,75 @@ export default function EditorToolbar({ id, isSimple, ...other }) {
         </div>
 
         <div className="ql-formats">
-          <button type="button" className="ql-list" value="ordered" />
-          <button type="button" className="ql-list" value="bullet" />
-          {!isSimple && <button type="button" className="ql-indent" value="-1" />}
-          {!isSimple && <button type="button" className="ql-indent" value="+1" />}
+          <button type="button" className="ql-list" value="ordered">
+            {' '}
+          </button>
+          <button type="button" className="ql-list" value="bullet">
+            {' '}
+          </button>
+          {!isSimple && (
+            <button type="button" className="ql-indent" value="-1">
+              {' '}
+            </button>
+          )}
+          {!isSimple && (
+            <button type="button" className="ql-indent" value="+1">
+              {' '}
+            </button>
+          )}
         </div>
 
         {!isSimple && (
           <div className="ql-formats">
-            <button type="button" className="ql-script" value="super" />
-            <button type="button" className="ql-script" value="sub" />
+            <button type="button" className="ql-script" value="super">
+              {' '}
+            </button>
+            <button type="button" className="ql-script" value="sub">
+              {' '}
+            </button>
           </div>
         )}
 
         {!isSimple && (
           <div className="ql-formats">
-            <button type="button" className="ql-code-block" />
-            <button type="button" className="ql-blockquote" />
+            <button type="button" className="ql-code-block">
+              {' '}
+            </button>
+            <button type="button" className="ql-blockquote">
+              {' '}
+            </button>
           </div>
         )}
 
         <div className="ql-formats">
-          <button type="button" className="ql-direction" value="rtl" />
+          <button type="button" className="ql-direction" value="rtl">
+            {' '}
+          </button>
           <select className="ql-align" />
         </div>
 
         {!isSimple && (
           <div className="ql-formats">
-            <button type="button" className="ql-link" />
-            <button type="button" className="ql-image" />
-            <button type="button" className="ql-video" />
+            <button type="button" className="ql-link">
+              {' '}
+            </button>
+            <button type="button" className="ql-image">
+              {' '}
+            </button>
+            <button type="button" className="ql-video">
+              {' '}
+            </button>
           </div>
         )}
 
         {!isSimple && (
           <div className="ql-formats">
-            <button type="button" className="ql-formula" />
-            <button type="button" className="ql-clean" />
+            <button type="button" className="ql-formula">
+              {' '}
+            </button>
+            <button type="button" className="ql-clean">
+              {' '}
+            </button>
           </div>
         )}
 

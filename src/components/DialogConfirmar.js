@@ -30,7 +30,7 @@ export default function DialogConfirmar({ isSaving, open, title = '', desc, desc
         <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button color="inherit" onClick={onClose}>
+        <Button color="inherit" variant="outlined" onClick={onClose}>
           Cancelar
         </Button>
         <LoadingButton color={color || 'error'} variant="soft" onClick={handleOk} autoFocus loading={isSaving}>

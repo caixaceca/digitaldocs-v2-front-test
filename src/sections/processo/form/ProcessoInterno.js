@@ -29,16 +29,15 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
   const { meuAmbiente } = useSelector((state) => state.parametrizacao);
-  const perfilId = cc?.perfil_id;
+  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
   const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
 
   const formSchema = Yup.object().shape({
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
     data_entrada: fluxo?.modelo !== 'Paralelo' && Yup.date().typeError().required().label('Data de entrada'),
-    noperacao: (processo?.numero_operacao || fluxo?.is_con) && Yup.number().positive().label('Nº de operação'),
+    noperacao: (processo?.numero_operacao || fluxo?.iscon) && Yup.number().positive().label('Nº de operação'),
     titular: deGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
     email:
       ((fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') &&
@@ -68,18 +67,18 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
       otherwise: () => Yup.mixed().notRequired(),
     }),
     // CON
-    valor: fluxo?.is_con && Yup.number().min(1000000).required().label('Valor'),
-    origem_fundo: fluxo?.is_con && Yup.string().required().label('Origem do fundo'),
-    finalidade_fundo: fluxo?.is_con && Yup.string().required().label('Finalidade do fundo'),
+    valor: fluxo?.iscon && Yup.number().min(1000000).required().label('Valor'),
+    origem_fundo: fluxo?.iscon && Yup.string().required().label('Origem do fundo'),
+    finalidade_fundo: fluxo?.iscon && Yup.string().required().label('Finalidade do fundo'),
     entidade_con:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => cliente,
         then: () => Yup.number().positive().integer().label('Nº da entidade'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     nif:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () =>
@@ -91,77 +90,77 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
         otherwise: () => Yup.mixed().notRequired(),
       }),
     mae:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Mãe'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     pai:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Pai'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     data_nascimento:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.date().typeError().required().label('Data de nascimento'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     profissao:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Profissão'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     telefone:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Nº de telefone'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     estado_civil:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Estado civil'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     tipo_docid:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.mixed().required().label('Tipo doc. identificação'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     docid:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Doc. de identificação'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     nacionalidade:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Nacionalidade'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     local_pais_nascimento:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Local/País de nascimento'),
         otherwise: () => Yup.mixed().notRequired(),
       }),
     ordenador:
-      fluxo?.is_con &&
+      fluxo?.iscon &&
       Yup.mixed().when('is_cliente', {
         is: (cliente) => !cliente,
         then: () => Yup.string().required().label('Nome do ordenador'),
@@ -294,7 +293,7 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
         );
       }
       // CON
-      if (fluxo?.is_con) {
+      if (fluxo?.iscon) {
         formData.append('valor', values.valor);
         formData.append('residente', values.residente);
         formData.append('origem_fundo', values.origem_fundo);

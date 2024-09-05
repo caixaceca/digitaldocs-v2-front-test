@@ -1,5 +1,5 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import { add, format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -13,9 +13,9 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime } from '../../utils/formatTime';
+import { ptDateTime, getDataLS, dataValido } from '../../utils/formatTime';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
-import { dataValido, entidadesParse, baralharString, noDados } from '../../utils/formatText';
+import { entidadesParse, baralharString, noDados } from '../../utils/formatText';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -45,7 +45,7 @@ const TABLE_HEAD_ENTRADAS = [
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'nome', label: 'Estado', align: 'left' },
   { id: 'criado_em', label: 'Criado', align: 'left', width: 10 },
-  { id: 'empty', width: 10 },
+  { id: '', width: 10 },
 ];
 
 const TABLE_HEAD_TRABALHADOS = [
@@ -66,7 +66,7 @@ const TABLE_HEAD_PORCONCLUIR = [
   { id: 'nome', label: 'Estado', align: 'left' },
   { id: 'colaborador', label: 'Criado por', align: 'left' },
   { id: 'trabalhado_em', label: 'Modificado em', align: 'center' },
-  { id: 'empty', width: 50 },
+  { id: '', width: 10 },
 ];
 
 // ----------------------------------------------------------------------
@@ -76,30 +76,22 @@ TableControle.propTypes = { from: PropTypes.string };
 export default function TableControle({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [data, setData] = useState(getDataLS('dataC', new Date()));
+  const [datai, setDatai] = useState(getDataLS('dataIC', new Date()));
+  const [dataf, setDataf] = useState(getDataLS('dataFC', new Date()));
   const [filter, setFilter] = useState(localStorage.getItem('filterC') || '');
   const [estado, setEstado] = useState(localStorage.getItem('estadoC') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoC') || null);
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorC') || null);
-  const [data, setData] = useState(
-    localStorage.getItem('dataIC') ? add(new Date(localStorage.getItem('dataC')), { hours: 2 }) : new Date()
-  );
-  const [datai, setDatai] = useState(
-    localStorage.getItem('dataIC') ? add(new Date(localStorage.getItem('dataIC')), { hours: 2 }) : new Date()
-  );
-  const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFC') ? add(new Date(localStorage.getItem('dataFC')), { hours: 2 }) : new Date()
-  );
-  const { mail, colaboradores, cc, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId, cc, colaboradores, uos } = useSelector((state) => state.intranet);
   const { entradas, trabalhados, porConcluir, isLoading } = useSelector((state) => state.digitaldocs);
   const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
   const [uo, setUo] = useState(
-    (localStorage.getItem('uoC') && uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC')))) ||
-      uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
+    uosList?.find((row) => row?.id === Number(localStorage.getItem('uoC'))) ||
+      uosList?.find((row) => row?.id === cc?.uo?.id) ||
       null
   );
-  const perfilId = cc?.perfil_id;
-  const fromAgencia = cc?.uo?.tipo === 'Agências';
 
   const {
     page,
@@ -115,16 +107,17 @@ export default function TableControle({ from }) {
   } = useTable({
     defaultOrder: from === 'Trabalhados' ? 'asc' : 'desc',
     defaultOrderBy: from === 'Trabalhados' ? 'trabalhado_em' : 'nentrada',
-    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
+    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
 
   useEffect(() => {
-    if (!uo && uosList && (localStorage.getItem('uoC') || cc?.uo?.id)) {
-      setUo(
-        uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoC'))) ||
-          uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id))
-      );
-      localStorage.setItem('uoC', localStorage.getItem('uoC') || cc?.uo?.id || '');
+    if (uosList?.length > 0 && !uosList?.map((row) => row?.id)?.includes(uo?.id)) {
+      const _uo =
+        uosList?.find((row) => row?.id === Number(localStorage.getItem('uoC'))) ||
+        uosList?.find((row) => row?.id === cc?.uo?.id) ||
+        uosList[0];
+      localStorage.setItem('uoC', _uo.id || '');
+      setUo(_uo);
     }
   }, [uosList, uo, cc?.uo?.id]);
 
@@ -149,10 +142,10 @@ export default function TableControle({ from }) {
   }, [dispatch, uo?.id, data, from, mail]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && from === 'Por concluir') {
-      dispatch(getAll(from, { perfilId: cc?.perfil_id, mail }));
+    if (mail && perfilId && from === 'Por concluir') {
+      dispatch(getAll(from, { perfilId, mail }));
     }
-  }, [dispatch, cc?.perfil_id, from, mail]);
+  }, [dispatch, perfilId, from, mail]);
 
   const handleView = (id) => {
     navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Controle`);
@@ -199,9 +192,8 @@ export default function TableControle({ from }) {
   return (
     <>
       <HeaderBreadcrumbs
+        sx={{ px: 1 }}
         heading={title}
-        links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
         action={
           <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
             {from !== 'Por concluir' && (

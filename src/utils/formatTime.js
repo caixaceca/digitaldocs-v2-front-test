@@ -28,10 +28,6 @@ export function fYear(date) {
   return format(add(new Date(date), { hours: 2 }), 'yyyy', { locale: pt });
 }
 
-export function fDateTime(date) {
-  return format(new Date(date), 'dd/MM/yyyy - HH:mm a', { locale: pt });
-}
-
 export function ptDateTime(date) {
   return format(new Date(date), 'dd/MM/yyyy - HH:mm', { locale: pt });
 }
@@ -74,4 +70,32 @@ export function dataPadraoPt(data) {
 
 export function formatDistanceStrict_(date, date1) {
   return formatDistanceStrict(new Date(date), new Date(date1), { unit: 'year', locale: pt });
+}
+
+export function getDataLS(label, data) {
+  return localStorage.getItem(label) ? add(new Date(localStorage.getItem(label)), { hours: 2 }) : data;
+}
+
+export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, valueF) {
+  setData(newValue);
+  if (localSI) {
+    localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
+  }
+  if (resetDate) {
+    if (newValue && dataValido(newValue) && newValue > valueF) {
+      resetDate(new Date());
+      if (localSIF) {
+        localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
+      }
+    } else if (!newValue) {
+      resetDate(null);
+      if (localSIF) {
+        localStorage.setItem(localSIF, '');
+      }
+    }
+  }
+}
+
+export function dataValido(data) {
+  return !!(data && data?.toString() !== 'Invalid Date');
 }

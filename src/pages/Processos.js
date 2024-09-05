@@ -41,9 +41,9 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { mail, cc } = useSelector((state) => state.intranet);
   const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
 
   const tabsList = useMemo(
@@ -85,10 +85,10 @@ export default function Processos() {
   }, [tabsList, currentTab]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id) {
-      dispatch(getIndicadores('totalP', { mail, perfilId: cc?.perfil_id }));
+    if (mail && perfilId && meusAmbientes?.length > 0) {
+      dispatch(getIndicadores('totalP', { mail, perfilId }));
     }
-  }, [dispatch, mail, currentTab, cc?.perfil_id]);
+  }, [dispatch, mail, currentTab, perfilId, meusAmbientes?.length]);
 
   const handleChangeTab = (event, newValue) => {
     setItemValue(newValue, setCurrentTab, 'tabProcessos');

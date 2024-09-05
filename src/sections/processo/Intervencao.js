@@ -1,13 +1,8 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // utils
-import {
-  noEstado,
-  podeArquivar,
-  caixaPrincipal,
-  pertencoAoEstado,
-  arquivoAtendimento,
-} from '../../utils/validarAcesso';
+import { noEstado, podeArquivar, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
 // redux
 import { updateItem } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
@@ -19,7 +14,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { DefaultAction } from '../../components/Actions';
 import DialogConfirmar from '../../components/DialogConfirmar';
 //
-import { IntervencaoForm, FinalizarForm, ArquivarForm, ColocarPendente, Abandonar } from './form/IntervencaoForm';
+import { Encaminhar, Abandonar, Domiciliar, Arquivar, Finalizar, ColocarPendente } from './form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -29,44 +24,26 @@ export default function Intervencao({ colaboradoresList }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
   const { processo, isSaving } = useSelector((state) => state.digitaldocs);
-  const { isGerente, arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const perfilId = cc?.perfil_id;
-  const gerencia = noEstado(processo?.estado_processo?.estado, ['Gerência', 'Caixa Principal']);
-  const fromAgencia = uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências';
-  const aberturaEmpSemValCompliance =
-    gerencia &&
-    processo.segmento === 'E' &&
-    processo?.assunto === 'Abertura de conta' &&
-    !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento');
-
-  const devolucoes = [];
-  const seguimentos = [];
-  const destinosFora = [];
-  processo?.destinos?.forEach((row) => {
-    if (processo?.uo_origem_id !== row?.uo_id) {
-      destinosFora.push(row?.nome);
-    }
-    const destino = {
-      modo: row.modo,
-      label: row?.nome,
-      id: row.transicao_id,
-      paralelo: row?.paralelo,
-      hasopnumero: row.hasopnumero,
-      estado_final_id: row.estado_id,
-      requer_parecer: row?.requer_parecer,
-    };
-    if (row.modo === 'Seguimento') {
-      if (aberturaEmpSemValCompliance && row?.nome?.includes('Compliance')) {
-        seguimentos?.push(destino);
-      } else if (!aberturaEmpSemValCompliance) {
-        seguimentos?.push(destino);
-      }
-    } else {
-      devolucoes.push(destino);
-    }
-  });
+  const { arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const gerencia = useMemo(
+    () => noEstado(processo?.estado_processo?.estado, ['Gerência', 'Caixa Principal']),
+    [processo?.estado_processo?.estado]
+  );
+  const fromAgencia = useMemo(
+    () => uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências',
+    [processo?.uo_origem_id, uos]
+  );
+  const aberturaEmpSemValCompliance = useMemo(
+    () =>
+      gerencia &&
+      processo.segmento === 'E' &&
+      processo?.assunto === 'Abertura de conta' &&
+      !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento'),
+    [gerencia, processo?.assunto, processo?.htransicoes, processo.segmento]
+  );
+  const dados = useMemo(() => setDados(processo, aberturaEmpSemValCompliance), [aberturaEmpSemValCompliance, processo]);
 
   const handleFinalizar = () => {
     dispatch(
@@ -79,19 +56,23 @@ export default function Intervencao({ colaboradoresList }) {
     );
   };
 
-  const handleEdit = () => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`);
-  };
-
   return (
     <>
-      {devolucoes?.length > 0 && (
-        <IntervencaoForm title="DEVOLVER" destinos={devolucoes} colaboradoresList={colaboradoresList} />
+      <ColocarPendente />
+
+      {dados?.devolucoes?.length > 0 && (
+        <Encaminhar
+          title="DEVOLVER"
+          gerencia={gerencia}
+          destinos={dados?.devolucoes}
+          colaboradoresList={colaboradoresList}
+        />
       )}
 
-      {seguimentos?.length > 0 && (
-        <IntervencaoForm
-          destinos={seguimentos}
+      {dados?.seguimentos?.length > 0 && (
+        <Encaminhar
+          gerencia={gerencia}
+          destinos={dados?.seguimentos}
           colaboradoresList={colaboradoresList}
           title={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
         />
@@ -103,12 +84,12 @@ export default function Intervencao({ colaboradoresList }) {
         (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
         pertencoAoEstado(meusAmbientes, ['Autorização SWIFT']) && (
           <>
-            <DefaultAction icon="finalizar" handleClick={onOpen} label="FINALIZAR" />
+            <DefaultAction handleClick={onOpen} label="FINALIZAR" />
             <DialogConfirmar
               open={open}
               onClose={onClose}
               isSaving={isSaving}
-              handleOk={handleFinalizar}
+              handleOk={() => handleFinalizar()}
               color="success"
               title="Finalizar"
               desc="finalizar este processo"
@@ -120,7 +101,7 @@ export default function Intervencao({ colaboradoresList }) {
         processo?.operacao === 'Cativo/Penhora' &&
         processo?.estado_atual === 'DOP - Validação Notas Externas' &&
         pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && (
-          <FinalizarForm id={processo?.id} cativos={processo?.cativos} />
+          <Finalizar id={processo?.id} cativos={processo?.cativos} />
         )}
 
       <Abandonar
@@ -130,29 +111,24 @@ export default function Intervencao({ colaboradoresList }) {
         estadoId={processo?.estado_processo?.estado_id}
       />
 
-      <ColocarPendente />
+      {processo?.status === 'Inicial' && <Domiciliar id={processo?.id} estadoId={processo?.estado_atual_id} />}
 
-      <DefaultAction color="warning" handleClick={handleEdit} label="EDITAR" />
+      <DefaultAction
+        label="EDITAR"
+        color="warning"
+        handleClick={() => navigate(`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`)}
+      />
 
       {podeArquivar(
-        meusAmbientes,
         fromAgencia,
-        isGerente || caixaPrincipal(meusAmbientes),
+        meusAmbientes,
+        arquivarProcessos,
         processo?.estado_atual_id,
         arquivoAtendimento(
           processo?.assunto,
           processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
-        ),
-        arquivarProcessos
-      ) && (
-        <ArquivarForm
-          arquivoAg={
-            (gerencia || processo?.estado_atual?.includes('Atendimento')) && destinosFora?.length > 0
-              ? destinosFora
-              : []
-          }
-        />
-      )}
+        )
+      ) && <Arquivar naoFinal={dados?.destinosFora?.length > 0 ? dados?.destinosFora : []} />}
     </>
   );
 }
@@ -185,4 +161,37 @@ export function Libertar({ perfilID, processoID }) {
       />
     </>
   );
+}
+
+// ----------------------------------------------------------------------
+
+function setDados(processo, aberturaEmpSemValCompliance) {
+  const devolucoes = [];
+  const seguimentos = [];
+  const destinosFora = [];
+  processo?.destinos?.forEach((row) => {
+    if (processo?.uo_origem_id !== row?.uo_id) {
+      destinosFora.push(row?.nome);
+    }
+    const destino = {
+      modo: row.modo,
+      label: row?.nome,
+      id: row.transicao_id,
+      paralelo: row?.paralelo,
+      hasopnumero: row.hasopnumero,
+      estado_final_id: row.estado_id,
+      requer_parecer: row?.requer_parecer,
+    };
+    if (row.modo === 'Seguimento') {
+      if (aberturaEmpSemValCompliance && row?.nome?.includes('Compliance')) {
+        seguimentos?.push(destino);
+      } else if (!aberturaEmpSemValCompliance) {
+        seguimentos?.push(destino);
+      }
+    } else {
+      devolucoes.push(destino);
+    }
+  });
+
+  return { seguimentos, devolucoes, destinosFora };
 }

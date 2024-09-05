@@ -2,7 +2,7 @@ import { add } from 'date-fns';
 import PropTypes from 'prop-types';
 import { Page, View, Text, Document } from '@react-pdf/renderer';
 // utils
-import { ptDate } from '../../../utils/formatTime';
+import { ptDateTime } from '../../../utils/formatTime';
 // components
 import { styles, RodapeAlt, CabecalhoAlt } from '../../../components/ExportDados';
 
@@ -33,10 +33,10 @@ export default function ParecerExport({ dados }) {
             <Text>
               Data parecer:{' '}
               <Text style={[styles.caption]}>
-                {ptDate(data)}{' '}
+                {ptDateTime(data)}{' '}
                 {add(new Date(dados?.parecer?.data_limite), { days: 1 }) < new Date(data) && (
                   <Text style={[styles.captionError]}>
-                    (Atrasado: data limite {ptDate(dados?.parecer?.data_limite)})
+                    (Atrasado: data limite {ptDateTime(dados?.parecer?.data_limite)})
                   </Text>
                 )}
               </Text>

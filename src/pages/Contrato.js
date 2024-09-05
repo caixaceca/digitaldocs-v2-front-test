@@ -26,7 +26,6 @@ export default function Contrato() {
         <HeaderBreadcrumbs
           heading="Contratos"
           sx={{ color: 'text.secondary' }}
-          links={[{ name: '', href: '' }]}
           action={
             !!contrato && (
               <RoleBasedGuard hasContent roles={['contratos-100', 'contratos-110']}>

@@ -5,7 +5,7 @@ import { Font, StyleSheet } from '@react-pdf/renderer';
 Font.register({
   family: 'Neo Sans Std',
   fonts: [
-    { src: '/fonts/neo-sans-std.otf', fontWeight: 'normmal' },
+    { src: '/fonts/neo-sans-std.otf', fontWeight: 'normal' },
     { src: '/fonts/neo-sans-std-bold.otf', fontWeight: 'bold' },
   ],
 });
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
   subtitle2: { fontSize: 9, fontWeight: 'bold' },
 
   pr0: { paddingRight: 0 },
+  pr2: { paddingRight: 2 },
   pr10: { paddingRight: 10 },
 
   pl0: { paddingLeft: 0 },

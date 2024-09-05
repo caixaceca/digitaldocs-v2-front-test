@@ -33,7 +33,7 @@ PedidoCompleto.propTypes = { open: PropTypes.bool };
 export default function PedidoCompleto({ open }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId, cc } = useSelector((state) => state.intranet);
   const { pedidoForm, pedidoCC, isSaving } = useSelector((state) => state.cc);
   const anexosAtivos = pedidoCC?.anexos?.filter((item) => item.ativo) || [];
 
@@ -180,8 +180,8 @@ export default function PedidoCompleto({ open }) {
       dispatch(
         updateItemCC('pedido credito', formData, {
           mail,
+          perfilId,
           id: pedidoCC?.id,
-          perfilId: cc?.perfil_id,
           msg: 'Pedido atualizado',
           estadoId: pedidoCC?.ultimo_estado_id,
         })

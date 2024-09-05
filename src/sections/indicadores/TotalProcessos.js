@@ -77,7 +77,7 @@ export function Criacao({ periodo, indicadores }) {
     grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
     xaxis: {
       categories:
-        periodo === 'anual'
+        periodo === 'Anual'
           ? indicadores?.map((row) => row?.criado_em && fYear(row?.criado_em))
           : indicadores?.map((row) => row?.criado_em && fMShortYear(row?.criado_em)),
     },
@@ -105,8 +105,8 @@ export function Criacao({ periodo, indicadores }) {
                   total={row?.valor}
                   percentagem={row?.percentagem}
                   label={
-                    (row?.desc && periodo === 'anual' && fYear(row?.desc)?.toString()) ||
-                    (row?.desc && periodo === 'mensal' && fMonthYear(row?.desc)) ||
+                    (row?.desc && periodo === 'Anual' && fYear(row?.desc)?.toString()) ||
+                    (row?.desc && periodo === 'Mensal' && fMonthYear(row?.desc)) ||
                     row?.desc
                   }
                 />

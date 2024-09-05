@@ -25,10 +25,9 @@ ProcessoCredito.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, p
 export default function ProcessoCredito({ isEdit, processo, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId, cc } = useSelector((state) => state.intranet);
   const { meuAmbiente, linhas } = useSelector((state) => state.parametrizacao);
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const perfilId = cc?.perfil_id;
   const credito = processo?.credito || null;
 
   const formSchema = Yup.object().shape({
@@ -92,7 +91,7 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
     }),
     taxa_juro: Yup.mixed().when('situacao_final_mes', {
       is: (sit) => sit === 'Contratado',
-      then: () => Yup.number().positive().integer().label('Taxa de juro'),
+      then: () => Yup.number().positive().label('Taxa de juro'),
       otherwise: () => Yup.mixed().notRequired(),
     }),
     data_contratacao: Yup.mixed().when('situacao_final_mes', {

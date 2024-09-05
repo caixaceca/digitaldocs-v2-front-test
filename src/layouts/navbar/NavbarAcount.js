@@ -3,11 +3,17 @@ import { useMsal } from '@azure/msal-react';
 // @mui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
+import Badge from '@mui/material/Badge';
 import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
+import CircleIcon from '@mui/icons-material/Circle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 // utils
 import { getFile } from '../../utils/getFile';
 // redux
@@ -34,7 +40,7 @@ NavbarAcount.propTypes = { isCollapse: PropTypes.bool };
 
 export default function NavbarAcount({ isCollapse }) {
   const { instance, accounts } = useMsal();
-  const { cc } = useSelector((state) => state.intranet);
+  const { cc, myStatus } = useSelector((state) => state.intranet);
 
   return (
     <Link color="inherit" underline="none">
@@ -48,7 +54,28 @@ export default function NavbarAcount({ isCollapse }) {
         </Box>
       )}
       <RootStyle sx={{ ...(isCollapse && { p: 1 }) }}>
-        <MyAvatar name={accounts[0]?.name} src={getFile('colaborador', cc?.foto_disk)} sx={{ height: 44, width: 44 }} />
+        <Badge
+          overlap="circular"
+          badgeContent={
+            (myStatus === 'Available' && <CheckCircleIcon color="success" sx={{ width: 15, height: 15 }} />) ||
+            (myStatus === 'Busy' && <CircleIcon color="error" sx={{ width: 15, height: 15 }} />) ||
+            (myStatus === 'DoNotDisturb' && <DoNotDisturbOnIcon color="error" sx={{ width: 15, height: 15 }} />) ||
+            (myStatus === 'Away' && <AccessTimeFilledIcon color="warning" sx={{ width: 15, height: 15 }} />) ||
+            (myStatus === 'BeRightBack' && <AccessTimeFilledIcon color="warning" sx={{ width: 15, height: 15 }} />) ||
+            (myStatus === 'Offline' && <CancelIcon sx={{ width: 15, height: 15, color: 'focus.main' }} />) ||
+            (myStatus === 'OutOfOffice' && <CancelIcon sx={{ width: 15, height: 15, color: 'focus.main' }} />) || (
+              <DoNotDisturbOnIcon sx={{ width: 15, height: 15, color: 'focus.main' }} />
+            )
+          }
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          sx={{ '& .MuiBadge-badge': { p: 0, minWidth: 10, width: 10, height: 10, bgcolor: 'common.white' } }}
+        >
+          <MyAvatar
+            name={accounts[0]?.name}
+            sx={{ height: 44, width: 44 }}
+            src={getFile('colaborador', cc?.foto_disk)}
+          />
+        </Badge>
         <Box
           sx={{
             ml: 2,

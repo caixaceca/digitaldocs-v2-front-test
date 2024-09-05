@@ -9,11 +9,10 @@ import Container from '@mui/material/Container';
 // utils
 import { fYear } from '../utils/formatTime';
 import { canPreview } from '../utils/getFileFormat';
-import { temAcesso, temNomeacao, findColaboradores, pertencoEstadoId } from '../utils/validarAcesso';
+import { temAcesso, findColaboradores, pertencoEstadoId, gestorEstado } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { parecerEstadoSuccess } from '../redux/slices/cc';
-import { getAll, getProcesso, getAnexo, createItem, updateItem, closeModal } from '../redux/slices/digitaldocs';
+import { getAll, getProcesso, getAnexo, updateItem } from '../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
@@ -34,12 +33,12 @@ import {
   TableDetalhes,
 } from '../sections/processo/Detalhes';
 import {
+  Atribuir,
   Resgatar,
   Cancelar,
   Abandonar,
-  AtribuirForm,
-  DesarquivarForm,
-  AtribuirAcessoForm,
+  Restaurar,
+  Desarquivar,
 } from '../sections/processo/form/IntervencaoForm';
 import Intervencao from '../sections/processo/Intervencao';
 
@@ -53,20 +52,31 @@ export default function Processo() {
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
-  const { mail, uos, cc, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, uos, perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { processo, done, error, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
-  const { meusacessos, meusAmbientes, isGerente, isAdmin, auditoriaProcesso, colaboradoresEstado } = useSelector(
+  const { meusacessos, meusAmbientes, isAdmin, auditoriaProcesso, colaboradoresEstado } = useSelector(
     (state) => state.parametrizacao
   );
-  const perfilId = useMemo(() => cc?.perfil_id, [cc?.perfil_id]);
+  const historico = useMemo(
+    () => params?.get('from') === 'Pesquisa' && localStorage.getItem('procHistorico') === 'true',
+    [params]
+  );
+
+  useEffect(() => {
+    if (mail && id && perfilId) {
+      dispatch(getProcesso('processo', { id, mail, perfilId, historico }));
+    }
+  }, [dispatch, perfilId, mail, historico, id]);
+
   const fluxoId = useMemo(() => processo?.fluxo_id, [processo?.fluxo_id]);
-  const isResponsavel = useMemo(() => temNomeacao(cc) || isGerente, [cc, isGerente]);
+  const ultimaTransicao = useMemo(() => processo?.htransicoes?.[0], [processo?.htransicoes]);
   const estadoId = useMemo(() => processo?.estado_processo?.estado_id || '', [processo?.estado_processo?.estado_id]);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
   const perfilEstado = useMemo(
     () => processo?.estado_processo?.perfil_id || '',
     [processo?.estado_processo?.perfil_id]
   );
+
   const podeVerProxAnt = useMemo(
     () => !!estadoId && meusAmbientes?.find((row) => row?.id === estadoId),
     [meusAmbientes, estadoId]
@@ -86,29 +96,52 @@ export default function Processo() {
     [colaboradores, colaboradoresEstado]
   );
 
-  const handleAceitar = (estadoId, modo) => {
-    dispatch(updateItem('aceitar', null, { mail, id, fluxoId, perfilId, estadoId, modo, msg: 'Processo aceitado' }));
-  };
-
   const tabsList = useMemo(
     () => [
       { value: 'Dados gerais', component: <DadosGerais /> },
       ...(processo && processo?.estados?.length > 0
-        ? [{ value: 'Estados', component: <Estados handleAceitar={handleAceitar} /> }]
+        ? [{ value: 'Pareceres', component: <Estados handleAceitar={handleAceitar} /> }]
         : []),
-      ...(processo && processo?.pareceres_estado?.length > 0 ? [{ value: 'Pareceres', component: <Pareceres /> }] : []),
+      ...(processo && processo?.estado_processo?.pareceres?.length > 0
+        ? [
+            {
+              value: 'Pareceres',
+              component: (
+                <Pareceres
+                  id={id}
+                  estado={processo?.estado_processo?.estado}
+                  estadoId={processo?.estado_processo?.estado_id}
+                  pareceres={processo?.estado_processo?.pareceres}
+                  assunto={`${processo?.assunto} - ${processo?.titular}`}
+                />
+              ),
+            },
+          ]
+        : []),
       ...(processo && processo?.htransicoes?.length > 0
-        ? [{ value: 'Transições', component: <Transicoes transicoes={processo?.htransicoes} /> }]
+        ? [
+            {
+              value: 'Transições',
+              component: (
+                <Transicoes
+                  transicoes={processo?.htransicoes}
+                  assunto={`${processo?.assunto} - ${processo?.titular}`}
+                />
+              ),
+            },
+          ]
         : []),
-      ...(processo
+      ...(processo && !historico
         ? [
             { value: 'Retenções', component: <TableDetalhes id={processo?.id} item="hretencoes" /> },
             { value: 'Pendências', component: <TableDetalhes id={processo?.id} item="hpendencias" /> },
             { value: 'Atribuições', component: <TableDetalhes id={processo?.id} item="hatribuicoes" /> },
           ]
         : []),
-      ...(processo && (isAdmin || auditoriaProcesso) ? [{ value: 'Versões', component: <Versoes id={id} /> }] : []),
-      ...(processo && (isAdmin || auditoriaProcesso)
+      ...(processo && !historico && (isAdmin || auditoriaProcesso)
+        ? [{ value: 'Versões', component: <Versoes id={id} /> }]
+        : []),
+      ...(processo && !historico && (isAdmin || auditoriaProcesso)
         ? [{ value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> }]
         : []),
     ],
@@ -119,15 +152,9 @@ export default function Processo() {
   useEffect(() => {
     const anexoPreview = processo?.anexos?.filter((item) => item?.ativo)?.find((row) => !!canPreview(row));
     if (anexoPreview) {
-      dispatch(
-        getAnexo('filePreview', {
-          mail,
-          perfilId: cc?.perfil_id,
-          anexo: { ...anexoPreview, tipo: canPreview(anexoPreview) },
-        })
-      );
+      dispatch(getAnexo('filePreview', { mail, perfilId, anexo: { ...anexoPreview, tipo: canPreview(anexoPreview) } }));
     }
-  }, [dispatch, mail, cc?.perfil_id, processo?.anexos]);
+  }, [dispatch, mail, perfilId, processo?.anexos]);
 
   const proximoAnterior = (next) => {
     if (mail && perfilId && id && estadoId) {
@@ -143,13 +170,10 @@ export default function Processo() {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
     }
-    if (done === 'Parecer enviado') {
-      dispatch(parecerEstadoSuccess());
-    }
     if (
-      done === 'Parecer enviado' ||
       done === 'Processo arquivado' ||
       done === 'Processo devolvido' ||
+      done === 'Pendência eliminada' ||
       done === 'Processo finalizado' ||
       done === 'Processo encaminhado' ||
       done === 'Processo colocado pendente'
@@ -158,8 +182,10 @@ export default function Processo() {
       setCurrentTab('Dados gerais');
     }
     if (
+      done === 'Parecer enviado' ||
       done === 'Processo atribuído' ||
       done === 'Processo abandonado' ||
+      done === 'Processo domiciliado' ||
       done === 'Atribuição eliminada' ||
       done === 'Processo desarquivado'
     ) {
@@ -174,12 +200,7 @@ export default function Processo() {
       if (noMoreProcess && error?.includes('Atendimento')) {
         //
       } else {
-        enqueueSnackbar(
-          error === 'Processo não encontrado ou Não tem permissão para o vê-lo!'
-            ? 'Processo não encontrado ou não tens acesso'
-            : error,
-          { variant: noMoreProcess ? 'info' : 'error' }
-        );
+        enqueueSnackbar(error, { variant: noMoreProcess ? 'info' : 'error' });
       }
       if (noMoreProcess) {
         navigate(linkNavigate);
@@ -189,16 +210,10 @@ export default function Processo() {
   }, [error]);
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getProcesso('processo', { id, mail, perfilId }));
-    }
-  }, [dispatch, perfilId, mail, id]);
-
-  useEffect(() => {
-    if (mail && processo?.id) {
+    if (mail && processo?.id && !historico) {
       dispatch(getAll('htransicoes', { id: processo?.id, mail, perfilId }));
     }
-  }, [dispatch, mail, perfilId, processo?.id]);
+  }, [dispatch, mail, perfilId, historico, processo?.id]);
 
   useEffect(() => {
     if (mail && processo?.estado_processo?._lock && estadoId && perfilEstado === perfilId) {
@@ -206,12 +221,14 @@ export default function Processo() {
     }
   }, [dispatch, estadoId, id, mail, perfilId, perfilEstado, processo?.estado_processo]);
 
-  const handlePedirAcesso = () => {
-    dispatch(createItem('pedir acesso', '', { perfilId, id, mail, msg: 'Solicitação enviada' }));
-  };
+  useEffect(() => {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+      setCurrentTab(tabsList?.[0]?.value);
+    }
+  }, [tabsList, currentTab]);
 
-  const handleClose = () => {
-    dispatch(closeModal());
+  const handleAceitar = (estadoId, modo) => {
+    dispatch(updateItem('aceitar', null, { mail, id, fluxoId, perfilId, estadoId, modo, msg: 'Processo aceitado' }));
   };
 
   return (
@@ -221,10 +238,10 @@ export default function Processo() {
           sx={{ color: 'text.secondary' }}
           heading={
             processo
-              ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
+              ? `Info. do processo: ${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
                   processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                 }`
-              : 'Detalhes do processo'
+              : 'Info. do processo'
           }
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
@@ -234,7 +251,7 @@ export default function Processo() {
                 ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
                     processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                   }`
-                : 'Detalhes do processo',
+                : 'Info. do processo',
             },
           ]}
           action={
@@ -253,65 +270,60 @@ export default function Processo() {
                     ))}
                   {processo?.status === 'Arquivado' ? (
                     <>
-                      {temAcesso(['arquivo-110', 'arquivo-111'], meusacessos) ? (
-                        <>
-                          <AtribuirAcessoForm processoId={id} />
-                          <DesarquivarForm id={id} onCancel={handleClose} colaboradoresList={colaboradoresList} />
-                        </>
-                      ) : (
-                        <DefaultAction icon="acesso" label="SOLICITAR ACESSO" handleClick={handlePedirAcesso} />
-                      )}
+                      {(processo?.historico && isAdmin && <Restaurar id={id} />) ||
+                        (!processo?.historico && temAcesso(['arquivo-110', 'arquivo-111'], meusacessos) && (
+                          <Desarquivar id={id} colaboradoresList={colaboradoresList} />
+                        ))}
                     </>
                   ) : (
                     <>
                       {/* Transição em série */}
-                      {processo?.estado_processo &&
-                        processo?.estados?.length === 0 &&
-                        processo?.pareceres_estado?.length === 0 && (
-                          <>
-                            {/* Aceitar/Atribuir/Intervir */}
-                            {pertencoEstadoId(meusAmbientes, estadoId) && (
-                              <>
-                                {processo?.estado_processo?._lock && perfilEstado === perfilId ? (
-                                  <Intervencao colaboradoresList={colaboradoresList} />
-                                ) : (
-                                  <>
-                                    {!processo?.estado_processo?._lock &&
-                                      (!perfilEstado || perfilEstado === perfilId) && (
-                                        <DefaultAction
-                                          label="ACEITAR"
-                                          handleClick={() => handleAceitar(estadoId, 'serie')}
-                                        />
-                                      )}
-                                    {!processo?.estado_processo?._lock && (isResponsavel || isAdmin) && (
-                                      <AtribuirForm
-                                        colaboradoresList={colaboradoresList}
-                                        dados={{ fluxoId, estadoId, perfilId: perfilEstado, processoId: processo?.id }}
+                      {processo?.estado_processo && processo?.estados?.length === 0 && (
+                        <>
+                          {/* Aceitar/Atribuir/Intervir */}
+                          {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
+                            <>
+                              {processo?.estado_processo?._lock && perfilEstado === perfilId ? (
+                                <Intervencao colaboradoresList={colaboradoresList} />
+                              ) : (
+                                <>
+                                  {!processo?.estado_processo?._lock &&
+                                    (!perfilEstado || perfilEstado === perfilId) && (
+                                      <DefaultAction
+                                        label="ACEITAR"
+                                        handleClick={() => handleAceitar(estadoId, 'serie')}
                                       />
                                     )}
-                                  </>
-                                )}
-                              </>
-                            )}
-
-                            {/* Resgatar */}
-                            {!perfilEstado &&
-                              !processo?.pendente &&
-                              !processo?.estado_processo?._lock &&
-                              !processo?.htransicoes?.[0]?.resgate &&
-                              perfilId === processo?.htransicoes?.[0]?.perfil_id &&
-                              pertencoEstadoId(meusAmbientes, processo?.htransicoes?.[0]?.estado_inicial_id) && (
-                                <Resgatar
-                                  processoId={id}
-                                  fluxoId={fluxoId}
-                                  estadoId={processo?.htransicoes?.[0]?.estado_inicial_id}
-                                />
+                                  {!processo?.estado_processo?._lock && gestorEstado(meusAmbientes, estadoId) && (
+                                    <Atribuir
+                                      dados={{ fluxoId, estadoId, perfilIdA: perfilEstado, processoId: processo?.id }}
+                                    />
+                                  )}
+                                </>
                               )}
-                          </>
-                        )}
+                            </>
+                          )}
+                          {/* Resgatar */}
+                          {ultimaTransicao &&
+                            !processo?.pendente &&
+                            !ultimaTransicao?.resgate &&
+                            !processo?.estado_processo?._lock &&
+                            perfilId === ultimaTransicao?.perfil_id &&
+                            pertencoEstadoId(meusAmbientes, ultimaTransicao?.estado_inicial_id) &&
+                            (!ultimaTransicao?.pareceres || ultimaTransicao?.pareceres?.length === 0) &&
+                            (!processo?.estado_processo?.pareceres ||
+                              !processo?.estado_processo?.pareceres?.find((row) => row?.parecer_em)) && (
+                              <Resgatar
+                                processoId={id}
+                                fluxoId={fluxoId}
+                                estadoId={ultimaTransicao?.estado_inicial_id}
+                              />
+                            )}
+                        </>
+                      )}
 
                       {/* Transição em paralelo */}
-                      {processo?.estados?.length > 1 && (
+                      {processo?.estados?.length > 0 && (
                         <>
                           {pertencoEstadoId(meusAmbientes, estadoId) && (
                             <>
@@ -323,8 +335,11 @@ export default function Processo() {
                                     isSaving={isSaving}
                                     estadoId={estadoId}
                                   />
-                                  <Cancelar fluxoId={fluxoId} id={id} estadoId={processo?.estado_atual_id} />
-                                  <Cancelar cancelar id={id} fluxoId={fluxoId} estadoId={processo?.estado_atual_id} />
+                                  {processo?.estados?.find((row) => row?.parecer_em) ? (
+                                    <Cancelar id={id} estadoId={estadoId} fechar />
+                                  ) : (
+                                    <Cancelar id={id} estadoId={estadoId} />
+                                  )}
                                 </>
                               )}
                               {!processo?.estado_processo?._lock && (

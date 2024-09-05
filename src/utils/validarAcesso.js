@@ -28,28 +28,6 @@ export function temNomeacao(colaborador) {
 
 // ----------------------------------------------------------------------
 
-export function isResponsavelUo(uo, mail) {
-  let isResponsavel = false;
-  if (mail?.toLowerCase() === uo?.responsavel?.toLowerCase()) {
-    isResponsavel = true;
-  }
-  return isResponsavel;
-}
-
-// ----------------------------------------------------------------------
-
-export function uosResponsavel(uos, colaborador) {
-  const responsavel = [];
-  uos?.forEach((row) => {
-    if (row?.responsavel === colaborador?.perfil?.mail) {
-      responsavel.push(row?.id);
-    }
-  });
-  return responsavel;
-}
-
-// ----------------------------------------------------------------------
-
 export function nomeacaoBySexo(nomeacao, sexo) {
   let _nomeaca = nomeacao;
 
@@ -116,8 +94,8 @@ export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
     uosList = uos?.filter((uo) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Sul');
   } else if (cc?.uo?.label === 'DOP') {
     uosList = uos?.filter((uo) => uo?.label?.includes('DOP'));
-  } else if (UosGerente(meusAmbientes)?.length > 0) {
-    uosList = uos?.filter((uo) => UosGerente(meusAmbientes)?.includes(Number(uo?.id)));
+  } else if (meusAmbientes?.length > 0) {
+    uosList = uos?.filter((uo) => meusAmbientes?.map((row) => row?.uo_id)?.includes(Number(uo?.id)));
   } else {
     uosList = uos?.filter((uo) => uo?.id === cc?.uo_id);
   }
@@ -163,21 +141,14 @@ export function UosGerente(meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export const podeArquivar = (
-  meusAmbientes,
-  fromAgencia,
-  isGerente,
-  estadoAtualID,
-  arquivoAtendimento,
-  acessoArquivarProcesso
-) => {
-  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoAtualID));
+export const podeArquivar = (fromAgencia, meusAmbientes, arquivarProcesso, estadoId, arquivoAtendimento) => {
+  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoId));
   return (
-    (estadoProcesso?.is_inicial && fromAgencia && isGerente) ||
-    (estadoProcesso?.is_inicial && fromAgencia && arquivoAtendimento) ||
-    (estadoProcesso?.is_inicial && !fromAgencia) ||
-    estadoProcesso?.is_final ||
-    acessoArquivarProcesso
+    arquivarProcesso ||
+    estadoProcesso?.isfinal ||
+    (estadoProcesso?.isinicial && !fromAgencia) ||
+    (estadoProcesso?.isinicial && fromAgencia && arquivoAtendimento) ||
+    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, estadoId))
   );
 };
 
@@ -185,17 +156,17 @@ export const podeArquivar = (
 
 export const arquivarCC = (meusAmbientes, estadoAtualID) => {
   const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoAtualID));
-  return estadoProcesso?.is_inicial || estadoProcesso?.is_final;
+  return estadoProcesso?.isinicial || estadoProcesso?.isfinal;
 };
 
 // ----------------------------------------------------------------------
 
-export function podeSerAtribuido(assunto) {
+export function paraLevantamento(assunto) {
   return (
-    !assunto?.includes('Cartão') &&
-    !assunto?.includes('Extrato') &&
-    !assunto?.includes('Declarações') &&
-    !assunto?.includes('Cheques - Requisição')
+    assunto?.includes('Cartão') ||
+    assunto?.includes('Extrato') ||
+    assunto?.includes('Declarações') ||
+    assunto?.includes('Cheques - Requisição')
   );
 }
 
@@ -214,32 +185,13 @@ export function noEstado(estado, labels) {
 // ----------------------------------------------------------------------
 
 export function arquivoAtendimento(assunto, encGer) {
-  return (
-    (assunto?.includes('Cartão') ||
-      assunto?.includes('Extrato') ||
-      assunto?.includes('Declarações') ||
-      assunto?.includes('Cheques - Requisição') ||
-      assunto?.includes('Conta Caixa Ordenado')) &&
-    encGer
-  );
-}
-
-// ----------------------------------------------------------------------
-
-export function caixaPrincipal(meusAmbientes) {
-  return !!meusAmbientes?.find((row) => row?.nome?.includes('Caixa Principal'));
+  return (paraLevantamento(assunto) || assunto?.includes('Conta Caixa Ordenado')) && encGer;
 }
 
 // ----------------------------------------------------------------------
 
 export function estadoInicial(meusAmbientes) {
-  return !!meusAmbientes?.find((row) => row?.is_inicial);
-}
-
-// ----------------------------------------------------------------------
-
-export function pertencoEstadoId(meusAmbientes, estadoId) {
-  return !!meusAmbientes?.find((row) => row?.id === estadoId);
+  return !!meusAmbientes?.find((row) => row?.isinicial);
 }
 
 // ----------------------------------------------------------------------
@@ -250,15 +202,14 @@ export function pertencoAoEstado(meusAmbientes, estados) {
 
 // ----------------------------------------------------------------------
 
-export function podeDarParecer(meusAmbientes, pareceres) {
-  let parecer = false;
-  pareceres?.forEach((element) => {
-    if (meusAmbientes.some((row) => row.id === element?.estado_id) && !element?.validado) {
-      parecer = element;
-    }
-    return parecer;
-  });
-  return parecer;
+export function pertencoEstadoId(meusAmbientes, estadoId) {
+  return !!meusAmbientes?.find((row) => row?.id === estadoId);
+}
+
+// ----------------------------------------------------------------------
+
+export function gestorEstado(meusAmbientes, estadoId) {
+  return !!meusAmbientes?.find((row) => row?.id === estadoId && row?.gestor);
 }
 
 // ----------------------------------------------------------------------

@@ -25,8 +25,8 @@ DadosGerais.propTypes = { dados: PropTypes.object };
 export default function DadosGerais({ dados }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { cc } = useSelector((state) => state.intranet);
   const { pedidoForm } = useSelector((state) => state.cc);
+  const { perfilId, cc } = useSelector((state) => state.intranet);
   const { linhas } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
@@ -44,8 +44,8 @@ export default function DadosGerais({ dados }) {
 
   const defaultValues = useMemo(
     () => ({
+      perfil_id: pedidoForm?.perfil_id || perfilId,
       fluxo_id: pedidoForm?.fluxo_id || dados?.fluxo_id,
-      perfil_id: pedidoForm?.perfil_id || cc?.perfil?.id,
       salario: pedidoForm?.salario || dados?.salario || '',
       cliente: pedidoForm?.cliente || dados?.cliente || '',
       uo_origem_id: pedidoForm?.uo_origem_id || cc?.uo?.id,
@@ -65,7 +65,7 @@ export default function DadosGerais({ dados }) {
         (dados?.credito?.linha_id && { id: dados?.credito?.linha_id, label: dados?.credito?.linha }) ||
         null,
     }),
-    [dados, pedidoForm, cc]
+    [dados, perfilId, pedidoForm, cc]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });

@@ -32,7 +32,7 @@ export default function PareceresEstado({ pareceres, estado, normal = false }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(null);
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { cc, colaboradores } = useSelector((state) => state.intranet);
+  const { perfilId, colaboradores } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
@@ -84,7 +84,7 @@ export default function PareceresEstado({ pareceres, estado, normal = false }) {
                           </Typography>
                         )}
                       </Stack>
-                      {row.perfil_id === cc?.perfil_id && (
+                      {row.perfil_id === perfilId && (
                         <>
                           {(row?.descritivo && !row?.validado && (
                             <DefaultAction

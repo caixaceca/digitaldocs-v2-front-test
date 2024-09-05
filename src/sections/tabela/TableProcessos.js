@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -11,7 +11,6 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { estadoInicial } from '../../utils/validarAcesso';
 import { fToNow, ptDateTime, formatDate } from '../../utils/formatTime';
 import { normalizeText, entidadesParse, noDados, baralharString } from '../../utils/formatText';
 // hooks
@@ -34,7 +33,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'nentrada', label: 'Nº', align: 'left' },
+  { id: 'entrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -50,17 +49,6 @@ TableProcessos.propTypes = { from: PropTypes.string };
 export default function TableProcessos({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mail, cc, colaboradores } = useSelector((state) => state.intranet);
-  const { meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
-  const { isLoading, processosInfo, processos } = useSelector((state) => state.digitaldocs);
-  const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
-  const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
-  const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
-  const fluxoId = meuFluxo?.id;
-  const perfilId = cc?.perfil_id;
-  const estadoId = meuAmbiente?.id;
-  const fromAgencia = cc?.uo?.tipo === 'Agências';
-
   const {
     page,
     dense,
@@ -75,28 +63,49 @@ export default function TableProcessos({ from }) {
   } = useTable({
     defaultOrder: 'asc',
     defaultOrderBy: 'transitado_em',
-    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || (fromAgencia && 100) || 25),
+    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
+  const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
+  const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
+  const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
+  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
+  const { isLoading, processosInfo, processos } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, colaboradoresGestor, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
+  const fluxoId = useMemo(() => meuFluxo?.id, [meuFluxo?.id]);
+  const estadoId = useMemo(() => meuAmbiente?.id, [meuAmbiente?.id]);
+  const motivosList = useMemo(() => (from === 'Pendentes' ? dadosList(processos) : []), [from, processos]);
+  const colaboradoresList = useMemo(
+    () =>
+      colaboradores
+        ?.filter((row) => colaboradoresGestor?.includes(row?.perfil_id))
+        ?.map((item) => ({ id: item?.perfil_id, label: item?.perfil?.displayName })),
+    [colaboradores, colaboradoresGestor]
+  );
+  const [colaborador, setColaborador] = useState(
+    colaboradoresList?.find((row) => row?.id === Number(localStorage.getItem('colaboradorP'))) ||
+      colaboradoresList?.find((row) => row?.id === perfilId) ||
+      null
+  );
+  const colaboradorId = useMemo(() => colaborador?.id, [colaborador?.id]);
 
   useEffect(() => {
-    if (mail && perfilId) {
-      dispatch(resetItem('processos'));
-      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, segmento, pagina: 0 }));
+    if (colaboradoresList?.includes(colaborador?.id)) {
+      setColaborador(colaboradoresList?.find((row) => row?.id === perfilId));
     }
-  }, [dispatch, estadoId, fluxoId, perfilId, segmento, from, mail]);
+  }, [colaborador?.id, colaboradoresList, perfilId]);
 
-  const dados = dadosList(processos, colaboradores);
-
-  const [colaborador, setColaborador] = useState(
-    dados?.colaboradoresList?.find((row) => row === localStorage.getItem('colaboradorP')) || null
-  );
+  useEffect(() => {
+    if (mail && perfilId && meusAmbientes?.length > 0) {
+      dispatch(resetItem('processos'));
+      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, colaboradorId, segmento, pagina: 0 }));
+    }
+  }, [dispatch, estadoId, fluxoId, perfilId, colaboradorId, segmento, from, mail, meusAmbientes?.length]);
 
   const dataFiltered = applySortFilter({
     from,
     motivo,
     filter,
-    colaborador,
-    dados: dados?.dados,
+    dados: processos,
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
@@ -104,36 +113,37 @@ export default function TableProcessos({ from }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, segmento, colaborador, meuAmbiente?.id, meuFluxo?.id]);
+  }, [filter, segmento, colaborador?.id, meuAmbiente?.id, meuFluxo?.id]);
 
   const verMais = () => {
-    if (mail && perfilId && processosInfo?.proxima_pagina) {
-      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, segmento, pagina: processosInfo?.proxima_pagina }));
-    }
-  };
-
-  const handleAdd = () => {
-    navigate(PATH_DIGITALDOCS.processos.novoProcesso);
+    dispatch(
+      getAll(from, {
+        mail,
+        fluxoId,
+        estadoId,
+        perfilId,
+        segmento,
+        colaboradorId,
+        pagina: processosInfo?.proxima_pagina,
+      })
+    );
   };
 
   const handleView = (id, isCC) => {
-    if (isCC) {
-      navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${id}`);
-    } else {
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${id}`);
-    }
+    navigate(`${PATH_DIGITALDOCS.processos.root}${isCC ? '/cc/' : '/'}${id}`);
   };
 
   return (
     <>
       <HeaderBreadcrumbs
         heading={from}
-        links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
+        sx={{ px: 1 }}
         action={
           <Stack direction="row" spacing={1.5}>
-            <Registos info={processosInfo} total={processos?.length} handleClick={verMais} />
-            {estadoInicial([meuAmbiente]) && <AddItem button handleClick={handleAdd} />}
+            <Registos info={processosInfo} total={processos?.length} handleClick={() => verMais()} />
+            {!meuAmbiente?.observador && meuAmbiente?.isinicial && (
+              <AddItem button handleClick={() => navigate(PATH_DIGITALDOCS.processos.novoProcesso)} />
+            )}
           </Stack>
         }
       />
@@ -148,8 +158,9 @@ export default function TableProcessos({ from }) {
           meuAmbiente={meuAmbiente}
           setSegmento={setSegmento}
           colaborador={colaborador}
+          motivosList={motivosList}
           setColaborador={setColaborador}
-          colaboradoresList={dados?.colaboradoresList}
+          colaboradoresList={colaboradoresList}
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -173,7 +184,7 @@ export default function TableProcessos({ from }) {
                           noDados()}
                       </TableCell>
                       <TableCell>{row?.assunto ? row?.assunto : meuFluxo?.assunto}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ maxWidth: 400 }}>
                         {row?.estado && <Typography variant="body2">{row?.estado}</Typography>}
                         {row?.motivo && <Label>{row?.motivo}</Label>}
                         {row?.observacao && (
@@ -181,7 +192,6 @@ export default function TableProcessos({ from }) {
                             {row?.observacao}
                           </Typography>
                         )}
-                        {row?.colaborador && <Label>{baralharString(row?.colaborador)}</Label>}
                       </TableCell>
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.transitado_em && (
@@ -233,43 +243,30 @@ export default function TableProcessos({ from }) {
 
 // ----------------------------------------------------------------------
 
-export function dadosList(processos, colaboradores) {
-  const dados = [];
-  const colaboradoresList = [];
+function dadosList(processos) {
+  const motivosList = [];
   processos?.forEach((row) => {
-    const colaborador = colaboradores?.find((colaborador) => Number(colaborador.perfil_id) === Number(row?.perfil_id));
-    if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
-      colaboradoresList.push(colaborador?.perfil?.displayName);
+    if (row?.observacao === 'Para levantamento do pedido' && !motivosList.includes('Levantamento do pedido')) {
+      motivosList.push('Levantamento do pedido');
+    } else if (row?.motivo && !motivosList.includes(row?.motivo)) {
+      motivosList.push(row?.motivo);
     }
-    dados.push({ ...row, colaborador: colaborador?.perfil?.displayName || '' });
   });
-  return { dados, colaboradoresList };
+  return motivosList;
 }
 
-function applySortFilter({ dados, comparator, filter, colaborador, motivo, from }) {
+// ----------------------------------------------------------------------
+
+function applySortFilter({ dados, comparator, filter, motivo, from }) {
   dados = applySort(dados, comparator);
 
-  if ((from === 'atribuidos' || from === 'retidos') && colaborador) {
-    dados = dados.filter((row) => row?.colaborador === colaborador);
+  if (from === 'Pendentes' && motivo === 'Levantamento do pedido') {
+    dados = dados.filter((row) => row?.observacao && row?.observacao === 'Para levantamento do pedido');
   }
 
-  if (from === 'pendentes' && motivo === 'Levantamento do pedido') {
+  if (from === 'Pendentes' && motivo && motivo !== 'Levantamento do pedido') {
     dados = dados.filter(
-      (row) =>
-        row?.assunto?.includes('Cartão') ||
-        row?.assunto?.includes('Extrato') ||
-        row?.assunto?.includes('Declarações') ||
-        row?.assunto?.includes('Cheques - Requisição')
-    );
-  }
-
-  if (from === 'pendentes' && motivo === 'Outros') {
-    dados = dados.filter(
-      (row) =>
-        !row?.assunto?.includes('Cartão') &&
-        !row?.assunto?.includes('Extrato') &&
-        !row?.assunto?.includes('Declarações') &&
-        !row?.assunto?.includes('Cheques - Requisição')
+      (row) => row?.motivo && row?.motivo === motivo && row?.observacao !== 'Para levantamento do pedido'
     );
   }
 

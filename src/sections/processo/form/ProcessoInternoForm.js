@@ -64,7 +64,12 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
                       <RHFDatePicker name="data_inicio" label="Data de início" />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <RHFDatePicker name="data_arquivamento" label="Data de término" />
+                      <RHFDatePicker
+                        label="Data de término"
+                        name="data_arquivamento"
+                        minDate={values.data_inicio}
+                        disabled={!values.data_inicio}
+                      />
                     </Grid>
                   </>
                 )}
@@ -73,7 +78,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
           </Card>
         </Grid>
       )}
-      {fluxo?.is_con && (
+      {fluxo?.iscon && (
         <Grid item xs={12}>
           <Card>
             <CardContent>

@@ -39,7 +39,7 @@ import { codacessos, objetos } from '../../_mock';
 
 const TABLE_HEAD_ACESSOS = [
   { id: 'nome', label: 'Objeto', align: 'left' },
-  { id: 'acesso', label: 'Acesso', align: 'left' },
+  { id: 'acessoLabel', label: 'Acesso', align: 'left' },
   { id: 'datalimite', label: 'Data de término', align: 'center' },
   { id: '' },
 ];
@@ -48,6 +48,8 @@ const TABLE_HEAD_ESTADOS = [
   { id: 'nome', label: 'Nome', align: 'left' },
   { id: 'data_inicial', label: 'Data de iníco', align: 'center' },
   { id: 'data_limite', label: 'Data de término', align: 'center' },
+  { id: 'padrao', label: 'Padrão', align: 'center' },
+  { id: 'gestor', label: 'Gestor', align: 'center' },
   { id: 'observador', label: 'Observador', align: 'center' },
   { id: '' },
 ];
@@ -73,7 +75,7 @@ export default function TableAcessos({ tab }) {
 
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
   const { done, error, acessos, isLoading, isOpenModal, estadosPerfil } = useSelector((state) => state.parametrizacao);
 
@@ -85,7 +87,7 @@ export default function TableAcessos({ tab }) {
         ? acessos?.map((row) => ({
             ...row,
             nome: objetos.find((item) => item?.id === row?.objeto)?.label || row?.objeto,
-            acesso: codacessos.find((item) => item.id === row.acesso)?.label || row.acesso,
+            acessoLabel: codacessos.find((item) => item.id === row.acesso)?.label || row.acesso,
           }))
         : estadosPerfil,
   });
@@ -103,10 +105,10 @@ export default function TableAcessos({ tab }) {
   }, [dispatch, id, tab, mail]);
 
   useEffect(() => {
-    if (mail && id && cc?.perfil_id && tab === 'estados') {
-      dispatch(getFromParametrizacao('estadosPerfil', { mail, estadoId: id, perfilId: cc?.perfil_id }));
+    if (mail && id && perfilId && tab === 'estados') {
+      dispatch(getFromParametrizacao('estadosPerfil', { mail, estadoId: id, perfilId }));
     }
-  }, [dispatch, id, cc?.perfil_id, tab, mail]);
+  }, [dispatch, id, perfilId, tab, mail]);
 
   const handleCloseModal = () => {
     dispatch(closeModal());
@@ -115,6 +117,7 @@ export default function TableAcessos({ tab }) {
   return (
     <>
       <HeaderBreadcrumbs
+        sx={{ px: 1 }}
         heading={tab === 'acessos' ? 'Acessos' : 'Estados'}
         links={[
           { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
@@ -126,7 +129,6 @@ export default function TableAcessos({ tab }) {
             <AddItem />
           </RoleBasedGuard>
         }
-        sx={{ color: 'text.secondary', px: 1 }}
       />
       <RoleBasedGuard hasContent roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
         <Notificacao done={done} error={error} afterSuccess={handleCloseModal} />
@@ -143,14 +145,14 @@ export default function TableAcessos({ tab }) {
                 />
                 <TableBody>
                   {isLoading && isNotFound ? (
-                    <SkeletonTable column={tab === 'estados' ? 5 : 4} row={10} />
+                    <SkeletonTable column={tab === 'estados' ? 7 : 4} row={10} />
                   ) : (
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                       <TableRow hover key={`${tab}_${index}`}>
                         {tab === 'acessos' ? (
                           <>
                             <TableCell>{row?.nome}</TableCell>
-                            <TableCell>{row?.acesso}</TableCell>
+                            <TableCell>{row?.acessoLabel}</TableCell>
                             <TableCell align="center">
                               {row?.datalimite ? ptDateTime(row.datalimite) : 'Acesso permanente'}
                             </TableCell>
@@ -165,6 +167,12 @@ export default function TableAcessos({ tab }) {
                               {row?.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}
                             </TableCell>
                             <TableCell align="center" width={10}>
+                              <Checked check={row.padrao} />
+                            </TableCell>
+                            <TableCell align="center" width={10}>
+                              <Checked check={row.gestor} />
+                            </TableCell>
+                            <TableCell align="center" width={10}>
                               <Checked check={row.observador} />
                             </TableCell>
                           </>
@@ -173,7 +181,7 @@ export default function TableAcessos({ tab }) {
                           {tab === 'acessos' &&
                             row.objeto !== 'Processo' &&
                             (!row?.datalimite || (row?.datalimite && new Date(row?.datalimite) > new Date())) && (
-                              <UpdateItem item="acesso" id={row?.id} />
+                              <UpdateItem dados={row} />
                             )}
                           {tab === 'estados' &&
                             (emailCheck(mail, 'vc.axiac@arove.ordnavi') ||
@@ -205,11 +213,8 @@ export default function TableAcessos({ tab }) {
           )}
         </Card>
 
-        {tab === 'acessos' ? (
-          <AcessoForm isOpenModal={isOpenModal} onCancel={handleCloseModal} perfilId={id} />
-        ) : (
-          <EstadosPerfilForm onCancel={handleCloseModal} perfilId={id} />
-        )}
+        {tab === 'acessos' && isOpenModal && <AcessoForm onCancel={handleCloseModal} perfilIdA={id} />}
+        {tab === 'estados' && isOpenModal && <EstadosPerfilForm onCancel={handleCloseModal} perfilIdE={id} />}
       </RoleBasedGuard>
     </>
   );

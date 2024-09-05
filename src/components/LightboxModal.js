@@ -10,9 +10,8 @@ import { useTheme, alpha } from '@mui/material/styles';
 
 function LightboxModalStyles() {
   const theme = useTheme();
-  const isRTL = theme.direction === 'rtl';
 
-  const ICON_SIZE = 32;
+  const ICON_SIZE = 28;
   const ICON_COLOR = theme.palette.grey[600].replace('#', '');
 
   const getIcon = (icon) =>
@@ -26,31 +25,18 @@ function LightboxModalStyles() {
     backgroundImage: `unset`,
     backgroundColor: 'transparent',
     transition: theme.transitions.create('opacity'),
-    '&:before': {
-      display: 'block',
-      width: ICON_SIZE,
-      height: ICON_SIZE,
-      content: getIcon(icon),
-    },
-    '&:hover': {
-      opacity: 0.72,
-    },
+    '&:before': { display: 'block', width: ICON_SIZE, height: ICON_SIZE, content: getIcon(icon) },
+    '&:hover': { opacity: 0.72 },
   });
 
   return (
     <GlobalStyles
       styles={{
         '& .ReactModalPortal': {
-          '& .ril__outer': {
-            backgroundColor: alpha(theme.palette.grey[900], 0.96),
-          },
+          '& .ril__outer': { backgroundColor: alpha(theme.palette.grey[900], 0.96) },
 
           // Toolbar
-          '& .ril__toolbar': {
-            height: 'auto !important',
-            padding: theme.spacing(2, 3),
-            backgroundColor: 'transparent',
-          },
+          '& .ril__toolbar': { height: 'auto !important', padding: theme.spacing(2), backgroundColor: 'transparent' },
           '& .ril__toolbarLeftSide': { display: 'none' },
           '& .ril__toolbarRightSide': {
             height: 'auto !important',
@@ -58,13 +44,8 @@ function LightboxModalStyles() {
             flexGrow: 1,
             display: 'flex',
             alignItems: 'center',
-            '& li': {
-              display: 'flex',
-              alignItems: 'center',
-            },
-            '& li:first-of-type': {
-              flexGrow: 1,
-            },
+            '& li': { display: 'flex', alignItems: 'center' },
+            '& li:first-of-type': { flexGrow: 1 },
             '& li:not(:first-of-type)': {
               width: 40,
               height: 40,
@@ -78,22 +59,14 @@ function LightboxModalStyles() {
           '& .ril__toolbarRightSide button': {
             width: '100%',
             height: '100%',
+            '&.ril__closeButton': Icon('close'),
             '&.ril__zoomInButton': Icon('zoom-in'),
             '&.ril__zoomOutButton': Icon('zoom-out'),
-            '&.ril__closeButton': Icon('close'),
           },
           '& .ril__navButtons': {
-            padding: theme.spacing(3),
-            '&.ril__navButtonPrev': {
-              right: 'auto',
-              left: theme.spacing(2),
-              ...Icon(isRTL ? 'arrow-right' : 'arrow-left'),
-            },
-            '&.ril__navButtonNext': {
-              left: 'auto',
-              right: theme.spacing(2),
-              ...Icon(isRTL ? 'arrow-left' : 'arrow-right'),
-            },
+            padding: theme.spacing(2),
+            '&.ril__navButtonPrev': { right: 'auto', left: theme.spacing(2), ...Icon('arrow-left') },
+            '&.ril__navButtonNext': { left: 'auto', right: theme.spacing(2), ...Icon('arrow-right') },
           },
         },
       }}
@@ -102,10 +75,10 @@ function LightboxModalStyles() {
 }
 
 LightboxModal.propTypes = {
-  images: PropTypes.array.isRequired,
+  isOpen: PropTypes.bool,
   photoIndex: PropTypes.number,
   setPhotoIndex: PropTypes.func,
-  isOpen: PropTypes.bool,
+  images: PropTypes.array.isRequired,
 };
 
 export default function LightboxModal({ images, photoIndex, setPhotoIndex, isOpen, ...other }) {
@@ -123,11 +96,7 @@ export default function LightboxModal({ images, photoIndex, setPhotoIndex, isOpe
 
   const toolbarButtons = [showIndex];
 
-  const customStyles = {
-    overlay: {
-      zIndex: 9999,
-    },
-  };
+  const customStyles = { overlay: { zIndex: 9999 } };
 
   return (
     <>
@@ -136,12 +105,12 @@ export default function LightboxModal({ images, photoIndex, setPhotoIndex, isOpe
       {isOpen && (
         <Lightbox
           animationDuration={160}
-          nextSrc={images.length > 1 && images[(photoIndex + 1) % images.length]}
-          prevSrc={images.length > 1 && images[(photoIndex + images.length - 1) % images.length]}
+          reactModalStyle={customStyles}
+          toolbarButtons={toolbarButtons}
+          nextSrc={images.length > 1 ? images[(photoIndex + 1) % images.length] : ''}
+          prevSrc={images.length > 1 ? images[(photoIndex + images.length - 1) % images.length] : ''}
           onMovePrevRequest={() => setPhotoIndex((photoIndex + images.length - 1) % images.length)}
           onMoveNextRequest={() => setPhotoIndex((photoIndex + 1) % images.length)}
-          toolbarButtons={toolbarButtons}
-          reactModalStyle={customStyles}
           {...other}
         />
       )}

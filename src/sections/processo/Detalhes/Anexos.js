@@ -8,6 +8,7 @@ import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
+import CircularProgress from '@mui/material/CircularProgress';
 // utils
 import { emailCheck } from '../../../utils/validarAcesso';
 import { findColaborador } from '../../../utils/formatText';
@@ -42,8 +43,8 @@ Anexos.propTypes = { anexos: PropTypes.array };
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
-  const { filePreview, isLoadingAnexo, isLoadingP, processo } = useSelector((state) => state.digitaldocs);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { filePreview, isLoadingPreview, processo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = useMemo(
     () => anexos?.filter((row) => row.ativo && row?.anexo !== filePreview?.anexo),
     [anexos, filePreview?.anexo]
@@ -57,7 +58,7 @@ export default function Anexos({ anexos }) {
     dispatch(
       getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', {
         mail,
-        perfilId: cc?.perfil_id,
+        perfilId,
         anexo: { ...anexo, tipo: canPreview(anexo) },
       })
     );
@@ -71,7 +72,7 @@ export default function Anexos({ anexos }) {
         </ListItem>
       </List>
       {!!filePreview && <AnexoItem eliminado anexo={filePreview} preview />}
-      {isLoadingP || isLoadingAnexo ? (
+      {isLoadingPreview && !filePreview?.url ? (
         <Stack alignItems="center" justifyContent="center" sx={sx1}>
           <Loading />
           <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>
@@ -101,7 +102,7 @@ export default function Anexos({ anexos }) {
         {anexosInativos?.length > 0 && (
           <RoleBasedGuard roles={['Todo-111']}>
             <Divider sx={{ mt: 1, pb: 0.5 }}>
-              <Typography variant="subtitle1">Anexos eliminados</Typography>
+              <Typography variant="subtitle2">Anexos eliminados</Typography>
             </Divider>
             <Stack direction="column" alignItems="center" spacing={1}>
               {anexosInativos?.map((row) => (
@@ -127,18 +128,29 @@ AnexoItem.propTypes = {
   parecer: PropTypes.bool,
   viewAnexo: PropTypes.func,
   eliminado: PropTypes.bool,
+  parecerId: PropTypes.number,
+  transicaoId: PropTypes.number,
 };
 
-export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false, parecer = false }) {
+export function AnexoItem({
+  anexo,
+  preview,
+  parecerId = '',
+  parecer = false,
+  transicaoId = '',
+  viewAnexo = null,
+  eliminado = false,
+}) {
   const { colaboradores } = useSelector((state) => state.intranet);
+  const { isLoadingFile } = useSelector((state) => state.digitaldocs);
   return (
     <Button
       fullWidth
       variant="soft"
-      color="inherit"
-      disabled={preview}
-      onClick={() => viewAnexo(anexo)}
+      color={anexo?.url ? 'success' : 'inherit'}
       startIcon={getFileThumb(false, null, anexo?.nome)}
+      disabled={preview || isLoadingFile === anexo?.anexo}
+      onClick={() => viewAnexo(anexo, transicaoId, parecerId)}
       sx={{
         boxShadow: 'none',
         textAlign: 'left',
@@ -148,33 +160,33 @@ export function AnexoItem({ anexo, viewAnexo = null, preview, eliminado = false,
         borderBottomRightRadius: preview && 0,
         opacity: (preview && 1) || (eliminado && 0.75) || 1,
         color: (theme) => preview && `${theme.palette.text.primary} !important`,
+        '& .MuiButton-startIcon': { opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 },
       }}
     >
       <ListItemText
         primaryTypographyProps={{ variant: 'subtitle2' }}
+        sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 }}
         primary={`${anexo?.nome} ${preview ? '(Em pré-vizualização)' : ''}`}
         secondary={
-          <Stack
-            useFlexGap
-            flexWrap="wrap"
-            direction="row"
-            sx={{ mt: 0.25 }}
-            spacing={{ xs: 0.5, sm: 1 }}
-            divider={<Divider orientation="vertical" flexItem />}
-          >
+          <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ mt: 0.15 }} spacing={{ xs: 0.5, sm: 1.5 }}>
             {anexo?.criador && (
               <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} baralhar />
             )}
             {anexo?.criado_em && (
               <Criado
                 caption
-                tipo="time"
+                tipo={eliminado || parecer ? 'data' : 'time'}
                 value={eliminado || parecer ? ptDateTime(anexo?.criado_em) : ptTime(anexo?.criado_em)}
               />
             )}
           </Stack>
         }
       />
+      {isLoadingFile === anexo?.anexo && (
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ position: 'absolute' }}>
+          <CircularProgress size={34} thickness={5} />
+        </Stack>
+      )}
     </Button>
   );
 }

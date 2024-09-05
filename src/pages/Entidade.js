@@ -35,7 +35,7 @@ import RoleBasedGuard from '../guards/RoleBasedGuard';
 export default function Entidade() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { numEntidade, entidade, dadosComValores, isLoading } = useSelector((state) => state.banka);
   const [numero, setNumero] = useState(numEntidade);
@@ -55,10 +55,10 @@ export default function Entidade() {
   );
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && numEntidade) {
-      dispatch(getFromBanka('entidade', { mail, perfilId: cc?.perfil_id, numEntidade }));
+    if (mail && perfilId && numEntidade) {
+      dispatch(getFromBanka('entidade', { mail, perfilId, numEntidade }));
     }
-  }, [dispatch, cc?.perfil_id, numEntidade, mail]);
+  }, [dispatch, perfilId, numEntidade, mail]);
 
   const changeNumero = () => {
     dispatch(changeNumEntidade(numero));
@@ -70,7 +70,6 @@ export default function Entidade() {
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
           heading="Informações de Entidade"
-          links={[{ name: '', href: '' }]}
           action={
             <RoleBasedGuard roles={['entidades-100', 'entidades-110']}>
               <TextField

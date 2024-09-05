@@ -2,13 +2,12 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { fDateTime } from '../../../utils/formatTime';
+import { ptDateTime } from '../../../utils/formatTime';
 // redux
 import { getAll } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
@@ -27,7 +26,7 @@ export default function Versoes({ id }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
   const { isLoading, processo } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
+  const { mail, colaboradores, perfilId } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
@@ -40,13 +39,13 @@ export default function Versoes({ id }) {
   }, [dispatch, processo?.hversoes]);
 
   useEffect(() => {
-    if (mail && id && cc?.perfil_id) {
-      dispatch(getAll('hversoes', { mail, id, perfilId: cc?.perfil_id }));
+    if (mail && id && perfilId) {
+      dispatch(getAll('hversoes', { mail, id, perfilId }));
     }
-  }, [dispatch, id, mail, cc?.perfil_id]);
+  }, [dispatch, id, mail, perfilId]);
 
   return (
-    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
+    <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
       {isLoading ? (
         <SkeletonBar column={3} height={150} />
       ) : (
@@ -58,7 +57,7 @@ export default function Versoes({ id }) {
               const colaborador = colaboradores?.find((_row) => _row.perfil_id === row?.updated_by);
 
               return (
-                <Stack key={row?.updated_in}>
+                <Stack key={`versao_${index}`}>
                   <Accordion expanded={accord === row?.updated_in} onChange={handleAccord(row?.updated_in)}>
                     <AccordionSummary>
                       <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
@@ -67,7 +66,7 @@ export default function Versoes({ id }) {
                             Alterado em:
                           </Typography>
                           <Typography variant="subtitle1">
-                            {row?.updated_in ? fDateTime(row?.updated_in) : ''}
+                            {row?.updated_in ? ptDateTime(row?.updated_in) : ''}
                           </Typography>
                         </Stack>
                         <ColaboradorInfo
@@ -87,7 +86,6 @@ export default function Versoes({ id }) {
                       />
                     </AccordionDetails>
                   </Accordion>
-                  {accord !== row?.updated_in && processo?.hversoes?.length > index + 1 && <Divider />}
                 </Stack>
               );
             })

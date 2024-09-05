@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 // @mui
 import Typography from '@mui/material/Typography';
 // config
@@ -25,11 +24,15 @@ export function newLineText(text) {
 
 // ----------------------------------------------------------------------
 
-export function baralharString(str = '') {
-  if (ambiente === 'producao') {
+export function baralharString(str) {
+  if (!str || ambiente === 'producao') {
     return str;
   }
   return str;
+
+  // if (foto) {
+  //   return 'foto';
+  // }
 
   // const arr = str.split('');
 
@@ -110,50 +113,6 @@ export function numeroPorExtenso(valor) {
 
 // ----------------------------------------------------------------------
 
-export function converterParaOrdinal(numero, f) {
-  if (!Number.isInteger(numero)) {
-    throw new Error('Introduza um número inteiro.');
-  }
-  if (numero > 999) {
-    throw new Error('Introduza um número número menor que 1000.');
-  }
-  if (numero < 1) {
-    throw new Error('Introduza um número inteiro positivo.');
-  }
-  const g = f ? 'a' : 'o';
-  let txt = '';
-  if (numero < 1000 && numero > 99) {
-    const t = [
-      '',
-      'cent',
-      'ducent',
-      'trecent',
-      'quadrigent',
-      'quingent',
-      'sexcent',
-      'septigent',
-      'octigent',
-      'nongent',
-    ];
-    const n100 = Math.floor(numero / 100);
-    const l = numero - n100 * 100;
-    txt = `${t[n100]}ésim${g} ${l > 0 ? converterParaOrdinal(l, f) : ''}`;
-  }
-  if (numero < 100 && numero > 9) {
-    const x = ['', 'décimo', 'vig', 'trig', 'quadrag', 'quinquag', 'sexag', 'septuag', 'octog', 'nonag'];
-    const n10 = Math.floor(numero / 10);
-    const l = numero - n10 * 10;
-    txt = `${x[n10] + (n10 > 1 ? `ésim${g}` : '')} ${l > 0 ? converterParaOrdinal(l, f) : ''}`;
-  }
-  if (numero < 10 && numero > 0) {
-    const u = ['', 'primeir', 'segund', 'terceir', 'quart', 'quint', 'sext', 'sétim', 'oitav', 'non'];
-    txt = u[numero] + g;
-  }
-  return txt;
-}
-
-// ----------------------------------------------------------------------
-
 export function findColaborador(mail, colaboradores) {
   const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
   return colaborador
@@ -180,28 +139,4 @@ export function setItemValue(newValue, setItem, localS, id) {
   if (localS) {
     localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
   }
-}
-
-export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, valueF) {
-  setData(newValue);
-  if (localSI) {
-    localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
-  }
-  if (resetDate) {
-    if (newValue && dataValido(newValue) && newValue > valueF) {
-      resetDate(new Date());
-      if (localSIF) {
-        localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
-      }
-    } else if (!newValue) {
-      resetDate(null);
-      if (localSIF) {
-        localStorage.setItem(localSIF, '');
-      }
-    }
-  }
-}
-
-export function dataValido(data) {
-  return !!(data && data?.toString() !== 'Invalid Date');
 }

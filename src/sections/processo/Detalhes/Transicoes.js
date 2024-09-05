@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
@@ -9,26 +10,44 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
 import { getFile } from '../../../utils/getFile';
-import { newLineText } from '../../../utils/formatText';
 import { ptDateTime, fDistance } from '../../../utils/formatTime';
 // hooks
-import { getComparator, applySort } from '../../../hooks/useTable';
+import useResponsive from '../../../hooks/useResponsive';
 // redux
-import { useSelector } from '../../../redux/store';
+import { getAnexo } from '../../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
 import MyAvatar from '../../../components/MyAvatar';
+//
+import { Info, InfoCriador } from './Estados';
 
 // ----------------------------------------------------------------------
 
-Transicoes.propTypes = { transicoes: PropTypes.array };
+Transicoes.propTypes = { transicoes: PropTypes.array, assunto: PropTypes.string };
 
-export default function Transicoes({ transicoes }) {
+export default function Transicoes({ transicoes, assunto }) {
+  const dispatch = useDispatch();
+  const transicoesFiltered = useMemo(() => removeDuplicates(transicoes), [transicoes]);
+  const { mail, perfilId, colaboradores, uos } = useSelector((state) => state.intranet);
+
+  const viewAnexo = (anexo, transicaoId, parecerId) => {
+    dispatch(getAnexo('fileDownload', { mail, perfilId, anexo, transicaoId, parecerId }));
+  };
+
   return (
     <Timeline position="right" sx={{ p: { xs: 1, sm: 2 } }}>
-      {applySort(transicoes || [], getComparator('desc', 'data_saida'))?.map((row, index) => (
-        <Transicao transicao={row} key={`transicao_${index}`} addConector={index !== transicoes?.length - 1} />
+      {transicoesFiltered?.map((row, index) => (
+        <Transicao
+          uos={uos}
+          transicao={row}
+          assunto={assunto}
+          viewAnexo={viewAnexo}
+          key={`transicao_${index}`}
+          colaboradores={colaboradores}
+          addConector={index !== transicoesFiltered?.length - 1}
+        />
       ))}
     </Timeline>
   );
@@ -36,23 +55,50 @@ export default function Transicoes({ transicoes }) {
 
 // ----------------------------------------------------------------------
 
-Transicao.propTypes = { transicao: PropTypes.object, addConector: PropTypes.bool };
+Transicao.propTypes = {
+  uos: PropTypes.array,
+  assunto: PropTypes.string,
+  viewAnexo: PropTypes.func,
+  transicao: PropTypes.object,
+  addConector: PropTypes.bool,
+  colaboradores: PropTypes.array,
+};
 
-function Transicao({ transicao, addConector }) {
-  const { colaboradores } = useSelector((state) => state.intranet);
-  const criador = colaboradores?.find((colab) => colab?.perfil?.id === transicao?.perfil_id);
-  const arqSistema = transicao?.observacao?.includes('por inatividade a pelo menos 6 meses');
-  const acao =
-    (transicao?.resgate && 'Resgate') ||
-    (transicao?.transicao_paralelo && 'Seguimento em paralelo') ||
-    ((transicao?.modo === 'Arquivamento' || transicao?.modo === 'arquivamento') && 'Arquivo') ||
-    ((transicao?.modo === 'desarquivamento' || transicao?.modo === 'Desarquivamento') && 'Desarquivo') ||
-    transicao?.modo;
-  const color =
-    (acao === 'Resgate' && 'warning') ||
-    (acao === 'Devolução' && 'error') ||
-    ((acao === 'Arquivo' || acao === 'Desarquivo') && 'info') ||
-    'success';
+function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colaboradores = [] }) {
+  const isDesktop = useResponsive('up', 'md');
+  const acao = useMemo(
+    () =>
+      ((transicao?.resgate || transicao?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') &&
+        'Resgate') ||
+      ((transicao?.modo === 'Arquivamento' || transicao?.modo === 'arquivamento') && 'Arquivo') ||
+      ((transicao?.modo === 'desarquivamento' || transicao?.modo === 'Desarquivamento') && 'Desarquivamento') ||
+      transicao?.modo,
+    [transicao?.modo, transicao?.resgate, transicao?.observacao]
+  );
+  const criador = useMemo(
+    () =>
+      transicao?.domiciliacao || acao === 'Restauro'
+        ? colaboradores?.find((colab) => colab?.perfil?.mail === transicao?.perfil_id)
+        : colaboradores?.find((colab) => colab?.perfil?.id === transicao?.perfil_id),
+    [colaboradores, acao, transicao?.domiciliacao, transicao?.perfil_id]
+  );
+  const arqSistema = useMemo(
+    () => transicao?.observacao?.includes('por inatividade a pelo menos 6 meses'),
+    [transicao?.observacao]
+  );
+  const temPareceres = useMemo(() => transicao?.pareceres && transicao?.pareceres?.length > 0, [transicao?.pareceres]);
+  const temParecer = useMemo(
+    () => transicao?.parecer_em && (transicao?.parecer_favoravel === true || transicao?.parecer_favoravel === false),
+    [transicao?.parecer_em, transicao?.parecer_favoravel]
+  );
+  const color = useMemo(
+    () =>
+      (acao === 'Devolução' && 'error') ||
+      ((acao === 'Resgate' || acao === 'Restauro') && 'warning') ||
+      ((acao === 'Arquivo' || acao === 'Desarquivamento') && 'info') ||
+      'success',
+    [acao]
+  );
 
   return (
     <TimelineItem sx={{ '&:before': { display: 'none' }, mt: 0.5 }}>
@@ -79,20 +125,12 @@ function Transicao({ transicao, addConector }) {
               justifyContent="space-between"
               direction={{ xs: 'column', md: 'row' }}
             >
-              <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="center" alignItems="center" spacing={0.5}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="center" alignItems="center" spacing={1}>
                 <Label color={color}>{acao}</Label>
-                {acao !== 'Resgate' && acao !== 'Arquivo' && (
-                  <Stack
-                    alignItems="center"
-                    justifyContent="center"
-                    spacing={{ xs: -0.5, sm: 0.5 }}
-                    direction={{ xs: 'column', sm: 'row' }}
-                  >
-                    {acao !== 'Desarquivo' && <Typography variant="body2">{transicao?.estado_inicial}</Typography>}
-                    <DoubleArrowIcon
-                      color={color}
-                      sx={{ width: 20, transform: { xs: 'rotate(90deg)', sm: 'rotate(0deg)' } }}
-                    />
+                {acao !== 'Resgate' && acao !== 'Arquivo' && acao !== 'Restauro' && (
+                  <Stack alignItems="center" justifyContent="center" spacing={0.5} direction="row">
+                    {acao !== 'Desarquivamento' && <Typography variant="body2">{transicao?.estado_inicial}</Typography>}
+                    <DoubleArrowIcon color={color} sx={{ width: 20 }} />
                     <Typography variant="body2">{transicao?.estado_final}</Typography>
                   </Stack>
                 )}
@@ -105,65 +143,53 @@ function Transicao({ transicao, addConector }) {
               </Stack>
             </Stack>
           </Paper>
-          <Stack direction="row" spacing={1.5} sx={{ p: 2 }}>
-            {!!criador && !arqSistema && (
+          <Stack direction="row" spacing={1.5} sx={{ p: { xs: 1, sm: 2 } }}>
+            {!!criador && !arqSistema && isDesktop && (!temPareceres || acao === 'Resgate') && (
               <MyAvatar alt={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
             )}
-            <Stack spacing={0.5}>
-              {!!criador && !arqSistema && (
-                <Stack direction="row" spacing={{ xs: 1, sm: 3 }} alignItems="center" useFlexGap flexWrap="wrap">
-                  <Box>
-                    <Stack direction="row" alignItems="center" spacing={0.5}>
-                      <Typography noWrap variant="subtitle2">
-                        {criador?.perfil?.displayName}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        ({criador?.uo?.label})
-                      </Typography>
-                    </Stack>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      {criador?.perfil?.mail}
-                      {criador?.perfil?.businessPhones?.[0] ? ` | ${criador?.perfil?.businessPhones?.[0]}` : ''}
-                    </Typography>
-                  </Box>
-                  {(transicao?.parecer_favoravel === false || transicao?.parecer_favoravel === true) && (
-                    <Label color={transicao?.parecer_favoravel ? 'success' : 'error'} variant="outlined">
-                      Parecer {transicao?.parecer_favoravel ? 'Favorável' : 'Não Favorável'}
-                    </Label>
-                  )}
-                </Stack>
+            <Stack sx={{ width: 1 }}>
+              {!!criador && !arqSistema && (!temPareceres || acao === 'Resgate') && (
+                <InfoCriador criador={criador} isDesktop={isDesktop} />
               )}
               {acao !== 'Resgate' && (
                 <>
+                  {transicao?.domiciliacao && !!transicao?.uo_origem_id && !!transicao?.uo_destino_id && (
+                    <Stack sx={{ mt: 2 }}>
+                      <Box>
+                        <Label color="info">Domiciliação do processo</Label>
+                      </Box>
+                      <Stack alignItems="center" spacing={0.5} direction="row">
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          U.O. origem:
+                        </Typography>
+                        <Typography>
+                          {uos?.find((row) => row?.id === transicao?.uo_origem_id)?.desegnicao ||
+                            transicao?.uo_origem_id}
+                        </Typography>
+                      </Stack>
+                      <Stack alignItems="center" spacing={0.5} direction="row">
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          U.O. destino:
+                        </Typography>
+                        <Typography>
+                          {uos?.find((row) => row?.id === transicao?.uo_destino_id)?.desegnicao ||
+                            transicao?.uo_destino_id}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  )}
                   {arqSistema ? (
                     <Typography>
                       O processo foi arquivado automaticamente pelo sistema devido a um período de inatividade contínua
                       de, no mínimo, seis meses.
                     </Typography>
                   ) : (
-                    <>
-                      {transicao?.observacao && <Typography>{newLineText(transicao.observacao)}</Typography>}
-                      {transicao?.data_parecer && (
-                        <Stack sx={{ pt: 2 }}>
-                          <Stack spacing={0.5} direction="row" alignItems="center">
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                              Parecer:
-                            </Typography>
-                            <Label variant="ghost" color={(transicao?.parecer_favoravel && 'success') || 'error'}>
-                              {transicao?.parecer_favoravel ? 'Favorável' : 'Não favorável'}
-                            </Label>
-                          </Stack>
-                          <Stack
-                            spacing={0.5}
-                            direction="row"
-                            alignItems="center"
-                            justifyContent={{ xs: 'center', sm: 'left' }}
-                          >
-                            <Typography variant="caption">{ptDateTime(transicao?.data_parecer)}</Typography>
-                          </Stack>
-                        </Stack>
-                      )}
-                    </>
+                    <Info
+                      viewAnexo={viewAnexo}
+                      temParecer={temParecer}
+                      colaboradores={temPareceres ? colaboradores : []}
+                      dados={{ ...transicao, assunto, perfil: criador?.perfil, temPareceres }}
+                    />
                   )}
                 </>
               )}
@@ -173,4 +199,21 @@ function Transicao({ transicao, addConector }) {
       </TimelineContent>
     </TimelineItem>
   );
+}
+
+// ----------------------------------------------------------------------
+
+function removeDuplicates(arr) {
+  const seen = new Map();
+  return arr.filter((item) => {
+    if (item.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.' && item.data_saida) {
+      const key = item.data_saida;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.set(key, true);
+      return true;
+    }
+    return true;
+  });
 }

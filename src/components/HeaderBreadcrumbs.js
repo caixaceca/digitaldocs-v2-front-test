@@ -19,13 +19,13 @@ HeaderBreadcrumbs.propTypes = {
 
 export default function HeaderBreadcrumbs({ links, action, heading, moreLink = '' || [], sx, ...other }) {
   return (
-    <Box sx={{ mb: 3, ...sx }}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
+    <Box sx={{ mb: 3, color: 'text.secondary', ...sx }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={1}>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4" gutterBottom sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
             {heading}
           </Typography>
-          <Breadcrumbs links={links} {...other} />
+          {links && <Breadcrumbs links={links} {...other} />}
         </Box>
 
         {action && <Box sx={{ flexShrink: 0 }}>{action}</Box>}

@@ -172,10 +172,6 @@ const slice = createSlice({
       state.isOpenModal = true;
     },
 
-    openModalItem(state) {
-      state.isOpenModal = true;
-    },
-
     selectItem(state, action) {
       state.selectedItem = action.payload;
     },

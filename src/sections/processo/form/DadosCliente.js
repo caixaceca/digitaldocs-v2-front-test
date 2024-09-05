@@ -107,7 +107,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
               <RHFTextField name="email" label="Email" />
             </Grid>
           )}
-          {(noperacao || fluxo?.is_con) && (
+          {(noperacao || fluxo?.iscon) && (
             <>
               <Grid item xs={12} sm={6} xl={3}>
                 <RHFNumberField tipo="moeda" name="valor" label="Valor" />

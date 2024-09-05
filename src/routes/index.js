@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, acquireToken, authenticateColaborador } from '../redux/slices/intranet';
+import { getFromIntranet, acquireToken, getMyStatus, authenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -40,8 +40,10 @@ export default function Router() {
   useEffect(() => {
     if (mail && perfil?.colaborador?.id) {
       dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
+      dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
+      dispatch(getMyStatus(accessToken));
     }
-  }, [dispatch, perfil?.colaborador?.id, mail, perfil?.mail]);
+  }, [dispatch, perfil?.colaborador?.id, mail, perfil?.mail, accessToken]);
 
   useEffect(() => {
     if (perfil?.mail && perfil?.id && cc?.id) {
@@ -50,13 +52,13 @@ export default function Router() {
       dispatch(getFromIntranet('frase', { mail: perfil?.mail }));
       dispatch(getFromIntranet('aplicacoes', { mail: perfil?.mail }));
       dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
-      dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
+      //
       dispatch(getFromParametrizacao('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
       dispatch(getFromParametrizacao('origens', { mail: perfil?.mail, perfilId: perfil?.id }));
       dispatch(getFromParametrizacao('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
       dispatch(getFromParametrizacao('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('ambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
       dispatch(getFromParametrizacao('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('meusambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
       dispatch(
         getFromIntranet('disposicao', { mail: perfil?.mail, id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') })
       );

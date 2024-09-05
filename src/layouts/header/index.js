@@ -5,7 +5,6 @@ import Snowfall from 'react-snowfall';
 // @mui
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Dialog from '@mui/material/Dialog';
@@ -232,84 +231,150 @@ function IconButtonHead({ open, title, icon, onOpen, ...sx }) {
 
 function Parabens() {
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { cc, aniversariantes, tempoServico } = useSelector((state) => state.intranet);
-  const aniversarianteHoje = aniversariantes
-    ?.filter((row) => formatDate(row.data_cel_aniv, 'dd') === formatDate(new Date(), 'dd'))
-    ?.find((item) => item?.id === cc.id);
-  const tempoServicoHoje = tempoServico
-    ?.filter((row) => formatDate(row.data_admissao, 'dd') === formatDate(new Date(), 'dd'))
-    ?.find((item) => item?.id === cc.id);
+  const { cc } = useSelector((state) => state.intranet);
+  const aniversarianteHoje =
+    cc?.data_cel_aniv && formatDate(cc?.data_cel_aniv, 'dd-MM') === formatDate(new Date(), 'dd-MM');
+  const tempoServicoHoje =
+    cc?.data_admissao && formatDate(cc?.data_admissao, 'dd-MM') === formatDate(new Date(), 'dd-MM');
+  const anos = tempoServicoHoje ? formatDate(new Date(), 'yyyy') - formatDate(cc?.data_admissao, 'yyyy') : 0;
 
-  return (
+  return !!aniversarianteHoje || !!tempoServicoHoje ? (
     <>
-      {!!aniversarianteHoje || !!tempoServicoHoje ? (
-        <>
-          <Tooltip arrow title="Parabéns">
-            <IconButtonAnimate size="small" onClick={onOpen}>
-              <m.div animate={{ rotate: [0, -20, 0, 20, 0] }} transition={{ duration: 1, repeat: Infinity }}>
-                <Image src="/assets/icons/gift.svg" sx={{ width: 36, height: 36 }} />
-              </m.div>
-            </IconButtonAnimate>
-          </Tooltip>
-          <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <Image
-              src="/assets/icons/gift.svg"
-              sx={{ opacity: 0.15, height: 1, width: 1, objectFit: 'cover', position: 'absolute' }}
-            />
-            <Box sx={{ p: { xs: 3, sm: 5 }, textAlign: 'center', backgroundColor: 'success.main' }}>
-              <Stack direction="row" justifyContent="center" alignItems="center" sx={{ pb: { xs: 3, sm: 4 } }}>
-                <Image src="/assets/icons/party.svg" sx={{ width: 40, height: 40, color: '#fff' }} />
-                <Typography variant="h4" sx={{ color: 'common.white', px: 2, zIndex: 2 }}>
-                  Parabéns: {cc?.perfil?.displayName}
+      <Tooltip arrow title="Parabéns">
+        <IconButtonAnimate size="small" onClick={onOpen}>
+          <m.div animate={{ rotate: [0, -20, 0, 20, 0] }} transition={{ duration: 1, repeat: Infinity }}>
+            <Image src="/assets/icons/gift.svg" sx={{ width: 36, height: 36 }} />
+          </m.div>
+        </IconButtonAnimate>
+      </Tooltip>
+      <Dialog
+        fullWidth
+        open={open}
+        maxWidth="xs"
+        scroll="paper"
+        onClose={onClose}
+        PaperProps={{ style: { overflow: 'hidden' } }}
+      >
+        <Logo
+          sx={{
+            opacity: 0.1,
+            width: '155%',
+            height: '155%',
+            position: 'absolute',
+            transform: 'rotate(37deg)',
+            left: aniversarianteHoje && tempoServicoHoje ? '55%' : '60%',
+            bottom: aniversarianteHoje && tempoServicoHoje ? '-80%' : '-70%',
+          }}
+        />
+        <Box sx={{ p: { xs: 4, sm: 8 } }}>
+          <Stack
+            spacing={1}
+            sx={{
+              color: 'success.main',
+              fontWeight: 'normal',
+              pt: (aniversarianteHoje && tempoServicoHoje && 1) || (tempoServicoHoje && 3) || 5,
+            }}
+          >
+            <Stack>
+              <Typography variant="subtitle1">Parabéns:</Typography>
+              <Typography variant="subtitle1">{cc?.perfil?.displayName}</Typography>
+              {aniversarianteHoje ? (
+                <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                  Feliz Aniversário!
                 </Typography>
-                <Image src="/assets/icons/party.svg" sx={{ width: 40, height: 40, color: '#fff' }} />
-              </Stack>
-              <Card sx={{ p: { xs: 3, sm: 5 } }}>
-                <Typography variant="h6" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                  {aniversarianteHoje ? (
-                    <>
-                      Trouxemos este bolo para comemorar o seu aniversário.
-                      <br />
-                      <br />
-                      <Stack direction="row" justifyContent="center">
-                        <Image src="/assets/icons/cake.svg" sx={{ width: 150, height: 150 }} />
-                      </Stack>
-                      <br />
-                      A CAIXA deseja-lhe um dia cheio de abraços, afetos e principalmente muita saúde.
-                      <br />
-                    </>
-                  ) : (
-                    ''
-                  )}
-                  {tempoServicoHoje ? (
-                    <>
-                      {aniversarianteHoje ? <br /> : ''}
-                      <Typography variant="h5" sx={{ color: 'success.main' }}>
-                        {formatDate(new Date(), 'yyyy') - formatDate(tempoServicoHoje?.data_admissao, 'yyyy')}
-                        &nbsp;anos de serviço
-                      </Typography>
-                      <br />
-                      É com enorme prazer e estima que a CAIXA comemora consigo, mais um ano de parceria, aprendizado,
-                      empenho e dedicação.
-                      <br />
-                      <br />
-                      Obrigado por fazer parte desta Família.
-                      <br />
-                    </>
-                  ) : (
-                    ''
-                  )}
+              ) : (
+                <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                  {anos} ano{anos > 1 ? 's' : ''} de serviço!
                 </Typography>
-              </Card>
-              <Stack direction="row" justifyContent="center" sx={{ mt: { xs: 3, sm: 4 } }}>
-                <Image src="/assets/Caixa_Logo_Branco_sem_fundo.png" sx={{ width: 130 }} />
-              </Stack>
-            </Box>
-          </Dialog>
-        </>
-      ) : (
-        ''
-      )}
+              )}
+            </Stack>
+            {aniversarianteHoje ? (
+              <>
+                <SvgIconStyle
+                  src="/assets/icons/party.svg"
+                  sx={{
+                    top: 33,
+                    width: 25,
+                    right: 65,
+                    height: 25,
+                    position: 'absolute',
+                    color: 'success.main',
+                    transform: 'rotate(-60deg)',
+                  }}
+                />
+                <SvgIconStyle
+                  src="/assets/icons/party.svg"
+                  sx={{ position: 'absolute', width: 37, height: 37, color: 'success.main', right: 30, top: 30 }}
+                />
+                <SvgIconStyle
+                  src="/assets/icons/party.svg"
+                  sx={{
+                    top: 65,
+                    width: 25,
+                    right: 35,
+                    height: 25,
+                    position: 'absolute',
+                    color: 'success.main',
+                    transform: 'rotate(60deg)',
+                  }}
+                />
+                <SvgIconStyle
+                  src="/assets/icons/calendarcake.svg"
+                  sx={{ position: 'absolute', width: 100, height: 100, color: 'success.main', right: 50, top: 60 }}
+                />
+                <Stack>
+                  <Typography>É com muita alegria que a</Typography>
+                  <Typography>Caixa celebra contigo este</Typography>
+                  <Typography>dia especial.</Typography>
+                </Stack>
+              </>
+            ) : (
+              ''
+            )}
+            {tempoServicoHoje ? (
+              <>
+                <SvgIconStyle
+                  src="/assets/icons/medal.svg"
+                  sx={{
+                    right: 30,
+                    width: 100,
+                    height: 100,
+                    position: 'absolute',
+                    color: 'success.main',
+                    top: aniversarianteHoje ? 230 : 30,
+                  }}
+                />
+                {aniversarianteHoje && (
+                  <Typography variant="subtitle1" sx={{ pt: 3 }}>
+                    {anos} ano{anos > 1 ? 's' : ''} de serviço!
+                  </Typography>
+                )}
+                <Stack>
+                  <Typography>É com grande prazer e estima</Typography>
+                  <Typography>que a Caixa comemora contigo {anos > 1 ? 'mais' : ''}</Typography>
+                  <Typography>um ano de parceria, aprendizado,</Typography>
+                  <Typography>empenho e dedicação.</Typography>
+                </Stack>
+                <Stack>
+                  <Typography>Agradecemos por todo</Typography>
+                  <Typography>o teu esforço e companheirismo</Typography>
+                  <Typography>
+                    ao longo deste{anos > 1 ? 's' : ''} ano{anos > 1 ? 's' : ''}.
+                  </Typography>
+                </Stack>
+              </>
+            ) : (
+              ''
+            )}
+            <Stack>
+              <Typography>Obrigado por fazeres parte</Typography>
+              <Typography>desta Família.</Typography>
+            </Stack>
+          </Stack>
+        </Box>
+      </Dialog>
     </>
+  ) : (
+    ''
   );
 }

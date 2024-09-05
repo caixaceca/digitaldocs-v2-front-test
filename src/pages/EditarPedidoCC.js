@@ -48,29 +48,29 @@ export default function EditarPedidoCC() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isLoading, pedidoCC, activeStep, tipoItem, garantiaId, entidadeId, itemId, isSaving, done, error } =
     useSelector((state) => state.cc);
   const completed = activeStep === STEPS.length;
 
   useEffect(() => {
-    if (mail && id && cc?.perfil_id) {
-      dispatch(getFromCC('pedido cc', { id, perfilId: cc?.perfil_id, mail }));
+    if (mail && id && perfilId) {
+      dispatch(getFromCC('pedido cc', { id, perfilId, mail }));
     }
-  }, [dispatch, id, cc?.perfil_id, mail]);
+  }, [dispatch, id, perfilId, mail]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id) {
+    if (mail && perfilId) {
       dispatch(getFromCC('despesas', { mail }));
       dispatch(getFromCC('anexos ativos', { mail }));
     }
-  }, [dispatch, cc?.perfil_id, mail]);
+  }, [dispatch, perfilId, mail]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id) {
-      dispatch(getFromParametrizacao('linhas', { perfilId: cc?.perfil_id, mail }));
+    if (mail && perfilId) {
+      dispatch(getFromParametrizacao('linhas', { perfilId, mail }));
     }
-  }, [dispatch, cc?.perfil_id, mail]);
+  }, [dispatch, perfilId, mail]);
 
   useEffect(() => {
     if (mail && pedidoCC?.fluxo_id) {
@@ -84,9 +84,9 @@ export default function EditarPedidoCC() {
         updateItemCC(tipoItem, null, {
           mail,
           itemId,
+          perfilId,
           entidadeId,
           garantiaId,
-          perfilId: cc?.perfil_id,
           processoId: pedidoCC?.id,
           msg: `${tipoItem?.includes('anexo') ? 'Anexo' : 'Item'} eliminado`,
         })
@@ -134,13 +134,13 @@ export default function EditarPedidoCC() {
         <PedidoSteps activeStep={activeStep} steps={STEPS} />
         {isLoading ? (
           <Card sx={{ mb: 3 }}>
-            <Skeleton variant="text" sx={{ height: cc ? 550 : 350, transform: 'none' }} />
+            <Skeleton variant="text" sx={{ height: perfilId ? 550 : 350, transform: 'none' }} />
           </Card>
         ) : (
           <>
             {pedidoCC ? (
               <>
-                {pedidoCC?.preso && pedidoCC?.perfil_id === cc?.perfil_id ? (
+                {pedidoCC?.preso && pedidoCC?.perfil_id === perfilId ? (
                   <>
                     {completed ? (
                       <PedidoCompleto open={completed} isEdit />

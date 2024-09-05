@@ -11,6 +11,7 @@ export function applySortFilter({ dados, filter, comparator }) {
   if (filter) {
     dados = dados.filter(
       (row) =>
+        (row?.uo && normalizeText(row?.uo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.obs && normalizeText(row?.obs).indexOf(normalizeText(filter)) !== -1) ||
         (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
         (row?.tipo && normalizeText(row?.tipo).indexOf(normalizeText(filter)) !== -1) ||

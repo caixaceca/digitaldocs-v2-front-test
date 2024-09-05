@@ -83,7 +83,7 @@ export default function Acessos() {
 
   return (
     <>
-      <HeaderBreadcrumbs heading="Acessos" links={[{ name: '' }]} action="" sx={{ color: 'text.secondary', px: 1 }} />
+      <HeaderBreadcrumbs heading="Acessos" sx={{ px: 1 }} />
       <RoleBasedGuard
         hasContent
         roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}

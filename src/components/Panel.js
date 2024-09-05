@@ -25,10 +25,10 @@ import { DefaultAction } from './Actions';
 
 // ----------------------------------------------------------------------
 
-Panel.propTypes = { sx: PropTypes.object, label: PropTypes.string, children: PropTypes.node };
+Panel.propTypes = { sx: PropTypes.object, label: PropTypes.string, value: PropTypes.string };
 
-export default function Panel({ label, children, sx }) {
-  return (
+export default function Panel({ label, value, sx }) {
+  return value ? (
     <Stack
       direction="row"
       alignItems="stretch"
@@ -50,9 +50,13 @@ export default function Panel({ label, children, sx }) {
       )}
 
       <Label variant="ghost" sx={{ textTransform: 'none', pt: 1.75, pb: 2, width: 1, color: 'text.secondary' }}>
-        {children}
+        <Typography noWrap sx={{ color: 'text.primary' }}>
+          {value}
+        </Typography>
       </Label>
     </Stack>
+  ) : (
+    ''
   );
 }
 
@@ -69,7 +73,7 @@ Criado.propTypes = {
 export function Criado({ tipo = '', value, caption = false, baralhar = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.secondary' };
   return (
-    <Stack direction="row" spacing={0.5} alignItems="center" {...sx}>
+    <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" {...sx}>
       {(tipo === 'uo' && <BusinessIcon sx={{ ...styles }} />) ||
         (tipo === 'data' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'warning' && <WarningAmberIcon sx={{ ...styles }} />) ||
@@ -89,13 +93,15 @@ export function Criado({ tipo = '', value, caption = false, baralhar = false, sx
 
 ColaboradorInfo.propTypes = {
   sx: PropTypes.object,
+  other: PropTypes.node,
   foto: PropTypes.string,
   nome: PropTypes.string,
   caption: PropTypes.bool,
   label: PropTypes.string,
+  labelAlt: PropTypes.string,
 };
 
-export function ColaboradorInfo({ nome, label, foto, caption = false, sx = null }) {
+export function ColaboradorInfo({ nome, foto, caption = false, label = '', labelAlt = '', other = null, sx = null }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
       <MyAvatar alt={nome} src={getFile('colaborador', foto)} />
@@ -104,14 +110,22 @@ export function ColaboradorInfo({ nome, label, foto, caption = false, sx = null 
           <Typography noWrap variant="subtitle2">
             {baralharString(nome)}
           </Typography>
+          {!!labelAlt && (
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              ({labelAlt})
+            </Typography>
+          )}
         </Stack>
-        <Typography
-          noWrap={!caption}
-          variant={caption ? 'caption' : 'body2'}
-          sx={{ color: caption ? 'text.disabled' : 'text.secondary' }}
-        >
-          {label}
-        </Typography>
+        {!!label && (
+          <Typography
+            noWrap={!caption}
+            variant={caption ? 'caption' : 'body2'}
+            sx={{ color: caption ? 'text.disabled' : 'text.secondary' }}
+          >
+            {label}
+          </Typography>
+        )}
+        {other}
       </Stack>
     </Box>
   );

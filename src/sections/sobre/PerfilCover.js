@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Badge from '@mui/material/Badge';
+import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
@@ -15,7 +15,9 @@ import { nomeacaoBySexo } from '../../utils/validarAcesso';
 import { changeDadosView } from '../../redux/slices/banka';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
+import Label from '../../components/Label';
 import MyAvatar from '../../components/MyAvatar';
+import SvgIconStyle from '../../components/SvgIconStyle';
 
 // ----------------------------------------------------------------------
 
@@ -32,78 +34,93 @@ const RootStyle = styled('div')(({ theme }) => ({
 }));
 
 const InfoStyle = styled('div')(({ theme }) => ({
-  left: 20,
   zIndex: 99,
   right: 'auto',
   display: 'flex',
   position: 'absolute',
+  left: theme.spacing(2),
   marginTop: theme.spacing(3),
-  [theme.breakpoints.up('md')]: { alignItems: 'center', left: theme.spacing(2), bottom: theme.spacing(4) },
-}));
-
-const StyledBadge = styled(Badge)(({ theme }) => ({
-  '& .MuiBadge-badge': { border: `2px solid ${theme.palette.common.white}` },
+  [theme.breakpoints.up('md')]: { alignItems: 'center', bottom: theme.spacing(4) },
 }));
 
 // ----------------------------------------------------------------------
 
-PerfilCover.propTypes = { perfilColaborador: PropTypes.object };
+PerfilCover.propTypes = { perfilColaborador: PropTypes.object, isDeFeria: PropTypes.object };
 
-export default function PerfilCover({ perfilColaborador }) {
+export default function PerfilCover({ perfilColaborador, isDeFeria }) {
+  const { isLoading } = useSelector((state) => state.parametrizacao);
   return (
     <RootStyle>
       <InfoStyle>
-        {perfilColaborador ? (
-          <StyledBadge
-            overlap="circular"
-            color={perfilColaborador.is_active ? 'success' : 'focus'}
+        <Stack>
+          <Badge
             badgeContent=" "
+            overlap="circular"
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            color={perfilColaborador?.is_active ? 'success' : 'focus'}
+            sx={{ '& .MuiBadge-badge': { border: (theme) => `2px solid ${theme.palette.common.white}` } }}
           >
             <MyAvatar
               sx={{
-                mx: 'auto',
                 borderWidth: 2,
+                cursor: 'zoom-in',
                 borderStyle: 'solid',
-                borderColor: 'common.white',
                 width: { xs: 80, md: 128 },
                 height: { xs: 80, md: 128 },
+                borderColor: 'common.white',
               }}
+              alt={perfilColaborador?.perfil?.displayName}
               src={getFile('colaborador', perfilColaborador?.foto_disk)}
             />
-          </StyledBadge>
-        ) : (
-          <MyAvatar
-            sx={{
-              mx: 'auto',
-              borderWidth: 2,
-              borderStyle: 'solid',
-              borderColor: 'common.white',
-              width: { xs: 80, md: 128 },
-              height: { xs: 80, md: 128 },
-            }}
-            src="assets/Shape.svg"
-          />
-        )}
-        <Box sx={{ ml: 3, mt: { xs: 2, md: 0 }, color: 'common.white', textAlign: { md: 'left' } }}>
-          <Typography variant="h4">
-            {perfilColaborador ? (
-              perfilColaborador?.perfil?.displayName || perfilColaborador?.perfil?.mail
+          </Badge>
+        </Stack>
+        <Stack sx={{ ml: 3, mt: { md: -2 }, color: 'common.white', textAlign: { md: 'left' } }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ pr: 1 }}>
+            {!perfilColaborador && isLoading ? (
+              <Stack>
+                <Skeleton sx={{ height: 26, width: 300, bgcolor: '#fff', opacity: 0.48, transform: 'scale(1)' }} />
+                <Skeleton
+                  sx={{ height: 15, width: 100, bgcolor: '#fff', mt: 1, opacity: 0.48, transform: 'scale(1)' }}
+                />
+                <Skeleton
+                  sx={{ height: 18, width: 200, bgcolor: '#fff', mt: 1, opacity: 0.48, transform: 'scale(1)' }}
+                />
+              </Stack>
             ) : (
-              <Skeleton height={40} width={250} animation="wave" sx={{ backgroundColor: 'background.neutral' }} />
-            )}
-          </Typography>
-          <Typography>
-            {perfilColaborador ? (
               <>
-                {nomeacaoBySexo(perfilColaborador?.nomeacao || perfilColaborador?.funcao, perfilColaborador?.sexo)} -{' '}
-                {perfilColaborador?.uo?.label}
+                {perfilColaborador ? (
+                  <Typography variant="h4" noWrap>
+                    {perfilColaborador?.perfil?.displayName || perfilColaborador?.perfil?.mail}
+                  </Typography>
+                ) : (
+                  <Typography variant="h6" noWrap sx={{ fontStyle: 'italic', fontWeight: 'normal', pr: 1 }}>
+                    Dados do colaborador não encontrado
+                  </Typography>
+                )}
               </>
-            ) : (
-              <Skeleton height={25} width={150} animation="wave" sx={{ backgroundColor: 'background.neutra' }} />
             )}
-          </Typography>
-        </Box>
+            {isDeFeria && (
+              <Label
+                variant="contained"
+                sx={{ fontSize: 16, height: 26 }}
+                startIcon={<SvgIconStyle src="/assets/icons/navbar/ferias.svg" sx={{ width: 20, height: 20 }} />}
+              >
+                Férias
+              </Label>
+            )}
+          </Stack>
+
+          {!!perfilColaborador && (
+            <>
+              <Typography noWrap variant="subtitle2">
+                {nomeacaoBySexo(perfilColaborador?.nomeacao || perfilColaborador?.funcao, perfilColaborador?.sexo)}
+              </Typography>
+              <Typography noWrap variant="body2">
+                {perfilColaborador?.uo?.desegnicao}
+              </Typography>
+            </>
+          )}
+        </Stack>
       </InfoStyle>
     </RootStyle>
   );
@@ -133,11 +150,13 @@ export function EntidadeCover({ numero, entidade }) {
         src={getFile('colaborador', '')}
       />
       <Stack
-        spacing={2}
+        useFlexGap
+        spacing={1}
+        direction="row"
+        flexWrap="wrap"
+        alignItems="center"
         sx={{ flexGrow: 1 }}
-        direction={{ xs: 'column', md: 'row' }}
-        alignItems={{ xs: 'left', md: 'center' }}
-        justifyContent={{ xs: 'left', md: 'space-between' }}
+        justifyContent="space-between"
       >
         <Box sx={{ color: 'common.white' }}>
           <Typography variant="h5">{numero}</Typography>

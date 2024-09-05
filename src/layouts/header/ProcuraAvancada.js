@@ -18,8 +18,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { setItemValue } from '../../utils/formatText';
 // redux
+import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -31,7 +31,7 @@ export default function ProcuraAvancada() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
   const [conta, setConta] = useState(localStorage.getItem('conta') || '');
   const [chave, setChave] = useState(localStorage.getItem('chave') || '');
   const [entrada, setEntrada] = useState(localStorage.getItem('entrada') || '');
@@ -40,7 +40,6 @@ export default function ProcuraAvancada() {
   const [noperacao, setNoperacao] = useState(localStorage.getItem('noperacao') || '');
   const [historico, setHistorico] = useState(localStorage.getItem('procHistorico') === 'true');
   const [avancada, setAvancada] = useState(localStorage.getItem('tipoPesquisa') === 'avancada');
-  const perfilId = cc?.perfil_id;
   const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, label: row?.label })) || [], [uos]);
   const [uo, setUo] = useState(
     uosList?.find((row) => row?.id === Number(localStorage.getItem('uoSearch'))) ||
@@ -50,7 +49,6 @@ export default function ProcuraAvancada() {
 
   const handleSearch = () => {
     if (mail) {
-      dispatch(resetItem('pesquisa'));
       if (localStorage.getItem('tipoPesquisa') === 'avancada') {
         dispatch(
           getAll('pesquisa avancada', { uo, mail, conta, cliente, entidade, entrada, noperacao, historico, perfilId })
@@ -146,7 +144,7 @@ export default function ProcuraAvancada() {
                     value={chave}
                     onKeyUp={handleKeyUp}
                     placeholder="Introduza uma palavra/texto chave..."
-                    onChange={(event) => setItemValue(event.target.value, setChave, 'chave')}
+                    onChange={(event) => setItemValue(event.target.value, setChave, 'chave', false)}
                   />
                 </Grid>
               </>
@@ -160,7 +158,7 @@ export default function ProcuraAvancada() {
                       checked={historico}
                       onChange={(event, value) => {
                         setHistorico(value);
-                        localStorage.setItem('procHistorico', value === true ? 'true' : 'false');
+                        localStorage.setItem('procHistorico', value === true ? 'true' : 'false', false);
                       }}
                     />
                   }
@@ -200,8 +198,8 @@ function TextFieldNumb({ value, setValue, label, localS }) {
       fullWidth
       value={value}
       label={label}
-      onChange={(event) => setItemValue(event.target.value, setValue, localS)}
       InputProps={{ type: 'number', inputProps: { style: { textAlign: 'right' } } }}
+      onChange={(event) => setItemValue(event.target.value, setValue, localS, false)}
     />
   );
 }

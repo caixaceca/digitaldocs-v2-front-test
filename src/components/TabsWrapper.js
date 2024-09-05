@@ -63,7 +63,7 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
               key={tab?.value}
               icon={tab?.icon}
               value={tab?.value}
-              sx={{ px: 0.5, mt: 0.5 }}
+              sx={{ px: 0.75, mt: 0.5 }}
               label={tab?.label || tab?.value}
             />
           ))}
@@ -120,11 +120,11 @@ export function TabCard({ tabs, tipo, item = '', setTipo }) {
       variant="scrollable"
       scrollButtons="auto"
       allowScrollButtonsMobile
-      sx={{ px: 2, bgcolor: 'background.neutral' }}
+      sx={{ px: 2, pt: 0.5, bgcolor: 'background.neutral' }}
       onChange={(event, newValue) => setItemValue(newValue, setTipo, item ? `tipo${item}` : '', false)}
     >
       {tabs.map((tab) => (
-        <Tab disableRipple key={tab.value} value={tab.value} label={tab.label || tab.value} sx={{ py: 2, px: 0.5 }} />
+        <Tab disableRipple key={tab.value} value={tab.value} label={tab.value} sx={{ px: 1 }} />
       ))}
     </Tabs>
   );

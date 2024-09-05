@@ -1,5 +1,5 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import { add, format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -11,11 +11,10 @@ import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { fCurrency } from '../../utils/formatNumber';
-import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, dataValido, setDataUtil, noDados, baralharString } from '../../utils/formatText';
+import { normalizeText, noDados, baralharString } from '../../utils/formatText';
+import { ptDate, ptDateTime, getDataLS, dataValido } from '../../utils/formatTime';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -24,6 +23,7 @@ import useTable, { getComparator, applySort } from '../../hooks/useTable';
 import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 // Components
+import { RHFDateIF } from '../../components/hook-form';
 import { SkeletonTable } from '../../components/skeleton';
 import { Checked, Criado, Registos } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -75,16 +75,12 @@ export default function TableCON({ item = 'con' }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { mail } = useSelector((state) => state.intranet);
-  const { con, pjf, pjfInfo, isLoading } = useSelector((state) => state.digitaldocs);
+  const { con, pjf, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
+  const [dataf, setDataf] = useState(getDataLS('dataFCon', new Date()));
   const [filter, setFilter] = useState(localStorage.getItem('filterCon') || '');
   const title = (item === 'pjf' && 'Processos Judiciais e Fiscais') || 'Comunicação Operação Numerário';
   const [datai, setDatai] = useState(
-    localStorage.getItem('dataICon')
-      ? add(new Date(localStorage.getItem('dataICon')), { hours: 2 })
-      : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-  );
-  const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFCon') ? add(new Date(localStorage.getItem('dataFCon')), { hours: 2 }) : new Date()
+    getDataLS('dataICon', new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   );
 
   useEffect(() => {
@@ -118,8 +114,8 @@ export default function TableCON({ item = 'con' }) {
   const isNotFound = !dataFiltered.length;
 
   const mostrarMais = () => {
-    if (mail && item === 'pjf' && pjfInfo?.proxima_pagina) {
-      dispatch(getAll('pjf', { mail, pagina: pjfInfo?.proxima_pagina, reset: false }));
+    if (mail && item === 'pjf' && processosInfo?.proxima_pagina) {
+      dispatch(getAll('pjf', { mail, pagina: processosInfo?.proxima_pagina, reset: false }));
     }
   };
 
@@ -130,30 +126,21 @@ export default function TableCON({ item = 'con' }) {
   return (
     <>
       <HeaderBreadcrumbs
+        sx={{ px: 1 }}
         heading={title}
-        links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
         action={
           <Stack direction="row" alignItems="center" spacing={1}>
             {item === 'con' && (
-              <>
-                <DatePicker
-                  value={datai}
-                  label="Data inicial"
-                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-                  onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataICon', setDataf, 'dataFCon', dataf)}
-                />
-                <DatePicker
-                  value={dataf}
-                  minDate={datai}
-                  disabled={!datai}
-                  label="Data final"
-                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 160 } } }}
-                  onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFCon', '', '', '')}
-                />
-              </>
+              <RHFDateIF
+                datai={datai}
+                dataf={dataf}
+                labeli="dataICon"
+                labelf="dataFCon"
+                setDatai={setDatai}
+                setDataf={setDataf}
+              />
             )}
-            {item === 'pjf' && <Registos info={pjfInfo} total={pjf?.length} handleClick={mostrarMais} />}
+            {item === 'pjf' && <Registos info={processosInfo} total={pjf?.length} handleClick={() => mostrarMais()} />}
             {!isNotFound && (
               <Stack>
                 <ExportExcel
@@ -200,8 +187,8 @@ export default function TableCON({ item = 'con' }) {
                           {row?.valor && <Criado value={fCurrency(row.valor)} />}
                         </TableCell>
                         <TableCell>
-                          {row?.data_entrada && <Criado tipo="data" value={ptDate(row.data_entrada)} />}
-                          {row?.estado && <Criado tipo="company" value={row.estado} />}
+                          {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row.criado_em)} />}
+                          {row?.estado && <Criado caption tipo="company" value={row.estado} />}
                         </TableCell>
                       </>
                     )) || (

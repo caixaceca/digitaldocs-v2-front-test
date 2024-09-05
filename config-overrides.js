@@ -1,23 +1,14 @@
-const path = require('path');
 const webpack = require('webpack');
 const WorkBoxPlugin = require('workbox-webpack-plugin');
 
 module.exports = function override(config) {
-  // config.resolve.fallback = {
-  //   process: require.resolve('process/browser'),
-  //   zlib: require.resolve('browserify-zlib'),
-  //   stream: require.resolve('stream-browserify'),
-  //   util: require.resolve('util'),
-  //   buffer: require.resolve('buffer'),
-  //   asset: require.resolve('assert'),
-  // };
-
-  config.resolve.alias = {
-    ...config.resolve.alias,
-    'node_modules/hast-util-raw/node_modules/parse5/dist/tokenizer/preprocessor.js.map': path.resolve(
-      __dirname,
-      'node_modules/hast-util-raw/node_modules/parse5/dist/tokenizer/preprocessor.js'
-    ),
+  config.resolve.fallback = {
+    process: require.resolve('process/browser'),
+    zlib: require.resolve('browserify-zlib'),
+    stream: require.resolve('stream-browserify'),
+    util: require.resolve('util'),
+    buffer: require.resolve('buffer'),
+    asset: require.resolve('assert'),
   };
 
   config.plugins.forEach((plugin) => {
@@ -28,10 +19,7 @@ module.exports = function override(config) {
 
   config.plugins = [
     ...config.plugins,
-    new webpack.ProvidePlugin({
-      process: 'process/browser.js',
-      Buffer: ['buffer', 'Buffer'],
-    }),
+    new webpack.ProvidePlugin({ process: 'process/browser.js', Buffer: ['buffer', 'Buffer'] }),
   ];
 
   return config;

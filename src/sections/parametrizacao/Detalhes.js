@@ -24,11 +24,11 @@ Detalhes.propTypes = { item: PropTypes.string, closeModal: PropTypes.func };
 
 export function Detalhes({ item, closeModal }) {
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenView, isLoading } = useSelector((state) => state.parametrizacao);
+  const { selectedItem, isLoading } = useSelector((state) => state.parametrizacao);
   const perfil = colaboradores?.find((row) => Number(row?.perfil_id) === Number(selectedItem?.perfil_id));
 
   return (
-    <Dialog open={isOpenView} onClose={closeModal} fullWidth maxWidth="sm">
+    <Dialog open onClose={closeModal} fullWidth maxWidth="sm">
       <DTFechar title="Detalhes" handleClick={() => closeModal()} />
       <DialogContent sx={{ mt: 0.5 }}>
         {isLoading ? (

@@ -13,9 +13,9 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDate } from '../../utils/formatTime';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { normalizeText, setItemValue, dataValido, baralharString } from '../../utils/formatText';
+import { ptDate, dataValido } from '../../utils/formatTime';
+import { normalizeText, baralharString } from '../../utils/formatText';
 // hooks
 import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
@@ -43,30 +43,14 @@ const TABLE_HEAD = [
   { id: 'cliente', label: 'Nº cliente', align: 'left' },
   { id: 'nome', label: 'Nome cliente', align: 'left' },
   { id: 'tipo', label: 'Tipo cartão', align: 'left' },
-  { id: 'emissao_validado', label: 'Conf. DOP', align: 'center' },
-  { id: 'rececao_validado', label: 'Conf. Agência', align: 'center' },
+  { id: 'emissao_validado', label: 'Canais', align: 'center' },
+  { id: 'rececao_validado', label: 'Agência', align: 'center' },
   { id: '' },
 ];
 
 // ----------------------------------------------------------------------
 
 export default function TableCartoes() {
-  const dispatch = useDispatch();
-  const [uo, setUo] = useState(null);
-  const { enqueueSnackbar } = useSnackbar();
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
-  const [datai, setDatai] = useState(sub(new Date(), { days: 1 }));
-  const [dataf, setDataf] = useState(sub(new Date(), { days: 1 }));
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
-  const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
-  const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
-  const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
-  const { isAdmin, confirmarCartoes } = useSelector((state) => state.parametrizacao);
-  const { cartoes, done, error, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
-  const fromAgencia = cc?.uo?.tipo === 'Agências';
-
   const {
     page,
     order,
@@ -89,16 +73,35 @@ export default function TableCartoes() {
     defaultOrderBy: 'numero',
     defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
+  const dispatch = useDispatch();
+  const [uo, setUo] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
+  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
+  const [datai, setDatai] = useState(sub(new Date(), { days: 1 }));
+  const [dataf, setDataf] = useState(sub(new Date(), { days: 1 }));
+  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
+  const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
+  const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
+  const { isAdmin, confirmarCartoes, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { cartoes, done, error, isLoading, isOpenModal, isOpenModal1 } = useSelector((state) => state.digitaldocs);
   const uosList = useMemo(
     () =>
       UosAcesso(
         uos?.filter((row) => row?.tipo === 'Agências'),
         cc,
         fase === 'Emissão' || isAdmin,
-        [],
+        meusAmbientes,
         'balcao'
       ),
-    [cc, isAdmin, fase, uos]
+    [cc, isAdmin, meusAmbientes, fase, uos]
+  );
+  const acessoDop = useMemo(() => fase === 'Emissão' && cc?.uo?.label === 'DOP-CE', [cc?.uo?.label, fase]);
+  const acessoAgencia = useMemo(
+    () => fase === 'Receção' && uosList?.find((row) => row?.id === uo?.id),
+    [fase, uo?.id, uosList]
   );
 
   useEffect(() => {
@@ -133,29 +136,15 @@ export default function TableCartoes() {
   }, [error]);
 
   useEffect(() => {
-    if (fase === 'Receção' && !uo?.id && uosList?.length > 0 && (localStorage.getItem('uoCartao') || cc?.uo?.balcao)) {
-      setUo(
-        (localStorage.getItem('uoCartao') &&
-          uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoCartao')))) ||
-          uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.balcao))
-      );
-      localStorage.setItem('uoCartao', localStorage.getItem('uoIndic') || cc?.uo?.balcao || '');
+    if (fase === 'Receção' && uosList?.length > 0 && !uosList?.map((row) => row?.id)?.includes(uo?.id)) {
+      const _uo =
+        uosList?.find((row) => row?.id === Number(localStorage.getItem('uoCartao'))) ||
+        uosList?.find((row) => row?.id === cc?.uo?.balcao) ||
+        uosList[0];
+      localStorage.setItem('uoCartao', _uo.id || '');
+      setUo(_uo);
     }
   }, [uosList, fase, uo, cc?.uo?.balcao]);
-
-  useEffect(() => {
-    if (fase === 'Receção' && uosList?.length > 0 && uo?.id !== cc?.uo?.balcao) {
-      setUo(uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.balcao)));
-      localStorage.setItem('uoCartao', cc?.uo?.balcao || '');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uosList, fase, cc?.uo?.balcao]);
-
-  useEffect(() => {
-    if (cc?.uo?.tipo) {
-      setFase(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
-    }
-  }, [cc?.uo?.tipo]);
 
   useEffect(() => {
     if (mail && datai && fase === 'Emissão') {
@@ -170,7 +159,7 @@ export default function TableCartoes() {
   }, [dispatch, datai, dataf, fase, mail]);
 
   useEffect(() => {
-    if (mail && datai && fase === 'Receção' && uo?.id) {
+    if (mail && datai && fase === 'Receção') {
       dispatch(
         getAll(fase, {
           mail,
@@ -187,13 +176,7 @@ export default function TableCartoes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, fase, datai, dataf, uo?.id]);
 
-  const dados = [];
-  const tiposCartao = [];
-  cartoes?.forEach((row) => {
-    const balcEntrega = uos?.find((uo) => Number(uo.balcao) === Number(row?.balcao_entrega));
-    dados.push({ ...row, entrega: balcEntrega?.label });
-  });
-
+  const dados = useMemo(() => dadosList(cartoes, uos), [cartoes, uos]);
   const dataFiltered = applySortFilter({
     dados,
     filter,
@@ -201,32 +184,29 @@ export default function TableCartoes() {
     balcao: uo?.id,
     comparator: getComparator(order, orderBy),
   });
+  const tiposCartao = useMemo(() => tiposCartoes(dados, filter, uo), [dados, filter, uo]);
   const isNotFound = !dataFiltered.length;
-  const temDadosNaoValidados =
-    (fase === 'Emissão' && dataFiltered?.filter((row) => !row?.emissao_validado)?.length > 0) ||
-    (fase === 'Receção' && dataFiltered?.filter((row) => !row?.rececao_validado)?.length > 0);
-  const temDadosValidados =
-    (fase === 'Emissão' &&
-      dataFiltered?.filter(
-        (row) =>
-          row?.emissao_validado && !row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { years: 1 })
-      )?.length > 0) ||
-    (fase === 'Receção' &&
-      dataFiltered?.filter(
-        (row) => row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { months: 1 })
-      )?.length > 0);
-
-  applySortFilter({
-    dados,
-    filter,
-    tipoCartao: '',
-    balcao: uo?.id,
-    comparator: getComparator(order, orderBy),
-  })?.forEach((row) => {
-    if (!tiposCartao.includes(row?.tipo)) {
-      tiposCartao.push(row?.tipo);
-    }
-  });
+  const dadosNaoValidados = useMemo(
+    () =>
+      fase === 'Emissão'
+        ? dataFiltered?.filter((row) => !row?.emissao_validado)
+        : dataFiltered?.filter((row) => !row?.rececao_validado),
+    [dataFiltered, fase]
+  );
+  const dadosValidados = useMemo(
+    () =>
+      fase === 'Emissão'
+        ? dataFiltered?.filter(
+            (row) =>
+              row?.emissao_validado &&
+              !row?.rececao_validado &&
+              new Date(row?.data_emissao) > sub(new Date(), { months: 3 })
+          )
+        : dataFiltered?.filter(
+            (row) => row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { days: 15 })
+          ),
+    [dataFiltered, fase]
+  );
 
   const handleViewRow = (id) => {
     dispatch(openDetalhes());
@@ -242,17 +222,11 @@ export default function TableCartoes() {
     dispatch(closeModal());
   };
 
-  const changeFase = (newValue) => {
-    setFase(newValue);
-    setSelected([]);
-  };
-
   return (
     <>
       <HeaderBreadcrumbs
-        links={[{ name: '' }]}
+        sx={{ px: 1 }}
         heading="Receção de cartões"
-        sx={{ color: 'text.secondary', px: 1 }}
         action={
           <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
             <UoData
@@ -267,41 +241,33 @@ export default function TableCartoes() {
               setSelected={setSelected}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
-              {(isAdmin || fromAgencia) && (
+              {(isAdmin || cc?.uo?.tipo === 'Agências') && (
                 <Autocomplete
                   fullWidth
                   size="small"
                   disableClearable
                   value={fase || null}
                   options={['Emissão', 'Receção']}
-                  onChange={(event, newValue) => setItemValue(newValue, changeFase, '', false)}
-                  renderInput={(params) => <TextField {...params} label="Dados de" sx={{ width: 120 }} />}
+                  renderInput={(params) => <TextField {...params} label="Fase" sx={{ width: 120 }} />}
+                  onChange={(event, newValue) => {
+                    setFase(newValue);
+                    setSelected([]);
+                  }}
                 />
               )}
-              {temDadosNaoValidados && confirmarCartoes && (
+              {dadosNaoValidados?.length > 0 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
                 <>
-                  {(fase === 'Receção' && Number(uo?.id) !== Number(cc?.uo?.balcao) && !isAdmin) ||
-                  (fase === 'Emissão' && fromAgencia && !isAdmin) ? (
-                    ''
-                  ) : (
-                    <Stack direction="row" spacing={1}>
-                      {uo && !filter && !tipoCartao && selected.length === 0 && (
-                        <DefaultAction label="CONFIRMAR" handleClick={onOpen1} icon="confirmar" variant="contained" />
-                      )}
-                      {selected.length > 0 && (
-                        <DefaultAction label="CONFIRMAR" handleClick={onOpen} icon="confirmar" variant="contained" />
-                      )}
-                    </Stack>
-                  )}
+                  {(uo && !filter && !tipoCartao && selected.length === 0 && (
+                    <DefaultAction label="CONFIRMAR" handleClick={onOpen1} variant="contained" />
+                  )) ||
+                    (selected.length > 0 && (
+                      <DefaultAction label="CONFIRMAR" handleClick={onOpen} variant="contained" />
+                    ))}
                 </>
               )}
-              {temDadosValidados &&
-                confirmarCartoes &&
-                ((fase === 'Receção' && Number(uo?.id) === Number(cc?.uo?.balcao)) ||
-                  (fase === 'Emissão' && cc?.uo?.label === 'DOP-CE') ||
-                  isAdmin) && (
-                  <DefaultAction label="ANULAR CONFIRMAÇÂO" handleClick={onOpen2} icon="cancelar" color="error" />
-                )}
+              {dadosValidados?.length > 0 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
+                <DefaultAction label="ANULAR CONFIRMAÇÂO" handleClick={onOpen2} icon="cancelar" color="error" />
+              )}
             </Stack>
           </Stack>
         }
@@ -336,39 +302,41 @@ export default function TableCartoes() {
                 {isLoading && isNotFound ? (
                   <SkeletonTable column={10} row={10} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                    <TableRow key={`${row.id}_${index}`} hover>
-                      <TableCell padding="checkbox">
-                        {((fase === 'Emissão' && !row?.emissao_validado) ||
-                          (fase === 'Receção' && !row?.rececao_validado)) && (
-                          <Checkbox checked={selected.includes(row.id)} onClick={() => onSelectRow(row.id)} />
-                        )}
-                      </TableCell>
-                      <TableCell>{ptDate(row.data_emissao)}</TableCell>
-                      <TableCell>{row?.entrega}</TableCell>
-                      <TableCell align="center">{baralharString(row?.numero)}</TableCell>
-                      <TableCell>{baralharString(row?.cliente)}</TableCell>
-                      <TableCell>{baralharString(row?.nome)}</TableCell>
-                      <TableCell>{row?.tipo}</TableCell>
-                      <TableCell align="center" sx={{ width: 10 }}>
-                        <Checked check={row.emissao_validado} color={row.emissao_validado ? '' : 'error.main'} />
-                      </TableCell>
-                      <TableCell align="center" sx={{ width: 10 }}>
-                        <Checked check={row.rececao_validado} color={row.rececao_validado ? '' : 'error.main'} />
-                      </TableCell>
-                      <TableCell width={10}>
-                        <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {!row.rececao_validado &&
-                            confirmarCartoes &&
-                            fase === 'Emissão' &&
-                            (cc?.uo?.label === 'DOP-CE' || isAdmin) && (
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
+                    const validado =
+                      (fase === 'Emissão' && row?.emissao_validado) || (fase === 'Receção' && row?.rececao_validado);
+                    return (
+                      <TableRow key={`${row.id}_${index}`} hover>
+                        <TableCell padding="checkbox" sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}>
+                          <Checkbox
+                            disabled={validado}
+                            onClick={() => onSelectRow(row.id)}
+                            checked={selected.includes(row.id) || validado}
+                          />
+                        </TableCell>
+                        <TableCell>{ptDate(row.data_emissao)}</TableCell>
+                        <TableCell>{row?.entrega}</TableCell>
+                        <TableCell align="center">{baralharString(row?.numero)}</TableCell>
+                        <TableCell>{baralharString(row?.cliente)}</TableCell>
+                        <TableCell>{baralharString(row?.nome)}</TableCell>
+                        <TableCell>{row?.tipo}</TableCell>
+                        <TableCell align="center" sx={{ width: 10 }}>
+                          <Checked check={row.emissao_validado} color={row.emissao_validado ? '' : 'error.main'} />
+                        </TableCell>
+                        <TableCell align="center" sx={{ width: 10 }}>
+                          <Checked check={row.rececao_validado} color={row.rececao_validado ? '' : 'error.main'} />
+                        </TableCell>
+                        <TableCell width={10}>
+                          <Stack direction="row" spacing={0.75} justifyContent="right">
+                            {!row.rececao_validado && (isAdmin || (confirmarCartoes && acessoDop)) && (
                               <DefaultAction label="EDITAR" handleClick={() => handleUpdate(row)} color="warning" />
                             )}
-                          <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                            <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
 
@@ -392,62 +360,57 @@ export default function TableCartoes() {
         )}
       </Card>
 
-      <Detalhes closeModal={handleCloseModal} />
-      {confirmarCartoes && fase === 'Emissão' && (cc?.uo?.label === 'DOP-CE' || isAdmin) && (
-        <BalcaoEntregaForm open={isOpenModal} onCancel={handleCloseModal} />
+      {isOpenModal1 && <Detalhes closeModal={handleCloseModal} />}
+      {isOpenModal && <BalcaoEntregaForm onCancel={handleCloseModal} />}
+      {open1 && (
+        <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} datai={datai} onCancel={onClose1} dataf={dataf} />
       )}
-      {uo && !filter && !tipoCartao && selected.length === 0 && (
-        <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} data={datai} onCancel={onClose1} />
-      )}
-      {selected.length > 0 && (
+      {open && (
         <ValidarMultiploForm
           open={open}
           fase={fase}
-          dense={dense}
           balcao={uo?.id}
           onCancel={onClose}
           cartoes={
-            (fase === 'Emissão' &&
-              dataFiltered?.filter((row) => !row?.emissao_validado && selected.includes(row.id))) ||
-            (fase === 'Receção' &&
-              dataFiltered?.filter((row) => !row?.rececao_validado && selected.includes(row.id))) ||
-            []
+            fase === 'Emissão'
+              ? dadosNaoValidados?.filter((row) => selected.includes(row.id))
+              : dadosNaoValidados?.filter((row) => selected.includes(row.id))
           }
         />
       )}
-      {temDadosValidados &&
-        confirmarCartoes &&
-        ((fase === 'Receção' && Number(uo?.id) === Number(cc?.uo?.balcao)) ||
-          (fase === 'Emissão' && cc?.uo?.label === 'DOP-CE') ||
-          isAdmin) && (
-          <AnularForm
-            uo={uo}
-            fase={fase}
-            open={open2}
-            dense={dense}
-            uosList={uosList}
-            onCancel={onClose2}
-            cartoes={
-              (fase === 'Emissão' &&
-                dataFiltered?.filter(
-                  (row) =>
-                    row?.emissao_validado &&
-                    !row?.rececao_validado &&
-                    new Date(row?.data_emissao) > sub(new Date(), { years: 1 })
-                )) ||
-              (fase === 'Receção' &&
-                dataFiltered?.filter(
-                  (row) => row?.rececao_validado && new Date(row?.data_emissao) > sub(new Date(), { months: 1 })
-                )) ||
-              []
-            }
-          />
-        )}
+      {open2 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
+        <AnularForm
+          uo={uo}
+          fase={fase}
+          open={open2}
+          dense={dense}
+          uosList={uosList}
+          onCancel={onClose2}
+          cartoes={dadosValidados}
+        />
+      )}
     </>
   );
 }
 
 // ----------------------------------------------------------------------
+
+function dadosList(cartoes, uos) {
+  return cartoes?.map((row) => ({
+    ...row,
+    entrega: uos?.find((uo) => Number(uo.balcao) === Number(row?.balcao_entrega))?.label || row?.balcao_entrega,
+  }));
+}
+
+function tiposCartoes(dados, filter, uo) {
+  const tiposCartao = [];
+  applySortFilter({ dados, filter, tipoCartao: '', balcao: uo?.id, comparator: getComparator('asc', 'id') })?.forEach(
+    (row) => {
+      tiposCartao.push(row?.tipo);
+    }
+  );
+  return [...new Set(tiposCartao)];
+}
 
 function applySortFilter({ dados, comparator, filter, tipoCartao, balcao }) {
   dados = applySort(dados, comparator);
@@ -463,11 +426,10 @@ function applySortFilter({ dados, comparator, filter, tipoCartao, balcao }) {
   if (filter) {
     dados = dados.filter(
       (row) =>
-        (row?.data_emissao && normalizeText(row?.data_emissao).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.entrega && normalizeText(row?.entrega).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.numero && normalizeText(row?.numero).indexOf(normalizeText(filter)) !== -1)
+        (row?.numero && normalizeText(row?.numero).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.data_emissao && normalizeText(row?.data_emissao).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

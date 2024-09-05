@@ -15,7 +15,7 @@ const initialState = {
   isSaving: false,
   isLoading: false,
   isOpenModal: false,
-  isLoadingAnexo: false,
+  isLoadingPreview: false,
   itemId: '',
   tipoItem: '',
   garantiaId: '',
@@ -38,16 +38,17 @@ const slice = createSlice({
     startLoading(state) {
       state.isLoading = true;
     },
-    startLoadingAnexo(state) {
-      state.isLoadingAnexo = true;
+
+    startLoadingPreview(state) {
+      state.isLoadingPreview = true;
     },
 
     stopLoading(state) {
       state.isLoading = false;
     },
 
-    stopLoadingAnexo(state) {
-      state.isLoadingAnexo = false;
+    stopLoadingPreview(state) {
+      state.isLoadingPreview = false;
     },
 
     startSaving(state) {
@@ -272,7 +273,7 @@ export const {
 export function getFromCC(item, params) {
   return async (dispatch) => {
     if (item === 'anexo') {
-      dispatch(slice.actions.startLoadingAnexo());
+      dispatch(slice.actions.startLoadingPreview());
     } else {
       dispatch(slice.actions.startLoading());
     }

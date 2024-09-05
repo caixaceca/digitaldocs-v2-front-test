@@ -26,9 +26,8 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, cc, uos } = useSelector((state) => state.intranet);
+  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
   const { meuAmbiente, origens } = useSelector((state) => state.parametrizacao);
-  const perfilId = cc?.perfil_id;
   const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
   const origensList = useMemo(
     () => origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` })) || [],

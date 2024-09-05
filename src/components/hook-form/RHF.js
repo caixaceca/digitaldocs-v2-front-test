@@ -2,17 +2,35 @@ import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+// utils
+import { setDataUtil } from '../../utils/formatTime';
+
+// ----------------------------------------------------------------------
+
+const datePickerConf = (clearable) => ({
+  field: { clearable },
+  textField: {
+    fullWidth: true,
+    size: 'small',
+    sx: {
+      width: clearable ? 170 : 150,
+      '&.MuiTextField-root .MuiIconButton-root': { padding: 0.5 },
+      '&.MuiTextField-root .clearButton': { padding: 0.25, opacity: 0.5 },
+    },
+  },
+});
 
 // ----------------------------------------------------------------------
 
 RHFAutocomplete.propTypes = { name: PropTypes.string, label: PropTypes.string };
 
-export default function RHFAutocomplete({ name, label, ...other }) {
+export function RHFAutocomplete({ name, label, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -141,6 +159,41 @@ export function RHFDatePicker({ name, label = '', small = false, required = fals
         )
       }
     />
+  );
+}
+
+// ----------------------------------------------------------------------
+
+RHFDateIF.propTypes = {
+  datai: PropTypes.object,
+  dataf: PropTypes.object,
+  setDatai: PropTypes.func,
+  setDataf: PropTypes.func,
+  labeli: PropTypes.string,
+  labelf: PropTypes.string,
+  clearable: PropTypes.bool,
+};
+
+export function RHFDateIF({ datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false }) {
+  return (
+    <Stack direction="row" spacing={1}>
+      <DatePicker
+        value={datai}
+        label="Data inicial"
+        maxDate={new Date()}
+        slotProps={{ ...datePickerConf(clearable) }}
+        onChange={(newValue) => setDataUtil(newValue, setDatai, labeli, setDataf, labelf, dataf)}
+      />
+      <DatePicker
+        value={dataf}
+        minDate={datai}
+        disabled={!datai}
+        label="Data final"
+        maxDate={new Date()}
+        slotProps={{ ...datePickerConf(clearable) }}
+        onChange={(newValue) => setDataUtil(newValue, setDataf, labelf, '', '', '')}
+      />
+    </Stack>
   );
 }
 

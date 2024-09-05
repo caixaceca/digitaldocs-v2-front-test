@@ -105,6 +105,7 @@ export function getIndicadores(item, params) {
       const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
         params?.dataf ? `dataf=${params?.dataf}&` : ''
       }`;
+      const intervalo = `?data_inicio=${params?.dataI || '2000-01-01'}${params?.dataF ? `&data_final=${params?.dataF}` : ''}`;
       switch (item) {
         case 'totalP': {
           const response = await axios.get(`${BASEURLDD}/v2/indicadores/default/${params?.perfilId}`, options);
@@ -119,7 +120,7 @@ export function getIndicadores(item, params) {
         case 'data': {
           if (params?.perfilId) {
             const response = await axios.get(
-              `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.periodo}${
+              `${BASEURLDD}/v1/indicadores/padrao/criacao/${params?.perfilId}?vista=${params?.periodo?.toLowerCase()}${
                 params?.uo ? `&uoID=${params?.uo}` : ''
               }${params?.perfil ? `&perfilID1=${params?.perfil}` : ''}`,
               options
@@ -233,7 +234,6 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'estatisticaCredito': {
-          dispatch(slice.actions.resetItem('estatisticaCredito'));
           const pathIds = `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}`;
           const data = `${params?.ano}&mes=${params?.mes}`;
           const entrada =
@@ -258,20 +258,13 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'resumoEstCredCaixa': {
-          dispatch(slice.actions.resetItem('estatisticaCredito'));
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo?data_inicio=${params?.dataI}&data_final=${params?.dataF}`,
-            options
-          );
+          const response = await axios.get(`${BASEURLDD}/v1/indicadores/resumo${intervalo}`, options);
           dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
           break;
         }
         case 'resumoEstCredAg': {
-          dispatch(slice.actions.resetItem('estatisticaCredito'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}?data_inicio=${params?.dataI}${
-              params?.dataF ? `&data_final=${params?.dataF}` : ''
-            }`,
+            `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}${intervalo}`,
             options
           );
           dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));

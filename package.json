@@ -91,7 +91,7 @@
     "redux-persist": "^6.0.0",
     "rehype-raw": "^7.0.0",
     "simplebar-react": "^3.2.6",
-    "web-vitals": "^4.2.2",
+    "stream-browserify": "^3.0.0",
     "webpack": "^5.93.0",
     "workbox-core": "^7.1.0",
     "workbox-expiration": "^7.1.0",
@@ -119,6 +119,7 @@
     "typescript": "^5.2.2"
   },
   "overrides": {
-    "@svgr/webpack": "^8.1.0"
+    "@svgr/webpack": "^8.1.0",
+    "@react-pdf/layout": "3.11.5"
   }
 }

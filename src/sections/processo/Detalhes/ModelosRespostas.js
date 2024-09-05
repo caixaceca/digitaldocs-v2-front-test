@@ -296,7 +296,7 @@ export default function ModelosRespostas() {
   return (
     <Grid item xs={12}>
       <Divider sx={{ mt: 1.5 }}>
-        <Typography variant="subtitle1">Modelos de resposta</Typography>
+        <Typography variant="subtitle2">Modelos de resposta</Typography>
       </Divider>
       {(processo?.operacao === 'Pedido de Informação' && (
         <>

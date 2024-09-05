@@ -1,5 +1,6 @@
 import { sumBy } from 'lodash';
 import PropTypes from 'prop-types';
+import { format, add } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
@@ -30,12 +31,11 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 // utils
-import { format, add } from 'date-fns';
 import { getFile } from '../../utils/getFile';
-import { fYear, fMonthYear, ptDate } from '../../utils/formatTime';
+import { setItemValue, baralharString } from '../../utils/formatText';
 import { fNumber, fPercent, fNumber2, fData } from '../../utils/formatNumber';
 import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
-import { dataValido, setDataUtil, setItemValue, baralharString } from '../../utils/formatText';
+import { fYear, fMonthYear, ptDate, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // redux
@@ -49,6 +49,7 @@ import { SearchNotFound } from '../../components/table';
 import Chart, { useChart } from '../../components/chart';
 import { DTFechar, ExportExcel } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 //
 import { Todos, Media, Maximo } from '../../assets';
 import { DuracaoEquipa, Conclusao, Execucao } from './Duracao';
@@ -72,23 +73,18 @@ Cabecalho.propTypes = {
 export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsList = [], currentTab = '', changeTab }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
+  const [datai, setDatai] = useState(getDataLS('dataIIndic', null));
+  const [dataf, setDataf] = useState(getDataLS('dataFIndic', null));
   const [origem, setOrigem] = useState(localStorage.getItem('origem') || 'Interna');
   const [entrada, setEntrada] = useState(localStorage.getItem('entrada') === 'true');
   const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
   const [agrEntradas, setAgrEntradas] = useState(localStorage.getItem('agrEntradas') || 'Balcão');
   const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
-  const [datai, setDatai] = useState(
-    localStorage.getItem('dataIIndic') ? add(new Date(localStorage.getItem('dataIIndic')), { hours: 2 }) : null
-  );
-  const [dataf, setDataf] = useState(
-    localStorage.getItem('dataFIndic') ? add(new Date(localStorage.getItem('dataFIndic')), { hours: 2 }) : null
-  );
   const [ano, setAno] = useState(
     localStorage.getItem('anoIndic') ? add(new Date(localStorage.getItem('anoIndic')), { hours: 2 }) : new Date()
   );
-  const { mail, cc, uos, colaboradores } = useSelector((state) => state.intranet);
+  const { mail, perfilId, cc, uos, colaboradores } = useSelector((state) => state.intranet);
   const { isAdmin, meusAmbientes, fluxos, estados } = useSelector((state) => state.parametrizacao);
-  const perfilId = useMemo(() => cc?.perfil_id, [cc?.perfil_id]);
 
   const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
   const [fluxo, setFluxo] = useState(
@@ -237,18 +233,15 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
 
   return (
     <>
-      <Box sx={{ mb: 2, color: 'text.secondary', px: 1 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h4" gutterBottom sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-              {title}
-            </Typography>
-          </Box>
+      <HeaderBreadcrumbs
+        sx={{ px: 1 }}
+        heading={title}
+        action={
           <Button variant="contained" endIcon={<FilterListOutlinedIcon />} onClick={onOpen}>
             Filtrar
           </Button>
-        </Stack>
-      </Box>
+        }
+      />
 
       {currentTab && (
         <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={changeTab} sx={{ mb: 1.5 }} />
@@ -256,32 +249,21 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
 
       <Stack direction="row" justifyContent="center" sx={{ mb: 1.5 }}>
         <Stack direction="row" alignItems="center" justifyContent="center" flexWrap="wrap" gap={1}>
-          {tab === 'conclusao' && momento && (
-            <Panel label="Momento" children={<Typography noWrap>{momento}</Typography>} />
-          )}
+          {tab === 'conclusao' && momento && <Panel label="Momento" value={momento} />}
           {tab === 'origem' && (agrupamento || top !== 'Todos') && (
             <>
-              {agrupamento && <Panel label="Agrupamento" children={<Typography noWrap>{agrupamento}</Typography>} />}
-              {top !== 'Todos' && <Panel label="Top" children={<Typography noWrap>{top}</Typography>} />}
+              {agrupamento && <Panel label="Agrupamento" value={agrupamento} />}
+              {top !== 'Todos' && <Panel value={top} />}
             </>
           )}
-          {tab === 'data' && periodo && (
-            <Panel
-              label="Período"
-              children={
-                <Typography noWrap sx={{ textTransform: 'capitalize' }}>
-                  {periodo}
-                </Typography>
-              }
-            />
-          )}
+          {tab === 'data' && periodo && <Panel label="Período" value={periodo} />}
           {(tab === 'acao' ||
             tab === 'equipa' ||
             tab === 'colaboradores' ||
             tab === 'totalTrabalhados' ||
             tab === 'entradaTrabalhado') &&
             ano &&
-            dataValido(ano) && <Panel label="Ano" children={<Typography noWrap>{format(ano, 'yyyy')}</Typography>} />}
+            dataValido(ano) && <Panel label="Ano" value={format(ano, 'yyyy')} />}
 
           {(tab === 'data' ||
             tab === 'tipos' ||
@@ -292,34 +274,26 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
               tab === 'totalTrabalhados' ||
               tab === 'colaboradores') &&
               agrEntradas === 'Balcão')) &&
-            uo?.label && <Panel label="Balcão/U.O" children={<Typography noWrap>{uo?.label}</Typography>} />}
+            uo?.label && <Panel label="Balcão/U.O" value={uo?.label} />}
           {tab === 'entradas' && balcao?.label && agrEntradas === 'Balcão' && (
-            <Panel label="Balcão" children={<Typography noWrap>{balcao?.label}</Typography>} />
+            <Panel label="Balcão" value={balcao?.label} />
           )}
-          {haveEstado && estado?.label && (
-            <Panel label="Estado" children={<Typography noWrap>{estado?.label}</Typography>} />
-          )}
-          {haveColaborador && perfil?.label && (
-            <Panel label="Colaborador" children={<Typography noWrap>{perfil?.label}</Typography>} />
-          )}
-          {tab === 'devolucoes' && origem && (
-            <Panel label="Origem" children={<Typography noWrap>{origem}</Typography>} />
-          )}
+          {haveEstado && estado?.label && <Panel label="Estado" value={estado?.label} />}
+          {haveColaborador && perfil?.label && <Panel label="Colaborador" value={perfil?.label} />}
+          {tab === 'devolucoes' && origem && <Panel label="Origem" value={origem} />}
           {(tab === 'conclusao' || tab === 'execucao') && fluxo?.label && (
-            <Panel label="Assunto" children={<Typography noWrap>{fluxo?.label}</Typography>} />
+            <Panel label="Assunto" value={balcao?.fluxo} />
           )}
           {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'acao') && entrada && (
-            <Panel children={<Typography noWrap>{tab === 'entradaTrabalhado' ? 'Distinto' : 'Entrada'}</Typography>} />
+            <Panel value={tab === 'entradaTrabalhado' ? 'Distinto' : 'Entrada'} />
           )}
           {havePeriodo && (datai || dataf) && (
             <Panel
               label={(datai && dataf && 'Período') || (datai && 'Desde') || (dataf && 'Até')}
-              children={
-                <Typography noWrap>
-                  {(datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
-                    (datai && ptDate(datai)) ||
-                    (dataf && ptDate(dataf))}
-                </Typography>
+              value={
+                (datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
+                (datai && ptDate(datai)) ||
+                (dataf && ptDate(dataf))
               }
             />
           )}
@@ -371,7 +345,7 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
                 localS="periodo"
                 value={periodo}
                 setValue={setPeriodo}
-                options={['mensal', 'anual']}
+                options={['Mensal', 'Anual']}
               />
             )}
             {(tab === 'acao' ||
@@ -478,7 +452,7 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
 export function FileSystem() {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { fileSystem, isLoading } = useSelector((state) => state.indicadores);
   const isNotFound = !fileSystem.length;
   const chartColors = [theme.palette.primary.main, theme.palette.primary.dark];
@@ -549,10 +523,10 @@ export function FileSystem() {
   });
 
   useEffect(() => {
-    if (mail && cc?.perfil_id) {
-      dispatch(getIndicadores('fileSystem', { mail, perfilId: cc?.perfil_id }));
+    if (mail && perfilId) {
+      dispatch(getIndicadores('fileSystem', { mail, perfilId }));
     }
-  }, [dispatch, cc?.perfil_id, mail]);
+  }, [dispatch, perfilId, mail]);
 
   return (
     <Card>
@@ -627,7 +601,7 @@ export function FileSystem() {
 export function TotalProcessos() {
   const { indicadores } = useSelector((state) => state.indicadores);
   const [top, setTop] = useState(localStorage.getItem('top') || 'Todos');
-  const [periodo, setPeriodo] = useState(localStorage.getItem('periodo') || 'mensal');
+  const [periodo, setPeriodo] = useState(localStorage.getItem('periodo') || 'Mensal');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabTotal') || 'data');
   const indicadoresList = useMemo(() => (Array.isArray(indicadores) ? indicadores : []), [indicadores]);
 
@@ -770,9 +744,7 @@ export function IndicadorItem({ isLoading = false, isNotFound = false, children 
   return (
     <CardContent>
       {isLoading ? (
-        <Stack direction="row" justifyContent="center">
-          <BarChart />
-        </Stack>
+        <BarChart />
       ) : (
         <>{isNotFound ? <SearchNotFound message="Nenhum registo encontrado..." /> : children}</>
       )}
@@ -803,35 +775,35 @@ export function CardInfo({ title, label, total, conclusao = false, dev = false, 
   return (
     <Card
       sx={{
-        p: 3,
         height: 1,
         display: 'flex',
         boxShadow: 'none',
         alignItems: 'center',
         color: `${color}.darker`,
         bgcolor: `${color}.lighter`,
-        justifyContent: 'space-between',
       }}
     >
       <BoxMask sx={{ maskSize: 'revert', maskRepeat: 'no-repeat', maskPositionX: 'right', maskPositionY: 'bottom' }} />
-      <Stack>
-        <Typography variant="subtitle2">{title}</Typography>
-        {label && (
-          <Typography variant="subtitle1" sx={{ color: `${color}.main`, py: 0.5 }} noWrap>
-            {label}
-          </Typography>
-        )}
-        <Typography variant="h4">
-          {conclusao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
-        </Typography>
-      </Stack>
-      <Stack direction="column" sx={{ position: 'absolute', right: 10 }} justifyContent="center" alignItems="center">
-        {(title === 'Média' && <Media sx={iconOptions} />) ||
-          (color === 'success' && <Maximo sx={iconOptions} />) ||
-          (color === 'error' && <Maximo sx={{ ...iconOptions, transform: 'rotate(180deg)' }} />) || (
-            <Todos sx={iconOptions} />
+      <Stack sx={{ p: 3 }}>
+        <Stack>
+          <Typography variant="subtitle2">{title}</Typography>
+          {label && (
+            <Typography variant="subtitle1" sx={{ color: `${color}.main`, py: 0.5 }} noWrap>
+              {label}
+            </Typography>
           )}
-        {percentagem > -1 && <Typography variant="caption">{fPercent(percentagem)}</Typography>}
+          <Typography variant="h4">
+            {conclusao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
+          </Typography>
+        </Stack>
+        <Stack direction="column" sx={{ position: 'absolute', right: 10 }} justifyContent="center" alignItems="center">
+          {(title === 'Média' && <Media sx={iconOptions} />) ||
+            (color === 'success' && <Maximo sx={iconOptions} />) ||
+            (color === 'error' && <Maximo sx={{ ...iconOptions, transform: 'rotate(180deg)' }} />) || (
+              <Todos sx={iconOptions} />
+            )}
+          {percentagem > -1 && <Typography variant="caption">{fPercent(percentagem)}</Typography>}
+        </Stack>
       </Stack>
     </Card>
   );
@@ -939,7 +911,7 @@ export function TableExport({ label, label1, dados, total = 0, percentagem = fal
           <TableRow key={`table_row_export_${index}`} hover>
             <TableCell>
               {row?.criado_em ? (
-                <>{periodo === 'anual' ? fYear(row?.criado_em) : periodo === 'mensal' && fMonthYear(row?.criado_em)}</>
+                <>{periodo === 'Anual' ? fYear(row?.criado_em) : periodo === 'Mensal' && fMonthYear(row?.criado_em)}</>
               ) : (
                 row?.assunto || row?.label
               )}
@@ -975,11 +947,11 @@ export function TabView({ vista, setVista }) {
     <Stack direction="row" justifyContent="right" alignItems="center" spacing={1}>
       <Tabs
         value={vista}
-        sx={{ width: 120, minHeight: '35px' }}
+        sx={{ minHeight: '35px' }}
         onChange={(event, newValue) => setItemValue(newValue, setVista, 'tabView')}
       >
         {['Gráfico', 'Tabela'].map((tab) => (
-          <Tab key={tab} label={tab} value={tab} sx={{ mx: '5px !important', minHeight: '35px' }} />
+          <Tab key={tab} label={tab} value={tab} sx={{ px: 0.5, minHeight: '35px' }} />
         ))}
       </Tabs>
       {vista === 'Tabela' && <ExportExcel icon filename="Indicadores" table="table-to-xls-tipo" />}

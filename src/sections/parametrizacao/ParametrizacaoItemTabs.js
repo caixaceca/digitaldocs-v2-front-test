@@ -80,6 +80,7 @@ const TABLE_HEAD_REGRAS_ANEXOS = [
 const TABLE_HEAD_LINHAS = [
   { id: 'linha', label: 'Linha', align: 'left' },
   { id: 'descricao', label: 'Segmento', align: 'left' },
+  { id: 'criado_em', label: 'Registo', align: 'left' },
   { id: '' },
 ];
 
@@ -126,9 +127,10 @@ ParametrizacaoItemTabs.propTypes = { item: PropTypes.string };
 
 export default function ParametrizacaoItemTabs({ item }) {
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { fluxo, fluxos, estados, notificacaoId } = useSelector((state) => state.parametrizacao);
-  const fluxosList = fluxos?.map((row) => ({ id: row?.id, label: row?.assunto }));
+
+  const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
   const transicoesList = useMemo(() => listaTransicoes(fluxo?.transicoes || [], estados), [estados, fluxo?.transicoes]);
   const [fluxoR, setFluxoR] = useState(
     fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoRegras')))
@@ -166,40 +168,40 @@ export default function ParametrizacaoItemTabs({ item }) {
   }, [dispatch, currentTab, mail]);
 
   useEffect(() => {
-    if (currentTab === 'Linhas de crédito' && mail && cc?.perfil_id) {
-      dispatch(getFromParametrizacao('linhas', { mail, perfilId: cc?.perfil_id }));
+    if (currentTab === 'Linhas de crédito' && mail && perfilId) {
+      dispatch(getFromParametrizacao('linhas', { mail, perfilId }));
     }
-    if (currentTab === 'Despesas' && mail && cc?.perfil_id) {
-      dispatch(getFromParametrizacao('despesas', { mail, perfilId: cc?.perfil_id }));
+    if (currentTab === 'Despesas' && mail && perfilId) {
+      dispatch(getFromParametrizacao('despesas', { mail, perfilId }));
     }
-  }, [dispatch, currentTab, cc?.perfil_id, mail]);
+  }, [dispatch, currentTab, perfilId, mail]);
 
   useEffect(() => {
-    if (currentTab === 'Regras' && mail && fluxoR?.id && cc?.perfil_id) {
+    if (currentTab === 'Regras' && mail && fluxoR?.id && perfilId) {
       dispatch(getFromParametrizacao('regrasAnexos', { mail, fluxoId: fluxoR?.id }));
-      dispatch(getFromParametrizacao('fluxo', { id: fluxoR?.id, mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('fluxo', { id: fluxoR?.id, mail, perfilId }));
     }
-  }, [dispatch, currentTab, fluxoR?.id, cc?.perfil_id, mail]);
+  }, [dispatch, currentTab, fluxoR?.id, perfilId, mail]);
 
   useEffect(() => {
-    if (currentTab === 'Estados' && mail && estado?.id && cc?.perfil_id) {
+    if (currentTab === 'Estados' && mail && estado?.id && perfilId) {
       dispatch(getFromParametrizacao('regrasEstado', { mail, estadoId: estado?.id }));
-      dispatch(getFromParametrizacao('estado', { id: estado?.id, mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('estado', { id: estado?.id, mail, perfilId }));
     }
-  }, [dispatch, currentTab, estado?.id, cc?.perfil_id, mail]);
+  }, [dispatch, currentTab, estado?.id, perfilId, mail]);
 
   useEffect(() => {
-    if ((currentTab === 'Transições' || currentTab === 'Notificações') && mail && fluxoR?.id && cc?.perfil_id) {
-      dispatch(getFromParametrizacao('fluxo', { id: fluxoR?.id, mail, perfilId: cc?.perfil_id }));
+    if ((currentTab === 'Transições' || currentTab === 'Notificações') && mail && fluxoR?.id && perfilId) {
+      dispatch(getFromParametrizacao('fluxo', { id: fluxoR?.id, mail, perfilId }));
     }
-  }, [dispatch, currentTab, fluxoR?.id, cc?.perfil_id, mail]);
+  }, [dispatch, currentTab, fluxoR?.id, perfilId, mail]);
 
   useEffect(() => {
-    if (currentTab === 'Transições' && mail && transicao?.id && cc?.perfil_id) {
+    if (currentTab === 'Transições' && mail && transicao?.id && perfilId) {
       dispatch(getFromParametrizacao('regrasTransicao', { id: transicao?.id, mail }));
-      dispatch(getFromParametrizacao('estado', { id: transicao?.estadoInicial, mail, perfilId: cc?.perfil_id }));
+      dispatch(getFromParametrizacao('estado', { id: transicao?.estadoInicial, mail, perfilId }));
     }
-  }, [dispatch, currentTab, transicao, mail, cc?.perfil_id]);
+  }, [dispatch, currentTab, transicao, mail, perfilId]);
 
   useEffect(() => {
     if (currentTab === 'Notificações' && mail && transicao?.id) {
@@ -250,8 +252,7 @@ export default function ParametrizacaoItemTabs({ item }) {
   return (
     <>
       <HeaderBreadcrumbs
-        links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
+        sx={{ px: 1 }}
         heading={
           (currentTab === 'Regras' && 'Regras de anexos') ||
           (item === 'pareceres' && 'Regras de pareceres') ||
@@ -340,6 +341,8 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
     linhas,
     despesas,
     isLoading,
+    isOpenView,
+    isOpenModal,
     regrasEstado,
     regrasAnexos,
     selectedItem,
@@ -431,6 +434,7 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                   <SkeletonTable
                     row={10}
                     column={
+                      (item === 'linhas' && 4) ||
                       (item === 'notificacoes' && 6) ||
                       ((item === 'regras transicao' || item === 'destinatarios') && 7) ||
                       ((item === 'regras anexos' || item === 'regras estado' || item === 'anexos') && 5) ||
@@ -529,7 +533,7 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
                             </TableCell>
                           </>
                         ))}
-                      {(item === 'notificacoes' || item === 'destinatarios') && (
+                      {(item === 'notificacoes' || item === 'destinatarios' || item === 'linhas') && (
                         <TableCell width={10}>
                           {row?.criado_em && <Criado caption tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.criador && <Criado caption tipo="user" value={row.criador} baralhar />}
@@ -584,17 +588,21 @@ function TableItem({ item, transicao = null, fluxo = null, changeTab }) {
         )}
       </Card>
 
-      {selectedItem && <Detalhes item={item} closeModal={handleCloseModal} />}
-      {(item === 'anexos' && <AnexoDespesaForm item="Anexo" onCancel={handleCloseModal} />) ||
-        (item === 'despesas' && <AnexoDespesaForm item="Despesa" onCancel={handleCloseModal} />) ||
-        (item === 'regras anexos' && <RegraAnexoForm onCancel={handleCloseModal} />) ||
-        (item === 'linhas' && <LinhaForm onCancel={handleCloseModal} />) ||
-        (item === 'regras estado' && <RegraEstadoForm onCancel={handleCloseModal} />) ||
-        (item === 'regras transicao' && <RegraTransicaoForm onCancel={handleCloseModal} transicao={transicao} />) ||
-        (item === 'notificacoes' && (
-          <NotificacaoForm onCancel={handleCloseModal} transicao={transicao} fluxo={fluxo} />
-        )) ||
-        (item === 'destinatarios' && <DestinatarioForm onCancel={handleCloseModal} />)}
+      {selectedItem && isOpenView && <Detalhes item={item} closeModal={handleCloseModal} />}
+      {isOpenModal && (
+        <>
+          {item === 'linhas' && <LinhaForm onCancel={handleCloseModal} />}
+          {item === 'regras anexos' && <RegraAnexoForm onCancel={handleCloseModal} />}
+          {item === 'regras estado' && <RegraEstadoForm onCancel={handleCloseModal} />}
+          {item === 'destinatarios' && <DestinatarioForm onCancel={handleCloseModal} />}
+          {item === 'anexos' && <AnexoDespesaForm item="Anexo" onCancel={handleCloseModal} />}
+          {item === 'despesas' && <AnexoDespesaForm item="Despesa" onCancel={handleCloseModal} />}
+          {item === 'regras transicao' && <RegraTransicaoForm onCancel={handleCloseModal} transicao={transicao} />}
+          {item === 'notificacoes' && (
+            <NotificacaoForm onCancel={handleCloseModal} transicao={transicao} fluxo={fluxo} />
+          )}
+        </>
+      )}
     </>
   );
 }

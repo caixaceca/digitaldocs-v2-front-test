@@ -4,9 +4,8 @@ import { PDFViewer, Page, View, Text, Document, Font } from '@react-pdf/renderer
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 // utils
-// import { fDate, ptDate } from '../../utils/formatTime';
-// import { fNumber, fCurrency } from '../../utils/formatNumber';
-import { converterParaOrdinal, substituirTexto } from '../../utils/formatText';
+import { substituirTexto } from '../../utils/formatText';
+import { converterParaOrdinal } from '../../utils/formatNumber';
 // redux
 import { useSelector } from '../../redux/store';
 // components
@@ -44,7 +43,7 @@ export default function ContratoPdf() {
                       <Text style={[styles.title, styles.uppercase]}>{contrato?.modelo}</Text>
                     </View>
                     <Text style={[styles.textBold]}>OUTORGANTES:</Text>
-                    <Text>
+                    <Text style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
                       <Text style={[styles.textBold]}>PRIMEIRO: CAIXA ECONÓMICA DE CABO VERDE S.A.</Text>, com sede na
                       Av. Cidade de Lisboa, Praia, capital social de 1.392.000.000$00, matriculada na Conservatória do
                       Registo Comercial da Praia sob o n.º 336, NIF 200131753, adiante designada abreviadamente por

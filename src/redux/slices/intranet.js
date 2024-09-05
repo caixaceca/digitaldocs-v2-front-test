@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { format, add } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 //
 import { callMsGraph } from '../../graph';
@@ -19,11 +18,14 @@ const initialState = {
   isOpenDisposicao: false,
   done: '',
   mail: '',
+  perfilId: '',
+  myStatus: 'PresenceUnknown',
   cc: null,
   frase: null,
   ajuda: null,
   perfil: null,
   documento: null,
+  dateUpdate: null,
   accessToken: null,
   msalProfile: null,
   uos: [],
@@ -31,12 +33,10 @@ const initialState = {
   perfis: [],
   myGroups: [],
   perguntas: [],
-  anosServico: [],
   myAplicacoes: [],
   notificacoes: [],
   certificacoes: [],
   colaboradores: [],
-  aniversariantes: [],
 };
 
 const slice = createSlice({
@@ -104,24 +104,12 @@ const slice = createSlice({
         action.payload?.filter((row) => row?.is_active)?.map((row) => ({ ...row, nome: row?.perfil?.displayName })),
         getComparator('asc', 'nome')
       );
-      state.aniversariantes = action?.payload?.filter(
-        (colaborador) =>
-          colaborador?.is_active &&
-          colaborador?.data_cel_aniv &&
-          format(add(new Date(colaborador.data_cel_aniv), { hours: 2 }), 'MM') ===
-            format(add(new Date(), { hours: 2 }), 'MM')
-      );
-      state.anosServico = action?.payload?.filter(
-        (colaborador) =>
-          colaborador?.is_active &&
-          colaborador?.data_admissao &&
-          format(add(new Date(colaborador.data_admissao), { hours: 2 }), 'MM') ===
-            format(add(new Date(), { hours: 2 }), 'MM')
-      );
     },
 
     getCcSuccess(state, action) {
       state.cc = action.payload;
+      state.dateUpdate = new Date();
+      state.perfilId = action.payload?.perfil_id || '';
     },
 
     getPerfisSuccess(state, action) {
@@ -129,13 +117,17 @@ const slice = createSlice({
     },
 
     getMsalProfileSuccess(state, action) {
-      state.mail = action.payload?.mail;
+      state.mail = action.payload?.userPrincipalName;
       state.msalProfile = action.payload;
     },
 
     getProfileSuccess(state, action) {
       state.perfil = action.payload;
       state.myGroups = action.payload?.grupos;
+    },
+
+    getMyStatusSuccess(state, action) {
+      state.myStatus = action.payload?.availability;
     },
 
     getAccessTokenSuccess(state, action) {
@@ -186,8 +178,20 @@ export function authenticateColaborador(accessToken, msalProfile) {
   return async (dispatch) => {
     try {
       const options = { headers: { Authorization: accessToken }, withCredentials: true };
-      const response = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, options);
-      dispatch(slice.actions.getProfileSuccess(response.data));
+      const perfil = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, options);
+      dispatch(slice.actions.getProfileSuccess(perfil.data));
+    } catch (error) {
+      hasError(error, dispatch);
+    }
+  };
+}
+
+export function getMyStatus(accessToken) {
+  return async (dispatch) => {
+    try {
+      const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+      const presense = await axios.get(`https://graph.microsoft.com/v1.0/me/presence`, { headers });
+      dispatch(slice.actions.getMyStatusSuccess(presense.data));
     } catch (error) {
       hasError(error, dispatch);
     }
@@ -202,6 +206,11 @@ export function getFromIntranet(item, params) {
     try {
       const options = { headers: { 'Current-Colaborador': params?.mail } };
       switch (item) {
+        case 'cc': {
+          const response = await axios.get(`${BASEURL}/colaborador/${params?.id}`, options);
+          dispatch(slice.actions.getCcSuccess(response.data));
+          break;
+        }
         case 'disposicao': {
           const response = await axios.get(`${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`, options);
           dispatch(slice.actions.getDisposicaoSuccess(response.data));
@@ -240,11 +249,6 @@ export function getFromIntranet(item, params) {
         case 'perguntas': {
           const response = await axios.get(`${BASEURL}/help/perguntas_frequentes`, options);
           dispatch(slice.actions.getPerguntasSuccess(response.data));
-          break;
-        }
-        case 'cc': {
-          const response = await axios.get(`${BASEURL}/colaborador/${params?.id}`, options);
-          dispatch(slice.actions.getCcSuccess(response.data));
           break;
         }
         case 'colaboradores': {

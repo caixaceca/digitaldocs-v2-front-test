@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
+import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
@@ -17,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import SearchIcon from '@mui/icons-material/Search';
 import RemoveIcon from '@mui/icons-material/Remove';
+import RestoreIcon from '@mui/icons-material/Restore';
 import HistoryIcon from '@mui/icons-material/History';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -31,6 +33,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import AddHomeOutlinedIcon from '@mui/icons-material/AddHomeOutlined';
 import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
@@ -109,15 +112,17 @@ export function DefaultAction({
           onClick={handleClick}
           sx={{ ...(small ? whsmall : wh), boxShadow: label === 'Remover' && 'none' }}
         >
-          {(icon === 'parecer' && <NotesIcon />) ||
+          {(label === 'FECHAR' && <CloseIcon />) ||
+            (icon === 'parecer' && <NotesIcon />) ||
             (icon === 'cancelar' && <ClearIcon />) ||
             (icon === 'history' && <HistoryIcon />) ||
-            (icon === 'confirmar' && <DoneAllIcon />) ||
             (icon === 'ANTERIOR' && <ArrowBackIcon />) ||
+            (label === 'RESTAURAR' && <RestoreIcon />) ||
             (icon === 'PRÓXIMO' && <ArrowForwardIcon />) ||
             (label === 'PARECER' && <ChatOutlinedIcon />) ||
             (icon === 'views' && <PreviewOutlinedIcon />) ||
             (icon === 'acesso' && <TaskAltOutlinedIcon />) ||
+            (label === 'DOMICILIAR' && <AddHomeOutlinedIcon />) ||
             (label === 'VALIDAR' && <SpellcheckOutlinedIcon />) ||
             (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
@@ -125,21 +130,22 @@ export function DefaultAction({
             (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
             (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
             (icon === 'abandonar' && <Abandonar sx={{ width: 24, height: 24 }} />) ||
+            (label === 'RESGATAR' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
+            (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
             (label === 'INFO. DAS CONTAS' && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Adicionar' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
-            (icon === 'resgatar' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Clonar fluxo' && <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
-            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
-            (icon === 'finalizar' && <SvgIconStyle src="/assets/icons/stop.svg" />)}
+            ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />)}
         </Fab>
       </Tooltip>
     </Stack>
@@ -182,7 +188,7 @@ UpdateItem.propTypes = {
 
 export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null }) {
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId } = useSelector((state) => state.intranet);
 
   const handleUpdateByItem = () => {
     dispatch(openModal('update'));
@@ -191,8 +197,8 @@ export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null
 
   const handleUpdateById = (id) => {
     dispatch(openModal('update'));
-    if (id && cc?.perfil_id && mail) {
-      dispatch(getFromParametrizacao(item, { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
+    if (id && perfilId && mail) {
+      dispatch(getFromParametrizacao(item, { id, mail, from: 'listagem', perfilId }));
     }
   };
 
@@ -346,14 +352,7 @@ export function AnexosExistente({ mt = 3, anexos, onOpen = null, anexo = false }
               primaryTypographyProps={{ variant: 'subtitle2', pb: 0.25 }}
               secondary={
                 (row?.criado_em || row?.criador) && (
-                  <Stack
-                    useFlexGap
-                    flexWrap="wrap"
-                    direction="row"
-                    sx={{ mt: 0.25 }}
-                    spacing={{ xs: 0.5, sm: 1 }}
-                    divider={<Divider orientation="vertical" flexItem />}
-                  >
+                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ mt: 0.15 }} spacing={{ xs: 0.5, sm: 1.5 }}>
                     {row?.criador && (
                       <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} baralhar />
                     )}

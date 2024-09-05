@@ -15,7 +15,6 @@ const initialState = {
   isAdmin: false,
   isSaving: false,
   isLoading: false,
-  isGerente: false,
   isOpenView: false,
   isOpenModal: false,
   confirmarCartoes: false,
@@ -51,6 +50,7 @@ const initialState = {
   regrasTransicao: [],
   motivosPendencias: [],
   colaboradoresEstado: [],
+  colaboradoresGestor: [],
 };
 
 const slice = createSlice({
@@ -108,23 +108,17 @@ const slice = createSlice({
     },
 
     getMeusAmbientesSuccess(state, action) {
-      state.meusAmbientes =
-        applySort(
-          action.payload?.filter((row) => row?.id !== -1),
-          getComparator('asc', 'nome')
-        ) || [];
-      const grpGerent = action.payload?.find((row) => row?.nome?.includes('Gerência'));
-      const grpAtend = action.payload?.find((row) => row?.nome?.includes('Atendimento'));
-      const currentAmbiente =
-        action.payload?.find((row) => row?.id === Number(localStorage.getItem('meuAmbiente'))) ||
-        action.payload?.find((row) => row?.id === grpGerent?.id) ||
-        action.payload?.find((row) => row?.id === grpAtend?.id) ||
-        action.payload?.[0];
-      state.isGerente = !!grpGerent;
+      const ambientes = applySort(action?.payload || [], getComparator('asc', 'nome'))?.map((item) => ({
+        ...item,
+        id: item?.estado_id,
+      }));
+      state.meusAmbientes = ambientes;
+      const currentAmbiente = ambientes?.find((row) => row?.padrao) || ambientes?.[0];
       state.meuAmbiente = currentAmbiente;
-      const fluxos = currentAmbiente?.fluxos?.filter((row) => row?.id !== -1) || [];
-      state.meusFluxos = applySort(fluxos, getComparator('asc', 'assunto'));
-      state.meuFluxo = fluxos?.length === 1 ? fluxos?.[0] : null;
+      state.meusFluxos = applySort(currentAmbiente?.fluxos || [], getComparator('asc', 'assunto'))?.map((item) => ({
+        ...item,
+        id: item?.fluxo_id,
+      }));
     },
 
     getMeusAcessosSuccess(state, action) {
@@ -146,6 +140,10 @@ const slice = createSlice({
           state.auditoriaProcesso = true;
         }
       });
+    },
+
+    getColaboradoresGestorSuccess(state, action) {
+      state.colaboradoresGestor = action.payload;
     },
 
     getAcessosSuccess(state, action) {
@@ -189,7 +187,10 @@ const slice = createSlice({
     },
 
     getMotivosPendenciasSuccess(state, action) {
-      state.motivosPendencias = action.payload;
+      state.motivosPendencias = applySort(
+        action.payload?.map((row) => ({ ...row, label: row?.motivo })),
+        getComparator('asc', 'label')
+      );
     },
 
     getLinhasSuccess(state, action) {
@@ -400,10 +401,6 @@ const slice = createSlice({
       }
     },
 
-    openModalItem(state) {
-      state.isOpenModal = true;
-    },
-
     selectItem(state, action) {
       state.selectedItem = action.payload;
     },
@@ -416,12 +413,11 @@ const slice = createSlice({
 
     changeMeuAmbiente(state, action) {
       state.meuAmbiente = action.payload;
-      const fluxos = action.payload?.fluxos || [];
-      state.meusFluxos = applySort(
-        fluxos?.filter((row) => row?.id !== -1),
-        getComparator('asc', 'assunto')
-      );
-      state.meuFluxo = fluxos?.length === 1 ? fluxos?.[0] : null;
+      state.meusFluxos = applySort(action.payload?.fluxos || [], getComparator('asc', 'assunto'))?.map((item) => ({
+        ...item,
+        id: item?.fluxo_id,
+      }));
+      state.meuFluxo = null;
     },
 
     changeMeuFluxo(state, action) {
@@ -438,16 +434,8 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const {
-  openModal,
-  resetItem,
-  selectItem,
-  closeModal,
-  openModalItem,
-  changeMeuFluxo,
-  setNotificacaoId,
-  changeMeuAmbiente,
-} = slice.actions;
+export const { openModal, resetItem, selectItem, closeModal, changeMeuFluxo, setNotificacaoId, changeMeuAmbiente } =
+  slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -460,6 +448,27 @@ export function getFromParametrizacao(item, params) {
         case 'meusacessos': {
           const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${params?.perfilId}`, options);
           dispatch(slice.actions.getMeusAcessosSuccess(response.data));
+          break;
+        }
+        case 'meusambientes': {
+          const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/v2/${params?.perfilId}`, options);
+          dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
+
+          const estadosGestor = response.data?.objeto?.filter((item) => item?.gestor);
+          const estadosPromises = estadosGestor.map(async (row) => {
+            const estado = axios.get(`${BASEURLDD}/v1/estados/${row?.estado_id}/${params?.perfilId}`, options);
+            return estado;
+          });
+          const estados = await Promise.all(estadosPromises);
+          const colaboradoresIds = [params?.perfilId];
+          await estados?.forEach((row) => {
+            row?.data?.perfis?.forEach((item) => {
+              if (!colaboradoresIds?.includes(item?.perfil_id)) {
+                colaboradoresIds?.push(item?.perfil_id);
+              }
+            });
+          });
+          dispatch(slice.actions.getColaboradoresGestorSuccess(colaboradoresIds));
           break;
         }
         case 'acessos': {
@@ -484,11 +493,6 @@ export function getFromParametrizacao(item, params) {
           } else {
             dispatch(slice.actions.getFluxoSuccess(response.data));
           }
-          break;
-        }
-        case 'ambientes': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/${params?.perfilId}`, options);
-          dispatch(slice.actions.getMeusAmbientesSuccess(response.data));
           break;
         }
         case 'transicao': {
@@ -670,11 +674,9 @@ export function createItem(item, dados, params) {
           break;
         }
         case 'estadoPerfil': {
-          await axios.post(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
+          await axios.post(`${BASEURLDD}/v1/estados/asscc/perfil`, JSON.stringify(dados), options);
           const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${JSON.parse(dados)?.perfil_id}/${
-              JSON.parse(dados)?.perfil_id_cc
-            }`,
+            `${BASEURLDD}/v1/estados/asscc/byperfilid/${dados?.perfil_id}/${dados?.perfil_id_cc}`,
             options
           );
           dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
@@ -771,11 +773,9 @@ export function updateItem(item, dados, params) {
           break;
         }
         case 'estadoPerfil': {
-          await axios.put(`${BASEURLDD}/v1/estados/asscc/perfil`, dados, options);
+          await axios.put(`${BASEURLDD}/v1/estados/asscc/perfil`, JSON.stringify(dados), options);
           const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${JSON.parse(dados)?.perfil_id}/${
-              JSON.parse(dados)?.perfil_id_cc
-            }`,
+            `${BASEURLDD}/v1/estados/asscc/byperfilid/${dados?.perfil_id}/${dados?.perfil_id_cc}`,
             options
           );
           dispatch(slice.actions.getEstadosPerfilSuccess(response.data));

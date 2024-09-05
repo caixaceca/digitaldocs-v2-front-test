@@ -12,7 +12,6 @@ import useSettings from '../../../hooks/useSettings';
 const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   padding: theme.spacing(2),
   color: theme.palette.text.disabled,
-  border: `solid 1px ${theme.palette.grey[500_12]}`,
   backgroundColor: theme.palette.background.neutral,
   borderRadius: Number(theme.shape.borderRadius) * 1.25,
 }));
@@ -22,8 +21,6 @@ const BoxStyle = styled(CardActionArea)(({ theme }) => ({
 export default function SettingStretch() {
   const { themeStretch, onToggleStretch } = useSettings();
 
-  const ICON_SIZE = { width: themeStretch ? 20 : 16, height: themeStretch ? 20 : 16 };
-
   return (
     <BoxStyle onClick={onToggleStretch} sx={{ ...(themeStretch && { color: (theme) => theme.palette.primary.main }) }}>
       <Stack
@@ -31,30 +28,23 @@ export default function SettingStretch() {
         alignItems="center"
         justifyContent="space-between"
         sx={{
-          px: 1,
           mx: 'auto',
           width: 0.5,
-          height: 40,
           borderRadius: 1,
           color: 'action.active',
-          bgcolor: 'background.default',
-          boxShadow: (theme) => theme.customShadows.z12,
           transition: (theme) => theme.transitions.create('width'),
-          ...(themeStretch && {
-            width: 1,
-            color: 'primary.main',
-          }),
+          ...(themeStretch && { width: 1, color: 'primary.main' }),
         }}
       >
         {themeStretch ? (
-          <ArrowForwardIosOutlinedIcon sx={{ ...ICON_SIZE }} />
+          <ArrowForwardIosOutlinedIcon sx={{ width: 18, height: 18 }} />
         ) : (
-          <ArrowBackIosNewOutlinedIcon sx={{ ...ICON_SIZE }} />
+          <ArrowBackIosNewOutlinedIcon sx={{ width: 18, height: 18 }} />
         )}
         {themeStretch ? (
-          <ArrowBackIosNewOutlinedIcon sx={{ ...ICON_SIZE }} />
+          <ArrowBackIosNewOutlinedIcon sx={{ width: 18, height: 18 }} />
         ) : (
-          <ArrowForwardIosOutlinedIcon sx={{ ...ICON_SIZE }} />
+          <ArrowForwardIosOutlinedIcon sx={{ width: 18, height: 18 }} />
         )}
       </Stack>
     </BoxStyle>

@@ -137,7 +137,7 @@ function AnexoPreview() {
   const dispatch = useDispatch();
   const [url, setUrl] = useState('');
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
-  const { isOpenModal, isLoadingAnexo, selectedAnexo, anexo } = useSelector((state) => state.cc);
+  const { isOpenModal, isLoadingPreview, selectedAnexo, anexo } = useSelector((state) => state.cc);
 
   useEffect(() => {
     if (anexo?.preview !== 'pdf' && anexo?.preview !== 'image' && anexo?.anexo?.ficheiro) {
@@ -166,7 +166,7 @@ function AnexoPreview() {
       <DTFechar title={selectedAnexo?.designacao} handleClick={() => handleCloseModal()} />
       <DialogContent sx={{ mt: 2, px: anexo?.preview === 'pdf' ? 0 : 3, pb: anexo?.preview === 'pdf' ? 0 : 3 }}>
         <Box sx={{ flexGrow: 1, height: '100%' }}>
-          {isLoadingAnexo ? (
+          {isLoadingPreview ? (
             <Stack direction="column" alignItems="center" justifyContent="center" sx={{ height: 1 }}>
               <Loading />
               <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>

@@ -10,6 +10,8 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // routes
+import { ptDateTime } from '../../utils/formatTime';
+// routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -17,8 +19,8 @@ import useTable, { getComparator } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, openModal, closeModal } from '../../redux/slices/parametrizacao';
 // Components
-import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
+import { Checked, Criado } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
@@ -41,6 +43,7 @@ const TABLE_HEAD_FLUXOS = [
 
 const TABLE_HEAD_ESTADOS = [
   { id: 'nome', label: 'Nome', align: 'left' },
+  { id: 'uo', label: 'Unidade orgânica', align: 'left' },
   { id: 'is_inicial', label: 'Inicial', align: 'center' },
   { id: 'is_final', label: 'Final', align: 'center' },
   { id: '' },
@@ -58,7 +61,8 @@ const TABLE_HEAD_ORIGENS = [
 
 const TABLE_HEAD_MOTIVOS = [
   { id: 'motivo', label: 'Motivo', align: 'left' },
-  { id: ' obs', label: 'Observação', align: 'left' },
+  { id: 'obs', label: 'Observação', align: 'left' },
+  { id: 'criado_em', label: 'Registo', align: 'left', width: 10 },
   { id: '' },
 ];
 
@@ -69,11 +73,10 @@ ParametrizacaoItem.propTypes = { item: PropTypes.string };
 export default function ParametrizacaoItem({ item }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mail, cc } = useSelector((state) => state.intranet);
+  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
-  const { fluxos, estados, origens, motivosPendencias, selectedItem, isLoading, done } = useSelector(
-    (state) => state.parametrizacao
-  );
+  const { fluxos, estados, origens, motivosPendencias, selectedItem, isOpenModal, isOpenView, isLoading, done } =
+    useSelector((state) => state.parametrizacao);
 
   const {
     page,
@@ -106,9 +109,7 @@ export default function ParametrizacaoItem({ item }) {
         done === 'Fluxo clonado'
       ) {
         navigate(
-          item === 'fluxos'
-            ? `${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${selectedItem?.id}`
-            : `${PATH_DIGITALDOCS.parametrizacao.root}/estado/${selectedItem?.id}`
+          `${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${selectedItem?.id}`
         );
       }
     }
@@ -116,10 +117,10 @@ export default function ParametrizacaoItem({ item }) {
   }, [done]);
 
   useEffect(() => {
-    if (mail && cc?.perfil_id && item) {
-      dispatch(getFromParametrizacao(item, { mail, perfilId: cc?.perfil_id }));
+    if (mail && perfilId && item) {
+      dispatch(getFromParametrizacao(item, { mail, perfilId }));
     }
-  }, [dispatch, cc?.perfil_id, item, mail]);
+  }, [dispatch, perfilId, item, mail]);
 
   useEffect(() => {
     setPage(0);
@@ -131,25 +132,21 @@ export default function ParametrizacaoItem({ item }) {
   };
 
   const handleView = (id) => {
-    navigate(
-      (item === 'fluxos' && `${PATH_DIGITALDOCS.parametrizacao.root}/fluxo/${id}`) ||
-        (item === 'estados' && `${PATH_DIGITALDOCS.parametrizacao.root}/estado/${id}`)
-    );
+    navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${id}`);
   };
 
   const handleClone = (id) => {
-    if (id && cc?.perfil_id && mail) {
-      dispatch(openModal('view'));
-      dispatch(getFromParametrizacao('fluxo', { id, mail, from: 'listagem', perfilId: cc?.perfil_id }));
-    }
+    dispatch(openModal('view'));
+    dispatch(getFromParametrizacao('fluxo', { id, mail, from: 'listagem', perfilId }));
   };
 
   const dataFiltered = applySortFilter({
     dados:
       (item === 'fluxos' && fluxos) ||
-      (item === 'estados' && estados) ||
       (item === 'origens' && origens) ||
       (item === 'motivos' && motivosPendencias) ||
+      (item === 'estados' &&
+        estados?.map((row) => ({ ...row, uo: uos?.find((item) => item?.id === row?.uo_id)?.label || row?.uo_id }))) ||
       [],
     filter,
     comparator: getComparator(order, orderBy),
@@ -159,9 +156,8 @@ export default function ParametrizacaoItem({ item }) {
   return (
     <>
       <HeaderBreadcrumbs
+        sx={{ px: 1 }}
         action={<AddItem />}
-        links={[{ name: '' }]}
-        sx={{ color: 'text.secondary', px: 1 }}
         heading={
           (item === 'fluxos' && 'Fluxos') ||
           (item === 'estados' && 'Estados') ||
@@ -192,9 +188,9 @@ export default function ParametrizacaoItem({ item }) {
                     row={10}
                     column={
                       (item === 'fluxos' && 6) ||
-                      (item === 'estados' && 4) ||
+                      (item === 'estados' && 5) ||
                       (item === 'origens' && 7) ||
-                      (item === 'motivos' && 3)
+                      (item === 'motivos' && 4)
                     }
                   />
                 ) : (
@@ -218,6 +214,7 @@ export default function ParametrizacaoItem({ item }) {
                         (item === 'estados' && (
                           <>
                             <TableCell>{row.nome}</TableCell>
+                            <TableCell>{row.uo}</TableCell>
                             <TableCell align="center">
                               <Checked check={row.is_inicial} />
                             </TableCell>
@@ -242,8 +239,13 @@ export default function ParametrizacaoItem({ item }) {
                           <>
                             <TableCell>{row.motivo}</TableCell>
                             <TableCell>{row.obs}</TableCell>
+                            <TableCell>
+                              {!!row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
+                              {!!row?.criador && <Criado caption tipo="user" value={row?.criador} />}
+                            </TableCell>
                           </>
                         ))}
+
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item === 'estados' ||
@@ -296,15 +298,15 @@ export default function ParametrizacaoItem({ item }) {
         )}
       </Card>
 
-      {(item === 'fluxos' && (
+      {item === 'fluxos' && isOpenView && <ClonarFluxoForm onCancel={handleCloseModal} />}
+      {isOpenModal && (
         <>
-          <FluxoForm onCancel={handleCloseModal} />
-          <ClonarFluxoForm onCancel={handleCloseModal} />
+          {item === 'fluxos' && <FluxoForm onCancel={handleCloseModal} />}
+          {item === 'estados' && <EstadoForm onCancel={handleCloseModal} />}
+          {item === 'origens' && <OrigemForm onCancel={handleCloseModal} />}
+          {item === 'motivos' && <MotivoPendenciaForm onCancel={handleCloseModal} />}
         </>
-      )) ||
-        (item === 'estados' && <EstadoForm onCancel={handleCloseModal} />) ||
-        (item === 'origens' && <OrigemForm onCancel={handleCloseModal} />) ||
-        (item === 'motivos' && <MotivoPendenciaForm onCancel={handleCloseModal} />)}
+      )}
     </>
   );
 }

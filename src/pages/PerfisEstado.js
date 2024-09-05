@@ -56,7 +56,7 @@ export default function PerfisEstado() {
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, colaboradores, cc } = useSelector((state) => state.intranet);
+  const { mail, colaboradores, perfilId } = useSelector((state) => state.intranet);
   const { isLoading, estado, done } = useSelector((state) => state.parametrizacao);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
 
@@ -87,10 +87,10 @@ export default function PerfisEstado() {
   }, [filter]);
 
   useEffect(() => {
-    if (mail && id && cc?.perfil_id) {
-      dispatch(getFromParametrizacao('estado', { id, mail, perfilId: cc?.perfil_id }));
+    if (mail && id && perfilId) {
+      dispatch(getFromParametrizacao('estado', { id, mail, perfilId }));
     }
-  }, [dispatch, cc?.perfil_id, mail, id]);
+  }, [dispatch, perfilId, mail, id]);
 
   const perfisAssociados = [];
   estado?.perfis?.forEach((row) => {
