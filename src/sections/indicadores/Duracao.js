@@ -23,6 +23,7 @@ import { useSelector } from '../../redux/store';
 // components
 import Chart, { useChart } from '../../components/chart';
 import { SkeletonTable } from '../../components/skeleton';
+import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndicadores';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { IndicadorItem, CardInfo, TableExport, TabView, dadosResumo } from './Indicadores';
@@ -224,9 +225,17 @@ export function Conclusao({ indicadores }) {
     yaxis: { title: { text: 'Dias' }, labels: { formatter: (value) => fNumber(value) } },
   });
 
+  console.log(conclusaoByItem);
+
   return (
     <Card sx={{ p: 1 }}>
-      {conclusaoByItem.length > 0 && <TabView vista={vista} setVista={setVista} />}
+      {conclusaoByItem.length > 0 && (
+        <TabView
+          vista={vista}
+          setVista={setVista}
+          exportar={<ExportarDados tabela="Duração dos processos - Conclusão" dados={conclusaoByItem} />}
+        />
+      )}
       <IndicadorItem
         isLoading={isLoading}
         isNotFound={isNotFound}

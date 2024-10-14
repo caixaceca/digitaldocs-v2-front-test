@@ -4,17 +4,30 @@ import { useNavigate } from 'react-router-dom';
 // utils
 import { noEstado, podeArquivar, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
 // redux
-import { updateItem } from '../../redux/slices/digitaldocs';
+import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
+import { updateItem, selectAnexo, getAll, selectItem } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import { DefaultAction } from '../../components/Actions';
-import DialogConfirmar from '../../components/DialogConfirmar';
+import { DialogConfirmar } from '../../components/CustomDialog';
 //
-import { Encaminhar, Abandonar, Domiciliar, Arquivar, Finalizar, ColocarPendente } from './form/IntervencaoForm';
+import {
+  AtribuirForm,
+  ResgatarForm,
+  LibertarForm,
+  CancelarForm,
+  FinalizarForm,
+  AbandonarForm,
+  DomiciliarForm,
+  EncaminharStepper,
+  ColocarPendenteForm,
+} from './form/IntervencaoForm';
+import { RestaurarForm, ArquivarForm, DesarquivarForm } from './form/Arquivo';
 
 // ----------------------------------------------------------------------
 
@@ -64,6 +77,7 @@ export default function Intervencao({ colaboradoresList }) {
         <Encaminhar
           title="DEVOLVER"
           gerencia={gerencia}
+          fluxoId={processo?.fluxo_id}
           destinos={dados?.devolucoes}
           colaboradoresList={colaboradoresList}
         />
@@ -85,15 +99,16 @@ export default function Intervencao({ colaboradoresList }) {
         pertencoAoEstado(meusAmbientes, ['Autorização SWIFT']) && (
           <>
             <DefaultAction handleClick={onOpen} label="FINALIZAR" />
-            <DialogConfirmar
-              open={open}
-              onClose={onClose}
-              isSaving={isSaving}
-              handleOk={() => handleFinalizar()}
-              color="success"
-              title="Finalizar"
-              desc="finalizar este processo"
-            />
+            {open && (
+              <DialogConfirmar
+                onClose={onClose}
+                isSaving={isSaving}
+                handleOk={() => handleFinalizar()}
+                color="success"
+                title="Finalizar"
+                desc="finalizar este processo"
+              />
+            )}
           </>
         )}
 
@@ -133,37 +148,222 @@ export default function Intervencao({ colaboradoresList }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// --- ENCAMINHAR/DEVOLVER PROCESSO ------------------------------------------------------------------------------------
 
-Libertar.propTypes = { perfilID: PropTypes.number, processoID: PropTypes.number };
+Encaminhar.propTypes = {
+  title: PropTypes.string,
+  gerencia: PropTypes.bool,
+  destinos: PropTypes.array,
+  fluxoId: PropTypes.number,
+  colaboradoresList: PropTypes.array,
+};
 
-export function Libertar({ perfilID, processoID }) {
+export function Encaminhar({ title, destinos, gerencia = false, colaboradoresList = [], fluxoId = null }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail } = useSelector((state) => state.intranet);
-  const { isSaving } = useSelector((state) => state.digitaldocs);
-
-  const hanndleLibertar = () => {
-    dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'Processo libertado' }));
-  };
-
+  const { mail, perfilId } = useSelector((state) => state.intranet);
   return (
     <>
-      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="LIBERTAR" />
-      <DialogConfirmar
-        open={open}
-        onClose={onClose}
-        isSaving={isSaving}
-        handleOk={hanndleLibertar}
-        color="warning"
-        title="Libertar"
-        desc="libertar este processo"
+      <DefaultAction
+        color={title === 'DEVOLVER' ? 'warning' : 'success'}
+        handleClick={() => {
+          onOpen();
+          dispatch(resetDados());
+          if (title === 'DEVOLVER') {
+            dispatch(getFromParametrizacao('motivos transicao', { mail, perfilId, fluxoId }));
+          }
+        }}
+        label={title}
       />
+      {open && (
+        <EncaminharStepper
+          title={title}
+          onClose={onClose}
+          destinos={destinos}
+          gerencia={gerencia}
+          colaboradoresList={colaboradoresList}
+        />
+      )}
     </>
   );
 }
 
-// ----------------------------------------------------------------------
+// --- ARQUIVAR PROCESSO -----------------------------------------------------------------------------------------------
+
+Arquivar.propTypes = { naoFinal: PropTypes.array };
+
+export function Arquivar({ naoFinal }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction color="error" handleClick={onOpen} label="ARQUIVAR" />
+      {open && <ArquivarForm naoFinal={naoFinal} onClose={onClose} />}
+    </>
+  );
+}
+
+// --- DESARQUIVAR PROCESSO --------------------------------------------------------------------------------------------
+
+Desarquivar.propTypes = { id: PropTypes.number, colaboradoresList: PropTypes.array };
+
+export function Desarquivar({ id, colaboradoresList }) {
+  const dispatch = useDispatch();
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { isOpenModal1 } = useSelector((state) => state.digitaldocs);
+  return (
+    <>
+      <DefaultAction
+        color="error"
+        label="DESARQUIVAR"
+        handleClick={() => dispatch(getAll('destinosDesarquivamento', { mail, id, perfilId }))}
+      />
+      {isOpenModal1 && <DesarquivarForm id={id} colaboradoresList={colaboradoresList} />}
+    </>
+  );
+}
+
+// --- RESTAURAR PROCESSO DO HISTÓRICO ---------------------------------------------------------------------------------
+
+Restaurar.propTypes = { id: PropTypes.number };
+
+export function Restaurar({ id }) {
+  const dispatch = useDispatch();
+  const { selectedAnexoId } = useSelector((state) => state.digitaldocs);
+  return (
+    <>
+      <DefaultAction color="error" label="RESTAURAR" handleClick={() => dispatch(selectAnexo(id))} />
+      {!!selectedAnexoId && <RestaurarForm id={id} />}
+    </>
+  );
+}
+
+// --- FINALIZAR NOTAS EXTERNAS ----------------------------------------------------------------------------------------
+
+Finalizar.propTypes = { id: PropTypes.number, cativos: PropTypes.array };
+
+export function Finalizar({ id, cativos = [] }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction handleClick={onOpen} label="FINALIZAR" />
+      {open && <FinalizarForm onClose={onClose} id={id} cativos={cativos} />}
+    </>
+  );
+}
+
+// --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
+
+Libertar.propTypes = { perfilID: PropTypes.number, processoID: PropTypes.number };
+
+export function Libertar({ perfilID, processoID }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="LIBERTAR" />
+      {open && <LibertarForm perfilID={perfilID} processoID={processoID} onClose={onClose} />}
+    </>
+  );
+}
+
+// --- RESGATAR PROCESSO -----------------------------------------------------------------------------------------------
+
+Resgatar.propTypes = { dados: PropTypes.object };
+
+export function Resgatar({ dados }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction label="RESGATAR" handleClick={onOpen} color="warning" />
+      {open && <ResgatarForm dados={dados} onClose={() => onClose()} />}
+    </>
+  );
+}
+
+// --- CANCELAR/FECHAR PROCESSO EM PARALELO ----------------------------------------------------------------------------
+
+Cancelar.propTypes = { id: PropTypes.number, estadoId: PropTypes.number, fechar: PropTypes.bool };
+
+export function Cancelar({ id, estadoId, fechar = false }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction label={fechar ? 'FECHAR' : 'RESGATAR'} color="warning" handleClick={onOpen} />
+      {open && <CancelarForm onClose={onClose} id={id} estadoId={estadoId} fechar={fechar} />}
+    </>
+  );
+}
+
+// --- ABANDONAR PROCESSO ----------------------------------------------------------------------------------------------
+
+Abandonar.propTypes = {
+  id: PropTypes.number,
+  isSaving: PropTypes.bool,
+  fluxoId: PropTypes.number,
+  estadoId: PropTypes.number,
+};
+
+export function Abandonar({ id, fluxoId, estadoId, isSaving }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="ABANDONAR" />
+      {open && <AbandonarForm dados={{ id, fluxoId, estadoId }} onClose={() => onClose} isSaving={isSaving} />}
+    </>
+  );
+}
+
+// --- ATRIBUIR/AFETAR PROCESSO ----------------------------------------------------------------------------------------
+
+Atribuir.propTypes = { dados: PropTypes.object };
+
+export function Atribuir({ dados }) {
+  const dispatch = useDispatch();
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+
+  const atribuirClick = () => {
+    onOpen();
+    if (mail && perfilId && dados?.estadoId) {
+      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: dados?.estadoId }));
+    }
+  };
+
+  return (
+    <>
+      <DefaultAction color="info" label="ATRIBUIR" handleClick={() => atribuirClick()} />
+      {open && <AtribuirForm dados={dados} onClose={onClose} />}
+    </>
+  );
+}
+
+// --- COLOCAR PROCESSO PENDENTE ---------------------------------------------------------------------------------------
+
+export function ColocarPendente() {
+  const dispatch = useDispatch();
+  const { processo, isOpenModal } = useSelector((state) => state.digitaldocs);
+  return (
+    <>
+      <DefaultAction color="inherit" label="PENDENTE" handleClick={() => dispatch(selectItem(processo))} />
+      {isOpenModal && <ColocarPendenteForm />}
+    </>
+  );
+}
+
+// --- DOMICILIAR PROCESSO ---------------------------------------------------------------------------------------------
+
+Domiciliar.propTypes = { id: PropTypes.number, estadoId: PropTypes.number };
+
+export function Domiciliar({ id, estadoId }) {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  return (
+    <>
+      <DefaultAction color="warning" label="DOMICILIAR" handleClick={() => onOpen()} />
+      {open && <DomiciliarForm id={id} estadoId={estadoId} onClose={onClose} />}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function setDados(processo, aberturaEmpSemValCompliance) {
   const devolucoes = [];

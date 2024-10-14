@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -35,9 +35,9 @@ import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile }
 
 // ----------------------------------------------------------------------
 
-FormSugestao.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
+FormSugestao.propTypes = { onCancel: PropTypes.func };
 
-export function FormSugestao({ open, onCancel }) {
+export function FormSugestao({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
@@ -50,15 +50,8 @@ export function FormSugestao({ open, onCancel }) {
 
   const defaultValues = useMemo(() => ({ titulo: '', descricao: '', imagem: '' }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, setValue, handleSubmit } = methods;
+  const { watch, setValue, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    if (open) {
-      reset(defaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const onSubmit = async () => {
     try {
@@ -85,7 +78,7 @@ export function FormSugestao({ open, onCancel }) {
   );
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <Notificacao error={error} afterSuccess={onCancel} done={done} />
       <DialogTitle>Deixe-nos a tua sugestão/feedback</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
@@ -110,9 +103,9 @@ export function FormSugestao({ open, onCancel }) {
 
 // ----------------------------------------------------------------------
 
-DenunciaForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
+DenunciaForm.propTypes = { onCancel: PropTypes.func };
 
-export function DenunciaForm({ open, onCancel }) {
+export function DenunciaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, done, error, isSaving } = useSelector((state) => state.intranet);
@@ -128,15 +121,8 @@ export function DenunciaForm({ open, onCancel }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, setValue, handleSubmit } = methods;
+  const { watch, setValue, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    if (open) {
-      reset(defaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const onSubmit = async () => {
     try {
@@ -164,7 +150,7 @@ export function DenunciaForm({ open, onCancel }) {
   );
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <Notificacao error={error} afterSuccess={onCancel} done={done} />
       <DialogTitle>Denúncia</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
@@ -192,9 +178,9 @@ export function DenunciaForm({ open, onCancel }) {
 
 // ----------------------------------------------------------------------
 
-ValidarDocForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
+ValidarDocForm.propTypes = { onCancel: PropTypes.func };
 
-export function ValidarDocForm({ open, onCancel }) {
+export function ValidarDocForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { documento, isLoading } = useSelector((state) => state.intranet);
@@ -219,7 +205,7 @@ export function ValidarDocForm({ open, onCancel }) {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DTFechar title="Validação de documento" handleClick={() => onCancel()} />
       <DialogContent sx={{ mt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>

@@ -17,7 +17,7 @@ const RootStyle = styled(Box)(({ theme }) => ({
     fontFamily: theme.typography.fontFamily,
   },
   '& .ql-editor': {
-    minHeight: 200,
+    minHeight: 150,
     maxHeight: 500,
     '&.ql-blank::before': {
       fontStyle: 'normal',
@@ -59,32 +59,16 @@ export default function Editor({
   const modules = {
     toolbar: {
       container: `#${id}`,
-      handlers: {
-        undo: undoChange,
-        redo: redoChange,
-      },
+      handlers: { undo: undoChange, redo: redoChange },
     },
-    history: {
-      delay: 500,
-      maxStack: 100,
-      userOnly: true,
-    },
+    history: { delay: 500, maxStack: 100, userOnly: true },
     syntax: true,
-    clipboard: {
-      matchVisual: false,
-    },
+    clipboard: { matchVisual: false },
   };
 
   return (
     <div>
-      <RootStyle
-        sx={{
-          ...(error && {
-            border: (theme) => `solid 1px ${theme.palette.error.main}`,
-          }),
-          ...sx,
-        }}
-      >
+      <RootStyle sx={{ ...(error && { border: (theme) => `solid 1px ${theme.palette.error.main}` }), ...sx }}>
         <EditorToolbar id={id} isSimple={simple} />
         <ReactQuill
           value={value}

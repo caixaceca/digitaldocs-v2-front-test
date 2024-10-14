@@ -1,4 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
+// highlight
+import './utils/highlight';
 // styles
 import './style.css';
 
@@ -22,7 +24,7 @@ import 'react-lazy-load-image-component/src/effects/black-and-white.css';
 
 import { setLocale } from 'yup';
 import pt from 'date-fns/locale/pt';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -66,7 +68,8 @@ setLocale({
   },
 });
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const domNode = document.getElementById('root');
+const root = createRoot(domNode);
 
 root.render(
   <HelmetProvider>

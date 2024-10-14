@@ -66,7 +66,7 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
           parecer={{ ...row, estado, observacao: row?.descritivo }}
         />
       ))}
-      {isOpenModal1 && <ParecerForm openModal={isOpenModal1} onCancel={handleClose} processoId={id} />}
+      {isOpenModal1 && <ParecerForm onCancel={handleClose} processoId={id} />}
     </Box>
   );
 }
@@ -75,7 +75,6 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
 
 Parecer.propTypes = {
   accord: PropTypes.string,
-  assunto: PropTypes.string,
   parecer: PropTypes.object,
   viewAnexo: PropTypes.func,
   estadoId: PropTypes.number,
@@ -83,7 +82,7 @@ Parecer.propTypes = {
   handleAccord: PropTypes.func,
 };
 
-export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord, assunto, viewAnexo }) {
+export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord, viewAnexo }) {
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
   const colaborador = colaboradores?.find((item) => item?.perfil_id === parecer?.perfil_id);
@@ -110,6 +109,7 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
               {colaborador && (
                 <ColaboradorInfo
                   foto={colaborador?.foto_disk}
+                  status={colaborador?.presence}
                   labelAlt={colaborador?.uo?.label}
                   nome={colaborador?.perfil?.displayName}
                   other={
@@ -128,14 +128,8 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
           <AccordionDetails>
             <Stack sx={{ pt: 1 }}>
               {temParecer ? (
-                <Stack direction="row" spacing={1.5}>
-                  <Stack sx={{ width: 1 }}>
-                    <Info
-                      viewAnexo={viewAnexo}
-                      temParecer={temParecer}
-                      dados={{ ...parecer, perfil: colaborador?.perfil, assunto, estado: parecer?.estado }}
-                    />
-                  </Stack>
+                <Stack sx={{ width: 1 }}>
+                  <Info viewAnexo={viewAnexo} temParecer={temParecer} dados={parecer} />
                 </Stack>
               ) : (
                 <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>

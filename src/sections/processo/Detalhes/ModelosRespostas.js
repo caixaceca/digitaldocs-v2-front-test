@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 // utils
 import { fDate } from '../../../utils/formatTime';
 import { fCurrency } from '../../../utils/formatNumber';
-import { getFileThumb } from '../../../utils/getFileFormat';
+import { getFileThumb } from '../../../utils/formatFile';
 import { numeroPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';

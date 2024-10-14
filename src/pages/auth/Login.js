@@ -13,7 +13,7 @@ import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // config
-import { loginRequest } from '../../config';
+import { loginRequest, msalInstance } from '../../config';
 // components
 import Page from '../../components/Page';
 
@@ -48,9 +48,10 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
+      await msalInstance.initialize();
       if (inProgress === InteractionStatus.None) {
         await instance.loginRedirect({ ...loginRequest });
-        enqueueSnackbar('Login efetuado com sucesso', { variant: 'error' });
+        enqueueSnackbar('Login efetuado com sucesso', { variant: 'success' });
       }
     } catch (error) {
       enqueueSnackbar(error, { variant: 'error' });
@@ -66,7 +67,6 @@ export default function LoginPage() {
               <Typography variant="h3">Olá, bem-vindo(a)</Typography>
               <Typography variant="h5">Intranet da Caixa Económica de Cabo Verde</Typography>
             </Stack>
-
             <Alert severity="success" sx={{ mb: 3 }}>
               Para aceder faça login com a sua conta <strong>Microsoft</strong>
             </Alert>
@@ -79,7 +79,7 @@ export default function LoginPage() {
       <Paper sx={{ position: 'absolute', bottom: 10, left: 10, right: 10, p: 1.5 }} elevation={3}>
         <Stack alignItems="center" spacing={{ xs: 1, sm: 2 }} justifyContent="space-between" direction="row">
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            © {format(new Date(), 'Y')} Caixa Económica de Cabo Verde
+            © {format(new Date(), 'y')} Caixa Económica de Cabo Verde
           </Typography>
           <Typography variant="caption" sx={{ textAlign: 'right', color: 'text.secondary' }}>
             <b>Versão 1.0</b>

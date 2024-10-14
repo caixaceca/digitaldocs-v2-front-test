@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import ReactHTMLTableToExcel from 'react-html-table-to-excel-3';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
@@ -45,7 +44,7 @@ import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
-import { getFileThumb } from '../utils/getFileFormat';
+import { getFileThumb } from '../utils/formatFile';
 import { findColaborador } from '../utils/formatText';
 import { ptDate, ptDateTime } from '../utils/formatTime';
 // hooks
@@ -59,7 +58,7 @@ import { Editar, Arquivo, Seguimento, Abandonar, Resgatar, Detalhes, Eliminar, A
 //
 import { Criado } from './Panel';
 import SvgIconStyle from './SvgIconStyle';
-import DialogConfirmar from './DialogConfirmar';
+import { DialogConfirmar } from './CustomDialog';
 
 const wh = { width: 38, height: 38 };
 const whsmall = { width: 30, height: 30 };
@@ -296,7 +295,7 @@ export function DialogButons({
       {desc && (
         <>
           <DefaultAction color="error" label="ELIMINAR" handleClick={onOpen} />
-          <DialogConfirmar desc={desc} open={open} onClose={onClose} isSaving={isSaving} handleOk={handleDelete} />
+          {open && <DialogConfirmar desc={desc} onClose={onClose} isSaving={isSaving} handleOk={handleDelete} />}
         </>
       )}
       <Box sx={{ flexGrow: 1 }} />
@@ -316,6 +315,31 @@ export function DialogButons({
         </LoadingButton>
       )}
     </DialogActions>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+ButtonsStepper.propTypes = {
+  label: PropTypes.string,
+  isSaving: PropTypes.bool,
+  onCancel: PropTypes.func,
+  hideSubmit: PropTypes.bool,
+  labelCancel: PropTypes.string,
+};
+
+export function ButtonsStepper({ isSaving, onCancel, label = 'Seguinte', labelCancel = 'Voltar', hideSubmit = false }) {
+  return (
+    <Stack direction="row" justifyContent="right" spacing={1} sx={{ mt: 3, pt: 1 }}>
+      <Button variant="outlined" color="inherit" onClick={() => onCancel()}>
+        {labelCancel}
+      </Button>
+      {!hideSubmit && (
+        <LoadingButton type="submit" loading={isSaving} variant="contained">
+          {(label && label) || 'Seguinte'}
+        </LoadingButton>
+      )}
+    </Stack>
   );
 }
 
@@ -379,40 +403,6 @@ export function AnexosExistente({ mt = 3, anexos, onOpen = null, anexo = false }
         ))}
       </List>
     </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-ExportExcel.propTypes = {
-  icon: PropTypes.bool,
-  sheet: PropTypes.string,
-  table: PropTypes.string,
-  filename: PropTypes.string,
-};
-
-export function ExportExcel({ filename, sheet = '', table, icon = false }) {
-  return (
-    <ReactHTMLTableToExcel
-      table={table}
-      filename={filename}
-      sheet={sheet || filename}
-      id="react-html-table-to-excel-button"
-      className="MuiButtonBase-root-MuiButton-root"
-      children={
-        icon ? (
-          <Tooltip title="EXPORTAR" arrow>
-            <Fab color="inherit" size="small" variant="soft" sx={{ ...wh }}>
-              {getFileThumb(false, null, 'file.xlsx')}
-            </Fab>
-          </Tooltip>
-        ) : (
-          <Button variant="contained" startIcon={getFileThumb(false, null, 'file.xlsx')}>
-            Exportar
-          </Button>
-        )
-      }
-    />
   );
 }
 

@@ -14,16 +14,10 @@ const FORMAT_PDF = ['pdf', 'PDF'];
 const FORMAT_PHOTOSHOP = ['psd'];
 const FORMAT_ILLUSTRATOR = ['ai', 'esp'];
 
+// ----------------------------------------------------------------------
+
 export function getFileType(fileUrl = '') {
   return (fileUrl && fileUrl.split('.').pop()) || '';
-}
-
-export function getFileName(fileUrl) {
-  return fileUrl.substring(fileUrl.lastIndexOf('/') + 1).replace(/\.[^/.]+$/, '');
-}
-
-export function getFileFullName(fileUrl) {
-  return fileUrl.split('/').pop();
 }
 
 export function getFileFormat(fileUrl = '') {
@@ -62,36 +56,6 @@ export function getFileFormat(fileUrl = '') {
   return format;
 }
 
-export function getFileFormatDisctint(fileUrl) {
-  let format;
-
-  switch (fileUrl.includes(getFileType(fileUrl))) {
-    case 'xls':
-      format = 'xls';
-      break;
-    case 'xlsx':
-      format = 'xlsx';
-      break;
-    case 'doc':
-      format = 'doc';
-      break;
-    case 'docx':
-      format = 'docx';
-      break;
-    default:
-      format = getFileType(fileUrl);
-  }
-
-  return format;
-}
-
-const getIcon = (name, thumbp, sx) =>
-  thumbp ? (
-    <Box component="img" src={`/assets/icons/file_format/${name}.svg`} sx={{ flexShrink: 0, ...sx }} />
-  ) : (
-    <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24 }} {...sx} />
-  );
-
 export function getFileThumb(thumbp, sx, fileUrl = '') {
   let thumb;
   switch (getFileFormat(fileUrl)) {
@@ -128,6 +92,15 @@ export function getFileThumb(thumbp, sx, fileUrl = '') {
   return thumb;
 }
 
+const getIcon = (name, thumbp, sx) =>
+  thumbp ? (
+    <Box component="img" src={`/assets/icons/file_format/${name}.svg`} sx={{ flexShrink: 0, ...sx }} />
+  ) : (
+    <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24 }} {...sx} />
+  );
+
+// ----------------------------------------------------------------------
+
 export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
   const byteCharacters = atob(b64Data);
   const byteArrays = [];
@@ -149,6 +122,27 @@ export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
   return blob;
 };
 
+// ----------------------------------------------------------------------
+
 export function canPreview(anexo) {
   return (anexo?.conteudo === 'application/pdf' && 'pdf') || (getFileFormat(anexo?.anexo) === 'image' && 'image') || '';
+}
+
+// ----------------------------------------------------------------------
+
+export function getFileData(file, index) {
+  if (typeof file === 'string') {
+    return { key: index ? `${file}-${index}` : file, preview: file };
+  }
+
+  return {
+    name: file.name,
+    size: file.size,
+    path: file.path,
+    type: file.type,
+    preview: file.preview,
+    lastModified: file.lastModified,
+    lastModifiedDate: file.lastModifiedDate,
+    key: index ? `${file.name}-${index}` : file.name,
+  };
 }

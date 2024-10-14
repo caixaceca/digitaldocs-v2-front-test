@@ -1,5 +1,7 @@
 // @mui
 import { ptPT } from '@mui/material/locale';
+// authentication
+import { PublicClientApplication } from '@azure/msal-browser';
 
 // ----------------------------------------------------------------------
 
@@ -12,24 +14,24 @@ export const msalConfig = {
   auth: {
     clientId: '1f73fdec-54e5-4bd5-9a39-ae5b8174e16e',
     authority: 'https://login.microsoftonline.com/353efa45-1c51-4b33-a7e4-b129dc92beb4',
-    redirectUri: 'http://localhost:3000',
-    // redirectUri: 'https://intraneteste.caixa.cv/inicio',
-    // redirectUri: 'https://intranet.caixa.cv/inicio',
+    // redirectUri: 'http://localhost:3000',
+    redirectUri: 'https://ddocsteste.caixa.cv/processos/lista',
+    // redirectUri: 'https://digitaldocs.caixa.cv/processos/lista',
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },
   system: { loggerOptions: {} },
 };
 
+export const msalInstance = new PublicClientApplication(msalConfig);
+
 export const loginRequest = {
   authority: 'https://login.microsoftonline.com/353efa45-1c51-4b33-a7e4-b129dc92beb4',
-  scopes: ['User.Read', 'Presence.Read', 'openid', 'profile'],
+  scopes: ['User.Read', 'Presence.Read.All', 'User.ReadBasic.All', 'openid', 'profile'],
 };
 
 export const graphConfig = { graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me' };
 
 // ----------------------------------------------------------------------
-
-export const HOST_API = process.env.REACT_APP_HOST_API_KEY || '';
 
 export const HEADER = {
   MOBILE_HEIGHT: 64,

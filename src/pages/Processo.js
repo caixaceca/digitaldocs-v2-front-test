@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { fYear } from '../utils/formatTime';
-import { canPreview } from '../utils/getFileFormat';
+import { canPreview } from '../utils/formatFile';
 import { temAcesso, findColaboradores, pertencoEstadoId, gestorEstado } from '../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
@@ -32,15 +32,14 @@ import {
   DadosGerais,
   TableDetalhes,
 } from '../sections/processo/Detalhes';
-import {
+import Intervencao, {
   Atribuir,
   Resgatar,
   Cancelar,
   Abandonar,
   Restaurar,
   Desarquivar,
-} from '../sections/processo/form/IntervencaoForm';
-import Intervencao from '../sections/processo/Intervencao';
+} from '../sections/processo/Intervencao';
 
 // ----------------------------------------------------------------------
 
@@ -96,6 +95,10 @@ export default function Processo() {
     [colaboradores, colaboradoresEstado]
   );
 
+  const handleAceitar = (estadoId, modo) => {
+    dispatch(updateItem('aceitar', null, { mail, id, fluxoId, perfilId, estadoId, modo, msg: 'Processo aceitado' }));
+  };
+
   const tabsList = useMemo(
     () => [
       { value: 'Dados gerais', component: <DadosGerais /> },
@@ -137,6 +140,9 @@ export default function Processo() {
             { value: 'Pendências', component: <TableDetalhes id={processo?.id} item="hpendencias" /> },
             { value: 'Atribuições', component: <TableDetalhes id={processo?.id} item="hatribuicoes" /> },
           ]
+        : []),
+      ...(processo?.versao !== 'v1' && !historico
+        ? [{ value: 'Confidencialidades', component: <TableDetalhes id={processo?.id} item="confidencialidades" /> }]
         : []),
       ...(processo && !historico && (isAdmin || auditoriaProcesso)
         ? [{ value: 'Versões', component: <Versoes id={id} /> }]
@@ -227,10 +233,6 @@ export default function Processo() {
     }
   }, [tabsList, currentTab]);
 
-  const handleAceitar = (estadoId, modo) => {
-    dispatch(updateItem('aceitar', null, { mail, id, fluxoId, perfilId, estadoId, modo, msg: 'Processo aceitado' }));
-  };
-
   return (
     <Page title="Processo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -313,11 +315,7 @@ export default function Processo() {
                             (!ultimaTransicao?.pareceres || ultimaTransicao?.pareceres?.length === 0) &&
                             (!processo?.estado_processo?.pareceres ||
                               !processo?.estado_processo?.pareceres?.find((row) => row?.parecer_em)) && (
-                              <Resgatar
-                                processoId={id}
-                                fluxoId={fluxoId}
-                                estadoId={ultimaTransicao?.estado_inicial_id}
-                              />
+                              <Resgatar dados={{ id, fluxoId, estadoId: ultimaTransicao?.estado_inicial_id }} />
                             )}
                         </>
                       )}

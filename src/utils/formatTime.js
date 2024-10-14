@@ -1,4 +1,12 @@
-import { format, formatDistanceToNow, formatDistance, formatDistanceStrict, add } from 'date-fns';
+import {
+  add,
+  format,
+  isSameYear,
+  isSameMonth,
+  formatDistance,
+  formatDistanceToNow,
+  formatDistanceStrict,
+} from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 // ----------------------------------------------------------------------
@@ -70,6 +78,32 @@ export function dataPadraoPt(data) {
 
 export function formatDistanceStrict_(date, date1) {
   return formatDistanceStrict(new Date(date), new Date(date1), { unit: 'year', locale: pt });
+}
+
+export function dataLabel(dataInicial, dataFinal) {
+  const isSameYears =
+    dataInicial && dataFinal
+      ? isSameYear(add(new Date(dataInicial), { hours: 2 }), add(new Date(dataFinal), { hours: 2 }))
+      : false;
+  const isSameMonths =
+    dataInicial && dataFinal
+      ? isSameMonth(add(new Date(dataInicial), { hours: 2 }), add(new Date(dataFinal), { hours: 2 }))
+      : false;
+  return (
+    (dataInicial === dataFinal && formatDate(dataFinal, "dd 'de' MMMM 'de' yyyy")) ||
+    (isSameYears &&
+      isSameMonths &&
+      `${formatDate(dataInicial, 'dd')} - ${formatDate(dataFinal, "dd 'de' MMMM 'de' yyyy")}`) ||
+    (isSameYears &&
+      `${formatDate(dataInicial, "dd 'de' MMMM")} - ${formatDate(dataFinal, "dd 'de' MMMM 'de' yyyy")}`) ||
+    `${formatDate(dataInicial, "dd 'de' MMMM 'de' yyyy")} - ${formatDate(dataFinal, "dd 'de' MMMM 'de' yyyy")}`
+  );
+}
+
+export function ultimoDiaDoMes(data) {
+  const primeiroDiaProximoMes = new Date(data.getFullYear(), data.getMonth() + 1, 1);
+  const ultimoDiaMesAtual = new Date(primeiroDiaProximoMes - 1);
+  return ultimoDiaMesAtual.getDate();
 }
 
 export function getDataLS(label, data) {

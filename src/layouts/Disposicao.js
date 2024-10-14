@@ -66,7 +66,7 @@ export default function Disposicao() {
   const dispatch = useDispatch();
   const value = React.useState(null);
   const radioGroupRef = React.useRef(null);
-  const { isOpenDisposicao, mail, frase } = useSelector((state) => state.intranet);
+  const { mail, frase } = useSelector((state) => state.intranet);
 
   const handleChange = (event) => {
     dispatch(createItem('disposicao', JSON.stringify({ disposicao: event.target.value }), { mail, msg: 'disposicao' }));
@@ -77,7 +77,7 @@ export default function Disposicao() {
   };
 
   return (
-    <Dialog fullWidth keepMounted maxWidth="sm" open={isOpenDisposicao}>
+    <Dialog fullWidth keepMounted maxWidth="sm" open>
       <DTFechar title="Como te sentes hoje?" handleClick={() => handleClose()} />
       <DialogContent sx={{ mt: 3 }}>
         <Stack direction="row" justifyContent="center" sx={{ pb: 5 }}>

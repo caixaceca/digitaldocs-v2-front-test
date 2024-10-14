@@ -1,5 +1,8 @@
 import axios from 'axios';
+import { add } from 'date-fns';
+import { useMsal } from '@azure/msal-react';
 import { createSlice } from '@reduxjs/toolkit';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '../../graph';
 import { loginRequest } from '../../config';
@@ -19,24 +22,25 @@ const initialState = {
   done: '',
   mail: '',
   perfilId: '',
-  myStatus: 'PresenceUnknown',
+  myStatus: '',
   cc: null,
   frase: null,
   ajuda: null,
   perfil: null,
   documento: null,
-  dateUpdate: null,
   accessToken: null,
   msalProfile: null,
+  dateUpdate: new Date(),
   uos: [],
   links: [],
   perfis: [],
+  usersIds: [],
   myGroups: [],
   perguntas: [],
-  myAplicacoes: [],
   notificacoes: [],
   certificacoes: [],
   colaboradores: [],
+  minhasAplicacoes: [],
 };
 
 const slice = createSlice({
@@ -79,8 +83,8 @@ const slice = createSlice({
       state.frase = action.payload;
     },
 
-    getMyAplicacoesSuccess(state, action) {
-      state.myAplicacoes = action.payload;
+    getMinhasAplicacoesSuccess(state, action) {
+      state.minhasAplicacoes = applySort(action.payload, getComparator('asc', 'nome'));
     },
 
     getLinksSuccess(state, action) {
@@ -126,8 +130,19 @@ const slice = createSlice({
       state.myGroups = action.payload?.grupos;
     },
 
-    getMyStatusSuccess(state, action) {
-      state.myStatus = action.payload?.availability;
+    getPresencesSuccess(state, action) {
+      state.usersIds = action.payload.allUsers;
+      state.myStatus =
+        action.payload.presencesEmail?.find(
+          (item) => item?.email?.toLowerCase() === action.payload?.mail?.toLowerCase()
+        )?.availability || 'PresenceUnknown';
+      const colaboradorPresence = state.colaboradores?.map((row) => ({
+        ...row,
+        presence:
+          action.payload.presencesEmail?.find((item) => item?.email?.toLowerCase() === row?.perfil?.mail?.toLowerCase())
+            ?.availability || 'PresenceUnknown',
+      }));
+      state.colaboradores = colaboradorPresence;
     },
 
     getAccessTokenSuccess(state, action) {
@@ -160,14 +175,16 @@ export const { closeDisposicao, resetItem } = slice.actions;
 export function acquireToken(instance, account) {
   return async (dispatch) => {
     try {
-      instance.acquireTokenSilent({ ...loginRequest, account }).then((response) => {
-        dispatch(slice.actions.getAccessTokenSuccess(response.accessToken));
-        callMsGraph(response.accessToken).then((response) => {
-          dispatch(slice.actions.getMsalProfileSuccess(response));
-        });
-      });
+      const response = await instance.acquireTokenSilent({ ...loginRequest, account });
+      dispatch(slice.actions.getAccessTokenSuccess(response.accessToken));
+      const userProfile = await callMsGraph(response.accessToken);
+      dispatch(slice.actions.getMsalProfileSuccess(userProfile));
     } catch (error) {
-      hasError(error, dispatch);
+      if (error instanceof InteractionRequiredAuthError) {
+        instance.loginRedirect({ ...loginRequest });
+      } else {
+        hasError(error, dispatch);
+      }
     }
   };
 }
@@ -186,22 +203,10 @@ export function authenticateColaborador(accessToken, msalProfile) {
   };
 }
 
-export function getMyStatus(accessToken) {
-  return async (dispatch) => {
-    try {
-      const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
-      const presense = await axios.get(`https://graph.microsoft.com/v1.0/me/presence`, { headers });
-      dispatch(slice.actions.getMyStatusSuccess(presense.data));
-    } catch (error) {
-      hasError(error, dispatch);
-    }
-  };
-}
-
 // ----------------------------------------------------------------------
 
 export function getFromIntranet(item, params) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(slice.actions.startLoading());
     try {
       const options = { headers: { 'Current-Colaborador': params?.mail } };
@@ -233,7 +238,7 @@ export function getFromIntranet(item, params) {
         }
         case 'aplicacoes': {
           const response = await axios.get(`${BASEURL}/aplicacao/aplicacoes/me`, options);
-          dispatch(slice.actions.getMyAplicacoesSuccess(response.data));
+          dispatch(slice.actions.getMinhasAplicacoesSuccess(response.data));
           break;
         }
         case 'uos': {
@@ -252,8 +257,41 @@ export function getFromIntranet(item, params) {
           break;
         }
         case 'colaboradores': {
+          const state = getState();
           const response = await axios.get(`${BASEURL}/colaborador`, options);
           dispatch(slice.actions.getColaboradoresSuccess(response.data));
+
+          /// REVALIDADE TOKEN
+          if (add(new Date(state?.intranet?.dateUpdate), { minutes: 5 }) < new Date()) {
+            const { instance, accounts } = useMsal();
+            await dispatch(acquireToken(instance, accounts[0]));
+          }
+
+          // USERS PRESENCE
+          const headers = {
+            Authorization: `Bearer ${state?.intranet?.accessToken}`,
+            'Content-Type': 'application/json',
+          };
+          let allUsers = state.intranet.usersIds;
+          if (allUsers?.length === 0) {
+            let nextLink = `https://graph.microsoft.com/v1.0/users`;
+            while (nextLink) {
+              // eslint-disable-next-line no-await-in-loop
+              const response = await axios.get(nextLink, { headers });
+              allUsers = [...allUsers, ...response.data.value];
+              nextLink = response.data['@odata.nextLink'];
+            }
+          }
+          const presences = await axios.post(
+            `https://graph.microsoft.com/v1.0/communications/getPresencesByUserId`,
+            { ids: allUsers?.map((row) => row?.id) },
+            { headers }
+          );
+          const presencesEmail = presences.data?.value?.map((row) => ({
+            ...row,
+            email: allUsers?.find((item) => item.id === row?.id).userPrincipalName,
+          }));
+          dispatch(slice.actions.getPresencesSuccess({ allUsers, presencesEmail, mail: params?.mail }));
           break;
         }
         case 'perfis': {

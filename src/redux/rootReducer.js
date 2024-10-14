@@ -3,6 +3,7 @@ import storage from 'redux-persist/lib/storage';
 // slices
 import ccReducer from './slices/cc';
 import bankaReducer from './slices/banka';
+import stepperReducer from './slices/stepper';
 import intranetReducer from './slices/intranet';
 import digitaldocsReducer from './slices/digitaldocs';
 import indicadorestReducer from './slices/indicadores';
@@ -15,6 +16,7 @@ const rootPersistConfig = { key: 'root', storage, keyPrefix: 'redux-', whitelist
 const rootReducer = combineReducers({
   cc: ccReducer,
   banka: bankaReducer,
+  stepper: stepperReducer,
   intranet: intranetReducer,
   digitaldocs: digitaldocsReducer,
   indicadores: indicadorestReducer,

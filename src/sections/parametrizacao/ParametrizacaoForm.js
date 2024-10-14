@@ -17,6 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { emailCheck } from '../../utils/validarAcesso';
+import { subtractArrays } from '../../utils/formatText';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -33,6 +34,7 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
+import ListSelect from '../../components/ListSelect';
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
 import { Notificacao } from '../../components/NotistackProvider';
@@ -412,7 +414,7 @@ export function MotivoPendenciaForm({ onCancel }) {
   const { mail, perfilId } = useSelector((state) => state.intranet);
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
-  const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Motivo') });
+  const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Designação') });
   const defaultValues = useMemo(
     () => ({ motivo: selectedItem?.motivo || '', obs: selectedItem?.obs || '' }),
     [selectedItem]
@@ -455,14 +457,10 @@ export function MotivoPendenciaForm({ onCancel }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFTextField name="motivo" label="Motivo" />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFTextField name="obs" label="Observação" />
-              </Grid>
-            </Grid>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="motivo" label="Designação" />
+              <RHFTextField name="obs" label="Observação" />
+            </Stack>
             <DialogButons
               edit={isEdit}
               isSaving={isSaving}
@@ -470,6 +468,108 @@ export function MotivoPendenciaForm({ onCancel }) {
               handleDelete={handleDelete}
               desc={isEdit ? 'eliminar este motivo' : ''}
             />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+MotivoTransicaoForm.propTypes = { onCancel: PropTypes.func };
+
+export function MotivoTransicaoForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, selectedItem, fluxos } = useSelector((state) => state.parametrizacao);
+
+  const fluxosList = useMemo(
+    () => fluxos?.filter((item) => item?.is_ativo)?.map((row) => ({ id: row?.id, label: row?.assunto })),
+    [fluxos]
+  );
+  const [fluxosAtribuidos, setFluxosAtribuidos] = useState([]);
+  const fluxosExistentes = useMemo(
+    () =>
+      selectedItem?.fluxos?.length > 0 ? selectedItem?.fluxos?.map((row) => ({ id: row?.id, label: row?.fluxo })) : [],
+    [selectedItem?.fluxos]
+  );
+  const fluxosDisponiveis = useMemo(
+    () => (fluxosList?.length > 0 ? subtractArrays(fluxosList, fluxosExistentes) : []),
+    [fluxosList, fluxosExistentes]
+  );
+
+  useEffect(() => {
+    setFluxosAtribuidos(
+      selectedItem?.fluxos?.length > 0 ? selectedItem?.fluxos?.map((row) => ({ id: row?.id, label: row?.fluxo })) : []
+    );
+  }, [selectedItem?.fluxos]);
+
+  const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
+  const defaultValues = useMemo(
+    () => ({
+      designacao: selectedItem?.designacao || '',
+      observacao: selectedItem?.observacao || '',
+      imputavel: selectedItem?.imputavel || false,
+      ativo: selectedItem ? selectedItem?.ativo : true,
+    }),
+    [selectedItem]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const changeFluxos = (novosFluxosAtribuidos) => {
+    setFluxosAtribuidos(novosFluxosAtribuidos);
+  };
+
+  const onSubmit = async () => {
+    try {
+      const dados = {
+        ...values,
+        fluxos: fluxosAtribuidos?.length > 0 ? fluxosAtribuidos?.map((row) => row?.id) : null,
+      };
+      if (isEdit) {
+        dispatch(
+          updateItem('motivo transicao', JSON.stringify(dados), {
+            mail,
+            perfilId,
+            id: selectedItem?.id,
+            msg: 'Motivo atualizado',
+          })
+        );
+      } else {
+        dispatch(createItem('motivo transicao', JSON.stringify(dados), { mail, perfilId, msg: 'Motivo adicionado' }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+      <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={3}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                <RHFTextField name="designacao" label="Designação" />
+                <RHFTextField name="observacao" label="Observação" />
+              </Stack>
+              <Stack direction="row" spacing={3}>
+                <RHFSwitch name="imputavel" label="Imputável" />
+                {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
+              </Stack>
+              <ListSelect atribuidos={fluxosExistentes} disponiveis={fluxosDisponiveis} changeFluxos={changeFluxos} />
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -615,17 +715,16 @@ export function LinhaForm({ onCancel }) {
     descricao: Yup.mixed().required().label('Segmento'),
   });
   const defaultValues = useMemo(
-    () => ({ linha: selectedItem?.linha || '', descricao: selectedItem?.descricao || null }),
+    () => ({
+      linha: selectedItem?.linha || '',
+      descricao: selectedItem?.descricao || null,
+      funcionario: selectedItem?.funcionario || false,
+    }),
     [selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { watch, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
 
   const onSubmit = async () => {
     try {
@@ -643,12 +742,7 @@ export function LinhaForm({ onCancel }) {
 
   const handleDelete = () => {
     dispatch(
-      deleteItem('linha', {
-        mail,
-        perfilID: perfilId,
-        linhaID: selectedItem?.id,
-        msg: 'Linha de crédito eliminada',
-      })
+      deleteItem('linha', { mail, perfilID: perfilId, linhaID: selectedItem?.id, msg: 'Linha de crédito eliminada' })
     );
   };
 
@@ -658,18 +752,15 @@ export function LinhaForm({ onCancel }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFTextField name="linha" label="Linha" />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFAutocompleteSimple
-                  name="descricao"
-                  label="Segmento"
-                  options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
-                />
-              </Grid>
-            </Grid>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="linha" label="Linha" />
+              <RHFAutocompleteSimple
+                name="descricao"
+                label="Segmento"
+                options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
+              />
+              <RHFSwitch name="funcionario" label="Funcionário" />
+            </Stack>
             <DialogButons
               edit={isEdit}
               isSaving={isSaving}
@@ -917,9 +1008,9 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.object, isOpenModal: PropTypes.bool };
+PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.object };
 
-export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
+export function PerfisEstadoForm({ estado, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving, done, error } = useSelector((state) => state.parametrizacao);
@@ -937,18 +1028,13 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
     perfis: Yup.array(Yup.object({ perfil: Yup.mixed().required().label('Colaborador') })),
   });
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { watch, control, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
   const perfisFilter = applyFilter(
     colaboradores.filter((colab) => !estado?.perfis?.map((row) => row?.perfil_id)?.includes(colab?.perfil_id)) || [],
     values?.perfis?.map((row) => row?.perfil?.id)
   );
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenModal]);
 
   const onSubmit = async () => {
     try {
@@ -978,7 +1064,7 @@ export function PerfisEstadoForm({ isOpenModal, estado, onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {`Adicionar colaborador ao estado » ${estado?.nome}`}

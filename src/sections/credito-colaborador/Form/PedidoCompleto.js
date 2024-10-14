@@ -28,9 +28,7 @@ import { DefaultAction } from '../../../components/Actions';
 
 // ----------------------------------------------------------------------
 
-PedidoCompleto.propTypes = { open: PropTypes.bool };
-
-export default function PedidoCompleto({ open }) {
+export default function PedidoCompleto() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, perfilId, cc } = useSelector((state) => state.intranet);
@@ -197,8 +195,8 @@ export default function PedidoCompleto({ open }) {
 
   return (
     <Dialog
+      open
       fullScreen
-      open={open}
       PaperProps={{ sx: { maxWidth: { md: 'calc(100% - 48px)' }, maxHeight: { md: 'calc(100% - 48px)' } } }}
     >
       <Stack spacing={3} direction="column" sx={{ m: 'auto', p: { xs: 1, sm: 3 } }}>

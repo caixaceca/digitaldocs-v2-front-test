@@ -1,12 +1,9 @@
-import { add } from 'date-fns';
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, getMyStatus } from '../redux/slices/intranet';
+import { useSelector } from '../redux/store';
 // hooks
 import useSettings from '../hooks/useSettings';
 // components
@@ -19,10 +16,8 @@ import { TotalProcessos, Duracao, SGQ, FileSystem } from '../sections/indicadore
 // ----------------------------------------------------------------------
 
 export default function Indicadores() {
-  const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { isAdmin } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, dateUpdate, accessToken } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState(
     localStorage.getItem('tabIndicadores') || (isAdmin && 'files') || 'total'
   );
@@ -37,16 +32,6 @@ export default function Indicadores() {
     ],
     [isAdmin]
   );
-
-  useEffect(() => {
-    if (mail && perfilId && (!dateUpdate || add(new Date(dateUpdate), { minutes: 5 }) < new Date())) {
-      dispatch(getMyStatus(accessToken));
-      dispatch(getFromIntranet('cc', { id: perfilId, mail }));
-      dispatch(getFromParametrizacao('motivos', { mail, perfilId }));
-      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId }));
-      dispatch(getFromParametrizacao('meusambientes', { mail, perfilId }));
-    }
-  }, [dispatch, perfilId, dateUpdate, accessToken, mail]);
 
   // const handleNotificationClick = () => {
   //   if (Notification.permission === 'granted') {

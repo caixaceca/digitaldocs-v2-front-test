@@ -20,8 +20,8 @@ import { getFile } from '../utils/getFile';
 import { baralharString } from '../utils/formatText';
 // components
 import Label from './Label';
-import MyAvatar from './MyAvatar';
 import { DefaultAction } from './Actions';
+import MyAvatar, { AvatarBedge } from './MyAvatar';
 
 // ----------------------------------------------------------------------
 
@@ -67,12 +67,13 @@ Criado.propTypes = {
   tipo: PropTypes.string,
   value: PropTypes.string,
   caption: PropTypes.bool,
+  value1: PropTypes.string,
   baralhar: PropTypes.bool,
 };
 
-export function Criado({ tipo = '', value, caption = false, baralhar = false, sx }) {
+export function Criado({ tipo = '', value, value1 = '', caption = false, baralhar = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.secondary' };
-  return (
+  return value ? (
     <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" {...sx}>
       {(tipo === 'uo' && <BusinessIcon sx={{ ...styles }} />) ||
         (tipo === 'data' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
@@ -85,7 +86,14 @@ export function Criado({ tipo = '', value, caption = false, baralhar = false, sx
       <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
         {baralhar ? baralharString(value) : value}
       </Typography>
+      {value1 && (
+        <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
+          ({baralhar ? baralharString(value1) : value1})
+        </Typography>
+      )}
     </Stack>
+  ) : (
+    ''
   );
 }
 
@@ -98,13 +106,25 @@ ColaboradorInfo.propTypes = {
   nome: PropTypes.string,
   caption: PropTypes.bool,
   label: PropTypes.string,
+  status: PropTypes.string,
   labelAlt: PropTypes.string,
 };
 
-export function ColaboradorInfo({ nome, foto, caption = false, label = '', labelAlt = '', other = null, sx = null }) {
+export function ColaboradorInfo({
+  nome,
+  foto,
+  sx = null,
+  label = '',
+  status = '',
+  other = null,
+  labelAlt = '',
+  caption = false,
+}) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
-      <MyAvatar alt={nome} src={getFile('colaborador', foto)} />
+      <AvatarBedge status={status}>
+        <MyAvatar name={baralharString(nome)} src={getFile('colaborador', baralharString(foto, true))} />
+      </AvatarBedge>
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography noWrap variant="subtitle2">

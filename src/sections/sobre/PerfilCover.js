@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
-import Badge from '@mui/material/Badge';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Skeleton from '@mui/material/Skeleton';
@@ -16,8 +15,8 @@ import { changeDadosView } from '../../redux/slices/banka';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
-import MyAvatar from '../../components/MyAvatar';
 import SvgIconStyle from '../../components/SvgIconStyle';
+import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
 
 // ----------------------------------------------------------------------
 
@@ -48,31 +47,27 @@ const InfoStyle = styled('div')(({ theme }) => ({
 PerfilCover.propTypes = { perfilColaborador: PropTypes.object, isDeFeria: PropTypes.object };
 
 export default function PerfilCover({ perfilColaborador, isDeFeria }) {
-  const { isLoading } = useSelector((state) => state.parametrizacao);
+  const { isLoading, colaboradores } = useSelector((state) => state.intranet);
   return (
     <RootStyle>
       <InfoStyle>
         <Stack>
-          <Badge
-            badgeContent=" "
-            overlap="circular"
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            color={perfilColaborador?.is_active ? 'success' : 'focus'}
-            sx={{ '& .MuiBadge-badge': { border: (theme) => `2px solid ${theme.palette.common.white}` } }}
+          <AvatarBedge
+            status={colaboradores?.find((item) => item?.id === perfilColaborador?.id)?.presence}
+            sx={{ border: (theme) => `2px solid ${theme.palette.common.white}`, width: 15, height: 15 }}
           >
             <MyAvatar
               sx={{
                 borderWidth: 2,
-                cursor: 'zoom-in',
                 borderStyle: 'solid',
                 width: { xs: 80, md: 128 },
                 height: { xs: 80, md: 128 },
                 borderColor: 'common.white',
               }}
-              alt={perfilColaborador?.perfil?.displayName}
+              name={perfilColaborador?.perfil?.displayName}
               src={getFile('colaborador', perfilColaborador?.foto_disk)}
             />
-          </Badge>
+          </AvatarBedge>
         </Stack>
         <Stack sx={{ ml: 3, mt: { md: -2 }, color: 'common.white', textAlign: { md: 'left' } }}>
           <Stack direction="row" alignItems="center" spacing={1} sx={{ pr: 1 }}>
@@ -143,9 +138,9 @@ export function EntidadeCover({ numero, entidade }) {
       <MyAvatar
         sx={{
           borderStyle: 'solid',
-          borderColor: 'common.white',
           width: { xs: 80, md: 120 },
           height: { xs: 80, md: 120 },
+          borderColor: 'common.white',
         }}
         src={getFile('colaborador', '')}
       />

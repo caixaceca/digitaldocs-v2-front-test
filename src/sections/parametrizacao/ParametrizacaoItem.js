@@ -10,8 +10,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // routes
-import { ptDateTime } from '../../utils/formatTime';
-// routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -20,15 +18,15 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, openModal, closeModal } from '../../redux/slices/parametrizacao';
 // Components
 import Scrollbar from '../../components/Scrollbar';
-import { Checked, Criado } from '../../components/Panel';
+import { Checked } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { AddItem, UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm, MotivoPendenciaForm } from './ParametrizacaoForm';
 import { applySortFilter } from './applySortFilter';
+import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm } from './ParametrizacaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -59,13 +57,6 @@ const TABLE_HEAD_ORIGENS = [
   { id: '' },
 ];
 
-const TABLE_HEAD_MOTIVOS = [
-  { id: 'motivo', label: 'Motivo', align: 'left' },
-  { id: 'obs', label: 'Observação', align: 'left' },
-  { id: 'criado_em', label: 'Registo', align: 'left', width: 10 },
-  { id: '' },
-];
-
 // ----------------------------------------------------------------------
 
 ParametrizacaoItem.propTypes = { item: PropTypes.string };
@@ -75,8 +66,9 @@ export default function ParametrizacaoItem({ item }) {
   const dispatch = useDispatch();
   const { mail, perfilId, uos } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
-  const { fluxos, estados, origens, motivosPendencias, selectedItem, isOpenModal, isOpenView, isLoading, done } =
-    useSelector((state) => state.parametrizacao);
+  const { fluxos, estados, origens, selectedItem, isOpenModal, isOpenView, isLoading, done } = useSelector(
+    (state) => state.parametrizacao
+  );
 
   const {
     page,
@@ -92,10 +84,7 @@ export default function ParametrizacaoItem({ item }) {
     onChangeRowsPerPage,
   } = useTable({
     defaultOrderBy:
-      (item === 'estados' && 'nome') ||
-      (item === 'fluxos' && 'assunto') ||
-      (item === 'origens' && 'designacao') ||
-      (item === 'motivos' && 'motivo'),
+      (item === 'estados' && 'nome') || (item === 'fluxos' && 'assunto') || (item === 'origens' && 'designacao'),
     defaultOrder: 'asc',
   });
 
@@ -144,7 +133,6 @@ export default function ParametrizacaoItem({ item }) {
     dados:
       (item === 'fluxos' && fluxos) ||
       (item === 'origens' && origens) ||
-      (item === 'motivos' && motivosPendencias) ||
       (item === 'estados' &&
         estados?.map((row) => ({ ...row, uo: uos?.find((item) => item?.id === row?.uo_id)?.label || row?.uo_id }))) ||
       [],
@@ -159,10 +147,7 @@ export default function ParametrizacaoItem({ item }) {
         sx={{ px: 1 }}
         action={<AddItem />}
         heading={
-          (item === 'fluxos' && 'Fluxos') ||
-          (item === 'estados' && 'Estados') ||
-          (item === 'origens' && 'Origens') ||
-          (item === 'motivos' && 'Motivos de pendências')
+          (item === 'fluxos' && 'Fluxos') || (item === 'estados' && 'Estados') || (item === 'origens' && 'Origens')
         }
       />
 
@@ -178,20 +163,14 @@ export default function ParametrizacaoItem({ item }) {
                 headLabel={
                   (item === 'fluxos' && TABLE_HEAD_FLUXOS) ||
                   (item === 'estados' && TABLE_HEAD_ESTADOS) ||
-                  (item === 'origens' && TABLE_HEAD_ORIGENS) ||
-                  (item === 'motivos' && TABLE_HEAD_MOTIVOS)
+                  (item === 'origens' && TABLE_HEAD_ORIGENS)
                 }
               />
               <TableBody>
                 {isLoading && isNotFound ? (
                   <SkeletonTable
                     row={10}
-                    column={
-                      (item === 'fluxos' && 6) ||
-                      (item === 'estados' && 5) ||
-                      (item === 'origens' && 7) ||
-                      (item === 'motivos' && 4)
-                    }
+                    column={(item === 'fluxos' && 6) || (item === 'estados' && 5) || (item === 'origens' && 7)}
                   />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
@@ -233,16 +212,6 @@ export default function ParametrizacaoItem({ item }) {
                             </TableCell>
                             <TableCell>{row.email}</TableCell>
                             <TableCell>{row.telefone}</TableCell>
-                          </>
-                        )) ||
-                        (item === 'motivos' && (
-                          <>
-                            <TableCell>{row.motivo}</TableCell>
-                            <TableCell>{row.obs}</TableCell>
-                            <TableCell>
-                              {!!row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
-                              {!!row?.criador && <Criado caption tipo="user" value={row?.criador} />}
-                            </TableCell>
                           </>
                         ))}
 
@@ -304,7 +273,6 @@ export default function ParametrizacaoItem({ item }) {
           {item === 'fluxos' && <FluxoForm onCancel={handleCloseModal} />}
           {item === 'estados' && <EstadoForm onCancel={handleCloseModal} />}
           {item === 'origens' && <OrigemForm onCancel={handleCloseModal} />}
-          {item === 'motivos' && <MotivoPendenciaForm onCancel={handleCloseModal} />}
         </>
       )}
     </>

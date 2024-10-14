@@ -1,16 +1,15 @@
 import { useState } from 'react';
 // @mui
-import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
+import LinkIcon from '@mui/icons-material/Link';
 import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 // redux
 import { useSelector } from '../../redux/store';
 // utils
@@ -20,54 +19,40 @@ import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
 import { IconButtonAnimate } from '../../components/animate';
 
-// ----------------------------------------------------------------------
-
 const LogoApp = styled(Avatar)(() => ({ p: 0.5, width: '33px', height: '33px' }));
+const IconButtonStd = { padding: 0, color: '#fff', width: { xs: 30, sm: 40 }, height: { xs: 30, sm: 40 } };
 
-//
+// ----------------------------------------------------------------------
 
 export default function Linksuteis() {
   const { links } = useSelector((state) => state.intranet);
   const [open, setOpen] = useState(false);
-
-  const handleOpen = (event) => {
-    setOpen(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setOpen(null);
-  };
 
   return (
     <>
       <Tooltip arrow title="Links úteis">
         <IconButtonAnimate
           color={open ? 'primary' : 'default'}
-          onClick={handleOpen}
+          onClick={(event) => setOpen(event.currentTarget)}
           sx={{
-            p: 0,
-            color: '#fff',
-            width: { xs: 28, sm: 40 },
-            height: { xs: 28, sm: 40 },
+            ...IconButtonStd,
             transform: 'rotate(-45deg)',
             ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
           }}
         >
-          <LinkOutlinedIcon sx={{ width: { xs: 22, sm: 30 }, height: { xs: 22, sm: 30 } }} />
+          <LinkIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />
         </IconButtonAnimate>
       </Tooltip>
 
       <MenuPopover
-        open={Boolean(open)}
         anchorEl={open}
-        onClose={handleClose}
-        sx={{ width: 360, p: 0, pb: 0.5, mt: 1.5, ml: 0.75 }}
+        open={Boolean(open)}
+        onClose={() => setOpen(false)}
+        sx={{ width: 360, p: 0, overflow: 'inherit' }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', py: 2, px: 2.5 }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="subtitle1">Links úteis</Typography>
-          </Box>
-        </Box>
+        <Typography variant="subtitle1" sx={{ p: 2 }}>
+          Links úteis
+        </Typography>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
@@ -78,8 +63,14 @@ export default function Linksuteis() {
             </Typography>
           ) : (
             links?.map((link) => (
-              <Link href={link.link} rel="noreferrer" target="_blank" key={link.link}>
-                <MenuItem onClick={handleClose} sx={{ py: 1, px: 2.5 }}>
+              <Link
+                target="_blank"
+                key={link.link}
+                href={link.link}
+                rel="noreferrer"
+                sx={{ textDecoration: 'none !important' }}
+              >
+                <MenuItem divider sx={{ py: 1.25, px: 2.5, borderStyle: 'dotted' }}>
                   <ListItemIcon>
                     <LogoApp variant="rounded" alt={link.nome} src={`${BASEURL}/aplicacao/logo/${link.logo_disco}`} />
                   </ListItemIcon>

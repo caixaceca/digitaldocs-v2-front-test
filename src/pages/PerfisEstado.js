@@ -194,7 +194,7 @@ export default function PerfisEstado() {
             )}
           </Card>
 
-          <PerfisEstadoForm isOpenModal={open} onCancel={onClose} estado={estado} />
+          {open && <PerfisEstadoForm onCancel={onClose} estado={estado} />}
         </RoleBasedGuard>
       </Container>
     </Page>

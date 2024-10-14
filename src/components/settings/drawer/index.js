@@ -13,6 +13,7 @@ import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import useSettings from '../../../hooks/useSettings';
 // utils
 import cssStyles from '../../../utils/cssStyles';
+import { fData, fPercent } from '../../../utils/formatNumber';
 // config
 import { NAVBAR, defaultSettings } from '../../../config';
 //
@@ -54,6 +55,17 @@ export default function SettingsDrawer() {
   const { themeMode, themeLayout, themeStretch, themeContrast, onResetSetting } = useSettings();
 
   const [open, setOpen] = useState(false);
+  const [used, setUsed] = useState(null);
+  const [quota, setQuota] = useState(null);
+
+  useEffect(() => {
+    if (navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then((estimate) => {
+        setUsed(estimate.usage);
+        setQuota(estimate.quota);
+      });
+    }
+  }, []);
 
   const notDefault =
     themeMode !== defaultSettings.themeMode ||
@@ -115,23 +127,24 @@ export default function SettingsDrawer() {
                     <Typography variant="subtitle2">Modo</Typography>
                     <SettingMode />
                   </Stack>
-
                   <Stack spacing={1.5}>
                     <Typography variant="subtitle2">Contraste</Typography>
                     <SettingContrast />
                   </Stack>
-
                   <Stack spacing={1.5}>
                     <Typography variant="subtitle2">Layout</Typography>
                     <SettingLayout />
                   </Stack>
-
                   <Stack spacing={1.5}>
                     <Typography variant="subtitle2">Espaçamento</Typography>
                     <SettingStretch />
                   </Stack>
-
                   <SettingFullscreen />
+                  <Stack sx={{ typography: 'caption', color: 'text.disabled', textAlign: 'center' }}>
+                    {`Cache disponível: ${fData(quota)}`}
+                    <br />
+                    {`Espaço utilizado: ${fData(used)} (${fPercent((used / quota) * 100)})`}
+                  </Stack>
                 </Stack>
               </Scrollbar>
             </RootStyle>

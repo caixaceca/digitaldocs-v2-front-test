@@ -65,6 +65,7 @@ export default function Views({ id, from = '', isLoading }) {
                         <ColaboradorInfo
                           foto={colaborador?.foto_disk}
                           label={colaborador?.uo?.label}
+                          status={colaborador?.presence}
                           nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
                         />
                         <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>

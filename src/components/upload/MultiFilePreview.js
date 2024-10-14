@@ -10,17 +10,16 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // utils
 import { fData } from '../../utils/formatNumber';
-import getFileData from '../../utils/getFileData';
-import { getFileThumb } from '../../utils/getFileFormat';
+import { getFileThumb, getFileData } from '../../utils/formatFile';
 //
 import Image from '../Image';
 
 // ----------------------------------------------------------------------
 
 MultiFilePreview.propTypes = {
-  files: PropTypes.array.isRequired,
   onRemove: PropTypes.func,
   showPreview: PropTypes.bool,
+  files: PropTypes.array.isRequired,
 };
 
 export default function MultiFilePreview({ showPreview = false, files, onRemove }) {
@@ -88,9 +87,9 @@ export default function MultiFilePreview({ showPreview = false, files, onRemove 
 
               <ListItemText
                 primary={typeof file === 'string' ? file : name}
-                secondary={typeof file === 'string' ? '' : fData(size || 0)}
                 primaryTypographyProps={{ variant: 'subtitle2' }}
                 secondaryTypographyProps={{ variant: 'caption' }}
+                secondary={typeof file === 'string' ? '' : fData(size || 0)}
               />
 
               {onRemove && (

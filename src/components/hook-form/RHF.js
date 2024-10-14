@@ -16,8 +16,8 @@ import { setDataUtil } from '../../utils/formatTime';
 const datePickerConf = (clearable) => ({
   field: { clearable },
   textField: {
-    fullWidth: true,
     size: 'small',
+    fullWidth: true,
     sx: {
       width: clearable ? 170 : 150,
       '&.MuiTextField-root .MuiIconButton-root': { padding: 0.5 },

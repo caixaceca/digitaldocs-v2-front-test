@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 // @mui
 import { ptPT } from '@mui/material/locale';
 import CssBaseline from '@mui/material/CssBaseline';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { createTheme, ThemeProvider as MUIThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 // hooks
 import useSettings from '../hooks/useSettings';
@@ -18,7 +19,7 @@ import shadows, { customShadows } from './shadows';
 ThemeProvider.propTypes = { children: PropTypes.node };
 
 export default function ThemeProvider({ children }) {
-  const { themeMode, themeDirection } = useSettings();
+  const { themeMode } = useSettings();
 
   const isLight = themeMode === 'light';
 
@@ -28,11 +29,11 @@ export default function ThemeProvider({ children }) {
       typography,
       breakpoints,
       shape: { borderRadius: 8 },
-      direction: themeDirection,
       shadows: isLight ? shadows.light : shadows.dark,
       customShadows: isLight ? customShadows.light : customShadows.dark,
+      components: { MuiInputBase: { defaultProps: { disableInjectingGlobalStyles: true } } },
     }),
-    [isLight, themeDirection]
+    [isLight]
   );
 
   const theme = createTheme(themeOptions, ptPT);
@@ -42,6 +43,12 @@ export default function ThemeProvider({ children }) {
   return (
     <StyledEngineProvider injectFirst>
       <MUIThemeProvider theme={theme}>
+        <GlobalStyles
+          styles={{
+            '@keyframes mui-auto-fill': { from: { display: 'block' } },
+            '@keyframes mui-auto-fill-cancel': { from: { display: 'block' } },
+          }}
+        />
         <CssBaseline />
         {children}
       </MUIThemeProvider>

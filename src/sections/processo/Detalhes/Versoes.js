@@ -72,6 +72,7 @@ export default function Versoes({ id }) {
                         <ColaboradorInfo
                           foto={colaborador?.foto_disk}
                           label={colaborador?.uo?.label}
+                          status={colaborador?.presence}
                           nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
                         />
                       </Stack>

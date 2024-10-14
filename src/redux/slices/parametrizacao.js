@@ -48,7 +48,8 @@ const initialState = {
   destinatarios: [],
   estadosPerfil: [],
   regrasTransicao: [],
-  motivosPendencias: [],
+  motivosPendencia: [],
+  motivosTransicao: [],
   colaboradoresEstado: [],
   colaboradoresGestor: [],
 };
@@ -92,6 +93,26 @@ const slice = createSlice({
         case 'estadoParecer':
           state.estadoRegra = null;
           state.regrasEstado = [];
+          break;
+
+        default:
+          break;
+      }
+    },
+
+    getSuccess(state, action) {
+      switch (action.payload.item) {
+        case 'motivos pendencia':
+          state.motivosPendencia = applySort(
+            action.payload?.dados?.map((row) => ({ ...row, label: row?.motivo })),
+            getComparator('asc', 'label')
+          );
+          break;
+        case 'motivos transicao':
+          state.motivosTransicao = applySort(
+            action.payload?.dados?.map((row) => ({ ...row, label: row?.designacao })),
+            getComparator('asc', 'label')
+          );
           break;
 
         default:
@@ -186,13 +207,6 @@ const slice = createSlice({
       state.origens = action.payload;
     },
 
-    getMotivosPendenciasSuccess(state, action) {
-      state.motivosPendencias = applySort(
-        action.payload?.map((row) => ({ ...row, label: row?.motivo })),
-        getComparator('asc', 'label')
-      );
-    },
-
     getLinhasSuccess(state, action) {
       state.linhas = action.payload;
     },
@@ -230,6 +244,17 @@ const slice = createSlice({
       state.destinatarios = action.payload;
     },
 
+    createSuccess(state, action) {
+      switch (action.payload.item) {
+        case 'motivo transicao':
+          state.motivosTransicao.push(action.payload.dados);
+          break;
+
+        default:
+          break;
+      }
+    },
+
     createAcessoSuccess(state, action) {
       state.acessos.push(action.payload);
     },
@@ -251,7 +276,7 @@ const slice = createSlice({
     },
 
     createMotivoPendenciaSuccess(state, action) {
-      state.motivosPendencias.push(action.payload);
+      state.motivosPendencia.push(action.payload);
     },
 
     createRegrasEstadoSuccess(state, action) {
@@ -274,14 +299,26 @@ const slice = createSlice({
       state.anexos.push(action.payload);
     },
 
+    updateSuccess(state, action) {
+      switch (action.payload.item) {
+        case 'motivo transicao':
+          state.motivosTransicao[state.motivosTransicao.findIndex((row) => row.id === action.payload.dados.id)] =
+            action.payload.dados;
+          break;
+
+        default:
+          break;
+      }
+    },
+
     updateAcessoSuccess(state, action) {
       const index = state.acessos.findIndex((row) => row.id === action.payload.id);
       state.acessos[index] = action.payload;
     },
 
     updateMotivoPendenciaSuccess(state, action) {
-      const index = state.motivosPendencias.findIndex((row) => row.id === action.payload.id);
-      state.motivosPendencias[index] = action.payload;
+      const index = state.motivosPendencia.findIndex((row) => row.id === action.payload.id);
+      state.motivosPendencia[index] = action.payload;
     },
 
     updateTransicaoSuccess(state, action) {
@@ -338,7 +375,7 @@ const slice = createSlice({
     },
 
     deleteMotivoPendenciaSuccess(state, action) {
-      state.motivosPendencias = state.motivosPendencias.filter((row) => row.id !== action.payload.id);
+      state.motivosPendencia = state.motivosPendencia.filter((row) => row.id !== action.payload.id);
     },
 
     deleteLinhaSuccess(state, action) {
@@ -518,9 +555,25 @@ export function getFromParametrizacao(item, params) {
           }
           break;
         }
-        case 'motivos': {
+        case 'motivos pendencia': {
           const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${params?.perfilId}`, options);
-          dispatch(slice.actions.getMotivosPendenciasSuccess(response.data.objeto));
+          dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+          break;
+        }
+        case 'motivos transicao': {
+          const response = await axios.get(
+            `${BASEURLDD}/v1/motivos_transicoes/lista/${params?.perfilId}?ativo=true${params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}`,
+            options
+          );
+          dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+          break;
+        }
+        case 'motivo transicao': {
+          const response = await axios.get(
+            `${BASEURLDD}/v1/motivos_transicoes/detalhe/${params?.perfilId}?id=${params?.id}`,
+            options
+          );
+          dispatch(slice.actions.selectItem(response.data.objeto));
           break;
         }
         case 'linhas': {
@@ -691,6 +744,11 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.getEstadoSuccess(response.data));
           break;
         }
+        case 'motivo transicao': {
+          const response = await axios.post(`${BASEURLDD}/v1/motivos_transicoes/${params?.perfilId}`, dados, options);
+          dispatch(slice.actions.createSuccess({ item, dados: response.data.objeto }));
+          break;
+        }
         case 'motivo pendencia': {
           const response = await axios.post(`${BASEURLDD}/v1/motivos/${params?.perfilId}`, dados, options);
           dispatch(slice.actions.createMotivoPendenciaSuccess(response.data.objeto));
@@ -803,6 +861,15 @@ export function updateItem(item, dados, params) {
         case 'linha': {
           const response = await axios.put(`${BASEURLDD}/v1/linhas/${params?.id}`, dados, options);
           dispatch(slice.actions.updateLinhaSuccess(response.data.objeto));
+          break;
+        }
+        case 'motivo transicao': {
+          const response = await axios.put(
+            `${BASEURLDD}/v1/motivos_transicoes/${params?.perfilId}?id=${params?.id}`,
+            dados,
+            options
+          );
+          dispatch(slice.actions.updateSuccess({ item, dados: response.data.objeto }));
           break;
         }
         case 'notificacao': {

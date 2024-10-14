@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fToNow, ptDateTime, formatDate } from '../../utils/formatTime';
-import { normalizeText, entidadesParse, noDados, baralharString } from '../../utils/formatText';
+import { normalizeText, noDados, baralharString, contaCliEnt } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -177,12 +177,7 @@ export default function TableProcessos({ from }) {
                         {row?.criado_em ? `/${formatDate(row?.criado_em, 'yyyy')}` : ''}
                       </TableCell>
                       <TableCell>{row?.titular ? baralharString(row?.titular) : noDados()}</TableCell>
-                      <TableCell>
-                        {(row?.conta && baralharString(row?.conta)) ||
-                          (row?.cliente && baralharString(row?.cliente)) ||
-                          (row?.entidades && baralharString(entidadesParse(row?.entidades))) ||
-                          noDados()}
-                      </TableCell>
+                      <TableCell>{contaCliEnt(row)}</TableCell>
                       <TableCell>{row?.assunto ? row?.assunto : meuFluxo?.assunto}</TableCell>
                       <TableCell sx={{ maxWidth: 400 }}>
                         {row?.estado && <Typography variant="body2">{row?.estado}</Typography>}

@@ -18,8 +18,8 @@ export default function Arquivo() {
 
   const tabsList = [
     { value: 'Arquivos', component: <TableArquivo tab="arquivos" /> },
-    { value: 'Pedidos', component: <TableArquivo tab="pedidosAcesso" /> },
     { value: 'Restauros', component: <TableArquivo tab="restauros" /> },
+    { value: 'Pedidos', component: <TableArquivo tab="pedidosAcesso" /> },
   ];
 
   return (

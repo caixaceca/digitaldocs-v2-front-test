@@ -19,7 +19,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 import { SearchNotFound404 } from '../components/table';
-import DialogConfirmar from '../components/DialogConfirmar';
+import { DialogConfirmar } from '../components/CustomDialog';
 import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
@@ -143,7 +143,7 @@ export default function EditarPedidoCC() {
                 {pedidoCC?.preso && pedidoCC?.perfil_id === perfilId ? (
                   <>
                     {completed ? (
-                      <PedidoCompleto open={completed} isEdit />
+                      <PedidoCompleto isEdit />
                     ) : (
                       <>
                         {activeStep === 0 && <DadosGerais dados={pedidoCC} />}
@@ -171,15 +171,15 @@ export default function EditarPedidoCC() {
             ) : (
               <SearchNotFound404 message="Pedido de crédito não encontrada..." />
             )}
-
-            <DialogConfirmar
-              open={!!itemId}
-              isSaving={isSaving}
-              onClose={handleCancel}
-              handleOk={() => handleConfirmeDelete()}
-              title={`Eliminar ${tipoItem?.includes('anexo') ? 'anexo' : tipoItem}`}
-              desc={`eliminar ${tipoItem?.includes('anexo') ? 'este anexo' : `esta ${tipoItem}`}`}
-            />
+            {!!itemId && (
+              <DialogConfirmar
+                isSaving={isSaving}
+                onClose={handleCancel}
+                handleOk={() => handleConfirmeDelete()}
+                title={`Eliminar ${tipoItem?.includes('anexo') ? 'anexo' : tipoItem}`}
+                desc={`eliminar ${tipoItem?.includes('anexo') ? 'este anexo' : `esta ${tipoItem}`}`}
+              />
+            )}
           </>
         )}
       </Container>

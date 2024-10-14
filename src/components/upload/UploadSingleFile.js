@@ -10,7 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 // utils
 import { varFade } from '../animate';
 import { fData } from '../../utils/formatNumber';
-import { getFileThumb, getFileFormat } from '../../utils/getFileFormat';
+import { getFileThumb, getFileFormat } from '../../utils/formatFile';
 //
 import Image from '../Image';
 import BlockContent from './BlockContent';
@@ -51,15 +51,8 @@ export default function UploadSingleFile({ error = false, file, helperText, sx, 
         {...getRootProps()}
         sx={{
           ...(isDragActive && { opacity: 0.72 }),
-          ...((isDragReject || error) && {
-            color: 'error.main',
-            borderColor: 'error.light',
-            bgcolor: 'error.lighter',
-          }),
-          ...(file &&
-            getFileFormat(file.name) === 'image' && {
-              padding: '12% 0',
-            }),
+          ...((isDragReject || error) && { color: 'error.main', borderColor: 'error.light', bgcolor: 'error.lighter' }),
+          ...(file && getFileFormat(file.name) === 'image' && { padding: '12% 0' }),
         }}
       >
         <input {...getInputProps()} />

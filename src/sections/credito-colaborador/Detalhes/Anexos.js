@@ -17,7 +17,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { ptDateTime, ptDate } from '../../../utils/formatTime';
-import { b64toBlob, getFileThumb } from '../../../utils/getFileFormat';
+import { b64toBlob, getFileThumb } from '../../../utils/formatFile';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getFromCC, closeModal } from '../../../redux/slices/cc';
@@ -38,6 +38,7 @@ export default function Anexos({ item, anexos }) {
   const dispatch = useDispatch();
   const [form, setForm] = useState('');
   const { mail } = useSelector((state) => state.intranet);
+  const { isOpenModal } = useSelector((state) => state.cc);
   const anexosAtivos = anexos?.filter((row) => row?.ativo);
   const anexosEliminados = anexos?.filter((row) => !row?.ativo);
 
@@ -70,8 +71,8 @@ export default function Anexos({ item, anexos }) {
         </>
       )}
 
-      <AnexoPreview />
-      {item === 'anexos' && <Formulario form={form} setForm={setForm} />}
+      {isOpenModal && <AnexoPreview />}
+      {item === 'anexos' && !!form && <Formulario form={form} setForm={setForm} />}
     </CardContent>
   );
 }
@@ -137,7 +138,7 @@ function AnexoPreview() {
   const dispatch = useDispatch();
   const [url, setUrl] = useState('');
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
-  const { isOpenModal, isLoadingPreview, selectedAnexo, anexo } = useSelector((state) => state.cc);
+  const { isLoadingPreview, selectedAnexo, anexo } = useSelector((state) => state.cc);
 
   useEffect(() => {
     if (anexo?.preview !== 'pdf' && anexo?.preview !== 'image' && anexo?.anexo?.ficheiro) {
@@ -162,7 +163,7 @@ function AnexoPreview() {
   };
 
   return (
-    <Dialog fullScreen open={isOpenModal}>
+    <Dialog fullScreen open>
       <DTFechar title={selectedAnexo?.designacao} handleClick={() => handleCloseModal()} />
       <DialogContent sx={{ mt: 2, px: anexo?.preview === 'pdf' ? 0 : 3, pb: anexo?.preview === 'pdf' ? 0 : 3 }}>
         <Box sx={{ flexGrow: 1, height: '100%' }}>
@@ -211,7 +212,7 @@ export function Formulario({ form, setForm }) {
     (row) => row?.perfil?.mail?.toLowerCase() === pedidoCC?.criador?.toLowerCase()
   );
   return (
-    <Dialog fullScreen open={!!form}>
+    <Dialog fullScreen open>
       <DTFechar title={form} handleClick={() => setForm('')} />
       <DialogContent sx={{ p: 0, mt: 2 }}>
         <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>

@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, acquireToken, getMyStatus, authenticateColaborador } from '../redux/slices/intranet';
+import { getFromIntranet, acquireToken, authenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -32,38 +32,35 @@ export default function Router() {
   }, [accounts, dispatch, instance]);
 
   useEffect(() => {
-    if (accessToken && msalProfile?.mail) {
+    if (accessToken && msalProfile) {
       dispatch(authenticateColaborador(accessToken, msalProfile));
     }
   }, [dispatch, accessToken, msalProfile]);
 
   useEffect(() => {
-    if (mail && perfil?.colaborador?.id) {
-      dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id, mail: perfil?.mail }));
-      dispatch(getFromIntranet('colaboradores', { mail: perfil?.mail }));
-      dispatch(getMyStatus(accessToken));
+    if (mail && perfil?.colaborador?.id && accessToken) {
+      dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id, mail }));
+      dispatch(getFromIntranet('colaboradores', { mail, accessToken }));
     }
-  }, [dispatch, perfil?.colaborador?.id, mail, perfil?.mail, accessToken]);
+  }, [dispatch, perfil?.colaborador?.id, mail, accessToken]);
 
   useEffect(() => {
-    if (perfil?.mail && perfil?.id && cc?.id) {
-      dispatch(getFromIntranet('uos', { mail: perfil?.mail }));
-      dispatch(getFromIntranet('links', { mail: perfil?.mail }));
-      dispatch(getFromIntranet('frase', { mail: perfil?.mail }));
-      dispatch(getFromIntranet('aplicacoes', { mail: perfil?.mail }));
-      dispatch(getFromIntranet('certificacao', { mail: perfil?.mail }));
+    if (mail && perfil?.id && cc?.id) {
+      dispatch(getFromIntranet('uos', { mail }));
+      dispatch(getFromIntranet('links', { mail }));
+      dispatch(getFromIntranet('frase', { mail }));
+      dispatch(getFromIntranet('aplicacoes', { mail }));
+      dispatch(getFromIntranet('certificacao', { mail }));
       //
-      dispatch(getFromParametrizacao('fluxos', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('origens', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('motivos', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('estados', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('meusacessos', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('meusambientes', { mail: perfil?.mail, perfilId: perfil?.id }));
-      dispatch(
-        getFromIntranet('disposicao', { mail: perfil?.mail, id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') })
-      );
+      dispatch(getFromParametrizacao('fluxos', { mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('origens', { mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('estados', { mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('meusambientes', { mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('motivos pendencia', { mail, perfilId: perfil?.id }));
+      dispatch(getFromIntranet('disposicao', { mail, id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') }));
     }
-  }, [dispatch, cc?.id, perfil?.mail, perfil?.id]);
+  }, [dispatch, cc?.id, mail, perfil?.id]);
 
   return useRoutes([
     {

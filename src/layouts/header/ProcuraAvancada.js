@@ -80,105 +80,112 @@ export default function ProcuraAvancada() {
         Procurar...
       </Button>
 
-      <Dialog
-        fullWidth
-        open={open}
-        onClose={onClose}
-        maxWidth={avancada ? 'md' : 'sm'}
-        sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
-      >
-        <DialogTitle>
-          <Stack direction="row" spacing={3} justifyContent="space-between" alignItems="center">
-            Procurar
-            <FormControlLabel
-              label="Pesquisa avançada"
-              control={
-                <Switch
-                  checked={avancada}
-                  onChange={(event, value) => {
-                    setAvancada(value);
-                    localStorage.setItem('tipoPesquisa', value === true ? 'avancada' : 'global');
-                  }}
-                />
-              }
-            />
-          </Stack>
-        </DialogTitle>
-        <DialogContent sx={{ pb: 0 }}>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            {avancada ? (
-              <>
-                <Grid item xs={12} md={6}>
-                  <Autocomplete
-                    fullWidth
-                    options={uosList}
-                    value={uo || null}
-                    getOptionLabel={(option) => option.label}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => <TextField {...params} label="Unidade orgânica" />}
-                    onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoSearch', true)}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextFieldNumb value={entrada} setValue={setEntrada} label="Nº de entrada" localS="entrada" />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextFieldNumb value={noperacao} setValue={setNoperacao} label="Nº de operação" localS="noperacao" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextFieldNumb value={entidade} setValue={setEntidade} label="Nº de entidade" localS="entidade" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextFieldNumb value={cliente} setValue={setCliente} label="Nº de cliente" localS="cliente" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextFieldNumb value={conta} setValue={setConta} label="Nº de conta" localS="conta" />
-                </Grid>
-              </>
-            ) : (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    autoFocus
-                    value={chave}
-                    onKeyUp={handleKeyUp}
-                    placeholder="Introduza uma palavra/texto chave..."
-                    onChange={(event) => setItemValue(event.target.value, setChave, 'chave', false)}
-                  />
-                </Grid>
-              </>
-            )}
-            <Grid item xs={12}>
-              <Stack direction="row" justifyContent="center">
-                <FormControlLabel
-                  label="Histórico"
-                  control={
-                    <Switch
-                      checked={historico}
-                      onChange={(event, value) => {
-                        setHistorico(value);
-                        localStorage.setItem('procHistorico', value === true ? 'true' : 'false', false);
-                      }}
-                    />
-                  }
-                />
-              </Stack>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', mt: 3 }}>
-          <Box sx={{ flexGrow: 1 }} />
-          <Button variant="outlined" color="inherit" onClick={onClose}>
-            Cancelar
-          </Button>
-          {(avancada || chave) && (
-            <Button variant="contained" onClick={handleSearch}>
+      {open && (
+        <Dialog
+          open
+          fullWidth
+          onClose={onClose}
+          maxWidth={avancada ? 'md' : 'sm'}
+          sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }}
+        >
+          <DialogTitle>
+            <Stack direction="row" spacing={3} justifyContent="space-between" alignItems="center">
               Procurar
+              <FormControlLabel
+                label="Pesquisa avançada"
+                control={
+                  <Switch
+                    checked={avancada}
+                    onChange={(event, value) => {
+                      setAvancada(value);
+                      localStorage.setItem('tipoPesquisa', value === true ? 'avancada' : 'global');
+                    }}
+                  />
+                }
+              />
+            </Stack>
+          </DialogTitle>
+          <DialogContent sx={{ pb: 0 }}>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              {avancada ? (
+                <>
+                  <Grid item xs={12} md={6}>
+                    <Autocomplete
+                      fullWidth
+                      options={uosList}
+                      value={uo || null}
+                      getOptionLabel={(option) => option.label}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                      renderInput={(params) => <TextField {...params} label="Unidade orgânica" />}
+                      onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoSearch', true)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextFieldNumb value={entrada} setValue={setEntrada} label="Nº de entrada" localS="entrada" />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextFieldNumb
+                      value={noperacao}
+                      setValue={setNoperacao}
+                      label="Nº de operação"
+                      localS="noperacao"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextFieldNumb value={entidade} setValue={setEntidade} label="Nº de entidade" localS="entidade" />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextFieldNumb value={cliente} setValue={setCliente} label="Nº de cliente" localS="cliente" />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextFieldNumb value={conta} setValue={setConta} label="Nº de conta" localS="conta" />
+                  </Grid>
+                </>
+              ) : (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      autoFocus
+                      value={chave}
+                      onKeyUp={handleKeyUp}
+                      placeholder="Introduza uma palavra/texto chave..."
+                      onChange={(event) => setItemValue(event.target.value, setChave, 'chave', false)}
+                    />
+                  </Grid>
+                </>
+              )}
+              <Grid item xs={12}>
+                <Stack direction="row" justifyContent="center">
+                  <FormControlLabel
+                    label="Histórico"
+                    control={
+                      <Switch
+                        checked={historico}
+                        onChange={(event, value) => {
+                          setHistorico(value);
+                          localStorage.setItem('procHistorico', value === true ? 'true' : 'false', false);
+                        }}
+                      />
+                    }
+                  />
+                </Stack>
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'center', mt: 3 }}>
+            <Box sx={{ flexGrow: 1 }} />
+            <Button variant="outlined" color="inherit" onClick={onClose}>
+              Cancelar
             </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+            {(avancada || chave) && (
+              <Button variant="contained" onClick={handleSearch}>
+                Procurar
+              </Button>
+            )}
+          </DialogActions>
+        </Dialog>
+      )}
     </>
   );
 }

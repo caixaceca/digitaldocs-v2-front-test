@@ -1,12 +1,9 @@
 import { format } from 'date-fns';
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
-import { useLocation, NavLink as RouterLink } from 'react-router-dom';
+import { NavLink as RouterLink } from 'react-router-dom';
 // @mui
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
 import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import { styled, useTheme } from '@mui/material/styles';
@@ -18,7 +15,6 @@ import { NAVBAR, ambiente } from '../../config';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 import useCollapseDrawer from '../../hooks/useCollapseDrawer';
-import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector } from '../../redux/store';
 // components
@@ -27,6 +23,7 @@ import Image from '../../components/Image';
 import Scrollbar from '../../components/Scrollbar';
 import { NavSectionVertical } from '../../components/nav-section';
 //
+import Aplicacoes from './Aplicacoes';
 import NavbarAcount from './NavbarAcount';
 import CollapseButton from './CollapseButton';
 import navConfigDigitalDocs from './NavConfigDigitalDocs';
@@ -40,40 +37,17 @@ const RootStyle = styled('div')(({ theme }) => ({
   },
 }));
 
-const LogoApp = styled(Avatar)(() => ({ p: 0.25, width: '25px', height: '25px' }));
-
 // ----------------------------------------------------------------------
 
 NavbarVertical.propTypes = { isOpenSidebar: PropTypes.bool, onCloseSidebar: PropTypes.func };
 
 export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   const theme = useTheme();
-  const { pathname } = useLocation();
   const isDesktop = useResponsive('up', 'lg');
-  const { myAplicacoes, certificacoes } = useSelector((state) => state.intranet);
-  const appsOrder = applySort(myAplicacoes, getComparator('asc', 'nome'));
-  const noApp = appsOrder.length === 0;
-
-  const Apps = [
-    {
-      subheader: 'aplicações',
-      items: appsOrder.map((app) => ({
-        title: app.nome,
-        path: app.link,
-        icon: <LogoApp variant="rounded" alt={app.nome} src={`${BASEURL}/aplicacao/logo/${app.logo_disco}`} />,
-      })),
-    },
-  ];
+  const { minhasAplicacoes, certificacoes } = useSelector((state) => state.intranet);
 
   const { isCollapse, collapseClick, collapseHover, onToggleCollapse, onHoverEnter, onHoverLeave } =
     useCollapseDrawer();
-
-  useEffect(() => {
-    if (isOpenSidebar) {
-      onCloseSidebar();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
 
   const renderContent = (
     <Scrollbar sx={{ height: 1, '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' } }}>
@@ -106,9 +80,15 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
         <NavbarAcount isCollapse={isCollapse} />
       </Stack>
 
-      <NavSectionVertical navConfig={navConfigDigitalDocs} isCollapse={isCollapse} />
-      {!noApp && <NavSectionVertical navConfig={Apps} isCollapse={isCollapse} />}
-      <Box sx={{ flexGrow: 1 }} />
+      <NavSectionVertical
+        isCollapse={isCollapse}
+        navConfig={[
+          ...navConfigDigitalDocs,
+          ...(minhasAplicacoes?.length === 0
+            ? []
+            : [{ subheader: 'Aplicações', items: Aplicacoes({ minhasAplicacoes }) }]),
+        ]}
+      />
 
       {!isCollapse && (
         <Stack spacing={3} alignItems="center" sx={{ px: 5.5, pb: 5, my: 10, width: 1, textAlign: 'center' }}>

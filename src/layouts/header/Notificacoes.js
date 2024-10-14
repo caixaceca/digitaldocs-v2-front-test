@@ -77,8 +77,8 @@ export default function Notificacoes() {
       </Tooltip>
 
       <MenuPopover
-        open={Boolean(open)}
         anchorEl={open}
+        open={Boolean(open)}
         onClose={handleClose}
         sx={{ width: 360, p: 0, pb: 1, mt: 1.5, ml: 0.75 }}
       >

@@ -2,8 +2,8 @@ import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { errorMsg } from '../../utils/formatText';
+import { getFileFormat } from '../../utils/formatFile';
 import { BASEURLCC, BASEURLDD } from '../../utils/axios';
-import { getFileFormat } from '../../utils/getFileFormat';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 

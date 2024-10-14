@@ -11,15 +11,10 @@ import Dialog from '@mui/material/Dialog';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import DialogTitle from '@mui/material/DialogTitle';
 import { alpha, styled } from '@mui/material/styles';
-import DialogContent from '@mui/material/DialogContent';
 import OutlinedFlagIcon from '@mui/icons-material/OutlinedFlag';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import cssStyles from '../../utils/cssStyles';
 import { formatDate } from '../../utils/formatTime';
@@ -29,7 +24,7 @@ import { useSelector } from '../../redux/store';
 // hooks
 import useOffSetTop from '../../hooks/useOffSetTop';
 import useResponsive from '../../hooks/useResponsive';
-import useToggle, { useToggle1, useToggle2, useToggle3 } from '../../hooks/useToggle';
+import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 // config
 import { HEADER, NAVBAR } from '../../config';
 // components
@@ -51,10 +46,9 @@ const RootStyle = styled(AppBar, {
   shouldForwardProp: (prop) => prop !== 'isCollapse' && prop !== 'isOffset' && prop !== 'verticalLayout',
 })(({ isCollapse, isOffset, verticalLayout, theme }) => ({
   ...cssStyles(theme).bgBlur(),
-  // boxShadow: 'none',
-  boxShadow: theme.customShadows.z8,
   height: HEADER.MOBILE_HEIGHT,
   zIndex: theme.zIndex.appBar + 1,
+  boxShadow: theme.customShadows.z8,
   transition: theme.transitions.create(['width', 'height'], { duration: theme.transitions.duration.shorter }),
   [theme.breakpoints.up('lg')]: {
     height: HEADER.DASHBOARD_DESKTOP_HEIGHT,
@@ -68,14 +62,14 @@ const RootStyle = styled(AppBar, {
     }),
   },
   '&:before': {
+    opacity: 1,
     width: '100%',
     content: "''",
     height: '100%',
     position: 'absolute',
-    backgroundImage: 'url(/assets/Shape.svg)',
-    backgroundPosition: 'center',
     backgroundSize: 'cover',
-    opacity: 1,
+    backgroundPosition: 'center',
+    backgroundImage: 'url(/assets/Shape.svg)',
   },
 }));
 
@@ -92,7 +86,6 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
-  const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const { myGroups } = useSelector((state) => state.intranet);
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
   const acessoValidarDoc = validarAcesso('Admin', myGroups) || validarAcesso('pdex', myGroups);
@@ -124,7 +117,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
                   title="Validação de documento"
                   icon={<BadgeOutlinedIcon sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }} />}
                 />
-                <ValidarDocForm open={open1} onCancel={onClose1} />
+                {open1 && <ValidarDocForm onCancel={onClose1} />}
               </>
             )}
 
@@ -137,29 +130,9 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
               title="Denúncia"
               icon={<OutlinedFlagIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />}
             />
-            <DenunciaForm open={open2} onCancel={onClose2} />
+            {open2 && <DenunciaForm open onCancel={onClose2} />}
 
-            <IconButtonHead
-              open={open3}
-              title="Ajuda"
-              onOpen={onOpen3}
-              icon={<HelpOutlineOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />}
-            />
-            <Dialog open={open3} onClose={onClose3} fullWidth maxWidth="lg">
-              <DialogTitle>
-                <Box display="flex" alignItems="center">
-                  <Box flexGrow={1}>Ajuda</Box>
-                  <Box>
-                    <IconButton onClick={onClose3}>
-                      <CloseOutlinedIcon sx={{ width: 20 }} />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </DialogTitle>
-              <DialogContent>
-                <Ajuda />
-              </DialogContent>
-            </Dialog>
+            <Ajuda />
             <Parabens />
           </Stack>
         </Toolbar>
@@ -190,40 +163,8 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           </Tooltip>
         </Box>
       </Box>
-      <FormSugestao open={open} onCancel={onClose} />
+      {open && <FormSugestao open onCancel={onClose} />}
     </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-IconButtonHead.propTypes = {
-  open: PropTypes.bool,
-  icon: PropTypes.node,
-  onOpen: PropTypes.func,
-  title: PropTypes.string,
-};
-
-function IconButtonHead({ open, title, icon, onOpen, ...sx }) {
-  return (
-    <Tooltip arrow title={title}>
-      <IconButtonAnimate
-        color={open ? 'primary' : 'default'}
-        onClick={onOpen}
-        sx={{
-          p: 0,
-          color: '#fff',
-          width: { xs: 28, sm: 40 },
-          height: { xs: 28, sm: 40 },
-          ...(open && {
-            bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity),
-          }),
-        }}
-        {...sx}
-      >
-        {icon}
-      </IconButtonAnimate>
-    </Tooltip>
   );
 }
 
@@ -376,5 +317,35 @@ function Parabens() {
     </>
   ) : (
     ''
+  );
+}
+
+// ----------------------------------------------------------------------
+
+IconButtonHead.propTypes = {
+  open: PropTypes.bool,
+  icon: PropTypes.node,
+  onOpen: PropTypes.func,
+  title: PropTypes.string,
+};
+
+export function IconButtonHead({ open, title, icon, onOpen, ...sx }) {
+  return (
+    <Tooltip arrow title={title}>
+      <IconButtonAnimate
+        color={open ? 'primary' : 'default'}
+        onClick={onOpen}
+        sx={{
+          p: 0,
+          color: '#fff',
+          width: { xs: 28, sm: 40 },
+          height: { xs: 28, sm: 40 },
+          ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
+        }}
+        {...sx}
+      >
+        {icon}
+      </IconButtonAnimate>
+    </Tooltip>
   );
 }

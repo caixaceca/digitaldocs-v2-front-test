@@ -2,10 +2,13 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { normalizeText, noDados } from '../../../utils/formatText';
@@ -13,14 +16,18 @@ import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
 // hooks
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
-import { getAll } from '../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../redux/store';
+import { getAll, selectItem } from '../../../redux/slices/digitaldocs';
 // components
+import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
+import { DefaultAction } from '../../../components/Actions';
 import { SkeletonTable } from '../../../components/skeleton';
 import { Criado, ColaboradorInfo } from '../../../components/Panel';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+//
+import { ConfidencialidadesForm } from '../form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -44,6 +51,13 @@ const TABLE_HEAD_PENDENCIAS = [
   { id: 'data_pendente', label: 'Registo', align: 'center', minWidth: 130, width: 10 },
 ];
 
+const TABLE_HEAD_CONF = [
+  { id: '', label: 'Critérios', align: 'left' },
+  { id: 'ativo', label: 'Ativo', align: 'center' },
+  { id: 'criador', label: 'Criado', align: 'left' },
+  { id: '', width: 10 },
+];
+
 // ----------------------------------------------------------------------
 
 TableDetalhes.propTypes = { id: PropTypes.number, item: PropTypes.string };
@@ -64,8 +78,8 @@ export default function TableDetalhes({ id, item }) {
   } = useTable();
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
-  const { processo, isLoading } = useSelector((state) => state.digitaldocs);
   const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
+  const { processo, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (mail && id && item && perfilId) {
@@ -80,6 +94,7 @@ export default function TableDetalhes({ id, item }) {
 
   const dataFiltered = applySortFilter({
     dados:
+      (item === 'confidencialidades' && processo?.confidencialidades) ||
       (item === 'hretencoes' && dadosComColaboradores(processo?.hretencoes || [], colaboradores)) ||
       (item === 'hpendencias' && dadosComColaboradores(processo?.hpendencias || [], colaboradores)) ||
       (item === 'hatribuicoes' && dadosComColaboradores(processo?.hatribuicoes || [], colaboradores)) ||
@@ -97,13 +112,14 @@ export default function TableDetalhes({ id, item }) {
           <Table size={dense || item?.includes('anexo') ? 'small' : 'medium'}>
             <TableHeadCustom
               order={order}
+              onSort={onSort}
               orderBy={orderBy}
               headLabel={
                 (item === 'hretencoes' && TABLE_HEAD_RETENCOES) ||
                 (item === 'hpendencias' && TABLE_HEAD_PENDENCIAS) ||
+                (item === 'confidencialidades' && TABLE_HEAD_CONF) ||
                 (item === 'hatribuicoes' && TABLE_HEAD_ATRIBUICOES)
               }
-              onSort={onSort}
             />
             <TableBody>
               {isLoading && isNotFound ? (
@@ -114,7 +130,7 @@ export default function TableDetalhes({ id, item }) {
                     {(item === 'hretencoes' && (
                       <>
                         <TableCell>
-                          <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} />
+                          <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} status={row?.presence} />
                         </TableCell>
                         <TableCell align="center">
                           {(row?.preso_em && row?.solto_em && fDistance(row?.preso_em, row?.solto_em)) ||
@@ -137,7 +153,7 @@ export default function TableDetalhes({ id, item }) {
                       (item === 'hatribuicoes' && (
                         <>
                           <TableCell>
-                            <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} />
+                            <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} status={row?.presence} />
                           </TableCell>
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
@@ -169,6 +185,31 @@ export default function TableDetalhes({ id, item }) {
                             )}
                           </TableCell>
                         </>
+                      )) ||
+                      (item === 'confidencialidades' && (
+                        <>
+                          <TableCell>
+                            <Criterios dados={row?.criterios} colaboradores={colaboradores} />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Label variant="ghost" color={row?.ativo ? 'success' : 'default'}>
+                              {row?.ativo ? 'Sim' : 'Não'}
+                            </Label>
+                          </TableCell>
+                          <TableCell>
+                            {row?.criador && <Criado caption tipo="user" value={row?.criador} baralhar />}
+                            {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
+                          </TableCell>
+                          <TableCell>
+                            {row?.ativo && row?.permite_alteracao && (
+                              <DefaultAction
+                                label="EDITAR"
+                                color="warning"
+                                handleClick={() => dispatch(selectItem(row))}
+                              />
+                            )}
+                          </TableCell>
+                        </>
                       ))}
                   </TableRow>
                 ))
@@ -193,7 +234,75 @@ export default function TableDetalhes({ id, item }) {
           onChangeRowsPerPage={onChangeRowsPerPage}
         />
       )}
+
+      {isOpenModal && <ConfidencialidadesForm processoId={processo.id} />}
     </Box>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Criterios.propTypes = { dados: PropTypes.array, colaboradores: PropTypes.array };
+
+export function Criterios({ dados, colaboradores }) {
+  const estadosIncluidos = dados.filter((row) => row.estado_incluido_id).map((item) => item.estado_incluido);
+  const estadosExcluidos = dados.filter((row) => row.estado_excluido_id).map((item) => item.estado_excluido);
+  const perfisIncluidos = dados
+    .filter((row) => row.perfil_incluido_id)
+    .map(
+      (item) =>
+        colaboradores?.find((colab) => colab?.perfil_id === item.perfil_incluido_id)?.perfil?.displayName ||
+        `PerfilID: ${item.perfil_incluido_id}`
+    );
+  const perfisExcluidos = dados
+    .filter((row) => row.perfil_excluido_id)
+    .map(
+      (item) =>
+        colaboradores?.find((colab) => colab?.perfil_id === item.perfil_excluido_id)?.perfil?.displayName ||
+        `PerfilID: ${item.perfil_excluido_id}`
+    );
+
+  return (
+    <Stack spacing={2} divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />}>
+      {(estadosIncluidos?.length > 0 || perfisIncluidos?.length > 0) && (
+        <ItemsCriterios label="Com acesso" estados={estadosIncluidos} colaboradores={perfisIncluidos} />
+      )}
+      {(estadosExcluidos?.length > 0 || perfisExcluidos?.length > 0) && (
+        <ItemsCriterios label="Sem acesso" estados={estadosExcluidos} colaboradores={perfisExcluidos} />
+      )}
+    </Stack>
+  );
+}
+
+ItemsCriterios.propTypes = { label: PropTypes.string, estados: PropTypes.array, colaboradores: PropTypes.array };
+
+export function ItemsCriterios({ label, estados = [], colaboradores = [] }) {
+  return (
+    <Stack direction="row" spacing={1} alignItems="center">
+      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+        {label}:
+      </Typography>
+      <Stack spacing={1}>
+        {estados?.length > 0 && (
+          <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+            {estados?.map((row, index) => (
+              <Label color={label === 'Com acesso' ? 'success' : 'error'} key={`${row}_${index}`}>
+                {row}
+              </Label>
+            ))}
+          </Stack>
+        )}
+        {colaboradores?.length > 0 && (
+          <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
+            {colaboradores?.map((row, index) => (
+              <Label color={label === 'Com acesso' ? 'success' : 'error'} key={`${row}_${index}`}>
+                {row}
+              </Label>
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    </Stack>
   );
 }
 
@@ -221,6 +330,7 @@ function dadosComColaboradores(dados, colaboradores) {
       ...row,
       uo: colaborador?.uo?.label,
       foto: colaborador?.foto_disk,
+      presence: colaborador?.presence,
       mail: colaborador?.perfil?.mail,
       nome: colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`,
     });

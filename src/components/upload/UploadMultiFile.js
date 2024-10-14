@@ -22,30 +22,16 @@ const DropZoneStyle = styled('div')(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 UploadMultiFile.propTypes = {
-  files: PropTypes.array.isRequired,
-  error: PropTypes.bool,
-  showPreview: PropTypes.bool,
-  // onUpload: PropTypes.func,
-  onRemove: PropTypes.func,
-  // onRemoveAll: PropTypes.func,
-  helperText: PropTypes.node,
   sx: PropTypes.object,
+  error: PropTypes.bool,
+  onRemove: PropTypes.func,
+  helperText: PropTypes.node,
+  showPreview: PropTypes.bool,
+  files: PropTypes.array.isRequired,
 };
 
-export default function UploadMultiFile({
-  error,
-  showPreview = false,
-  files,
-  // onUpload,
-  onRemove,
-  // onRemoveAll,
-  helperText,
-  sx,
-  ...other
-}) {
-  const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({
-    ...other,
-  });
+export default function UploadMultiFile({ error, showPreview = false, files, onRemove, helperText, sx, ...other }) {
+  const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({ ...other });
 
   return (
     <Box sx={{ width: '100%', ...sx }}>
@@ -53,11 +39,7 @@ export default function UploadMultiFile({
         {...getRootProps()}
         sx={{
           ...(isDragActive && { opacity: 0.72 }),
-          ...((isDragReject || error) && {
-            color: 'error.main',
-            borderColor: 'error.light',
-            bgcolor: 'error.lighter',
-          }),
+          ...((isDragReject || error) && { color: 'error.main', borderColor: 'error.light', bgcolor: 'error.lighter' }),
         }}
       >
         <input {...getInputProps()} />

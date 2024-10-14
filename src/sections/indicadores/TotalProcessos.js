@@ -29,6 +29,7 @@ import { useSelector } from '../../redux/store';
 import MyAvatar from '../../components/MyAvatar';
 import Chart, { useChart } from '../../components/chart';
 import { DTFechar, DefaultAction } from '../../components/Actions';
+import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndicadores';
 //
 import { TabView, CardInfo, dadosResumo, TableExport, IndicadorItem, ColaboradorCard } from './Indicadores';
 
@@ -92,7 +93,13 @@ export function Criacao({ periodo, indicadores }) {
 
   return (
     <Card sx={{ p: 1 }}>
-      {indicadores.length > 0 && <TabView vista={vista} setVista={setVista} />}
+      {indicadores.length > 0 && (
+        <TabView
+          vista={vista}
+          setVista={setVista}
+          exportar={<ExportarDados tabela="Total de processos - Data" dados={indicadores} />}
+        />
+      )}
       <IndicadorItem
         isLoading={isLoading}
         isNotFound={isNotFound}
@@ -199,58 +206,60 @@ export function EntradasTrabalhados({ indicadores }) {
                 {dadosByColaborador.length > 1 && (
                   <>
                     <DefaultAction small button handleClick={onOpen1} label="Comparar colaboradores" />
-                    <Dialog open={open1} onClose={handleClose} fullWidth maxWidth="sm">
-                      <DTFechar title="Comparação colaboradores" handleClick={() => handleClose()} />
-                      <DialogContent>
-                        <Grid container spacing={1.5} sx={{ mt: 1 }}>
-                          <ColaboradorComp
-                            colaborador={colaborador1}
-                            colaboradorComp={colaborador2}
-                            setColaborador={setColaborador1}
-                            colaboradoresList={colaboradoresList}
-                          />
-                          <ColaboradorComp
-                            colaborador={colaborador2}
-                            colaboradorComp={colaborador1}
-                            setColaborador={setColaborador2}
-                            colaboradoresList={colaboradoresList}
-                          />
-                          {colaborador1 && colaborador2 && (
-                            <>
-                              <LineProgress
-                                isTotal
-                                item="Total"
-                                trabalhadoC1={totalC1}
-                                trabalhadoC2={totalC2}
-                                leftSuccess={totalC1 > totalC2}
-                              />
-                              {dadosByAssunto?.map((row) => {
-                                const trabalhadoC1 =
-                                  dadosByColaborador
-                                    ?.find((colaborador) => colaborador?.item === colaborador1?.id)
-                                    ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
-                                const trabalhadoC2 =
-                                  dadosByColaborador
-                                    ?.find((colaborador) => colaborador?.item === colaborador2?.id)
-                                    ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
-                                return (
-                                  <>
-                                    {(trabalhadoC1 > 0 || trabalhadoC2 > 0) && (
-                                      <LineProgress
-                                        item={row?.item}
-                                        trabalhadoC1={trabalhadoC1}
-                                        trabalhadoC2={trabalhadoC2}
-                                        leftSuccess={trabalhadoC1 > trabalhadoC2}
-                                      />
-                                    )}
-                                  </>
-                                );
-                              })}
-                            </>
-                          )}
-                        </Grid>
-                      </DialogContent>
-                    </Dialog>
+                    {open1 && (
+                      <Dialog open onClose={handleClose} fullWidth maxWidth="sm">
+                        <DTFechar title="Comparação colaboradores" handleClick={() => handleClose()} />
+                        <DialogContent>
+                          <Grid container spacing={1.5} sx={{ mt: 1 }}>
+                            <ColaboradorComp
+                              colaborador={colaborador1}
+                              colaboradorComp={colaborador2}
+                              setColaborador={setColaborador1}
+                              colaboradoresList={colaboradoresList}
+                            />
+                            <ColaboradorComp
+                              colaborador={colaborador2}
+                              colaboradorComp={colaborador1}
+                              setColaborador={setColaborador2}
+                              colaboradoresList={colaboradoresList}
+                            />
+                            {colaborador1 && colaborador2 && (
+                              <>
+                                <LineProgress
+                                  isTotal
+                                  item="Total"
+                                  trabalhadoC1={totalC1}
+                                  trabalhadoC2={totalC2}
+                                  leftSuccess={totalC1 > totalC2}
+                                />
+                                {dadosByAssunto?.map((row) => {
+                                  const trabalhadoC1 =
+                                    dadosByColaborador
+                                      ?.find((colaborador) => colaborador?.item === colaborador1?.id)
+                                      ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
+                                  const trabalhadoC2 =
+                                    dadosByColaborador
+                                      ?.find((colaborador) => colaborador?.item === colaborador2?.id)
+                                      ?.processos?.find((assunto) => assunto?.assunto === row?.item)?.total || 0;
+                                  return (
+                                    <>
+                                      {(trabalhadoC1 > 0 || trabalhadoC2 > 0) && (
+                                        <LineProgress
+                                          item={row?.item}
+                                          trabalhadoC1={trabalhadoC1}
+                                          trabalhadoC2={trabalhadoC2}
+                                          leftSuccess={trabalhadoC1 > trabalhadoC2}
+                                        />
+                                      )}
+                                    </>
+                                  );
+                                })}
+                              </>
+                            )}
+                          </Grid>
+                        </DialogContent>
+                      </Dialog>
+                    )}
                   </>
                 )}
               </Stack>
@@ -329,7 +338,13 @@ export function DevolvidosTipos({ dev, indicadores }) {
 
   return (
     <Card sx={{ p: 1 }}>
-      {indicadores.length > 0 && <TabView vista={vista} setVista={setVista} />}
+      {indicadores.length > 0 && (
+        <TabView
+          vista={vista}
+          setVista={setVista}
+          exportar={<ExportarDados tabela="Total de processos" dados={indicadores} />}
+        />
+      )}
       <IndicadorItem
         isLoading={isLoading}
         isNotFound={isNotFound}
@@ -403,7 +418,13 @@ export function Origem({ top, indicadores }) {
 
   return (
     <Card sx={{ p: 1 }}>
-      {indicadores.length > 0 && <TabView vista={vista} setVista={setVista} />}
+      {origemByItem.length > 0 && (
+        <TabView
+          vista={vista}
+          setVista={setVista}
+          exportar={<ExportarDados tabela="Origem dos processos" dados={origemByItem} />}
+        />
+      )}
       <IndicadorItem
         isLoading={isLoading}
         isNotFound={isNotFound}
@@ -447,7 +468,7 @@ export function ColaboradorComp({ colaborador, colaboradoresList = [], colaborad
         sx={{ py: 1, px: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}
       >
         <MyAvatar
-          alt={colaborador?.label}
+          name={colaborador?.label}
           src={getFile('colaborador', colaborador?.foto)}
           sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
         />

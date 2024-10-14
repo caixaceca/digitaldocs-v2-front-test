@@ -21,7 +21,7 @@ import useSettings from '../hooks/useSettings';
 // components
 import Page from '../components/Page';
 import { SearchNotFound } from '../components/table';
-import DialogConfirmar from '../components/DialogConfirmar';
+import { DialogConfirmar } from '../components/CustomDialog';
 import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
@@ -190,13 +190,14 @@ export default function NovoEditarProcesso() {
               </>
             )}
 
-            <DialogConfirmar
-              isSaving={isSaving}
-              open={!!selectedAnexoId}
-              handleOk={eliminarAnexo}
-              desc="eliminar este anexo"
-              onClose={() => dispatch(selectAnexo(null))}
-            />
+            {!!selectedAnexoId && (
+              <DialogConfirmar
+                isSaving={isSaving}
+                handleOk={eliminarAnexo}
+                desc="eliminar este anexo"
+                onClose={() => dispatch(selectAnexo(null))}
+              />
+            )}
           </>
         ) : (
           <RoleBasedGuard

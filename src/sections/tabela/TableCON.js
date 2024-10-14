@@ -7,14 +7,13 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
-import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fCurrency } from '../../utils/formatNumber';
 import { normalizeText, noDados, baralharString } from '../../utils/formatText';
-import { ptDate, ptDateTime, getDataLS, dataValido } from '../../utils/formatTime';
+import { ptDate, ptDateTime, getDataLS, dataValido, dataLabel } from '../../utils/formatTime';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -24,14 +23,13 @@ import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 // Components
 import { RHFDateIF } from '../../components/hook-form';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { Checked, Criado, Registos } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { ExportExcel, DefaultAction } from '../../components/Actions';
+import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-// _mock
-import { dis } from '../../_mock';
 
 // ----------------------------------------------------------------------
 
@@ -84,20 +82,14 @@ export default function TableCON({ item = 'con' }) {
   );
 
   useEffect(() => {
-    if (mail && item === 'con') {
-      dispatch(
-        getAll('con', {
-          mail,
-          dataFim: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
-          dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
-        })
-      );
+    if (mail && item === 'con' && dataValido(datai) && dataValido(dataf)) {
+      dispatch(getAll('con', { mail, dataFim: format(dataf, 'yyyy-MM-dd'), dataInicio: format(datai, 'yyyy-MM-dd') }));
     }
   }, [dispatch, mail, item, datai, dataf]);
 
   useEffect(() => {
     if (mail && item === 'pjf') {
-      dispatch(getAll('pjf', { mail, pagina: 0, reset: true }));
+      dispatch(getAll('pjf', { mail, pagina: 0 }));
     }
   }, [dispatch, mail, item]);
 
@@ -115,7 +107,7 @@ export default function TableCON({ item = 'con' }) {
 
   const mostrarMais = () => {
     if (mail && item === 'pjf' && processosInfo?.proxima_pagina) {
-      dispatch(getAll('pjf', { mail, pagina: processosInfo?.proxima_pagina, reset: false }));
+      dispatch(getAll('pjf', { mail, pagina: processosInfo?.proxima_pagina }));
     }
   };
 
@@ -142,15 +134,14 @@ export default function TableCON({ item = 'con' }) {
             )}
             {item === 'pjf' && <Registos info={processosInfo} total={pjf?.length} handleClick={() => mostrarMais()} />}
             {!isNotFound && (
-              <Stack>
-                <ExportExcel
-                  table="tabel-con"
-                  sheet={title}
-                  filename={`${title} ${dataValido(datai) && item === 'con' ? format(datai, 'yyyy-MM-dd') : ''} - ${
-                    dataValido(dataf) && item === 'con' ? format(dataf, 'yyyy-MM-dd') : ''
-                  }`}
-                />
-              </Stack>
+              <ExportarDados
+                tabela={item === 'pjf' ? 'PJF' : 'CON'}
+                dados={dataFiltered}
+                titulo={
+                  (item === 'pjf' && 'Processos Judiciais e Fiscais') ||
+                  `Comunicação de operações de Numerário  - ${dataLabel(datai, dataf)}`
+                }
+              />
             )}
           </Stack>
         }
@@ -229,42 +220,6 @@ export default function TableCON({ item = 'con' }) {
             onChangeDense={onChangeDense}
             onChangeRowsPerPage={onChangeRowsPerPage}
           />
-        )}
-
-        {!isNotFound && (
-          <Table id="tabel-con" sx={{ display: 'none' }}>
-            <TableHead>
-              <TableRow>
-                {Object.keys(dataFiltered?.[0])
-                  ?.filter((item) => item !== 'id')
-                  ?.map((row) => (
-                    <TableCell key={`${row}_cabecalho`}>{row}</TableCell>
-                  ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {dataFiltered?.map((row, index) => (
-                <TableRow key={`dados_${index}`}>
-                  {Object.keys(dataFiltered?.[0])
-                    ?.filter((item) => item !== 'id')
-                    ?.map((reg) => (
-                      <TableCell key={`${reg}_dados`}>
-                        {(reg === 'residente' && <>{row[reg] ? 'Sim' : 'Não'}</>) ||
-                          (reg === 'titular_ordenador' && <>{row[reg] ? 'Sim' : 'Não'}</>) ||
-                          (reg === 'criado_em' && <>{row[reg] ? ptDateTime(row[reg]) : ''}</>) ||
-                          (reg === 'tipo_doc_idp' && (
-                            <>{dis?.find((di) => di?.id === row[reg])?.label || row[reg]}</>
-                          )) ||
-                          (reg === 'tipo_doc_ids' && (
-                            <>{dis?.find((di) => di?.id === row[reg])?.label || row[reg]}</>
-                          )) ||
-                          row[reg]}
-                      </TableCell>
-                    ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         )}
       </Card>
     </>

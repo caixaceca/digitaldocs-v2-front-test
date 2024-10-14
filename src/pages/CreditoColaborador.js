@@ -6,14 +6,14 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { pertencoEstadoId, arquivarCC, gestorEstado } from '../utils/validarAcesso';
+import { pertencoEstadoId, gestorEstado } from '../utils/validarAcesso';
 // routes
 import { PATH_DIGITALDOCS } from '../routes/paths';
 // hooks
 import useSettings from '../hooks/useSettings';
 // hooks
 import { getComparator, applySort } from '../hooks/useTable';
-import useToggle, { useToggle1, useToggle2, useToggle3 } from '../hooks/useToggle';
+import useToggle, { useToggle1, useToggle2 } from '../hooks/useToggle';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromCC, updateItemCC } from '../redux/slices/cc';
@@ -21,21 +21,15 @@ import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // components
 import Page from '../components/Page';
 import { TabCard } from '../components/TabsWrapper';
-import DialogConfirmar from '../components/DialogConfirmar';
+import { DialogConfirmar } from '../components/CustomDialog';
 import { Notificacao } from '../components/NotistackProvider';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 import { UpdateItem, DefaultAction } from '../components/Actions';
 // sections
-import {
-  Anexos,
-  DadosGerais,
-  TableDetalhes,
-  PareceresEstado,
-  EntidadesGarantias,
-} from '../sections/credito-colaborador/Detalhes';
 import { Views, Transicoes } from '../sections/processo/Detalhes';
-import { Abandonar, ColocarPendente, Atribuir } from '../sections/processo/form/IntervencaoForm';
-import { EncaminharForm, ArquivarForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
+import { EncaminharForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
+import { Atribuir, ColocarPendente, Abandonar } from '../sections/processo/Intervencao';
+import { Anexos, DadosGerais, TableDetalhes, EntidadesGarantias } from '../sections/credito-colaborador/Detalhes';
 
 // ----------------------------------------------------------------------
 
@@ -48,7 +42,6 @@ export default function CreditoColaborador() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
-  const { toggle3: open3, onOpen3, onClose3 } = useToggle3();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { mail, perfilId } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
@@ -253,15 +246,16 @@ export default function CreditoColaborador() {
                     {!pedidoCC?.pendente && pedidoCC?.estados?.length === 1 && (
                       <>
                         <DefaultAction label="RESGATAR" color="warning" handleClick={onOpen} />
-                        <DialogConfirmar
-                          open={open}
-                          onClose={onClose}
-                          isSaving={isSaving}
-                          handleOk={handleResgatar}
-                          color="warning"
-                          title="Resgatar"
-                          desc="resgatar este processo"
-                        />
+                        {open && (
+                          <DialogConfirmar
+                            onClose={onClose}
+                            isSaving={isSaving}
+                            handleOk={handleResgatar}
+                            color="warning"
+                            title="Resgatar"
+                            desc="resgatar este processo"
+                          />
+                        )}
                       </>
                     )}
 
@@ -279,24 +273,34 @@ export default function CreditoColaborador() {
                       )}
                   </>
                 )}
-                {pedidoCC?.estados?.[0]?.pareceres?.length > 0 && (
-                  <PareceresEstado
-                    estado={pedidoCC?.estados?.[0]?.estado}
-                    pareceres={pedidoCC?.estados?.[0]?.pareceres}
-                  />
-                )}
+                {/* {pedidoCC?.estados?.[0]?.pareceres?.length > 0 && (
+                  <>
+                    <DefaultAction
+                      icon="parecer"
+                      label={`Pareceres - ${pedidoCC?.estados?.[0]?.estado}`}
+                      handleClick={onOpen4}
+                    />
+                    {open4 && (
+                      <PareceresEstado
+                        onCancel={() => onClose4()}
+                        estado={pedidoCC?.estados?.[0]?.estado}
+                        pareceres={pedidoCC?.estados?.[0]?.pareceres}
+                      />
+                    )}
+                  </>
+                )} */}
                 {pedidoCC?.preso && pedidoCC?.perfil_id === perfilId && (
                   <>
                     {destinosList?.devolucoes?.length > 0 && (
                       <>
                         <DefaultAction color="warning" icon="devolver" label="DEVOLVER" handleClick={onOpen2} />
-                        <EncaminharForm dev open={open2} onCancel={onClose2} destinos={destinosList?.devolucoes} />
+                        {open2 && <EncaminharForm dev onCancel={onClose2} destinos={destinosList?.devolucoes} />}
                       </>
                     )}
                     {destinosList?.seguimentos?.length > 0 && (
                       <>
                         <DefaultAction icon="encaminhar" label="Encaminhar" handleClick={onOpen1} />
-                        <EncaminharForm open={open1} onCancel={onClose1} destinos={destinosList?.seguimentos} />
+                        {open1 && <EncaminharForm onCancel={onClose1} destinos={destinosList?.seguimentos} />}
                       </>
                     )}
                     <Abandonar
@@ -310,12 +314,12 @@ export default function CreditoColaborador() {
                       pedidoCC?.estados?.[0]?.pareceres?.length === 0 && <ColocarPendente />}
 
                     <UpdateItem handleClick={handleEdit} />
-                    {arquivarCC(meusAmbientes, pedidoCC?.ultimo_estado_id) && (
+                    {/* {arquivarCC(meusAmbientes, pedidoCC?.ultimo_estado_id) && (
                       <>
                         <DefaultAction icon="arquivo" label="Arquivar" color="error" handleClick={onOpen3} />
-                        <ArquivarForm open={open3} onCancel={onClose3} />
+                        {open3 && <ArquivarForm open onCancel={onClose3} />}
                       </>
-                    )}
+                    )} */}
                   </>
                 )}
               </Stack>

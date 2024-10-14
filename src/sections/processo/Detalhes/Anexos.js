@@ -12,8 +12,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 // utils
 import { emailCheck } from '../../../utils/validarAcesso';
 import { findColaborador } from '../../../utils/formatText';
+import { getFileThumb, canPreview } from '../../../utils/formatFile';
 import { ptTime, ptDate, ptDateTime } from '../../../utils/formatTime';
-import { getFileThumb, canPreview } from '../../../utils/getFileFormat';
 // redux
 import { getAnexo } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
@@ -71,7 +71,11 @@ export default function Anexos({ anexos }) {
           <Typography variant="subtitle1">Anexos</Typography>
         </ListItem>
       </List>
-      {!!filePreview && <AnexoItem eliminado anexo={filePreview} preview />}
+      {!!filePreview && (
+        <Stack>
+          <AnexoItem eliminado anexo={filePreview} preview />
+        </Stack>
+      )}
       {isLoadingPreview && !filePreview?.url ? (
         <Stack alignItems="center" justifyContent="center" sx={sx1}>
           <Loading />
@@ -92,7 +96,7 @@ export default function Anexos({ anexos }) {
         {anexosPorData(anexosAtivos)?.map((row) => (
           <Stack key={row?.data} sx={{ pb: 1 }}>
             <Divider sx={{ py: 0.5, px: 3 }}>{row?.data}</Divider>
-            <Stack direction="column" alignItems="center" spacing={1}>
+            <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>
               {row?.anexos?.map((row) => (
                 <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
               ))}
@@ -104,7 +108,7 @@ export default function Anexos({ anexos }) {
             <Divider sx={{ mt: 1, pb: 0.5 }}>
               <Typography variant="subtitle2">Anexos eliminados</Typography>
             </Divider>
-            <Stack direction="column" alignItems="center" spacing={1}>
+            <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>
               {anexosInativos?.map((row) => (
                 <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
               ))}
@@ -145,13 +149,13 @@ export function AnexoItem({
   const { isLoadingFile } = useSelector((state) => state.digitaldocs);
   return (
     <Button
-      fullWidth
       variant="soft"
       color={anexo?.url ? 'success' : 'inherit'}
       startIcon={getFileThumb(false, null, anexo?.nome)}
       disabled={preview || isLoadingFile === anexo?.anexo}
       onClick={() => viewAnexo(anexo, transicaoId, parecerId)}
       sx={{
+        flexGrow: 1,
         boxShadow: 'none',
         textAlign: 'left',
         marginTop: preview && 0,

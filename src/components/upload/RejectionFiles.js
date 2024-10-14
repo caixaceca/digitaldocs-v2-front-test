@@ -6,7 +6,7 @@ import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 // utils
 import { fData } from '../../utils/formatNumber';
-import getFileData from '../../utils/getFileData';
+import { getFileData } from '../../utils/formatFile';
 
 // ----------------------------------------------------------------------
 

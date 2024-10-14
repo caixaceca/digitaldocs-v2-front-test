@@ -55,14 +55,13 @@ const TABLE_HEAD = [
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 ValidarMultiploForm.propTypes = {
-  open: PropTypes.bool,
   fase: PropTypes.string,
   balcao: PropTypes.number,
   cartoes: PropTypes.array,
   onCancel: PropTypes.func,
 };
 
-export function ValidarMultiploForm({ fase, open, cartoes = [], balcao, onCancel }) {
+export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
@@ -82,16 +81,9 @@ export function ValidarMultiploForm({ fase, open, cartoes = [], balcao, onCancel
     [cartoes]
   );
   const methods = useForm({ defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
+  const { watch, control, handleSubmit } = methods;
   const { fields } = useFieldArray({ control, name: 'cartoes' });
   const values = watch();
-
-  useEffect(() => {
-    if (cartoes) {
-      reset(defaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartoes]);
 
   const onSubmit = async () => {
     try {
@@ -114,59 +106,61 @@ export function ValidarMultiploForm({ fase, open, cartoes = [], balcao, onCancel
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle sx={{ mb: 2 }}>Confirmar receção de cartões</DialogTitle>
-      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-        <Stack divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
-          {fields.map((item, index) => (
-            <Stack
-              spacing={1}
-              key={`cartao__${index}`}
-              direction={{ xs: 'column', sm: 'row' }}
-              sx={{ py: 1, px: 3, '&:hover': { backgroundColor: (theme) => theme.palette.action.hover } }}
-            >
-              <Stack direction="row" spacing={1}>
-                <Stack
-                  direction="column"
-                  justifyContent="center"
-                  sx={{
-                    py: 0.5,
-                    px: 1.5,
-                    borderRadius: 1,
-                    bgcolor: 'background.neutral',
-                    width: { xs: 1, sm: fase === 'Receção' ? 300 : 150 },
-                  }}
-                >
-                  <Typography variant="subtitle1" noWrap sx={{ color: 'success.main' }}>
-                    <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                      Nº cartão:&nbsp;
+      <DialogContent sx={{ p: 0 }}>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
+            {fields.map((item, index) => (
+              <Stack
+                spacing={1}
+                key={`cartao__${index}`}
+                direction={{ xs: 'column', sm: 'row' }}
+                sx={{ py: 1, px: 3, '&:hover': { backgroundColor: (theme) => theme.palette.action.hover } }}
+              >
+                <Stack direction="row" spacing={1}>
+                  <Stack
+                    direction="column"
+                    justifyContent="center"
+                    sx={{
+                      py: 0.5,
+                      px: 1.5,
+                      borderRadius: 1,
+                      bgcolor: 'background.neutral',
+                      width: { xs: 1, sm: fase === 'Receção' ? 300 : 150 },
+                    }}
+                  >
+                    <Typography variant="subtitle1" noWrap sx={{ color: 'success.main' }}>
+                      <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                        Nº cartão:&nbsp;
+                      </Typography>
+                      {baralharString(item?.numero)}
                     </Typography>
-                    {baralharString(item?.numero)}
-                  </Typography>
-                  <Typography variant="subtitle2" noWrap sx={{ color: 'info.main' }}>
-                    <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                      {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
+                    <Typography variant="subtitle2" noWrap sx={{ color: 'info.main' }}>
+                      <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                        {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
+                      </Typography>
+                      {fase === 'Emissão' ? item?.tipo : baralharString(item?.nome)}
                     </Typography>
-                    {fase === 'Emissão' ? item?.tipo : baralharString(item?.nome)}
-                  </Typography>
+                  </Stack>
+                  {fase === 'Emissão' && (
+                    <RHFDatePicker
+                      disableFuture
+                      label="Data recessão"
+                      name={`cartoes[${index}].dataSisp`}
+                      slotProps={{ textField: { fullWidth: true, sx: { width: { sm: 160 } } } }}
+                    />
+                  )}
                 </Stack>
-                {fase === 'Emissão' && (
-                  <RHFDatePicker
-                    disableFuture
-                    label="Data recessão"
-                    name={`cartoes[${index}].dataSisp`}
-                    slotProps={{ textField: { fullWidth: true, sx: { width: { sm: 160 } } } }}
-                  />
-                )}
+                <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
               </Stack>
-              <RHFTextField name={`cartoes[${index}].nota`} label="Nota" />
-            </Stack>
-          ))}
-        </Stack>
-        <Stack sx={{ pb: 3, pr: 3 }}>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
-        </Stack>
-      </FormProvider>
+            ))}
+          </Stack>
+          <Stack sx={{ pb: 3, pr: 3 }}>
+            <DialogButons isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
+          </Stack>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   );
 }
@@ -174,7 +168,6 @@ export function ValidarMultiploForm({ fase, open, cartoes = [], balcao, onCancel
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 ConfirmarPorDataForm.propTypes = {
-  open: PropTypes.bool,
   fase: PropTypes.string,
   datai: PropTypes.object,
   dataf: PropTypes.object,
@@ -182,7 +175,7 @@ ConfirmarPorDataForm.propTypes = {
   onCancel: PropTypes.func,
 };
 
-export function ConfirmarPorDataForm({ open, balcao, fase, datai = null, dataf = null, onCancel }) {
+export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
@@ -197,13 +190,8 @@ export function ConfirmarPorDataForm({ open, balcao, fase, datai = null, dataf =
     [balcao?.id, datai]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { watch, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const onSubmit = async () => {
     try {
@@ -225,7 +213,7 @@ export function ConfirmarPorDataForm({ open, balcao, fase, datai = null, dataf =
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth={fase === 'Emissão' ? 'sm' : 'xs'}>
+    <Dialog open onClose={onCancel} fullWidth maxWidth={fase === 'Emissão' ? 'sm' : 'xs'}>
       <DialogTitle>Confirmar receção de cartões</DialogTitle>
       <DialogContent>
         <Stack direction="row" spacing={1} justifyContent="center" sx={{ py: 3 }}>
@@ -263,7 +251,7 @@ export function BalcaoEntregaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, uos } = useSelector((state) => state.intranet);
-  const { isSaving, isOpenModal, selectedItem } = useSelector((state) => state.digitaldocs);
+  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const uosList = uos
     ?.filter((row) => row?.tipo === 'Agências')
     ?.map((uo) => ({ id: uo?.balcao, label: `${uo?.balcao} - ${uo?.label}` }));
@@ -304,7 +292,7 @@ export function BalcaoEntregaForm({ onCancel }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
       <DialogTitle>Alterar balão de entrega</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -324,14 +312,13 @@ export function BalcaoEntregaForm({ onCancel }) {
 
 AnularForm.propTypes = {
   uo: PropTypes.number,
-  open: PropTypes.bool,
   fase: PropTypes.string,
   uosList: PropTypes.array,
   cartoes: PropTypes.array,
   onCancel: PropTypes.func,
 };
 
-export function AnularForm({ fase, open, cartoes, uo, uosList, onCancel }) {
+export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
   const {
     order,
     dense,
@@ -355,14 +342,8 @@ export function AnularForm({ fase, open, cartoes, uo, uosList, onCancel }) {
   });
   const defaultValues = useMemo(() => ({ data: null, uo }), [uo]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { watch, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
   const onSubmit = async () => {
     try {
       dispatch(
@@ -392,7 +373,7 @@ export function AnularForm({ fase, open, cartoes, uo, uosList, onCancel }) {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle sx={{ mb: 2 }}>Anular confirmação de receção de cartões</DialogTitle>
       <DialogContent>
         <FormControlLabel
@@ -474,14 +455,14 @@ Detalhes.propTypes = { closeModal: PropTypes.func };
 
 export function Detalhes({ closeModal }) {
   const { uos } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenModal1, isLoading } = useSelector((state) => state.digitaldocs);
+  const { selectedItem, isLoading } = useSelector((state) => state.digitaldocs);
   const bEntrega = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_entrega));
   const bEmissao = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_emissao));
   const bDomicilio = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_cliente));
   const bEntregaOriginal = uos?.find((uo) => Number(uo.balcao) === Number(selectedItem?.balcao_entrega_original));
 
   return (
-    <Dialog open={isOpenModal1} onClose={closeModal} fullWidth maxWidth="sm">
+    <Dialog open onClose={closeModal} fullWidth maxWidth="sm">
       <DTFechar title="Detalhes do cartão" handleClick={() => closeModal()} />
       <DialogContent>
         {isLoading ? (
@@ -612,8 +593,8 @@ export function Detalhes({ closeModal }) {
 TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string, text1: PropTypes.node, label: PropTypes.node };
 
 export function TextItem({ title, text = '', text1 = null, label = null }) {
-  return (
-    <Stack spacing={1} direction="row" alignItems="center" sx={{ p: 1.5, pb: 0 }}>
+  return text || label || text1 ? (
+    <Stack spacing={1} direction="row" alignItems="center" sx={{ py: 1, pb: 0 }}>
       <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
       <Stack>
         {text && <Typography>{text}</Typography>}
@@ -621,5 +602,7 @@ export function TextItem({ title, text = '', text1 = null, label = null }) {
         {text1}
       </Stack>
     </Stack>
+  ) : (
+    ''
   );
 }

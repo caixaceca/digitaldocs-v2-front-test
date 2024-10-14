@@ -12,19 +12,16 @@ const initialState = {
   isLoading: false,
   fileSystem: [],
   indicadores: [],
-  estatisticaCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
+  estCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
+  resumoEstCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
 };
 
 const slice = createSlice({
   name: 'indicadores',
   initialState,
   reducers: {
-    startLoading(state) {
-      state.isLoading = true;
-    },
-
-    stopLoading(state) {
-      state.isLoading = false;
+    setLoading(state, action) {
+      state.isLoading = action.payload;
     },
 
     setError(state, action) {
@@ -39,8 +36,9 @@ const slice = createSlice({
           state.totalP = null;
           state.indicadores = [];
           break;
-        case 'estatisticaCredito':
-          state.estatisticaCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
+        case 'estCredito':
+          state.resumoEstCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
+          state.estCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
           break;
 
         default:
@@ -61,27 +59,27 @@ const slice = createSlice({
     },
 
     getEstatisticaCreditoSuccess(state, action) {
-      state.estatisticaCredito = action.payload;
+      state.estCredito = action.payload;
     },
 
     getResumoEstatisticaCreditoSuccess(state, action) {
       const dados =
-        (action.payload?.label === 'DCN' && action.payload?.dados?.filter((row) => row?.regiao === 'Norte')) ||
-        (action.payload?.label === 'DCS' && action.payload?.dados?.filter((row) => row?.regiao === 'Sul')) ||
+        (action.payload?.uoId === -2 && action.payload?.dados?.filter((row) => row?.regiao === 'Norte')) ||
+        (action.payload?.uoId === -3 && action.payload?.dados?.filter((row) => row?.regiao === 'Sul')) ||
         action.payload?.dados;
-      state.estatisticaCredito.entrada = dados
+      state.resumoEstCredito.entrada = dados
         ?.filter((row) => row.fase === 'Entrada')
         ?.map((row) => ({ ...row, montantes: row?.montante }));
-      state.estatisticaCredito.aprovado = dados
+      state.resumoEstCredito.aprovado = dados
         ?.filter((row) => row.fase === 'Aprovado')
         ?.map((row) => ({ ...row, montante_aprovado: row?.montante }));
-      state.estatisticaCredito.contratado = dados
+      state.resumoEstCredito.contratado = dados
         ?.filter((row) => row.fase === 'Contratado')
         ?.map((row) => ({ ...row, montante_contratado: row?.montante }));
-      state.estatisticaCredito.indeferido = dados
+      state.resumoEstCredito.indeferido = dados
         ?.filter((row) => row.fase === 'Indeferido')
         ?.map((row) => ({ ...row, montantes: row?.montante }));
-      state.estatisticaCredito.desistido = dados
+      state.resumoEstCredito.desistido = dados
         ?.filter((row) => row.fase === 'Desistido')
         ?.map((row) => ({ ...row, montantes: row?.montante }));
     },
@@ -92,20 +90,19 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { resetItem } = slice.actions;
+export const { resetItem, setLoading } = slice.actions;
 
 // ----------------------------------------------------------------------
 
 export function getIndicadores(item, params) {
   return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
+    dispatch(slice.actions.setLoading(true));
     dispatch(slice.actions.resetItem('indicadores'));
     try {
       const options = { headers: { cc: params?.mail } };
       const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
         params?.dataf ? `dataf=${params?.dataf}&` : ''
       }`;
-      const intervalo = `?data_inicio=${params?.dataI || '2000-01-01'}${params?.dataF ? `&data_final=${params?.dataF}` : ''}`;
       switch (item) {
         case 'totalP': {
           const response = await axios.get(`${BASEURLDD}/v2/indicadores/default/${params?.perfilId}`, options);
@@ -233,41 +230,40 @@ export function getIndicadores(item, params) {
           dispatch(slice.actions.getIndicadoresSuccess(response.data.objeto));
           break;
         }
-        case 'estatisticaCredito': {
+        case 'estCreditoMensal': {
           const pathIds = `${BASEURLDD}/v1/indicadores/estatistica/credito/${params?.perfilId}?uoID=${params?.uoID}`;
           const data = `${params?.ano}&mes=${params?.mes}`;
-          const entrada =
-            params?.fase === 'Entradas' ? await axios.get(`${pathIds}&fase=entrada&ano=${data}`, options) : [];
-          const aprovado =
-            params?.fase === 'Aprovados' ? await axios.get(`${pathIds}&fase=aprovado&ano=${data}`, options) : [];
-          const contratado =
-            params?.fase === 'Contratados' ? await axios.get(`${pathIds}&fase=contratado&ano=${data}`, options) : [];
-          const indeferido =
-            params?.fase === 'Indeferidos' ? await axios.get(`${pathIds}&fase=indeferido&ano=${data}`, options) : [];
-          const desistido =
-            params?.fase === 'Desistidos' ? await axios.get(`${pathIds}&fase=desistido&ano=${data}`, options) : [];
+          const response = await Promise.all([
+            axios.get(`${pathIds}&fase=entrada&ano=${data}`, options),
+            axios.get(`${pathIds}&fase=aprovado&ano=${data}`, options),
+            axios.get(`${pathIds}&fase=contratado&ano=${data}`, options),
+            axios.get(`${pathIds}&fase=indeferido&ano=${data}`, options),
+            axios.get(`${pathIds}&fase=desistido&ano=${data}`, options),
+            axios.get(
+              `${BASEURLDD}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`,
+              options
+            ),
+          ]);
           dispatch(
             slice.actions.getEstatisticaCreditoSuccess({
-              entrada: entrada?.data || [],
-              aprovado: aprovado?.data || [],
-              contratado: contratado?.data || [],
-              indeferido: indeferido?.data || [],
-              desistido: desistido?.data || [],
+              entrada: response?.[0]?.data || [],
+              aprovado: response?.[1]?.data || [],
+              contratado: response?.[2]?.data || [],
+              indeferido: response?.[3]?.data || [],
+              desistido: response?.[4]?.data || [],
             })
           );
+          dispatch(
+            slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.[5]?.data, uoId: params?.uoID })
+          );
           break;
         }
-        case 'resumoEstCredCaixa': {
-          const response = await axios.get(`${BASEURLDD}/v1/indicadores/resumo${intervalo}`, options);
-          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
-          break;
-        }
-        case 'resumoEstCredAg': {
+        case 'estCreditoIntervalo': {
           const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/resumo/dauo/${params?.uoID}${intervalo}`,
+            `${BASEURLDD}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`,
             options
           );
-          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, label: params?.uoID }));
+          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response?.data, uoId: params?.uoID }));
           break;
         }
         case 'entradaTrabalhado': {
@@ -316,7 +312,7 @@ export function getIndicadores(item, params) {
         default:
           break;
       }
-      dispatch(slice.actions.stopLoading());
+      dispatch(slice.actions.setLoading(false));
     } catch (error) {
       hasError(error, dispatch);
     }

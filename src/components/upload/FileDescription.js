@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // utils
 import { fData } from '../../utils/formatNumber';
-import { getFileThumb } from '../../utils/getFileFormat';
+import { getFileThumb } from '../../utils/formatFile';
 
 // ----------------------------------------------------------------------
 

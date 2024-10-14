@@ -398,50 +398,52 @@ function ValorItem({ title, valor, cativos }) {
       {cativos?.length > 0 && (
         <>
           <DefaultAction handleClick={onOpen} small color="info" label="INFO. DAS CONTAS" />
-          <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-            <DTFechar title="Contas para cativo" handleClick={() => onClose()} />
-            <DialogContent>
-              <TableContainer sx={{ minWidth: 500, mt: 3, position: 'relative', overflow: 'hidden' }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Conta</TableCell>
-                      <TableCell align="right">Saldo</TableCell>
-                      <TableCell align="right">Saldo em CVE</TableCell>
-                      <TableCell align="center">Enviado a banka</TableCell>
-                      <TableCell align="center" width={10}>
-                        Executado
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {cativos?.map((row, index) => (
-                      <TableRow hover key={`${row?.id}_${index}`}>
-                        <TableCell>{row?.conta}</TableCell>
-                        <TableCell align="right">
-                          {fNumber(row?.saldo)} {row?.moeda}
-                        </TableCell>
-                        <TableCell align="right">{fCurrency(row?.saldo_cve)}</TableCell>
-                        <TableCell align="center">
-                          <Checked check={row?.enviado_banka} />
-                        </TableCell>
-                        <TableCell align="center">
-                          {row?.executado ? (
-                            <>
-                              {row?.cativador && <Criado tipo="user" value={row?.cativador} baralhar />}
-                              {row.data_cativo && <Criado tipo="data" value={ptDate(row.data_cativo)} />}
-                            </>
-                          ) : (
-                            <Checked check={row?.executado} />
-                          )}
+          {open && (
+            <Dialog open onClose={onClose} fullWidth maxWidth="md">
+              <DTFechar title="Contas para cativo" handleClick={() => onClose()} />
+              <DialogContent>
+                <TableContainer sx={{ minWidth: 500, mt: 3, position: 'relative', overflow: 'hidden' }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Conta</TableCell>
+                        <TableCell align="right">Saldo</TableCell>
+                        <TableCell align="right">Saldo em CVE</TableCell>
+                        <TableCell align="center">Enviado a banka</TableCell>
+                        <TableCell align="center" width={10}>
+                          Executado
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </DialogContent>
-          </Dialog>
+                    </TableHead>
+                    <TableBody>
+                      {cativos?.map((row, index) => (
+                        <TableRow hover key={`${row?.id}_${index}`}>
+                          <TableCell>{row?.conta}</TableCell>
+                          <TableCell align="right">
+                            {fNumber(row?.saldo)} {row?.moeda}
+                          </TableCell>
+                          <TableCell align="right">{fCurrency(row?.saldo_cve)}</TableCell>
+                          <TableCell align="center">
+                            <Checked check={row?.enviado_banka} />
+                          </TableCell>
+                          <TableCell align="center">
+                            {row?.executado ? (
+                              <>
+                                {row?.cativador && <Criado tipo="user" value={row?.cativador} baralhar />}
+                                {row.data_cativo && <Criado tipo="data" value={ptDate(row.data_cativo)} />}
+                              </>
+                            ) : (
+                              <Checked check={row?.executado} />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </DialogContent>
+            </Dialog>
+          )}
         </>
       )}
     </Stack>

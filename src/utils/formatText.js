@@ -122,6 +122,17 @@ export function findColaborador(mail, colaboradores) {
 
 // ----------------------------------------------------------------------
 
+export function contaCliEnt(dados) {
+  return (
+    (dados?.conta && baralharString(dados?.conta)) ||
+    (dados?.cliente && baralharString(dados?.cliente)) ||
+    (dados?.entidades && baralharString(entidadesParse(dados?.entidades))) ||
+    noDados()
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function noDados(vazio) {
   return (
     <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
@@ -139,4 +150,26 @@ export function setItemValue(newValue, setItem, localS, id) {
   if (localS) {
     localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
   }
+}
+
+// ----------------------------------------------------------------------
+
+function objectsEqual(o1, o2) {
+  return o1.id === o2.id;
+}
+
+export function subtractArrays(a1, a2) {
+  const arr = [];
+  a1.forEach((o1) => {
+    let found = false;
+    a2.forEach((o2) => {
+      if (objectsEqual(o1, o2)) {
+        found = true;
+      }
+    });
+    if (!found) {
+      arr.push(o1);
+    }
+  });
+  return arr;
 }

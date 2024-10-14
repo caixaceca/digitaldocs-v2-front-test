@@ -41,6 +41,7 @@ export default function Controle() {
           ? [
               { value: 'Entradas', component: <TableControle from="Entradas" /> },
               { value: 'Por concluir', component: <TableControle from="Por concluir" /> },
+              { value: 'Devoluções', component: <TableControle from="Devoluções" /> },
             ]
           : []),
         { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },

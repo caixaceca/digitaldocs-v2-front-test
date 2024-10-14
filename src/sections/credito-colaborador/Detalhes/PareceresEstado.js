@@ -12,8 +12,6 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
 import { newLineText } from '../../../utils/formatText';
-// hooks
-import useToggle from '../../../hooks/useToggle';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { selectItem, openModal } from '../../../redux/slices/cc';
@@ -26,12 +24,12 @@ import { ParecerForm } from '../Form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
-PareceresEstado.propTypes = { pareceres: PropTypes.array, estado: PropTypes.string, normal: PropTypes.bool };
+PareceresEstado.propTypes = { pareceres: PropTypes.array, estado: PropTypes.string, onCancel: PropTypes.func };
 
-export default function PareceresEstado({ pareceres, estado, normal = false }) {
+export default function PareceresEstado({ pareceres, estado, onCancel }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(null);
-  const { toggle: open, onOpen, onClose } = useToggle();
+  const { isOpenModal } = useSelector((state) => state.cc);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
@@ -45,8 +43,7 @@ export default function PareceresEstado({ pareceres, estado, normal = false }) {
 
   return (
     <>
-      <DefaultAction icon="parecer" label={`Pareceres - ${estado}`} handleClick={onOpen} />
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+      <Dialog open onClose={onCancel} fullWidth maxWidth="md">
         <DialogTitle>{`Pareceres - ${estado}`}</DialogTitle>
         <DialogContent sx={{ mt: 1 }}>
           {pareceres?.map((row, index) => {
@@ -108,7 +105,7 @@ export default function PareceresEstado({ pareceres, estado, normal = false }) {
           })}
         </DialogContent>
       </Dialog>
-      <ParecerForm normal={normal} />
+      {isOpenModal && <ParecerForm />}
     </>
   );
 }

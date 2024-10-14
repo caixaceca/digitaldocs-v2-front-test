@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
 
   /// BODY
   body: { padding: '3mm 12mm 3mm 24mm', color: 'rgb(90,170,40)', fontSize: 8 },
-  bodyAlt: { padding: '0mm 51mm 0mm 30mm', textAlign: 'justify', color: '#333' },
+  bodyAlt: { padding: '0mm 24mm 0mm 30mm', textAlign: 'justify', color: '#333' },
   bodyDeclaracao: {
     fontSize: 9,
     lineHeight: 0,

@@ -7,6 +7,8 @@ import { styled } from '@mui/material/styles';
 import useSettings from '../hooks/useSettings';
 import useResponsive from '../hooks/useResponsive';
 import useCollapseDrawer from '../hooks/useCollapseDrawer';
+// redux
+import { useSelector } from '../redux/store';
 // config
 import { HEADER, NAVBAR } from '../config';
 // components
@@ -30,12 +32,8 @@ const MainStyle = styled('main', {
     paddingTop: HEADER.DASHBOARD_DESKTOP_HEIGHT + 24,
     paddingBottom: HEADER.DASHBOARD_DESKTOP_HEIGHT + 24,
     width: `calc(100% - ${NAVBAR.DASHBOARD_WIDTH}px)`,
-    transition: theme.transitions.create('margin-left', {
-      duration: theme.transitions.duration.shorter,
-    }),
-    ...(collapseClick && {
-      marginLeft: NAVBAR.DASHBOARD_COLLAPSE_WIDTH,
-    }),
+    transition: theme.transitions.create('margin-left', { duration: theme.transitions.duration.shorter }),
+    ...(collapseClick && { marginLeft: NAVBAR.DASHBOARD_COLLAPSE_WIDTH }),
   },
 }));
 
@@ -47,6 +45,7 @@ export default function IntranetLayout() {
   const isDesktop = useResponsive('up', 'lg');
   const verticalLayout = themeLayout === 'vertical';
   const { collapseClick, isCollapse } = useCollapseDrawer();
+  const { isOpenDisposicao } = useSelector((state) => state.intranet);
 
   if (verticalLayout) {
     return (
@@ -63,14 +62,8 @@ export default function IntranetLayout() {
           component="main"
           sx={{
             px: { lg: 2 },
-            pt: {
-              xs: `${HEADER.MOBILE_HEIGHT + 24}px`,
-              lg: `${HEADER.DASHBOARD_DESKTOP_HEIGHT + 70}px`,
-            },
-            pb: {
-              xs: `${HEADER.MOBILE_HEIGHT + 24}px`,
-              lg: `${HEADER.DASHBOARD_DESKTOP_HEIGHT + 24}px`,
-            },
+            pt: { xs: `${HEADER.MOBILE_HEIGHT + 24}px`, lg: `${HEADER.DASHBOARD_DESKTOP_HEIGHT + 70}px` },
+            pb: { xs: `${HEADER.MOBILE_HEIGHT + 24}px`, lg: `${HEADER.DASHBOARD_DESKTOP_HEIGHT + 24}px` },
           }}
         >
           <Disposicao />
@@ -81,18 +74,11 @@ export default function IntranetLayout() {
   }
 
   return (
-    <Box
-      sx={{
-        display: { lg: 'flex' },
-        minHeight: { lg: 1 },
-      }}
-    >
+    <Box sx={{ display: { lg: 'flex' }, minHeight: { lg: 1 } }}>
       <DashboardHeader isCollapse={isCollapse} onOpenSidebar={() => setOpen(true)} />
-
       <NavbarVertical isOpenSidebar={open} onCloseSidebar={() => setOpen(false)} />
-
       <MainStyle collapseClick={collapseClick}>
-        <Disposicao />
+        {isOpenDisposicao && <Disposicao />}
         <Outlet />
       </MainStyle>
     </Box>

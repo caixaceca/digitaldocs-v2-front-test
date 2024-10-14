@@ -50,7 +50,7 @@ export default function Parametrizacao() {
               { value: 'Anexos', component: <ParametrizacaoItemTabs item="anexos" /> },
               { value: 'Crédito', component: <ParametrizacaoItemTabs item="crédito" /> },
               { value: 'Pareceres', component: <ParametrizacaoItemTabs item="pareceres" /> },
-              { value: 'Motivos pendências', component: <ParametrizacaoItem item="motivos" /> },
+              { value: 'Motivos', component: <ParametrizacaoItemTabs item="motivos" /> },
               { value: 'Notificações', component: <ParametrizacaoItemTabs item="notificacoes" /> },
             ]
           : []),

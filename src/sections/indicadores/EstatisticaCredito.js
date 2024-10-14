@@ -22,40 +22,44 @@ import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturnedOutlined';
 // utils
-import { format, add } from 'date-fns';
+import {
+  ptDate,
+  dataLabel,
+  getDataLS,
+  dataValido,
+  formatDate,
+  setDataUtil,
+  ultimoDiaDoMes,
+} from '../../utils/formatTime';
 import { bgGradient } from '../../utils/cssStyles';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue, normalizeText } from '../../utils/formatText';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
-import { ptDate, fMonthYear, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores, resetItem } from '../../redux/slices/indicadores';
 // components
 import { BoxMask } from '../../components/Panel';
 import { RHFDateIF } from '../../components/hook-form';
-import { ExportExcel } from '../../components/Actions';
-import { TableSearchNotFound } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
+import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import ExportarEstatisticaCred from '../../components/ExportDados/ToExcell/EstatisticaCredito';
 
 // ----------------------------------------------------------------------
 
-const headStyle = { border: 'none', typography: 'h6' };
-const frResumoStyle = { pl: '12px !important', fontWeight: 900 };
 const frSegmentoStyle = { pl: '12px !important', typography: 'subtitle2' };
-const linhaStyle = { fontWeight: 900, backgroundColor: 'background.neutral' };
-const borderStyle = { borderTop: '4px solid transparent', borderColor: 'background.paper' };
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------
 
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
   const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
   const [data, setData] = useState(getDataLS('dataEst', new Date()));
+  const [vista, setVista] = useState(localStorage.getItem('vistaEst') || 'Mensal');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
   const [dataf, setDataf] = useState(getDataLS('dataFEst', new Date()));
   const [datai, setDatai] = useState(
     getDataLS('dataIEst', new Date(new Date().getFullYear(), new Date().getMonth(), 1))
@@ -71,25 +75,22 @@ export default function EstatisticaCredito() {
       ),
     [cc, isAdmin, meusAmbientes, uos]
   );
-  const [uo, setUo] = useState(null);
-
-  useEffect(() => {
-    if (!uo && uosList && (localStorage.getItem('uoEst') || cc?.uo?.id)) {
-      setUo(
-        uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoEst'))) ||
-          uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
-          null
-      );
-    }
-  }, [uosList, uo, cc?.uo?.id]);
+  const [uo, setUo] = useState(
+    uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoEst'))) ||
+      uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) || { id: -1, label: 'Caixa' }
+  );
 
   const tabsList = [
     { value: 'Resumo', component: <Totais /> },
-    { value: 'Entradas', component: <TableEstatistica from="entrada" uo={uo?.label} data={fMonthYear(data)} /> },
-    { value: 'Aprovados', component: <TableEstatistica from="aprovado" uo={uo?.label} data={fMonthYear(data)} /> },
-    { value: 'Contratados', component: <TableEstatistica from="contratado" uo={uo?.label} data={fMonthYear(data)} /> },
-    { value: 'Indeferidos', component: <TableEstatistica from="indeferido" uo={uo?.label} data={fMonthYear(data)} /> },
-    { value: 'Desistidos', component: <TableEstatistica from="desistido" uo={uo?.label} data={fMonthYear(data)} /> },
+    ...(vista === 'Mensal' && uo?.id > 0
+      ? [
+          { value: 'Entradas', component: <TableEstatistica from="entrada" /> },
+          { value: 'Aprovados', component: <TableEstatistica from="aprovado" /> },
+          { value: 'Contratados', component: <TableEstatistica from="contratado" /> },
+          { value: 'Indeferidos', component: <TableEstatistica from="indeferido" /> },
+          { value: 'Desistidos', component: <TableEstatistica from="desistido" /> },
+        ]
+      : []),
   ];
 
   const handleChangeTab = async (event, newValue) => {
@@ -97,26 +98,22 @@ export default function EstatisticaCredito() {
   };
 
   useEffect(() => {
-    dispatch(resetItem('estatisticaCredito'));
-    if (mail && perfilId && uo?.id && data && currentTab !== 'Resumo') {
-      const mes = format(add(data, { hours: 2 }), 'M');
-      const ano = format(add(data, { hours: 2 }), 'yyyy');
-      dispatch(getIndicadores('estatisticaCredito', { mail, fase: currentTab, perfilId, uoID: uo?.id, mes, ano }));
+    if (mail && perfilId && vista === 'Mensal' && uo?.id && dataValido(data)) {
+      dispatch(resetItem('estCredito'));
+      const mes = formatDate(data, 'M');
+      const ano = formatDate(data, 'yyyy');
+      const intervalo = `?data_inicio=${formatDate(data, 'yyyy-MM')}-01&data_final=${formatDate(data, 'yyyy-MM')}-${ultimoDiaDoMes(data)}`;
+      dispatch(getIndicadores('estCreditoMensal', { mail, perfilId, uoID: uo?.id, mes, ano, intervalo }));
     }
-  }, [dispatch, currentTab, perfilId, data, uo, mail]);
+  }, [dispatch, perfilId, data, uo, vista, mail]);
 
   useEffect(() => {
-    dispatch(resetItem('estatisticaCredito'));
-    const dataI = dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '';
-    const dataF = dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '';
-    if (mail && uo?.id && currentTab === 'Resumo') {
-      if (uo?.id === -1 || uo?.id === -2 || uo?.id === -3) {
-        dispatch(getIndicadores('resumoEstCredCaixa', { mail, dataI, dataF, uoID: uo?.label }));
-      } else {
-        dispatch(getIndicadores('resumoEstCredAg', { mail, uoID: uo?.id, dataI, dataF }));
-      }
+    if (mail && perfilId && vista === 'Intervalo' && uo?.id && dataValido(datai) && dataValido(dataf)) {
+      dispatch(resetItem('estCredito'));
+      const intervalo = `?data_inicio=${formatDate(datai, 'yyyy-MM-dd')}&data_final=${formatDate(dataf, 'yyyy-MM-dd')}`;
+      dispatch(getIndicadores('estCreditoIntervalo', { mail, perfilId, uoID: uo?.id, intervalo }));
     }
-  }, [dispatch, currentTab, datai, dataf, uo, mail]);
+  }, [dispatch, perfilId, datai, dataf, uo, vista, mail]);
 
   return (
     <>
@@ -125,20 +122,55 @@ export default function EstatisticaCredito() {
         heading="Estatística de crédito"
         action={
           <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
-            <Autocomplete
-              fullWidth
-              value={uo}
-              size="small"
-              disableClearable
-              sx={{ minWidth: 200 }}
-              getOptionLabel={(option) => option?.label}
-              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-              renderInput={(params) => <TextField {...params} fullWidth label="Agência/U.O" />}
-              options={[{ id: -1, label: 'Caixa' }, { id: -2, label: 'DCN' }, { id: -3, label: 'DCS' }, ...uosList]}
-              onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoEst', true)}
-            />
             <Stack direction="row" alignItems="center" spacing={1}>
-              {currentTab === 'Resumo' ? (
+              {vista === 'Mensal' && currentTab !== 'Resumo' ? (
+                ''
+              ) : (
+                <Autocomplete
+                  fullWidth
+                  size="small"
+                  value={vista}
+                  disableClearable
+                  sx={{ width: { xs: 190, md: 120 } }}
+                  options={['Mensal', 'Intervalo']}
+                  renderInput={(params) => <TextField {...params} fullWidth label="Vista" />}
+                  onChange={(event, newValue) => setItemValue(newValue, setVista, 'vistaEst', false)}
+                />
+              )}
+              <Autocomplete
+                fullWidth
+                value={uo}
+                size="small"
+                disableClearable
+                getOptionLabel={(option) => option?.label}
+                sx={{ width: { md: 200 }, minWidth: 150 }}
+                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoEst', true)}
+                renderInput={(params) => <TextField {...params} fullWidth label="Agência/U.O" />}
+                options={[
+                  ...(vista === 'Mensal' && currentTab !== 'Resumo'
+                    ? []
+                    : [
+                        { id: -1, label: 'Caixa' },
+                        { id: -2, label: 'DCN' },
+                        { id: -3, label: 'DCS' },
+                      ]),
+                  ...uosList,
+                ]}
+              />
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              {vista === 'Mensal' ? (
+                <DatePicker
+                  label="Data"
+                  value={data}
+                  maxDate={new Date()}
+                  views={['month', 'year']}
+                  minDate={new Date('2020-01-01')}
+                  onChange={(newValue) => setDataUtil(newValue, setData, 'dataEst', '', '', '')}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 175 } } }}
+                />
+              ) : (
                 <RHFDateIF
                   datai={datai}
                   dataf={dataf}
@@ -147,24 +179,13 @@ export default function EstatisticaCredito() {
                   setDatai={setDatai}
                   setDataf={setDataf}
                 />
-              ) : (
-                <DatePicker
-                  label="Data"
-                  value={data}
-                  disableFuture
-                  views={['month', 'year']}
-                  onChange={(newValue) => setDataUtil(newValue, setData, 'dataEst', '', '', '')}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 180 } } }}
-                />
               )}
-            </Stack>
-            {((uo?.label !== 'Caixa' && uo?.label !== 'DCN' && uo?.label !== 'DCS') || currentTab === 'Resumo') && (
-              <ExportExcel
-                sheet={`${currentTab}`}
-                table="tabel-estatistica-credito"
-                filename={`Estatística de Crédito ${currentTab} - ${uo?.label} -  ${fMonthYear(data)}`}
+              <ExportarEstatisticaCred
+                vista={vista}
+                uo={uo?.label}
+                periodo={vista === 'Mensal' ? formatDate(data, "MMMM 'de' yyyy") : dataLabel(datai, dataf)}
               />
-            )}
+            </Stack>
           </Stack>
         }
       />
@@ -180,7 +201,8 @@ export default function EstatisticaCredito() {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 export function Totais() {
-  const { isLoading, estatisticaCredito } = useSelector((state) => state.indicadores);
+  const { isLoading, resumoEstCredito } = useSelector((state) => state.indicadores);
+  const totais = dadosResumo(resumoEstCredito, '', '');
 
   return (
     <Grid container spacing={3}>
@@ -192,28 +214,10 @@ export function Totais() {
         </Grid>
       ) : (
         <>
-          <CardResumo
-            label="Entrada"
-            qtd={sumBy(estatisticaCredito?.entrada, 'total')}
-            total={sumBy(estatisticaCredito?.entrada, 'montantes')}
-          />
-          <CardResumo
-            label="Aprovado"
-            qtd={sumBy(estatisticaCredito?.aprovado, 'total')}
-            total={sumBy(estatisticaCredito?.aprovado, 'montante_aprovado')}
-          />
-          <CardResumo
-            label="Contratado"
-            qtd={sumBy(estatisticaCredito?.contratado, 'total')}
-            total={sumBy(estatisticaCredito?.contratado, 'montante_contratado')}
-          />
-          <CardResumo
-            label="Indeferido/Desistido"
-            qtd={sumBy(estatisticaCredito?.indeferido, 'total') + sumBy(estatisticaCredito?.desistido, 'total')}
-            total={
-              sumBy(estatisticaCredito?.indeferido, 'montantes') + sumBy(estatisticaCredito?.desistido, 'montantes')
-            }
-          />
+          <CardResumo label="Entrada" qtd={totais.qtdEnt} total={totais.valorEnt} />
+          <CardResumo label="Aprovado" qtd={totais.qtdAp} total={totais.valorAp} />
+          <CardResumo label="Contratado" qtd={totais.qtdCont} total={totais.valorCont} />
+          <CardResumo label="Indeferido/Desistido" qtd={totais.qtdId} total={totais.valorId} />
           <Grid item xs={12}>
             <Card sx={{ p: 1 }}>
               <TableContainer>
@@ -236,10 +240,7 @@ export function Totais() {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell
-                        align="right"
-                        sx={{ borderTopLeftRadius: '0px !important', borderBottomLeftRadius: '0px !important' }}
-                      >
+                      <TableCell align="right" sx={{ borderRadius: '0px !important' }}>
                         Qtd
                       </TableCell>
                       <TableCell align="right">Valor</TableCell>
@@ -254,44 +255,36 @@ export function Totais() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TotaisLinha first segmento="Empresa" linha="Construção" dados={estatisticaCredito} />
-                    <TotaisLinha segmento="Empresa" linha="Tesouraria" dados={estatisticaCredito} />
-                    <TotaisLinha segmento="Empresa" linha="Investimento" dados={estatisticaCredito} />
-                    <TotaisLinha first segmento="Particular" linha="Habitação" dados={estatisticaCredito} />
-                    <TotaisLinha segmento="Particular" linha="CrediCaixa" dados={estatisticaCredito} />
-                    <TotaisLinha segmento="Particular" linha="Outros" dados={estatisticaCredito} />
-                    <TotaisLinha first segmento="Produtor Individual" linha="Tesouraria" dados={estatisticaCredito} />
-                    <TotaisLinha segmento="Produtor Individual" linha="Investimento" dados={estatisticaCredito} />
-                    <TotaisLinha segmento="Produtor Individual" linha="Microcrédito" dados={estatisticaCredito} />
-                    <TotaisLinha first segmento="Entidade Pública" dados={estatisticaCredito} />
-                    <TotaisLinha first segmento="Garantia Bancária" dados={estatisticaCredito} />
+                    <EmptyRow />
+                    <TotaisLinha first segmento="Empresa" linha="Construção" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Empresa" linha="Tesouraria" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Empresa" linha="Investimento" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Empresa" dados={resumoEstCredito} />
+                    <EmptyRow />
+                    <TotaisLinha first segmento="Particular" linha="Habitação" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Particular" linha="CrediCaixa" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Particular" linha="Outros" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Particular" dados={resumoEstCredito} />
+                    <EmptyRow />
+                    <TotaisLinha first segmento="Produtor Individual" linha="Tesouraria" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Produtor Individual" linha="Investimento" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Produtor Individual" linha="Micro-Crédito" dados={resumoEstCredito} />
+                    <TotaisLinha segmento="Produtor Individual" dados={resumoEstCredito} />
+                    <EmptyRow />
+                    <TotaisLinha first segmento="Entidade Pública" dados={resumoEstCredito} />
+                    <EmptyRow />
+                    <TotaisLinha first linha="Garantia Bancária" dados={resumoEstCredito} />
+                    <EmptyRow />
                   </TableBody>
                   <TableHead>
-                    <TableRow sx={{ ...borderStyle }}>
-                      <TableCell colSpan={2}>TOTAL ACUMULADO</TableCell>
-                      <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.entrada, 'total'))}</TableCell>
-                      <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.entrada, 'montantes'))}</TableCell>
-                      <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.aprovado, 'total'))}</TableCell>
-                      <TableCell align="right">
-                        {fNumber(sumBy(estatisticaCredito?.aprovado, 'montante_aprovado'))}
-                      </TableCell>
-                      <TableCell align="right">{fNumber(sumBy(estatisticaCredito?.contratado, 'total'))}</TableCell>
-                      <TableCell align="right">
-                        {fNumber(sumBy(estatisticaCredito?.contratado, 'montante_contratado'))}
-                      </TableCell>
-                      <TableCell align="right">
-                        {fNumber(
-                          sumBy(estatisticaCredito?.indeferido, 'total') + sumBy(estatisticaCredito?.desistido, 'total')
-                        )}
-                      </TableCell>
-                      <TableCell align="right">
-                        {fNumber(
-                          sumBy(estatisticaCredito?.indeferido, 'montantes') +
-                            sumBy(estatisticaCredito?.desistido, 'montantes')
-                        )}
-                      </TableCell>
-                    </TableRow>
+                    <TotaisLinha first dados={resumoEstCredito} />
                   </TableHead>
+                  <TableBody>
+                    <EmptyRow segmento />
+                    <TotaisLinha linha="Tesouraria" dados={resumoEstCredito} />
+                    <TotaisLinha linha="Investimento" dados={resumoEstCredito} />
+                    <EmptyRow />
+                  </TableBody>
                 </Table>
               </TableContainer>
             </Card>
@@ -304,178 +297,137 @@ export function Totais() {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TableEstatistica.propTypes = { from: PropTypes.string, uo: PropTypes.string, data: PropTypes.string };
+TableEstatistica.propTypes = { from: PropTypes.string };
 
-export function TableEstatistica({ from, uo, data }) {
-  const { isLoading, estatisticaCredito } = useSelector((state) => state.indicadores);
-  const total =
-    ((from === 'entrada' || from === 'desistido' || from === 'indeferido') && 'montantes') ||
-    (from === 'aprovado' && 'montante_aprovado') ||
-    (from === 'contratado' && 'montante_contratado');
-  const dados = filterDados(
-    (from === 'entrada' && estatisticaCredito?.entrada) ||
-      (from === 'aprovado' && estatisticaCredito?.aprovado) ||
-      (from === 'desistido' && estatisticaCredito?.desistido) ||
-      (from === 'contratado' && estatisticaCredito?.contratado) ||
-      (from === 'indeferido' && estatisticaCredito?.indeferido)
+export function TableEstatistica({ from }) {
+  const [filter, setFilter] = useState('');
+  const { isLoading, estCredito } = useSelector((state) => state.indicadores);
+  const total = useMemo(
+    () =>
+      ((from === 'entrada' || from === 'desistido' || from === 'indeferido') && 'montantes') ||
+      (from === 'aprovado' && 'montante_aprovado') ||
+      (from === 'contratado' && 'montante_contratado'),
+    [from]
   );
+  const dadosFrom = useMemo(
+    () =>
+      (from === 'entrada' && estCredito?.entrada) ||
+      (from === 'aprovado' && estCredito?.aprovado) ||
+      (from === 'desistido' && estCredito?.desistido) ||
+      (from === 'contratado' && estCredito?.contratado) ||
+      (from === 'indeferido' && estCredito?.indeferido) ||
+      [],
+    [estCredito, from]
+  );
+  const dados = filterDados(dadosFrom, filter);
 
   return (
     <Card sx={{ p: 1 }}>
-      {uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS' ? (
-        <TableContainer sx={{ mb: 0.5 }}>
-          <Table size="small" id="tabel-estatistica-credito">
-            <TableHead>
-              <TableRow hover>
-                <TableCell colSpan={2} align="right" sx={{ ...headStyle, borderBottomLeftRadius: '0px !important' }}>
-                  Unidade orgânica
-                </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{ ...headStyle, borderBottomRightRadius: '0px !important', color: 'text.primary' }}
-                  colSpan={(from === 'entrada' && 8) || (from === 'contratado' && 12) || 7}
-                >
-                  {uo}
-                </TableCell>
-              </TableRow>
-              <TableRow hover>
-                <TableCell colSpan={2} align="right" sx={{ ...headStyle, borderRadius: '0px !important' }}>
-                  Mês/Ano
-                </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{ ...headStyle, borderRadius: '0px !important', color: 'text.primary' }}
-                  colSpan={(from === 'entrada' && 8) || (from === 'contratado' && 12) || 7}
-                >
-                  {data}
-                </TableCell>
-              </TableRow>
-              <TableRow hover>
-                <TableCell colSpan={2} align="right" sx={{ ...headStyle, borderTopLeftRadius: '0px !important' }}>
-                  Total {from}
-                </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{ ...headStyle, borderTopRightRadius: '0px !important', color: 'text.primary' }}
-                  colSpan={(from === 'entrada' && 8) || (from === 'contratado' && 12) || 7}
-                >
-                  {fNumber(
-                    sumBy(dados?.empresaInvestimento, total) +
-                      sumBy(dados?.empresaConstrucao, total) +
-                      sumBy(dados?.empresaTesouraria, total) +
-                      sumBy(dados?.particularHabitacao, total) +
-                      sumBy(dados?.particularCrediCaixa, total) +
-                      sumBy(dados?.particularOutros, total) +
-                      sumBy(dados?.piTesouraria, total) +
-                      sumBy(dados?.piInvestimento, total) +
-                      sumBy(dados?.piMicrocredito, total) +
-                      sumBy(dados?.entidadesPublicas, total) +
-                      sumBy(dados?.garantiaBancaria, total)
-                  )}
-                </TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell
-                  sx={{ border: 'none', backgroundColor: 'transparent' }}
-                  colSpan={(from === 'entrada' && 10) || (from === 'contratado' && 14) || 9}
-                >
-                  {' '}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Segmento</TableCell>
-                <TableCell>Linha de crédito</TableCell>
-                <TableCell align="right">Nº</TableCell>
-                <TableCell>Proponente</TableCell>
-                <TableCell>
-                  Data de{' '}
-                  {((from === 'entrada' || from === 'indeferido' || from === 'desistido') && 'entrada') ||
-                    (from === 'aprovado' && 'aprovação') ||
-                    (from === 'contratado' && 'contratação')}
-                </TableCell>
-                <TableCell>Sector de atividade</TableCell>
-                {(from === 'entrada' || from === 'indeferido' || from === 'desistido') && (
+      <SearchToolbarSimple filter={filter} setFilter={setFilter} />
+      <Stack
+        sx={{ p: 1.5, borderRadius: 1, textAlign: 'center', bgcolor: 'background.neutral', typography: 'subtitle1' }}
+      >
+        TOTAL DE CRÉDITOS{' '}
+        {(from === 'entrada' && 'ENTRADOS') ||
+          (from === 'aprovado' && 'APROVADOS') ||
+          (from === 'contratado' && 'CONTRATADOS') ||
+          (from === 'indeferido' && 'INDEFERIDOS') ||
+          (from === 'desistido' && 'DESISTIDOS')}{' '}
+        ({fNumber(dadosFrom.length)}) - {fCurrency(sumBy(dadosFrom, total))}
+      </Stack>
+      <TableContainer sx={{ mt: 1 }}>
+        <Table size="small" id="tabel-estatistica-credito">
+          <TableHead>
+            <TableRow>
+              <TableCell>Segmento</TableCell>
+              <TableCell>Linha de crédito</TableCell>
+              <TableCell align="right">Nº</TableCell>
+              <TableCell>Proponente</TableCell>
+              <TableCell>
+                Data de{' '}
+                {((from === 'entrada' || from === 'indeferido' || from === 'desistido') && 'entrada') ||
+                  (from === 'aprovado' && 'aprovação') ||
+                  (from === 'contratado' && 'contratação')}
+              </TableCell>
+              <TableCell>Sector de atividade</TableCell>
+              {(from === 'entrada' || from === 'indeferido' || from === 'desistido') && (
+                <TableCell>Finalidade</TableCell>
+              )}
+              {(from === 'entrada' || from === 'aprovado') && <TableCell>Situação</TableCell>}
+              {from === 'entrada' && <TableCell>Nº proposta</TableCell>}
+              {from === 'contratado' && (
+                <>
                   <TableCell>Finalidade</TableCell>
-                )}
-                {(from === 'entrada' || from === 'aprovado') && <TableCell>Situação</TableCell>}
-                {from === 'entrada' && <TableCell>Nº proposta</TableCell>}
-                {from === 'contratado' && (
-                  <>
-                    <TableCell>Finalidade</TableCell>
-                    <TableCell>Prazo amortização</TableCell>
-                    <TableCell>Taxa juro</TableCell>
-                    <TableCell>Garantia</TableCell>
-                    <TableCell>Escalão decisão</TableCell>
-                    <TableCell>Nº de cliente</TableCell>
-                  </>
-                )}
-                {(from === 'indeferido' || from === 'desistido') && (
-                  <TableCell>Data de {from === 'indeferido' ? 'indeferimento' : 'desistência'}</TableCell>
-                )}
-                {(from === 'entrada' || from === 'aprovado' || from === 'indeferido' || from === 'desistido') && (
-                  <TableCell align="right">Montante solicitado</TableCell>
-                )}
-                {(from === 'aprovado' || from === 'contratado') && (
-                  <TableCell align="right">Montante aprovado</TableCell>
-                )}
-                {from === 'contratado' && <TableCell align="right">Montante contratado</TableCell>}
-              </TableRow>
-            </TableHead>
-            {uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS' && (
-              <TableBody>
-                {isLoading ? (
-                  <SkeletonTable column={(from === 'entrada' && 10) || (from === 'contratado' && 14) || 9} row={10} />
-                ) : (
-                  <>
-                    {/* EMPESAS */}
-                    <Segmento
-                      from={from}
-                      linha1="Construção"
-                      linha2="Tesouraria"
-                      linha3="Investimento"
-                      segmento="Empresas"
-                      linha1Dados={dados?.empresaConstrucao}
-                      linha2Dados={dados?.empresaTesouraria}
-                      linha3Dados={dados?.empresaInvestimento}
-                    />
-                    {/* PARTICULARES */}
-                    <Segmento
-                      from={from}
-                      linha1="Habitação"
-                      linha2="CrediCaixa"
-                      linha3="Outros"
-                      segmento="Particular"
-                      linha1Dados={dados?.particularHabitacao}
-                      linha2Dados={dados?.particularCrediCaixa}
-                      linha3Dados={dados?.particularOutros}
-                    />
-                    {/* PRODUTOR INDIVIDUAL */}
-                    <Segmento
-                      from={from}
-                      linha1="Tesouraria"
-                      linha2="Investimento"
-                      linha3="Micro-Crédito"
-                      segmento="Produtor Individual"
-                      linha1Dados={dados?.piTesouraria}
-                      linha2Dados={dados?.piInvestimento}
-                      linha3Dados={dados?.piMicrocredito}
-                    />
-                    {/* ENTIDADES PÚBLICAS */}
-                    <SegmentoStd from={from} dados={dados?.entidadesPublicas} segmento="Entidades Públicas" />
-                    {/* GARANTIAS BANCÁRIAS */}
-                    <SegmentoStd from={from} dados={dados?.garantiaBancaria} segmento="Garantias Bancárias" />
-                  </>
-                )}
-              </TableBody>
+                  <TableCell>Prazo amortização</TableCell>
+                  <TableCell>Taxa juro</TableCell>
+                  <TableCell>Garantia</TableCell>
+                  <TableCell>Escalão decisão</TableCell>
+                  <TableCell>Nº de cliente</TableCell>
+                </>
+              )}
+              {(from === 'indeferido' || from === 'desistido') && (
+                <TableCell>Data de {from === 'indeferido' ? 'indeferimento' : 'desistência'}</TableCell>
+              )}
+              {(from === 'entrada' || from === 'aprovado' || from === 'indeferido' || from === 'desistido') && (
+                <TableCell align="right">Montante solicitado</TableCell>
+              )}
+              {(from === 'aprovado' || from === 'contratado') && <TableCell align="right">Montante aprovado</TableCell>}
+              {from === 'contratado' && <TableCell align="right">Montante contratado</TableCell>}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading ? (
+              <SkeletonTable column={(from === 'entrada' && 10) || (from === 'contratado' && 14) || 9} row={10} />
+            ) : (
+              <>
+                {/* EMPESAS */}
+                <EmptyRow />
+                <Segmento
+                  from={from}
+                  linha1="Construção"
+                  linha2="Tesouraria"
+                  linha3="Investimento"
+                  segmento="Empresas"
+                  linha1Dados={dados?.empresaConstrucao}
+                  linha2Dados={dados?.empresaTesouraria}
+                  linha3Dados={dados?.empresaInvestimento}
+                />
+                <EmptyRow />
+                {/* PARTICULARES */}
+                <Segmento
+                  from={from}
+                  linha1="Habitação"
+                  linha2="CrediCaixa"
+                  linha3="Outros"
+                  segmento="Particular"
+                  linha1Dados={dados?.particularHabitacao}
+                  linha2Dados={dados?.particularCrediCaixa}
+                  linha3Dados={dados?.particularOutros}
+                />
+                <EmptyRow />
+                {/* PRODUTOR INDIVIDUAL */}
+                <Segmento
+                  from={from}
+                  linha1="Tesouraria"
+                  linha2="Investimento"
+                  linha3="Micro-Crédito"
+                  segmento="Produtor Individual"
+                  linha1Dados={dados?.piTesouraria}
+                  linha2Dados={dados?.piInvestimento}
+                  linha3Dados={dados?.piMicrocredito}
+                />
+                <EmptyRow />
+                {/* ENTIDADES PÚBLICAS */}
+                <SegmentoStd from={from} dados={dados?.entidadesPublicas} segmento="Entidades Públicas" />
+                <EmptyRow />
+                {/* GARANTIAS BANCÁRIAS */}
+                <SegmentoStd from={from} dados={dados?.garantiaBancaria} segmento="Garantias Bancárias" />
+                <EmptyRow />
+              </>
             )}
-          </Table>
-        </TableContainer>
-      ) : (
-        <Stack direction="row" justifyContent="center">
-          <TableSearchNotFound message="Para visualizar os detalhes seleciona uma Agência específica" />
-        </Stack>
-      )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Card>
   );
 }
@@ -570,6 +522,13 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
       <TableRowTotal
         nivel={2}
         from={from}
+        length={linha1Dados?.length + linha2Dados?.length + linha3Dados?.length}
+        color={
+          (segmento === 'Empresa' && 'grey.50016') ||
+          (segmento === 'Particular' && 'grey.50024') ||
+          (segmento === 'Produtor Individual' && 'grey.50032') ||
+          'background.neutral'
+        }
         total={
           sumBy(linha1Dados, from === 'contratado' ? 'montante_aprovado' : 'montantes') +
           sumBy(linha2Dados, from === 'contratado' ? 'montante_aprovado' : 'montantes') +
@@ -627,13 +586,14 @@ function SegmentoStd({ from, segmento, dados }) {
 TableRowTotal.propTypes = {
   empty: PropTypes.bool,
   from: PropTypes.string,
-  neutral: PropTypes.bool,
-  total: PropTypes.number,
+  color: PropTypes.string,
   nivel: PropTypes.number,
+  total: PropTypes.number,
   total1: PropTypes.number,
+  length: PropTypes.number,
 };
 
-function TableRowTotal({ total, total1 = 0, nivel, from, neutral, empty = false }) {
+function TableRowTotal({ total, total1 = 0, nivel, from, color = '', empty = false, length = -1 }) {
   const cell =
     (from === 'entrada' && 7) ||
     (from === 'aprovado' && 5) ||
@@ -641,21 +601,31 @@ function TableRowTotal({ total, total1 = 0, nivel, from, neutral, empty = false 
     ((from === 'desistido' || from === 'indeferido') && 6);
   return empty ? (
     <>
-      <TableCell colSpan={nivel === 1 ? cell : cell + 1} sx={{ backgroundColor: neutral && 'background.neutral' }}>
+      <TableCell colSpan={nivel === 1 ? cell : cell + 1} sx={{ backgroundColor: color }}>
         {}
       </TableCell>
-      <TableCell align="right" sx={{ typography: 'subtitle2', backgroundColor: neutral && 'background.neutral' }}>
+      <TableCell align="right" sx={{ typography: 'subtitle2', backgroundColor: color }}>
         {nivel === 1 ? fNumber(0) : <b>{fNumber(0)}</b>}
       </TableCell>
       {(from === 'aprovado' || from === 'contratado') && (
-        <TableCell align="right" sx={{ typography: 'subtitle2', backgroundColor: neutral && 'background.neutral' }}>
+        <TableCell align="right" sx={{ typography: 'subtitle2', backgroundColor: color }}>
           {nivel === 1 ? fNumber(0) : <b>{fNumber(0)}</b>}
         </TableCell>
       )}
     </>
   ) : (
-    <TableRow sx={{ backgroundColor: (nivel === 1 && 'background.paper') || 'background.neutral' }}>
-      <TableCell colSpan={nivel === 1 ? cell : cell + 1}>{}</TableCell>
+    <TableRow hover sx={{ backgroundColor: (nivel === 1 && 'background.paper') || color }}>
+      {length > -1 ? (
+        <>
+          <TableCell>{}</TableCell>
+          <TableCell align="right" sx={{ typography: 'subtitle1' }}>
+            {length}
+          </TableCell>
+          <TableCell colSpan={cell - 1}>{}</TableCell>
+        </>
+      ) : (
+        <TableCell colSpan={nivel === 1 ? cell : cell + 1}>{}</TableCell>
+      )}
       <TableCell align="right" sx={{ typography: (nivel === 1 && 'subtitle2') || 'subtitle1', whiteSpace: 'nowrap' }}>
         {nivel === 1 ? fNumber(total) : <b>{fNumber(total)}</b>}
       </TableCell>
@@ -681,9 +651,14 @@ FirstRowSegmento.propTypes = {
 };
 
 function FirstRowSegmento({ segmento, linha, dados, total = false, length, from, length1 }) {
+  const color =
+    (segmento === 'Empresa' && 'grey.50016') ||
+    (segmento === 'Particular' && 'grey.50024') ||
+    (segmento === 'Produtor Individual' && 'grey.50032') ||
+    'background.neutral';
   return (
-    <TableRow hover sx={{ ...borderStyle }}>
-      <TableCell rowSpan={length} sx={{ ...frSegmentoStyle, backgroundColor: 'background.neutral' }}>
+    <TableRow hover sx={{ borderColor: 'background.paper' }}>
+      <TableCell rowSpan={length} sx={{ ...frSegmentoStyle, bgcolor: color }}>
         <b>{segmento}</b>
       </TableCell>
       {segmento === 'Entidades Públicas' || segmento === 'Garantias Bancárias' ? (
@@ -777,7 +752,7 @@ function DadosCell({ dados, from, index = 1, total }) {
       )}
     </>
   ) : (
-    <TableRowTotal nivel={1} from={from} empty neutral={total} />
+    <TableRowTotal nivel={1} from={from} empty color={total ? 'background.neutral' : ''} />
   );
 }
 
@@ -852,42 +827,75 @@ TotaisLinha.propTypes = {
   segmento: PropTypes.string,
 };
 
-function TotaisLinha({ first = false, segmento, linha = '', dados }) {
+function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
+  const color =
+    (segmento === 'Empresa' && 'grey.50016') ||
+    (segmento === 'Particular' && 'grey.50024') ||
+    (segmento === 'Produtor Individual' && 'grey.50032') ||
+    (first && !linha && !segmento && 'grey.50048');
+  const subTotal =
+    !linha && (segmento === 'Empresa' || segmento === 'Particular' || segmento === 'Produtor Individual');
   return (
-    <TableRow hover sx={first ? borderStyle : null}>
+    <TableRow hover sx={{ bgcolor: subTotal && color, '& .MuiTableCell-root': { fontWeight: subTotal && 900 } }}>
       {first && (
-        <TableCell rowSpan={linha ? 3 : 1} sx={{ ...linhaStyle }}>
-          {segmento}
+        <TableCell rowSpan={linha && segmento ? 4 : 1} sx={{ bgcolor: color, fontWeight: 900 }}>
+          {segmento || linha || 'TOTAL ACUMULADO'}
         </TableCell>
       )}
-      <TableCell sx={{ ...frResumoStyle }}>{linha}</TableCell>
-      <TableRowTotais dados={dadosResumo(dados, segmento, linha, !linha)} />
+      {!segmento && (linha === 'Tesouraria' || linha === 'Investimento') && <TableCell> </TableCell>}
+      <TableCell sx={{ fontWeight: 900, pl: '12px !important', bgcolor: first && !linha && !segmento && 'grey.50048' }}>
+        {(segmento && linha) || (!segmento && (linha === 'Tesouraria' || linha === 'Investimento')) ? linha : ''}
+      </TableCell>
+      <TableRowTotais dados={dadosResumo(dados, segmento, linha)} isTotal={!segmento && !linha} />
     </TableRow>
   );
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TableRowTotais.propTypes = { dados: PropTypes.object };
+TableRowTotais.propTypes = { dados: PropTypes.object, isTotal: PropTypes.bool };
 
-function TableRowTotais({ dados }) {
+function TableRowTotais({ dados, isTotal }) {
+  return ['qtdEnt', 'valorEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valorCont', 'qtdId', 'valorId']?.map((row, index) => (
+    <TableCell
+      key={row}
+      align="right"
+      sx={{
+        bgcolor:
+          isTotal &&
+          `${((index === 2 || index === 3) && 'success') || ((index === 4 || index === 5) && 'primary') || ((index === 6 || index === 7) && 'error') || 'focus'}.lighter`,
+      }}
+    >
+      {fNumber(dados[row])}
+    </TableCell>
+  ));
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+EmptyRow.propTypes = { segmento: PropTypes.bool };
+
+function EmptyRow({ segmento }) {
   return (
-    <>
-      <TableCell align="right">{fNumber(dados?.qtdEnt)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.valorEnt)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.qtdAp)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.valorAp)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.qtdCont)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.valorCont)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.qtdId)}</TableCell>
-      <TableCell align="right">{fNumber(dados?.valorId)}</TableCell>
-    </>
+    <TableRow>
+      <TableCell colSpan={20} sx={{ p: segmento ? 3 : 0.25 }}>
+        {' '}
+      </TableCell>
+    </TableRow>
   );
 }
 
 // ----------------------------------------------------------------------
 
-function filterDados(dados) {
+function filterDados(dados, filter) {
+  if (filter) {
+    dados = dados.filter(
+      (row) =>
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1)
+    );
+  }
+
   return {
     empresaConstrucao: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Construção'),
     empresaTesouraria: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Tesouraria'),
@@ -905,12 +913,12 @@ function filterDados(dados) {
 
 // ----------------------------------------------------------------------
 
-function dadosResumo(dados, segmento, linha, std) {
-  const entradas = dadosRes(dados?.entrada, segmento, linha, std);
-  const aprovados = dadosRes(dados?.aprovado, segmento, linha, std);
-  const contratados = dadosRes(dados?.contratado, segmento, linha, std);
-  const indeferidos = dadosRes(dados?.indeferido, segmento, linha, std);
-  const desistidos = dadosRes(dados?.desistido, segmento, linha, std);
+function dadosResumo(dados, segmento, linha) {
+  const entradas = dadosPorItem(dados?.entrada, segmento, linha);
+  const aprovados = dadosPorItem(dados?.aprovado, segmento, linha);
+  const contratados = dadosPorItem(dados?.contratado, segmento, linha);
+  const indeferidos = dadosPorItem(dados?.indeferido, segmento, linha);
+  const desistidos = dadosPorItem(dados?.desistido, segmento, linha);
 
   return {
     qtdEnt: sumBy(entradas, 'total'),
@@ -924,8 +932,11 @@ function dadosResumo(dados, segmento, linha, std) {
   };
 }
 
-function dadosRes(dados, segmento, linha, std) {
-  return std
-    ? dados?.filter((row) => row?.segmento === segmento || row?.linha === linha)
-    : dados?.filter((row) => row?.segmento === segmento && row?.linha === linha);
+function dadosPorItem(dados, segmento, linha) {
+  return (
+    (segmento && linha && dados?.filter((row) => row?.segmento === segmento && row?.linha === linha)) ||
+    (segmento && dados?.filter((row) => row?.segmento === segmento && row?.linha !== 'Garantia Bancária')) ||
+    (linha && dados?.filter((row) => row?.linha === linha && row?.segmento !== 'Entidade Pública')) ||
+    dados
+  );
 }

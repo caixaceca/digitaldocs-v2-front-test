@@ -11,25 +11,24 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { getFile } from '../../../utils/getFile';
 import { newLineText, baralharString } from '../../../utils/formatText';
+import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
-import { padraoDate, ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
-// hooks
-import useResponsive from '../../../hooks/useResponsive';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getAnexo, selectItem, closeModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
-import MyAvatar from '../../../components/MyAvatar';
 import { DefaultAction } from '../../../components/Actions';
+import MyAvatar, { AvatarBedge } from '../../../components/MyAvatar';
 // guards
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
 import Pareceres from './Pareceres';
 import { AnexoItem } from './Anexos';
 import MinutaParecer from './MinutaParecer';
-import { Abandonar, ParecerForm, Atribuir } from '../form/IntervencaoForm';
+import { Atribuir, Abandonar } from '../Intervencao';
+import { ParecerForm } from '../form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +36,6 @@ Estados.propTypes = { handleAceitar: PropTypes.func };
 
 export default function Estados({ handleAceitar }) {
   const dispatch = useDispatch();
-  const isDesktop = useResponsive('up', 'md');
   const [accord, setAccord] = useState(false);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
@@ -120,7 +118,7 @@ export default function Estados({ handleAceitar }) {
                         </Label>
                       )}
                     </Stack>
-                    {!!row?.parecer_data_limite && !temParecer && <DataLimite data1={row?.parecer_data_limite} />}
+                    {!!row?.parecer_data_limite && !temParecer && <DataParecer data1={row?.parecer_data_limite} />}
                     {afeto && !temPareceres && (
                       <Typography sx={{ typography: 'caption', color: 'info.main' }}>
                         {row?._lock ? '' : 'Este processo foi tribuído a '}
@@ -145,25 +143,10 @@ export default function Estados({ handleAceitar }) {
                     ) : (
                       <>
                         {temParecer ? (
-                          <Stack direction="row" spacing={1.5}>
-                            {!!afeto && (
-                              <MyAvatar
-                                alt={afeto?.perfil?.displayName}
-                                src={getFile('colaborador', afeto?.foto_disk)}
-                              />
-                            )}
-                            <Stack sx={{ width: 1 }}>
-                              {!!afeto && <InfoCriador criador={afeto} isDesktop={isDesktop} />}
-
-                              <Info
-                                viewAnexo={viewAnexo}
-                                temParecer={temParecer}
-                                dados={{
-                                  ...row,
-                                  perfil: afeto?.perfil,
-                                  assunto: `${processo?.assunto} - ${processo?.titular}`,
-                                }}
-                              />
+                          <Stack>
+                            {!!afeto && <InfoCriador criador={afeto} />}
+                            <Stack sx={{ pl: { md: afeto ? 6.5 : 0 } }}>
+                              <Info viewAnexo={viewAnexo} temParecer={temParecer} dados={{ ...row }} />
                             </Stack>
                           </Stack>
                         ) : (
@@ -180,93 +163,64 @@ export default function Estados({ handleAceitar }) {
           </Stack>
         );
       })}
-      {isOpenModal && <ParecerForm openModal={isOpenModal} onCancel={handleClose} processoId={processo?.id} estado />}
+      {isOpenModal && <ParecerForm onCancel={handleClose} processoId={processo?.id} estado />}
     </Box>
   );
 }
 
 // ----------------------------------------------------------------------
 
-Info.propTypes = {
-  dados: PropTypes.object,
-  viewAnexo: PropTypes.func,
-  temParecer: PropTypes.bool,
-  colaboradores: PropTypes.array,
-};
+Info.propTypes = { dados: PropTypes.object, viewAnexo: PropTypes.func, colaboradores: PropTypes.array };
 
-export function Info({ temParecer = false, dados, viewAnexo, colaboradores }) {
-  const isDesktop = useResponsive('up', 'md');
+export function Info({ dados, viewAnexo, colaboradores }) {
   const anexosAtivos = useMemo(() => dados?.anexos?.filter((item) => item?.ativo), [dados?.anexos]);
   const anexosInativos = useMemo(() => dados?.anexos?.filter((item) => !item?.ativo), [dados?.anexos]);
 
   return (
     <>
-      {temParecer && (
-        <Stack
-          useFlexGap
-          spacing={1}
-          direction="row"
-          flexWrap="wrap"
-          alignItems="center"
-          sx={{ mt: dados?.temPareceres ? 0.5 : 2 }}
-        >
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Parecer:
-          </Typography>
-          <Label color={dados?.parecer_favoravel ? 'success' : 'error'} variant="outlined">
-            {dados?.parecer_favoravel ? 'Favorável' : 'Não Favorável'}
-          </Label>
-          {!dados?.temPareceres && <MinutaParecer dados={{ ...dados, assunto: dados?.assunto }} />}
-        </Stack>
-      )}
-
-      {!!dados?.parecer_em && (
-        <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap" spacing={0.5}>
-          <DataLimite data1={dados?.parecer_em} parecer />
-          {!!dados?.parecer_data_limite && (
-            <Stack direction="row">
-              [<DataLimite data1={dados?.parecer_data_limite} data2={dados?.parecer_em} />]
-            </Stack>
-          )}
-        </Stack>
-      )}
-
-      {dados?.observacao && !dados?.temPareceres && (
-        <Typography sx={{ textAlign: 'justify', pt: 2 }}>{newLineText(dados.observacao)}</Typography>
+      {(dados?.observacao || dados?.descritivo) && !dados?.temPareceres && (
+        <Typography sx={{ textAlign: 'justify', pt: 2 }}>
+          {newLineText(dados?.observacao || dados?.descritivo)}
+        </Typography>
       )}
 
       {dados?.temPareceres && (
-        <Stack spacing={2} divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} sx={{ mt: 3 }}>
-          {dados?.pareceres?.map((row, index) => {
-            const criador = colaboradores?.find((colab) => colab?.perfil?.id === row?.perfil_id);
-            return (
-              <Stack key={`parecer_${index}_${row?.id}`} direction="row" spacing={1.5}>
-                {!!criador && isDesktop && (
-                  <MyAvatar alt={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
-                )}
-                <Stack sx={{ width: 1 }}>
-                  {!!criador && <InfoCriador criador={criador} isDesktop={isDesktop} />}
-                  <Info
-                    viewAnexo={viewAnexo}
-                    temParecer={temParecer}
-                    colaboradores={colaboradores}
-                    dados={{
-                      ...row,
-                      assunto: dados?.assunto,
-                      perfil: criador?.perfil,
-                      observacao: row?.descritivo,
-                      estado: dados?.estado_inicial,
-                    }}
-                  />
+        <>
+          <InfoCriador temParecer dados={dados} />
+          <Divider flexItem sx={{ pt: 3 }} />
+          <Stack spacing={3} divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} sx={{ mt: 3 }}>
+            {dados?.pareceres?.map((row, index) => {
+              const criador = colaboradores?.find((colab) => colab?.perfil?.id === row?.perfil_id);
+              return (
+                <Stack key={`parecer_${index}_${row?.id}`} direction="row" spacing={1.5}>
+                  <Stack sx={{ width: 1 }}>
+                    {!!criador && (
+                      <InfoCriador
+                        criador={criador}
+                        temParecer={
+                          row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false)
+                        }
+                        dados={{
+                          ...row,
+                          perfil: criador?.perfil,
+                          assunto: dados?.observacao,
+                          estado: dados?.estado_inicial,
+                        }}
+                      />
+                    )}
+                    <Stack sx={{ pl: { md: criador ? 6.5 : 0 } }}>
+                      <Info viewAnexo={viewAnexo} colaboradores={colaboradores} dados={row} />
+                    </Stack>
+                  </Stack>
                 </Stack>
-              </Stack>
-            );
-          })}
-        </Stack>
+              );
+            })}
+          </Stack>
+        </>
       )}
 
       {anexosAtivos?.length > 0 && (
-        <Stack spacing={1} direction="column" sx={{ mt: 2 }}>
+        <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap', mt: 2 }}>
           {anexosAtivos?.map((item) => (
             <AnexoItem
               parecer
@@ -284,7 +238,7 @@ export function Info({ temParecer = false, dados, viewAnexo, colaboradores }) {
           <Divider sx={{ my: 1 }}>
             <Typography variant="subtitle2">Anexos eliminados</Typography>
           </Divider>
-          <Stack direction="column" alignItems="center" spacing={1}>
+          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             {anexosInativos?.map((item) => (
               <AnexoItem
                 eliminado
@@ -304,25 +258,25 @@ export function Info({ temParecer = false, dados, viewAnexo, colaboradores }) {
 
 // ----------------------------------------------------------------------
 
-DataLimite.propTypes = { data1: PropTypes.string, data2: PropTypes.string, parecer: PropTypes.bool };
+DataParecer.propTypes = { data1: PropTypes.string, data2: PropTypes.string, envio: PropTypes.bool };
 
-export function DataLimite({ data1, data2 = '', parecer = false }) {
+export function DataParecer({ data1, data2 = '', envio = false }) {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }} useFlexGap flexWrap="wrap">
-      <Typography variant={parecer ? 'body2' : 'caption'} sx={{ color: 'text.secondary' }}>
-        Data{parecer ? ' envio' : ' limite'}:
+      <Typography variant={envio ? 'body2' : 'caption'} sx={{ color: 'text.secondary' }}>
+        Data{envio ? ' envio' : ' limite parecer'}:
       </Typography>
-      <Typography variant={parecer ? 'body2' : 'caption'}>{ptDateTime(data1)}</Typography>
-      {!parecer && (
+      <Typography variant={envio ? 'body2' : 'caption'}>{ptDateTime(data1)}</Typography>
+      {!envio && (
         <Criado
           caption
           tipo="time"
           value={
-            dataMaior(data1, padraoDate(data2 || new Date()))
+            dataMaior(data1, data2 || new Date())
               ? fDistance(data2 || new Date(), data1)
               : `${fDistance(data1, data2 || new Date())} Atrasado`
           }
-          sx={{ color: dataMaior(data1, padraoDate(data2 || new Date())) ? 'success.main' : 'error.main' }}
+          sx={{ color: dataMaior(data1, data2 || new Date()) ? 'success.main' : 'error.main' }}
         />
       )}
     </Stack>
@@ -331,26 +285,57 @@ export function DataLimite({ data1, data2 = '', parecer = false }) {
 
 // ----------------------------------------------------------------------
 
-InfoCriador.propTypes = { criador: PropTypes.object, isDesktop: PropTypes.bool };
+InfoCriador.propTypes = { dados: PropTypes.object, criador: PropTypes.object, temParecer: PropTypes.bool };
 
-export function InfoCriador({ criador, isDesktop }) {
+export function InfoCriador({ criador = null, temParecer = false, dados = null }) {
   return (
     <Stack direction="row" spacing={1.5}>
-      {!isDesktop && <MyAvatar alt={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />}
-      <Box>
-        <Stack direction="row" alignItems="center" spacing={0.5}>
-          <Typography noWrap variant="subtitle2">
-            {criador?.perfil?.displayName}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            ({criador?.uo?.label})
-          </Typography>
-        </Stack>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {criador?.perfil?.mail}
-          {criador?.perfil?.businessPhones?.[0] ? ` | ${criador?.perfil?.businessPhones?.[0]}` : ''}
-        </Typography>
-      </Box>
+      {!!criador && (
+        <AvatarBedge status={criador?.presence}>
+          <MyAvatar name={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
+        </AvatarBedge>
+      )}
+      <Stack
+        useFlexGap
+        spacing={2}
+        flexWrap="wrap"
+        direction="row"
+        divider={<Divider orientation="vertical" flexItem />}
+      >
+        {!!criador && (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Typography noWrap variant="subtitle2">
+                {criador?.perfil?.displayName}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                ({criador?.uo?.label})
+              </Typography>
+            </Stack>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {criador?.perfil?.mail}
+              {criador?.perfil?.businessPhones?.[0] ? ` | ${criador?.perfil?.businessPhones?.[0]}` : ''}
+            </Typography>
+          </Box>
+        )}
+        {temParecer && (
+          <Box>
+            <Stack spacing={1} direction="row" alignItems="center">
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Parecer:
+              </Typography>
+              <Label color={dados?.parecer_favoravel ? 'success' : 'error'} variant="outlined">
+                {dados?.parecer_favoravel ? 'Favorável' : 'Não Favorável'}
+              </Label>
+              {!dados?.temPareceres && <MinutaParecer dados={{ ...dados }} />}
+            </Stack>
+            {!!dados?.parecer_em && <DataParecer data1={dados?.parecer_em} envio />}
+            {!!dados?.parecer_data_limite && (
+              <DataParecer data1={dados?.parecer_data_limite} data2={dados?.parecer_em} />
+            )}
+          </Box>
+        )}
+      </Stack>
     </Stack>
   );
 }

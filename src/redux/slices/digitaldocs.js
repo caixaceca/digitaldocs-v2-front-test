@@ -12,7 +12,6 @@ import { getComparator, applySort } from '../../hooks/useTable';
 const initialState = {
   done: '',
   error: '',
-  urlBlob: '',
   isLoadingFile: '',
   isSaving: false,
   isLoading: false,
@@ -32,12 +31,9 @@ const initialState = {
   cartoes: [],
   pesquisa: [],
   arquivos: [],
-  entradas: [],
-  restauros: [],
   processos: [],
   objectURLs: [],
-  porConcluir: [],
-  trabalhados: [],
+  dadosControle: [],
 };
 
 const slice = createSlice({
@@ -99,19 +95,16 @@ const slice = createSlice({
           state.pesquisa = [];
           state.processosInfo = null;
           break;
-        case 'restauros':
-          state.restauros = [];
+        case 'arquivos':
+          state.arquivos = [];
           state.processosInfo = null;
           break;
         case 'pjf':
           state.pjf = [];
           state.processosInfo = null;
           break;
-        case 'entradas':
-          state.entradas = [];
-          break;
-        case 'trabalhados':
-          state.trabalhados = [];
+        case 'controle':
+          state.dadosControle = [];
           break;
         case 'cartoes':
           state.cartoes = [];
@@ -130,29 +123,24 @@ const slice = createSlice({
       state.processos = [...state.processos, ...action.payload.objeto];
     },
 
-    getEntradasSuccess(state, action) {
-      state.entradas = action.payload;
-    },
+    getSuccess(state, action) {
+      switch (action.payload.item) {
+        case 'controle':
+          state.dadosControle = action.payload.dados;
+          break;
 
-    getPorConcluirSuccess(state, action) {
-      state.porConcluir = action.payload;
-    },
-
-    getArquivosSuccess(state, action) {
-      state.arquivos = action.payload;
-    },
-
-    getTrabalhadosSuccess(state, action) {
-      state.trabalhados = action.payload;
+        default:
+          break;
+      }
     },
 
     getPedidosAcessoSuccess(state, action) {
       state.pedidos = action.payload;
     },
 
-    getRestaurosSuccess(state, action) {
+    getArquivosSuccess(state, action) {
       state.processosInfo = action.payload.paginacao;
-      state.restauros = [...state.restauros, ...action.payload.objeto];
+      state.arquivos = [...state.arquivos, ...action.payload.objeto];
     },
 
     getIndicadoresArquivoSuccess(state, action) {
@@ -439,6 +427,7 @@ export function getAll(item, params) {
       item !== 'hpendencias' &&
       item !== 'hatribuicoes' &&
       item !== 'hvisualizacoes' &&
+      item !== 'confidencialidades' &&
       item !== 'destinosDesarquivamento'
     ) {
       dispatch(slice.actions.resetItem('processo'));
@@ -514,16 +503,18 @@ export function getAll(item, params) {
           break;
         }
         case 'htransicoes': {
-          const transicoes = await axios.get(`${BASEURLDD}/v2/processos/ht_transicoes/${idPerfilId}`, options);
-          const domiciliacoes = await axios.get(`${BASEURLDD}/v2/processos/ht_domicilios/${idPerfilId}`, options);
-          const restauros = await axios.get(
-            `${BASEURLDD}/v2/processos/ht_restauro/processo?perfil_cc_id=${params?.perfilId}&processo_id=${params?.id}`,
-            options
-          );
+          const transicoes = await Promise.all([
+            axios.get(`${BASEURLDD}/v2/processos/ht_transicoes/${idPerfilId}`, options),
+            axios.get(`${BASEURLDD}/v2/processos/ht_domicilios/${idPerfilId}`, options),
+            axios.get(
+              `${BASEURLDD}/v2/processos/ht_restauro/processo?perfil_cc_id=${params?.perfilId}&processo_id=${params?.id}`,
+              options
+            ),
+          ]);
           const ht = [
-            ...(transicoes?.data?.objeto?.length > 0 ? transicoes?.data?.objeto : []),
-            ...(domiciliacoes?.data?.objeto?.length > 0
-              ? domiciliacoes?.data?.objeto?.map((row) => ({
+            ...(transicoes?.[0]?.data?.objeto?.length > 0 ? transicoes?.[0]?.data?.objeto : []),
+            ...(transicoes?.[1]?.data?.objeto?.length > 0
+              ? transicoes?.[1]?.data?.objeto?.map((row) => ({
                   modo: 'Seguimento',
                   domiciliacao: true,
                   observacao: row?.observacao,
@@ -536,13 +527,13 @@ export function getAll(item, params) {
                   estado_inicial: row?.estado_origem,
                 }))
               : []),
-            ...(restauros?.data?.objeto?.length > 0
-              ? restauros?.data?.objeto?.map((row) => ({
+            ...(transicoes?.[2]?.data?.objeto?.length > 0
+              ? transicoes?.[2]?.data?.objeto?.map((row) => ({
                   modo: 'Restauro',
-                  observacao: row?.observacao,
-                  id: `restauro_${row?.id}`,
                   perfil_id: row?.criador,
+                  id: `restauro_${row?.id}`,
                   data_saida: row?.criado_em,
+                  observacao: row?.observacao,
                 }))
               : []),
           ];
@@ -572,6 +563,14 @@ export function getAll(item, params) {
           dispatch(slice.actions.addItemProcesso({ hvisualizacoes: response.data.objeto }));
           break;
         }
+        case 'confidencialidades': {
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/confidencialidades?perfil_cc_id=${params?.perfilId}&processo_id=${params?.id}`,
+            options
+          );
+          dispatch(slice.actions.addItemProcesso({ confidencialidades: response.data.objeto }));
+          break;
+        }
         case 'hversoes': {
           const response = await axios.get(
             `${BASEURLDD}/v1/processos/versoes/${params?.perfilId}?processoID=${params?.id}`,
@@ -590,33 +589,45 @@ export function getAll(item, params) {
           break;
         }
         case 'Entradas': {
-          dispatch(slice.actions.resetItem('entradas'));
+          dispatch(slice.actions.resetItem('controle'));
           const response = await axios.get(
-            `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${params?.perfilId}?diai=${
-              params?.dataInicio
-            }${params?.dataFim ? `&diaf=${params?.dataFim}` : ''}`,
+            `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${params?.perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`,
             options
           );
-          dispatch(slice.actions.getEntradasSuccess(response.data.objeto));
+          dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
+          break;
+        }
+        case 'Devoluções': {
+          dispatch(slice.actions.resetItem('controle'));
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/ht_devolvidos?perfil_cc_id=${params?.perfilId}&uo_id=${params?.uoId}&apartir_de=${params?.dataInicio}&ate=${params?.dataFim}`,
+            options
+          );
+          dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
           break;
         }
         case 'Por concluir': {
+          dispatch(slice.actions.resetItem('controle'));
           const response = await axios.get(`${BASEURLDD}/v1/processos/porconcluir/${params?.perfilId}`, options);
-          dispatch(slice.actions.getPorConcluirSuccess(response.data.objeto));
+          dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
           break;
         }
         case 'Trabalhados': {
+          dispatch(slice.actions.resetItem('controle'));
           if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
               options
             );
-            dispatch(slice.actions.getTrabalhadosSuccess(response.data.objeto));
+            dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
           }
           break;
         }
         case 'arquivos': {
-          const response = await axios.get(`${BASEURLDD}/v1/arquivos/${params?.perfilId}`, options);
+          const response = await axios.get(
+            `${BASEURLDD}/v2/arquivos/${params?.perfilId}?apartir_de=${params?.data}&pagina=${params?.pagina}`,
+            options
+          );
           dispatch(slice.actions.getArquivosSuccess(response.data));
           break;
         }
@@ -626,14 +637,11 @@ export function getAll(item, params) {
           break;
         }
         case 'restauros': {
-          if (params?.pagina === 0) {
-            dispatch(slice.actions.resetItem('restauros'));
-          }
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/ht_restauro?perfil_cc_id=${params?.perfilId}${params?.datai ? `&datai=${params?.datai}` : ''}${params?.dataf ? `&dataf=${params?.dataf}` : ''}&pagina=${params?.pagina}`,
             options
           );
-          dispatch(slice.actions.getRestaurosSuccess(response.data));
+          dispatch(slice.actions.getArquivosSuccess(response.data));
           break;
         }
         case 'indicadores arquivos': {
@@ -677,7 +685,7 @@ export function getAll(item, params) {
           break;
         }
         case 'pjf': {
-          if (params?.reset) {
+          if (params?.pagina === 0) {
             dispatch(slice.actions.resetItem('pjf'));
           }
           const response = await axios.get(
@@ -849,25 +857,6 @@ export function updateItem(item, dados, params) {
             dados,
             options1
           );
-          if (params?.colocarPendente) {
-            await axios.patch(
-              `${BASEURLDD}/v2/processos/aceitar/${params?.perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-              null,
-              options
-            );
-            await axios.patch(
-              `${BASEURLDD}/v2/processos/pender/misto/${params?.perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}`,
-              params?.pendencia,
-              options
-            );
-          }
-          if (params?.atribuir) {
-            await axios.patch(
-              `${BASEURLDD}/v2/processos/atribuicao/mista/${params?.perfilId}?perfil_afeto_id=${params?.atribuir}&processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-              '',
-              options
-            );
-          }
           break;
         }
         case 'encaminhar paralelo': {
@@ -1048,6 +1037,19 @@ export function updateItem(item, dados, params) {
             options
           );
           dispatch(slice.actions.deleteAnexoSuccess(params));
+          break;
+        }
+        case 'confidencialidade': {
+          await axios.patch(
+            `${BASEURLDD}/v2/processos/confidencia/${params?.perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`,
+            dados,
+            options
+          );
+          const response = await axios.get(
+            `${BASEURLDD}/v2/processos/confidencialidades?perfil_cc_id=${params?.perfilId}&processo_id=${params?.processoId}`,
+            options
+          );
+          dispatch(slice.actions.addItemProcesso({ confidencialidades: response.data.objeto }));
           break;
         }
 

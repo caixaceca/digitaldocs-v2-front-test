@@ -29,7 +29,7 @@ SearchToolbarSimple.propTypes = {
 
 export function SearchToolbarSimple({ filter, item = '', setFilter, children = null }) {
   return (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ pb: 1 }}>
+    <Stack direction={{ xs: children ? 'column' : 'row', sm: 'row' }} alignItems="center" spacing={1} sx={{ pb: 1 }}>
       {children}
       <SearchField item={item} filter={filter} setFilter={setFilter} />
       {filter && <RemoverFiltros removerFiltro={() => setItemValue('', setFilter, item, false)} />}
@@ -492,12 +492,18 @@ export function SearchAutocomplete({ value = null, label, valuel = '', setValue,
 
 // ----------------------------------------------------------------------
 
-SearchField.propTypes = { item: PropTypes.string, filter: PropTypes.string, setFilter: PropTypes.func };
+SearchField.propTypes = {
+  small: PropTypes.bool,
+  item: PropTypes.string,
+  filter: PropTypes.string,
+  setFilter: PropTypes.func,
+};
 
-function SearchField({ item, filter, setFilter }) {
+export function SearchField({ item, small = false, filter, setFilter }) {
   return (
     <TextField
       fullWidth
+      size={small && 'small'}
       value={filter}
       placeholder="Procurar..."
       onChange={(event) => setItemValue(event.target.value, setFilter, item)}

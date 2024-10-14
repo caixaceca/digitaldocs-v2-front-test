@@ -362,12 +362,9 @@ export default function TableCartoes() {
 
       {isOpenModal1 && <Detalhes closeModal={handleCloseModal} />}
       {isOpenModal && <BalcaoEntregaForm onCancel={handleCloseModal} />}
-      {open1 && (
-        <ConfirmarPorDataForm balcao={uo} open={open1} fase={fase} datai={datai} onCancel={onClose1} dataf={dataf} />
-      )}
+      {open1 && <ConfirmarPorDataForm balcao={uo} fase={fase} datai={datai} onCancel={onClose1} dataf={dataf} />}
       {open && (
         <ValidarMultiploForm
-          open={open}
           fase={fase}
           balcao={uo?.id}
           onCancel={onClose}
@@ -379,15 +376,7 @@ export default function TableCartoes() {
         />
       )}
       {open2 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
-        <AnularForm
-          uo={uo}
-          fase={fase}
-          open={open2}
-          dense={dense}
-          uosList={uosList}
-          onCancel={onClose2}
-          cartoes={dadosValidados}
-        />
+        <AnularForm uo={uo} fase={fase} dense={dense} uosList={uosList} onCancel={onClose2} cartoes={dadosValidados} />
       )}
     </>
   );

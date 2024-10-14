@@ -1,3 +1,4 @@
+import { add } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
@@ -16,7 +17,9 @@ import { pertencoAoEstado } from '../utils/validarAcesso';
 import useSettings from '../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
+import { getFromIntranet } from '../redux/slices/intranet';
 import { getIndicadores } from '../redux/slices/indicadores';
+import { getFromParametrizacao } from '../redux/slices/parametrizacao';
 // components
 import Page from '../components/Page';
 import { Notificacao } from '../components/NotistackProvider';
@@ -43,8 +46,18 @@ export default function Processos() {
   const { themeStretch } = useSettings();
   const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { mail, perfilId, cc, dateUpdate } = useSelector((state) => state.intranet);
+
+  useEffect(() => {
+    if (mail && perfilId && cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
+      dispatch(getFromIntranet('colaboradores', { mail }));
+      dispatch(getFromIntranet('cc', { id: cc?.id, mail }));
+      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId }));
+      dispatch(getFromParametrizacao('meusambientes', { mail, perfilId }));
+      dispatch(getFromParametrizacao('motivos pendencia', { mail, perfilId }));
+    }
+  }, [dispatch, perfilId, cc?.id, dateUpdate, mail]);
 
   const tabsList = useMemo(
     () =>

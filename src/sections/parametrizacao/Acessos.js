@@ -55,20 +55,16 @@ export default function Acessos() {
   } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
   const navigate = useNavigate();
-  const { isLoading } = useSelector((state) => state.digitaldocs);
-  const { colaboradores } = useSelector((state) => state.intranet);
+  const { isLoading, colaboradores } = useSelector((state) => state.intranet);
   const [uo, setUo] = useState(localStorage.getItem('uoParams') || '');
   const [filter, setFilter] = useState(localStorage.getItem('filterAcessos') || '');
-
-  const handleUpdate = (id) => {
-    navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${id}`);
-  };
 
   const colasByName = colaboradores.map((row) => ({
     uo: row?.uo,
     sexo: row.sexo,
     nome: row?.nome,
     perfil: row?.perfil,
+    presence: row?.presence,
     foto_disk: row?.foto_disk,
     unidade_organica: row?.uo?.label,
     nomeacao_funcao: row.nomeacao || row?.funcao,
@@ -80,6 +76,10 @@ export default function Acessos() {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, uo]);
+
+  const handleUpdate = (id) => {
+    navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${id}`);
+  };
 
   return (
     <>
@@ -101,7 +101,12 @@ export default function Acessos() {
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow key={row?.id} hover>
                         <TableCell>
-                          <ColaboradorInfo foto={row?.foto_disk} label={row?.perfil?.mail} nome={row?.nome} />
+                          <ColaboradorInfo
+                            nome={row?.nome}
+                            foto={row?.foto_disk}
+                            status={row?.presence}
+                            label={row?.perfil?.mail}
+                          />
                         </TableCell>
                         <TableCell align="left">
                           <Typography variant="subtitle2"> {row?.uo?.label}</Typography>

@@ -30,12 +30,11 @@ import {
 
 EncaminharForm.propTypes = {
   dev: PropTypes.bool,
-  open: PropTypes.bool,
   onCancel: PropTypes.func,
   destinos: PropTypes.array,
 };
 
-export function EncaminharForm({ open, destinos, onCancel, dev }) {
+export function EncaminharForm({ destinos, onCancel, dev }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, perfilId } = useSelector((state) => state.intranet);
@@ -48,13 +47,8 @@ export function EncaminharForm({ open, destinos, onCancel, dev }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { watch, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const onSubmit = async () => {
     try {
@@ -83,7 +77,7 @@ export function EncaminharForm({ open, destinos, onCancel, dev }) {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{dev ? 'Devolver' : 'Encaminhar'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -118,7 +112,7 @@ export function ParecerForm({ normal = false }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { selectedItem, isOpenModal, isSaving } = useSelector((state) => state.cc);
+  const { selectedItem, isSaving } = useSelector((state) => state.cc);
 
   const formSchema = Yup.object().shape({
     parecer: Yup.mixed().required('Escolhe o parecer'),
@@ -187,7 +181,7 @@ export function ParecerForm({ normal = false }) {
   };
 
   return (
-    <Dialog open={isOpenModal} onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>Parecer</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -219,9 +213,9 @@ export function ParecerForm({ normal = false }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ArquivarForm.propTypes = { open: PropTypes.bool, onCancel: PropTypes.func };
+ArquivarForm.propTypes = { onCancel: PropTypes.func };
 
-export function ArquivarForm({ open, onCancel }) {
+export function ArquivarForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { pedidoCC, isSaving } = useSelector((state) => state.cc);
@@ -238,13 +232,8 @@ export function ArquivarForm({ open, onCancel }) {
   );
 
   const methods = useForm({ defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { watch, handleSubmit } = methods;
   const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const onSubmit = async () => {
     try {
@@ -255,7 +244,7 @@ export function ArquivarForm({ open, onCancel }) {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>Arquivar</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>

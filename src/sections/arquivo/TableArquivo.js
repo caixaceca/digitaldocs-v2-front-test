@@ -10,15 +10,17 @@ import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { ptDateTime, getDataLS, dataValido } from '../../utils/formatTime';
-import { entidadesParse, noDados, baralharString } from '../../utils/formatText';
+import { ptDateTime, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
+import { entidadesParse, noDados, baralharString, contaCliEnt } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -27,9 +29,9 @@ import { RHFDateIF } from '../../components/hook-form';
 import ItemAnalytic from '../../components/ItemAnalytic';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { Criado, Registos } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { Criado, Registos, ColaboradorInfo } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from '../parametrizacao/applySortFilter';
@@ -42,14 +44,9 @@ const TABLE_HEAD_ARQUIVOS = [
   { id: 'referencia', label: 'Referência', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
   { id: 'entidades', label: 'Entidade(s)', align: 'left' },
-  { id: 'data_last_transicao', label: 'Data', align: 'center', width: 10 },
-  { id: '', width: 10 },
-];
-
-const TABLE_HEAD_PEDIDOS = [
-  { id: 'nome', label: 'Colaborador', align: 'left' },
-  { id: 'processo_id', label: 'ID Processo', align: 'left' },
-  { id: 'criado_em', label: 'Data do pedido', align: 'center' },
+  { id: 'assunto', label: 'Assunto', align: 'left' },
+  { id: 'uo', label: 'U.O', align: 'left' },
+  { id: 'data_arquivamento', label: 'Data arquivo', align: 'center' },
   { id: '', width: 10 },
 ];
 
@@ -59,7 +56,14 @@ const TABLE_HEAD_RESTAUROS = [
   { id: 'conta', label: 'Cliente/Conta', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'estado_atual', label: 'Estado', align: 'left' },
-  { id: 'criado_em	', label: 'Criado', width: 10, align: 'left' },
+  { id: 'criado_em', label: 'Criado', align: 'left' },
+  { id: '', width: 10 },
+];
+
+const TABLE_HEAD_PEDIDOS = [
+  { id: 'nome', label: 'Colaborador', align: 'left' },
+  { id: 'processo_id', label: 'ID Processo', align: 'left' },
+  { id: 'criado_em', label: 'Data do pedido', align: 'center' },
   { id: '', width: 10 },
 ];
 
@@ -73,10 +77,9 @@ export default function TableArquivo({ tab }) {
   const [datai, setDatai] = useState(getDataLS('dataIArq', null));
   const [dataf, setDataf] = useState(getDataLS('dataFArq', null));
   const [filter, setFilter] = useState(localStorage.getItem('filterArq') || '');
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { arquivos, pedidos, restauros, processosInfo, indicadoresArquivo, isLoading } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const [data, setData] = useState(getDataLS('dataArq', new Date(new Date().getFullYear(), 0, 1)));
+  const { mail, perfilId, colaboradores, uos } = useSelector((state) => state.intranet);
+  const { arquivos, pedidos, processosInfo, indicadoresArquivo, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
     page,
@@ -92,23 +95,31 @@ export default function TableArquivo({ tab }) {
     onChangeRowsPerPage,
   } = useTable({
     defaultOrder: 'desc',
-    defaultOrderBy: (tab === 'restauros' && 'id') || (tab === 'pedidosAcesso' && 'data_last_transicao') || 'criado_em',
+    defaultOrderBy:
+      (tab === 'pedidosAcesso' && 'data_last_transicao') ||
+      (tab === 'arquivos' && 'data_last_transicao') ||
+      'criado_em',
   });
 
   useEffect(() => {
+    dispatch(resetItem('arquivos'));
     dispatch(
       getAll(tab, {
         mail,
         perfilId,
         pagina: 0,
+        data: dataValido(data) ? format(data, 'yyyy-MM-dd') : '',
         dataf: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
         datai: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
       })
     );
+  }, [dataf, datai, data, dispatch, mail, perfilId, tab]);
+
+  useEffect(() => {
     if (mail && perfilId && tab === 'arquivos') {
       dispatch(getAll('indicadores arquivos', { mail, perfilId }));
     }
-  }, [dispatch, perfilId, datai, dataf, tab, mail]);
+  }, [dispatch, mail, perfilId, tab]);
 
   useEffect(() => {
     setPage(0);
@@ -118,11 +129,7 @@ export default function TableArquivo({ tab }) {
   const dataFiltered = applySortFilter({
     filter,
     comparator: getComparator(order, orderBy),
-    dados:
-      (tab === 'arquivos' && arquivos) ||
-      (tab === 'restauros' && restauros) ||
-      (tab === 'pedidosAcesso' && pedidosList(pedidos, colaboradores)) ||
-      [],
+    dados: pedidosList(tab === 'pedidosAcesso' ? pedidos : arquivos, colaboradores, uos),
   });
   const isNotFound = !dataFiltered.length;
 
@@ -136,6 +143,7 @@ export default function TableArquivo({ tab }) {
         mail,
         perfilId,
         pagina: processosInfo?.proxima_pagina,
+        data: dataValido(data) ? format(data, 'yyyy-MM-dd') : '',
         dataf: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
         datai: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
       })
@@ -153,18 +161,15 @@ export default function TableArquivo({ tab }) {
         }
         action={
           tab === 'restauros' && (
-            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
-              <Registos info={processosInfo} total={restauros?.length} handleClick={() => mostrarMais()} />
-              <RHFDateIF
-                clearable
-                datai={datai}
-                dataf={dataf}
-                labeli="dataIArq"
-                labelf="dataFArq"
-                setDatai={setDatai}
-                setDataf={setDataf}
-              />
-            </Stack>
+            <RHFDateIF
+              clearable
+              datai={datai}
+              dataf={dataf}
+              labeli="dataIArq"
+              labelf="dataFArq"
+              setDatai={setDatai}
+              setDataf={setDataf}
+            />
           )
         }
       />
@@ -197,7 +202,22 @@ export default function TableArquivo({ tab }) {
         </Card>
       )}
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple item="filterArq" filter={filter} setFilter={setFilter} />
+        <SearchToolbarSimple item="filterArq" filter={filter} setFilter={setFilter}>
+          {tab === 'arquivos' && (
+            <DatePicker
+              value={data}
+              label="Apartir de"
+              maxDate={new Date()}
+              slotProps={{ textField: { fullWidth: true, sx: { maxWidth: 170 } } }}
+              onChange={(newValue) => setDataUtil(newValue, setData, 'dataArq', '', '', '')}
+            />
+          )}
+        </SearchToolbarSimple>
+        {tab !== 'pedidosAcesso' && (
+          <Stack sx={{ pb: 1 }}>
+            <Registos info={processosInfo} handleClick={() => mostrarMais()} total={arquivos?.length} />
+          </Stack>
+        )}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -213,20 +233,15 @@ export default function TableArquivo({ tab }) {
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={(tab === 'pedidosAcesso' && 4) || (tab === 'restauros' && 7) || 5} row={10} />
+                  <SkeletonTable column={(tab === 'pedidosAcesso' && 4) || 7} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <>
                       {(tab === 'restauros' && (
-                        <TableRow hover key={`${tab}_${index}`}>
+                        <TableRow hover key={`${tab}_rest_${index}`}>
                           <TableCell>{row.numero_entrada}</TableCell>
                           <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
-                          <TableCell>
-                            {(row?.conta && baralharString(row?.conta)) ||
-                              (row?.cliente && baralharString(row?.cliente)) ||
-                              (row?.entidades && baralharString(entidadesParse(row?.entidades))) ||
-                              noDados()}
-                          </TableCell>
+                          <TableCell>{contaCliEnt(row)}</TableCell>
                           <TableCell>{row?.assunto ? row?.assunto : noDados()}</TableCell>
                           <TableCell>{row?.estado_atual ? row?.estado_atual : noDados()}</TableCell>
                           <TableCell>
@@ -241,26 +256,35 @@ export default function TableArquivo({ tab }) {
                         </TableRow>
                       )) ||
                         (tab === 'pedidosAcesso' && (
-                          <TableRow hover key={`${tab}_${index}`}>
-                            <TableCell>{baralharString(row?.nome)}</TableCell>
+                          <TableRow hover key={`${tab}_pa_${index}`}>
+                            <TableCell>
+                              <ColaboradorInfo caption nome={row?.nome} label={row?.uoColaborador} foto={row?.foto} />
+                            </TableCell>
                             <TableCell>{row?.processo_id}</TableCell>
                             <TableCell align="center" width={50}>
-                              {row?.criado_em && ptDateTime(row?.criado_em)}
+                              <Typography noWrap variant="body2">
+                                {row?.criado_em && ptDateTime(row?.criado_em)}
+                              </Typography>
                             </TableCell>
                             <TableCell align="center">
                               <DefaultAction label="DETALHES" handleClick={() => handleView(row?.processo_id)} />
                             </TableCell>
                           </TableRow>
                         )) || (
-                          <TableRow hover key={`${tab}_${index}`}>
+                          <TableRow hover key={`${tab}_arq_${index}`}>
                             <TableCell>{row.referencia}</TableCell>
                             <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
                             <TableCell>
                               {row?.entidades ? baralharString(entidadesParse(row?.entidades)) : noDados()}
                             </TableCell>
-                            <TableCell align="center">
-                              {row?.data_last_transicao ? (
-                                <Criado value={ptDateTime(row?.data_last_transicao)} />
+                            <TableCell>{row.assunto}</TableCell>
+                            <TableCell width={10}>
+                              {row?.uo && <Criado value={row?.uo} />}
+                              {row?.balcao && <Criado value={`Balcão: ${row.balcao}`} caption />}
+                            </TableCell>
+                            <TableCell align="center" width={10}>
+                              {row?.data_arquivamento ? (
+                                <Criado value={ptDateTime(row?.data_arquivamento)} />
                               ) : (
                                 noDados()
                               )}
@@ -300,11 +324,19 @@ export default function TableArquivo({ tab }) {
 
 // ----------------------------------------------------------------------
 
-function pedidosList(dados, colaboradores) {
+function pedidosList(dados, colaboradores, uos) {
   const pedidos = [];
   dados?.forEach((row) => {
+    const uo = uos?.find((_uo) => _uo?.id === row.uo_id);
     const colaborador = colaboradores?.find((colab) => colab?.perfil_id === row.perfil_id);
-    pedidos.push({ ...row, nome: colaborador?.perfil?.displayName || row.perfil_id });
+    pedidos.push({
+      ...row,
+      balcao: uo?.balcao,
+      uo: uo?.label || row?.uo_id,
+      foto: colaborador?.foto_disk,
+      uoColaborador: colaborador?.uo?.label,
+      nome: colaborador?.perfil?.displayName || row.perfil_id,
+    });
   });
   return pedidos;
 }

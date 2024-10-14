@@ -43,11 +43,11 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
 // components
 import MyAvatar from '../../components/MyAvatar';
+import { DTFechar } from '../../components/Actions';
 import { BarChart } from '../../components/skeleton';
 import Panel, { BoxMask } from '../../components/Panel';
 import { SearchNotFound } from '../../components/table';
 import Chart, { useChart } from '../../components/chart';
-import { DTFechar, ExportExcel } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 //
@@ -300,151 +300,160 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
         </Stack>
       </Stack>
 
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-        <DTFechar title="Filtrar" handleClick={() => onClose()} />
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 3 }}>
-            {tab === 'devolucoes' && (
-              <FilterRG localS="origem" value={origem} setValue={setOrigem} options={['Interna', 'Externa']} />
-            )}
-            {tab === 'conclusao' && (
-              <FilterRG
-                localS="momento"
-                value={momento}
-                setValue={setMomento}
-                options={['Criação no sistema', 'Data de entrada']}
-              />
-            )}
-            {(tab === 'acao' ||
-              tab === 'equipa' ||
-              tab === 'entradas' ||
-              tab === 'colaboradores' ||
-              tab === 'totalTrabalhados' ||
-              tab === 'entradaTrabalhado') && (
-              <FilterRG
-                localS="agrEntradas"
-                value={agrEntradas}
-                setValue={setAgrEntradas}
-                options={['Balcão', 'Estado']}
-              />
-            )}
-            {tab === 'origem' && (
-              <>
+      {open && (
+        <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+          <DTFechar title="Filtrar" handleClick={() => onClose()} />
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 3 }}>
+              {tab === 'devolucoes' && (
+                <FilterRG localS="origem" value={origem} setValue={setOrigem} options={['Interna', 'Externa']} />
+              )}
+              {tab === 'conclusao' && (
                 <FilterRG
-                  localS="agrupamento"
-                  value={agrupamento}
-                  setValue={setAgrupamento}
-                  options={['Unidade orgânica', 'Colaborador']}
+                  localS="momento"
+                  value={momento}
+                  setValue={setMomento}
+                  options={['Criação no sistema', 'Data de entrada']}
                 />
-                <FilterRG localS="top" value={top} setValue={setTop} options={['Todos', 'Top 5', 'Top 10', 'Top 20']} />
-              </>
-            )}
-            {tab === 'data' && (
-              <FilterRG
-                label="Período"
-                localS="periodo"
-                value={periodo}
-                setValue={setPeriodo}
-                options={['Mensal', 'Anual']}
-              />
-            )}
-            {(tab === 'acao' ||
-              tab === 'equipa' ||
-              tab === 'colaboradores' ||
-              tab === 'totalTrabalhados' ||
-              tab === 'entradaTrabalhado') && (
-              <DatePicker
-                value={ano}
-                label="Ano"
-                disableFuture
-                views={['year']}
-                onChange={(newValue) => setDataUtil(newValue, setAno, 'anoIndic', null, '', null)}
-              />
-            )}
-            {(tab === 'data' ||
-              tab === 'tipos' ||
-              tab === 'criacao' ||
-              ((tab === 'acao' ||
+              )}
+              {(tab === 'acao' ||
+                tab === 'equipa' ||
+                tab === 'entradas' ||
+                tab === 'colaboradores' ||
+                tab === 'totalTrabalhados' ||
+                tab === 'entradaTrabalhado') && (
+                <FilterRG
+                  localS="agrEntradas"
+                  value={agrEntradas}
+                  setValue={setAgrEntradas}
+                  options={['Balcão', 'Estado']}
+                />
+              )}
+              {tab === 'origem' && (
+                <>
+                  <FilterRG
+                    localS="agrupamento"
+                    value={agrupamento}
+                    setValue={setAgrupamento}
+                    options={['Unidade orgânica', 'Colaborador']}
+                  />
+                  <FilterRG
+                    localS="top"
+                    value={top}
+                    setValue={setTop}
+                    options={['Todos', 'Top 5', 'Top 10', 'Top 20']}
+                  />
+                </>
+              )}
+              {tab === 'data' && (
+                <FilterRG
+                  label="Período"
+                  localS="periodo"
+                  value={periodo}
+                  setValue={setPeriodo}
+                  options={['Mensal', 'Anual']}
+                />
+              )}
+              {(tab === 'acao' ||
                 tab === 'equipa' ||
                 tab === 'colaboradores' ||
                 tab === 'totalTrabalhados' ||
-                tab === 'entradaTrabalhado') &&
-                agrEntradas === 'Balcão')) && (
-              <FilterAutocomplete
-                value={uo}
-                setValue={setUo}
-                options={uosList}
-                label="Unidade orgânica"
-                disableClearable={tab === 'criacao'}
-              />
-            )}
-            {tab === 'entradas' && agrEntradas === 'Balcão' && (
-              <FilterAutocomplete
-                value={balcao}
-                label="Balcão"
-                disableClearable
-                setValue={setBalcao}
-                options={balcoesList}
-              />
-            )}
-            {haveEstado && (
-              <FilterAutocomplete
-                label="Estado"
-                value={estado}
-                setValue={setEstado}
-                options={estadosList}
-                disableClearable={haveEstado && !perfil && !fluxo}
-              />
-            )}
-            {haveColaborador && (
-              <FilterAutocomplete
-                value={perfil}
-                label="Colaborador"
-                setValue={setPerfil}
-                options={colaboradoresList}
-                disableClearable={tab === 'execucao' && !estado && !fluxo}
-              />
-            )}
-            {(tab === 'conclusao' || tab === 'execucao') && (
-              <FilterAutocomplete
-                value={fluxo}
-                setValue={setFluxo}
-                options={fluxosList}
-                label="Assunto"
-                disableClearable={tab === 'execucao' && !perfil && !estado}
-              />
-            )}
-            {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'acao') && (
-              <FilterSwitch
-                value={entrada}
-                localS="entrada"
-                setValue={setEntrada}
-                label={tab === 'entradaTrabalhado' ? 'Distinto' : 'Entrada'}
-              />
-            )}
-            {havePeriodo && (
-              <Stack direction="row" spacing={1}>
+                tab === 'entradaTrabalhado') && (
                 <DatePicker
+                  value={ano}
+                  label="Ano"
                   disableFuture
-                  value={datai}
-                  label="Data inicial"
-                  slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                  onChange={(newValue) => setDataUtil(newValue, setDatai, 'dataIIndic', setDataf, 'dataFIndic', dataf)}
+                  views={['year']}
+                  onChange={(newValue) => setDataUtil(newValue, setAno, 'anoIndic', null, '', null)}
                 />
-                <DatePicker
-                  disableFuture
-                  value={dataf}
-                  minDate={datai}
-                  disabled={!datai}
-                  label="Data final"
-                  slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
-                  onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFIndic', '', '', '')}
+              )}
+              {(tab === 'data' ||
+                tab === 'tipos' ||
+                tab === 'criacao' ||
+                ((tab === 'acao' ||
+                  tab === 'equipa' ||
+                  tab === 'colaboradores' ||
+                  tab === 'totalTrabalhados' ||
+                  tab === 'entradaTrabalhado') &&
+                  agrEntradas === 'Balcão')) && (
+                <FilterAutocomplete
+                  value={uo}
+                  setValue={setUo}
+                  options={uosList}
+                  label="Unidade orgânica"
+                  disableClearable={tab === 'criacao'}
                 />
-              </Stack>
-            )}
-          </Stack>
-        </DialogContent>
-      </Dialog>
+              )}
+              {tab === 'entradas' && agrEntradas === 'Balcão' && (
+                <FilterAutocomplete
+                  value={balcao}
+                  label="Balcão"
+                  disableClearable
+                  setValue={setBalcao}
+                  options={balcoesList}
+                />
+              )}
+              {haveEstado && (
+                <FilterAutocomplete
+                  label="Estado"
+                  value={estado}
+                  setValue={setEstado}
+                  options={estadosList}
+                  disableClearable={haveEstado && !perfil && !fluxo}
+                />
+              )}
+              {haveColaborador && (
+                <FilterAutocomplete
+                  value={perfil}
+                  label="Colaborador"
+                  setValue={setPerfil}
+                  options={colaboradoresList}
+                  disableClearable={tab === 'execucao' && !estado && !fluxo}
+                />
+              )}
+              {(tab === 'conclusao' || tab === 'execucao') && (
+                <FilterAutocomplete
+                  value={fluxo}
+                  setValue={setFluxo}
+                  options={fluxosList}
+                  label="Assunto"
+                  disableClearable={tab === 'execucao' && !perfil && !estado}
+                />
+              )}
+              {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'acao') && (
+                <FilterSwitch
+                  value={entrada}
+                  localS="entrada"
+                  setValue={setEntrada}
+                  label={tab === 'entradaTrabalhado' ? 'Distinto' : 'Entrada'}
+                />
+              )}
+              {havePeriodo && (
+                <Stack direction="row" spacing={1}>
+                  <DatePicker
+                    disableFuture
+                    value={datai}
+                    label="Data inicial"
+                    slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
+                    onChange={(newValue) =>
+                      setDataUtil(newValue, setDatai, 'dataIIndic', setDataf, 'dataFIndic', dataf)
+                    }
+                  />
+                  <DatePicker
+                    disableFuture
+                    value={dataf}
+                    minDate={datai}
+                    disabled={!datai}
+                    label="Data final"
+                    slotProps={{ field: { clearable: true }, textField: { fullWidth: true } }}
+                    onChange={(newValue) => setDataUtil(newValue, setDataf, 'dataFIndic', '', '', '')}
+                  />
+                </Stack>
+              )}
+            </Stack>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }
@@ -454,8 +463,6 @@ export function FileSystem() {
   const dispatch = useDispatch();
   const { mail, perfilId } = useSelector((state) => state.intranet);
   const { fileSystem, isLoading } = useSelector((state) => state.indicadores);
-  const isNotFound = !fileSystem.length;
-  const chartColors = [theme.palette.primary.main, theme.palette.primary.dark];
   const chartOptions = useChart({
     chart: { offsetY: -16, sparkline: { enabled: true } },
     grid: { padding: { top: 24, bottom: 24 } },
@@ -469,23 +476,15 @@ export function FileSystem() {
           name: { offsetY: 8 },
           value: { offsetY: -50 },
           total: {
-            label: `Usado de ${fData(500000000000)}`,
             color: theme.palette.text.disabled,
+            label: `Usado de ${fData(500000000000)}`,
             fontSize: theme.typography.body2.fontSize,
             fontWeight: theme.typography.body2.fontWeight,
           },
         },
       },
     },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        colorStops: [chartColors].map((colors) => [
-          { offset: 0, color: colors[0] },
-          { offset: 75, color: colors[1] },
-        ]),
-      },
-    },
+    fill: { type: 'gradient', gradient: { type: 'horizontal', opacityTo: 1, stops: [0, 100] } },
   });
 
   const total = { tipo: 'Total', qnt: 0, tamanho: 0, file: 'folder' };
@@ -532,7 +531,7 @@ export function FileSystem() {
     <Card>
       <IndicadorItem
         isLoading={isLoading}
-        isNotFound={isNotFound}
+        isNotFound={!fileSystem.length}
         children={
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} sm={6}>
@@ -834,7 +833,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           sx={{ py: 1.5, bgcolor: detail && 'background.neutral', borderRadius: 1 }}
         >
           <MyAvatar
-            alt={colaborador?.perfil?.displayName}
+            name={colaborador?.perfil?.displayName}
             src={getFile('colaborador', colaborador?.foto_disk)}
             sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
           />
@@ -940,9 +939,9 @@ export function TableExport({ label, label1, dados, total = 0, percentagem = fal
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TabView.propTypes = { vista: PropTypes.string, setVista: PropTypes.func };
+TabView.propTypes = { vista: PropTypes.string, setVista: PropTypes.func, exportar: PropTypes.node };
 
-export function TabView({ vista, setVista }) {
+export function TabView({ vista, setVista, exportar = null }) {
   return (
     <Stack direction="row" justifyContent="right" alignItems="center" spacing={1}>
       <Tabs
@@ -954,7 +953,7 @@ export function TabView({ vista, setVista }) {
           <Tab key={tab} label={tab} value={tab} sx={{ px: 0.5, minHeight: '35px' }} />
         ))}
       </Tabs>
-      {vista === 'Tabela' && <ExportExcel icon filename="Indicadores" table="table-to-xls-tipo" />}
+      {exportar}
     </Stack>
   );
 }
