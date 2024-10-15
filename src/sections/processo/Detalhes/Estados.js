@@ -136,8 +136,8 @@ export default function Estados({ handleAceitar }) {
                       <Pareceres
                         id={processo?.id}
                         estado={row?.estado}
+                        estadoId={row?.estado_id}
                         pareceres={row?.pareceres}
-                        estadoId={processo?.estado_processo?.estado_id}
                         assunto={`${processo?.assunto} - ${processo?.titular}`}
                       />
                     ) : (

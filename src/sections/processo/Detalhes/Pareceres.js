@@ -40,10 +40,6 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
     dispatch(selectParecer(item));
   };
 
-  const handleClose = () => {
-    dispatch(closeModal());
-  };
-
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
   };
@@ -51,6 +47,8 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
   const viewAnexo = (anexo, transicaoId, parecerId) => {
     dispatch(getAnexo('fileDownload', { mail, perfilId, anexo, transicaoId, parecerId }));
   };
+
+  console.log(pareceres);
 
   return (
     <Box sx={{ pb: 3 }}>
@@ -66,7 +64,7 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
           parecer={{ ...row, estado, observacao: row?.descritivo }}
         />
       ))}
-      {isOpenModal1 && <ParecerForm onCancel={handleClose} processoId={id} />}
+      {isOpenModal1 && <ParecerForm onCancel={() => dispatch(closeModal())} processoId={id} />}
     </Box>
   );
 }
