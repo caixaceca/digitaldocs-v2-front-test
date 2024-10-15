@@ -84,14 +84,17 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
     localStorage.getItem('anoIndic') ? add(new Date(localStorage.getItem('anoIndic')), { hours: 2 }) : new Date()
   );
   const { mail, perfilId, cc, uos, colaboradores } = useSelector((state) => state.intranet);
-  const { isAdmin, meusAmbientes, fluxos, estados } = useSelector((state) => state.parametrizacao);
+  const { isAdmin, isAuditoria, meusAmbientes, fluxos, estados } = useSelector((state) => state.parametrizacao);
 
   const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
   const [fluxo, setFluxo] = useState(
     fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic'))) || null
   );
 
-  const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
+  const uosList = useMemo(
+    () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'id'),
+    [cc, isAdmin, isAuditoria, meusAmbientes, uos]
+  );
   const [uo, setUo] = useState(
     uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoIndic'))) ||
       uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
@@ -99,8 +102,8 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   );
 
   const balcoesList = useMemo(
-    () => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'balcao'),
-    [cc, isAdmin, meusAmbientes, uos]
+    () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'balcao'),
+    [cc, isAdmin, isAuditoria, meusAmbientes, uos]
   );
   const [balcao, setBalcao] = useState(
     balcoesList?.find((row) => Number(row?.id) === Number(localStorage.getItem('balcaoIndic'))) ||
@@ -109,8 +112,8 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   );
 
   const estadosList = useMemo(
-    () => EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes),
-    [cc, estados, isAdmin, meusAmbientes, uos]
+    () => EstadosAcesso(uos, cc, isAdmin || isAuditoria, estados, meusAmbientes),
+    [cc, estados, isAdmin, isAuditoria, meusAmbientes, uos]
   );
   const [estado, setEstado] = useState(
     estadosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic'))) || null
@@ -119,9 +122,11 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   const colaboradoresList = useMemo(
     () =>
       uo?.id && tab !== 'execucao' && tab !== 'conclusao'
-        ? ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.filter((row) => row?.uoId === uo?.id)
-        : ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes),
-    [cc, colaboradores, isAdmin, meusAmbientes, tab, uo?.id]
+        ? ColaboradoresAcesso(colaboradores, cc, isAdmin || isAuditoria, meusAmbientes)?.filter(
+            (row) => row?.uoId === uo?.id
+          )
+        : ColaboradoresAcesso(colaboradores, cc, isAdmin || isAuditoria, meusAmbientes),
+    [cc, colaboradores, isAdmin, isAuditoria, meusAmbientes, tab, uo?.id]
   );
   const [perfil, setPerfil] = useState(
     colaboradoresList?.find((row) => Number(row?.id) === Number(localStorage.getItem('colaboradorIndic'))) ||

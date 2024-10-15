@@ -53,7 +53,7 @@ export default function Processo() {
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { mail, uos, perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { processo, done, error, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
-  const { meusacessos, meusAmbientes, isAdmin, auditoriaProcesso, colaboradoresEstado } = useSelector(
+  const { meusacessos, meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector(
     (state) => state.parametrizacao
   );
   const historico = useMemo(
@@ -139,20 +139,18 @@ export default function Processo() {
             { value: 'Retenções', component: <TableDetalhes id={processo?.id} item="hretencoes" /> },
             { value: 'Pendências', component: <TableDetalhes id={processo?.id} item="hpendencias" /> },
             { value: 'Atribuições', component: <TableDetalhes id={processo?.id} item="hatribuicoes" /> },
+            { value: 'Confidencialidades', component: <TableDetalhes id={processo?.id} item="confidencialidades" /> },
           ]
         : []),
-      ...(processo?.versao !== 'v1' && !historico
-        ? [{ value: 'Confidencialidades', component: <TableDetalhes id={processo?.id} item="confidencialidades" /> }]
-        : []),
-      ...(processo && !historico && (isAdmin || auditoriaProcesso)
+      ...(processo && !historico && (isAdmin || isAuditoria)
         ? [{ value: 'Versões', component: <Versoes id={id} /> }]
         : []),
-      ...(processo && !historico && (isAdmin || auditoriaProcesso)
+      ...(processo && !historico && (isAdmin || isAuditoria)
         ? [{ value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> }]
         : []),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, isAdmin, auditoriaProcesso, processo]
+    [id, isAdmin, isAuditoria, processo]
   );
 
   useEffect(() => {

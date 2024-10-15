@@ -44,7 +44,7 @@ DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object 
 
 export default function DetalhesProcesso({ isPS, processo }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const { origens, isAdmin } = useSelector((state) => state.parametrizacao);
+  const { origens, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
 
   const con = useMemo(() => processo?.con || null, [processo?.con]);
   const credito = useMemo(() => processo?.credito || null, [processo?.credito]);
@@ -66,7 +66,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
         <ListItem disableGutters divider sx={{ pb: 0.5 }}>
           <Typography variant="subtitle1">Processo</Typography>
         </ListItem>
-        {isAdmin && <TextItem title="Versão:" text={processo?.versao} />}
+        {isAdmin || isAuditoria ? <TextItem title="Versão:" text={processo?.versao} /> : ''}
         <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
         <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
         <TextItem title="Assunto:" text={processo?.assunto} />

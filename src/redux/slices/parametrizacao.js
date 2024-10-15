@@ -17,8 +17,8 @@ const initialState = {
   isLoading: false,
   isOpenView: false,
   isOpenModal: false,
+  isAuditoria: false,
   confirmarCartoes: false,
-  auditoriaProcesso: false,
   arquivarProcessos: false,
   fluxo: null,
   acesso: null,
@@ -157,8 +157,8 @@ const slice = createSlice({
         if (acesso === 'arquivar-processo-110') {
           state.arquivarProcessos = true;
         }
-        if (acesso === 'auditoria-processo-100') {
-          state.auditoriaProcesso = true;
+        if (acesso === 'auditoria-100') {
+          state.isAuditoria = true;
         }
       });
     },

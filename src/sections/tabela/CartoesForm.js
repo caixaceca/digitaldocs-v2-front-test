@@ -281,8 +281,8 @@ export function BalcaoEntregaForm({ onCancel }) {
           updateItem('alterar balcao', JSON.stringify({ balcaoEntrega: values?.balcao?.id }), {
             mail,
             id: selectedItem.id,
-            msg: 'balcao alterado',
             balcao: values?.balcao?.id,
+            msg: 'Balcão de entrega alterado',
           })
         );
       }

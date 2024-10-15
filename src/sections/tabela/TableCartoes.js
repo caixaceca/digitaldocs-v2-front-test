@@ -1,5 +1,4 @@
 import { sub, format } from 'date-fns';
-import { useSnackbar } from 'notistack';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -27,6 +26,7 @@ import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
+import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -75,7 +75,6 @@ export default function TableCartoes() {
   });
   const dispatch = useDispatch();
   const [uo, setUo] = useState(null);
-  const { enqueueSnackbar } = useSnackbar();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
@@ -85,18 +84,18 @@ export default function TableCartoes() {
   const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
   const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
   const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
-  const { isAdmin, confirmarCartoes, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { isAdmin, isAuditoria, confirmarCartoes, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { cartoes, done, error, isLoading, isOpenModal, isOpenModal1 } = useSelector((state) => state.digitaldocs);
   const uosList = useMemo(
     () =>
       UosAcesso(
         uos?.filter((row) => row?.tipo === 'Agências'),
         cc,
-        fase === 'Emissão' || isAdmin,
+        fase === 'Emissão' || isAdmin || isAuditoria,
         meusAmbientes,
         'balcao'
       ),
-    [cc, isAdmin, meusAmbientes, fase, uos]
+    [cc, isAdmin, isAuditoria, meusAmbientes, fase, uos]
   );
   const acessoDop = useMemo(() => fase === 'Emissão' && cc?.uo?.label === 'DOP-CE', [cc?.uo?.label, fase]);
   const acessoAgencia = useMemo(
@@ -106,7 +105,6 @@ export default function TableCartoes() {
 
   useEffect(() => {
     if (done === 'Receção dos cartões confirmada' || done === 'Confirmação anulada') {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       onClose();
       onClose1();
       onClose2();
@@ -121,19 +119,9 @@ export default function TableCartoes() {
           })
         );
       }
-    } else if (done === 'balcao alterado') {
-      enqueueSnackbar('Balcão de entrega alterado com sucesso', { variant: 'success' });
-      handleCloseModal();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
-
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
 
   useEffect(() => {
     if (fase === 'Receção' && uosList?.length > 0 && !uosList?.map((row) => row?.id)?.includes(uo?.id)) {
@@ -159,7 +147,7 @@ export default function TableCartoes() {
   }, [dispatch, datai, dataf, fase, mail]);
 
   useEffect(() => {
-    if (mail && datai && fase === 'Receção') {
+    if (mail && datai && uo?.id && fase === 'Receção') {
       dispatch(
         getAll(fase, {
           mail,
@@ -208,22 +196,9 @@ export default function TableCartoes() {
     [dataFiltered, fase]
   );
 
-  const handleViewRow = (id) => {
-    dispatch(openDetalhes());
-    dispatch(getAll('cartao', { mail, id }));
-  };
-
-  const handleUpdate = (item) => {
-    dispatch(openModal('update'));
-    dispatch(selectItem(item));
-  };
-
-  const handleCloseModal = () => {
-    dispatch(closeModal());
-  };
-
   return (
     <>
+      <Notificacao done={done} error={error} afterSuccess={() => dispatch(closeModal())} />
       <HeaderBreadcrumbs
         sx={{ px: 1 }}
         heading="Receção de cartões"
@@ -241,7 +216,7 @@ export default function TableCartoes() {
               setSelected={setSelected}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
-              {(isAdmin || cc?.uo?.tipo === 'Agências') && (
+              {(isAdmin || isAuditoria || cc?.uo?.tipo === 'Agências') && (
                 <Autocomplete
                   fullWidth
                   size="small"
@@ -329,9 +304,22 @@ export default function TableCartoes() {
                         <TableCell width={10}>
                           <Stack direction="row" spacing={0.75} justifyContent="right">
                             {!row.rececao_validado && (isAdmin || (confirmarCartoes && acessoDop)) && (
-                              <DefaultAction label="EDITAR" handleClick={() => handleUpdate(row)} color="warning" />
+                              <DefaultAction
+                                label="EDITAR"
+                                color="warning"
+                                handleClick={() => {
+                                  dispatch(openModal('update'));
+                                  dispatch(selectItem(row));
+                                }}
+                              />
                             )}
-                            <DefaultAction label="DETALHES" handleClick={() => handleViewRow(row?.id)} />
+                            <DefaultAction
+                              label="DETALHES"
+                              handleClick={() => {
+                                dispatch(openDetalhes());
+                                dispatch(getAll('cartao', { mail, id: row?.id }));
+                              }}
+                            />
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -360,9 +348,8 @@ export default function TableCartoes() {
         )}
       </Card>
 
-      {isOpenModal1 && <Detalhes closeModal={handleCloseModal} />}
-      {isOpenModal && <BalcaoEntregaForm onCancel={handleCloseModal} />}
-      {open1 && <ConfirmarPorDataForm balcao={uo} fase={fase} datai={datai} onCancel={onClose1} dataf={dataf} />}
+      {isOpenModal1 && <Detalhes closeModal={() => dispatch(closeModal())} />}
+      {isOpenModal && <BalcaoEntregaForm onCancel={() => dispatch(closeModal())} />}
       {open && (
         <ValidarMultiploForm
           fase={fase}
@@ -375,6 +362,7 @@ export default function TableCartoes() {
           }
         />
       )}
+      {open1 && <ConfirmarPorDataForm balcao={uo} fase={fase} datai={datai} onCancel={onClose1} dataf={dataf} />}
       {open2 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
         <AnularForm uo={uo} fase={fase} dense={dense} uosList={uosList} onCancel={onClose2} cartoes={dadosValidados} />
       )}

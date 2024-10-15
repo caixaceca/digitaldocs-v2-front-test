@@ -355,72 +355,59 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      {processo?.versao !== 'v1' || podeAtribuir || podeColocarPendente ? (
-        <Stack spacing={3}>
-          {/* CONFIDENCILAIDADE */}
-          {processo?.versao !== 'v1' && (
-            <Stack>
-              <Accordion
-                expanded={values?.confidencial}
-                onChange={() => setValue('confidencial', !values?.confidencial)}
-              >
-                <AccordionSummary sx={{ py: 0.75 }}>Confidencialidade</AccordionSummary>
-                <AccordionDetails sx={{ pt: 2 }}>
-                  <Confidencialidade
-                    perfisIncluidos="perfis_incluidos"
-                    perfisExcluidos="perfis_excluidos"
-                    estadosIncluidos="estados_incluidos"
-                    estadosExcluidos="estados_excluidos"
-                  />
-                </AccordionDetails>
-              </Accordion>
-            </Stack>
-          )}
-
-          {/* ATRIBUIÇÃO */}
-          {podeAtribuir && (
-            <Stack>
-              <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
-                <AccordionSummary sx={{ py: 0.75 }}>Atribuir processo</AccordionSummary>
-                <AccordionDetails sx={{ pt: 2 }}>
-                  <RHFAutocompleteObject name="colaborador" label="Colaborador" options={colaboradoresList} />
-                </AccordionDetails>
-              </Accordion>
-            </Stack>
-          )}
-
-          {/* PENDÊNCIA */}
-          {podeColocarPendente && (
-            <Stack>
-              <Accordion expanded={values?.pendente} onChange={() => setValue('pendente', !values?.pendente)}>
-                <AccordionSummary sx={{ py: 0.75 }}>Enviar como pendente</AccordionSummary>
-                <AccordionDetails sx={{ pt: paraLevantamento(processo?.assunto) ? 2 : 0 }}>
-                  {paraLevantamento(processo?.assunto) && (
-                    <RHFSwitch otherSx={{ mt: 0 }} name="pendenteLevantamento" label="Pendente de levantamento" />
-                  )}
-                  {!values?.pendenteLevantamento && (
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 2 }}>
-                      <RHFAutocompleteObject
-                        label="Motivo"
-                        name="motivo_pendencia"
-                        options={motivosPendencia}
-                        sx={{ width: { sm: '50%' } }}
-                      />
-                      <RHFTextField name="mobs" label="Observação pendência" />
-                    </Stack>
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            </Stack>
-          )}
+      <Stack spacing={3}>
+        {/* CONFIDENCILAIDADE */}
+        <Stack>
+          <Accordion expanded={values?.confidencial} onChange={() => setValue('confidencial', !values?.confidencial)}>
+            <AccordionSummary sx={{ py: 0.75 }}>Confidencialidade</AccordionSummary>
+            <AccordionDetails sx={{ pt: 2 }}>
+              <Confidencialidade
+                perfisIncluidos="perfis_incluidos"
+                perfisExcluidos="perfis_excluidos"
+                estadosIncluidos="estados_incluidos"
+                estadosExcluidos="estados_excluidos"
+              />
+            </AccordionDetails>
+          </Accordion>
         </Stack>
-      ) : (
-        <Stack sx={{ textAlign: 'center', color: 'text.secondary', typography: 'body2', py: 2 }}>
-          O encaminhamento deste processo, neste estado, não permite a adição de mais informações,
-          <br />
-          Podes ignorar este passo e continuar com o encaminhamento.
-        </Stack>
-      )}
+
+        {/* ATRIBUIÇÃO */}
+        {podeAtribuir && (
+          <Stack>
+            <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
+              <AccordionSummary sx={{ py: 0.75 }}>Atribuir processo</AccordionSummary>
+              <AccordionDetails sx={{ pt: 2 }}>
+                <RHFAutocompleteObject name="colaborador" label="Colaborador" options={colaboradoresList} />
+              </AccordionDetails>
+            </Accordion>
+          </Stack>
+        )}
+
+        {/* PENDÊNCIA */}
+        {podeColocarPendente && (
+          <Stack>
+            <Accordion expanded={values?.pendente} onChange={() => setValue('pendente', !values?.pendente)}>
+              <AccordionSummary sx={{ py: 0.75 }}>Enviar como pendente</AccordionSummary>
+              <AccordionDetails sx={{ pt: paraLevantamento(processo?.assunto) ? 2 : 0 }}>
+                {paraLevantamento(processo?.assunto) && (
+                  <RHFSwitch otherSx={{ mt: 0 }} name="pendenteLevantamento" label="Pendente de levantamento" />
+                )}
+                {!values?.pendenteLevantamento && (
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 2 }}>
+                    <RHFAutocompleteObject
+                      label="Motivo"
+                      name="motivo_pendencia"
+                      options={motivosPendencia}
+                      sx={{ width: { sm: '50%' } }}
+                    />
+                    <RHFTextField name="mobs" label="Observação pendência" />
+                  </Stack>
+                )}
+              </AccordionDetails>
+            </Accordion>
+          </Stack>
+        )}
+      </Stack>
       <ButtonsStepper
         label="Enviar"
         labelCancel="Voltar"
@@ -483,20 +470,16 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
     try {
       const formData = [];
       values?.destinos_par?.forEach((row) => {
-        if (processo?.versao === 'v1') {
-          formData?.push({ observacao: row?.observacao, transicao_id: row?.estado?.id });
-        } else {
-          formData?.push({
-            observacao: row?.observacao,
-            transicao_id: row?.estado?.id,
-            confidencia: {
-              perfis_incluidos: confidenciaIds(row, 'perfis_incluidos'),
-              perfis_excluidos: confidenciaIds(row, 'perfis_excluidos'),
-              estados_incluidos: confidenciaIds(row, 'estados_incluidos'),
-              estados_excluidos: confidenciaIds(row, 'estados_excluidos'),
-            },
-          });
-        }
+        formData?.push({
+          observacao: row?.observacao,
+          transicao_id: row?.estado?.id,
+          confidencia: {
+            perfis_incluidos: confidenciaIds(row, 'perfis_incluidos'),
+            perfis_excluidos: confidenciaIds(row, 'perfis_excluidos'),
+            estados_incluidos: confidenciaIds(row, 'estados_incluidos'),
+            estados_excluidos: confidenciaIds(row, 'estados_excluidos'),
+          },
+        });
       });
       dispatch(
         updateItem('encaminhar paralelo', JSON.stringify(formData), {
@@ -541,23 +524,21 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
                       />
                     </Stack>
                   </Grid>
-                  {processo?.versao !== 'v1' && (
-                    <Grid item xs={12}>
-                      <RHFSwitch
-                        otherSx={{ mt: 0 }}
-                        label="Confidencialidade"
-                        name={`destinos_par[${index}].confidencial`}
+                  <Grid item xs={12}>
+                    <RHFSwitch
+                      otherSx={{ mt: 0 }}
+                      label="Confidencialidade"
+                      name={`destinos_par[${index}].confidencial`}
+                    />
+                    {values?.destinos_par?.[index]?.confidencial && (
+                      <Confidencialidade
+                        perfisIncluidos={`destinos_par[${index}].perfis_incluidos`}
+                        perfisExcluidos={`destinos_par[${index}].perfis_excluidos`}
+                        estadosIncluidos={`destinos_par[${index}].estados_incluidos`}
+                        estadosExcluidos={`destinos_par[${index}].estados_excluidos`}
                       />
-                      {values?.destinos_par?.[index]?.confidencial && (
-                        <Confidencialidade
-                          perfisIncluidos={`destinos_par[${index}].perfis_incluidos`}
-                          perfisExcluidos={`destinos_par[${index}].perfis_excluidos`}
-                          estadosIncluidos={`destinos_par[${index}].estados_incluidos`}
-                          estadosExcluidos={`destinos_par[${index}].estados_excluidos`}
-                        />
-                      )}
-                    </Grid>
-                  )}
+                    )}
+                  </Grid>
                 </Grid>
               </Box>
               {fields?.length > 2 && (

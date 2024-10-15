@@ -9,7 +9,7 @@ export const objetos = [
   { id: 'acesso', label: 'Acesso' },
   { id: 'arquivo', label: 'Arquivo' },
   { id: 'arquivar-processo', label: 'Arquivar processo' },
-  { id: 'auditoria-processo', label: 'Auditoria processo' },
+  { id: 'auditoria', label: 'Auditoria' },
   { id: 'contratos', label: 'Contratos' },
   { id: 'rececao-cartoes', label: 'Confirmar receção de cartões' },
   { id: 'estado', label: 'Estado' },

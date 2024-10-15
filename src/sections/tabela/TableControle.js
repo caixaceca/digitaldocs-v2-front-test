@@ -53,9 +53,12 @@ export default function TableControle({ from }) {
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorC') || null);
 
   const { dadosControle, isLoading } = useSelector((state) => state.digitaldocs);
-  const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
   const { mail, perfilId, cc, colaboradores, uos } = useSelector((state) => state.intranet);
-  const uosList = useMemo(() => UosAcesso(uos, cc, isAdmin, meusAmbientes, 'id'), [cc, isAdmin, meusAmbientes, uos]);
+  const uosList = useMemo(
+    () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'id'),
+    [cc, isAdmin, isAuditoria, meusAmbientes, uos]
+  );
   const [uo, setUo] = useState(
     uosList?.find((row) => row?.id === Number(localStorage.getItem('uoC'))) ||
       uosList?.find((row) => row?.id === cc?.uo?.id) ||
@@ -196,7 +199,9 @@ export default function TableControle({ from }) {
           assuntosList={dados?.assuntosList || []}
           colaboradoresList={
             (from === 'Trabalhados' &&
-              ColaboradoresAcesso(dados?.colaboradoresList, cc, isAdmin, meusAmbientes)?.map((row) => row?.label)) ||
+              ColaboradoresAcesso(dados?.colaboradoresList, cc, isAdmin || isAuditoria, meusAmbientes)?.map(
+                (row) => row?.label
+              )) ||
             dados?.colaboradoresList ||
             []
           }

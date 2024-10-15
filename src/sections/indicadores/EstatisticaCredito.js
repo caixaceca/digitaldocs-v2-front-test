@@ -56,7 +56,7 @@ const frSegmentoStyle = { pl: '12px !important', typography: 'subtitle2' };
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
   const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
-  const { meusAmbientes, isAdmin } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
   const [data, setData] = useState(getDataLS('dataEst', new Date()));
   const [vista, setVista] = useState(localStorage.getItem('vistaEst') || 'Mensal');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
@@ -69,11 +69,11 @@ export default function EstatisticaCredito() {
       UosAcesso(
         uos?.filter((item) => item?.tipo === 'Agências'),
         cc,
-        isAdmin,
+        isAdmin || isAuditoria,
         meusAmbientes,
         'id'
       ),
-    [cc, isAdmin, meusAmbientes, uos]
+    [cc, isAdmin, isAuditoria, meusAmbientes, uos]
   );
   const [uo, setUo] = useState(
     uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoEst'))) ||

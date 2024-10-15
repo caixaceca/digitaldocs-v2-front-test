@@ -20,7 +20,7 @@ import { TableCON, TableControle, TableCartoes } from '../sections/tabela';
 export default function Controle() {
   const { themeStretch } = useSettings();
   const { cc } = useSelector((state) => state.intranet);
-  const { isAdmin, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
+  const { isAdmin, isAuditoria, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     if (cc?.uo?.id && !localStorage.getItem('uoSearch')) {
@@ -37,7 +37,7 @@ export default function Controle() {
   const tabsList = useMemo(
     () =>
       [
-        ...(isAdmin || estadoInicial(meusAmbientes)
+        ...(isAdmin || isAuditoria || estadoInicial(meusAmbientes)
           ? [
               { value: 'Entradas', component: <TableControle from="Entradas" /> },
               { value: 'Por concluir', component: <TableControle from="Por concluir" /> },
@@ -46,17 +46,18 @@ export default function Controle() {
           : []),
         { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
         ...(isAdmin ||
+        isAuditoria ||
         cc?.uo?.tipo === 'Agências' ||
         cc?.uo?.label === 'DOP-CE' ||
         temAcesso(['emissao-cartoes-100'], meusacessos)
           ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
-        ...(isAdmin || cc?.uo?.label === 'GFC' ? [{ value: 'CON', component: <TableCON /> }] : []),
-        ...(isAdmin || temAcesso(['pjf-100'], meusacessos)
+        ...(isAdmin || isAuditoria || cc?.uo?.label === 'GFC' ? [{ value: 'CON', component: <TableCON /> }] : []),
+        ...(isAdmin || isAuditoria || temAcesso(['pjf-100'], meusacessos)
           ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
           : []),
       ] || [],
-    [meusAmbientes, meusacessos, isAdmin, cc?.uo]
+    [meusAmbientes, meusacessos, isAdmin, isAuditoria, cc?.uo]
   );
 
   const [currentTab, setCurrentTab] = useState(

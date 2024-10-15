@@ -143,12 +143,12 @@ export function EntradasTrabalhados({ indicadores }) {
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { isLoading } = useSelector((state) => state.indicadores);
   const { cc, colaboradores } = useSelector((state) => state.intranet);
-  const { isAdmin, meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { isAdmin, isAuditoria, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const [detail, setDetail] = useState(localStorage.getItem('detail') === 'true');
 
   const colaboradoresAcesso = useMemo(
-    () => ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes)?.map((row) => row?.id),
-    [cc, colaboradores, isAdmin, meusAmbientes]
+    () => ColaboradoresAcesso(colaboradores, cc, isAdmin || isAuditoria, meusAmbientes)?.map((row) => row?.id),
+    [cc, colaboradores, isAdmin, isAuditoria, meusAmbientes]
   );
   const dadosByColaborador = useMemo(
     () =>
