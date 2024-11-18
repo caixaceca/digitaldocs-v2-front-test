@@ -7,21 +7,21 @@ import Skeleton from '@mui/material/Skeleton';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // utils
-import { fYear } from '../utils/formatTime';
+import { fYear } from '../../utils/formatTime';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromCC, updateItemCC, closeModalAnexo } from '../redux/slices/cc';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
+import { getFromCC, updateItemCC, closeModalAnexo } from '../../redux/slices/cc';
 // routes
-import { PATH_DIGITALDOCS } from '../routes/paths';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // components
-import Page from '../components/Page';
-import { SearchNotFound404 } from '../components/table';
-import { DialogConfirmar } from '../components/CustomDialog';
-import { Notificacao } from '../components/NotistackProvider';
-import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
+import Page from '../../components/Page';
+import { SearchNotFound404 } from '../../components/table';
+import { DialogConfirmar } from '../../components/CustomDialog';
+import { Notificacao } from '../../components/NotistackProvider';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import {
   PedidoSteps,
@@ -32,9 +32,9 @@ import {
   Responsabilidades,
   DespesasProponente,
   EntidadesRelacionadas,
-} from '../sections/credito-colaborador/Form';
+} from '../../sections/credito-colaborador/Form';
 // guards
-import RoleBasedGuard from '../guards/RoleBasedGuard';
+import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -48,43 +48,35 @@ export default function EditarPedidoCC() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { perfilId } = useSelector((state) => state.intranet);
   const { isLoading, pedidoCC, activeStep, tipoItem, garantiaId, entidadeId, itemId, isSaving, done, error } =
     useSelector((state) => state.cc);
   const completed = activeStep === STEPS.length;
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getFromCC('pedido cc', { id, perfilId, mail }));
-    }
-  }, [dispatch, id, perfilId, mail]);
+    dispatch(getFromCC('pedido cc', { id }));
+  }, [dispatch, id]);
 
   useEffect(() => {
-    if (mail && perfilId) {
-      dispatch(getFromCC('despesas', { mail }));
-      dispatch(getFromCC('anexos ativos', { mail }));
-    }
-  }, [dispatch, perfilId, mail]);
+    dispatch(getFromCC('despesas'));
+    dispatch(getFromCC('anexos ativos'));
+  }, [dispatch]);
 
   useEffect(() => {
-    if (mail && perfilId) {
-      dispatch(getFromParametrizacao('linhas', { perfilId, mail }));
-    }
-  }, [dispatch, perfilId, mail]);
+    dispatch(getFromParametrizacao('linhas'));
+  }, [dispatch]);
 
   useEffect(() => {
-    if (mail && pedidoCC?.fluxo_id) {
-      dispatch(getFromCC('anexos processo', { mail, fluxoId: pedidoCC?.fluxo_id }));
+    if (pedidoCC?.fluxo_id) {
+      dispatch(getFromCC('anexos processo', { fluxoId: pedidoCC?.fluxo_id }));
     }
-  }, [dispatch, pedidoCC?.fluxo_id, mail]);
+  }, [dispatch, pedidoCC?.fluxo_id]);
 
   const handleConfirmeDelete = async () => {
     try {
       dispatch(
         updateItemCC(tipoItem, null, {
-          mail,
           itemId,
-          perfilId,
           entidadeId,
           garantiaId,
           processoId: pedidoCC?.id,
@@ -157,12 +149,12 @@ export default function EditarPedidoCC() {
                   </>
                 ) : (
                   <RoleBasedGuard
-                    apChild
                     hasContent
+                    showChildren
                     roles={['XXXXX']}
                     children={
                       <Typography sx={{ color: 'text.secondary' }}>
-                        O processo não te pertence, ou tens de o aceitar primeiro...
+                        Este processo não pertence a nenhum dos teus estados, ou tens de o aceitar primeiro...
                       </Typography>
                     }
                   />

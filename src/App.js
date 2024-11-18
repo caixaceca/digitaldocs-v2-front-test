@@ -8,7 +8,7 @@ import Router from './routes';
 // theme
 import ThemeProvider from './theme';
 // components
-import LoginPage from './pages/auth/Login';
+import LoginPage from './pages/Login';
 import { StyledChart } from './components/chart';
 import ThemeSettings from './components/settings';
 import ScrollToTop from './components/ScrollToTop';

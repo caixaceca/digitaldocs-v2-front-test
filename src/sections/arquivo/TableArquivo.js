@@ -102,7 +102,7 @@ export default function TableArquivo({ tab }) {
   });
 
   useEffect(() => {
-    dispatch(resetItem('arquivos'));
+    dispatch(resetItem({ item: 'arquivos', tipo: 'array' }));
     dispatch(
       getAll(tab, {
         mail,

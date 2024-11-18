@@ -31,18 +31,12 @@ const slice = createSlice({
     },
 
     resetItem(state, action) {
-      switch (action.payload) {
-        case 'indicadores':
-          state.totalP = null;
-          state.indicadores = [];
-          break;
-        case 'estCredito':
-          state.resumoEstCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
-          state.estCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
-          break;
-
-        default:
-          break;
+      const { item } = action.payload;
+      if (item === 'estCredito') {
+        state.resumoEstCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
+        state.estCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
+      } else {
+        state[item] = action.payload?.tipo === 'array' ? [] : null;
       }
     },
 
@@ -97,7 +91,7 @@ export const { resetItem, setLoading } = slice.actions;
 export function getIndicadores(item, params) {
   return async (dispatch) => {
     dispatch(slice.actions.setLoading(true));
-    dispatch(slice.actions.resetItem('indicadores'));
+    dispatch(slice.actions.resetItem({ item: 'indicadores', tipo: 'array' }));
     try {
       const options = { headers: { cc: params?.mail } };
       const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${

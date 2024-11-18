@@ -58,33 +58,31 @@ export default function Views({ id, from = '', isLoading }) {
             viewsGroupByColaborador?.map((row, index) => {
               const colaborador = colaboradores?.find((colab) => colab.perfil_id === row.perfilId);
               return (
-                <Stack key={`view_${index}`}>
-                  <Accordion expanded={accord === row.perfilId} onChange={handleAccord(row.perfilId)}>
-                    <AccordionSummary>
-                      <Stack direction="row" alignItems="center" sx={{ flexGrow: 1 }} justifyContent="space-between">
-                        <ColaboradorInfo
-                          foto={colaborador?.foto_disk}
-                          label={colaborador?.uo?.label}
-                          status={colaborador?.presence}
-                          nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
-                        />
-                        <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>
-                          <Typography variant="subtitle1">{row?.views?.length}</Typography>
-                          <Typography variant="body2">visualizaç{row?.views?.length > 1 ? 'ões' : 'ão'}</Typography>
-                        </Stack>
+                <Accordion expanded={accord === row.perfilId} onChange={handleAccord(row.perfilId)} key={`vw_${index}`}>
+                  <AccordionSummary>
+                    <Stack direction="row" alignItems="center" sx={{ flexGrow: 1 }} justifyContent="space-between">
+                      <ColaboradorInfo
+                        foto={colaborador?.foto_disk}
+                        label={colaborador?.uo?.label}
+                        status={colaborador?.presence}
+                        nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
+                      />
+                      <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>
+                        <Typography variant="subtitle1">{row?.views?.length}</Typography>
+                        <Typography variant="body2">visualizaç{row?.views?.length > 1 ? 'ões' : 'ão'}</Typography>
                       </Stack>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Stack useFlexGap flexWrap="wrap" direction="row" spacing={2} sx={{ pt: 1 }}>
-                        {row?.views?.map((view, index) => (
-                          <Label key={`view_${view?.visto_em}_${index}`}>
-                            {ptDateTime(view?.visto_em || view?.data_leitura)}
-                          </Label>
-                        ))}
-                      </Stack>
-                    </AccordionDetails>
-                  </Accordion>
-                </Stack>
+                    </Stack>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Stack useFlexGap flexWrap="wrap" direction="row" spacing={2} sx={{ pt: 1 }}>
+                      {row?.views?.map((view, index) => (
+                        <Label key={`view_${view?.visto_em}_${index}`}>
+                          {ptDateTime(view?.visto_em || view?.data_leitura)}
+                        </Label>
+                      ))}
+                    </Stack>
+                  </AccordionDetails>
+                </Accordion>
               );
             })
           )}

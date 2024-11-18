@@ -173,3 +173,13 @@ export function subtractArrays(a1, a2) {
   });
   return arr;
 }
+
+// ----------------------------------------------------------------------
+
+export function transicoesList(transicoes, estados) {
+  return transicoes?.map((row) => ({
+    ...row,
+    estado_final: estados?.find((item) => item.id === row.estado_final_id)?.nome,
+    estado_inicial: estados?.find((item) => item.id === row.estado_inicial_id)?.nome,
+  }));
+}

@@ -5,9 +5,9 @@ import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // components
-import Page from '../../components/Page';
+import Page from '../components/Page';
 // assets
-import { PageNotFoundIllustration } from '../../assets';
+import { PageNotFoundIllustration } from '../assets';
 
 // ----------------------------------------------------------------------
 

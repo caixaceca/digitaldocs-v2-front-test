@@ -17,7 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { emailCheck } from '../../utils/validarAcesso';
-import { subtractArrays } from '../../utils/formatText';
+import { subtractArrays, transicoesList } from '../../utils/formatText';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -52,7 +52,7 @@ FluxoForm.propTypes = { onCancel: PropTypes.func };
 export function FluxoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { perfilId } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
@@ -88,9 +88,9 @@ export function FluxoForm({ onCancel }) {
   const onSubmit = async () => {
     try {
       if (selectedItem) {
-        dispatch(updateItem('fluxo', JSON.stringify(values), { mail, id: selectedItem?.id, msg: 'Fluxo atualizado' }));
+        dispatch(updateItem('fluxo', JSON.stringify(values), { id: selectedItem?.id, msg: 'Fluxo atualizado' }));
       } else {
-        dispatch(createItem('fluxo', JSON.stringify(values), { mail, msg: 'Fluxo adicionado' }));
+        dispatch(createItem('fluxo', JSON.stringify(values), { msg: 'Fluxo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -110,23 +110,25 @@ export function FluxoForm({ onCancel }) {
               <Grid item xs={12} sm={6}>
                 <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid item xs={6} sm={isEdit ? 3 : 6}>
                 <RHFSwitch name="is_interno" label="Interno" />
               </Grid>
-              <Grid item xs={6} sm={3}>
-                <RHFSwitch name="is_ativo" label="Ativo" />
-              </Grid>
+              {isEdit && (
+                <Grid item xs={6} sm={3}>
+                  <RHFSwitch name="is_ativo" label="Ativo" />
+                </Grid>
+              )}
               <Grid item xs={6}>
                 <RHFSwitch name="is_credito" label="Crédito" />
               </Grid>
               <Grid item xs={6}>
-                <RHFSwitch name="credito_funcionario" label="Crédito colaborador" />
+                <RHFSwitch name="credito_funcionario" label="Cré. colaborador" />
               </Grid>
               <Grid item xs={6}>
                 <RHFSwitch name="limpo" label="Limpo" />
               </Grid>
               <Grid item xs={6}>
-                <RHFSwitch name="is_con" label="Com. Operação Numerário" />
+                <RHFSwitch name="is_con" label="CON" />
               </Grid>
               <Grid item xs={12}>
                 <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
@@ -147,7 +149,7 @@ ClonarFluxoForm.propTypes = { onCancel: PropTypes.func };
 export function ClonarFluxoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { perfilId } = useSelector((state) => state.intranet);
   const { isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({ assunto: Yup.string().required().label('Assunto') });
@@ -184,7 +186,6 @@ export function ClonarFluxoForm({ onCancel }) {
       if (selectedItem) {
         dispatch(
           createItem('clonar fluxo', JSON.stringify(values), {
-            mail,
             perfilId,
             msg: 'Fluxo clonado',
             transicoes: selectedItem?.transicoes?.filter((option) => option?.modo !== 'desarquivamento'),
@@ -360,9 +361,11 @@ export function AcessoForm({ perfilIdA, onCancel }) {
       values.objeto = values.objeto.id;
       values.acesso = values.acesso.id;
       if (isEdit) {
-        dispatch(updateItem('acesso', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Acesso atualizado' }));
+        dispatch(
+          updateItem('acessos', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Acesso atualizado' })
+        );
       } else {
-        dispatch(createItem('acesso', JSON.stringify(values), { mail, msg: 'Acesso atribuido' }));
+        dispatch(createItem('acessos', JSON.stringify(values), { mail, msg: 'Acesso atribuido' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -370,7 +373,7 @@ export function AcessoForm({ perfilIdA, onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('acesso', { mail, id: selectedItem.id, msg: 'Acesso eliminado', perfilId }));
+    dispatch(deleteItem('acessos', { mail, id: selectedItem.id, msg: 'Acesso eliminado', perfilId }));
   };
 
   return (
@@ -411,7 +414,6 @@ MotivoPendenciaForm.propTypes = { onCancel: PropTypes.func };
 export function MotivoPendenciaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Designação') });
@@ -432,15 +434,10 @@ export function MotivoPendenciaForm({ onCancel }) {
     try {
       if (isEdit) {
         dispatch(
-          updateItem('motivo pendencia', JSON.stringify(values), {
-            mail,
-            perfilId,
-            id: selectedItem?.id,
-            msg: 'Motivo atualizado',
-          })
+          updateItem('motivosPendencia', JSON.stringify(values), { id: selectedItem?.id, msg: 'Motivo atualizado' })
         );
       } else {
-        dispatch(createItem('motivo pendencia', JSON.stringify(values), { mail, perfilId, msg: 'Motivo adicionado' }));
+        dispatch(createItem('motivosPendencia', JSON.stringify(values), { msg: 'Motivo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -448,7 +445,7 @@ export function MotivoPendenciaForm({ onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('motivo pendencia', { mail, perfilId, id: selectedItem?.id, msg: 'Motivo eliminado' }));
+    dispatch(deleteItem('motivosPendencia', { id: selectedItem?.id, msg: 'Motivo eliminado' }));
   };
 
   return (
@@ -482,7 +479,6 @@ MotivoTransicaoForm.propTypes = { onCancel: PropTypes.func };
 export function MotivoTransicaoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem, fluxos } = useSelector((state) => state.parametrizacao);
 
   const fluxosList = useMemo(
@@ -537,15 +533,10 @@ export function MotivoTransicaoForm({ onCancel }) {
       };
       if (isEdit) {
         dispatch(
-          updateItem('motivo transicao', JSON.stringify(dados), {
-            mail,
-            perfilId,
-            id: selectedItem?.id,
-            msg: 'Motivo atualizado',
-          })
+          updateItem('motivosTransicao', JSON.stringify(dados), { id: selectedItem?.id, msg: 'Motivo atualizado' })
         );
       } else {
-        dispatch(createItem('motivo transicao', JSON.stringify(dados), { mail, perfilId, msg: 'Motivo adicionado' }));
+        dispatch(createItem('motivosTransicao', JSON.stringify(dados), { msg: 'Motivo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -584,7 +575,6 @@ OrigemForm.propTypes = { onCancel: PropTypes.func };
 export function OrigemForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const [Concelhos, setConcelhos] = useState([]);
   const { mail, perfilId } = useSelector((state) => state.intranet);
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
@@ -623,9 +613,11 @@ export function OrigemForm({ onCancel }) {
   const onSubmit = async () => {
     try {
       if (isEdit) {
-        dispatch(updateItem('origem', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Origem atualizada' }));
+        dispatch(
+          updateItem('origens', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Origem atualizada' })
+        );
       } else {
-        dispatch(createItem('origem', JSON.stringify(values), { mail, msg: 'Origem adicionada' }));
+        dispatch(createItem('origens', JSON.stringify(values), { mail, msg: 'Origem adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -633,14 +625,8 @@ export function OrigemForm({ onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('origem', { mail, id: selectedItem.id, msg: 'Origem eliminada', perfilId }));
+    dispatch(deleteItem('origens', { mail, id: selectedItem.id, msg: 'Origem eliminada', perfilId }));
   };
-
-  useEffect(() => {
-    setValue('cidade', null);
-    setConcelhos(_concelhos.filter((row) => row?.ilha === values?.ilha));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values?.ilha]);
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
@@ -665,15 +651,18 @@ export function OrigemForm({ onCancel }) {
                 <RHFAutocompleteSimple
                   name="ilha"
                   label="Ilha"
-                  options={[...new Set(_concelhos.map((obj) => obj.ilha))]}
+                  onChange={(event, value) => {
+                    setValue('ilha', value);
+                    setValue('cidade', null);
+                  }}
+                  options={[...new Set(_concelhos.map((row) => row.ilha))]}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <RHFAutocompleteSimple
                   name="cidade"
                   label="Concelho"
-                  disabled={!values.ilha}
-                  options={[...new Set(Concelhos?.map((obj) => obj.concelho))]}
+                  options={_concelhos?.filter((row) => row?.ilha === values?.ilha)?.map((item) => item?.concelho)}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -711,7 +700,7 @@ export function LinhaForm({ onCancel }) {
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
-    linha: Yup.string().required().label('Linha'),
+    linha: Yup.string().required().label('Designação'),
     descricao: Yup.mixed().required().label('Segmento'),
   });
   const defaultValues = useMemo(
@@ -730,10 +719,10 @@ export function LinhaForm({ onCancel }) {
     try {
       if (isEdit) {
         dispatch(
-          updateItem('linha', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Linha de crédito atualizada' })
+          updateItem('linhas', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Linha crédito atualizada' })
         );
       } else {
-        dispatch(createItem('linha', JSON.stringify(values), { mail, msg: 'Linha de crédito adicionada' }));
+        dispatch(createItem('linhas', JSON.stringify(values), { mail, msg: 'Linha crédito adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -742,7 +731,7 @@ export function LinhaForm({ onCancel }) {
 
   const handleDelete = () => {
     dispatch(
-      deleteItem('linha', { mail, perfilID: perfilId, linhaID: selectedItem?.id, msg: 'Linha de crédito eliminada' })
+      deleteItem('linhas', { mail, perfilID: perfilId, linhaID: selectedItem?.id, msg: 'Linha crédito eliminada' })
     );
   };
 
@@ -753,7 +742,7 @@ export function LinhaForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
             <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="linha" label="Linha" />
+              <RHFTextField name="linha" label="Designação" />
               <RHFAutocompleteSimple
                 name="descricao"
                 label="Segmento"
@@ -768,6 +757,125 @@ export function LinhaForm({ onCancel }) {
               handleDelete={handleDelete}
               desc={isEdit ? 'eliminar esta linha de crédito' : ''}
             />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+GarantiaForm.propTypes = { onCancel: PropTypes.func };
+
+export function GarantiaForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
+
+  const formSchema = Yup.object().shape({
+    codigo: Yup.string().required().label('Código'),
+    descritivo: Yup.string().required().label('Designação'),
+  });
+  const defaultValues = useMemo(
+    () => ({
+      codigo: selectedItem?.codigo || '',
+      descritivo: selectedItem?.descritivo || '',
+      ativo: selectedItem ? selectedItem?.ativo : true,
+    }),
+    [selectedItem]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      if (isEdit) {
+        dispatch(updateItem('garantias', JSON.stringify(values), { id: selectedItem?.id, msg: 'Garantia atualizada' }));
+      } else {
+        dispatch(createItem('garantias', JSON.stringify(values), { msg: 'Garantia adicionada' }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar garantia' : 'Adicionar garantia'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={2}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="codigo" label="Código" />
+              <RHFTextField name="descritivo" label="Designação" />
+              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+DespesaForm.propTypes = { onCancel: PropTypes.func };
+
+export function DespesaForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
+
+  const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
+  const defaultValues = useMemo(
+    () => ({
+      descricao: selectedItem?.descricao || '',
+      designacao: selectedItem?.designacao || '',
+      ativo: selectedItem ? selectedItem?.ativo : true,
+    }),
+    [selectedItem]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      if (isEdit) {
+        dispatch(updateItem('despesas', JSON.stringify(values), { id: selectedItem?.id, msg: 'Despesa atualizada' }));
+      } else {
+        dispatch(createItem('despesas', JSON.stringify(values), { msg: 'Despesa adicionada' }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar despesa' : 'Adicionar despesa'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={2}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="designacao" label="Designação" />
+              <RHFTextField name="descricao" label="Descrição" />
+              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -826,10 +934,17 @@ export function TransicaoForm({ onCancel, fluxoId }) {
       values.estado_inicial_id = values?.estado_inicial?.id;
       if (selectedItem) {
         dispatch(
-          updateItem('transicao', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Transição atualizada' })
+          updateItem('transicoes', JSON.stringify(values), {
+            mail,
+            item1: 'fluxo',
+            id: selectedItem.id,
+            msg: 'Transição atualizada',
+          })
         );
       } else {
-        dispatch(createItem('transicao', JSON.stringify(values), { mail, msg: 'Transição adicionada' }));
+        dispatch(
+          createItem('transicoes', JSON.stringify(values), { mail, item1: 'fluxo', msg: 'Transição adicionada' })
+        );
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -837,7 +952,9 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('transicao', { mail, id: selectedItem.id, msg: 'Transição eliminada', perfilId }));
+    dispatch(
+      deleteItem('transicoes', { mail, item1: 'fluxo', id: selectedItem.id, msg: 'Transição eliminada', perfilId })
+    );
   };
 
   return (
@@ -903,6 +1020,160 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+ChecklistForm.propTypes = { fluxo: PropTypes.object, onCancel: PropTypes.func };
+
+export function ChecklistForm({ fluxo, onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mail } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, selectedItem, estados, documentos } = useSelector((state) => state.parametrizacao);
+  const listaTransicoes = useMemo(
+    () =>
+      transicoesList(fluxo?.transicoes, estados)?.map((row) => ({
+        id: row?.id,
+        label: `${row?.modo} ${row?.is_after_devolucao ? '(DD)' : ''}: ${row?.estado_inicial} » ${row?.estado_final}`,
+      })),
+    [fluxo?.transicoes, estados]
+  );
+
+  const formSchema = Yup.object().shape({
+    transicao: isEdit && Yup.mixed().required().label('Transição'),
+    tipo_documento: isEdit && Yup.mixed().required().label('Documento'),
+    documentos:
+      !isEdit &&
+      Yup.array(
+        Yup.object({
+          transicao: Yup.mixed().required().label('Transição'),
+          tipo_documento: Yup.mixed().required().label('Documento'),
+        })
+      ),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      ativo: isEdit ? selectedItem?.ativo : false,
+      obrigatorio: isEdit ? selectedItem?.obrigatorio : false,
+      transicao: listaTransicoes?.find((row) => row?.id === selectedItem?.transicao_id) || null,
+      documentos: isEdit ? [] : [{ tipo_documento: null, transicao: null, obrigatorio: false }],
+      tipo_documento: documentos?.find((row) => row?.id === selectedItem?.tipo_documento_id) || null,
+    }),
+    [isEdit, selectedItem, listaTransicoes, documentos]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'documentos' });
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      if (selectedItem) {
+        dispatch(
+          updateItem(
+            'checklist',
+            JSON.stringify({
+              ativo: values?.ativo,
+              obrigatorio: values?.obrigatorio,
+              transicao_id: values?.transicao?.id,
+              tipo_documento_id: values?.tipo_documento?.id,
+            }),
+            { mail, id: selectedItem?.id, msg: 'Documento atualizado' }
+          )
+        );
+      } else {
+        dispatch(
+          createItem(
+            'checklist',
+            JSON.stringify({
+              fluxo_id: fluxo?.id,
+              documentos: values?.documentos?.map((row) => ({
+                ativo: true,
+                obrigatorio: row?.obrigatorio,
+                transicao_id: row?.transicao?.id,
+                tipo_documento_id: row?.tipo_documento?.id,
+              })),
+            }),
+            { mail, msg: 'Documentos adicionados' }
+          )
+        );
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+          {isEdit ? 'Editar documento' : 'Adicionar documentos'}
+          {!isEdit && (
+            <AddItem small handleClick={() => append({ tipo_documento: null, transicao: null, obrigatorio: false })} />
+          )}
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={1}>
+            {isEdit ? (
+              <Grid container spacing={3} sx={{ mt: 0 }}>
+                <Grid item xs={12}>
+                  <RHFAutocompleteObject label="Documento" options={documentos} name="tipo_documento" />
+                </Grid>
+                <Grid item xs={12}>
+                  <RHFAutocompleteObject label="Transição" options={listaTransicoes} name="transicao" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <RHFSwitch name="obrigatorio" label="Obrigatório" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <RHFSwitch name="ativo" label="Ativo" />
+                </Grid>
+              </Grid>
+            ) : (
+              <Stack spacing={2} sx={{ pt: 3 }} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+                {fields.map((item, index) => (
+                  <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+                    <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                      <Stack direction="row" spacing={1}>
+                        <RHFAutocompleteObject
+                          small
+                          label="Documento"
+                          options={documentos}
+                          name={`documentos[${index}].tipo_documento`}
+                        />
+                        <Stack>
+                          <RHFSwitch name={`documentos[${index}].obrigatorio`} label="Obrigatório" sx={{ mt: 0 }} />
+                        </Stack>
+                      </Stack>
+                      <RHFAutocompleteObject
+                        small
+                        label="Transição"
+                        options={listaTransicoes}
+                        name={`documentos[${index}].transicao`}
+                      />
+                    </Stack>
+                    {values.documentos.length > 1 && (
+                      <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                    )}
+                  </Stack>
+                ))}
+              </Stack>
+            )}
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.string };
 
 export function EstadosPerfilForm({ perfilIdE, onCancel }) {
@@ -940,9 +1211,9 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
     try {
       values.estado_id = values?.estado?.id;
       if (isEdit) {
-        dispatch(updateItem('estadoPerfil', values, { mail, id: selectedItem.id, msg: 'Estado atualizado' }));
+        dispatch(updateItem('estadosPerfil', values, { mail, id: selectedItem.id, msg: 'Estado atualizado' }));
       } else {
-        dispatch(createItem('estadoPerfil', values, { mail, msg: 'Estado adicionado' }));
+        dispatch(createItem('estadosPerfil', values, { mail, msg: 'Estado adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -950,7 +1221,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('estadoPerfil', { mail, id: selectedItem.id, msg: 'Estado eliminado', perfilId }));
+    dispatch(deleteItem('estadosPerfil', { mail, id: selectedItem.id, msg: 'Estado eliminado', perfilId }));
   };
 
   return (
@@ -1049,7 +1320,9 @@ export function PerfisEstadoForm({ estado, onCancel }) {
           observador: row?.observador || false,
         });
       });
-      dispatch(createItem('perfisEstado', JSON.stringify(formData), { mail, msg: 'Perfis adicionados' }));
+      dispatch(
+        createItem('perfisEstado', JSON.stringify(formData), { mail, item1: 'estado', msg: 'Perfis adicionados' })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -1156,11 +1429,7 @@ export function AnexoDespesaForm({ item, onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>
-        {isEdit
-          ? `Editar ${item === 'Despesa' ? 'despesa' : 'anexo'}`
-          : `Adicionar ${item === 'Despesa' ? 'despesa' : 'anexo'}`}
-      </DialogTitle>
+      <DialogTitle>{isEdit ? `Editar ${item}` : `Adicionar ${item}`}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={item === 'Anexo' ? 3 : 1}>
@@ -1241,10 +1510,10 @@ export function RegraAnexoForm({ onCancel }) {
       };
       if (selectedItem) {
         dispatch(
-          updateItem('regra anexo', JSON.stringify(formData), { mail, id: selectedItem?.id, msg: 'Regra atualizado' })
+          updateItem('regrasAnexos', JSON.stringify(formData), { mail, id: selectedItem?.id, msg: 'Regra atualizado' })
         );
       } else {
-        dispatch(createItem('regra anexo', JSON.stringify(formData), { mail, msg: 'Regra atualizado' }));
+        dispatch(createItem('regrasAnexos', JSON.stringify(formData), { mail, msg: 'Regra atualizado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -1252,7 +1521,7 @@ export function RegraAnexoForm({ onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('regra anexo', { mail, id: selectedItem?.id, msg: 'Regra eliminado', perfilId }));
+    dispatch(deleteItem('regrasAnexos', { mail, id: selectedItem?.id, msg: 'Regra eliminado', perfilId }));
   };
 
   return (
@@ -1322,7 +1591,7 @@ export function RegraEstadoForm({ onCancel }) {
         ? values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))
         : { estado_id: estado?.id };
       dispatch(
-        createItem(values?.destribuir ? 'regra estado destribuido' : 'regra estado', JSON.stringify(formData), {
+        createItem(values?.destribuir ? 'regra estado destribuido' : 'regrasEstado', JSON.stringify(formData), {
           mail,
           estadoId: estado?.id,
           msg: 'Regra adicionada',
@@ -1402,7 +1671,7 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
     try {
       dispatch(
         createItem(
-          'regras transicao',
+          'regrasTransicao',
           JSON.stringify(values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))),
           { mail, transicaoId: transicao?.id, msg: 'Regra adicionada', estadoId: estado?.id }
         )
@@ -1470,14 +1739,14 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
     try {
       if (selectedItem) {
         dispatch(
-          updateItem('notificacao', JSON.stringify(values), {
+          updateItem('notificacoes', JSON.stringify(values), {
             mail,
             id: selectedItem?.id,
             msg: 'Notificação atualizada',
           })
         );
       } else {
-        dispatch(createItem('notificacao', JSON.stringify(values), { mail, msg: 'Notificação adicionada' }));
+        dispatch(createItem('notificacoes', JSON.stringify(values), { mail, msg: 'Notificação adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -1520,13 +1789,14 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DestinatarioForm.propTypes = { onCancel: PropTypes.func };
+DestinatarioForm.propTypes = { id: PropTypes.number, selectedItem: PropTypes.object, onCancel: PropTypes.func };
 
-export function DestinatarioForm({ onCancel }) {
+export function DestinatarioForm({ id, onCancel, selectedItem }) {
+  const isEdit = selectedItem?.id;
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { isSaving } = useSelector((state) => state.parametrizacao);
   const { mail, colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, selectedItem, notificacaoId } = useSelector((state) => state.parametrizacao);
   const perfisList = useMemo(
     () => colaboradores?.map((row) => ({ id: row?.id, label: row?.perfil?.displayName, email: row?.perfil?.mail })),
     [colaboradores]
@@ -1561,17 +1831,17 @@ export function DestinatarioForm({ onCancel }) {
 
   const onSubmit = async () => {
     try {
-      if (selectedItem) {
+      if (isEdit) {
         dispatch(
           updateItem(
-            'destinatario',
+            'destinatarios',
             JSON.stringify({
               telefone: values?.telefone,
               email: values?.perfil?.email,
               data_inicio: values?.data_inicio ? format(values.data_inicio, 'yyyy-MM-dd') : null,
               data_termino: values?.data_termino ? format(values.data_termino, 'yyyy-MM-dd') : null,
             }),
-            { mail, id: selectedItem?.id, msg: 'Destinatário atualizado' }
+            { mail, id: selectedItem?.id || id, msg: 'Destinatário atualizado' }
           )
         );
       } else {
@@ -1586,7 +1856,7 @@ export function DestinatarioForm({ onCancel }) {
                 data_termino: row?.data_termino ? format(row.data_termino, 'yyyy-MM-dd') : null,
               }))
             ),
-            { mail, id: notificacaoId, msg: 'Destinatários adicionado' }
+            { mail, id, msg: 'Destinatários adicionado' }
           )
         );
       }
@@ -1595,24 +1865,17 @@ export function DestinatarioForm({ onCancel }) {
     }
   };
 
-  const handleDelete = () => {
-    dispatch(deleteItem('destinatario', { mail, id: selectedItem?.id, msg: 'Destinatário eliminado' }));
-  };
-
-  const handleAdd = () => {
-    append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' });
-  };
-
-  const handleRemove = (index) => {
-    remove(index);
-  };
-
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {isEdit ? 'Editar destinatário' : 'Adicionar destinatários'}
-          <AddItem small handleClick={handleAdd} />
+          {!isEdit && (
+            <AddItem
+              small
+              handleClick={() => append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' })}
+            />
+          )}
         </Stack>
       </DialogTitle>
       <DialogContent>
@@ -1636,7 +1899,7 @@ export function DestinatarioForm({ onCancel }) {
             ) : (
               fields.map((item, index) => (
                 <Grid item xs={12} key={item.id}>
-                  <Grid container spacing={3}>
+                  <Grid container spacing={2}>
                     <Grid item xs={12} md={5}>
                       <RHFAutocompleteObject
                         label="Colaborador"
@@ -1652,7 +1915,7 @@ export function DestinatarioForm({ onCancel }) {
                         <RHFDatePicker label="Data de início" name={`destinatarios[${index}].data_inicio`} />
                         <RHFDatePicker label="Data de fim" name={`destinatarios[${index}].data_termino`} />
                         {values.destinatarios.length > 1 && (
-                          <DefaultAction color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
+                          <DefaultAction color="error" label="ELIMINAR" handleClick={() => remove(index)} />
                         )}
                       </Stack>
                     </Grid>
@@ -1665,8 +1928,10 @@ export function DestinatarioForm({ onCancel }) {
             edit={isEdit}
             isSaving={isSaving}
             onCancel={onCancel}
-            handleDelete={handleDelete}
             desc={isEdit ? 'eliminar esta destinatário' : ''}
+            handleDelete={() =>
+              dispatch(deleteItem('destinatarios', { mail, id: selectedItem?.id, msg: 'Destinatário eliminado' }))
+            }
           />
         </FormProvider>
       </DialogContent>
@@ -1706,11 +1971,11 @@ export function Transicao({ item, transicao, fluxo = false }) {
     <Grid item xs={12}>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Typography sx={{ color: 'text.secondary' }}>{fluxo ? 'Fluxo:' : 'Estado:'}</Typography>
-        <Typography variant="subtitle1">{item}</Typography>
+        <Typography>{item}</Typography>
       </Stack>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Typography sx={{ color: 'text.secondary' }}>Transição:</Typography>
-        <Typography variant="subtitle1">{transicao}</Typography>
+        <Typography>{transicao}</Typography>
       </Stack>
     </Grid>
   );

@@ -10,21 +10,21 @@ import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // utils
-import { setItemValue } from '../utils/formatText';
-import { colorLabel } from '../utils/getColorPresets';
-import { pertencoAoEstado } from '../utils/validarAcesso';
+import { setItemValue } from '../../utils/formatText';
+import { colorLabel } from '../../utils/getColorPresets';
+import { pertencoAoEstado } from '../../utils/validarAcesso';
 // routes
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getFromIntranet } from '../redux/slices/intranet';
-import { getIndicadores } from '../redux/slices/indicadores';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getFromIntranet } from '../../redux/slices/intranet';
+import { getIndicadores } from '../../redux/slices/indicadores';
+import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
 // components
-import Page from '../components/Page';
-import { Notificacao } from '../components/NotistackProvider';
+import Page from '../../components/Page';
+import { Notificacao } from '../../components/NotistackProvider';
 // sections
-import { TableProcessos } from '../sections/tabela';
+import { TableProcessos } from '../../sections/tabela';
 
 // ----------------------------------------------------------------------
 
@@ -53,9 +53,9 @@ export default function Processos() {
     if (mail && perfilId && cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
       dispatch(getFromIntranet('colaboradores', { mail }));
       dispatch(getFromIntranet('cc', { id: cc?.id, mail }));
-      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId }));
-      dispatch(getFromParametrizacao('meusambientes', { mail, perfilId }));
-      dispatch(getFromParametrizacao('motivos pendencia', { mail, perfilId }));
+      dispatch(getFromParametrizacao('meusacessos'));
+      dispatch(getFromParametrizacao('meusambientes'));
+      dispatch(getFromParametrizacao('motivosPendencia'));
     }
   }, [dispatch, perfilId, cc?.id, dateUpdate, mail]);
 
@@ -103,10 +103,6 @@ export default function Processos() {
     }
   }, [dispatch, mail, currentTab, perfilId, meusAmbientes?.length]);
 
-  const handleChangeTab = (event, newValue) => {
-    setItemValue(newValue, setCurrentTab, 'tabProcessos');
-  };
-
   return (
     <Page title="Processos | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -122,7 +118,7 @@ export default function Processos() {
               scrollButtons="auto"
               variant="scrollable"
               allowScrollButtonsMobile
-              onChange={handleChangeTab}
+              onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabProcessos')}
             >
               {tabsList.map((tab) => (
                 <Tab

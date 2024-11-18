@@ -27,7 +27,7 @@ import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 import Pareceres from './Pareceres';
 import { AnexoItem } from './Anexos';
 import MinutaParecer from './MinutaParecer';
-import { Atribuir, Abandonar } from '../Intervencao';
+import { Atribuir, Libertar } from '../Intervencao';
 import { ParecerForm } from '../form/IntervencaoForm';
 
 // ----------------------------------------------------------------------
@@ -88,11 +88,10 @@ export default function Estados({ handleAceitar }) {
                             color={temParecer ? 'warning' : 'success'}
                             label={temParecer ? 'EDITAR' : 'ADICIONAR'}
                           />
-                          <Abandonar
-                            id={processo?.id}
+
+                          <Libertar
                             isSaving={isSaving}
-                            estadoId={row?.estado_id}
-                            fluxoId={processo?.fluxo_id}
+                            dados={{ id: processo?.id, fluxoId: processo?.fluxo_id, estadoId: row?.estado_id }}
                           />
                         </>
                       )}

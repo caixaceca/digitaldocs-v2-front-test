@@ -2,28 +2,27 @@ import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // utils
-import { noEstado, podeArquivar, pertencoAoEstado, arquivoAtendimento } from '../../utils/validarAcesso';
+import { noEstado, podeArquivar, processoEstadoInicial } from '../../utils/validarAcesso';
 // redux
 import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
-import { updateItem, selectAnexo, getAll, selectItem } from '../../redux/slices/digitaldocs';
+import { selectAnexo, getAll, selectItem } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import { DefaultAction } from '../../components/Actions';
-import { DialogConfirmar } from '../../components/CustomDialog';
 //
 import {
   AtribuirForm,
   ResgatarForm,
-  LibertarForm,
   CancelarForm,
+  LibertarForm,
   FinalizarForm,
-  AbandonarForm,
   DomiciliarForm,
+  FinalizarOPForm,
   EncaminharStepper,
   ColocarPendenteForm,
 } from './form/IntervencaoForm';
@@ -35,9 +34,7 @@ Intervencao.propTypes = { colaboradoresList: PropTypes.array };
 
 export default function Intervencao({ colaboradoresList }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const { processo, isSaving } = useSelector((state) => state.digitaldocs);
   const { arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const gerencia = useMemo(
@@ -48,7 +45,7 @@ export default function Intervencao({ colaboradoresList }) {
     () => uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências',
     [processo?.uo_origem_id, uos]
   );
-  const aberturaEmpSemValCompliance = useMemo(
+  const aberturaESemValGFC = useMemo(
     () =>
       gerencia &&
       processo.segmento === 'E' &&
@@ -56,77 +53,52 @@ export default function Intervencao({ colaboradoresList }) {
       !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento'),
     [gerencia, processo?.assunto, processo?.htransicoes, processo.segmento]
   );
-  const dados = useMemo(() => setDados(processo, aberturaEmpSemValCompliance), [aberturaEmpSemValCompliance, processo]);
-
-  const handleFinalizar = () => {
-    dispatch(
-      updateItem('finalizar', JSON.stringify({ cativos: [] }), {
-        mail,
-        perfilId,
-        id: processo?.id,
-        msg: 'Processo finalizado',
-      })
-    );
-  };
+  const destinos = useMemo(() => destinosProcesso(processo, aberturaESemValGFC), [aberturaESemValGFC, processo]);
 
   return (
     <>
-      <ColocarPendente />
-
-      {dados?.devolucoes?.length > 0 && (
+      {destinos?.devolucoes?.length > 0 && (
         <Encaminhar
           title="DEVOLVER"
           gerencia={gerencia}
           fluxoId={processo?.fluxo_id}
-          destinos={dados?.devolucoes}
+          destinos={destinos?.devolucoes}
           colaboradoresList={colaboradoresList}
         />
       )}
 
-      {dados?.seguimentos?.length > 0 && (
+      {destinos?.seguimentos?.length > 0 && (
         <Encaminhar
           gerencia={gerencia}
-          destinos={dados?.seguimentos}
+          destinos={destinos?.seguimentos}
           colaboradoresList={colaboradoresList}
           title={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
         />
       )}
 
+      <ColocarPendente />
+
+      {processoEstadoInicial(meusAmbientes, processo?.estado_atual_id) && (
+        <Domiciliar id={processo?.id} estadoId={processo?.estado_atual_id} />
+      )}
+
       {processo?.agendado &&
         processo?.status !== 'Executado' &&
         processo?.estado_atual === 'Autorização SWIFT' &&
-        (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') &&
-        pertencoAoEstado(meusAmbientes, ['Autorização SWIFT']) && (
-          <>
-            <DefaultAction handleClick={onOpen} label="FINALIZAR" />
-            {open && (
-              <DialogConfirmar
-                onClose={onClose}
-                isSaving={isSaving}
-                handleOk={() => handleFinalizar()}
-                color="success"
-                title="Finalizar"
-                desc="finalizar este processo"
-              />
-            )}
-          </>
+        (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') && (
+          <FinalizarOP id={processo?.id} isSaving={isSaving} />
         )}
 
       {processo?.status === 'Em andamento' &&
         processo?.operacao === 'Cativo/Penhora' &&
-        processo?.estado_atual === 'DOP - Validação Notas Externas' &&
-        pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas']) && (
+        processo?.estado_atual === 'DOP - Validação Notas Externas' && (
           <Finalizar id={processo?.id} cativos={processo?.cativos} />
         )}
 
-      <Abandonar
-        id={processo?.id}
+      <Libertar
         isSaving={isSaving}
-        fluxoId={processo?.fluxo_id}
-        estadoId={processo?.estado_processo?.estado_id}
+        dados={{ id: processo?.id, fluxoId: processo?.fluxo_id, estadoId: processo?.estado_processo?.estado_id }}
       />
-
-      {processo?.status === 'Inicial' && <Domiciliar id={processo?.id} estadoId={processo?.estado_atual_id} />}
 
       <DefaultAction
         label="EDITAR"
@@ -134,16 +106,9 @@ export default function Intervencao({ colaboradoresList }) {
         handleClick={() => navigate(`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`)}
       />
 
-      {podeArquivar(
-        fromAgencia,
-        meusAmbientes,
-        arquivarProcessos,
-        processo?.estado_atual_id,
-        arquivoAtendimento(
-          processo?.assunto,
-          processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
-        )
-      ) && <Arquivar naoFinal={dados?.destinosFora?.length > 0 ? dados?.destinosFora : []} />}
+      {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
+        <Arquivar naoFinal={destinos?.destinosFora?.length > 0 ? destinos?.destinosFora : []} />
+      )}
     </>
   );
 }
@@ -161,7 +126,6 @@ Encaminhar.propTypes = {
 export function Encaminhar({ title, destinos, gerencia = false, colaboradoresList = [], fluxoId = null }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   return (
     <>
       <DefaultAction
@@ -170,7 +134,7 @@ export function Encaminhar({ title, destinos, gerencia = false, colaboradoresLis
           onOpen();
           dispatch(resetDados());
           if (title === 'DEVOLVER') {
-            dispatch(getFromParametrizacao('motivos transicao', { mail, perfilId, fluxoId }));
+            dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
           }
         }}
         label={title}
@@ -178,9 +142,9 @@ export function Encaminhar({ title, destinos, gerencia = false, colaboradoresLis
       {open && (
         <EncaminharStepper
           title={title}
-          onClose={onClose}
           destinos={destinos}
           gerencia={gerencia}
+          onClose={() => onClose()}
           colaboradoresList={colaboradoresList}
         />
       )}
@@ -197,7 +161,7 @@ export function Arquivar({ naoFinal }) {
   return (
     <>
       <DefaultAction color="error" handleClick={onOpen} label="ARQUIVAR" />
-      {open && <ArquivarForm naoFinal={naoFinal} onClose={onClose} />}
+      {open && <ArquivarForm naoFinal={naoFinal} onClose={() => onClose()} />}
     </>
   );
 }
@@ -246,21 +210,21 @@ export function Finalizar({ id, cativos = [] }) {
   return (
     <>
       <DefaultAction handleClick={onOpen} label="FINALIZAR" />
-      {open && <FinalizarForm onClose={onClose} id={id} cativos={cativos} />}
+      {open && <FinalizarForm onClose={() => onClose()} id={id} cativos={cativos} />}
     </>
   );
 }
 
-// --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
+// --- FINALIZAR NOTAS EXTERNAS ----------------------------------------------------------------------------------------
 
-Libertar.propTypes = { perfilID: PropTypes.number, processoID: PropTypes.number };
+FinalizarOP.propTypes = { id: PropTypes.number, isSaving: PropTypes.bool };
 
-export function Libertar({ perfilID, processoID }) {
+export function FinalizarOP({ id, isSaving }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="LIBERTAR" />
-      {open && <LibertarForm perfilID={perfilID} processoID={processoID} onClose={onClose} />}
+      <DefaultAction handleClick={onOpen} label="FINALIZAR" />
+      {open && <FinalizarOPForm onClose={() => onClose()} id={id} isSaving={isSaving} />}
     </>
   );
 }
@@ -288,26 +252,21 @@ export function Cancelar({ id, estadoId, fechar = false }) {
   return (
     <>
       <DefaultAction label={fechar ? 'FECHAR' : 'RESGATAR'} color="warning" handleClick={onOpen} />
-      {open && <CancelarForm onClose={onClose} id={id} estadoId={estadoId} fechar={fechar} />}
+      {open && <CancelarForm onClose={() => onClose()} id={id} estadoId={estadoId} fechar={fechar} />}
     </>
   );
 }
 
-// --- ABANDONAR PROCESSO ----------------------------------------------------------------------------------------------
+// --- LIBERTAR PROCESSO -------------------------------------------------------------------------------------
 
-Abandonar.propTypes = {
-  id: PropTypes.number,
-  isSaving: PropTypes.bool,
-  fluxoId: PropTypes.number,
-  estadoId: PropTypes.number,
-};
+Libertar.propTypes = { dados: PropTypes.object, isSaving: PropTypes.bool };
 
-export function Abandonar({ id, fluxoId, estadoId, isSaving }) {
+export function Libertar({ dados, isSaving }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction color="warning" icon="abandonar" handleClick={onOpen} label="ABANDONAR" />
-      {open && <AbandonarForm dados={{ id, fluxoId, estadoId }} onClose={() => onClose} isSaving={isSaving} />}
+      <DefaultAction color="warning" label="LIBERTAR" handleClick={onOpen} />
+      {open && <LibertarForm dados={dados} onClose={() => onClose()} isSaving={isSaving} />}
     </>
   );
 }
@@ -319,19 +278,18 @@ Atribuir.propTypes = { dados: PropTypes.object };
 export function Atribuir({ dados }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
 
   const atribuirClick = () => {
     onOpen();
-    if (mail && perfilId && dados?.estadoId) {
-      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: dados?.estadoId }));
+    if (dados?.estadoId) {
+      dispatch(getFromParametrizacao('colaboradoresEstado', { id: dados?.estadoId }));
     }
   };
 
   return (
     <>
       <DefaultAction color="info" label="ATRIBUIR" handleClick={() => atribuirClick()} />
-      {open && <AtribuirForm dados={dados} onClose={onClose} />}
+      {open && <AtribuirForm dados={dados} onClose={() => onClose()} />}
     </>
   );
 }
@@ -358,14 +316,14 @@ export function Domiciliar({ id, estadoId }) {
   return (
     <>
       <DefaultAction color="warning" label="DOMICILIAR" handleClick={() => onOpen()} />
-      {open && <DomiciliarForm id={id} estadoId={estadoId} onClose={onClose} />}
+      {open && <DomiciliarForm id={id} estadoId={estadoId} onClose={() => onClose()} />}
     </>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function setDados(processo, aberturaEmpSemValCompliance) {
+function destinosProcesso(processo, aberturaESemValGFC) {
   const devolucoes = [];
   const seguimentos = [];
   const destinosFora = [];
@@ -383,9 +341,9 @@ function setDados(processo, aberturaEmpSemValCompliance) {
       requer_parecer: row?.requer_parecer,
     };
     if (row.modo === 'Seguimento') {
-      if (aberturaEmpSemValCompliance && row?.nome?.includes('Compliance')) {
+      if (aberturaESemValGFC && row?.nome?.includes('Compliance')) {
         seguimentos?.push(destino);
-      } else if (!aberturaEmpSemValCompliance) {
+      } else if (!aberturaESemValGFC) {
         seguimentos?.push(destino);
       }
     } else {

@@ -80,41 +80,15 @@ const slice = createSlice({
     },
 
     resetItem(state, action) {
-      switch (action.payload) {
-        case 'processo':
-          state.processo = null;
-          state.filePreview = null;
-          state.objectURLs.forEach(URL.revokeObjectURL);
-          state.objectURLs = [];
-          break;
-        case 'processos':
-          state.processos = [];
-          state.processosInfo = null;
-          break;
-        case 'pesquisa':
-          state.pesquisa = [];
-          state.processosInfo = null;
-          break;
-        case 'arquivos':
-          state.arquivos = [];
-          state.processosInfo = null;
-          break;
-        case 'pjf':
-          state.pjf = [];
-          state.processosInfo = null;
-          break;
-        case 'controle':
-          state.dadosControle = [];
-          break;
-        case 'cartoes':
-          state.cartoes = [];
-          break;
-        case 'con':
-          state.con = [];
-          break;
-
-        default:
-          break;
+      const { item } = action.payload;
+      state[action.payload.item] = action.payload?.tipo === 'array' ? [] : null;
+      if (action.payload.item === 'processo') {
+        state.filePreview = null;
+        state.objectURLs.forEach(URL.revokeObjectURL);
+        state.objectURLs = [];
+      }
+      if (item === 'processo' || item === 'pesquisa' || item === 'arquivos' || item === 'pjf') {
+        state.processosInfo = null;
       }
     },
 
@@ -125,7 +99,7 @@ const slice = createSlice({
 
     getSuccess(state, action) {
       switch (action.payload.item) {
-        case 'controle':
+        case 'dadosControle':
           state.dadosControle = action.payload.dados;
           break;
 
@@ -430,11 +404,11 @@ export function getAll(item, params) {
       item !== 'confidencialidades' &&
       item !== 'destinosDesarquivamento'
     ) {
-      dispatch(slice.actions.resetItem('processo'));
+      dispatch(slice.actions.resetItem({ item: 'processo' }));
     }
 
     if ((item === 'pesquisa global' || item === 'pesquisa avancada') && !params?.pagina) {
-      await dispatch(slice.actions.resetItem('pesquisa'));
+      await dispatch(slice.actions.resetItem({ item: 'processo' }));
     }
 
     if (
@@ -452,7 +426,7 @@ export function getAll(item, params) {
       // LISTA DE PROCESSOS
       if (item === 'Tarefas' || item === 'Retidos' || item === 'Pendentes' || item === 'Atribuídos') {
         const pathItem = `/v2/processos/tarefas/${item === 'Retidos' ? 'retidas/' : ''}${item === 'Pendentes' ? 'pendentes/' : ''}${item === 'Atribuídos' ? 'atribuidas/' : ''}${params?.perfilId}?pagina=`;
-        const query = `${params?.colaboradorId ? `&perfil_id=${params?.colaboradorId}` : ''}${params?.estadoId ? `&estado_id=${params?.estadoId}` : ''}${params?.estadoId && params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}${params?.segmento ? `&segmento=${params?.segmento === 'Particulares' ? 'P' : 'E'}` : ''}`;
+        const query = `${(item === 'Retidos' || item === 'Atribuídos') && params?.colaboradorId ? `&perfil_id=${params?.colaboradorId}` : ''}${params?.estadoId ? `&estado_id=${params?.estadoId}` : ''}${params?.estadoId && params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}${params?.segmento ? `&segmento=${params?.segmento === 'Particulares' ? 'P' : 'E'}` : ''}`;
         const response = await axios.get(`${BASEURLDD}${pathItem}${params?.pagina || 0}${query}`, options);
         const dados = response.data;
         if (response?.data?.paginacao?.total_paginas === 2 && response?.data?.paginacao?.proxima_pagina === 1) {
@@ -589,37 +563,37 @@ export function getAll(item, params) {
           break;
         }
         case 'Entradas': {
-          dispatch(slice.actions.resetItem('controle'));
+          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
           const response = await axios.get(
             `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${params?.perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`,
             options
           );
-          dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
           break;
         }
         case 'Devoluções': {
-          dispatch(slice.actions.resetItem('controle'));
+          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/ht_devolvidos?perfil_cc_id=${params?.perfilId}&uo_id=${params?.uoId}&apartir_de=${params?.dataInicio}&ate=${params?.dataFim}`,
             options
           );
-          dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
           break;
         }
         case 'Por concluir': {
-          dispatch(slice.actions.resetItem('controle'));
+          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
           const response = await axios.get(`${BASEURLDD}/v1/processos/porconcluir/${params?.perfilId}`, options);
-          dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
           break;
         }
         case 'Trabalhados': {
-          dispatch(slice.actions.resetItem('controle'));
+          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
           if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
               options
             );
-            dispatch(slice.actions.getSuccess({ item: 'controle', dados: response.data.objeto }));
+            dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
           }
           break;
         }
@@ -650,7 +624,7 @@ export function getAll(item, params) {
           break;
         }
         case 'Emissão': {
-          dispatch(slice.actions.resetItem('cartoes'));
+          dispatch(slice.actions.resetItem({ item: 'cartoes', tipo: 'array' }));
           const response = await axios.get(
             `${BASEURLDD}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
               params?.dataFim ? `&data_final=${params?.dataFim}` : ''
@@ -661,7 +635,7 @@ export function getAll(item, params) {
           break;
         }
         case 'Receção': {
-          dispatch(slice.actions.resetItem('cartoes'));
+          dispatch(slice.actions.resetItem({ item: 'cartoes', tipo: 'array' }));
           if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
@@ -674,7 +648,7 @@ export function getAll(item, params) {
           break;
         }
         case 'con': {
-          dispatch(slice.actions.resetItem('con'));
+          dispatch(slice.actions.resetItem({ item: 'con', tipo: 'array' }));
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/export/con?data_inicio=${params?.dataInicio}${
               params?.dataFim ? `&data_final=${params?.dataFim}` : ''
@@ -686,7 +660,7 @@ export function getAll(item, params) {
         }
         case 'pjf': {
           if (params?.pagina === 0) {
-            dispatch(slice.actions.resetItem('pjf'));
+            dispatch(slice.actions.resetItem({ item: 'pjf', tipo: 'array' }));
           }
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/historico/pe/financas?pagina=${params?.pagina}`,
@@ -715,7 +689,7 @@ export function getAll(item, params) {
 
 export function getProcesso(item, params) {
   return async (dispatch) => {
-    await dispatch(slice.actions.resetItem('processo'));
+    await dispatch(slice.actions.resetItem({ item: 'processo' }));
     dispatch(slice.actions.loadingProcesso(true));
     try {
       const options = { headers: { cc: params?.mail } };
@@ -730,7 +704,7 @@ export function getProcesso(item, params) {
         }
         case 'prevnext': {
           const response = await axios.get(
-            `${BASEURLDD}/v2/processos/next/prev/${params?.perfilId}?processo_id=${params?.processoId}&estado_id=${params?.estadoId}&next=${params?.next}`,
+            `${BASEURLDD}/v2/processos/next/prev/${params?.perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}&next=${params?.next}`,
             options
           );
           dispatch(slice.actions.getProcessoSuccess(response.data?.objeto));
@@ -750,7 +724,7 @@ export function getProcesso(item, params) {
       }
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(slice.actions.setError(''));
-      dispatch(slice.actions.resetItem('processo'));
+      dispatch(slice.actions.resetItem({ item: 'processo' }));
     }
   };
 }
@@ -961,7 +935,7 @@ export function updateItem(item, dados, params) {
           await axios.patch(`${BASEURLDD}/v2/processos/finalizar/${params?.perfilId}/${params?.id}`, dados, options);
           break;
         }
-        case 'abandonar': {
+        case 'libertar': {
           await axios.patch(
             `${BASEURLDD}/v2/processos/abandonar/${params?.perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
             null,

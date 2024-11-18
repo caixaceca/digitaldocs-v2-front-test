@@ -141,14 +141,19 @@ export function UosGerente(meusAmbientes) {
 
 // ----------------------------------------------------------------------
 
-export const podeArquivar = (fromAgencia, meusAmbientes, arquivarProcesso, estadoId, arquivoAtendimento) => {
-  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoId));
+export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) => {
+  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(processo?.estado_atual_id));
+  const arqAtendimento = arquivoAtendimento(
+    processo?.assunto,
+    processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
+  );
   return (
-    arquivarProcesso ||
+    arquivarProcessos ||
     estadoProcesso?.isfinal ||
+    (estadoProcesso?.isinicial && gerencia) ||
     (estadoProcesso?.isinicial && !fromAgencia) ||
-    (estadoProcesso?.isinicial && fromAgencia && arquivoAtendimento) ||
-    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, estadoId))
+    (estadoProcesso?.isinicial && fromAgencia && arqAtendimento) ||
+    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, processo?.estado_atual_id))
   );
 };
 
@@ -180,6 +185,10 @@ export function deGmkt(assunto) {
 
 export function noEstado(estado, labels) {
   return !!labels?.find((row) => estado?.includes(row));
+}
+
+export function processoEstadoInicial(meusAmbientes, estadoId) {
+  return !!meusAmbientes?.find((row) => Number(row?.id) === Number(estadoId))?.isinicial;
 }
 
 // ----------------------------------------------------------------------

@@ -3,12 +3,12 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // components
-import Page from '../components/Page';
-import TabsWrapper from '../components/TabsWrapper';
+import Page from '../../components/Page';
+import TabsWrapper from '../../components/TabsWrapper';
 // sections
-import TableArquivo from '../sections/arquivo/TableArquivo';
+import TableArquivo from '../../sections/arquivo/TableArquivo';
 
 // ----------------------------------------------------------------------
 

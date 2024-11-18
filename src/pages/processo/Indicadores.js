@@ -3,15 +3,15 @@ import { useState, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // redux
-import { useSelector } from '../redux/store';
+import { useSelector } from '../../redux/store';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // components
-import Page from '../components/Page';
-import TabsWrapper from '../components/TabsWrapper';
+import Page from '../../components/Page';
+import TabsWrapper from '../../components/TabsWrapper';
 // sections
-import EstatisticaCredito from '../sections/indicadores/EstatisticaCredito';
-import { TotalProcessos, Duracao, SGQ, FileSystem } from '../sections/indicadores/Indicadores';
+import EstatisticaCredito from '../../sections/indicadores/EstatisticaCredito';
+import { TotalProcessos, Duracao, SGQ, FileSystem } from '../../sections/indicadores/Indicadores';
 
 // ----------------------------------------------------------------------
 

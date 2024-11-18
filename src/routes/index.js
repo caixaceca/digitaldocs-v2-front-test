@@ -52,12 +52,12 @@ export default function Router() {
       dispatch(getFromIntranet('aplicacoes', { mail }));
       dispatch(getFromIntranet('certificacao', { mail }));
       //
-      dispatch(getFromParametrizacao('fluxos', { mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('origens', { mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('estados', { mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('meusacessos', { mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('meusambientes', { mail, perfilId: perfil?.id }));
-      dispatch(getFromParametrizacao('motivos pendencia', { mail, perfilId: perfil?.id }));
+      dispatch(getFromParametrizacao('fluxos'));
+      dispatch(getFromParametrizacao('origens'));
+      dispatch(getFromParametrizacao('estados'));
+      dispatch(getFromParametrizacao('meusacessos'));
+      dispatch(getFromParametrizacao('meusambientes'));
+      dispatch(getFromParametrizacao('motivosPendencia'));
       dispatch(getFromIntranet('disposicao', { mail, id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') }));
     }
   }, [dispatch, cc?.id, mail, perfil?.id]);
@@ -72,16 +72,6 @@ export default function Router() {
         { path: 'indicadores', element: <Indicadores /> },
         { path: 'entidade', element: <Entidade /> },
         { path: 'contratos', element: <Contrato /> },
-        {
-          path: 'parametrizacao',
-          children: [
-            { element: <Navigate to="/parametrizacao/tabs" replace />, index: true },
-            { path: 'tabs', element: <Parametrizacao /> },
-            { path: 'fluxo/:id', element: <Fluxo /> },
-            { path: 'estado/:id', element: <PerfisEstado /> },
-            { path: 'acesso/:id', element: <PerfilEstadosAcessos /> },
-          ],
-        },
         {
           path: 'processos',
           children: [
@@ -111,6 +101,23 @@ export default function Router() {
             { path: ':id', element: <Processo /> },
           ],
         },
+        {
+          path: 'parametrizacao',
+          children: [
+            { element: <Navigate to="/parametrizacao/gestao" replace />, index: true },
+            { path: 'gestao', element: <Parametrizacao /> },
+            { path: 'fluxo/:id', element: <FluxoDetail /> },
+            { path: 'estado/:id', element: <EstadoDetail /> },
+            { path: 'acesso/:id', element: <PerfilEstadosAcessos /> },
+          ],
+        },
+        {
+          path: 'gaji9',
+          children: [
+            { element: <Navigate to="/gaji9/acessos" replace />, index: true },
+            { path: 'acessos', element: <Gaji9 /> },
+          ],
+        },
       ],
     },
 
@@ -121,22 +128,29 @@ export default function Router() {
 
 // IMPORT PAGES
 
-const NotFound = Loadable(lazy(() => import('../pages/excecoes/Page404')));
+const NotFound = Loadable(lazy(() => import('../pages/Page404')));
 
-// //////////////////////////////////////////////// DIGITALDOCS //////////////////////////////////////////////
+// //////////////////////////////////////////////// PAGES //////////////////////////////////////////////
 
-const Fluxo = Loadable(lazy(() => import('../pages/Fluxo')));
-const Arquivo = Loadable(lazy(() => import('../pages/Arquivo')));
-const Procura = Loadable(lazy(() => import('../pages/Procura')));
 const Contrato = Loadable(lazy(() => import('../pages/Contrato')));
 const Entidade = Loadable(lazy(() => import('../pages/Entidade')));
 const Controle = Loadable(lazy(() => import('../pages/Controle')));
-const Processo = Loadable(lazy(() => import('../pages/Processo')));
-const Processos = Loadable(lazy(() => import('../pages/Processos')));
-const Indicadores = Loadable(lazy(() => import('../pages/Indicadores')));
-const PerfisEstado = Loadable(lazy(() => import('../pages/PerfisEstado')));
-const Parametrizacao = Loadable(lazy(() => import('../pages/Parametrizacao')));
-const EditarPedidoCC = Loadable(lazy(() => import('../pages/EditarPedidoCC')));
-const CreditoColaborador = Loadable(lazy(() => import('../pages/CreditoColaborador')));
-const NovoEditarProcesso = Loadable(lazy(() => import('../pages/NovoEditarProcesso')));
-const PerfilEstadosAcessos = Loadable(lazy(() => import('../pages/PerfilEstadosAcessos')));
+
+// Processo
+const Arquivo = Loadable(lazy(() => import('../pages/processo/Arquivo')));
+const Procura = Loadable(lazy(() => import('../pages/processo/Procura')));
+const Processo = Loadable(lazy(() => import('../pages/processo/Processo')));
+const Processos = Loadable(lazy(() => import('../pages/processo/Processos')));
+const Indicadores = Loadable(lazy(() => import('../pages/processo/Indicadores')));
+const EditarPedidoCC = Loadable(lazy(() => import('../pages/processo/EditarPedidoCC')));
+const CreditoColaborador = Loadable(lazy(() => import('../pages/processo/CreditoColaborador')));
+const NovoEditarProcesso = Loadable(lazy(() => import('../pages/processo/NovoEditarProcesso')));
+
+// Parametrização
+const FluxoDetail = Loadable(lazy(() => import('../pages/parametrizacao/FluxoDetail')));
+const EstadoDetail = Loadable(lazy(() => import('../pages/parametrizacao/EstadoDetail')));
+const Parametrizacao = Loadable(lazy(() => import('../pages/parametrizacao/Parametrizacao')));
+const PerfilEstadosAcessos = Loadable(lazy(() => import('../pages/parametrizacao/PerfilEstadosAcessos')));
+
+// Gaji9
+const Gaji9 = Loadable(lazy(() => import('../pages/gaji9/Gaji9')));

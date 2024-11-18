@@ -11,8 +11,8 @@ import { HEADER } from '../../config';
 // components
 import { NavSectionHorizontal } from '../../components/nav-section';
 //
+import NavConfig from './NavConfig';
 import Aplicacoes from './Aplicacoes';
-import navConfigDigitalDocs from './NavConfigDigitalDocs';
 
 // ----------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ function NavbarHorizontal() {
       <Container maxWidth={false}>
         <NavSectionHorizontal
           navConfig={[
-            ...navConfigDigitalDocs,
+            ...NavConfig,
             ...(minhasAplicacoes?.length === 0
               ? []
               : [

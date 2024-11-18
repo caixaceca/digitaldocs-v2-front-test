@@ -107,42 +107,38 @@ function AjudaDialog({ onClose }) {
               <Scrollbar>
                 {isLoading && isNotFound ? (
                   <Stack>
-                    <Skeleton animation="wave" height={60} />
-                    <Skeleton animation="wave" height={60} />
-                    <Skeleton animation="wave" height={60} />
-                    <Skeleton animation="wave" height={60} />
-                    <Skeleton animation="wave" height={60} />
-                    <Skeleton animation="wave" height={60} />
+                    {[...Array(6)].map((row, index) => (
+                      <Skeleton animation="wave" height={70} key={`index_${index}`} />
+                    ))}
                   </Stack>
                 ) : (
                   <>
                     {!isLoading && isNotFound ? (
                       <SearchNotFound message="Não foi encontrada nenhuma pergunta frequente disponível..." />
                     ) : (
-                      <>
+                      <Stack spacing={1}>
                         {perguntas.map((item) => (
-                          <Stack key={item.pergunta} sx={{ mb: 1, mx: 1 }}>
-                            <Accordion
-                              expanded={controlled === item.pergunta}
-                              sx={{ '&.Mui-expanded': { boxShadow: (theme) => theme.customShadows.z1 } }}
-                              onChange={(event, isExpanded) => {
-                                setControlled(isExpanded ? item.pergunta : false);
-                              }}
-                            >
-                              <AccordionSummary>
-                                <Stack direction="row">
-                                  <Typography variant="subtitle2" sx={{ py: 0.5, color: 'text.secondary' }}>
-                                    {item.pergunta}
-                                  </Typography>
-                                </Stack>
-                              </AccordionSummary>
-                              <AccordionDetails sx={{ typography: 'body2' }}>
-                                <Markdown own children={item.resposta} />
-                              </AccordionDetails>
-                            </Accordion>
-                          </Stack>
+                          <Accordion
+                            key={item.pergunta}
+                            expanded={controlled === item.pergunta}
+                            sx={{ '&.Mui-expanded': { boxShadow: (theme) => theme.customShadows.z1 } }}
+                            onChange={(event, isExpanded) => {
+                              setControlled(isExpanded ? item.pergunta : false);
+                            }}
+                          >
+                            <AccordionSummary>
+                              <Stack direction="row">
+                                <Typography variant="subtitle2" sx={{ py: 0.5, color: 'text.secondary' }}>
+                                  {item.pergunta}
+                                </Typography>
+                              </Stack>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ typography: 'body2' }}>
+                              <Markdown own children={item.resposta} />
+                            </AccordionDetails>
+                          </Accordion>
                         ))}
-                      </>
+                      </Stack>
                     )}
                   </>
                 )}

@@ -21,18 +21,14 @@ const Connector = styled(StepConnector)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-Steps.propTypes = {
-  sx: PropTypes.object,
-  activeStep: PropTypes.number,
-  steps: PropTypes.arrayOf(PropTypes.string),
-};
+Steps.propTypes = { sx: PropTypes.object, activeStep: PropTypes.number, steps: PropTypes.arrayOf(PropTypes.string) };
 
 export default function Steps({ steps, activeStep, sx, ...other }) {
   return (
     <Stepper alternativeLabel activeStep={activeStep} connector={<Connector />} sx={{ mb: 4, ...sx }} {...other}>
       {steps.map((label) => (
         <Step key={label}>
-          <StepLabel StepIconComponent={StepIcon} sx={{ '& .MuiStepLabel-label': { typography: 'subtitle2' } }}>
+          <StepLabel StepIconComponent={StepIcon} sx={{ '& .MuiStepLabel-label': { typography: 'subtitle2', mt: 1 } }}>
             {label}
           </StepLabel>
         </Step>
@@ -50,7 +46,7 @@ function StepIcon({ active, completed }) {
     <Stack
       alignItems="center"
       justifyContent="center"
-      sx={{ width: 24, height: 24, color: 'text.disabled', ...(active && { color: 'primary.main' }) }}
+      sx={{ mt: completed ? 0 : 0.5, color: 'text.disabled', ...(active && { color: 'primary.main' }) }}
     >
       {completed ? (
         <CheckIcon sx={{ color: 'primary.main' }} />

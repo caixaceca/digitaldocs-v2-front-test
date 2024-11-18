@@ -120,7 +120,6 @@ EncaminharEmSerie.propTypes = {
 export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { motivosTransicao } = useSelector((state) => state.parametrizacao);
 
@@ -165,11 +164,11 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
   const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
 
   useEffect(() => {
-    if (mail && perfilId && values?.estado?.estado_final_id) {
+    if (values?.estado?.estado_final_id) {
       setValue('perfil', null);
-      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: values?.estado?.estado_final_id }));
+      dispatch(getFromParametrizacao('colaboradoresEstado', { id: values?.estado?.estado_final_id }));
     }
-  }, [dispatch, mail, perfilId, setValue, values?.estado?.estado_final_id]);
+  }, [dispatch, setValue, values?.estado?.estado_final_id]);
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -357,55 +356,49 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
         {/* CONFIDENCILAIDADE */}
-        <Stack>
-          <Accordion expanded={values?.confidencial} onChange={() => setValue('confidencial', !values?.confidencial)}>
-            <AccordionSummary sx={{ py: 0.75 }}>Confidencialidade</AccordionSummary>
-            <AccordionDetails sx={{ pt: 2 }}>
-              <Confidencialidade
-                perfisIncluidos="perfis_incluidos"
-                perfisExcluidos="perfis_excluidos"
-                estadosIncluidos="estados_incluidos"
-                estadosExcluidos="estados_excluidos"
-              />
-            </AccordionDetails>
-          </Accordion>
-        </Stack>
+        <Accordion expanded={values?.confidencial} onChange={() => setValue('confidencial', !values?.confidencial)}>
+          <AccordionSummary sx={{ py: 0.75 }}>Confidencialidade</AccordionSummary>
+          <AccordionDetails sx={{ pt: 2 }}>
+            <Confidencialidade
+              perfisIncluidos="perfis_incluidos"
+              perfisExcluidos="perfis_excluidos"
+              estadosIncluidos="estados_incluidos"
+              estadosExcluidos="estados_excluidos"
+            />
+          </AccordionDetails>
+        </Accordion>
 
         {/* ATRIBUIÇÃO */}
         {podeAtribuir && (
-          <Stack>
-            <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
-              <AccordionSummary sx={{ py: 0.75 }}>Atribuir processo</AccordionSummary>
-              <AccordionDetails sx={{ pt: 2 }}>
-                <RHFAutocompleteObject name="colaborador" label="Colaborador" options={colaboradoresList} />
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
+          <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
+            <AccordionSummary sx={{ py: 0.75 }}>Atribuir processo</AccordionSummary>
+            <AccordionDetails sx={{ pt: 2 }}>
+              <RHFAutocompleteObject name="colaborador" label="Colaborador" options={colaboradoresList} />
+            </AccordionDetails>
+          </Accordion>
         )}
 
         {/* PENDÊNCIA */}
         {podeColocarPendente && (
-          <Stack>
-            <Accordion expanded={values?.pendente} onChange={() => setValue('pendente', !values?.pendente)}>
-              <AccordionSummary sx={{ py: 0.75 }}>Enviar como pendente</AccordionSummary>
-              <AccordionDetails sx={{ pt: paraLevantamento(processo?.assunto) ? 2 : 0 }}>
-                {paraLevantamento(processo?.assunto) && (
-                  <RHFSwitch otherSx={{ mt: 0 }} name="pendenteLevantamento" label="Pendente de levantamento" />
-                )}
-                {!values?.pendenteLevantamento && (
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 2 }}>
-                    <RHFAutocompleteObject
-                      label="Motivo"
-                      name="motivo_pendencia"
-                      options={motivosPendencia}
-                      sx={{ width: { sm: '50%' } }}
-                    />
-                    <RHFTextField name="mobs" label="Observação pendência" />
-                  </Stack>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
+          <Accordion expanded={values?.pendente} onChange={() => setValue('pendente', !values?.pendente)}>
+            <AccordionSummary sx={{ py: 0.75 }}>Enviar como pendente</AccordionSummary>
+            <AccordionDetails sx={{ pt: paraLevantamento(processo?.assunto) ? 2 : 0 }}>
+              {paraLevantamento(processo?.assunto) && (
+                <RHFSwitch otherSx={{ mt: 0 }} name="pendenteLevantamento" label="Pendente de levantamento" />
+              )}
+              {!values?.pendenteLevantamento && (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 2 }}>
+                  <RHFAutocompleteObject
+                    label="Motivo"
+                    name="motivo_pendencia"
+                    options={motivosPendencia}
+                    sx={{ width: { sm: '50%' } }}
+                  />
+                  <RHFTextField name="mobs" label="Observação pendência" />
+                </Stack>
+              )}
+            </AccordionDetails>
+          </Accordion>
         )}
       </Stack>
       <ButtonsStepper
@@ -732,31 +725,6 @@ export function FinalizarForm({ id, cativos, onClose }) {
   );
 }
 
-// --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
-
-LibertarForm.propTypes = { perfilID: PropTypes.number, processoID: PropTypes.number, onClose: PropTypes.func };
-
-export function LibertarForm({ perfilID, processoID, onClose }) {
-  const dispatch = useDispatch();
-  const { mail } = useSelector((state) => state.intranet);
-  const { isSaving } = useSelector((state) => state.digitaldocs);
-
-  const hanndleLibertar = () => {
-    dispatch(updateItem('atribuir', '', { mail, perfilID, processoID, perfilIDAfeto: '', msg: 'Processo libertado' }));
-  };
-
-  return (
-    <DialogConfirmar
-      onClose={onClose}
-      isSaving={isSaving}
-      handleOk={hanndleLibertar}
-      color="warning"
-      title="Libertar"
-      desc="libertar este processo"
-    />
-  );
-}
-
 // --- PARECER INDIVIDUAL/ESTADO ---------------------------------------------------------------------------------------
 
 ParecerForm.propTypes = { estado: PropTypes.bool, onCancel: PropTypes.func, processoId: PropTypes.number };
@@ -1042,6 +1010,29 @@ export function AtribuirForm({ dados, onClose }) {
   );
 }
 
+// --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
+
+LibertarForm.propTypes = { dados: PropTypes.func, isSaving: PropTypes.bool, onClose: PropTypes.func };
+
+export function LibertarForm({ dados, isSaving, onClose }) {
+  const dispatch = useDispatch();
+  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const libertarClick = () => {
+    dispatch(updateItem('libertar', null, { mail, perfilId, msg: 'Processo libertado', ...dados }));
+  };
+
+  return (
+    <DialogConfirmar
+      onClose={onClose}
+      isSaving={isSaving}
+      handleOk={() => libertarClick()}
+      color="warning"
+      title="Libertar"
+      desc="libertar este processo"
+    />
+  );
+}
+
 // --- COLOCAR PROCESSO PENDENTE ---------------------------------------------------------------------------------------
 
 export function ColocarPendenteForm() {
@@ -1101,7 +1092,7 @@ export function ColocarPendenteForm() {
     <Dialog open onClose={() => dispatch(closeModal())} fullWidth maxWidth="sm">
       <DialogTitle>Processo pendente</DialogTitle>
       <DialogContent>
-        {processo?.motivo_pendencia_id && processo?.motivo ? (
+        {processo?.pendente && processo?.motivo_pendencia_id && processo?.motivo ? (
           <Stack direction="column" spacing={1} sx={{ pt: 3 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography sx={{ color: 'text.secondary' }}>Motivo:</Typography>
@@ -1220,25 +1211,27 @@ export function DomiciliarForm({ id, estadoId, onClose }) {
   );
 }
 
-// --- ABANDONAR PROCESSO ----------------------------------------------------------------------------------------------
+// --- FINALIZAR PROCESSO ----------------------------------------------------------------------------------------------
 
-AbandonarForm.propTypes = { dados: PropTypes.func, isSaving: PropTypes.bool, onClose: PropTypes.func };
+FinalizarOPForm.propTypes = { id: PropTypes.number, isSaving: PropTypes.bool, onClose: PropTypes.func };
 
-export function AbandonarForm({ dados, isSaving, onClose }) {
+export function FinalizarOPForm({ id, isSaving, onClose }) {
   const dispatch = useDispatch();
   const { mail, perfilId } = useSelector((state) => state.intranet);
-  const abandonarClick = () => {
-    dispatch(updateItem('abandonar', null, { mail, perfilId, msg: 'Processo abandonado', ...dados }));
+  const handleFinalizar = () => {
+    dispatch(
+      updateItem('finalizar', JSON.stringify({ cativos: [] }), { id, mail, perfilId, msg: 'Processo finalizado' })
+    );
   };
 
   return (
     <DialogConfirmar
       onClose={onClose}
       isSaving={isSaving}
-      handleOk={() => abandonarClick()}
-      color="warning"
-      title="Abandonar"
-      desc="abandonar este processo"
+      handleOk={() => handleFinalizar()}
+      color="success"
+      title="Finalizar"
+      desc="finalizar este processo"
     />
   );
 }

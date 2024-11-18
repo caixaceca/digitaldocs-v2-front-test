@@ -99,7 +99,7 @@ export default function EstatisticaCredito() {
 
   useEffect(() => {
     if (mail && perfilId && vista === 'Mensal' && uo?.id && dataValido(data)) {
-      dispatch(resetItem('estCredito'));
+      dispatch(resetItem({ item: 'estCredito' }));
       const mes = formatDate(data, 'M');
       const ano = formatDate(data, 'yyyy');
       const intervalo = `?data_inicio=${formatDate(data, 'yyyy-MM')}-01&data_final=${formatDate(data, 'yyyy-MM')}-${ultimoDiaDoMes(data)}`;
@@ -109,7 +109,7 @@ export default function EstatisticaCredito() {
 
   useEffect(() => {
     if (mail && perfilId && vista === 'Intervalo' && uo?.id && dataValido(datai) && dataValido(dataf)) {
-      dispatch(resetItem('estCredito'));
+      dispatch(resetItem({ item: 'estCredito' }));
       const intervalo = `?data_inicio=${formatDate(datai, 'yyyy-MM-dd')}&data_final=${formatDate(dataf, 'yyyy-MM-dd')}`;
       dispatch(getIndicadores('estCreditoIntervalo', { mail, perfilId, uoID: uo?.id, intervalo }));
     }
@@ -276,9 +276,6 @@ export function Totais() {
                     <TotaisLinha first linha="Garantia Bancária" dados={resumoEstCredito} />
                     <EmptyRow />
                   </TableBody>
-                  <TableHead>
-                    <TotaisLinha first dados={resumoEstCredito} />
-                  </TableHead>
                   <TableBody>
                     <EmptyRow segmento />
                     <TotaisLinha linha="Tesouraria" dados={resumoEstCredito} />
@@ -832,40 +829,34 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
     (segmento === 'Empresa' && 'grey.50016') ||
     (segmento === 'Particular' && 'grey.50024') ||
     (segmento === 'Produtor Individual' && 'grey.50032') ||
-    (first && !linha && !segmento && 'grey.50048');
+    'grey.50048';
   const subTotal =
     !linha && (segmento === 'Empresa' || segmento === 'Particular' || segmento === 'Produtor Individual');
   return (
     <TableRow hover sx={{ bgcolor: subTotal && color, '& .MuiTableCell-root': { fontWeight: subTotal && 900 } }}>
       {first && (
         <TableCell rowSpan={linha && segmento ? 4 : 1} sx={{ bgcolor: color, fontWeight: 900 }}>
-          {segmento || linha || 'TOTAL ACUMULADO'}
+          {segmento || linha}
         </TableCell>
       )}
-      {!segmento && (linha === 'Tesouraria' || linha === 'Investimento') && <TableCell> </TableCell>}
+      {!segmento && (linha === 'Tesouraria' || linha === 'Investimento') && (
+        <TableCell sx={{ border: 'none' }}> </TableCell>
+      )}
       <TableCell sx={{ fontWeight: 900, pl: '12px !important', bgcolor: first && !linha && !segmento && 'grey.50048' }}>
         {(segmento && linha) || (!segmento && (linha === 'Tesouraria' || linha === 'Investimento')) ? linha : ''}
       </TableCell>
-      <TableRowTotais dados={dadosResumo(dados, segmento, linha)} isTotal={!segmento && !linha} />
+      <TableRowTotais dados={dadosResumo(dados, segmento, linha)} />
     </TableRow>
   );
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TableRowTotais.propTypes = { dados: PropTypes.object, isTotal: PropTypes.bool };
+TableRowTotais.propTypes = { dados: PropTypes.object };
 
-function TableRowTotais({ dados, isTotal }) {
-  return ['qtdEnt', 'valorEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valorCont', 'qtdId', 'valorId']?.map((row, index) => (
-    <TableCell
-      key={row}
-      align="right"
-      sx={{
-        bgcolor:
-          isTotal &&
-          `${((index === 2 || index === 3) && 'success') || ((index === 4 || index === 5) && 'primary') || ((index === 6 || index === 7) && 'error') || 'focus'}.lighter`,
-      }}
-    >
+function TableRowTotais({ dados }) {
+  return ['qtdEnt', 'valorEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valorCont', 'qtdId', 'valorId']?.map((row) => (
+    <TableCell key={row} align="right">
       {fNumber(dados[row])}
     </TableCell>
   ));
@@ -878,6 +869,7 @@ EmptyRow.propTypes = { segmento: PropTypes.bool };
 function EmptyRow({ segmento }) {
   return (
     <TableRow>
+      <TableCell sx={{ p: segmento ? 3 : 0.25, border: segmento && 'none' }}> </TableCell>
       <TableCell colSpan={20} sx={{ p: segmento ? 3 : 0.25 }}>
         {' '}
       </TableCell>

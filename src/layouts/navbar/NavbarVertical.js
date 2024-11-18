@@ -23,10 +23,10 @@ import Image from '../../components/Image';
 import Scrollbar from '../../components/Scrollbar';
 import { NavSectionVertical } from '../../components/nav-section';
 //
+import NavConfig from './NavConfig';
 import Aplicacoes from './Aplicacoes';
 import NavbarAcount from './NavbarAcount';
 import CollapseButton from './CollapseButton';
-import navConfigDigitalDocs from './NavConfigDigitalDocs';
 
 // ----------------------------------------------------------------------
 
@@ -83,7 +83,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
       <NavSectionVertical
         isCollapse={isCollapse}
         navConfig={[
-          ...navConfigDigitalDocs,
+          ...NavConfig,
           ...(minhasAplicacoes?.length === 0
             ? []
             : [{ subheader: 'Aplicações', items: Aplicacoes({ minhasAplicacoes }) }]),

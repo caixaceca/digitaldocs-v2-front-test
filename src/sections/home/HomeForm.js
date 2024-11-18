@@ -201,7 +201,7 @@ export function ValidarDocForm({ onCancel }) {
 
   const limparDados = () => {
     reset(defaultValues);
-    dispatch(resetItem());
+    dispatch(resetItem({ item: 'documento' }));
   };
 
   return (

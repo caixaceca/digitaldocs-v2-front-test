@@ -158,8 +158,8 @@ const slice = createSlice({
       state.isOpenDisposicao = false;
     },
 
-    resetItem(state) {
-      state.documento = null;
+    resetItem(state, action) {
+      state[action.payload.item] = action.payload?.tipo === 'array' ? [] : null;
     },
   },
 });
@@ -291,6 +291,20 @@ export function getFromIntranet(item, params) {
             ...row,
             email: allUsers?.find((item) => item.id === row?.id).userPrincipalName,
           }));
+          // if (allUsers?.length === 0) {
+          //   const response = await axios.get(`${BASEURL}/perfil`, options);
+          //   allUsers = response?.data;
+          // }
+
+          // const presences = await axios.post(
+          //   `https://graph.microsoft.com/v1.0/communications/getPresencesByUserId`,
+          //   { ids: allUsers?.filter((item) => item?.id_aad)?.map((row) => row?.id_aad) },
+          //   { headers }
+          // );
+          // const presencesEmail = presences.data?.value?.map((row) => ({
+          //   ...row,
+          //   email: allUsers?.find((item) => item.id_aad === row?.id).userPrincipalName,
+          // }));
           dispatch(slice.actions.getPresencesSuccess({ allUsers, presencesEmail, mail: params?.mail }));
           break;
         }
@@ -300,7 +314,7 @@ export function getFromIntranet(item, params) {
           break;
         }
         case 'validar doc': {
-          dispatch(slice.actions.resetItem());
+          dispatch(slice.actions.resetItem({ item: 'documento' }));
           const response = await axios.get(
             `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`,
             options

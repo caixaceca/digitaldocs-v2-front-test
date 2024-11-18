@@ -6,30 +6,30 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { pertencoEstadoId, gestorEstado } from '../utils/validarAcesso';
+import { pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
 // routes
-import { PATH_DIGITALDOCS } from '../routes/paths';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // hooks
-import { getComparator, applySort } from '../hooks/useTable';
-import useToggle, { useToggle1, useToggle2 } from '../hooks/useToggle';
+import { getComparator, applySort } from '../../hooks/useTable';
+import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getFromCC, updateItemCC } from '../redux/slices/cc';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getFromCC, updateItemCC } from '../../redux/slices/cc';
+import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
 // components
-import Page from '../components/Page';
-import { TabCard } from '../components/TabsWrapper';
-import { DialogConfirmar } from '../components/CustomDialog';
-import { Notificacao } from '../components/NotistackProvider';
-import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import { UpdateItem, DefaultAction } from '../components/Actions';
+import Page from '../../components/Page';
+import { TabCard } from '../../components/TabsWrapper';
+import { DialogConfirmar } from '../../components/CustomDialog';
+import { Notificacao } from '../../components/NotistackProvider';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { UpdateItem, DefaultAction } from '../../components/Actions';
 // sections
-import { Views, Transicoes } from '../sections/processo/Detalhes';
-import { EncaminharForm } from '../sections/credito-colaborador/Form/IntervencaoForm';
-import { Atribuir, ColocarPendente, Abandonar } from '../sections/processo/Intervencao';
-import { Anexos, DadosGerais, TableDetalhes, EntidadesGarantias } from '../sections/credito-colaborador/Detalhes';
+import { Views, Transicoes } from '../../sections/processo/Detalhes';
+import { EncaminharForm } from '../../sections/credito-colaborador/Form/IntervencaoForm';
+import { Atribuir, ColocarPendente, Libertar } from '../../sections/processo/Intervencao';
+import { Anexos, DadosGerais, TableDetalhes, EntidadesGarantias } from '../../sections/credito-colaborador/Detalhes';
 
 // ----------------------------------------------------------------------
 
@@ -83,7 +83,7 @@ export default function CreditoColaborador() {
     if (
       done === 'Processo arquivado' ||
       done === 'Processo atribuído' ||
-      done === 'Processo abandonado' ||
+      done === 'Processo libertado' ||
       done === 'Atribuição eliminada' ||
       done === 'Processo encaminhado' ||
       done === 'Processo adicionado a listagem de pendentes'
@@ -177,8 +177,8 @@ export default function CreditoColaborador() {
   }, [dispatch, id, perfilId, mail, pedidoCC?.preso, pedidoCC?.perfil_id]);
 
   useEffect(() => {
-    if (mail && podeAtribuir() && pedidoCC?.ultimo_estado_id && perfilId) {
-      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, id: pedidoCC?.ultimo_estado_id, perfilId }));
+    if (podeAtribuir() && pedidoCC?.ultimo_estado_id) {
+      dispatch(getFromParametrizacao('colaboradoresEstado', { id: pedidoCC?.ultimo_estado_id }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mail, dispatch, pedidoCC]);
@@ -205,11 +205,7 @@ export default function CreditoColaborador() {
   };
 
   function podeAtribuir() {
-    return (
-      !pedidoCC?.preso &&
-      pertencoEstadoId(meusAmbientes, pedidoCC?.ultimo_estado_id) &&
-      gestorEstado(meusAmbientes, pedidoCC?.ultimo_estado_id)
-    );
+    return !pedidoCC?.preso && gestorEstado(meusAmbientes, pedidoCC?.ultimo_estado_id);
   }
 
   return (
@@ -303,11 +299,9 @@ export default function CreditoColaborador() {
                         {open1 && <EncaminharForm onCancel={onClose1} destinos={destinosList?.seguimentos} />}
                       </>
                     )}
-                    <Abandonar
-                      id={pedidoCC?.id}
+                    <Libertar
                       isSaving={isSaving}
-                      fluxoId={pedidoCC?.fluxo_id}
-                      estadoId={pedidoCC?.ultimo_estado_id}
+                      dados={{ id: pedidoCC?.id, fluxoId: pedidoCC?.fluxo_id, estadoId: pedidoCC?.ultimo_estado_id }}
                     />
                     {!pedidoCC?.pendente &&
                       pedidoCC?.estados?.length === 1 &&

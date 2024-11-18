@@ -225,8 +225,6 @@ export function Conclusao({ indicadores }) {
     yaxis: { title: { text: 'Dias' }, labels: { formatter: (value) => fNumber(value) } },
   });
 
-  console.log(conclusaoByItem);
-
   return (
     <Card sx={{ p: 1 }}>
       {conclusaoByItem.length > 0 && (

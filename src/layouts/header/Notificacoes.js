@@ -37,7 +37,6 @@ import { IconButtonAnimate } from '../../components/animate';
 export default function Notificacoes() {
   const [open, setOpen] = useState(null);
   const { notificacoes } = useSelector((state) => state.intranet);
-  const total = notificacoes?.length;
   const totalUnRead = notificacoes.filter((item) => !item.vista).length;
   const dataSorted = applySort(notificacoes, getComparator('desc', 'criado_em'));
 
@@ -85,7 +84,7 @@ export default function Notificacoes() {
         <Box sx={{ display: 'flex', alignItems: 'center', py: 2, px: 2.5 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="subtitle1">Notificações</Typography>
-            {total > 0 && (
+            {notificacoes?.length > 0 && (
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 {totalUnRead === 0
                   ? 'Todas as notificaçõs já foram vistas'
@@ -105,7 +104,7 @@ export default function Notificacoes() {
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        {total > 0 ? (
+        {notificacoes?.length > 0 ? (
           <Scrollbar sx={{ maxHeight: { xs: 340, sm: 420 } }}>
             <List disablePadding>
               {dataSorted.slice().map((notificacao) => (

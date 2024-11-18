@@ -66,7 +66,7 @@ export default function IntranetLayout() {
             pb: { xs: `${HEADER.MOBILE_HEIGHT + 24}px`, lg: `${HEADER.DASHBOARD_DESKTOP_HEIGHT + 24}px` },
           }}
         >
-          <Disposicao />
+          {isOpenDisposicao && <Disposicao />}
           <Outlet />
         </Box>
       </>

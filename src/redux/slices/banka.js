@@ -135,17 +135,7 @@ const slice = createSlice({
     },
 
     resetItem(state, action) {
-      switch (action.payload) {
-        case 'entidade':
-          state.entidade = null;
-          break;
-        case 'infoContrato':
-          // state.infoContrato = null;
-          break;
-
-        default:
-          break;
-      }
+      state[action.payload.item] = action.payload?.tipo === 'array' ? [] : null;
     },
 
     changeNumEntidade(state, action) {
@@ -199,7 +189,7 @@ export function getFromBanka(item, params) {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
         case 'entidade': {
-          dispatch(slice.actions.resetItem('entidade'));
+          dispatch(slice.actions.resetItem({ item }));
           const response = await axios.get(
             `http://172.17.8.78:9900/api/v1/banka/consultar/entidade/${params?.perfilId}?entidade=${params?.numEntidade}`,
             options
@@ -208,7 +198,6 @@ export function getFromBanka(item, params) {
           break;
         }
         case 'contratos': {
-          dispatch(slice.actions.resetItem('infoContrato'));
           const response = await fetch('/assets/contratos.json');
           const data = await response.json();
           dispatch(

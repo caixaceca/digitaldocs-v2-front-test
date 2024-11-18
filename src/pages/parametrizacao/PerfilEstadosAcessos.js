@@ -9,15 +9,15 @@ import Card from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 // redux
-import { useSelector } from '../redux/store';
+import { useSelector } from '../../redux/store';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // components
-import Page from '../components/Page';
-import { SearchNotFound404 } from '../components/table';
+import Page from '../../components/Page';
+import { SearchNotFound404 } from '../../components/table';
 // sections
-import PerfilCover from '../sections/sobre/PerfilCover';
-import TableAcessos from '../sections/parametrizacao/TableAcessos';
+import PerfilCover from '../../sections/sobre/PerfilCover';
+import TableAcessos from '../../sections/parametrizacao/TableAcessos';
 
 // ----------------------------------------------------------------------
 

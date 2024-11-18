@@ -12,27 +12,27 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime, fYear } from '../utils/formatTime';
-import { normalizeText, entidadesParse, noDados } from '../utils/formatText';
+import { ptDateTime, fYear } from '../../utils/formatTime';
+import { normalizeText, entidadesParse, noDados } from '../../utils/formatText';
 // hooks
-import useTable, { getComparator, applySort } from '../hooks/useTable';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getAll, resetItem } from '../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getAll, resetItem } from '../../redux/slices/digitaldocs';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // routes
-import { PATH_DIGITALDOCS } from '../routes/paths';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
-import Page from '../components/Page';
-import Label from '../components/Label';
-import Scrollbar from '../components/Scrollbar';
-import { DefaultAction } from '../components/Actions';
-import { SkeletonTable } from '../components/skeleton';
-import Panel, { Criado, Registos } from '../components/Panel';
-import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
-import { SearchToolbarProcura } from '../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../components/table';
+import Page from '../../components/Page';
+import Label from '../../components/Label';
+import Scrollbar from '../../components/Scrollbar';
+import { DefaultAction } from '../../components/Actions';
+import { SkeletonTable } from '../../components/skeleton';
+import Panel, { Criado, Registos } from '../../components/Panel';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { SearchToolbarProcura } from '../../components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // ----------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ export default function Procura() {
   });
 
   useEffect(() => {
-    dispatch(resetItem('processo'));
+    dispatch(resetItem({ item: 'processo' }));
   }, [dispatch]);
 
   useEffect(() => {

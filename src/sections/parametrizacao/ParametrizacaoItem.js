@@ -8,6 +8,7 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -15,7 +16,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, openModal, closeModal } from '../../redux/slices/parametrizacao';
+import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { Checked } from '../../components/Panel';
@@ -26,7 +27,7 @@ import { AddItem, UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from './applySortFilter';
-import { FluxoForm, EstadoForm, OrigemForm, ClonarFluxoForm } from './ParametrizacaoForm';
+import { FluxoForm, EstadoForm, OrigemForm } from './ParametrizacaoForm';
 
 // ----------------------------------------------------------------------
 
@@ -64,9 +65,9 @@ ParametrizacaoItem.propTypes = { item: PropTypes.string };
 export default function ParametrizacaoItem({ item }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
-  const { fluxos, estados, origens, selectedItem, isOpenModal, isOpenView, isLoading, done } = useSelector(
+  const { fluxos, estados, origens, selectedItem, isOpenModal, isLoading, done } = useSelector(
     (state) => state.parametrizacao
   );
 
@@ -90,13 +91,7 @@ export default function ParametrizacaoItem({ item }) {
 
   useEffect(() => {
     if (done) {
-      if (
-        done === 'Estado adicionado' ||
-        done === 'Estado atualizado' ||
-        done === 'Fluxo adicionado' ||
-        done === 'Fluxo atualizado' ||
-        done === 'Fluxo clonado'
-      ) {
+      if (done === 'Estado adicionado' || done === 'Fluxo adicionado') {
         navigate(
           `${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${selectedItem?.id}`
         );
@@ -106,27 +101,16 @@ export default function ParametrizacaoItem({ item }) {
   }, [done]);
 
   useEffect(() => {
-    if (mail && perfilId && item) {
-      dispatch(getFromParametrizacao(item, { mail, perfilId }));
-    }
-  }, [dispatch, perfilId, item, mail]);
+    dispatch(getFromParametrizacao(item));
+  }, [dispatch, item]);
 
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const handleCloseModal = () => {
-    dispatch(closeModal());
-  };
-
   const handleView = (id) => {
     navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${id}`);
-  };
-
-  const handleClone = (id) => {
-    dispatch(openModal('view'));
-    dispatch(getFromParametrizacao('fluxo', { id, mail, from: 'listagem', perfilId }));
   };
 
   const dataFiltered = applySortFilter({
@@ -190,18 +174,7 @@ export default function ParametrizacaoItem({ item }) {
                           </TableCell>
                         </>
                       )) ||
-                        (item === 'estados' && (
-                          <>
-                            <TableCell>{row.nome}</TableCell>
-                            <TableCell>{row.uo}</TableCell>
-                            <TableCell align="center">
-                              <Checked check={row.is_inicial} />
-                            </TableCell>
-                            <TableCell align="center">
-                              <Checked check={row.is_final} />
-                            </TableCell>
-                          </>
-                        )) ||
+                        (item === 'estados' && <EstadoDetail row={row} />) ||
                         (item === 'origens' && (
                           <>
                             <TableCell>{row.designacao}</TableCell>
@@ -217,28 +190,12 @@ export default function ParametrizacaoItem({ item }) {
 
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {item === 'estados' ||
-                            (item === 'fluxos' && row.is_ativo && (
-                              <UpdateItem
-                                id={row?.id}
-                                item={(item === 'fluxos' && 'fluxo') || (item === 'estados' && 'estado')}
-                              />
-                            ))}
-                          {item === 'origens' && <UpdateItem item="origem" id={row?.id} />}
-                          {item !== 'estados' && item !== 'fluxos' && item !== 'origens' && <UpdateItem dados={row} />}
-                          {item === 'estados' && <UpdateItem item="estado" id={row?.id} />}
-                          {item === 'fluxos' && (
-                            <DefaultAction
-                              color="inherit"
-                              label="Clonar fluxo"
-                              handleClick={() => handleClone(row?.id)}
-                            />
+                          {item === 'origens' && <UpdateItem dados={{ item: 'origem', id: row?.id }} />}
+                          {item !== 'estados' && item !== 'fluxos' && item !== 'origens' && (
+                            <UpdateItem dados={{ dados: row }} />
                           )}
                           {(item === 'fluxos' || item === 'estados') && (
-                            <DefaultAction
-                              handleClick={() => handleView(row?.id)}
-                              label={item === 'estados' ? 'Colaboradores' : 'Transições'}
-                            />
+                            <DefaultAction label="DETALHES" handleClick={() => handleView(row?.id)} />
                           )}
                         </Stack>
                       </TableCell>
@@ -267,14 +224,42 @@ export default function ParametrizacaoItem({ item }) {
         )}
       </Card>
 
-      {item === 'fluxos' && isOpenView && <ClonarFluxoForm onCancel={handleCloseModal} />}
       {isOpenModal && (
         <>
-          {item === 'fluxos' && <FluxoForm onCancel={handleCloseModal} />}
-          {item === 'estados' && <EstadoForm onCancel={handleCloseModal} />}
-          {item === 'origens' && <OrigemForm onCancel={handleCloseModal} />}
+          {item === 'fluxos' && <FluxoForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'estados' && <EstadoForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'origens' && <OrigemForm onCancel={() => dispatch(closeModal())} />}
         </>
       )}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+EstadoDetail.propTypes = { row: PropTypes.object };
+
+export function EstadoDetail({ row = null }) {
+  return (
+    <>
+      <TableCell>{row.nome}</TableCell>
+      <TableCell>
+        <Typography variant="body2">{row.uo}</Typography>
+        {!!row?.balcao && (
+          <Typography variant="body2">
+            <Typography variant="caption" component="span" sx={{ color: 'text.secondary' }}>
+              Balcão:{' '}
+            </Typography>
+            {row.balcao}
+          </Typography>
+        )}
+      </TableCell>
+      <TableCell align="center">
+        <Checked check={row.is_inicial} />
+      </TableCell>
+      <TableCell align="center">
+        <Checked check={row.is_final} />
+      </TableCell>
     </>
   );
 }

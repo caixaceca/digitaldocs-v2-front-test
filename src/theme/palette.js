@@ -138,7 +138,7 @@ const palette = {
       warning: WARNING.main,
       error: ERROR.main,
     },
-    background: { paper: '#fff', default: '#fff', neutral: GREY[200] },
+    background: { paper: '#fff', default: '#fff', neutral: GREY[200], disabled: GREY[100] },
     action: { active: GREY[600], ...COMMON.action },
   },
   dark: {
@@ -152,7 +152,7 @@ const palette = {
       warning: WARNING.main,
       error: ERROR.main,
     },
-    background: { paper: GREY[800], default: GREY[900], neutral: GREY[500_16] },
+    background: { paper: GREY[800], default: GREY[900], neutral: GREY[500_16], disabled: GREY[500_8] },
     action: { active: GREY[500], ...COMMON.action },
   },
 };

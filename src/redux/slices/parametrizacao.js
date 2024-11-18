@@ -1,10 +1,22 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { errorMsg } from '../../utils/formatText';
 import { BASEURLDD, BASEURLCC } from '../../utils/axios';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
+//
+import {
+  hasError,
+  actionGet,
+  doneSucess,
+  actionReset,
+  actionCreate,
+  actionUpdate,
+  actionDelete,
+  actionOpenModal,
+  actionCloseModal,
+  actionResponseMsg,
+} from './sliceActions';
 
 // ----------------------------------------------------------------------
 
@@ -25,11 +37,9 @@ const initialState = {
   estado: null,
   origem: null,
   meuFluxo: null,
-  transicao: null,
   meuAmbiente: null,
   estadoRegra: null,
   selectedItem: null,
-  notificacaoId: null,
   fluxos: [],
   linhas: [],
   anexos: [],
@@ -37,7 +47,9 @@ const initialState = {
   acessos: [],
   origens: [],
   despesas: [],
-  transicoes: [],
+  checklist: [],
+  garantias: [],
+  documentos: [],
   meusFluxos: [],
   meusacessos: [],
   notificacoes: [],
@@ -58,74 +70,20 @@ const slice = createSlice({
   name: 'parametrizacao',
   initialState,
   reducers: {
-    startLoading(state) {
-      state.isLoading = true;
+    setLoading(state, action) {
+      state.isLoading = action.payload;
     },
 
     startSaving(state) {
       state.isSaving = true;
     },
 
-    stopLoading(state) {
-      state.isLoading = false;
-    },
-
-    setDone(state, action) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.done = action.payload;
-    },
-
-    setError(state, action) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.error = action.payload;
+    responseMsg(state, action) {
+      actionResponseMsg(state, action.payload);
     },
 
     resetItem(state, action) {
-      switch (action.payload) {
-        case 'fluxo':
-          state.fluxo = null;
-          break;
-        case 'estado':
-          state.estado = null;
-          break;
-        case 'estadoParecer':
-          state.estadoRegra = null;
-          state.regrasEstado = [];
-          break;
-
-        default:
-          break;
-      }
-    },
-
-    getSuccess(state, action) {
-      switch (action.payload.item) {
-        case 'motivos pendencia':
-          state.motivosPendencia = applySort(
-            action.payload?.dados?.map((row) => ({ ...row, label: row?.motivo })),
-            getComparator('asc', 'label')
-          );
-          break;
-        case 'motivos transicao':
-          state.motivosTransicao = applySort(
-            action.payload?.dados?.map((row) => ({ ...row, label: row?.designacao })),
-            getComparator('asc', 'label')
-          );
-          break;
-
-        default:
-          break;
-      }
-    },
-
-    getFluxosSuccess(state, action) {
-      state.fluxos = applySort(action.payload, getComparator('asc', 'assunto'));
-    },
-
-    getFluxoSuccess(state, action) {
-      state.fluxo = action.payload;
+      actionReset(state, action.payload);
     },
 
     getMeusAmbientesSuccess(state, action) {
@@ -163,289 +121,28 @@ const slice = createSlice({
       });
     },
 
-    getColaboradoresGestorSuccess(state, action) {
-      state.colaboradoresGestor = action.payload;
-    },
-
-    getAcessosSuccess(state, action) {
-      state.acessos = action.payload;
-    },
-
-    getAcessoSuccess(state, action) {
-      state.acesso = action.payload;
-    },
-
-    getEstadosSuccess(state, action) {
-      state.estados = applySort(action.payload, getComparator('asc', 'nome'));
-    },
-
-    getEstadoSuccess(state, action) {
-      state.estado = action.payload;
-    },
-
-    getPerfisEstadoSuccess(state, action) {
-      state.perfisEstado = action.payload;
-    },
-
-    getColaboradoresEstadoSuccess(state, action) {
-      state.colaboradoresEstado = action.payload?.perfis;
-    },
-
-    getEstadosPerfilSuccess(state, action) {
-      state.estadosPerfil = action.payload;
-    },
-
-    getTransicaoSuccess(state, action) {
-      state.transicao = action.payload;
-    },
-
-    getOrigemSuccess(state, action) {
-      state.origem = action.payload;
-    },
-
-    getOrigensSuccess(state, action) {
-      state.origens = action.payload;
-    },
-
-    getLinhasSuccess(state, action) {
-      state.linhas = action.payload;
-    },
-
-    getDespesasSuccess(state, action) {
-      state.despesas = action.payload;
-    },
-
-    getAnexosSuccess(state, action) {
-      state.anexos = action.payload || [];
-    },
-
-    getRegrasAnexosSuccess(state, action) {
-      state.regrasAnexos = action.payload || [];
-    },
-
-    getRegrasEstadoSuccess(state, action) {
-      state.regrasEstado = action.payload;
-    },
-
-    getRegrasTransicaoSuccess(state, action) {
-      state.regrasTransicao = action.payload;
-    },
-
-    getEstadoRegraSuccess(state, action) {
-      state.estadoRegra = action.payload;
-    },
-
-    getNotificacoesSuccess(state, action) {
-      state.notificacaoId = null;
-      state.notificacoes = action.payload;
-    },
-
-    getDestinatariosSuccess(state, action) {
-      state.destinatarios = action.payload;
+    getSuccess(state, action) {
+      actionGet(state, action.payload);
     },
 
     createSuccess(state, action) {
-      switch (action.payload.item) {
-        case 'motivo transicao':
-          state.motivosTransicao.push(action.payload.dados);
-          break;
-
-        default:
-          break;
-      }
-    },
-
-    createAcessoSuccess(state, action) {
-      state.acessos.push(action.payload);
-    },
-
-    createOrigemSuccess(state, action) {
-      state.origens.push(action.payload);
-    },
-
-    createLinhaSuccess(state, action) {
-      state.linhas.push(action.payload);
-    },
-
-    createNotificacaoSuccess(state, action) {
-      state.notificacoes.push(action.payload);
-    },
-
-    createDestinatarioSuccess(state, action) {
-      state.destinatarios.push(action.payload);
-    },
-
-    createMotivoPendenciaSuccess(state, action) {
-      state.motivosPendencia.push(action.payload);
-    },
-
-    createRegrasEstadoSuccess(state, action) {
-      state.regrasEstado.push(action.payload);
-    },
-
-    createRegraAnexoSuccess(state, action) {
-      state.regrasAnexos.push(action.payload);
-    },
-
-    createTransicaoSuccess(state, action) {
-      state.fluxo.transicoes?.push(action.payload);
-    },
-
-    createDespesaSuccess(state, action) {
-      state.despesas.push(action.payload);
-    },
-
-    createAnexoSuccess(state, action) {
-      state.anexos.push(action.payload);
+      actionCreate(state, action.payload);
     },
 
     updateSuccess(state, action) {
-      switch (action.payload.item) {
-        case 'motivo transicao':
-          state.motivosTransicao[state.motivosTransicao.findIndex((row) => row.id === action.payload.dados.id)] =
-            action.payload.dados;
-          break;
-
-        default:
-          break;
-      }
+      actionUpdate(state, action.payload);
     },
 
-    updateAcessoSuccess(state, action) {
-      const index = state.acessos.findIndex((row) => row.id === action.payload.id);
-      state.acessos[index] = action.payload;
-    },
-
-    updateMotivoPendenciaSuccess(state, action) {
-      const index = state.motivosPendencia.findIndex((row) => row.id === action.payload.id);
-      state.motivosPendencia[index] = action.payload;
-    },
-
-    updateTransicaoSuccess(state, action) {
-      const index = state.fluxo.transicoes.findIndex((row) => row.id === action.payload.id);
-      state.fluxo.transicoes[index] = action.payload;
-    },
-
-    updateOrigemSuccess(state, action) {
-      const index = state.origens.findIndex((row) => row.id === action.payload.id);
-      state.origens[index] = action.payload;
-    },
-
-    updateLinhaSuccess(state, action) {
-      const index = state.linhas.findIndex((row) => row.id === action.payload.id);
-      state.linhas[index] = action.payload;
-    },
-
-    updateNotificacaoSuccess(state, action) {
-      const index = state.notificacoes.findIndex((row) => row.id === action.payload.id);
-      state.notificacoes[index] = action.payload;
-    },
-
-    updateDestinatarioSuccess(state, action) {
-      const index = state.destinatarios.findIndex((row) => row.id === action.payload.id);
-      state.destinatarios[index] = action.payload;
-    },
-
-    updateAnexoSuccess(state, action) {
-      const index = state.anexos.findIndex((row) => row.id === action.payload.id);
-      state.anexos[index] = action.payload;
-    },
-
-    updateRegraAnexoSuccess(state, action) {
-      const index = state.regrasAnexos.findIndex((row) => row.id === action.payload.id);
-      state.regrasAnexos[index] = action.payload;
-    },
-
-    updateDespesaSuccess(state, action) {
-      const index = state.despesas.findIndex((row) => row.id === action.payload.id);
-      state.despesas[index] = action.payload;
-    },
-
-    deleteAcessoSuccess(state, action) {
-      state.acessos = state.acessos.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteFluxoSuccess(state, action) {
-      const index = state.fluxos.findIndex((row) => row.id === action.payload.id);
-      state.fluxos[index].is_ativo = false;
-    },
-
-    deleteTransicaoSuccess(state, action) {
-      state.fluxo.transicoes = state.fluxo.transicoes.filter((row) => row.id !== action.payload);
-    },
-
-    deleteMotivoPendenciaSuccess(state, action) {
-      state.motivosPendencia = state.motivosPendencia.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteLinhaSuccess(state, action) {
-      state.linhas = state.linhas.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteEstadoSuccess(state, action) {
-      state.estados = state.estados.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteEstadoPerfilSuccess(state, action) {
-      state.estadosPerfil = state.estadosPerfil.filter((row) => row.id !== action.payload.id);
-    },
-
-    deletePerfilFromEstadoSuccess(state, action) {
-      state.estado.perfis = state.estado.perfis.filter((row) => row.peid !== action.payload.id);
-    },
-
-    deleteOrigemSuccess(state, action) {
-      state.origens = state.origens.filter((row) => row.id !== action.payload.id);
-    },
-
-    deleteDespesaSuccess(state, action) {
-      const index = state.despesas.findIndex((row) => row.id === action.payload.id);
-      state.despesas[index].ativo = false;
-    },
-
-    deleteAnexoSuccess(state, action) {
-      const index = state.anexos.findIndex((row) => row.id === action.payload.id);
-      state.anexos[index].ativo = false;
-    },
-
-    deleteRegraAnexoSuccess(state, action) {
-      const index = state.regrasAnexos.findIndex((row) => row.id === action.payload.id);
-      state.regrasAnexos[index].ativo = false;
-    },
-
-    deleteDestinatarioSuccess(state, action) {
-      const index = state.destinatarios.findIndex((row) => row.id === action.payload.id);
-      state.destinatarios[index].ativo = false;
+    deleteSuccess(state, action) {
+      actionDelete(state, action.payload);
     },
 
     openModal(state, action) {
-      switch (action.payload) {
-        case 'add':
-          state.isEdit = false;
-          state.isOpenModal = true;
-          break;
-        case 'update':
-          state.isEdit = true;
-          state.isOpenModal = true;
-          break;
-        case 'view':
-          state.isEdit = true;
-          state.isOpenView = true;
-          break;
-
-        default:
-          break;
-      }
-    },
-
-    selectItem(state, action) {
-      state.selectedItem = action.payload;
+      actionOpenModal(state, action.payload);
     },
 
     closeModal(state) {
-      state.isOpenModal = false;
-      state.isOpenView = false;
-      state.selectedItem = null;
+      actionCloseModal(state);
     },
 
     changeMeuAmbiente(state, action) {
@@ -456,14 +153,6 @@ const slice = createSlice({
       }));
       state.meuFluxo = null;
     },
-
-    changeMeuFluxo(state, action) {
-      state.meuFluxo = action.payload;
-    },
-
-    setNotificacaoId(state, action) {
-      state.notificacaoId = action.payload;
-    },
   },
 });
 
@@ -471,191 +160,268 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, resetItem, selectItem, closeModal, changeMeuFluxo, setNotificacaoId, changeMeuAmbiente } =
-  slice.actions;
+export const { openModal, resetItem, getSuccess, closeModal, changeMeuAmbiente } = slice.actions;
 
 // ----------------------------------------------------------------------
 
 export function getFromParametrizacao(item, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
-    try {
-      const options = { headers: { cc: params?.mail } };
-      switch (item) {
-        case 'meusacessos': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${params?.perfilId}`, options);
-          dispatch(slice.actions.getMeusAcessosSuccess(response.data));
-          break;
-        }
-        case 'meusambientes': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/v2/${params?.perfilId}`, options);
-          dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
+  return async (dispatch, getState) => {
+    const state = getState();
+    const { perfilId, mail } = state.intranet;
+    if (perfilId && mail) {
+      try {
+        dispatch(slice.actions.setLoading(true));
+        const options = { headers: { cc: mail } };
 
-          const estadosGestor = response.data?.objeto?.filter((item) => item?.gestor);
-          const estadosPromises = estadosGestor.map(async (row) => {
-            const estado = axios.get(`${BASEURLDD}/v1/estados/${row?.estado_id}/${params?.perfilId}`, options);
-            return estado;
-          });
-          const estados = await Promise.all(estadosPromises);
-          const colaboradoresIds = [params?.perfilId];
-          await estados?.forEach((row) => {
-            row?.data?.perfis?.forEach((item) => {
-              if (!colaboradoresIds?.includes(item?.perfil_id)) {
-                colaboradoresIds?.push(item?.perfil_id);
-              }
+        switch (item) {
+          // ---- LISTA --------------------------------------------------------------------------------------------------
+          case 'meusacessos': {
+            const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${perfilId}`, options);
+            dispatch(slice.actions.getMeusAcessosSuccess(response.data));
+            break;
+          }
+          case 'meusambientes': {
+            const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/v2/${perfilId}`, options);
+            dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
+
+            const estadosGestor = response.data?.objeto?.filter((item) => item?.gestor);
+            const estadosPromises = estadosGestor.map(async (row) => {
+              const estado = axios.get(`${BASEURLDD}/v1/estados/${row?.estado_id}/${perfilId}`, options);
+              return estado;
             });
-          });
-          dispatch(slice.actions.getColaboradoresGestorSuccess(colaboradoresIds));
-          break;
-        }
-        case 'acessos': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${params?.perfilId}`, options);
-          dispatch(slice.actions.getAcessosSuccess(response.data));
-          break;
-        }
-        case 'acesso': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
-          dispatch(slice.actions.selectItem(response.data));
-          break;
-        }
-        case 'fluxos': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.perfilId}`, options);
-          dispatch(slice.actions.getFluxosSuccess(response.data));
-          break;
-        }
-        case 'fluxo': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getFluxoSuccess(response.data));
+            const estados = await Promise.all(estadosPromises);
+            const colaboradoresIds = [perfilId];
+            await estados?.forEach((row) => {
+              row?.data?.perfis?.forEach((item) => {
+                if (!colaboradoresIds?.includes(item?.perfil_id)) {
+                  colaboradoresIds?.push(item?.perfil_id);
+                }
+              });
+            });
+            dispatch(slice.actions.getSuccess({ item: 'colaboradoresGestor', dados: colaboradoresIds }));
+            break;
           }
-          break;
-        }
-        case 'transicao': {
-          const response = await axios.get(`${BASEURLDD}/v1/transicoes/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getTransicaoSuccess(response.data));
+          case 'acessos': {
+            const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${params?.perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item: 'acessos', dados: response.data }));
+            break;
           }
-          break;
-        }
-        case 'origens': {
-          const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.perfilId}`, options);
-          dispatch(slice.actions.getOrigensSuccess(response.data));
-          break;
-        }
-        case 'origem': {
-          const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else {
-            dispatch(slice.actions.getOrigemSuccess(response.data));
+          case 'fluxos': {
+            const response = await axios.get(`${BASEURLDD}/v1/fluxos/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data, label: 'assunto' }));
+            break;
           }
-          break;
-        }
-        case 'motivos pendencia': {
-          const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${params?.perfilId}`, options);
-          dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
-          break;
-        }
-        case 'motivos transicao': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/motivos_transicoes/lista/${params?.perfilId}?ativo=true${params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}`,
-            options
-          );
-          dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
-          break;
-        }
-        case 'motivo transicao': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/motivos_transicoes/detalhe/${params?.perfilId}?id=${params?.id}`,
-            options
-          );
-          dispatch(slice.actions.selectItem(response.data.objeto));
-          break;
-        }
-        case 'linhas': {
-          const response = await axios.get(`${BASEURLDD}/v1/linhas/${params?.perfilId}`, options);
-          dispatch(slice.actions.getLinhasSuccess(response.data.objeto));
-          break;
-        }
-        case 'despesas': {
-          const response = await axios.get(`${BASEURLCC}/v1/suportes/designacao/despesas/gestao`, options);
-          dispatch(slice.actions.getDespesasSuccess(response.data.objeto));
-          break;
-        }
-        case 'estados': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.perfilId}`, options);
-          dispatch(slice.actions.getEstadosSuccess(response.data));
-          break;
-        }
-        case 'estado': {
-          dispatch(slice.actions.resetItem('estado'));
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          if (params?.from === 'listagem') {
-            dispatch(slice.actions.selectItem(response.data));
-          } else if (params?.from === 'regras transicao') {
-            dispatch(slice.actions.getPerfisEstadoSuccess(response?.data?.perfis || []));
-          } else {
-            dispatch(slice.actions.getEstadoSuccess(response.data));
+          case 'estados': {
+            const response = await axios.get(`${BASEURLDD}/v1/estados/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data, label: 'nome' }));
+            break;
           }
-          break;
-        }
-        case 'anexos': {
-          const response = await axios.get(`${BASEURLCC}/v1/anexos/gestao`, options);
-          dispatch(slice.actions.getAnexosSuccess(response.data.objeto));
-          break;
-        }
-        case 'regrasAnexos': {
-          const response = await axios.get(`${BASEURLCC}/v1/anexos/regra/byfluxo/${params?.fluxoId}`, options);
-          dispatch(slice.actions.getRegrasAnexosSuccess(response.data.objeto));
-          break;
-        }
-        case 'estadosPerfil': {
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${params?.estadoId}/${params?.perfilId}`,
-            options
-          );
-          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
-          break;
-        }
-        case 'regrasEstado': {
-          const response = await axios.get(
-            `${BASEURLCC}/v1/suportes/regra_parecer/estado/${params?.estadoId}`,
-            options
-          );
-          dispatch(slice.actions.getRegrasEstadoSuccess(response.data.objeto));
-          break;
-        }
-        case 'regrasTransicao': {
-          const response = await axios.get(`${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.id}`, options);
-          dispatch(slice.actions.getRegrasTransicaoSuccess(response.data.objeto));
-          break;
-        }
-        case 'colaboradoresEstado': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.getColaboradoresEstadoSuccess(response.data));
-          break;
-        }
-        case 'notificacoes': {
-          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/transicao/${params?.id}`, options);
-          dispatch(slice.actions.getNotificacoesSuccess(response.data.objeto));
-          break;
-        }
-        case 'destinatarios': {
-          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
-          dispatch(slice.actions.getDestinatariosSuccess(response.data.objeto));
-          break;
+          case 'estadosPerfil': {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`,
+              options
+            );
+            dispatch(slice.actions.getSuccess({ item: 'estadosPerfil', dados: response.data }));
+            break;
+          }
+          case 'colaboradoresEstado': {
+            const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.perfis }));
+            break;
+          }
+          case 'regrasEstado': {
+            const response = await axios.get(
+              `${BASEURLCC}/v1/suportes/regra_parecer/estado/${params?.estadoId}`,
+              options
+            );
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'origens': {
+            const response = await axios.get(`${BASEURLDD}/v1/origens/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data }));
+            break;
+          }
+          case 'anexos': {
+            const response = await axios.get(`${BASEURLCC}/v1/anexos/gestao`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'regrasAnexos': {
+            const response = await axios.get(`${BASEURLCC}/v1/anexos/regra/byfluxo/${params?.fluxoId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'regrasTransicao': {
+            const response = await axios.get(`${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.id}`, options);
+            dispatch(slice.actions.getSuccess({ item: 'regrasTransicao', dados: response.data.objeto }));
+            break;
+          }
+          case 'notificacoes': {
+            const response = await axios.get(`${BASEURLDD}/v1/notificacoes/transicao/${params?.id}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'destinatarios': {
+            const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'motivosPendencia': {
+            const response = await axios.get(`${BASEURLDD}/v1/motivos/all/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto, label: 'motivo' }));
+            break;
+          }
+          case 'motivosTransicao': {
+            const fluxoId = params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : '';
+            const _path = `${BASEURLDD}/v1/motivos_transicoes/lista/${perfilId}`;
+            const ativo = await axios.get(`${_path}?ativo=true${fluxoId}`, options);
+            if (params?.gestao) {
+              const inativo = await axios.get(`${_path}?ativo=false${fluxoId}`, options);
+              dispatch(slice.actions.getSuccess({ item, dados: [...ativo.data.objeto, ...inativo.data.objeto] }));
+            } else {
+              dispatch(slice.actions.getSuccess({ item, dados: ativo.data.objeto, label: 'designacao' }));
+            }
+            break;
+          }
+          case 'linhas': {
+            const response = await axios.get(`${BASEURLDD}/v1/linhas/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'despesas': {
+            const _path = `${BASEURLDD}/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}`;
+            const ativos = await axios.get(`${_path}&ativo=true`, options);
+            if (params?.gestao) {
+              const inativos = await axios.get(`${_path}&ativo=false`, options);
+              dispatch(slice.actions.getSuccess({ item, dados: [...ativos.data.objeto, ...inativos.data.objeto] }));
+            } else {
+              dispatch(slice.actions.getSuccess({ item, dados: ativos.data.objeto, label: 'designacao' }));
+            }
+            break;
+          }
+          case 'garantias': {
+            const _path = `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/lista?perfil_cc_id=${perfilId}`;
+            const ativos = await axios.get(`${_path}&ativo=true`, options);
+            if (params?.gestao) {
+              const inativos = await axios.get(`${_path}&ativo=false`, options);
+              dispatch(slice.actions.getSuccess({ item, dados: [...ativos.data.objeto, ...inativos.data.objeto] }));
+            } else {
+              dispatch(slice.actions.getSuccess({ item, dados: ativos.data.objeto, label: 'descritivo' }));
+            }
+            break;
+          }
+          case 'documentos': {
+            const _path = `${BASEURLDD}/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}`;
+            const ativos = await axios.get(`${_path}&ativo=true`, options);
+            if (params?.gestao) {
+              const inativos = await axios.get(`${_path}&ativo=false`, options);
+              dispatch(
+                slice.actions.getSuccess({
+                  item,
+                  label: 'designacao',
+                  dados: [...ativos.data.objeto, ...inativos.data.objeto],
+                })
+              );
+            } else {
+              dispatch(slice.actions.getSuccess({ item, label: 'designacao	', dados: ativos.data.objeto }));
+            }
+            break;
+          }
+          case 'checklist': {
+            const _path = `${BASEURLDD}/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}`;
+            const ativos = await axios.get(`${_path}&ativo=true`, options);
+            if (params?.gestao) {
+              const inativos = await axios.get(`${_path}&ativo=false`, options);
+              dispatch(slice.actions.getSuccess({ item, dados: [...ativos.data.objeto, ...inativos.data.objeto] }));
+            } else {
+              dispatch(slice.actions.getSuccess({ item, label: 'designacao	', dados: ativos.data.objeto }));
+            }
+            break;
+          }
+
+          // ---- OBJETO -------------------------------------------------------------------------------------------------
+
+          case 'acesso': {
+            const response = await axios.get(`${BASEURLDD}/v1/acessos/${perfilId}/${params?.id}`, options);
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
+            break;
+          }
+          case 'fluxo': {
+            const response = await axios.get(`${BASEURLDD}/v1/fluxos/${params?.id}/${perfilId}`, options);
+            dispatch(
+              slice.actions.getSuccess({
+                dados: response.data,
+                item: params?.from === 'listagem' ? 'selectedItem' : item,
+              })
+            );
+            break;
+          }
+          case 'estado': {
+            dispatch(slice.actions.resetItem({ item: 'estado' }));
+            const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`, options);
+            if (params?.from === 'regrasTransicao') {
+              dispatch(slice.actions.getSuccess({ item: 'perfisEstado', dados: response?.data?.perfis || [] }));
+            } else {
+              dispatch(
+                slice.actions.getSuccess({
+                  dados: response.data,
+                  item: params?.from === 'listagem' ? 'selectedItem' : item,
+                })
+              );
+            }
+            break;
+          }
+          case 'origem': {
+            const response = await axios.get(`${BASEURLDD}/v1/origens/${params?.id}/${perfilId}`, options);
+            dispatch(
+              slice.actions.getSuccess({
+                dados: response.data,
+                item: params?.from === 'listagem' ? 'selectedItem' : item,
+              })
+            );
+            break;
+          }
+          case 'motivoTransicao': {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/motivos_transicoes/detalhe/${perfilId}?id=${params?.id}`,
+              options
+            );
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data?.objeto }));
+            break;
+          }
+          case 'despesa': {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/despesas/tipos/detail?perfil_cc_id=${perfilId}&id=${params?.id}`,
+              options
+            );
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data?.objeto }));
+            break;
+          }
+          case 'garantia': {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`,
+              options
+            );
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data?.objeto }));
+            break;
+          }
+          case 'checklistitem': {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/tipos_documentos/checklist/detail?perfil_cc_id=${perfilId}&id=${params?.id}`,
+              options
+            );
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data?.objeto }));
+            break;
+          }
+          default:
+            break;
         }
 
-        default:
-          break;
+        dispatch(slice.actions.setLoading(false));
+      } catch (error) {
+        hasError(error, dispatch, slice.actions.responseMsg);
       }
-      dispatch(slice.actions.stopLoading());
-    } catch (error) {
-      hasError(error, dispatch);
     }
   };
 }
@@ -663,148 +429,84 @@ export function getFromParametrizacao(item, params) {
 // ----------------------------------------------------------------------
 
 export function createItem(item, dados, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
-      switch (item) {
-        case 'acesso': {
-          const response = await axios.post(`${BASEURLDD}/v1/acessos`, dados, options);
-          dispatch(slice.actions.createAcessoSuccess(response.data));
-          break;
-        }
-        case 'fluxo': {
-          const response = await axios.post(`${BASEURLDD}/v1/fluxos`, dados, options);
-          dispatch(slice.actions.selectItem(response.data));
-          break;
-        }
-        case 'clonar fluxo': {
-          const response = await axios.post(`${BASEURLDD}/v1/fluxos`, dados, options);
-          const transicoes = [];
-          params?.transicoes?.forEach((row) => {
-            transicoes.push({
-              modo: row?.modo,
-              to_alert: row?.to_alert,
-              fluxo_id: response?.data?.id,
-              perfilIDCC: params?.perfilId,
-              hasopnumero: row?.hasopnumero,
-              prazoemdias: row?.prazoemdias,
-              is_paralelo: row?.is_paralelo,
-              estado_final_id: row?.estado_final_id,
-              estado_inicial_id: row?.estado_inicial_id,
-              is_after_devolucao: row?.is_after_devolucao,
-              arqhasopnumero: row?.arqhasopnumero || false,
-              requer_parecer: row?.requer_parecer || false,
-            });
-          });
-          await axios.post(`${BASEURLDD}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
-          dispatch(slice.actions.selectItem(response.data));
-          break;
-        }
-        case 'transicao': {
-          const response = await axios.post(`${BASEURLDD}/v1/transicoes`, dados, options);
-          dispatch(slice.actions.createTransicaoSuccess(response.data));
-          break;
-        }
-        case 'origem': {
-          const response = await axios.post(`${BASEURLDD}/v1/origens`, dados, options);
-          dispatch(slice.actions.createOrigemSuccess(response.data));
-          break;
-        }
-        case 'linha': {
-          const response = await axios.post(`${BASEURLDD}/v1/linhas`, dados, options);
-          dispatch(slice.actions.createLinhaSuccess(response.data.objeto));
-          break;
-        }
-        case 'Despesa': {
-          const response = await axios.post(`${BASEURLCC}/v1/suportes/designacao/despesa`, dados, options);
-          dispatch(slice.actions.createDespesaSuccess(response.data.objeto));
-          break;
-        }
-        case 'estado': {
-          const response = await axios.post(`${BASEURLDD}/v1/estados`, dados, options);
-          dispatch(slice.actions.selectItem(response.data));
-          break;
-        }
-        case 'estadoPerfil': {
-          await axios.post(`${BASEURLDD}/v1/estados/asscc/perfil`, JSON.stringify(dados), options);
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${dados?.perfil_id}/${dados?.perfil_id_cc}`,
-            options
-          );
-          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
-          break;
-        }
-        case 'perfisEstado': {
-          await axios.post(`${BASEURLDD}/v1/estados/asscc/perfis`, dados, options);
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/${JSON.parse(dados)?.estado_id}/${JSON.parse(dados)?.perfil_id_cc}`,
-            options
-          );
-          dispatch(slice.actions.getEstadoSuccess(response.data));
-          break;
-        }
-        case 'motivo transicao': {
-          const response = await axios.post(`${BASEURLDD}/v1/motivos_transicoes/${params?.perfilId}`, dados, options);
-          dispatch(slice.actions.createSuccess({ item, dados: response.data.objeto }));
-          break;
-        }
-        case 'motivo pendencia': {
-          const response = await axios.post(`${BASEURLDD}/v1/motivos/${params?.perfilId}`, dados, options);
-          dispatch(slice.actions.createMotivoPendenciaSuccess(response.data.objeto));
-          break;
-        }
-        case 'Anexo': {
-          const response = await axios.post(`${BASEURLCC}/v1/anexos`, dados, options);
-          dispatch(slice.actions.createAnexoSuccess(response.data.objeto));
-          break;
-        }
-        case 'regra anexo': {
-          const response = await axios.post(`${BASEURLCC}/v1/anexos/regra`, dados, options);
-          dispatch(slice.actions.createRegraAnexoSuccess(response.data.objeto));
-          break;
-        }
-        case 'regra estado': {
-          const response = await axios.post(`${BASEURLCC}/v1/suportes/regra_parecer/estado/default`, dados, options);
-          dispatch(slice.actions.getRegrasEstadoSuccess(response.data.objeto));
-          break;
-        }
-        case 'regra estado destribuido': {
-          const response = await axios.post(
-            `${BASEURLCC}/v1/suportes/regra_parecer/estado/coru/${params?.estadoId}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.createRegraAnexoSuccess(response.data.objeto));
-          break;
-        }
-        case 'regras transicao': {
-          const response = await axios.post(
-            `${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.estadoId}/${params?.transicaoId}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.getRegrasTransicaoSuccess(response.data.objeto));
-          break;
-        }
-        case 'notificacao': {
-          const response = await axios.post(`${BASEURLDD}/v1/notificacoes`, dados, options);
-          dispatch(slice.actions.createNotificacaoSuccess(response.data.objeto));
-          break;
-        }
-        case 'destinatario': {
-          await axios.post(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, dados, options);
-          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
-          dispatch(slice.actions.getDestinatariosSuccess(response.data.objeto));
-          break;
+  return async (dispatch, getState) => {
+    const state = getState();
+    const { perfilId, mail } = state.intranet;
+    if (perfilId && mail) {
+      try {
+        dispatch(slice.actions.startSaving());
+        const options = { headers: { 'content-type': 'application/json', cc: mail } };
+        const _path =
+          (item === 'fluxo' && `${BASEURLDD}/v1/fluxos`) ||
+          (item === 'linhas' && `${BASEURLDD}/v1/linhas`) ||
+          (item === 'anexos' && `${BASEURLCC}/v1/anexos`) ||
+          (item === 'estado' && `${BASEURLDD}/v1/estados`) ||
+          (item === 'acessos' && `${BASEURLDD}/v1/acessos`) ||
+          (item === 'origens' && `${BASEURLDD}/v1/origens`) ||
+          (item === 'acessos' && `${BASEURLDD}/v1/acessos`) ||
+          (item === 'transicoes' && `${BASEURLDD}/v1/transicoes`) ||
+          (item === 'regrasAnexos' && `${BASEURLCC}/v1/anexos/regra`) ||
+          (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes`) ||
+          (item === 'perfisEstado' && `${BASEURLDD}/v1/estados/asscc/perfis`) ||
+          (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil`) ||
+          (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}`) ||
+          (item === 'motivosTransicao' && `${BASEURLDD}/v1/motivos_transicoes/${perfilId}`) ||
+          (item === 'despesas' && `${BASEURLDD}/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
+          (item === 'regrasEstado' && `${BASEURLCC}/v1/suportes/regra_parecer/estado/default`) ||
+          (item === 'checklist' && `${BASEURLDD}/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
+          (item === 'garantias' && `${BASEURLDD}/v1/tipos_garantias/tipo_garantia?perfil_cc_id=${perfilId}`) ||
+          (item === 'regrasTransicao' &&
+            `${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.estadoId}/${params?.transicaoId}`) ||
+          '';
+
+        if (_path) {
+          const response = await axios.post(_path, dados, options);
+          if (item === 'fluxo' || item === 'estado') {
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
+          } else {
+            dispatch(
+              slice.actions.createSuccess({
+                item1: params?.item1 || '',
+                item: item === 'perfisEstado' ? 'perfis' : item,
+                dados: (item === 'perfisEstado' && JSON.parse(dados)?.perfis) || response.data?.objeto || response.data,
+              })
+            );
+          }
         }
 
-        default:
-          break;
+        switch (item) {
+          case 'destinatario': {
+            await axios.post(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, dados, options);
+            const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
+            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+            break;
+          }
+          case 'clonar fluxo': {
+            const clone = await axios.post(`${BASEURLDD}/v1/fluxos`, dados, options);
+            if (params?.transicoes?.length > 0)
+              await axios.post(
+                `${BASEURLDD}/v1/transicoes/multi`,
+                JSON.stringify(
+                  params?.transicoes?.map((row) => ({ ...row, fluxo_id: response?.data?.id, perfilIDCC: perfilId }))
+                ),
+                options
+              );
+            const response = await axios.get(`${BASEURLDD}/v1/fluxos/${clone?.data?.id}/${perfilId}`, options);
+            dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: response.data }));
+            break;
+          }
+          case 'regra estado destribuido': {
+            await axios.post(`${BASEURLCC}/v1/suportes/regra_parecer/estado/coru/${params?.estadoId}`, dados, options);
+            break;
+          }
+
+          default:
+            break;
+        }
+        doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      } catch (error) {
+        hasError(error, dispatch, slice.actions.responseMsg);
       }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
     }
   };
 }
@@ -812,98 +514,52 @@ export function createItem(item, dados, params) {
 // ----------------------------------------------------------------------
 
 export function updateItem(item, dados, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
-      switch (item) {
-        case 'acesso': {
-          const response = await axios.put(`${BASEURLDD}/v1/acessos/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateAcessoSuccess(response.data));
-          break;
-        }
-        case 'fluxo': {
-          await axios.put(`${BASEURLDD}/v1/fluxos/${params?.id}`, dados, options);
-          break;
-        }
-        case 'estado': {
-          await axios.put(`${BASEURLDD}/v1/estados/${params?.id}`, dados, options);
-          break;
-        }
-        case 'estadoPerfil': {
-          await axios.put(`${BASEURLDD}/v1/estados/asscc/perfil`, JSON.stringify(dados), options);
-          const response = await axios.get(
-            `${BASEURLDD}/v1/estados/asscc/byperfilid/${dados?.perfil_id}/${dados?.perfil_id_cc}`,
-            options
-          );
-          dispatch(slice.actions.getEstadosPerfilSuccess(response.data));
-          break;
-        }
-        case 'transicao': {
-          const response = await axios.put(`${BASEURLDD}/v1/transicoes/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateTransicaoSuccess(response.data));
-          break;
-        }
-        case 'origem': {
-          const response = await axios.put(`${BASEURLDD}/v1/origens/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateOrigemSuccess(response.data));
-          break;
-        }
-        case 'motivo pendencia': {
-          const response = await axios.put(
-            `${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.updateMotivoPendenciaSuccess(response.data.objeto));
-          break;
-        }
-        case 'linha': {
-          const response = await axios.put(`${BASEURLDD}/v1/linhas/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateLinhaSuccess(response.data.objeto));
-          break;
-        }
-        case 'motivo transicao': {
-          const response = await axios.put(
-            `${BASEURLDD}/v1/motivos_transicoes/${params?.perfilId}?id=${params?.id}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.updateSuccess({ item, dados: response.data.objeto }));
-          break;
-        }
-        case 'notificacao': {
-          const response = await axios.put(`${BASEURLDD}/v1/notificacoes/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateNotificacaoSuccess(response.data.objeto));
-          break;
-        }
-        case 'destinatario': {
-          const response = await axios.put(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateDestinatarioSuccess(response.data.objeto));
-          break;
-        }
-        case 'Despesa': {
-          const response = await axios.put(`${BASEURLCC}/v1/suportes/designacao/despesa/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateDespesaSuccess(response.data.objeto));
-          break;
-        }
-        case 'Anexo': {
-          const response = await axios.put(`${BASEURLCC}/v1/anexos/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateAnexoSuccess(response.data.objeto));
-          break;
-        }
-        case 'regra anexo': {
-          const response = await axios.put(`${BASEURLCC}/v1/anexos/regra/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateRegraAnexoSuccess(response.data.objeto));
-          break;
-        }
+  return async (dispatch, getState) => {
+    const state = getState();
+    const { perfilId, mail } = state.intranet;
+    if (perfilId && mail) {
+      try {
+        const options = { headers: { 'content-type': 'application/json', cc: mail } };
+        const _path =
+          (item === 'fluxo' && `${BASEURLDD}/v1/fluxos/${params?.id}`) ||
+          (item === 'linhas' && `${BASEURLDD}/v1/linhas/${params?.id}`) ||
+          (item === 'anexos' && `${BASEURLCC}/v1/anexos/${params?.id}`) ||
+          (item === 'acessos' && `${BASEURLDD}/v1/acessos/${params?.id}`) ||
+          (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}`) ||
+          (item === 'origens' && `${BASEURLDD}/v1/origens/${params?.id}`) ||
+          (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil`) ||
+          (item === 'transicoes' && `${BASEURLDD}/v1/transicoes/${params?.id}`) ||
+          (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes/${params?.id}`) ||
+          (item === 'regrasAnexos' && `${BASEURLCC}/v1/anexos/regra/${params?.id}`) ||
+          (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
+          (item === 'motivosTransicao' && `${BASEURLDD}/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
+          (item === 'despesas' && `${BASEURLDD}/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+          (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
+          (item === 'garantias' &&
+            `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
+          (item === 'checklist' &&
+            `${BASEURLDD}/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+          '';
 
-        default:
-          break;
+        if (_path) {
+          dispatch(slice.actions.startSaving());
+          const response = await axios.put(_path, dados, options);
+          if (item === 'fluxo' || item === 'estado') {
+            dispatch(slice.actions.getSuccess({ item, dados: response.data }));
+          } else {
+            dispatch(
+              slice.actions.updateSuccess({
+                item,
+                item1: params?.item1 || '',
+                dados: response.data?.objeto || response.data,
+              })
+            );
+          }
+        }
+        doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      } catch (error) {
+        hasError(error, dispatch, slice.actions.responseMsg);
       }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
     }
   };
 }
@@ -911,94 +567,42 @@ export function updateItem(item, dados, params) {
 // ----------------------------------------------------------------------
 
 export function deleteItem(item, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { cc: params?.mail } };
-      switch (item) {
-        case 'acesso': {
-          await axios.delete(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
-          dispatch(slice.actions.deleteAcessoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'fluxo': {
-          await axios.delete(`${BASEURLDD}/v1/fluxos/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteFluxoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'estado': {
-          await axios.delete(`${BASEURLDD}/v1/estados/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteEstadoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'transicao': {
-          await axios.delete(`${BASEURLDD}/v1/transicoes/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteTransicaoSuccess(params?.id));
-          break;
-        }
-        case 'estadoPerfil': {
-          await axios.delete(`${BASEURLDD}/v1/estados/asscc/perfil/${params?.perfilId}?peID=${params?.id}`, options);
-          dispatch(slice.actions.deleteEstadoPerfilSuccess({ id: params?.id }));
-          break;
-        }
-        case 'origem': {
-          await axios.delete(`${BASEURLDD}/v1/origens/${params?.id}/${params?.perfilId}`, options);
-          dispatch(slice.actions.deleteOrigemSuccess({ id: params?.id }));
-          break;
-        }
-        case 'motivo pendencia': {
-          await axios.delete(`${BASEURLDD}/v1/motivos/${params?.perfilId}?motivoID=${params?.id}`, options);
-          dispatch(slice.actions.deleteMotivoPendenciaSuccess({ id: params?.id }));
-          break;
-        }
-        case 'linha': {
-          await axios.delete(`${BASEURLDD}/v1/linhas/${params?.linhaID}/${params?.perfilID}`, options);
-          dispatch(slice.actions.deleteLinhaSuccess({ id: params?.id }));
-          break;
-        }
-        case 'Despesa': {
-          await axios.delete(`${BASEURLCC}/v1/suportes/designacao/despesa/${params?.id}`, options);
-          dispatch(slice.actions.deleteDespesaSuccess({ id: params?.id }));
-          break;
-        }
-        case 'Anexo': {
-          await axios.delete(`${BASEURLCC}/v1/anexos/${params?.id}`, options);
-          dispatch(slice.actions.deleteAnexoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'regra anexo': {
-          await axios.delete(`${BASEURLCC}/v1/anexos/regra/${params?.id}`, options);
-          dispatch(slice.actions.deleteRegraAnexoSuccess({ id: params?.id }));
-          break;
-        }
-        case 'destinatario': {
-          await axios.delete(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
-          dispatch(slice.actions.deleteDestinatarioSuccess({ id: params?.id }));
-          break;
+  return async (dispatch, getState) => {
+    const state = getState();
+    const { perfilId, mail } = state.intranet;
+    if (perfilId && mail) {
+      try {
+        const options = { headers: { cc: mail } };
+        const _path =
+          (item === 'anexos' && `${BASEURLCC}/v1/anexos/${params?.id}`) ||
+          (item === 'regrasAnexos' && `${BASEURLCC}/v1/anexos/regra/${params?.id}`) ||
+          (item === 'acessos' && `${BASEURLDD}/v1/acessos/${perfilId}/${params?.id}`) ||
+          (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`) ||
+          (item === 'origens' && `${BASEURLDD}/v1/origens/${params?.id}/${perfilId}`) ||
+          (item === 'transicoes' && `${BASEURLDD}/v1/transicoes/${params?.id}/${perfilId}`) ||
+          (item === 'linhas' && `${BASEURLDD}/v1/linhas/${params?.linhaID}/${params?.perfilID}`) ||
+          (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
+          (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
+          (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil/${perfilId}?peID=${params?.id}`) ||
+          '';
+
+        if (_path) {
+          dispatch(slice.actions.startSaving());
+          await axios.delete(_path, options);
+          dispatch(
+            slice.actions.deleteSuccess({
+              item,
+              id: params?.id,
+              item1: params?.item1 || '',
+              destaivar: item === 'anexos' || item === 'regra anexo' || item === 'destinatario',
+            })
+          );
         }
 
-        default:
-          break;
+        doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      } catch (error) {
+        hasError(error, dispatch, slice.actions.responseMsg);
       }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
     }
   };
-}
-
-// ----------------------------------------------------------------------
-
-async function doneSucess(msg, dispatch) {
-  if (msg) {
-    dispatch(slice.actions.setDone(msg));
-  }
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(slice.actions.setDone(''));
-}
-
-async function hasError(error, dispatch) {
-  dispatch(slice.actions.setError(errorMsg(error)));
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(slice.actions.setError(''));
 }

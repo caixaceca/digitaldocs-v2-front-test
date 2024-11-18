@@ -25,8 +25,6 @@ import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-// guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -84,65 +82,60 @@ export default function Acessos() {
   return (
     <>
       <HeaderBreadcrumbs heading="Acessos" sx={{ px: 1 }} />
-      <RoleBasedGuard
-        hasContent
-        roles={['acesso-110', 'acesso-111', 'perfilestado-110', 'perfilestado-111', 'Todo-110', 'Todo-111']}
-      >
-        <Card sx={{ p: 1 }}>
-          <TableToolbarPerfilEstados filter={filter} setFilter={setFilter} uo={uo} setUo={setUo} />
-          <Scrollbar>
-            <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
-              <Table size={dense ? 'small' : 'medium'}>
-                <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
-                <TableBody>
-                  {isLoading && isNotFound ? (
-                    <SkeletonTable column={4} row={10} />
-                  ) : (
-                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow key={row?.id} hover>
-                        <TableCell>
-                          <ColaboradorInfo
-                            nome={row?.nome}
-                            foto={row?.foto_disk}
-                            status={row?.presence}
-                            label={row?.perfil?.mail}
-                          />
-                        </TableCell>
-                        <TableCell align="left">
-                          <Typography variant="subtitle2"> {row?.uo?.label}</Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            Balcão nº {row?.uo?.balcao}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
-                        <TableCell align="center" width={50}>
-                          <DefaultAction label="Gerir acessos" handleClick={() => handleUpdate(row?.perfil?.id)} />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-
-                {!isLoading && isNotFound && (
-                  <TableSearchNotFound message="Não foi encontrado nenhum colaborador disponível..." />
+      <Card sx={{ p: 1 }}>
+        <TableToolbarPerfilEstados filter={filter} setFilter={setFilter} uo={uo} setUo={setUo} />
+        <Scrollbar>
+          <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
+            <Table size={dense ? 'small' : 'medium'}>
+              <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
+              <TableBody>
+                {isLoading && isNotFound ? (
+                  <SkeletonTable column={4} row={10} />
+                ) : (
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow key={row?.id} hover>
+                      <TableCell>
+                        <ColaboradorInfo
+                          nome={row?.nome}
+                          foto={row?.foto_disk}
+                          status={row?.presence}
+                          label={row?.perfil?.mail}
+                        />
+                      </TableCell>
+                      <TableCell align="left">
+                        <Typography variant="subtitle2"> {row?.uo?.label}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          Balcão nº {row?.uo?.balcao}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
+                      <TableCell align="center" width={50}>
+                        <DefaultAction label="Gerir acessos" handleClick={() => handleUpdate(row?.perfil?.id)} />
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-              </Table>
-            </TableContainer>
-          </Scrollbar>
+              </TableBody>
 
-          {!isNotFound && dataFiltered.length > 10 && (
-            <TablePaginationAlt
-              page={page}
-              dense={dense}
-              rowsPerPage={rowsPerPage}
-              onChangePage={onChangePage}
-              count={dataFiltered.length}
-              onChangeDense={onChangeDense}
-              onChangeRowsPerPage={onChangeRowsPerPage}
-            />
-          )}
-        </Card>
-      </RoleBasedGuard>
+              {!isLoading && isNotFound && (
+                <TableSearchNotFound message="Não foi encontrado nenhum colaborador disponível..." />
+              )}
+            </Table>
+          </TableContainer>
+        </Scrollbar>
+
+        {!isNotFound && dataFiltered.length > 10 && (
+          <TablePaginationAlt
+            page={page}
+            dense={dense}
+            rowsPerPage={rowsPerPage}
+            onChangePage={onChangePage}
+            count={dataFiltered.length}
+            onChangeDense={onChangeDense}
+            onChangeRowsPerPage={onChangeRowsPerPage}
+          />
+        )}
+      </Card>
     </>
   );
 }

@@ -17,7 +17,7 @@ import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getAll, selectItem } from '../../../redux/slices/digitaldocs';
+import { getAll, selectParecer } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
@@ -33,8 +33,8 @@ import { ConfidencialidadesForm } from '../form/IntervencaoForm';
 
 const TABLE_HEAD_RETENCOES = [
   { id: 'nome', label: 'Colaborador', align: 'left' },
-  { id: '', label: 'Duração', align: 'center' },
   { id: 'preso_em', label: 'Retido em', align: 'center' },
+  { id: '', label: 'Duração', align: 'center' },
   { id: 'solto_em', label: 'Solto em', align: 'center', minWidth: 100, width: 10 },
 ];
 
@@ -79,7 +79,7 @@ export default function TableDetalhes({ id, item }) {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { processo, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { processo, isLoading, isOpenModal1 } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (mail && id && item && perfilId) {
@@ -127,17 +127,19 @@ export default function TableDetalhes({ id, item }) {
               ) : (
                 dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                   <TableRow hover key={`table_detalhes_${index}`}>
+                    {(item === 'hretencoes' || item === 'hatribuicoes') && (
+                      <TableCell>
+                        <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} status={row?.presence} />
+                      </TableCell>
+                    )}
                     {(item === 'hretencoes' && (
                       <>
-                        <TableCell>
-                          <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} status={row?.presence} />
-                        </TableCell>
+                        <TableCell align="center">{ptDateTime(row?.preso_em)}</TableCell>
                         <TableCell align="center">
                           {(row?.preso_em && row?.solto_em && fDistance(row?.preso_em, row?.solto_em)) ||
                             (row?.preso_em && !row?.solto_em && fToNow(row?.preso_em)) ||
                             noDados(true)}
                         </TableCell>
-                        <TableCell align="center">{ptDateTime(row?.preso_em)}</TableCell>
                         <TableCell align={row?.solto_em ? 'left' : 'center'}>
                           {row?.solto_em ? (
                             <Criado tipo="data" value={ptDateTime(row?.solto_em)} />
@@ -152,9 +154,6 @@ export default function TableDetalhes({ id, item }) {
                     )) ||
                       (item === 'hatribuicoes' && (
                         <>
-                          <TableCell>
-                            <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} status={row?.presence} />
-                          </TableCell>
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
                             {row?.atribuido_em && <Criado caption tipo="data" value={ptDateTime(row?.atribuido_em)} />}
@@ -205,7 +204,7 @@ export default function TableDetalhes({ id, item }) {
                               <DefaultAction
                                 label="EDITAR"
                                 color="warning"
-                                handleClick={() => dispatch(selectItem(row))}
+                                handleClick={() => dispatch(selectParecer(row))}
                               />
                             )}
                           </TableCell>
@@ -235,7 +234,7 @@ export default function TableDetalhes({ id, item }) {
         />
       )}
 
-      {isOpenModal && <ConfidencialidadesForm processoId={processo.id} />}
+      {isOpenModal1 && <ConfidencialidadesForm processoId={processo.id} />}
     </Box>
   );
 }

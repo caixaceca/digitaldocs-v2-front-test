@@ -25,7 +25,6 @@ const initialState = {
   pedidoCC: null,
   pedidoForm: null,
   selectedAnexo: null,
-  despesas: [],
   anexosAtivos: [],
   anexosProcesso: [],
   anexosNecessarios: [],
@@ -68,7 +67,7 @@ const slice = createSlice({
     },
 
     resetItem(state, action) {
-      switch (action.payload) {
+      switch (action.payload.item) {
         case 'pedido cc':
           state.itemId = '';
           state.tipoItem = '';
@@ -115,12 +114,6 @@ const slice = createSlice({
       state.pedidoCC = { ...state.pedidoCC, ...action.payload };
     },
 
-    getDespesasSuccess(state, action) {
-      state.despesas = Array.isArray(action.payload)
-        ? applySort(action?.payload, getComparator('asc', 'designacao'))
-        : [];
-    },
-
     updatePedidoForm(state, action) {
       state.pedidoForm = { ...state.pedidoForm, ...action.payload };
       state.activeStep += 1;
@@ -161,13 +154,6 @@ const slice = createSlice({
       const index = state?.pedidoCC?.anexos?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
       if (index > -1) {
         state.pedidoCC.anexos[index].ativo = false;
-      }
-    },
-
-    deleteDespesaSuccess(state, action) {
-      const index = state?.pedidoCC?.despesas?.findIndex((row) => Number(row.id) === Number(action.payload.itemId));
-      if (index > -1) {
-        state.pedidoCC.despesas[index].ativo = false;
       }
     },
 
@@ -281,7 +267,7 @@ export function getFromCC(item, params) {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
         case 'pedido cc': {
-          dispatch(slice.actions.resetItem('pedido cc'));
+          dispatch(slice.actions.resetItem({ item }));
           const response = await axios.get(
             `${BASEURLCC}/v1/creditos/funcionario/${params?.perfilId}?processoID=${params?.id}`,
             options
@@ -334,11 +320,6 @@ export function getFromCC(item, params) {
         case 'hatribuicoes': {
           const response = await axios.get(`${BASEURLCC}/v1/creditos/historico/atribuicoes/${params?.id}`, options);
           dispatch(slice.actions.getPedidoCCItemSuccess({ hatribuicoes: response.data.objeto }));
-          break;
-        }
-        case 'despesas': {
-          const response = await axios.get(`${BASEURLCC}/v1/suportes/designacao/despesas/ativas`, options);
-          dispatch(slice.actions.getDespesasSuccess(response.data.objeto));
           break;
         }
         case 'anexos ativos': {
@@ -518,7 +499,7 @@ export function updateItemCC(item, dados, params) {
           dispatch(slice.actions.aceitarProcessoSuccess(params));
           break;
         }
-        case 'abandonar': {
+        case 'libertar': {
           await axios.patch(`${BASEURLDD}/v1/processos/abandonar/${params?.id}`, dados, options);
           break;
         }

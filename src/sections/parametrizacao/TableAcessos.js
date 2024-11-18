@@ -75,9 +75,11 @@ export default function TableAcessos({ tab }) {
 
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { mail } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
-  const { done, error, acessos, isLoading, isOpenModal, estadosPerfil } = useSelector((state) => state.parametrizacao);
+  const { done, error, acessos, isLoading, isOpenModal, estados, estadosPerfil } = useSelector(
+    (state) => state.parametrizacao
+  );
 
   const dataFiltered = applySortFilter({
     filter,
@@ -89,7 +91,10 @@ export default function TableAcessos({ tab }) {
             nome: objetos.find((item) => item?.id === row?.objeto)?.label || row?.objeto,
             acessoLabel: codacessos.find((item) => item.id === row.acesso)?.label || row.acesso,
           }))
-        : estadosPerfil,
+        : estadosPerfil?.map((row) => ({
+            ...row,
+            nome: row?.nome || estados?.find((item) => item?.id === row?.estado_id)?.nome || row?.estado_id,
+          })),
   });
   const isNotFound = !dataFiltered.length;
 
@@ -99,16 +104,16 @@ export default function TableAcessos({ tab }) {
   }, [filter]);
 
   useEffect(() => {
-    if (mail && id && tab === 'acessos') {
-      dispatch(getFromParametrizacao('acessos', { mail, perfilId: id }));
+    if (id && tab === 'acessos') {
+      dispatch(getFromParametrizacao('acessos', { perfilId: id }));
     }
-  }, [dispatch, id, tab, mail]);
+  }, [dispatch, id, tab]);
 
   useEffect(() => {
-    if (mail && id && perfilId && tab === 'estados') {
-      dispatch(getFromParametrizacao('estadosPerfil', { mail, estadoId: id, perfilId }));
+    if (id && tab === 'estados') {
+      dispatch(getFromParametrizacao('estadosPerfil', { estadoId: id }));
     }
-  }, [dispatch, id, perfilId, tab, mail]);
+  }, [dispatch, id, tab]);
 
   const handleCloseModal = () => {
     dispatch(closeModal());
@@ -181,13 +186,13 @@ export default function TableAcessos({ tab }) {
                           {tab === 'acessos' &&
                             row.objeto !== 'Processo' &&
                             (!row?.datalimite || (row?.datalimite && new Date(row?.datalimite) > new Date())) && (
-                              <UpdateItem dados={row} />
+                              <UpdateItem dados={{ dados: row }} />
                             )}
                           {tab === 'estados' &&
                             (emailCheck(mail, 'vc.axiac@arove.ordnavi') ||
                               !row?.data_limite ||
                               (row?.data_limite && new Date(row?.data_limite) > new Date())) && (
-                              <UpdateItem dados={row} />
+                              <UpdateItem dados={{ dados: row }} />
                             )}
                         </TableCell>
                       </TableRow>

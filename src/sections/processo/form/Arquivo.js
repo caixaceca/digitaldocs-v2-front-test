@@ -166,7 +166,6 @@ DesarquivarForm.propTypes = { id: PropTypes.number, colaboradoresList: PropTypes
 export function DesarquivarForm({ id, colaboradoresList }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
@@ -180,12 +179,11 @@ export function DesarquivarForm({ id, colaboradoresList }) {
   const values = watch();
 
   useEffect(() => {
-    if (mail && perfilId && values?.estado?.id) {
+    if (values?.estado?.id) {
       setValue('perfil', null);
-      dispatch(getFromParametrizacao('colaboradoresEstado', { mail, perfilId, id: values?.estado?.id }));
+      dispatch(getFromParametrizacao('colaboradoresEstado', { id: values?.estado?.id }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mail, dispatch, perfilId, values?.estado?.id]);
+  }, [dispatch, setValue, values?.estado?.id]);
 
   const onSubmit = async () => {
     try {
@@ -195,7 +193,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
         estado_id: values?.estado?.id,
         observacao: values?.observacao,
       };
-      dispatch(updateItem('desarquivar', JSON.stringify(dados), { id, mail, perfilId, msg: 'Processo desarquivado' }));
+      dispatch(updateItem('desarquivar', JSON.stringify(dados), { id, msg: 'Processo desarquivado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

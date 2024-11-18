@@ -31,6 +31,7 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.telefone && normalizeText(row?.telefone).indexOf(normalizeText(filter)) !== -1) ||
         (row?.descricao && normalizeText(row?.descricao).indexOf(normalizeText(filter)) !== -1) ||
         (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.descritivo && normalizeText(row?.descritivo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1) ||
         (row?.seguimento && normalizeText(row?.seguimento).indexOf(normalizeText(filter)) !== -1) ||
         (row?.referencia && normalizeText(row?.referencia).indexOf(normalizeText(filter)) !== -1) ||
@@ -48,11 +49,9 @@ export function listaTransicoes(transicoes, estados) {
   return (
     transicoes?.map((row) => ({
       id: row?.id,
-      label: `${row?.modo?.toUpperCase()}: ${
+      label: `${row?.modo}${row?.is_after_devolucao ? ' (DD)' : ''}: ${
         estados?.find((item) => item?.id === row.estado_inicial_id)?.nome || row.estado_inicial_id
-      } para ${estados?.find((item) => item?.id === row.estado_final_id)?.nome || row.estado_final_id}${
-        row?.is_after_devolucao ? ' (DD)' : ''
-      }`,
+      } » ${estados?.find((item) => item?.id === row.estado_final_id)?.nome || row.estado_final_id}`,
       estadoInicial: row.estado_inicial_id,
     })) || []
   );

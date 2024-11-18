@@ -13,9 +13,9 @@ import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // config
-import { loginRequest, msalInstance } from '../../config';
+import { loginRequest, msalInstance } from '../config';
 // components
-import Page from '../../components/Page';
+import Page from '../components/Page';
 
 // ----------------------------------------------------------------------
 

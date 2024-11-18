@@ -57,37 +57,37 @@ export default function Versoes({ id }) {
               const colaborador = colaboradores?.find((_row) => _row.perfil_id === row?.updated_by);
 
               return (
-                <Stack key={`versao_${index}`}>
-                  <Accordion expanded={accord === row?.updated_in} onChange={handleAccord(row?.updated_in)}>
-                    <AccordionSummary>
-                      <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
-                        <Stack>
-                          <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
-                            Alterado em:
-                          </Typography>
-                          <Typography variant="subtitle1">
-                            {row?.updated_in ? ptDateTime(row?.updated_in) : ''}
-                          </Typography>
-                        </Stack>
-                        <ColaboradorInfo
-                          foto={colaborador?.foto_disk}
-                          label={colaborador?.uo?.label}
-                          status={colaborador?.presence}
-                          nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
-                        />
+                <Accordion
+                  key={`vr_${index}`}
+                  expanded={accord === row?.updated_in}
+                  onChange={handleAccord(row?.updated_in)}
+                >
+                  <AccordionSummary>
+                    <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
+                      <Stack>
+                        <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
+                          Alterado em:
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {row?.updated_in ? ptDateTime(row?.updated_in) : ''}
+                        </Typography>
                       </Stack>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <DetalhesProcesso
-                        processo={
-                          index === 0
-                            ? camposAterados(row, processo)
-                            : camposAterados(processo?.hversoes[index - 1], row)
-                        }
+                      <ColaboradorInfo
+                        foto={colaborador?.foto_disk}
+                        label={colaborador?.uo?.label}
+                        status={colaborador?.presence}
+                        nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
                       />
-                    </AccordionDetails>
-                  </Accordion>
-                </Stack>
+                    </Stack>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <DetalhesProcesso
+                      processo={
+                        index === 0 ? camposAterados(row, processo) : camposAterados(processo?.hversoes[index - 1], row)
+                      }
+                    />
+                  </AccordionDetails>
+                </Accordion>
               );
             })
           )}

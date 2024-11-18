@@ -15,11 +15,13 @@ export const objetos = [
   { id: 'estado', label: 'Estado' },
   { id: 'entidades', label: 'Entidades' },
   { id: 'fluxo', label: 'Fluxo' },
+  { id: 'gaji9', label: 'GAJi9' },
   { id: 'origem', label: 'Origem' },
   { id: 'perfilestado', label: 'Perfil/Estado' },
   { id: 'transicao', label: 'Transição' },
-  { id: 'emissao-cartoes', label: 'Ver lista de receção de cartões' },
+  { id: 'con', label: 'Ver lista de processos CON' },
   { id: 'pjf', label: 'Ver lista de processos Judiciais e Fiscais' },
+  { id: 'emissao-cartoes', label: 'Ver lista de receção de cartões' },
 ];
 
 export const dis = [

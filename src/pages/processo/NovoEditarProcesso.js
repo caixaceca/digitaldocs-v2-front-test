@@ -9,25 +9,25 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { fYear } from '../utils/formatTime';
+import { fYear } from '../../utils/formatTime';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getProcesso, selectAnexo, updateItem, resetItem } from '../redux/slices/digitaldocs';
-import { getFromParametrizacao, changeMeuAmbiente, changeMeuFluxo } from '../redux/slices/parametrizacao';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getProcesso, selectAnexo, updateItem, resetItem } from '../../redux/slices/digitaldocs';
+import { getFromParametrizacao, changeMeuAmbiente, getSuccess } from '../../redux/slices/parametrizacao';
 // routes
-import { PATH_DIGITALDOCS } from '../routes/paths';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // components
-import Page from '../components/Page';
-import { SearchNotFound } from '../components/table';
-import { DialogConfirmar } from '../components/CustomDialog';
-import { Notificacao } from '../components/NotistackProvider';
-import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
+import Page from '../../components/Page';
+import { SearchNotFound } from '../../components/table';
+import { DialogConfirmar } from '../../components/CustomDialog';
+import { Notificacao } from '../../components/NotistackProvider';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
-import { ProcessoInterno, ProcessoExterno, ProcessoCredito } from '../sections/processo/form';
+import { ProcessoInterno, ProcessoExterno, ProcessoCredito } from '../../sections/processo/form';
 // guards
-import RoleBasedGuard from '../guards/RoleBasedGuard';
+import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -51,13 +51,15 @@ export default function NovoEditarProcesso() {
   }, [dispatch, perfilId, mail, id]);
 
   useEffect(() => {
-    if (mail && perfilId && linhas?.length === 0 && meuFluxo?.iscredito) {
-      dispatch(getFromParametrizacao('linhas', { mail, perfilId }));
+    if (linhas?.length === 0 && meuFluxo?.iscredito) {
+      dispatch(getFromParametrizacao('linhas'));
     }
-  }, [dispatch, linhas, meuFluxo, perfilId, mail]);
+  }, [dispatch, linhas, meuFluxo]);
 
   useEffect(() => {
-    dispatch(changeMeuFluxo(meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null));
+    dispatch(
+      getSuccess({ item: 'meuFluxo', dados: meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null })
+    );
   }, [dispatch, meusFluxos, processo?.fluxo_id]);
 
   useEffect(() => {
@@ -72,14 +74,9 @@ export default function NovoEditarProcesso() {
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
-      dispatch(resetItem('processo'));
+      dispatch(resetItem({ item: 'processo' }));
       navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
     }
-  };
-
-  const changeAmbiente = (newValue) => {
-    dispatch(changeMeuAmbiente(newValue));
-    localStorage.setItem('meuAmbiente', newValue?.id);
   };
 
   const eliminarAnexo = () => {
@@ -103,11 +100,11 @@ export default function NovoEditarProcesso() {
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
           heading={!isEdit ? 'Novo processo' : 'Editar processo'}
-          links={
-            isEdit
+          links={[
+            { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
+            { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
+            ...(isEdit
               ? [
-                  { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-                  { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
                   {
                     name: processo
                       ? `${processo?.numero_entrada}${uoOrigem?.balcao ? `/${uoOrigem?.balcao}` : ''}${
@@ -118,12 +115,8 @@ export default function NovoEditarProcesso() {
                   },
                   { name: 'Editar' },
                 ]
-              : [
-                  { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-                  { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
-                  { name: 'Novo processo' },
-                ]
-          }
+              : [{ name: 'Novo processo' }]),
+          ]}
         />
         <Card sx={{ mb: 3, p: 3 }}>
           <Grid container spacing={3} justifyContent="center">
@@ -134,10 +127,13 @@ export default function NovoEditarProcesso() {
                 readOnly={isEdit}
                 value={meuAmbiente}
                 getOptionLabel={(option) => option?.nome}
-                onChange={(event, newValue) => changeAmbiente(newValue)}
                 isOptionEqualToValue={(option, value) => option?.id === value?.id}
                 renderInput={(params) => <TextField {...params} label="Estado" />}
                 options={isEdit ? meusAmbientes : meusAmbientes?.filter((row) => row?.isinicial && !row?.observador)}
+                onChange={(event, newValue) => {
+                  dispatch(changeMeuAmbiente(newValue));
+                  localStorage.setItem('meuAmbiente', newValue?.id);
+                }}
               />
             </Grid>
             {(isEdit || (!isEdit && meuAmbiente?.isinicial)) && (
@@ -146,17 +142,18 @@ export default function NovoEditarProcesso() {
                   value={meuFluxo}
                   disableClearable
                   getOptionLabel={(option) => option?.assunto}
-                  onChange={(event, newValue) => dispatch(changeMeuFluxo(newValue))}
                   isOptionEqualToValue={(option, value) => option?.id === value?.id}
                   renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
                   options={meusFluxos?.filter((option) => option?.ativo && !option?.credito_funcionario)}
+                  onChange={(event, newValue) => dispatch(getSuccess({ item: 'meuFluxo', dadaos: newValue }))}
                 />
               </Grid>
             )}
           </Grid>
         </Card>
         {(!isEdit && meuAmbiente?.isinicial) ||
-        (processo?.estado_processo?._lock &&
+        (isEdit &&
+          processo?.estado_processo?._lock &&
           processo?.estado_processo?.perfil_id === perfilId &&
           processo?.estado_processo?.estado_id === meuAmbiente?.id) ? (
           <>
@@ -201,18 +198,16 @@ export default function NovoEditarProcesso() {
           </>
         ) : (
           <RoleBasedGuard
-            apChild
             hasContent
+            showChildren
             roles={['XXXXX']}
             children={
               isEdit ? (
-                <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  Este estado não permite editar este processo...
-                </Typography>
+                <Typography sx={{ mb: 3 }}>Este estado não permite editar este processo...</Typography>
               ) : (
-                <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                <Typography sx={{ mb: 3 }}>
                   {meuAmbiente
-                    ? 'Este estado não possui nenhum assunto para criação de processo...'
+                    ? 'Seleciona um assunto para adicionar um novo processo...'
                     : 'Seleciona um estado para adicionar um novo processo...'}
                 </Typography>
               )

@@ -15,13 +15,13 @@ import { useSelector } from '../redux/store';
 // ----------------------------------------------------------------------
 
 RoleBasedGuard.propTypes = {
-  apChild: PropTypes.bool,
   children: PropTypes.node,
   hasContent: PropTypes.bool,
+  showChildren: PropTypes.bool,
   roles: PropTypes.arrayOf(PropTypes.string),
 };
 
-export default function RoleBasedGuard({ hasContent, roles, children, apChild }) {
+export default function RoleBasedGuard({ hasContent, roles, children = null, showChildren = false }) {
   const navigate = useNavigate();
   const { meusacessos } = useSelector((state) => state.parametrizacao);
   const noRole = !roles?.find((row) => meusacessos.includes(row));
@@ -35,22 +35,20 @@ export default function RoleBasedGuard({ hasContent, roles, children, apChild })
               Sem permissão
             </Typography>
 
-            {apChild ? (
+            {showChildren && children ? (
               children
             ) : (
-              <>
-                <Typography sx={{ color: 'text.secondary' }}>Não tens permissão para aceder a este item.</Typography>
-                <Typography sx={{ color: 'text.secondary' }}>
-                  Por favor, contacte o administrador do sistema para mais informações (DICS).
-                </Typography>
-                <Typography sx={{ color: 'text.secondary' }}>
-                  Cria um ticket no{' '}
-                  <Link href="http://helpdesk.caixa.cv/" variant="subtitle1" target="_blank" rel="noopener">
-                    GLPI
-                  </Link>
-                </Typography>
-              </>
+              <Typography sx={{ color: 'text.secondary' }}>Não tens permissão para aceder a este item.</Typography>
             )}
+            <Typography sx={{ color: 'text.secondary' }}>
+              Por favor, contacte o administrador do sistema para mais informações (DICS).
+            </Typography>
+            <Typography sx={{ color: 'text.secondary' }}>
+              Cria um ticket no{' '}
+              <Link href="http://helpdesk.caixa.cv/" variant="subtitle1" target="_blank" rel="noopener">
+                GLPI
+              </Link>
+            </Typography>
 
             <ForbiddenIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
 

@@ -14,8 +14,8 @@ export const msalConfig = {
   auth: {
     clientId: '1f73fdec-54e5-4bd5-9a39-ae5b8174e16e',
     authority: 'https://login.microsoftonline.com/353efa45-1c51-4b33-a7e4-b129dc92beb4',
-    redirectUri: 'http://localhost:3000',
-    // redirectUri: 'https://ddocsteste.caixa.cv/processos/lista',
+    // redirectUri: 'http://localhost:3000',
+    redirectUri: 'https://ddocsteste.caixa.cv/processos/lista',
     // redirectUri: 'https://digitaldocs.caixa.cv/processos/lista',
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },

@@ -39,7 +39,7 @@ const TABLE_HEAD = [
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'estado', label: 'Estado', align: 'left' },
   { id: 'transitado_em', label: 'Última transição', align: 'center', width: 170 },
-  { id: 'empty', width: 50 },
+  { id: '', width: 10 },
 ];
 
 // ----------------------------------------------------------------------
@@ -96,7 +96,7 @@ export default function TableProcessos({ from }) {
 
   useEffect(() => {
     if (mail && perfilId && meusAmbientes?.length > 0) {
-      dispatch(resetItem('processos'));
+      dispatch(resetItem({ item: 'processos', tipo: 'array' }));
       dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, colaboradorId, segmento, pagina: 0 }));
     }
   }, [dispatch, estadoId, fluxoId, perfilId, colaboradorId, segmento, from, mail, meusAmbientes?.length]);
@@ -191,8 +191,9 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.transitado_em && (
                           <>
-                            <Criado tipo="data" value={ptDateTime(row?.transitado_em)} />
+                            <Criado caption tipo="data" value={ptDateTime(row?.transitado_em)} />
                             <Criado
+                              caption
                               tipo="time"
                               value={fToNow(row?.transitado_em)}
                               sx={{ color: colorProcesso(row?.cor) }}
@@ -201,12 +202,10 @@ export default function TableProcessos({ from }) {
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        <Stack direction="row" spacing={0.5} justifyContent="right">
-                          <DefaultAction
-                            label="DETALHES"
-                            handleClick={() => handleView(row?.id, row?.credito_colaborador)}
-                          />
-                        </Stack>
+                        <DefaultAction
+                          label="DETALHES"
+                          handleClick={() => handleView(row?.id, row?.credito_colaborador)}
+                        />
                       </TableCell>
                     </TableRow>
                   ))

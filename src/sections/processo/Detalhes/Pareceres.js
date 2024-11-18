@@ -48,8 +48,6 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
     dispatch(getAnexo('fileDownload', { mail, perfilId, anexo, transicaoId, parecerId }));
   };
 
-  console.log(pareceres);
-
   return (
     <Box sx={{ pb: 3 }}>
       {pareceres?.map((row) => (

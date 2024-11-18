@@ -7,21 +7,21 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { fYear } from '../utils/formatTime';
-import { canPreview } from '../utils/formatFile';
-import { temAcesso, findColaboradores, pertencoEstadoId, gestorEstado } from '../utils/validarAcesso';
+import { fYear } from '../../utils/formatTime';
+import { canPreview } from '../../utils/formatFile';
+import { temAcesso, findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
 // redux
-import { useDispatch, useSelector } from '../redux/store';
-import { getAll, getProcesso, getAnexo, updateItem } from '../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../redux/store';
+import { getAll, getProcesso, getAnexo, updateItem } from '../../redux/slices/digitaldocs';
 // routes
-import { PATH_DIGITALDOCS } from '../routes/paths';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
-import useSettings from '../hooks/useSettings';
+import useSettings from '../../hooks/useSettings';
 // components
-import Page from '../components/Page';
-import { TabCard } from '../components/TabsWrapper';
-import { DefaultAction } from '../components/Actions';
-import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
+import Page from '../../components/Page';
+import { TabCard } from '../../components/TabsWrapper';
+import { DefaultAction } from '../../components/Actions';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import {
   Views,
@@ -31,15 +31,15 @@ import {
   Transicoes,
   DadosGerais,
   TableDetalhes,
-} from '../sections/processo/Detalhes';
+} from '../../sections/processo/Detalhes';
 import Intervencao, {
+  Libertar,
   Atribuir,
   Resgatar,
   Cancelar,
-  Abandonar,
   Restaurar,
   Desarquivar,
-} from '../sections/processo/Intervencao';
+} from '../../sections/processo/Intervencao';
 
 // ----------------------------------------------------------------------
 
@@ -71,10 +71,11 @@ export default function Processo() {
   const ultimaTransicao = useMemo(() => processo?.htransicoes?.[0], [processo?.htransicoes]);
   const estadoId = useMemo(() => processo?.estado_processo?.estado_id || '', [processo?.estado_processo?.estado_id]);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
-  const perfilEstado = useMemo(
+  const perfilAtribuido = useMemo(
     () => processo?.estado_processo?.perfil_id || '',
     [processo?.estado_processo?.perfil_id]
   );
+  const atribuidoAMim = useMemo(() => perfilAtribuido === perfilId, [perfilAtribuido, perfilId]);
 
   const podeVerProxAnt = useMemo(
     () => !!estadoId && meusAmbientes?.find((row) => row?.id === estadoId),
@@ -143,10 +144,10 @@ export default function Processo() {
           ]
         : []),
       ...(processo && !historico && (isAdmin || isAuditoria)
-        ? [{ value: 'Versões', component: <Versoes id={id} /> }]
-        : []),
-      ...(processo && !historico && (isAdmin || isAuditoria)
-        ? [{ value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> }]
+        ? [
+            { value: 'Versões', component: <Versoes id={id} /> },
+            { value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> },
+          ]
         : []),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,7 +164,7 @@ export default function Processo() {
   const proximoAnterior = (next) => {
     if (mail && perfilId && id && estadoId) {
       dispatch(
-        getProcesso('prevnext', { mail, next, perfilId, estadoId, processoId: id, estado: processo?.estado_atual })
+        getProcesso('prevnext', { mail, next, perfilId, estadoId, id: processo?.id, estado: processo?.estado_atual })
       );
     } else {
       navigate(linkNavigate);
@@ -188,7 +189,7 @@ export default function Processo() {
     if (
       done === 'Parecer enviado' ||
       done === 'Processo atribuído' ||
-      done === 'Processo abandonado' ||
+      done === 'Processo libertado' ||
       done === 'Processo domiciliado' ||
       done === 'Atribuição eliminada' ||
       done === 'Processo desarquivado'
@@ -200,10 +201,8 @@ export default function Processo() {
 
   useEffect(() => {
     if (error && typeof error === 'string') {
-      const noMoreProcess = error?.includes('Sem mais processos disponíveis no estado');
-      if (noMoreProcess && error?.includes('Atendimento')) {
-        //
-      } else {
+      const noMoreProcess = error?.includes('Sem mais processos');
+      if ((noMoreProcess && !error?.includes('Atendimento')) || !noMoreProcess) {
         enqueueSnackbar(error, { variant: noMoreProcess ? 'info' : 'error' });
       }
       if (noMoreProcess) {
@@ -220,10 +219,10 @@ export default function Processo() {
   }, [dispatch, mail, perfilId, historico, processo?.id]);
 
   useEffect(() => {
-    if (mail && processo?.estado_processo?._lock && estadoId && perfilEstado === perfilId) {
+    if (mail && processo?.estado_processo?._lock && estadoId && atribuidoAMim) {
       dispatch(getAll('destinos', { id, mail, perfilId, estadoId }));
     }
-  }, [dispatch, estadoId, id, mail, perfilId, perfilEstado, processo?.estado_processo]);
+  }, [atribuidoAMim, dispatch, estadoId, id, mail, perfilId, processo?.estado_processo?._lock]);
 
   useEffect(() => {
     if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
@@ -270,10 +269,10 @@ export default function Processo() {
                     ))}
                   {processo?.status === 'Arquivado' ? (
                     <>
-                      {(processo?.historico && isAdmin && <Restaurar id={id} />) ||
-                        (!processo?.historico && temAcesso(['arquivo-110', 'arquivo-111'], meusacessos) && (
-                          <Desarquivar id={id} colaboradoresList={colaboradoresList} />
-                        ))}
+                      {processo?.historico && isAdmin && <Restaurar id={id} />}
+                      {!processo?.historico && temAcesso(['arquivo-110'], meusacessos) && (
+                        <Desarquivar id={id} colaboradoresList={colaboradoresList} />
+                      )}
                     </>
                   ) : (
                     <>
@@ -283,28 +282,24 @@ export default function Processo() {
                           {/* Aceitar/Atribuir/Intervir */}
                           {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
                             <>
-                              {processo?.estado_processo?._lock && perfilEstado === perfilId ? (
+                              {processo?.estado_processo?._lock && atribuidoAMim && (
                                 <Intervencao colaboradoresList={colaboradoresList} />
-                              ) : (
-                                <>
-                                  {!processo?.estado_processo?._lock &&
-                                    (!perfilEstado || perfilEstado === perfilId) && (
-                                      <DefaultAction
-                                        label="ACEITAR"
-                                        handleClick={() => handleAceitar(estadoId, 'serie')}
-                                      />
-                                    )}
-                                  {!processo?.estado_processo?._lock && gestorEstado(meusAmbientes, estadoId) && (
-                                    <Atribuir
-                                      dados={{ fluxoId, estadoId, perfilIdA: perfilEstado, processoId: processo?.id }}
-                                    />
-                                  )}
-                                </>
+                              )}
+                              {!atribuidoAMim &&
+                                processo?.estado_processo?._lock &&
+                                gestorEstado(meusAmbientes, estadoId) && (
+                                  <Libertar dados={{ id: processo?.id, fluxoId, estadoId }} isSaving={isSaving} />
+                                )}
+                              {!processo?.estado_processo?._lock && (!perfilAtribuido || atribuidoAMim) && (
+                                <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
+                              )}
+                              {!processo?.estado_processo?._lock && gestorEstado(meusAmbientes, estadoId) && (
+                                <Atribuir dados={{ fluxoId, estadoId, perfilIdA: perfilAtribuido, processoId: id }} />
                               )}
                             </>
                           )}
                           {/* Resgatar */}
-                          {ultimaTransicao &&
+                          {!!ultimaTransicao &&
                             !processo?.pendente &&
                             !ultimaTransicao?.resgate &&
                             !processo?.estado_processo?._lock &&
@@ -319,29 +314,20 @@ export default function Processo() {
                       )}
 
                       {/* Transição em paralelo */}
-                      {processo?.estados?.length > 0 && (
+                      {processo?.estados?.length > 0 && pertencoEstadoId(meusAmbientes, estadoId) && (
                         <>
-                          {pertencoEstadoId(meusAmbientes, estadoId) && (
+                          {processo?.estado_processo?._lock && atribuidoAMim && (
                             <>
-                              {processo?.estado_processo?._lock && perfilEstado === perfilId && (
-                                <>
-                                  <Abandonar
-                                    id={processo?.id}
-                                    fluxoId={fluxoId}
-                                    isSaving={isSaving}
-                                    estadoId={estadoId}
-                                  />
-                                  {processo?.estados?.find((row) => row?.parecer_em) ? (
-                                    <Cancelar id={id} estadoId={estadoId} fechar />
-                                  ) : (
-                                    <Cancelar id={id} estadoId={estadoId} />
-                                  )}
-                                </>
-                              )}
-                              {!processo?.estado_processo?._lock && (
-                                <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
+                              <Libertar dados={{ id: processo?.id, fluxoId, estadoId }} isSaving={isSaving} />
+                              {processo?.estados?.find((row) => row?.parecer_em) ? (
+                                <Cancelar id={id} estadoId={estadoId} fechar />
+                              ) : (
+                                <Cancelar id={id} estadoId={estadoId} />
                               )}
                             </>
+                          )}
+                          {!processo?.estado_processo?._lock && (
+                            <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
                           )}
                         </>
                       )}

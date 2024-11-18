@@ -32,7 +32,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import AddHomeOutlinedIcon from '@mui/icons-material/AddHomeOutlined';
 import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
@@ -42,6 +41,7 @@ import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
+import AddHomeWorkOutlinedIcon from '@mui/icons-material/AddHomeWorkOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
 import { getFileThumb } from '../utils/formatFile';
@@ -52,9 +52,9 @@ import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
 import { selectAnexo } from '../redux/slices/digitaldocs';
-import { getFromParametrizacao, openModal, selectItem } from '../redux/slices/parametrizacao';
+import { getFromParametrizacao, openModal, getSuccess } from '../redux/slices/parametrizacao';
 // assets
-import { Editar, Arquivo, Seguimento, Abandonar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
+import { Editar, Arquivo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
 //
 import { Criado } from './Panel';
 import SvgIconStyle from './SvgIconStyle';
@@ -92,10 +92,13 @@ export function DefaultAction({
         onClick={handleClick}
         size={small ? 'small' : 'medium'}
         startIcon={
+          (label === 'Clonar' && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
           (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
-          ((label === 'Mostrar detalhes' || label === 'Adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />)
+          ((label === 'Mostrar detalhes' || label === 'Adicionar' || icon === 'adicionar') && (
+            <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
+          ))
         }
       >
         {label}
@@ -121,14 +124,14 @@ export function DefaultAction({
             (label === 'PARECER' && <ChatOutlinedIcon />) ||
             (icon === 'views' && <PreviewOutlinedIcon />) ||
             (icon === 'acesso' && <TaskAltOutlinedIcon />) ||
-            (label === 'DOMICILIAR' && <AddHomeOutlinedIcon />) ||
             (label === 'VALIDAR' && <SpellcheckOutlinedIcon />) ||
             (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
+            (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
             (label === 'EDITAR' && <Editar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
+            (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
             (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
-            (icon === 'abandonar' && <Abandonar sx={{ width: 24, height: 24 }} />) ||
             (label === 'RESGATAR' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
             (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
@@ -138,7 +141,6 @@ export function DefaultAction({
             (label === 'Adicionar' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
-            (label === 'Clonar fluxo' && <FileCopyOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -158,17 +160,19 @@ AddItem.propTypes = { small: PropTypes.bool, label: PropTypes.string, handleClic
 export function AddItem({ small = false, label = 'Adicionar', handleClick = null }) {
   const dispatch = useDispatch();
 
-  const handleOpenModal = () => {
-    dispatch(openModal('add'));
-  };
-
   return (
     <Stack>
       <Button
         variant="soft"
         startIcon={<AddCircleIcon />}
         size={small ? 'small' : 'medium'}
-        onClick={handleClick || handleOpenModal}
+        onClick={() => {
+          if (handleClick) {
+            handleClick();
+          } else {
+            dispatch(openModal('add'));
+          }
+        }}
       >
         {label}
       </Button>
@@ -178,50 +182,43 @@ export function AddItem({ small = false, label = 'Adicionar', handleClick = null
 
 // ----------------------------------------------------------------------
 
-UpdateItem.propTypes = {
-  id: PropTypes.number,
-  item: PropTypes.string,
-  dados: PropTypes.object,
-  handleClick: PropTypes.func,
-};
+UpdateItem.propTypes = { dados: PropTypes.object, handleClick: PropTypes.func };
 
-export function UpdateItem({ item = '', id = 0, dados = null, handleClick = null }) {
+export function UpdateItem({ dados, handleClick = null }) {
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
 
-  const handleUpdateByItem = () => {
-    dispatch(openModal('update'));
-    dispatch(selectItem(dados));
-  };
-
-  const handleUpdateById = (id) => {
-    dispatch(openModal('update'));
-    if (id && perfilId && mail) {
-      dispatch(getFromParametrizacao(item, { id, mail, from: 'listagem', perfilId }));
+  const handleUpdate = () => {
+    if (handleClick) {
+      handleClick();
+    } else {
+      dispatch(openModal('update'));
+      if (dados?.dados) {
+        dispatch(getSuccess({ item: 'selectedItem', dados: dados?.dados }));
+      } else {
+        dispatch(getFromParametrizacao(dados?.item, { id: dados?.id, from: 'listagem' }));
+      }
     }
   };
 
   return (
     <Stack>
-      <Tooltip title="Editar" arrow>
-        <Fab
-          size="small"
-          variant="soft"
-          color="warning"
-          onClick={() => {
-            if (handleClick) {
-              handleClick();
-            } else if (dados) {
-              handleUpdateByItem();
-            } else {
-              handleUpdateById(id);
-            }
-          }}
-          sx={{ ...wh }}
-        >
-          <Editar sx={{ width: 22 }} />
-        </Fab>
-      </Tooltip>
+      {dados?.button ? (
+        <Button color="warning" variant="soft" onClick={() => handleUpdate()} startIcon={<Editar sx={{ width: 18 }} />}>
+          Editar
+        </Button>
+      ) : (
+        <Tooltip title="Editar" arrow>
+          <Fab
+            size="small"
+            variant="soft"
+            color="warning"
+            onClick={() => handleUpdate()}
+            sx={dados?.small ? whsmall : wh}
+          >
+            <Editar sx={{ width: dados?.small ? 18 : 22 }} />
+          </Fab>
+        </Tooltip>
+      )}
     </Stack>
   );
 }
@@ -325,19 +322,37 @@ ButtonsStepper.propTypes = {
   isSaving: PropTypes.bool,
   onCancel: PropTypes.func,
   hideSubmit: PropTypes.bool,
+  handleSubmit: PropTypes.func,
   labelCancel: PropTypes.string,
 };
 
-export function ButtonsStepper({ isSaving, onCancel, label = 'Seguinte', labelCancel = 'Voltar', hideSubmit = false }) {
+export function ButtonsStepper({
+  isSaving,
+  onCancel,
+  label = 'Seguinte',
+  hideSubmit = false,
+  handleSubmit = null,
+  labelCancel = 'Voltar',
+}) {
   return (
     <Stack direction="row" justifyContent="right" spacing={1} sx={{ mt: 3, pt: 1 }}>
       <Button variant="outlined" color="inherit" onClick={() => onCancel()}>
         {labelCancel}
       </Button>
-      {!hideSubmit && (
-        <LoadingButton type="submit" loading={isSaving} variant="contained">
-          {(label && label) || 'Seguinte'}
-        </LoadingButton>
+      {hideSubmit ? (
+        <></>
+      ) : (
+        <>
+          {handleSubmit ? (
+            <LoadingButton loading={isSaving} variant="contained" onClick={() => handleSubmit()}>
+              {(label && label) || 'Seguinte'}
+            </LoadingButton>
+          ) : (
+            <LoadingButton type="submit" loading={isSaving} variant="contained">
+              {(label && label) || 'Seguinte'}
+            </LoadingButton>
+          )}
+        </>
       )}
     </Stack>
   );
