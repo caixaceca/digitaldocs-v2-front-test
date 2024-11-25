@@ -16,10 +16,10 @@ export {
   Resgatar,
   Contraste,
   Dashboard,
-  Processos,
   Definicoes,
   Seguimento,
   ContrasteAlt,
+  FilaTrabalho,
   Parametrizacao,
 } from './icons';
 export { default as DocIllustration } from './illustration_doc';

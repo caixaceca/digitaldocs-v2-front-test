@@ -290,7 +290,7 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
   return (
     <Stack direction="row" spacing={1.5}>
       {!!criador && (
-        <AvatarBedge status={criador?.presence}>
+        <AvatarBedge id={criador?.id}>
           <MyAvatar name={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
         </AvatarBedge>
       )}

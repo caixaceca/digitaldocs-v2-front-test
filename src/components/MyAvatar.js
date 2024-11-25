@@ -9,6 +9,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+// redux
+import { useSelector } from '../redux/store';
 
 const iconWH = { width: 14, height: 14 };
 
@@ -30,22 +32,24 @@ CustomAvatar.propTypes = { sx: PropTypes.object, name: PropTypes.string };
 
 // ----------------------------------------------------------------------
 
-AvatarBedge.propTypes = { status: PropTypes.string, children: PropTypes.node, sx: PropTypes.object };
+AvatarBedge.propTypes = { id: PropTypes.string, children: PropTypes.node, sx: PropTypes.object };
 
-export function AvatarBedge({ status, children, sx = null }) {
-  return status ? (
+export function AvatarBedge({ id, children, sx = null }) {
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const presence = colaboradores?.find((row) => Number(row?.id) === Number(id))?.presence || null;
+  return presence ? (
     <Box>
       <Badge
         overlap="circular"
         badgeContent={
-          (status === 'Available' && <CheckCircleIcon color="success" sx={{ ...iconWH }} />) ||
-          (status === 'Busy' && <CircleIcon color="error" sx={{ ...iconWH }} />) ||
-          (status === 'DoNotDisturb' && <RemoveCircleOutlineIcon color="error" sx={{ ...iconWH }} />) ||
-          (status === 'Away' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
-          (status === 'BeRightBack' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
-          (status === 'Offline' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
-          (status === 'OutOfOffice' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
-          (status && <RemoveCircleOutlineIcon color="focus" sx={{ ...iconWH }} />)
+          (presence?.availability === 'Available' && <CheckCircleIcon color="success" sx={{ ...iconWH }} />) ||
+          (presence?.availability === 'Busy' && <CircleIcon color="error" sx={{ ...iconWH }} />) ||
+          (presence?.availability === 'DoNotDisturb' && <RemoveCircleOutlineIcon color="error" sx={{ ...iconWH }} />) ||
+          (presence?.availability === 'Away' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
+          (presence?.availability === 'BeRightBack' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
+          (presence?.availability === 'Offline' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
+          (presence?.availability === 'OutOfOffice' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
+          (presence?.availability && <RemoveCircleOutlineIcon color="focus" sx={{ ...iconWH }} />)
         }
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         sx={{

@@ -60,8 +60,8 @@ function AjudaDialog({ onClose }) {
 
   useEffect(() => {
     if (mail) {
-      dispatch(getFromIntranet('ajuda', { mail }));
-      dispatch(getFromIntranet('perguntas', { mail }));
+      dispatch(getFromIntranet('ajuda'));
+      dispatch(getFromIntranet('perguntas'));
     }
   }, [dispatch, mail]);
 

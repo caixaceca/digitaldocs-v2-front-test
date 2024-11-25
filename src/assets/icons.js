@@ -33,7 +33,7 @@ export function Dashboard() {
   );
 }
 
-export function Processos() {
+export function FilaTrabalho() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14">
       <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">

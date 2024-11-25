@@ -6,6 +6,13 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // ----------------------------------------------------------------------
 
 export function actionGet(state, payload) {
+  if (payload?.item === 'cc') {
+    state.dateUpdate = new Date();
+    state.perfilId = payload?.dados?.perfil_id || '';
+  }
+  if (payload?.item === 'accessToken') {
+    localStorage.setItem('accessToken', payload);
+  }
   if (payload.label) {
     state[payload.item] = dadosLabel(payload?.dados, payload.label);
   } else {

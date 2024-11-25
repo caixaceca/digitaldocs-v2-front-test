@@ -28,8 +28,8 @@ export default function Gaji9() {
     () => [
       { value: 'Acessos', component: <TabGaji9 item="acessos" label="Acessos" subTabs /> },
       { value: 'Identificadores', component: <TabGaji9 item="identificadores" label="Identificadores" subTabs /> },
-      { value: 'Parâmetros', component: <TabGaji9 item="parametros" label="Parâmetros" subTabs /> },
       { value: 'Cláusulas', component: <TabGaji9 item="clausulas" label="Cláusulas" /> },
+      { value: 'Minutas', component: <TabGaji9 item="minutas" label="Minutas" /> },
     ],
     []
   );

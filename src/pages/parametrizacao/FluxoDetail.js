@@ -38,7 +38,7 @@ export default function FluxoDetail() {
   const { themeStretch } = useSettings();
   const { perfilId } = useSelector((state) => state.intranet);
   const { fluxo, estados, done, error } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Dados');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
   const transicoes = useMemo(
     () =>
       listaTransicoes(
@@ -81,7 +81,6 @@ export default function FluxoDetail() {
     { value: 'Estados', component: <TableInfoFluxo item="estados" onClose={handleCloseModal} /> },
     { value: 'Transições', component: <TableInfoFluxo item="transicoes" onClose={handleCloseModal} /> },
     { value: 'Regras transições', component: <TableInfoFluxo item="regrasTransicao" onClose={handleCloseModal} /> },
-    { value: 'Regras Anexos', component: <TableInfoFluxo item="regrasAnexos" onClose={handleCloseModal} /> },
     { value: 'Checklist', component: <TableInfoFluxo item="checklist" onClose={handleCloseModal} /> },
     {
       value: 'Notificações',
@@ -94,73 +93,72 @@ export default function FluxoDetail() {
       <Notificacao done={done} error={error} afterSuccess={() => handleCloseModal()} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
-          tab="tabEstado"
+          tab="tabFluxo"
           tabsList={tabsList}
           currentTab={currentTab}
           changeTab={setCurrentTab}
           title={fluxo?.assunto || 'Detalhes do fluxo'}
         />
+        <HeaderBreadcrumbs
+          sx={{ px: 1 }}
+          heading={currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab}
+          links={[
+            { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
+            { name: 'Parametrização', href: PATH_DIGITALDOCS.parametrizacao.tabs },
+            { name: currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab },
+          ]}
+          action={
+            fluxo && (
+              <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
+                <Stack direction="row" spacing={0.75} alignItems="center">
+                  {(currentTab === 'Notificações' || currentTab === 'Regras transições') && (
+                    <Autocomplete
+                      fullWidth
+                      size="small"
+                      disableClearable
+                      options={transicoes}
+                      sx={{ minWidth: 300 }}
+                      value={transicao || null}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                      renderInput={(params) => <TextField {...params} label="Transição" />}
+                      onChange={(event, newValue) => setItemValue(newValue, setTransicao, 'transicaoParam', true)}
+                    />
+                  )}
+                  {currentTab === 'Dados' && (
+                    <>
+                      <UpdateItem dados={{ button: true, dados: fluxo }} />
+                      <DefaultAction
+                        button
+                        label="Clonar"
+                        color="inherit"
+                        handleClick={() => {
+                          dispatch(openModal('view'));
+                          dispatch(getSuccess({ item: 'selectedItem', dados: fluxo }));
+                        }}
+                      />
+                    </>
+                  )}
+                  {fluxo?.is_ativo &&
+                    (currentTab === 'Transições' ||
+                      currentTab === 'Checklist' ||
+                      (currentTab === 'Notificações' && !!transicao)) && <AddItem />}
+                </Stack>
+              </RoleBasedGuard>
+            )
+          }
+        />
+
         {!fluxo ? (
           <Grid item xs={12}>
             <SearchNotFound404 message="Fluxo não encontrado..." />
           </Grid>
         ) : (
-          <>
-            <HeaderBreadcrumbs
-              sx={{ px: 1 }}
-              heading={currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab}
-              links={[
-                { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-                { name: 'Parametrização', href: PATH_DIGITALDOCS.parametrizacao.tabs },
-                { name: currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab },
-              ]}
-              action={
-                <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-                  {fluxo && (
-                    <Stack direction="row" spacing={0.75} alignItems="center">
-                      {(currentTab === 'Notificações' || currentTab === 'Regras transições') && (
-                        <Autocomplete
-                          fullWidth
-                          size="small"
-                          disableClearable
-                          options={transicoes}
-                          sx={{ minWidth: 300 }}
-                          value={transicao || null}
-                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                          renderInput={(params) => <TextField {...params} label="Transição" />}
-                          onChange={(event, newValue) => setItemValue(newValue, setTransicao, 'transicaoParam', true)}
-                        />
-                      )}
-                      {currentTab === 'Dados' && (
-                        <>
-                          <UpdateItem dados={{ button: true, dados: fluxo }} />
-                          <DefaultAction
-                            button
-                            label="Clonar"
-                            color="inherit"
-                            handleClick={() => {
-                              dispatch(openModal('view'));
-                              dispatch(getSuccess({ item: 'selectedItem', dados: fluxo }));
-                            }}
-                          />
-                        </>
-                      )}
-                      {fluxo?.is_ativo &&
-                        (currentTab === 'Transições' ||
-                          currentTab === 'Checklist' ||
-                          (currentTab === 'Notificações' && !!transicao)) && <AddItem />}
-                    </Stack>
-                  )}
-                </RoleBasedGuard>
-              }
-            />
-            <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
-              {tabsList.map((tab) => {
-                const isMatched = tab.value === currentTab;
-                return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-              })}
-            </RoleBasedGuard>
-          </>
+          <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
+            {tabsList.map((tab) => {
+              const isMatched = tab.value === currentTab;
+              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
+            })}
+          </RoleBasedGuard>
         )}
       </Container>
     </Page>

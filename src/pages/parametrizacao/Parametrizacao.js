@@ -17,8 +17,8 @@ import TabsWrapper from '../../components/TabsWrapper';
 import { Notificacao } from '../../components/NotistackProvider';
 // sections
 import Acessos from '../../sections/parametrizacao/Acessos';
-import ParametrizacaoItem from '../../sections/parametrizacao/ParametrizacaoItem';
-import ParametrizacaoTabs from '../../sections/parametrizacao/ParametrizacaoTabs';
+// import ParametrizacaoItem from '../../sections/parametrizacao/ParametrizacaoItem';
+import TabParametrizacao from '../../sections/parametrizacao/TabParametrizacao';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -35,12 +35,12 @@ export default function Parametrizacao() {
         ...(isAdmin
           ? [
               { value: 'Acessos', component: <Acessos /> },
-              { value: 'Fluxos', component: <ParametrizacaoItem item="fluxos" /> },
-              { value: 'Estados', component: <ParametrizacaoItem item="estados" /> },
-              { value: 'Origens', component: <ParametrizacaoItem item="origens" /> },
-              { value: 'Anexos', component: <ParametrizacaoTabs item="anexos" /> },
-              { value: 'Crédito', component: <ParametrizacaoTabs item="crédito" /> },
-              { value: 'Motivos', component: <ParametrizacaoTabs item="motivos" /> },
+              { value: 'Fluxos', component: <TabParametrizacao item="fluxos" label="Fluxos" /> },
+              { value: 'Estados', component: <TabParametrizacao item="estados" label="Estados" /> },
+              { value: 'Origens', component: <TabParametrizacao item="origens" label="Origens" /> },
+              { value: 'Crédito', component: <TabParametrizacao item="credito" label="Crédito" subTabs /> },
+              { value: 'Motivos', component: <TabParametrizacao item="motivos" label="Motivos" subTabs /> },
+              { value: 'Documentos', component: <TabParametrizacao item="documentos" label="Documentos" /> },
             ]
           : []),
       ] || [],

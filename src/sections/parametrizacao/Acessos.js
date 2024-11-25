@@ -57,17 +57,7 @@ export default function Acessos() {
   const [uo, setUo] = useState(localStorage.getItem('uoParams') || '');
   const [filter, setFilter] = useState(localStorage.getItem('filterAcessos') || '');
 
-  const colasByName = colaboradores.map((row) => ({
-    uo: row?.uo,
-    sexo: row.sexo,
-    nome: row?.nome,
-    perfil: row?.perfil,
-    presence: row?.presence,
-    foto_disk: row?.foto_disk,
-    unidade_organica: row?.uo?.label,
-    nomeacao_funcao: row.nomeacao || row?.funcao,
-  }));
-  const dataFiltered = applySortFilter({ colasByName, comparator: getComparator(order, orderBy), filter, uo });
+  const dataFiltered = applySortFilter({ colaboradores, comparator: getComparator(order, orderBy), filter, uo });
   const isNotFound = !dataFiltered.length;
 
   useEffect(() => {
@@ -96,9 +86,9 @@ export default function Acessos() {
                     <TableRow key={row?.id} hover>
                       <TableCell>
                         <ColaboradorInfo
+                          id={row?.id}
                           nome={row?.nome}
                           foto={row?.foto_disk}
-                          status={row?.presence}
                           label={row?.perfil?.mail}
                         />
                       </TableCell>
@@ -108,7 +98,7 @@ export default function Acessos() {
                           Balcão nº {row?.uo?.balcao}
                         </Typography>
                       </TableCell>
-                      <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
+                      <TableCell>{nomeacaoBySexo(row.nomeacao || row?.funcao, row?.sexo)}</TableCell>
                       <TableCell align="center" width={50}>
                         <DefaultAction label="Gerir acessos" handleClick={() => handleUpdate(row?.perfil?.id)} />
                       </TableCell>
@@ -142,15 +132,15 @@ export default function Acessos() {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ colasByName, comparator, filter, uo }) {
-  colasByName = applySort(colasByName, comparator);
+function applySortFilter({ colaboradores, comparator, filter, uo }) {
+  colaboradores = applySort(colaboradores, comparator);
   if (uo) {
-    colasByName = colasByName.filter((row) => row?.uo?.label === uo);
+    colaboradores = colaboradores.filter((row) => row?.uo?.label === uo);
   }
   if (filter && filter !== null) {
-    colasByName = colasByName.filter(
+    colaboradores = colaboradores.filter(
       (row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1
     );
   }
-  return colasByName;
+  return colaboradores;
 }

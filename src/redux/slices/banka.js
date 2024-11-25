@@ -1,24 +1,20 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/axios';
-import { errorMsg } from '../../utils/formatText';
+// hooks
+import { actionGet, actionReset, hasError, actionResponseMsg } from './sliceActions';
 
 // ----------------------------------------------------------------------
 
 const initialState = {
   done: '',
   error: '',
-  isSaving: false,
   isLoading: false,
-  isOpenModal: false,
   dadosComValores: false,
   numEntidade: '',
   numProposta: '',
-  contratos: [],
   contrato: null,
   entidade: null,
-  selectItem: null,
   infoContrato: {
     dadosGerente: {
       nome: 'IVANDRO PINTO FORTES ÉVORA',
@@ -110,65 +106,20 @@ const slice = createSlice({
   name: 'banka',
   initialState,
   reducers: {
-    startLoading(state) {
-      state.isLoading = true;
+    setLoading(state, action) {
+      state.isLoading = action.payload;
     },
 
-    startSaving(state) {
-      state.isSaving = true;
+    responseMsg(state, action) {
+      actionResponseMsg(state, action.payload);
     },
 
-    stopLoading(state) {
-      state.isLoading = false;
-    },
-
-    setDone(state, action) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.done = action.payload;
-    },
-
-    setError(state, action) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.error = action.payload;
+    getSuccess(state, action) {
+      actionGet(state, action.payload);
     },
 
     resetItem(state, action) {
-      state[action.payload.item] = action.payload?.tipo === 'array' ? [] : null;
-    },
-
-    changeNumEntidade(state, action) {
-      state.numEntidade = action.payload;
-    },
-
-    changeNumProposta(state, action) {
-      state.numProposta = action.payload;
-    },
-
-    changeDadosView(state, action) {
-      state.dadosComValores = action.payload;
-    },
-
-    getentidadeSuccess(state, action) {
-      state.entidade = action.payload;
-    },
-
-    getContratoSuccess(state, action) {
-      state.contrato = action.payload;
-    },
-
-    openModal(state) {
-      state.isOpenModal = true;
-    },
-
-    selectItem(state, action) {
-      state.selectedItem = action.payload;
-    },
-
-    closeModal(state) {
-      state.isOpenModal = false;
-      state.selectedItem = null;
+      actionReset(state, action.payload);
     },
   },
 });
@@ -177,14 +128,13 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, selectItem, closeModal, changeNumEntidade, changeNumProposta, changeDadosView } =
-  slice.actions;
+export const { getSuccess } = slice.actions;
 
 // ----------------------------------------------------------------------
 
 export function getFromBanka(item, params) {
   return async (dispatch) => {
-    dispatch(slice.actions.startLoading());
+    dispatch(slice.actions.setLoading(true));
     try {
       const options = { headers: { cc: params?.mail } };
       switch (item) {
@@ -194,16 +144,17 @@ export function getFromBanka(item, params) {
             `http://172.17.8.78:9900/api/v1/banka/consultar/entidade/${params?.perfilId}?entidade=${params?.numEntidade}`,
             options
           );
-          dispatch(slice.actions.getentidadeSuccess(response.data.objeto));
+          dispatch(slice.actions.getSuccess({ item: 'entidade', dados: response.data.objeto }));
           break;
         }
-        case 'contratos': {
+        case 'contrato': {
           const response = await fetch('/assets/contratos.json');
           const data = await response.json();
           dispatch(
-            slice.actions.getContratoSuccess(
-              data?.find((row) => row?.tipo === params?.tipo && row?.modelo === params?.modelo)
-            )
+            slice.actions.getSuccess({
+              item: 'contrato',
+              dados: data?.find((row) => row?.tipo === params?.tipo && row?.modelo === params?.modelo),
+            })
           );
           break;
         }
@@ -211,97 +162,9 @@ export function getFromBanka(item, params) {
         default:
           break;
       }
-      dispatch(slice.actions.stopLoading());
+      dispatch(slice.actions.setLoading(false));
     } catch (error) {
       hasError(error, dispatch);
     }
   };
-}
-
-// ----------------------------------------------------------------------
-
-export function createItem(item, dados, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
-      switch (item) {
-        case 'acesso': {
-          const response = await axios.post(`${BASEURLDD}/v1/acessos`, dados, options);
-          dispatch(slice.actions.createAcessoSuccess(response.data));
-          break;
-        }
-
-        default:
-          break;
-      }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function updateItem(item, dados, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { 'content-type': 'application/json', cc: params?.mail } };
-      switch (item) {
-        case 'acesso': {
-          const response = await axios.put(`${BASEURLDD}/v1/acessos/${params?.id}`, dados, options);
-          dispatch(slice.actions.updateAcessoSuccess(response.data));
-          break;
-        }
-
-        default:
-          break;
-      }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-export function deleteItem(item, params) {
-  return async (dispatch) => {
-    dispatch(slice.actions.startSaving());
-    try {
-      const options = { headers: { cc: params?.mail } };
-      switch (item) {
-        case 'acesso': {
-          await axios.delete(`${BASEURLDD}/v1/acessos/${params?.perfilId}/${params?.id}`, options);
-          dispatch(slice.actions.deleteAcessoSuccess({ id: params?.id }));
-          break;
-        }
-
-        default:
-          break;
-      }
-      doneSucess(params?.msg, dispatch);
-    } catch (error) {
-      hasError(error, dispatch);
-    }
-  };
-}
-
-// ----------------------------------------------------------------------
-
-async function doneSucess(msg, dispatch) {
-  if (msg) {
-    dispatch(slice.actions.setDone(msg));
-  }
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(slice.actions.setDone(''));
-}
-
-async function hasError(error, dispatch) {
-  dispatch(slice.actions.setError(errorMsg(error)));
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(slice.actions.setError(''));
 }

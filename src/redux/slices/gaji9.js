@@ -26,10 +26,16 @@ const initialState = {
   isLoading: false,
   isOpenModal: false,
   selectedItem: null,
+  grupos: [],
+  minutas: [],
+  funcoes: [],
   produtos: [],
-  titulares: [],
-  garantias: [],
+  recursos: [],
+  variaveis: [],
   marcadores: [],
+  tiposGarantias: [],
+  tiposTitulares: [],
+  representantes: [],
 };
 
 const slice = createSlice({
@@ -89,19 +95,25 @@ export const { openModal, getSuccess, closeModal } = slice.actions;
 export function getFromGaji9(item, params) {
   return async (dispatch, getState) => {
     const state = getState();
-    const { perfilId, mail } = state.intranet;
+    const { perfilId, mail, accessToken } = state.intranet;
     if (perfilId && mail) {
       try {
         dispatch(slice.actions.setLoading(true));
-        const options = { headers: { cc: mail } };
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } };
         const _path =
-          (item === 'produtos' && `${BASEURLGAJI9}/api/v1/produtos/lista?ativo=`) ||
-          (item === 'variaveis' && `${BASEURLGAJI9}/api/v1/variaveis/lista?ativo=`) ||
-          (item === 'marcadores' && `${BASEURLGAJI9}/api/v1/marcadores/lista?ativo=`) ||
-          (item === 'titulares' && `${BASEURLGAJI9}/api/v1/tipos_titulares/lista?ativo=`) ||
-          (item === 'garantias' && `${BASEURLGAJI9}/api/v1/tipos_garantias/lista?ativo=`) ||
-          (item === 'lausulas' &&
-            `${BASEURLGAJI9}/api/v1/clausulas/lista?tipo_titular_id=${params?.titularId}&tipo_garantia_id=${params?.garantiaId}&componente_id=${params?.componenteId}&ativo=`) ||
+          (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos/lista?ativo=`) ||
+          (item === 'produtos' && `${BASEURLGAJI9}/v1/produtos/lista?ativo=`) ||
+          (item === 'variaveis' && `${BASEURLGAJI9}/v1/variaveis/lista?ativo=`) ||
+          (item === 'marcadores' && `${BASEURLGAJI9}/v1/marcadores/lista?ativo=`) ||
+          (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos/lista?ativo=`) ||
+          (item === 'tiposTitulares' && `${BASEURLGAJI9}/v1/tipos_titulares/lista?ativo=`) ||
+          (item === 'tiposGarantias' && `${BASEURLGAJI9}/v1/tipos_garantias/lista?ativo=`) ||
+          (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/lista?ativo=`) ||
+          (item === 'funcoes' && `${BASEURLGAJI9}/v1/acs/roles/lista?pagina=${params?.pagina || 0}&ativo=`) ||
+          (item === 'minutas' &&
+            `${BASEURLGAJI9}/v1/minutas/lista?em_analise=${params?.emanalise}&em_vigor=${params?.emvigor}&revogado=${params?.revogado}&ativo=`) ||
+          (item === 'clausulas' &&
+            `${BASEURLGAJI9}/v1/clausulas/lista?tipo_titular_id=${params?.titularId}&tipo_garantia_id=${params?.garantiaId}&componente_id=${params?.componenteId}&ativo=`) ||
           '';
         if (_path) {
           const response = await axios.get(params?.getInativos ? `${_path}true` : _path, options);
@@ -131,9 +143,21 @@ export function createItem(item, dados, params) {
         dispatch(slice.actions.startSaving());
         const options = { headers: { 'content-type': 'application/json', cc: mail } };
         const _path =
-          (item === 'fluxo' && `${BASEURLGAJI9}/v1/fluxos`) ||
-          (item === 'linhas' && `${BASEURLGAJI9}/v1/linhas`) ||
-          (item === 'anexos' && `${BASEURLGAJI9}/v1/anexos`) ||
+          (item === 'minutas' && `${BASEURLGAJI9}/v1/minutas`) ||
+          (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos`) ||
+          (item === 'funcoes' && `${BASEURLGAJI9}/v1/acs/roles`) ||
+          (item === 'clausulas' && `${BASEURLGAJI9}/v1/clausulas`) ||
+          (item === 'variaveis' && `${BASEURLGAJI9}/v1/variaveis`) ||
+          (item === 'marcadores' && `${BASEURLGAJI9}/v1/marcadores`) ||
+          (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos`) ||
+          (item === 'tiposTitulares' && `${BASEURLGAJI9}/v1/tipos_titulares`) ||
+          (item === 'tiposGarantias' && `${BASEURLGAJI9}/v1/tipos_garantias`) ||
+          (item === 'produtos' && `${BASEURLGAJI9}/v1/produtos/importar/one`) ||
+          (item === 'produtos' && `${BASEURLGAJI9}/v1/produtos/importar/one`) ||
+          (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/definir`) ||
+          (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
+          (item === 'comporMinuta' &&
+            `${BASEURLGAJI9}/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=${params?.carregarClausulas}`) ||
           '';
         if (_path) {
           const response = await axios.post(_path, dados, options);
@@ -162,9 +186,21 @@ export function updateItem(item, dados, params) {
         dispatch(slice.actions.startSaving());
         const options = { headers: { 'content-type': 'application/json', cc: mail } };
         const _path =
-          (item === 'fluxo' && `${BASEURLGAJI9}/v1/fluxos/${params?.id}`) ||
-          (item === 'linhas' && `${BASEURLGAJI9}/v1/linhas/${params?.id}`) ||
-          (item === 'anexos' && `${BASEURLGAJI9}/v1/anexos/${params?.id}`);
+          (item === 'variaveis' && `${BASEURLGAJI9}/v1/variaveis`) ||
+          (item === 'produtos' && `${BASEURLGAJI9}/v1/produtos/rotular`) ||
+          (item === 'minutas' && `${BASEURLGAJI9}/v1/minutas?id=${params?.id}`) ||
+          (item === 'funcoes' && `${BASEURLGAJI9}/v1/acs/roles?id=${params?.id}`) ||
+          (item === 'clausulas' && `${BASEURLGAJI9}/v1/clausulas?id=${params?.id}`) ||
+          (item === 'marcadores' && `${BASEURLGAJI9}/v1/marcadores?id=${params?.id}`) ||
+          (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos?grupo_id=${params?.id}`) ||
+          (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos?recurso_id=${params?.id}`) ||
+          (item === 'tiposTitulares' && `${BASEURLGAJI9}/v1/tipos_titulares?id=${params?.id}`) ||
+          (item === 'tiposGarantias' && `${BASEURLGAJI9}/v1/tipos_garantias?id=${params?.id}`) ||
+          (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/update/recurso?id=${params?.id}`) ||
+          (item === 'utilizadoresGrupo' && `${BASEURLGAJI9}/v1/acs/utilizadores/grupo?id=${params?.id}`) ||
+          (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/atualizar?id=${params?.id}`) ||
+          (item === 'coposicaoMinuta' && `${BASEURLGAJI9}/v1/minutas/atualizar/composicao?minuta_id=${params?.id}`) ||
+          '';
 
         if (_path) {
           const response = await axios.put(_path, dados, options);
@@ -188,14 +224,15 @@ export function updateItem(item, dados, params) {
 export function deleteItem(item, params) {
   return async (dispatch, getState) => {
     const state = getState();
-    const { perfilId, mail } = state.intranet;
+    const { perfilId, mail, accessToken } = state.intranet;
     if (perfilId && mail) {
       try {
-        const options = { headers: { cc: mail } };
+        const options = { headers: { Authorization: accessToken }, withCredentials: true };
+
         const _path =
-          (item === 'anexos' && `${BASEURLGAJI9}/v1/anexos/${params?.id}`) ||
-          (item === 'regrasAnexos' && `${BASEURLGAJI9}/v1/anexos/regra/${params?.id}`) ||
-          (item === 'acessos' && `${BASEURLGAJI9}/v1/acessos/${perfilId}/${params?.id}`) ||
+          (item === 'clausulas' && `${BASEURLGAJI9}/v1/clausulas?id=${params?.id}`) ||
+          (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos?grupo_id=${params?.id}`) ||
+          (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos?recurso_id=${params?.id}`) ||
           '';
 
         if (_path) {

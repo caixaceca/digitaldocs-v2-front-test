@@ -93,7 +93,7 @@ export default function EditarPedidoCC() {
   };
 
   const goToDetail = () => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${id}`);
+    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/cc/${id}`);
   };
 
   return (
@@ -112,12 +112,12 @@ export default function EditarPedidoCC() {
           heading="Editar pedido"
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-            { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
+            { name: 'Processos', href: PATH_DIGITALDOCS.profilaTrabalhocessos.root },
             {
               name: pedidoCC
                 ? `${pedidoCC?.n_entrada}${pedidoCC?.criado_em ? `/${fYear(pedidoCC?.criado_em)}` : ''}`
                 : id,
-              href: `${PATH_DIGITALDOCS.processos.root}/cc/${id}`,
+              href: `${PATH_DIGITALDOCS.filaTrabalho.root}/cc/${id}`,
             },
             { name: 'Editar' },
           ]}

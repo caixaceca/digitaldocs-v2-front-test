@@ -10,6 +10,8 @@ import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+// utils
+import { fillData } from '../../utils/formatTime';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem } from '../../redux/slices/gaji9';
@@ -25,6 +27,8 @@ import {
   RHFAutocompleteSimple,
   RHFAutocompleteObject,
 } from '../../components/hook-form';
+// _mock_
+import { freguesiasConcelhos } from '../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -117,7 +121,7 @@ export function TitularForm({ onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar titular' : 'Adicionar titular'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar tipo de titular' : 'Adicionar tipo de titular'}</DialogTitle>
       <DialogContent>
         <FormProvider
           methods={methods}
@@ -171,7 +175,7 @@ export function GarantiaForm({ onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar garantia' : 'Adicionar garantia'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar tipo de dgarantia' : 'Adicionar tipo de dgarantia'}</DialogTitle>
       <DialogContent>
         <FormProvider
           methods={methods}
@@ -443,7 +447,13 @@ FuncaoForm.propTypes = { onCancel: PropTypes.func };
 
 export function FuncaoForm({ onCancel }) {
   const dispatch = useDispatch();
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
+
+  const colaboradoresList = useMemo(
+    () => colaboradores?.map((row) => ({ id: row?.perfil?.id_aad, email: row?.perfil?.mail, label: row?.nome })),
+    [colaboradores]
+  );
 
   const formSchema = Yup.object().shape({
     role: Yup.mixed().required().label('Função'),
@@ -452,12 +462,12 @@ export function FuncaoForm({ onCancel }) {
   const defaultValues = useMemo(
     () => ({
       role: selectedItem?.role || null,
-      utilizador: selectedItem?.utilizador || null,
       ativo: selectedItem ? selectedItem?.ativo : true,
       data_inicio: selectedItem?.data_inicio ? new Date(selectedItem?.data_inicio) : null,
       data_termino: selectedItem?.data_termino ? new Date(selectedItem?.data_termino) : null,
+      utilizador: colaboradoresList?.find((row) => row?.id === selectedItem?.utilizador_id) || null,
     }),
-    [selectedItem]
+    [selectedItem, colaboradoresList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -487,12 +497,154 @@ export function FuncaoForm({ onCancel }) {
         >
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFAutocompleteObject name="utilizador" label="Colaborador" options={[]} />
+              <RHFAutocompleteObject name="utilizador" label="Colaborador" options={colaboradoresList} />
               <RHFAutocompleteSimple name="role" label="Função" options={[]} />
               <Stack spacing={3} direction="row">
                 <RHFDatePicker dateTime name="data_inicio" label="Data de início" />
                 <RHFDatePicker dateTime name="data_termino" label="Data de término" />
               </Stack>
+              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+RepresentanteForm.propTypes = { onCancel: PropTypes.func };
+
+export function RepresentanteForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
+
+  const colaboradoresList = useMemo(
+    () =>
+      colaboradores?.map((row) => ({
+        id: row?.id,
+        balcao: row?.uo?.balcao,
+        email: row?.perfil?.mail,
+        label: row?.perfil?.displayName,
+        estado_civil: row?.estado_civil,
+        concelho: row?.morada?.concelho,
+        funcao: row?.nomeacao || row?.funcao,
+        residencia: `${row?.morada?.concelho}${row?.morada?.zona ? ` - ${row?.morada?.zona}` : ''}`,
+      })),
+    [colaboradores]
+  );
+
+  const formSchema = Yup.object().shape({
+    nif: Yup.string().required().label('NIF'),
+    funcao: Yup.string().required().label('Função'),
+    concelho: Yup.mixed().required().label('Concelho'),
+    freguesia: Yup.mixed().required().label('Fregusia'),
+    atua_como: Yup.string().required().label('Atua como'),
+    utilizador: Yup.mixed().required().label('Colaborador'),
+    residencia: Yup.string().required().label('Residência'),
+    bi_cni: Yup.string().required().label('Doc. identificação'),
+    local_emissao: Yup.string().required().label('Local emissão'),
+    data_emissao: Yup.date().typeError().required().label('Data de nacimento'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      nif: selectedItem?.nif || '',
+      bi_cni: selectedItem?.bi_cni || '',
+      funcao: selectedItem?.funcao || '',
+      atua_como: selectedItem?.atua_como || '',
+      concelho: selectedItem?.concelho || null,
+      freguesia: selectedItem?.freguesia || null,
+      residencia: selectedItem?.residencia || '',
+      observacao: selectedItem?.observacao || '',
+      ativo: selectedItem ? selectedItem?.ativo : true,
+      local_emissao: selectedItem?.local_emissao || null,
+      data_emissao: fillData(selectedItem?.data_emissao, null),
+      data_inicio: selectedItem?.data_emissao ? new Date(selectedItem?.data_emissao) : null,
+      utilizador: colaboradoresList?.find((row) => row?.id === selectedItem?.utilizador_id) || null,
+    }),
+    [colaboradoresList, selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, setValue, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+      <DialogTitle>{isEdit ? 'Atualizar representante' : 'Adicionar representante'}</DialogTitle>
+      <DialogContent>
+        <FormProvider
+          methods={methods}
+          onSubmit={handleSubmit(() =>
+            submitDados(
+              selectedItem?.id,
+              {
+                ...values,
+                nome: values?.utilizador?.label,
+                balcao: values?.utilizador?.balcao,
+                utilizador_id: values?.utilizador?.id,
+                utilizador_email: values?.utilizador?.mail,
+                estado_civil: values?.utilizador?.estado_civil,
+              },
+              isEdit,
+              dispatch,
+              'representantes'
+            )
+          )}
+        >
+          <ItemComponent item={selectedItem} rows={1}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFAutocompleteObject
+                name="utilizador"
+                label="Colaborador"
+                options={colaboradoresList}
+                onChange={(event, newValue) => {
+                  setValue('utilizador', newValue, { shouldValidate: true, shouldDirty: true });
+                  setValue('funcao', newValue?.funcao || null, { shouldValidate: true, shouldDirty: true });
+                  setValue('atua_como', newValue?.funcao || null, { shouldValidate: true, shouldDirty: true });
+                  setValue('concelho', newValue?.concelho || null, { shouldValidate: true, shouldDirty: true });
+                  setValue('residencia', newValue?.residencia || null, { shouldValidate: true, shouldDirty: true });
+                }}
+              />
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
+                  <RHFTextField name="nif" label="NIF" />
+                  <RHFTextField name="bi_cni" label="Doc. identificação" />
+                </Stack>
+                <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
+                  <RHFTextField name="local_emissao" label="Local de emissão" />
+                  <RHFDatePicker name="data_emissao" label="Data de emissão" />
+                </Stack>
+              </Stack>
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                <RHFTextField name="funcao" label="Função" />
+                <RHFTextField name="atua_como" label="Atua como" />
+              </Stack>
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                <RHFAutocompleteSimple
+                  name="concelho"
+                  label="Concelho"
+                  options={[...new Set(freguesiasConcelhos?.map((row) => row?.concelho))]?.sort()}
+                />
+                <RHFAutocompleteSimple
+                  name="freguesia"
+                  label="Freguesia"
+                  options={freguesiasConcelhos
+                    ?.filter((item) => item?.concelho === values?.concelho)
+                    ?.map((row) => row?.freguesia)}
+                />
+              </Stack>
+              <RHFTextField name="residencia" label="Residência" />
+              <RHFTextField name="observacao" label="Observação" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
@@ -526,7 +678,7 @@ export function ItemComponent({ item, rows, children }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function submitDados(id, values, isEdit, dispatch, item) {
+export function submitDados(id, values, isEdit, dispatch, item) {
   if (isEdit) {
     dispatch(updateItem(item, JSON.stringify(values), { id, msg: 'Item tualizado' }));
   } else {

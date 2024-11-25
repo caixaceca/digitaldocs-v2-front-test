@@ -9,7 +9,7 @@ import {
   Entidade,
   Contrato,
   Dashboard,
-  Processos,
+  FilaTrabalho,
   Parametrizacao,
 } from '../../assets';
 
@@ -20,7 +20,7 @@ const navConfig = [
     subheader: 'Menu',
     items: [
       { title: 'Indicadores', path: PATH_DIGITALDOCS.general.indicadores, icon: <Dashboard /> },
-      { title: 'Processos', path: PATH_DIGITALDOCS.processos.root, icon: <Processos /> },
+      { title: 'Fila de trabalho', path: PATH_DIGITALDOCS.filaTrabalho.root, icon: <FilaTrabalho /> },
       { title: 'Controle', path: PATH_DIGITALDOCS.controle.root, icon: <Controle /> },
       {
         icon: <Arquivo />,

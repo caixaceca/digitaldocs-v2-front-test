@@ -74,10 +74,10 @@ export default function CreditoColaborador() {
   const fromProcurar = params?.get?.('from') === 'Pesquisa';
   const fromControle = params?.get?.('from') === 'Controle';
   const linkNavigate =
-    (fromProcurar && `${PATH_DIGITALDOCS.processos.procurar}`) ||
+    (fromProcurar && `${PATH_DIGITALDOCS.filaTrabalho.procurar}`) ||
     (fromArquivo && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
     (fromControle && `${PATH_DIGITALDOCS.controle.lista}`) ||
-    `${PATH_DIGITALDOCS.processos.lista}`;
+    `${PATH_DIGITALDOCS.filaTrabalho.lista}`;
 
   const navigateToProcess = () => {
     if (
@@ -155,7 +155,7 @@ export default function CreditoColaborador() {
   );
 
   const handleEdit = () => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${id}/editar`);
+    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/cc/${id}/editar`);
   };
 
   useEffect(() => {

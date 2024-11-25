@@ -118,7 +118,15 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                       />
                     )}
                     <TableRowItem title="Transição ID:" text={dados?.transicao_id} />
+                    <TableRowItem title="Segmento:" text={dados?.seguimento} />
+                    <TableRowItem title="Tipo:" text={dados?.tipo} />
                     <TableRowItem title="Email:" text={dados?.email} />
+                    <TableRowItem title="Telefone:" text={dados?.telefone} />
+                    <TableRowItem title="Título:" text={dados?.titulo} />
+                    <TableRowItem title="Subtítulo:" text={dados?.sub_titulo} />
+                    <TableRowItem title="Telefone:" text={dados?.telefone} />
+                    <TableRowItem title="Página:" text={dados?.pagina} />
+                    {dados?.data_formulario && <TableRowItem title="Telefone:" text={ptDate(dados?.data_formulario)} />}
                     {'prazoemdias' in dados && (
                       <TableRowItem
                         title="Prazo:"
@@ -137,6 +145,8 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                       <TableRowItem title="Corpo:" item={<Markdown own children={dados?.corpo} />} />
                     )}
                     <TableRowItem title="Via:" text={dados?.via} />
+                    <TableRowItem title="Concelho:" text={dados?.cidade} />
+                    <TableRowItem title="Ilha:" text={dados?.ilha} />
                     {dados?.percentagem && <TableRowItem title="Percentagem:" text={fPercent(dados?.percentagem)} />}
                     {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
                     {'is_ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.is_ativo} />} />}
@@ -149,6 +159,13 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                     {'limpo' in dados && <TableRowItem title="Limpo:" item={<LabelSN item={dados?.limpo} />} />}
                     {'requer_parecer' in dados && (
                       <TableRowItem title="Requer parecer:" item={<LabelSN item={dados?.requer_parecer} />} />
+                    )}
+                    {'formulario' in dados && (
+                      <TableRowItem title="Formulário:" item={<LabelSN item={dados?.formulario} />} />
+                    )}
+                    {'anexo' in dados && <TableRowItem title="Anexo:" item={<LabelSN item={dados?.anexo} />} />}
+                    {'identificador' in dados && (
+                      <TableRowItem title="Identificador:" item={<LabelSN item={dados?.identificador} />} />
                     )}
                     {'obriga_prazo_validade' in dados && (
                       <TableRowItem title="Prazo de validade:" item={<LabelSN item={dados?.obriga_prazo_validade} />} />
@@ -184,10 +201,10 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                       <TableRowItem title="Estado de decisão:" item={<LabelSN item={dados?.is_decisao} />} />
                     )}
                     {'credito_funcionario' in dados && (
-                      <TableRowItem
-                        title="Processo de crédito colaborador:"
-                        item={<LabelSN item={dados?.credito_funcionario} />}
-                      />
+                      <TableRowItem title="Crédito colaborador:" item={<LabelSN item={dados?.credito_funcionario} />} />
+                    )}
+                    {'funcionario' in dados && (
+                      <TableRowItem title="Crédito colaborador:" item={<LabelSN item={dados?.funcionario} />} />
                     )}
                     {'is_con' in dados && (
                       <TableRowItem

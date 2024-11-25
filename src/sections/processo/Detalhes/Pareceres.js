@@ -104,8 +104,8 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
             <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
               {colaborador && (
                 <ColaboradorInfo
+                  id={colaborador?.id}
                   foto={colaborador?.foto_disk}
-                  status={colaborador?.presence}
                   labelAlt={colaborador?.uo?.label}
                   nome={colaborador?.perfil?.displayName}
                   other={

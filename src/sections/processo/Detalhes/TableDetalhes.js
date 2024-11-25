@@ -129,7 +129,7 @@ export default function TableDetalhes({ id, item }) {
                   <TableRow hover key={`table_detalhes_${index}`}>
                     {(item === 'hretencoes' || item === 'hatribuicoes') && (
                       <TableCell>
-                        <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} status={row?.presence} />
+                        <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} id={row?.idColab} />
                       </TableCell>
                     )}
                     {(item === 'hretencoes' && (
@@ -327,9 +327,9 @@ function dadosComColaboradores(dados, colaboradores) {
     const colaborador = colaboradores.find((item) => Number(item?.perfil_id) === Number(row?.perfil_id));
     dadosList.push({
       ...row,
+      idColab: colaborador?.id,
       uo: colaborador?.uo?.label,
       foto: colaborador?.foto_disk,
-      presence: colaborador?.presence,
       mail: colaborador?.perfil?.mail,
       nome: colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`,
     });

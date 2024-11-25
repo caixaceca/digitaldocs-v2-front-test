@@ -16,7 +16,8 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.sufixo && normalizeText(row?.sufixo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.prefixo && normalizeText(row?.prefixo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.descritivo && normalizeText(row?.descritivo).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1)
+        (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.utilizador_email && normalizeText(row?.utilizador_email).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

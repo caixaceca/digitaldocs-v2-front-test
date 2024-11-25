@@ -57,14 +57,14 @@ export default function ProcuraAvancada() {
         dispatch(getAll('pesquisa global', { mail, chave, historico, uoID: cc?.uo_id, perfilId }));
       }
     }
-    navigate(PATH_DIGITALDOCS.processos.procurar);
+    navigate(PATH_DIGITALDOCS.filaTrabalho.procurar);
     onClose();
   };
 
   const handleKeyUp = (event) => {
     if (event.key === 'Enter' && chave && cc?.uo_id) {
       dispatch(getAll('pesquisa global', { mail, chave, historico, uoID: cc?.uo_id, perfilId }));
-      navigate(PATH_DIGITALDOCS.processos.procurar);
+      navigate(PATH_DIGITALDOCS.filaTrabalho.procurar);
       onClose();
     }
   };

@@ -34,9 +34,7 @@ export default function TabGaji9({ item, label, subTabs }) {
 SubTabsGaji9.propTypes = { item: PropTypes.string, label: PropTypes.string };
 
 function SubTabsGaji9({ item, label }) {
-  const [currentTab, setCurrentTab] = useState(
-    (item === 'identificadores' && 'Produtos') || (item === 'parametros' && 'Marcadores') || 'Representantes'
-  );
+  const [currentTab, setCurrentTab] = useState((item === 'identificadores' && 'Produtos') || 'Representantes');
 
   const handleChangeTab = async (event, newValue) => {
     setItemValue(newValue, setCurrentTab, '', false);
@@ -51,12 +49,10 @@ function SubTabsGaji9({ item, label }) {
     ]) ||
       (item === 'identificadores' && [
         { value: 'Produtos', component: <TableGaji9 item="produtos" /> },
-        { value: 'Titulares', component: <TableGaji9 item="titulares" /> },
-        { value: 'Garantias', component: <TableGaji9 item="garantias" /> },
-      ]) ||
-      (item === 'parametros' && [
-        { value: 'Marcadores', component: <TableGaji9 item="marcadores" /> },
+        { value: 'Tipos de titulares', component: <TableGaji9 item="tiposTitulares" /> },
+        { value: 'Tipos de garantias', component: <TableGaji9 item="tiposGarantias" /> },
         { value: 'Variáveis', component: <TableGaji9 item="variaveis" /> },
+        { value: 'Marcadores', component: <TableGaji9 item="marcadores" /> },
       ]) ||
       []),
   ];

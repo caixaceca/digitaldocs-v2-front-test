@@ -133,3 +133,7 @@ export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, val
 export function dataValido(data) {
   return !!(data && data?.toString() !== 'Invalid Date');
 }
+
+export function fillData(data, defaultDate) {
+  return data ? add(new Date(data), { hours: 2 }) : defaultDate;
+}

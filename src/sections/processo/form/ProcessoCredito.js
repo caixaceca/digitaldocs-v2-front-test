@@ -157,6 +157,8 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
       formData.append('segmento', values.segmento);
       formData.append('finalidade', values.finalidade);
       formData.append('linha_id', values?.linha_id?.id);
+      formData.append('uo_origem_id', meuAmbiente?.uo_id);
+      formData.append('estado_atual_id', meuAmbiente?.id);
       formData.append('setor_atividade', values.setor_atividade);
       formData.append('montante_solicitado', values.montante_solicitado);
       formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
@@ -230,8 +232,6 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
         dispatch(updateItem('processo', formData, { mail, perfilId, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
         formData.append('situacao_final_mes', 'Em análise');
-        formData.append('uo_origem_id', meuAmbiente?.uo_id);
-        formData.append('estado_atual_id', meuAmbiente?.id);
         dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
       }
     } catch (error) {

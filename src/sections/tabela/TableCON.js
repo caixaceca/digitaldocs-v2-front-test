@@ -112,7 +112,7 @@ export default function TableCON({ item = 'con' }) {
   };
 
   const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Controle`);
+    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${id}?from=Controle`);
   };
 
   return (

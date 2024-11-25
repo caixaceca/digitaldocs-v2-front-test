@@ -100,29 +100,31 @@ export function Criado({ tipo = '', value, value1 = '', caption = false, baralha
 // ----------------------------------------------------------------------
 
 ColaboradorInfo.propTypes = {
+  id: PropTypes.number,
   sx: PropTypes.object,
   other: PropTypes.node,
   foto: PropTypes.string,
   nome: PropTypes.string,
   caption: PropTypes.bool,
   label: PropTypes.string,
-  status: PropTypes.string,
   labelAlt: PropTypes.string,
+  labelAltCaption: PropTypes.bool,
 };
 
 export function ColaboradorInfo({
   nome,
   foto,
+  id = 0,
   sx = null,
   label = '',
-  status = '',
   other = null,
   labelAlt = '',
   caption = false,
+  labelAltCaption = false,
 }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
-      <AvatarBedge status={status}>
+      <AvatarBedge id={id}>
         <MyAvatar name={baralharString(nome)} src={getFile('colaborador', baralharString(foto, true))} />
       </AvatarBedge>
       <Stack sx={{ ml: 1.5 }}>
@@ -131,7 +133,7 @@ export function ColaboradorInfo({
             {baralharString(nome)}
           </Typography>
           {!!labelAlt && (
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant={labelAltCaption ? 'caption' : 'body2'} sx={{ color: 'text.secondary' }}>
               ({labelAlt})
             </Typography>
           )}

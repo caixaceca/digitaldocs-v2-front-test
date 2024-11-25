@@ -18,7 +18,6 @@ import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 // utils
 import cssStyles from '../../utils/cssStyles';
 import { formatDate } from '../../utils/formatTime';
-import { validarAcesso } from '../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -39,6 +38,8 @@ import { ValidarDocForm, DenunciaForm, FormSugestao } from '../../sections/home/
 import Linksuteis from './Linksuteis';
 import Notificacoes from './Notificacoes';
 import ProcuraAvancada from './ProcuraAvancada';
+// guards
+import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -86,9 +87,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   const { toggle: open, onOpen, onClose } = useToggle();
   const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
   const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
-  const { myGroups } = useSelector((state) => state.intranet);
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
-  const acessoValidarDoc = validarAcesso('Admin', myGroups) || validarAcesso('pdex', myGroups);
 
   return (
     <>
@@ -109,17 +108,15 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.25, sm: 1 }}>
-            {acessoValidarDoc && (
-              <>
-                <IconButtonHead
-                  open={open1}
-                  onOpen={onOpen1}
-                  title="Validação de documento"
-                  icon={<BadgeOutlinedIcon sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }} />}
-                />
-                {open1 && <ValidarDocForm onCancel={onClose1} />}
-              </>
-            )}
+            <RoleBasedGuard roles={['Todo-111']}>
+              <IconButtonHead
+                open={open1}
+                onOpen={onOpen1}
+                title="Validação de documento"
+                icon={<BadgeOutlinedIcon sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }} />}
+              />
+              {open1 && <ValidarDocForm onCancel={onClose1} />}
+            </RoleBasedGuard>
 
             <Linksuteis />
             <Notificacoes />

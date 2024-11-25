@@ -45,7 +45,7 @@ export default function IntranetLayout() {
   const isDesktop = useResponsive('up', 'lg');
   const verticalLayout = themeLayout === 'vertical';
   const { collapseClick, isCollapse } = useCollapseDrawer();
-  const { isOpenDisposicao } = useSelector((state) => state.intranet);
+  const { disposicao } = useSelector((state) => state.intranet);
 
   if (verticalLayout) {
     return (
@@ -66,7 +66,7 @@ export default function IntranetLayout() {
             pb: { xs: `${HEADER.MOBILE_HEIGHT + 24}px`, lg: `${HEADER.DASHBOARD_DESKTOP_HEIGHT + 24}px` },
           }}
         >
-          {isOpenDisposicao && <Disposicao />}
+          {!disposicao && <Disposicao />}
           <Outlet />
         </Box>
       </>
@@ -78,7 +78,7 @@ export default function IntranetLayout() {
       <DashboardHeader isCollapse={isCollapse} onOpenSidebar={() => setOpen(true)} />
       <NavbarVertical isOpenSidebar={open} onCloseSidebar={() => setOpen(false)} />
       <MainStyle collapseClick={collapseClick}>
-        {isOpenDisposicao && <Disposicao />}
+        {!disposicao && <Disposicao />}
         <Outlet />
       </MainStyle>
     </Box>

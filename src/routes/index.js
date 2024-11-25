@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, acquireToken, authenticateColaborador } from '../redux/slices/intranet';
+import { getFromIntranet, acquireTokenAuthenticate } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -23,44 +23,42 @@ const Loadable = (Component) => (props) => (
 export default function Router() {
   const dispatch = useDispatch();
   const { instance, accounts } = useMsal();
-  const { cc, perfil, mail, msalProfile, accessToken } = useSelector((state) => state.intranet);
+  const { cc, perfil, mail, perfilId, accessToken } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (instance && accounts?.[0]) {
-      dispatch(acquireToken(instance, accounts[0]));
+      dispatch(acquireTokenAuthenticate(instance, accounts[0]));
     }
   }, [accounts, dispatch, instance]);
 
   useEffect(() => {
-    if (accessToken && msalProfile) {
-      dispatch(authenticateColaborador(accessToken, msalProfile));
+    if (perfil?.colaborador?.id && accessToken) {
+      dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id }));
+      dispatch(getFromIntranet('colaboradores', { accessToken }));
     }
-  }, [dispatch, accessToken, msalProfile]);
+  }, [dispatch, perfil?.colaborador?.id, accessToken]);
 
   useEffect(() => {
-    if (mail && perfil?.colaborador?.id && accessToken) {
-      dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id, mail }));
-      dispatch(getFromIntranet('colaboradores', { mail, accessToken }));
+    if (cc?.id) {
+      dispatch(getFromIntranet('frase'));
+      dispatch(getFromIntranet('certificacoes'));
+      dispatch(getFromIntranet('uos', { label: 'label' }));
+      dispatch(getFromIntranet('links', { label: 'nome' }));
+      dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
+      dispatch(getFromIntranet('disposicao', { id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') }));
     }
-  }, [dispatch, perfil?.colaborador?.id, mail, accessToken]);
+  }, [dispatch, cc?.id]);
 
   useEffect(() => {
-    if (mail && perfil?.id && cc?.id) {
-      dispatch(getFromIntranet('uos', { mail }));
-      dispatch(getFromIntranet('links', { mail }));
-      dispatch(getFromIntranet('frase', { mail }));
-      dispatch(getFromIntranet('aplicacoes', { mail }));
-      dispatch(getFromIntranet('certificacao', { mail }));
-      //
+    if (mail && perfilId) {
       dispatch(getFromParametrizacao('fluxos'));
       dispatch(getFromParametrizacao('origens'));
       dispatch(getFromParametrizacao('estados'));
       dispatch(getFromParametrizacao('meusacessos'));
       dispatch(getFromParametrizacao('meusambientes'));
       dispatch(getFromParametrizacao('motivosPendencia'));
-      dispatch(getFromIntranet('disposicao', { mail, id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') }));
     }
-  }, [dispatch, cc?.id, mail, perfil?.id]);
+  }, [dispatch, mail, perfilId]);
 
   return useRoutes([
     {
@@ -68,14 +66,14 @@ export default function Router() {
       element: <IntranetLayout />,
       children: [
         // { element: <Navigate to="indicadores" replace />, index: true },
-        { element: <Navigate to="processos" replace />, index: true },
+        { element: <Navigate to="fila-trabalho" replace />, index: true },
         { path: 'indicadores', element: <Indicadores /> },
         { path: 'entidade', element: <Entidade /> },
         { path: 'contratos', element: <Contrato /> },
         {
-          path: 'processos',
+          path: 'fila-trabalho',
           children: [
-            { element: <Navigate to="/processos/lista" replace />, index: true },
+            { element: <Navigate to="/fila-trabalho/lista" replace />, index: true },
             { path: ':id', element: <Processo /> },
             { path: 'lista', element: <Processos /> },
             { path: 'procurar', element: <Procura /> },
@@ -114,8 +112,9 @@ export default function Router() {
         {
           path: 'gaji9',
           children: [
-            { element: <Navigate to="/gaji9/acessos" replace />, index: true },
-            { path: 'acessos', element: <Gaji9 /> },
+            { element: <Navigate to="/gaji9/gestao" replace />, index: true },
+            { path: 'gestao', element: <Gaji9 /> },
+            { path: 'minuta/:id', element: <MinutaDetail /> },
           ],
         },
       ],
@@ -154,3 +153,4 @@ const PerfilEstadosAcessos = Loadable(lazy(() => import('../pages/parametrizacao
 
 // Gaji9
 const Gaji9 = Loadable(lazy(() => import('../pages/gaji9/Gaji9')));
+const MinutaDetail = Loadable(lazy(() => import('../pages/gaji9/MinutaDetail')));

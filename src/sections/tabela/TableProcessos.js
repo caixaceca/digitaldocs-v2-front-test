@@ -130,7 +130,7 @@ export default function TableProcessos({ from }) {
   };
 
   const handleView = (id, isCC) => {
-    navigate(`${PATH_DIGITALDOCS.processos.root}${isCC ? '/cc/' : '/'}${id}`);
+    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}${isCC ? '/cc/' : '/'}${id}`);
   };
 
   return (
@@ -142,7 +142,7 @@ export default function TableProcessos({ from }) {
           <Stack direction="row" spacing={1.5}>
             <Registos info={processosInfo} total={processos?.length} handleClick={() => verMais()} />
             {!meuAmbiente?.observador && meuAmbiente?.isinicial && (
-              <AddItem button handleClick={() => navigate(PATH_DIGITALDOCS.processos.novoProcesso)} />
+              <AddItem button handleClick={() => navigate(PATH_DIGITALDOCS.filaTrabalho.novoProcesso)} />
             )}
           </Stack>
         }

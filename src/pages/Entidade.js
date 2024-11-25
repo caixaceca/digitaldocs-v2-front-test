@@ -17,7 +17,7 @@ import useSettings from '../hooks/useSettings';
 import { getComparator, applySort } from '../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getFromBanka, changeNumEntidade } from '../redux/slices/banka';
+import { getFromBanka, getSuccess } from '../redux/slices/banka';
 // components
 import Page from '../components/Page';
 import { SearchAdornment } from '../components/Actions';
@@ -61,7 +61,7 @@ export default function Entidade() {
   }, [dispatch, perfilId, numEntidade, mail]);
 
   const changeNumero = () => {
-    dispatch(changeNumEntidade(numero));
+    dispatch(getSuccess({ item: 'numEntidade', dados: numero }));
   };
 
   return (

@@ -86,8 +86,8 @@ export default function Processo() {
     () =>
       (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
       (params?.get?.('from') === 'Controle' && `${PATH_DIGITALDOCS.controle.lista}`) ||
-      (params?.get?.('from') === 'Pesquisa' && `${PATH_DIGITALDOCS.processos.procurar}`) ||
-      `${PATH_DIGITALDOCS.processos.lista}`,
+      (params?.get?.('from') === 'Pesquisa' && `${PATH_DIGITALDOCS.filaTrabalho.procurar}`) ||
+      `${PATH_DIGITALDOCS.filaTrabalho.lista}`,
     [params]
   );
 

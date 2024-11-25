@@ -539,7 +539,7 @@ function indicadoresGroupBy(dados, item) {
       res[value[item]] = { item: value[item], processos: [] };
       dadosGrouped.push(res[value[item]]);
     }
-    res[value[item]].processos.push({ assunto: value?.assunto, total: value?.total });
+    res[value[item]].filaTrabalho.push({ assunto: value?.assunto, total: value?.total });
     return res;
   }, {});
 

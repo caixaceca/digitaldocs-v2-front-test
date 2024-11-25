@@ -52,7 +52,9 @@ export default function Controle() {
         temAcesso(['emissao-cartoes-100'], meusacessos)
           ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
-        ...(isAdmin || isAuditoria || cc?.uo?.label === 'GFC' ? [{ value: 'CON', component: <TableCON /> }] : []),
+        ...(isAdmin || isAuditoria || temAcesso(['con-100'], meusacessos)
+          ? [{ value: 'CON', component: <TableCON /> }]
+          : []),
         ...(isAdmin || isAuditoria || temAcesso(['pjf-100'], meusacessos)
           ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
           : []),

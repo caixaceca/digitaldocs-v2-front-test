@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -7,10 +8,12 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // hooks
-import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
+// routes
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { openModal, getSuccess, closeModal, getFromParametrizacao } from '../../redux/slices/parametrizacao';
@@ -24,10 +27,12 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 import {
   LinhaForm,
+  FluxoForm,
+  EstadoForm,
+  OrigemForm,
   DespesaForm,
   GarantiaForm,
-  RegraAnexoForm,
-  AnexoDespesaForm,
+  DocumentoForm,
   MotivoTransicaoForm,
   MotivoPendenciaForm,
 } from './ParametrizacaoForm';
@@ -40,21 +45,25 @@ TableParametrizacao.propTypes = { item: PropTypes.string, fluxo: PropTypes.objec
 
 export default function TableParametrizacao({ item, fluxo = null }) {
   const dispatch = useDispatch();
-  const { handleCloseModal } = useModal(closeModal());
+  const navigate = useNavigate();
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
   const {
-    anexos,
+    done,
+    fluxos,
     linhas,
+    estados,
+    origens,
     despesas,
     garantias,
     isLoading,
     isOpenView,
+    documentos,
     isOpenModal,
-    regrasAnexos,
+    selectedItem,
     motivosTransicao,
     motivosPendencia,
   } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
 
   const {
     page,
@@ -68,12 +77,17 @@ export default function TableParametrizacao({ item, fluxo = null }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
+  } = useTable({
+    defaultOrder: 'asc',
+    defaultOrderBy: (item === 'estados' && 'nome') || (item === 'fluxos' && 'assunto') || 'designacao',
+  });
 
-  const itemSingle =
-    (item === 'despesas' && 'despesa') ||
-    (item === 'garantias' && 'garantia') ||
-    (item === 'motivosTransicao' && 'motivoTransicao');
+  useEffect(() => {
+    if (done === 'Estado adicionado' || done === 'Fluxo adicionado') {
+      navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${selectedItem?.id}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
   useEffect(() => {
     setPage(0);
@@ -81,33 +95,46 @@ export default function TableParametrizacao({ item, fluxo = null }) {
   }, [filter]);
 
   useEffect(() => {
-    if (mail && perfilId && item) {
-      dispatch(getFromParametrizacao(item, { mail, perfilId, fluxoId: fluxo?.id, gestao: true }));
+    if (item) {
+      dispatch(getFromParametrizacao(item, { fluxoId: fluxo?.id, gestao: true }));
     }
   }, [dispatch, perfilId, item, fluxo, mail]);
 
   const dataFiltered = applySortFilter({
     filter,
     dados:
-      (item === 'anexos' && anexos) ||
       (item === 'linhas' && linhas) ||
+      (item === 'fluxos' && fluxos) ||
+      (item === 'origens' && origens) ||
       (item === 'despesas' && despesas) ||
       (item === 'garantias' && garantias) ||
-      (item === 'regrasAnexos' && regrasAnexos) ||
+      (item === 'documentos' && documentos) ||
       (item === 'motivosPendencia' && motivosPendencia) ||
       (item === 'motivosTransicao' && motivosTransicao) ||
+      (item === 'estados' &&
+        estados?.map((row) => ({ ...row, uo: uos?.find((item) => item?.id === row?.uo_id)?.label || row?.uo_id }))) ||
       [],
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
 
-  const handleView = (dados) => {
-    if (itemSingle) {
-      dispatch(openModal('view'));
-      dispatch(getFromParametrizacao(itemSingle, { id: dados?.id, mail, perfilId }));
+  const handleView = (dados, modal) => {
+    const itemSingle =
+      (item === 'origens' && 'origem') ||
+      (item === 'despesas' && 'despesa') ||
+      (item === 'garantias' && 'garantia') ||
+      (item === 'documentos' && 'documento') ||
+      (item === 'motivosTransicao' && 'motivoTransicao');
+
+    if (modal === 'view' && (item === 'fluxos' || item === 'estados')) {
+      navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${dados?.id}`);
     } else {
-      dispatch(openModal('view'));
-      dispatch(getSuccess({ item: 'selectedItem', dados }));
+      dispatch(openModal(modal));
+      if (itemSingle) {
+        dispatch(getFromParametrizacao(itemSingle, { id: dados?.id, from: 'listagem' }));
+      } else {
+        dispatch(getSuccess({ item: 'selectedItem', dados }));
+      }
     }
   };
 
@@ -123,28 +150,23 @@ export default function TableParametrizacao({ item, fluxo = null }) {
                 {isLoading && isNotFound ? (
                   <SkeletonTable
                     row={10}
-                    column={(item === 'linhas' && 4) || ((item === 'regrasAnexos' || item === 'anexos') && 5) || 3}
+                    column={
+                      (item === 'fluxos' && 6) ||
+                      (item === 'linhas' && 4) ||
+                      (item === 'origens' && 7) ||
+                      ((item === 'estados' || item === 'documentos') && 5) ||
+                      3
+                    }
                   />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
-                      {(item === 'anexos' && (
+                      {(item === 'linhas' && (
                         <>
-                          <TableCell>{row.designacao}</TableCell>
-                          <TableCell align="center">
-                            <Checked check={row.obriga_prazo_validade} />
-                          </TableCell>
-                          <TableCell align="center">
-                            <Checked check={row.reutilizavel} />
-                          </TableCell>
+                          <TableCell>{row.linha}</TableCell>
+                          <TableCell>{row.descricao}</TableCell>
                         </>
                       )) ||
-                        (item === 'linhas' && (
-                          <>
-                            <TableCell>{row.linha}</TableCell>
-                            <TableCell>{row.descricao}</TableCell>
-                          </>
-                        )) ||
                         ((item === 'despesas' || item === 'garantias' || item === 'motivosTransicao') && (
                           <TableCell>{row.designacao || row.descritivo}</TableCell>
                         )) ||
@@ -154,24 +176,53 @@ export default function TableParametrizacao({ item, fluxo = null }) {
                             <TableCell>{row.obs}</TableCell>
                           </>
                         )) ||
-                        (item === 'regrasAnexos' && (
+                        (item === 'fluxos' && (
+                          <>
+                            <TableCell>{row.assunto}</TableCell>
+                            <TableCell>{row.modelo}</TableCell>
+                            <TableCell align="center">
+                              <Checked check={row.is_interno} />
+                            </TableCell>
+                            <TableCell align="center">
+                              <Checked check={row.is_credito} />
+                            </TableCell>
+                          </>
+                        )) ||
+                        (item === 'estados' && <EstadoDetail row={row} />) ||
+                        (item === 'origens' && (
                           <>
                             <TableCell>{row.designacao}</TableCell>
-                            <TableCell>{row.assunto}</TableCell>
+                            <TableCell>{row.seguimento}</TableCell>
+                            <TableCell>{row.tipo}</TableCell>
+                            <TableCell>
+                              {row.ilha} - {row.cidade}
+                            </TableCell>
+                            <TableCell>{row.email}</TableCell>
+                            <TableCell>{row.telefone}</TableCell>
+                          </>
+                        )) ||
+                        (item === 'documentos' && (
+                          <>
+                            <TableCell>{row.designacao}</TableCell>
                             <TableCell align="center">
-                              <Checked check={row.obrigatorio} />
+                              <Checked check={row.obriga_prazo_validade} />
+                            </TableCell>
+                            <TableCell align="center">
+                              <Checked check={row.anexo} />
                             </TableCell>
                           </>
                         ))}
-                      <TableCell align="center">
-                        <Checked check={item === 'motivosPendencia' ? true : row.ativo} />
-                      </TableCell>
+                      {item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens' && (
+                        <TableCell align="center">
+                          <Checked check={row?.is_ativo || row.ativo} />
+                        </TableCell>
+                      )}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {((!itemSingle && item !== 'motivosTransicao' && row?.ativo) ||
-                            item === 'motivosPendencia') && <UpdateItem dados={{ dados: row }} />}
-                          {itemSingle && <UpdateItem dados={{ item: itemSingle, id: row?.id }} />}
-                          <DefaultAction handleClick={() => handleView(row)} label="DETALHES" />
+                          {item !== 'fluxos' && item !== 'estados' && (
+                            <UpdateItem handleClick={() => handleView(row, 'update')} />
+                          )}
+                          <DefaultAction handleClick={() => handleView(row, 'view')} label="DETALHES" />
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -199,18 +250,51 @@ export default function TableParametrizacao({ item, fluxo = null }) {
         )}
       </Card>
 
-      {isOpenView && <Detalhes item={item} closeModal={handleCloseModal} />}
+      {isOpenView && <Detalhes item={item} closeModal={() => dispatch(closeModal())} />}
       {isOpenModal && (
         <>
-          {item === 'linhas' && <LinhaForm onCancel={handleCloseModal} />}
-          {item === 'despesas' && <DespesaForm onCancel={handleCloseModal} />}
-          {item === 'garantias' && <GarantiaForm onCancel={handleCloseModal} />}
-          {item === 'regrasAnexos' && <RegraAnexoForm onCancel={handleCloseModal} />}
-          {item === 'anexos' && <AnexoDespesaForm item="Anexo" onCancel={handleCloseModal} />}
-          {item === 'motivosPendencia' && <MotivoPendenciaForm onCancel={handleCloseModal} />}
-          {item === 'motivosTransicao' && <MotivoTransicaoForm onCancel={handleCloseModal} />}
+          {item === 'linhas' && <LinhaForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'fluxos' && <FluxoForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'estados' && <EstadoForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'origens' && <OrigemForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'despesas' && <DespesaForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'garantias' && <GarantiaForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'documentos' && <DocumentoForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'motivosPendencia' && <MotivoPendenciaForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'motivosTransicao' && <MotivoTransicaoForm onCancel={() => dispatch(closeModal())} />}
         </>
       )}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+EstadoDetail.propTypes = { row: PropTypes.object };
+
+export function EstadoDetail({ row = null }) {
+  return (
+    <>
+      <TableCell>{row.nome}</TableCell>
+      <TableCell>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <Typography variant="body2">{row.uo}</Typography> (
+          {!!row?.balcao && (
+            <>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                (Balc:
+              </Typography>
+              <Typography variant="body2">{row.balcao})</Typography>
+            </>
+          )}
+        </Stack>
+      </TableCell>
+      <TableCell align="center">
+        <Checked check={row.is_inicial} />
+      </TableCell>
+      <TableCell align="center">
+        <Checked check={row.is_final} />
+      </TableCell>
     </>
   );
 }
@@ -223,6 +307,8 @@ export function dadosComColaborador(dados, colaboradores) {
     nome: colaboradores?.find((item) => item?.perfil_id === row?.perfil_id)?.perfil?.displayName || row?.perfil_id,
   }));
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function headerTable(item) {
   return [
@@ -238,18 +324,35 @@ function headerTable(item) {
         { id: 'linha', label: 'Designação', align: 'left' },
         { id: 'descricao', label: 'Segmento', align: 'left' },
       ]) ||
-      (item === 'anexos' && [
-        { id: 'designacao', label: 'Designação', align: 'left' },
-        { id: 'obriga_prazo_validade', label: 'Prazo de validade', align: 'center' },
-        { id: 'reutilizavel', label: 'Reutilizável', align: 'center' },
-      ]) ||
-      (item === 'regrasAnexos' && [
-        { id: 'designacao', label: 'Designação', align: 'left' },
+      (item === 'fluxos' && [
         { id: 'assunto', label: 'Assunto', align: 'left' },
-        { id: 'obrigatorio', label: 'Obrigatório', align: 'center' },
+        { id: 'modelo', label: 'Modelo', align: 'left' },
+        { id: 'is_interno', label: 'Interno', align: 'center' },
+        { id: 'is_credito', label: 'Crédito', align: 'center' },
+      ]) ||
+      (item === 'estados' && [
+        { id: 'nome', label: 'Nome', align: 'left' },
+        { id: 'uo', label: 'Unidade orgânica', align: 'left' },
+        { id: 'is_inicial', label: 'Inicial', align: 'center' },
+        { id: 'is_final', label: 'Final', align: 'center' },
+      ]) ||
+      (item === 'origens' && [
+        { id: 'designacao', label: 'Designação', align: 'left' },
+        { id: 'seguimento', label: 'Segmento', align: 'left' },
+        { id: 'tipo', label: 'Tipo', align: 'left' },
+        { id: 'ilha', label: 'Localização', align: 'left' },
+        { id: 'email', label: 'Email', align: 'left' },
+        { id: 'telefone', label: 'Telefone', align: 'left' },
+      ]) ||
+      (item === 'documentos' && [
+        { id: 'designacao', label: 'Designação', align: 'left' },
+        { id: 'obriga_prazo_validade', label: 'Validade', align: 'center' },
+        { id: 'anexo', label: 'Anexo', align: 'center' },
       ]) ||
       []),
-    { id: 'ativo', label: 'Ativo', align: 'center' },
-    { id: '' },
+    ...(item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens'
+      ? [{ id: item === 'fluxos' ? 'is_ativo' : 'ativo', label: 'Ativo', align: 'center', width: 10 }]
+      : []),
+    { id: '', width: 10 },
   ];
 }

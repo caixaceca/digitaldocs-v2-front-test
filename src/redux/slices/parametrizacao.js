@@ -42,7 +42,6 @@ const initialState = {
   selectedItem: null,
   fluxos: [],
   linhas: [],
-  anexos: [],
   estados: [],
   acessos: [],
   origens: [],
@@ -54,7 +53,6 @@ const initialState = {
   meusacessos: [],
   notificacoes: [],
   regrasEstado: [],
-  regrasAnexos: [],
   perfisEstado: [],
   meusAmbientes: [],
   destinatarios: [],
@@ -242,16 +240,6 @@ export function getFromParametrizacao(item, params) {
             dispatch(slice.actions.getSuccess({ item, dados: response.data }));
             break;
           }
-          case 'anexos': {
-            const response = await axios.get(`${BASEURLCC}/v1/anexos/gestao`, options);
-            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
-            break;
-          }
-          case 'regrasAnexos': {
-            const response = await axios.get(`${BASEURLCC}/v1/anexos/regra/byfluxo/${params?.fluxoId}`, options);
-            dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
-            break;
-          }
           case 'regrasTransicao': {
             const response = await axios.get(`${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.id}`, options);
             dispatch(slice.actions.getSuccess({ item: 'regrasTransicao', dados: response.data.objeto }));
@@ -382,6 +370,19 @@ export function getFromParametrizacao(item, params) {
             );
             break;
           }
+          case 'documento': {
+            const response = await axios.get(
+              `${BASEURLDD}/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`,
+              options
+            );
+            dispatch(
+              slice.actions.getSuccess({
+                dados: response.data?.objeto,
+                item: params?.from === 'listagem' ? 'selectedItem' : item,
+              })
+            );
+            break;
+          }
           case 'motivoTransicao': {
             const response = await axios.get(
               `${BASEURLDD}/v1/motivos_transicoes/detalhe/${perfilId}?id=${params?.id}`,
@@ -439,13 +440,11 @@ export function createItem(item, dados, params) {
         const _path =
           (item === 'fluxo' && `${BASEURLDD}/v1/fluxos`) ||
           (item === 'linhas' && `${BASEURLDD}/v1/linhas`) ||
-          (item === 'anexos' && `${BASEURLCC}/v1/anexos`) ||
           (item === 'estado' && `${BASEURLDD}/v1/estados`) ||
           (item === 'acessos' && `${BASEURLDD}/v1/acessos`) ||
           (item === 'origens' && `${BASEURLDD}/v1/origens`) ||
           (item === 'acessos' && `${BASEURLDD}/v1/acessos`) ||
           (item === 'transicoes' && `${BASEURLDD}/v1/transicoes`) ||
-          (item === 'regrasAnexos' && `${BASEURLCC}/v1/anexos/regra`) ||
           (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes`) ||
           (item === 'perfisEstado' && `${BASEURLDD}/v1/estados/asscc/perfis`) ||
           (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil`) ||
@@ -453,6 +452,7 @@ export function createItem(item, dados, params) {
           (item === 'motivosTransicao' && `${BASEURLDD}/v1/motivos_transicoes/${perfilId}`) ||
           (item === 'despesas' && `${BASEURLDD}/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
           (item === 'regrasEstado' && `${BASEURLCC}/v1/suportes/regra_parecer/estado/default`) ||
+          (item === 'documentos' && `${BASEURLDD}/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
           (item === 'checklist' && `${BASEURLDD}/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
           (item === 'garantias' && `${BASEURLDD}/v1/tipos_garantias/tipo_garantia?perfil_cc_id=${perfilId}`) ||
           (item === 'regrasTransicao' &&
@@ -523,18 +523,17 @@ export function updateItem(item, dados, params) {
         const _path =
           (item === 'fluxo' && `${BASEURLDD}/v1/fluxos/${params?.id}`) ||
           (item === 'linhas' && `${BASEURLDD}/v1/linhas/${params?.id}`) ||
-          (item === 'anexos' && `${BASEURLCC}/v1/anexos/${params?.id}`) ||
-          (item === 'acessos' && `${BASEURLDD}/v1/acessos/${params?.id}`) ||
           (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}`) ||
+          (item === 'acessos' && `${BASEURLDD}/v1/acessos/${params?.id}`) ||
           (item === 'origens' && `${BASEURLDD}/v1/origens/${params?.id}`) ||
           (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil`) ||
           (item === 'transicoes' && `${BASEURLDD}/v1/transicoes/${params?.id}`) ||
           (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes/${params?.id}`) ||
-          (item === 'regrasAnexos' && `${BASEURLCC}/v1/anexos/regra/${params?.id}`) ||
           (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
+          (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
           (item === 'motivosTransicao' && `${BASEURLDD}/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
           (item === 'despesas' && `${BASEURLDD}/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-          (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
+          (item === 'documentos' && `${BASEURLDD}/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
           (item === 'garantias' &&
             `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
           (item === 'checklist' &&
@@ -574,10 +573,8 @@ export function deleteItem(item, params) {
       try {
         const options = { headers: { cc: mail } };
         const _path =
-          (item === 'anexos' && `${BASEURLCC}/v1/anexos/${params?.id}`) ||
-          (item === 'regrasAnexos' && `${BASEURLCC}/v1/anexos/regra/${params?.id}`) ||
-          (item === 'acessos' && `${BASEURLDD}/v1/acessos/${perfilId}/${params?.id}`) ||
           (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`) ||
+          (item === 'acessos' && `${BASEURLDD}/v1/acessos/${perfilId}/${params?.id}`) ||
           (item === 'origens' && `${BASEURLDD}/v1/origens/${params?.id}/${perfilId}`) ||
           (item === 'transicoes' && `${BASEURLDD}/v1/transicoes/${params?.id}/${perfilId}`) ||
           (item === 'linhas' && `${BASEURLDD}/v1/linhas/${params?.linhaID}/${params?.perfilID}`) ||
@@ -594,7 +591,7 @@ export function deleteItem(item, params) {
               item,
               id: params?.id,
               item1: params?.item1 || '',
-              destaivar: item === 'anexos' || item === 'regra anexo' || item === 'destinatario',
+              destaivar: item === 'destinatario',
             })
           );
         }

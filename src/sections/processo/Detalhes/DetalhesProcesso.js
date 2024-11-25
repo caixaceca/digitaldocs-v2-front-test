@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
@@ -295,15 +296,15 @@ export default function DetalhesProcesso({ isPS, processo }) {
           {credito?.data_indeferido && (
             <TextItem title="Data de indeferimento:" text={ptDate(credito?.data_indeferido)} />
           )}
-          {/* {credito?.valor_divida && (
+          {credito?.valor_divida && (
             <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
               <Label color="info" startIcon={<InfoOutlinedIcon />}>
                 Entidade com crédito em dívida
               </Label>
-              <TextItem title="Valor:" text={fCurrency(credito?.valor_divida)} />
+              <TextItem title="Valor:" text={fCurrency(credito?.valor_divida * 1000)} />
               {credito?.periodo && <TextItem title="Data:" text={ptDate(credito?.periodo)} />}
             </Paper>
-          )} */}
+          )}
         </List>
       )}
 

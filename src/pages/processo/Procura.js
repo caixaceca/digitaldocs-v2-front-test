@@ -98,9 +98,9 @@ export default function Procura() {
 
   const handleView = (id, isCC) => {
     if (isCC) {
-      navigate(`${PATH_DIGITALDOCS.processos.root}/cc/${id}?from=Pesquisa`);
+      navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/cc/${id}?from=Pesquisa`);
     } else {
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${id}?from=Pesquisa`);
+      navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${id}?from=Pesquisa`);
     }
   };
 
@@ -168,7 +168,7 @@ export default function Procura() {
           }
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-            { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
+            { name: 'Processos', href: PATH_DIGITALDOCS.filaTrabalho.root },
             { name: 'Procurar' },
           ]}
         />

@@ -15,7 +15,7 @@ import SentimentDissatisfiedOutlinedIcon from '@mui/icons-material/SentimentDiss
 import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVerySatisfiedOutlined';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { createItem, closeDisposicao } from '../redux/slices/intranet';
+import { createItem, getSuccess } from '../redux/slices/intranet';
 // components
 import { DTFechar } from '../components/Actions';
 // sections
@@ -72,13 +72,12 @@ export default function Disposicao() {
     dispatch(createItem('disposicao', JSON.stringify({ disposicao: event.target.value }), { mail, msg: 'disposicao' }));
   };
 
-  const handleClose = () => {
-    dispatch(closeDisposicao());
-  };
-
   return (
     <Dialog fullWidth keepMounted maxWidth="sm" open>
-      <DTFechar title="Como te sentes hoje?" handleClick={() => handleClose()} />
+      <DTFechar
+        title="Como te sentes hoje?"
+        handleClick={() => dispatch(getSuccess({ item: 'disposicao', dados: true }))}
+      />
       <DialogContent sx={{ mt: 3 }}>
         <Stack direction="row" justifyContent="center" sx={{ pb: 5 }}>
           <RadioGroup row value={value} name="disposicao" ref={radioGroupRef} onChange={handleChange}>

@@ -3,10 +3,6 @@ import { getComparator, applySort } from '../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
-export function validarAcesso(grupo, grupos) {
-  return !!grupos?.find((row) => row?.grupo?.label === grupo);
-}
-
 export function temAcesso(acessos, acessosList) {
   return !!acessosList?.find((row) => acessos?.includes(row));
 }

@@ -11,7 +11,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { getFile } from '../../utils/getFile';
 import { nomeacaoBySexo } from '../../utils/validarAcesso';
 // redux
-import { changeDadosView } from '../../redux/slices/banka';
+import { getSuccess } from '../../redux/slices/banka';
 import { useDispatch, useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
@@ -36,10 +36,10 @@ const InfoStyle = styled('div')(({ theme }) => ({
   zIndex: 99,
   right: 'auto',
   display: 'flex',
+  alignItems: 'center',
   position: 'absolute',
-  left: theme.spacing(2),
-  marginTop: theme.spacing(3),
-  [theme.breakpoints.up('md')]: { alignItems: 'center', bottom: theme.spacing(4) },
+  left: theme.spacing(1),
+  [theme.breakpoints.up('md')]: { left: theme.spacing(2) },
 }));
 
 // ----------------------------------------------------------------------
@@ -47,18 +47,20 @@ const InfoStyle = styled('div')(({ theme }) => ({
 PerfilCover.propTypes = { perfilColaborador: PropTypes.object, isDeFeria: PropTypes.object };
 
 export default function PerfilCover({ perfilColaborador, isDeFeria }) {
-  const { isLoading, colaboradores } = useSelector((state) => state.intranet);
+  const { isLoading } = useSelector((state) => state.intranet);
+  console.log(perfilColaborador);
   return (
     <RootStyle>
       <InfoStyle>
         <Stack>
           <AvatarBedge
-            status={colaboradores?.find((item) => item?.id === perfilColaborador?.id)?.presence}
+            id={perfilColaborador?.id}
             sx={{ border: (theme) => `2px solid ${theme.palette.common.white}`, width: 15, height: 15 }}
           >
             <MyAvatar
               sx={{
                 borderWidth: 2,
+                mt: { xs: 3, md: 1.5 },
                 borderStyle: 'solid',
                 width: { xs: 80, md: 128 },
                 height: { xs: 80, md: 128 },
@@ -130,7 +132,7 @@ export function EntidadeCover({ numero, entidade }) {
   const { dadosComValores } = useSelector((state) => state.banka);
 
   const changeView = (newValue) => {
-    dispatch(changeDadosView(newValue));
+    dispatch(getSuccess({ item: 'dadosComValores', dados: newValue }));
   };
 
   return (

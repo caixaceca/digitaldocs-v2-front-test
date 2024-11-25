@@ -43,7 +43,7 @@ import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 import { codacessos, objetos, _concelhos } from '../../_mock';
 //
 import PesosDecisao from './PesosDecisao';
-import { listaTransicoes, listaPerfis } from './applySortFilter';
+import { listaPerfis } from './applySortFilter';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1020,6 +1020,115 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+DocumentoForm.propTypes = { onCancel: PropTypes.func };
+
+export function DocumentoForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
+
+  const formSchema = Yup.object().shape({
+    codigo: Yup.string().required().label('Código'),
+    designacao: Yup.string().required().label('Designação'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      codigo: selectedItem?.codigo || '',
+      pagina: selectedItem?.pagina || '',
+      anexo: selectedItem?.anexo || false,
+      titulo: selectedItem?.titulo || null,
+      designacao: selectedItem?.designacao || '',
+      sub_titulo: selectedItem?.sub_titulo || null,
+      formulario: selectedItem?.formulario || false,
+      ativo: selectedItem ? selectedItem?.ativo : true,
+      identificador: selectedItem?.identificador || false,
+      obriga_prazo_validade: selectedItem?.obriga_prazo_validade || false,
+      data_formulario: selectedItem?.data_formulario
+        ? add(new Date(selectedItem?.data_formulario), { hours: 2 })
+        : null,
+    }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    try {
+      const formData = {
+        ...values,
+        data_formulario: values?.data_formulario ? format(values.data_formulario, 'yyyy-MM-dd') : null,
+      };
+      if (selectedItem) {
+        dispatch(
+          updateItem('documentos', JSON.stringify(formData), { id: selectedItem?.id, msg: 'Documento atualizado' })
+        );
+      } else {
+        dispatch(createItem('documentos', JSON.stringify(formData), { msg: 'Documento adicionado' }));
+      }
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar documento' : 'Adicionar documento'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={3}>
+            <Grid container spacing={3} sx={{ mt: 0 }} justifyContent="center">
+              <Grid item xs={12}>
+                <RHFTextField name="codigo" label="Código" />
+              </Grid>
+              <Grid item xs={12}>
+                <RHFTextField name="designacao" label="Designação" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="formulario" label="Formulário" />
+              </Grid>
+              {values?.formulario && (
+                <>
+                  <Grid item xs={12}>
+                    <RHFTextField name="titulo" label="Título" />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <RHFTextField name="subt_titulo" label="Subtítulo" />
+                  </Grid>
+                </>
+              )}
+              <Grid item xs={6}>
+                <RHFSwitch name="identificador" label="Identificador" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="obriga_prazo_validade" label="Validade" />
+              </Grid>
+              <Grid item xs={6}>
+                <RHFSwitch name="anexo" label="Anexo" />
+              </Grid>
+              {isEdit && (
+                <Grid item xs={6}>
+                  <RHFSwitch name="ativo" label="Ativo" />
+                </Grid>
+              )}
+            </Grid>
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 ChecklistForm.propTypes = { fluxo: PropTypes.object, onCancel: PropTypes.func };
 
 export function ChecklistForm({ fluxo, onCancel }) {
@@ -1454,99 +1563,6 @@ export function AnexoDespesaForm({ item, onCancel }) {
               onCancel={onCancel}
               handleDelete={handleDelete}
               desc={isEdit ? `eliminar ${item === 'Despesa' ? 'esta despesa' : 'este anexo'}` : ''}
-            />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-RegraAnexoForm.propTypes = { onCancel: PropTypes.func };
-
-export function RegraAnexoForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, selectedItem, fluxo, estados, anexos } = useSelector((state) => state.parametrizacao);
-  const transicoesList = useMemo(
-    () => listaTransicoes(fluxo?.transicoes || [], estados || []),
-    [estados, fluxo?.transicoes]
-  );
-  const anexosList = useMemo(
-    () => anexos?.filter((item) => item?.ativo)?.map((row) => ({ id: row?.id, label: row?.designacao })) || [],
-    [anexos]
-  );
-
-  const formSchema = Yup.object().shape({ designacao: Yup.mixed().required().label('Anexo') });
-
-  const defaultValues = useMemo(
-    () => ({
-      obrigatorio: selectedItem ? selectedItem?.obrigatorio : false,
-      transicao: transicoesList?.find((row) => row?.id === selectedItem?.transicao_id),
-      designacao: anexosList?.find((row) => row?.id === selectedItem?.designacao_id) || null,
-    }),
-    [selectedItem, anexosList, transicoesList]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
-    try {
-      const formData = {
-        fluxo_id: fluxo?.id,
-        obrigatorio: values?.obrigatorio,
-        transicao_id: values?.transicao?.id,
-        designacao_id: values?.designacao?.id,
-      };
-      if (selectedItem) {
-        dispatch(
-          updateItem('regrasAnexos', JSON.stringify(formData), { mail, id: selectedItem?.id, msg: 'Regra atualizado' })
-        );
-      } else {
-        dispatch(createItem('regrasAnexos', JSON.stringify(formData), { mail, msg: 'Regra atualizado' }));
-      }
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  const handleDelete = () => {
-    dispatch(deleteItem('regrasAnexos', { mail, id: selectedItem?.id, msg: 'Regra eliminado', perfilId }));
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regra'}</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={3}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFAutocompleteObject name="designacao" label="Anexo" options={anexosList} />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFAutocompleteObject name="transicao" label="Transição" options={transicoesList} />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFSwitch name="obrigatorio" label="Obrigatório" />
-              </Grid>
-            </Grid>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? 'eliminar esta regra' : ''}
             />
           </ItemComponent>
         </FormProvider>

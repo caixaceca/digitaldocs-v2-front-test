@@ -76,12 +76,12 @@ function Clausula({ onCancel, dados }) {
   const { isEdit, titulares, garantias, produtos, selectedItem } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
-    seccao: Yup.mixed().required().label('Secção'),
-    titulo: Yup.string().required().label('Título'),
-    titular: Yup.mixed().required().label('Titular'),
-    garantia: Yup.mixed().required().label('Garantia'),
-    componente: Yup.mixed().required().label('Componente'),
-    numero: Yup.number().positive().typeError().required().label('Nº'),
+    // seccao: Yup.mixed().required().label('Secção'),
+    // titulo: Yup.string().required().label('Título'),
+    // titular: Yup.mixed().required().label('Titular'),
+    // garantia: Yup.mixed().required().label('Garantia'),
+    // componente: Yup.mixed().required().label('Componente'),
+    // numero: Yup.number().positive().typeError().required().label('Nº'),
   });
 
   const defaultValues = useMemo(
@@ -187,7 +187,7 @@ function Incisos() {
           <Paper key={`inciso_${index}`} variant="elevation" elevation={10} sx={{ flexGrow: 1, p: 1 }}>
             <Stack spacing={1} direction="row" alignItems="center">
               <Stack spacing={2} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
-                <RHFNumberField name={`incisos[${index}].numero`} label="Nº" sx={{ width: 100 }} />
+                <RHFNumberField name={`incisos[${index}].numero`} label="Nº" sx={{ width: 80 }} />
                 <RHFTextField multiline rows={3} label="Conteúdo" name={`incisos[${index}].conteudo`} />
               </Stack>
               <DefaultAction small variant="filled" color="error" label="ELIMINAR" handleClick={() => remove(index)} />
@@ -200,7 +200,7 @@ function Incisos() {
             button
             label="Inciso"
             icon="adicionar"
-            handleClick={() => append({ ativo: true, numero: null, conteudo: '', alineas: [] })}
+            handleClick={() => append({ ativo: true, numero: fields?.length + 1, conteudo: '', alineas: [] })}
           />
         </Stack>
       </Stack>
@@ -215,23 +215,19 @@ AlineasInciso.propTypes = { incisoIndex: PropTypes.number };
 
 export function AlineasInciso({ incisoIndex }) {
   const { control } = useFormContext();
-  const {
-    append: appendAlinea,
-    remove: removeAlinea,
-    fields: alineasFields,
-  } = useFieldArray({ control, name: `incisos[${incisoIndex}].alineas` });
+  const { append, remove, fields } = useFieldArray({ control, name: `incisos[${incisoIndex}].alineas` });
 
   return (
     <Stack spacing={2}>
       <Divider sx={{ pt: 2 }} />
-      {alineasFields.map((item, index) => (
+      {fields.map((item, index) => (
         <Stack spacing={1} direction="row" alignItems="center" key={`inciso_${incisoIndex}_alinea${index}`}>
           <Stack spacing={2} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
             <RHFTextField
               size="small"
-              name={`incisos[${incisoIndex}].alineas[${index}].numero`}
               label="Alínea"
-              sx={{ width: 100 }}
+              sx={{ width: 80 }}
+              name={`incisos[${incisoIndex}].alineas[${index}].numero`}
             />
             <RHFTextField
               rows={2}
@@ -241,7 +237,7 @@ export function AlineasInciso({ incisoIndex }) {
               name={`incisos[${incisoIndex}].alineas[${index}].conteudo`}
             />
           </Stack>
-          <DefaultAction small color="error" label="ELIMINAR" handleClick={() => removeAlinea(index)} />
+          <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
         </Stack>
       ))}
       <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
@@ -250,7 +246,7 @@ export function AlineasInciso({ incisoIndex }) {
           button
           label="Alínea"
           icon="adicionar"
-          handleClick={() => appendAlinea({ ativo: true, numero: '', conteudo: '' })}
+          handleClick={() => append({ ativo: true, numero: '', conteudo: '' })}
         />
       </Stack>
     </Stack>

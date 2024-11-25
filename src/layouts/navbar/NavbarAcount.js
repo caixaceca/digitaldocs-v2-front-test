@@ -34,7 +34,7 @@ NavbarAcount.propTypes = { isCollapse: PropTypes.bool };
 
 export default function NavbarAcount({ isCollapse }) {
   const { instance, accounts } = useMsal();
-  const { cc, myStatus } = useSelector((state) => state.intranet);
+  const { cc } = useSelector((state) => state.intranet);
 
   return (
     <Link color="inherit" underline="none">
@@ -48,20 +48,14 @@ export default function NavbarAcount({ isCollapse }) {
         </Box>
       )}
       <RootStyle sx={{ ...(isCollapse && { p: 1 }) }}>
-        <AvatarBedge status={myStatus}>
+        <AvatarBedge id={cc?.id}>
           <MyAvatar
             name={accounts[0]?.name}
             sx={{ height: 44, width: 44 }}
             src={getFile('colaborador', cc?.foto_disk)}
           />
         </AvatarBedge>
-        <Box
-          sx={{
-            ml: 2,
-            transition: (theme) => theme.transitions.create('width', { duration: theme.transitions.duration.shorter }),
-            ...(isCollapse && { ml: 0, width: 0 }),
-          }}
-        >
+        <Box sx={{ ml: 2, ...(isCollapse && { ml: 0, width: 0 }) }}>
           <Typography variant="subtitle2" noWrap sx={{ maxWidth: 170 }}>
             {accounts[0]?.name}
           </Typography>

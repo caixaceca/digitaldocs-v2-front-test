@@ -103,7 +103,7 @@ export default function Intervencao({ colaboradoresList }) {
       <DefaultAction
         label="EDITAR"
         color="warning"
-        handleClick={() => navigate(`${PATH_DIGITALDOCS.processos.root}/${processo.id}/editar`)}
+        handleClick={() => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${processo.id}/editar`)}
       />
 
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (

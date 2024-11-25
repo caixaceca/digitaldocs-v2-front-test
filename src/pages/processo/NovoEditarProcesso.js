@@ -57,9 +57,11 @@ export default function NovoEditarProcesso() {
   }, [dispatch, linhas, meuFluxo]);
 
   useEffect(() => {
-    dispatch(
-      getSuccess({ item: 'meuFluxo', dados: meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null })
-    );
+    if (processo?.fluxo_id && meusFluxos?.length > 0) {
+      dispatch(
+        getSuccess({ item: 'meuFluxo', dados: meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null })
+      );
+    }
   }, [dispatch, meusFluxos, processo?.fluxo_id]);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export default function NovoEditarProcesso() {
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
       dispatch(resetItem({ item: 'processo' }));
-      navigate(`${PATH_DIGITALDOCS.processos.root}/${processo?.id}`);
+      navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${processo?.id}`);
     }
   };
 
@@ -102,7 +104,7 @@ export default function NovoEditarProcesso() {
           heading={!isEdit ? 'Novo processo' : 'Editar processo'}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
-            { name: 'Processos', href: PATH_DIGITALDOCS.processos.root },
+            { name: 'Processos', href: PATH_DIGITALDOCS.filaTrabalho.root },
             ...(isEdit
               ? [
                   {
@@ -111,7 +113,7 @@ export default function NovoEditarProcesso() {
                           processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
                         }`
                       : id,
-                    href: `${PATH_DIGITALDOCS.processos.root}/${id}`,
+                    href: `${PATH_DIGITALDOCS.filaTrabalho.root}/${id}`,
                   },
                   { name: 'Editar' },
                 ]
@@ -145,7 +147,7 @@ export default function NovoEditarProcesso() {
                   isOptionEqualToValue={(option, value) => option?.id === value?.id}
                   renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
                   options={meusFluxos?.filter((option) => option?.ativo && !option?.credito_funcionario)}
-                  onChange={(event, newValue) => dispatch(getSuccess({ item: 'meuFluxo', dadaos: newValue }))}
+                  onChange={(event, newValue) => dispatch(getSuccess({ item: 'meuFluxo', dados: newValue }))}
                 />
               </Grid>
             )}

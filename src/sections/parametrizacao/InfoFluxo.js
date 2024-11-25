@@ -28,16 +28,15 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 import {
   FluxoForm,
+  ChecklistForm,
   TransicaoForm,
   ClonarFluxoForm,
-  ChecklistForm,
   NotificacaoForm,
   RegraTransicaoForm,
 } from './ParametrizacaoForm';
-import { EstadoDetail } from './ParametrizacaoItem';
 import { applySortFilter } from './applySortFilter';
 import { Detalhes, DetalhesContent } from './Detalhes';
-import { dadosComColaborador } from './TableParametrizacao';
+import { dadosComColaborador, EstadoDetail } from './TableParametrizacao';
 
 // ----------------------------------------------------------------------
 

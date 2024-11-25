@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 // redux
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromBanka, changeNumEntidade } from '../../redux/slices/banka';
+import { getFromBanka, getSuccess } from '../../redux/slices/banka';
 // components
 import { SearchAdornment } from '../../components/Actions';
 import { SearchAutocomplete } from '../../components/SearchToolbar';
@@ -23,12 +23,12 @@ export default function TolbarContrato() {
 
   useEffect(() => {
     if (mail) {
-      dispatch(getFromBanka('contratos', { mail, tipo, modelo }));
+      dispatch(getFromBanka('contrato', { mail, tipo, modelo }));
     }
   }, [dispatch, mail, tipo, modelo]);
 
   const changeNumero = () => {
-    dispatch(changeNumEntidade(numero));
+    dispatch(getSuccess({ item: 'numEntidade', dados: numero }));
   };
   return (
     <Card sx={{ p: 1 }}>

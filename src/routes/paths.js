@@ -16,13 +16,13 @@ export const PATH_DIGITALDOCS = {
     contratos: path(ROOTS_DIGITALDOCS, '/contratos'),
     entidade: path(ROOTS_DIGITALDOCS, '/entidade'),
   },
-  processos: {
-    root: path(ROOTS_DIGITALDOCS, '/processos'),
-    cc: path(ROOTS_DIGITALDOCS, '/processos/cc/:id'),
-    lista: path(ROOTS_DIGITALDOCS, '/processos/lista'),
-    processo: path(ROOTS_DIGITALDOCS, '/processos/:id'),
-    novoProcesso: path(ROOTS_DIGITALDOCS, '/processos/novo'),
-    procurar: path(ROOTS_DIGITALDOCS, '/processos/procurar'),
+  filaTrabalho: {
+    root: path(ROOTS_DIGITALDOCS, '/fila-trabalho'),
+    cc: path(ROOTS_DIGITALDOCS, '/fila-trabalho/cc/:id'),
+    lista: path(ROOTS_DIGITALDOCS, '/fila-trabalho/lista'),
+    processo: path(ROOTS_DIGITALDOCS, '/fila-trabalho/:id'),
+    novoProcesso: path(ROOTS_DIGITALDOCS, '/fila-trabalho/novo'),
+    procurar: path(ROOTS_DIGITALDOCS, '/fila-trabalho/procurar'),
   },
   controle: {
     root: path(ROOTS_DIGITALDOCS, '/controle'),
@@ -43,6 +43,7 @@ export const PATH_DIGITALDOCS = {
   },
   gaji9: {
     root: path(ROOTS_DIGITALDOCS, '/gaji9'),
-    tabs: path(ROOTS_DIGITALDOCS, '/gaji9/gestao'),
+    gestao: path(ROOTS_DIGITALDOCS, '/gaji9/gestao'),
+    minuta: path(ROOTS_DIGITALDOCS, '/gaji9/minuta/:id'),
   },
 };

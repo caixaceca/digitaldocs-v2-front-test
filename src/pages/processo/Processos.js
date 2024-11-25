@@ -1,4 +1,5 @@
 import { add } from 'date-fns';
+import { useMsal } from '@azure/msal-react';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
@@ -17,9 +18,9 @@ import { pertencoAoEstado } from '../../utils/validarAcesso';
 import useSettings from '../../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
+import { getFromIntranet, acquireTokenAuthenticate } from '../../redux/slices/intranet';
 // components
 import Page from '../../components/Page';
 import { Notificacao } from '../../components/NotistackProvider';
@@ -44,20 +45,27 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 export default function Processos() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
+  const { instance, accounts } = useMsal();
   const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { mail, perfilId, cc, dateUpdate } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (mail && perfilId && cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
-      dispatch(getFromIntranet('colaboradores', { mail }));
-      dispatch(getFromIntranet('cc', { id: cc?.id, mail }));
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
+      dispatch(acquireTokenAuthenticate(instance, accounts[0]));
+    }
+  }, [dispatch, instance, cc?.id, dateUpdate, accounts]);
+
+  useEffect(() => {
+    if (perfilId && cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
+      dispatch(getFromIntranet('colaboradores'));
       dispatch(getFromParametrizacao('meusacessos'));
+      dispatch(getFromIntranet('cc', { id: cc?.id }));
       dispatch(getFromParametrizacao('meusambientes'));
       dispatch(getFromParametrizacao('motivosPendencia'));
     }
-  }, [dispatch, perfilId, cc?.id, dateUpdate, mail]);
+  }, [dispatch, perfilId, cc?.id, dateUpdate]);
 
   const tabsList = useMemo(
     () =>
@@ -104,12 +112,12 @@ export default function Processos() {
   }, [dispatch, mail, currentTab, perfilId, meusAmbientes?.length]);
 
   return (
-    <Page title="Processos | DigitalDocs">
+    <Page title="Fila de trabalho | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Notificacao error={error} />
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
           <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: 'primary.main' }}>
-            <Typography variant="h4">Processos</Typography>
+            <Typography variant="h4">Fila de trabalho</Typography>
           </Box>
 
           <TabsWrapperStyle>

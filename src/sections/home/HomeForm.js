@@ -183,7 +183,7 @@ ValidarDocForm.propTypes = { onCancel: PropTypes.func };
 export function ValidarDocForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { documento, isLoading } = useSelector((state) => state.intranet);
+  const { docIdentificacao, isLoading } = useSelector((state) => state.intranet);
 
   const formSchema = Yup.object().shape({ documento: Yup.string().required('Introduza o nº do documento') });
   const defaultValues = useMemo(() => ({ documento: '', cache: true }), []);
@@ -193,7 +193,8 @@ export function ValidarDocForm({ onCancel }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(getFromIntranet('validar doc', { doc: values.documento, cache: values.cache }));
+      dispatch(resetItem({ item: 'docIdentificacao' }));
+      dispatch(getFromIntranet('docIdentificacao', { doc: values.documento, cache: values.cache }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -201,7 +202,7 @@ export function ValidarDocForm({ onCancel }) {
 
   const limparDados = () => {
     reset(defaultValues);
-    dispatch(resetItem({ item: 'documento' }));
+    dispatch(resetItem({ item: 'docIdentificacao' }));
   };
 
   return (
@@ -247,58 +248,42 @@ export function ValidarDocForm({ onCancel }) {
               </Grid>
             ) : (
               <>
-                {documento && (
+                {docIdentificacao && (
                   <Grid item xs={12}>
                     <Table size="small">
-                      {documento?.caregadoEm && (
+                      {docIdentificacao?.caregadoEm && (
                         <TableHead>
                           <TableRow>
                             <TableCell align="right" sx={{ fontWeight: 700, color: 'text.secondary' }}>
                               Data carregamento
                             </TableCell>
-                            <TableCell>{ptDateTime(documento.caregadoEm)}</TableCell>
+                            <TableCell>{ptDateTime(docIdentificacao.caregadoEm)}</TableCell>
                           </TableRow>
                         </TableHead>
                       )}
                       <TableBody>
-                        {documento?.id_tp_doc && <TableRowItem title="Tipo de documento" desc={documento?.id_tp_doc} />}
-                        {documento?.NUM_DOCUMENTO && (
-                          <TableRowItem title="Nº do documento" desc={documento?.NUM_DOCUMENTO} />
-                        )}
-                        {documento?.NOME_COMPLETO && (
-                          <TableRowItem title="Nome completo" desc={documento?.NOME_COMPLETO} />
-                        )}
-                        {documento?.nome_normaliz && (
-                          <TableRowItem title="Nome normalizado" desc={documento?.nome_normaliz} />
-                        )}
-                        {documento?.NOME_MAE_COMPLETO && (
-                          <TableRowItem title="Nome da Mãe" desc={documento?.NOME_MAE_COMPLETO} />
-                        )}
-                        {documento?.NOME_PAI_COMPLETO && (
-                          <TableRowItem title="Nome do Pai" desc={documento?.NOME_PAI_COMPLETO} />
-                        )}
-                        {documento?.DATA_NASC && (
-                          <TableRowItem title="Data de nascimento" desc={documento?.DATA_NASC} />
-                        )}
-                        {documento?.SEXO && (
+                        <TableRowItem title="Tipo de documento" desc={docIdentificacao?.id_tp_doc} />
+                        <TableRowItem title="Nº do documento" desc={docIdentificacao?.NUM_DOCUMENTO} />
+                        <TableRowItem title="Nome completo" desc={docIdentificacao?.NOME_COMPLETO} />
+                        <TableRowItem title="Nome normalizado" desc={docIdentificacao?.nome_normaliz} />
+                        <TableRowItem title="Nome da Mãe" desc={docIdentificacao?.NOME_MAE_COMPLETO} />
+                        <TableRowItem title="Nome do Pai" desc={docIdentificacao?.NOME_PAI_COMPLETO} />
+                        <TableRowItem title="Data de nascimento" desc={docIdentificacao?.DATA_NASC} />
+                        {docIdentificacao?.SEXO && (
                           <TableRowItem
                             title="Sexo"
                             desc={
-                              (documento?.SEXO === 'F' && 'FEMININO') ||
-                              (documento?.SEXO === 'M' && 'MASCULINO') ||
-                              documento?.SEXO
+                              (docIdentificacao?.SEXO === 'F' && 'FEMININO') ||
+                              (docIdentificacao?.SEXO === 'M' && 'MASCULINO') ||
+                              docIdentificacao?.SEXO
                             }
                           />
                         )}
-                        {documento?.NIF && <TableRowItem title="NIF" desc={documento?.NIF} />}
-                        {documento?.FREGUESIA_ID && (
-                          <TableRowItem title="ID Freguêsia" desc={documento?.FREGUESIA_ID} />
-                        )}
-                        {documento?.ID_CIVIL && <TableRowItem title="ID Estado civil" desc={documento?.ID_CIVIL} />}
-                        {documento?.LOCALIDADE_ID && (
-                          <TableRowItem title="ID Localidade" desc={documento?.LOCALIDADE_ID} />
-                        )}
-                        {documento?.PAIS_ID && <TableRowItem title="ID País" desc={documento?.PAIS_ID} />}
+                        <TableRowItem title="NIF" desc={docIdentificacao?.NIF} />
+                        <TableRowItem title="ID Freguêsia" desc={docIdentificacao?.FREGUESIA_ID} />
+                        <TableRowItem title="ID Estado civil" desc={docIdentificacao?.ID_CIVIL} />
+                        <TableRowItem title="ID Localidade" desc={docIdentificacao?.LOCALIDADE_ID} />
+                        <TableRowItem title="ID País" desc={docIdentificacao?.PAIS_ID} />
                       </TableBody>
                     </Table>
                   </Grid>
@@ -317,12 +302,14 @@ export function ValidarDocForm({ onCancel }) {
 TableRowItem.propTypes = { title: PropTypes.string, desc: PropTypes.string };
 
 function TableRowItem({ title, desc }) {
-  return (
+  return title && desc ? (
     <TableRow hover>
       <TableCell align="right" sx={{ fontWeight: 700, color: 'text.secondary' }}>
         {title}
       </TableCell>
       <TableCell>{desc}</TableCell>
     </TableRow>
+  ) : (
+    <></>
   );
 }
