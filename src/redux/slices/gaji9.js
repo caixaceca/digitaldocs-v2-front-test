@@ -223,9 +223,9 @@ export function getDocumento(item, params) {
       }
     } catch (error) {
       // hasError(error, dispatch, slice.actions.responseMsg);
-      const decodedString = new TextDecoder().decode(error.response.data);
-      const errorData = JSON.parse(decodedString);
-      hasError({ message: errorData.mensagem }, dispatch, slice.actions.responseMsg);
+      const uint8Array = new Uint8Array(error.response.data);
+      const decodedString = new TextDecoder('ISO-8859-1').decode(uint8Array);
+      hasError({ message: JSON.parse(decodedString)?.mensagem || 'Erro' }, dispatch, slice.actions.responseMsg);
     }
     dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: false }));
   };
