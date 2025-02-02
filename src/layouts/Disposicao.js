@@ -1,5 +1,4 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Radio from '@mui/material/Radio';
 import Stack from '@mui/material/Stack';
@@ -45,23 +44,6 @@ const BpCheckedIcon = styled('span')(({ color }) => ({
 
 // ----------------------------------------------------------------------
 
-BpRadio.propTypes = { value: PropTypes.string, cor: PropTypes.string, icon1: PropTypes.node };
-
-function BpRadio(props) {
-  return (
-    <Radio
-      disableRipple
-      color="default"
-      sx={{ py: 0, mb: -1 }}
-      checkedIcon={<BpCheckedIcon color={props.cor}>{props.icon1}</BpCheckedIcon>}
-      icon={<BpIcon color={props.cor}>{props.icon1}</BpIcon>}
-      {...props}
-    />
-  );
-}
-
-// ----------------------------------------------------------------------
-
 export default function Disposicao() {
   const dispatch = useDispatch();
   const value = React.useState(null);
@@ -79,11 +61,21 @@ export default function Disposicao() {
         handleClick={() => dispatch(getSuccess({ item: 'disposicao', dados: true }))}
       />
       <DialogContent sx={{ mt: 3 }}>
-        <Stack direction="row" justifyContent="center" sx={{ pb: 5 }}>
+        <Stack direction="row" justifyContent="center">
           <RadioGroup row value={value} name="disposicao" ref={radioGroupRef} onChange={handleChange}>
             {disposicoes.map((option) => (
               <Tooltip key={option.value} title={option.value.toUpperCase()} arrow>
-                <FormControlLabel value={option.value} control={<BpRadio icon1={option.icon} cor={option.cor} />} />
+                <FormControlLabel
+                  value={option.value}
+                  control={
+                    <Radio
+                      disableRipple
+                      color="default"
+                      icon={<BpIcon color={option.cor}>{option.icon}</BpIcon>}
+                      checkedIcon={<BpCheckedIcon color={option.cor}>{option.icon}</BpCheckedIcon>}
+                    />
+                  }
+                />
               </Tooltip>
             ))}
           </RadioGroup>

@@ -33,7 +33,7 @@ import { Anexos, DadosGerais, TableDetalhes, EntidadesGarantias } from '../../se
 
 // ----------------------------------------------------------------------
 
-export default function CreditoColaborador() {
+export default function PageCreditoColaborador() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();

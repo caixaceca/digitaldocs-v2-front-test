@@ -104,7 +104,9 @@ export function Notificacao({ done, error, afterSuccess = null }) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (done) {
+    if (done === 'Bem-vindo(a) a GAJ-i9') {
+      enqueueSnackbar(done, { variant: 'success' });
+    } else if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       if (afterSuccess) {
         afterSuccess();

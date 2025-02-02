@@ -11,7 +11,7 @@ import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // utils
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 import { colorLabel } from '../../utils/getColorPresets';
 import { pertencoAoEstado } from '../../utils/validarAcesso';
 // routes
@@ -42,7 +42,7 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function Processos() {
+export default function PageFilaTrabalho() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { instance, accounts } = useMsal();

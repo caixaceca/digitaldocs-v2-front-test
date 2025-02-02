@@ -5,6 +5,8 @@ import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+//
+import GridItem from '../GridItem';
 
 // ----------------------------------------------------------------------
 
@@ -12,9 +14,7 @@ SkeletonContainer.propTypes = { height: PropTypes.object };
 
 export function SkeletonContainer({ height = { xs: 400, sm: 760 } }) {
   return (
-    <Grid item xs={12}>
-      <Skeleton variant="rectangular" sx={{ height, borderRadius: 2, transform: 'scale(1)' }} />
-    </Grid>
+    <GridItem children={<Skeleton variant="rectangular" sx={{ height, borderRadius: 2, transform: 'scale(1)' }} />} />
   );
 }
 
@@ -88,14 +88,17 @@ export function SkeletonPedidoCredito() {
   return (
     <Grid container spacing={3}>
       {[...Array(8)].map((row, index) => (
-        <Grid item xs={12} md={3} key={`index_${index}`}>
-          <Skeleton variant="text" height={90} sx={{ transform: 'none' }} />
-        </Grid>
+        <GridItem
+          md={3}
+          key={`index_${index}`}
+          children={<Skeleton variant="text" height={90} sx={{ transform: 'none' }} />}
+        />
       ))}
       {[...Array(5)].map((row, index) => (
-        <Grid item xs={12} key={`index1_${index}`}>
-          <Skeleton variant="text" height={45} sx={{ transform: 'none' }} />
-        </Grid>
+        <GridItem
+          key={`index1_${index}`}
+          children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />}
+        />
       ))}
     </Grid>
   );
@@ -106,16 +109,14 @@ export function SkeletonPedidoCredito() {
 export function SkeletonEntidade() {
   return (
     <>
-      <Grid item xs={12}>
-        <Skeleton variant="text" height={140} sx={{ transform: 'none' }} />
-      </Grid>
-      <Grid item xs={12}>
-        <Skeleton variant="text" height={45} sx={{ transform: 'none' }} />
-      </Grid>
+      <GridItem children={<Skeleton variant="text" height={140} sx={{ transform: 'none' }} />} />
+      <GridItem children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />} />
       {[...Array(2)].map((row, index) => (
-        <Grid item xs={12} sm={6} key={`SkeletonEntidade_${index}`}>
-          <Skeleton variant="text" height={500} sx={{ transform: 'none' }} />
-        </Grid>
+        <GridItem
+          sm={6}
+          key={`SkeletonEntidade_${index}`}
+          children={<Skeleton variant="text" height={500} sx={{ transform: 'none' }} />}
+        />
       ))}
     </>
   );

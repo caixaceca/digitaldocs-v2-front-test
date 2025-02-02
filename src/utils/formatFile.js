@@ -146,3 +146,14 @@ export function getFileData(file, index) {
     key: index ? `${file.name}-${index}` : file.name,
   };
 }
+
+// ----------------------------------------------------------------------
+
+export function downloadDoc(url, nome) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = nome;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}

@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, openModal, getSuccess, closeModal } from '../../redux/slices/parametrizacao';
@@ -32,7 +32,7 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
-export default function FluxoDetail() {
+export default function PageDetalhesFluxo() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();

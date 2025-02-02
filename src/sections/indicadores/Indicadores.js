@@ -11,7 +11,6 @@ import Card from '@mui/material/Card';
 import Radio from '@mui/material/Radio';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -32,7 +31,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 // utils
 import { getFile } from '../../utils/getFile';
-import { setItemValue, baralharString } from '../../utils/formatText';
+import { baralharString } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 import { fNumber, fPercent, fNumber2, fData } from '../../utils/formatNumber';
 import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
 import { fYear, fMonthYear, ptDate, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
@@ -48,6 +48,7 @@ import { BarChart } from '../../components/skeleton';
 import Panel, { BoxMask } from '../../components/Panel';
 import { SearchNotFound } from '../../components/table';
 import Chart, { useChart } from '../../components/chart';
+import { FilterSwitch } from '../../components/hook-form';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 //
@@ -1016,35 +1017,6 @@ function FilterRG({ localS, value, setValue, options = [] }) {
         ))}
       </RadioGroup>
     </Stack>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FilterSwitch.propTypes = {
-  value: PropTypes.bool,
-  label: PropTypes.string,
-  localS: PropTypes.string,
-  setValue: PropTypes.func,
-};
-
-export function FilterSwitch({ label, value, setValue, localS = '' }) {
-  return (
-    <FormControlLabel
-      label={label}
-      sx={{ pr: 2, justifyContent: 'center' }}
-      control={
-        <Switch
-          checked={value}
-          onChange={(event, value) => {
-            setValue(value);
-            if (localS) {
-              localStorage.setItem(localS, value === true ? 'true' : 'false');
-            }
-          }}
-        />
-      }
-    />
   );
 }
 

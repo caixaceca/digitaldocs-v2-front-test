@@ -94,9 +94,9 @@ export function getIndicadores(item, params) {
     dispatch(slice.actions.resetItem({ item: 'indicadores', tipo: 'array' }));
     try {
       const options = { headers: { cc: params?.mail } };
-      const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${
-        params?.dataf ? `dataf=${params?.dataf}&` : ''
-      }`;
+      const query = `${params?.datai ? `datai=${params?.datai}&` : ''}${params?.dataf ? `dataf=${params?.dataf}&` : ''}`;
+      const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
+      const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
       switch (item) {
         case 'totalP': {
           const response = await axios.get(`${BASEURLDD}/v2/indicadores/default/${params?.perfilId}`, options);
@@ -261,8 +261,6 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'entradaTrabalhado': {
-          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
-          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
           const response = await axios.get(
             `${BASEURLDD}/v2/indicadores/racio/es/anual/default/${params?.perfilId}?ano=${params?.ano}&distinto=${params?.entrada}${uo}${estado}`,
             options
@@ -272,8 +270,6 @@ export function getIndicadores(item, params) {
         }
         case 'totalTrabalhados': {
           const perfil = params?.perfil ? `&perfil_id=${params?.perfil}` : '';
-          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
-          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
           const response = await axios.get(
             `${BASEURLDD}/v2/indicadores/racio/unidirecional/fluxo/anual/${params?.perfilId}?ano=${params?.ano}&entrada=${params?.entrada}${uo}${estado}${perfil}`,
             options
@@ -283,8 +279,6 @@ export function getIndicadores(item, params) {
         }
         case 'acao': {
           const perfil = params?.perfil ? `&perfil_id=${params?.perfil}` : '';
-          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
-          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
           const response = await axios.get(
             `${BASEURLDD}/v2/indicadores/racio/unidirecional/anual/${params?.perfilId}?ano=${params?.ano}&entrada=${params?.entrada}${uo}${estado}${perfil}`,
             options
@@ -293,8 +287,6 @@ export function getIndicadores(item, params) {
           break;
         }
         case 'colaboradores': {
-          const uo = params?.uo && params?.agrEntradas === 'Balcão' ? `&uo_id=${params?.uo}` : '';
-          const estado = params?.estado && params?.agrEntradas === 'Estado' ? `&estado_id=${params?.estado}` : '';
           const response = await axios.get(
             `${BASEURLDD}/v2/indicadores/racio/es/anual/individual/${params?.perfilId}?ano=${params?.ano}${uo}${estado}`,
             options

@@ -27,25 +27,34 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import InputAdornment from '@mui/material/InputAdornment';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
+import CircularProgress from '@mui/material/CircularProgress';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+import PublishOutlinedIcon from '@mui/icons-material/PublishOutlined';
+import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
+import SwapVertOutlinedIcon from '@mui/icons-material/SwapVertOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
+import DifferenceOutlinedIcon from '@mui/icons-material/DifferenceOutlined';
 import AddHomeWorkOutlinedIcon from '@mui/icons-material/AddHomeWorkOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import UnpublishedOutlinedIcon from '@mui/icons-material/UnpublishedOutlined';
+import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 // utils
 import { getFileThumb } from '../utils/formatFile';
-import { findColaborador } from '../utils/formatText';
+import { findColaborador } from '../utils/formatObject';
 import { ptDate, ptDateTime } from '../utils/formatTime';
 // hooks
 import useToggle from '../hooks/useToggle';
@@ -93,7 +102,9 @@ export function DefaultAction({
         size={small ? 'small' : 'medium'}
         startIcon={
           (label === 'Clonar' && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
+          (label === 'Procurar' && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
           (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
+          (icon === 'pdf' && getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
           (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
           ((label === 'Mostrar detalhes' || label === 'Adicionar' || icon === 'adicionar') && (
@@ -124,28 +135,39 @@ export function DefaultAction({
             (label === 'PARECER' && <ChatOutlinedIcon />) ||
             (icon === 'views' && <PreviewOutlinedIcon />) ||
             (icon === 'acesso' && <TaskAltOutlinedIcon />) ||
+            (label === 'APROVAR' && <TaskAltOutlinedIcon />) ||
             (label === 'VALIDAR' && <SpellcheckOutlinedIcon />) ||
             (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
             (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
-            (label === 'EDITAR' && <Editar sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'ADMIN' && <AdminPanelSettingsOutlinedIcon />) ||
+            (label === 'ORDENAR' && <SwapVertOutlinedIcon sx={{ width: 20 }} />) ||
+            (label === 'PUBLICAR' && <PublishOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
+            (label === 'DOWNLOAD' && <DownloadOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
             (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
+            (label === 'CLONAR' && <ContentCopyOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'RESGATAR' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
+            (label === 'REVOGAR' && <UnpublishedOutlinedIcon sx={{ width: 20 }} />) ||
+            (label === 'PROCURAR' && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
+            (label === 'VERSIONAR' && <DifferenceOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
+            (label === 'BAIXANDO...' && <CircularProgress size={24} thickness={5} />) ||
             (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
             (label === 'INFO. DAS CONTAS' && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
-            (label === 'Adicionar' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
+            (label === 'OBTER DOCUMENTO' && <CloudDownloadOutlinedIcon sx={{ width: 20 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
+            ((label === 'EDITAR' || icon === 'editar') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
+            ((label === 'Adicionar' || icon === 'adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />)}
         </Fab>
       </Tooltip>
@@ -455,5 +477,32 @@ export function ButtonDocx({ label, handleClick }) {
     >
       {label}
     </Button>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DownloadDoc.propTypes = {
+  temUrl: PropTypes.bool,
+  isLoading: PropTypes.func,
+  funcObter: PropTypes.func,
+  funcDownload: PropTypes.func,
+};
+
+export function DownloadDoc({ temUrl = false, isLoading, funcDownload, funcObter }) {
+  return (
+    <>
+      {temUrl ? (
+        <DefaultAction color="inherit" label="DOWNLOAD" handleClick={funcDownload} />
+      ) : (
+        <>
+          {isLoading ? (
+            <DefaultAction label="BAIXANDO..." handleClick={() => null} />
+          ) : (
+            <DefaultAction label="OBTER DOCUMENTO" handleClick={funcObter} />
+          )}
+        </>
+      )}
+    </>
   );
 }

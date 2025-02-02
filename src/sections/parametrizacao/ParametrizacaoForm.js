@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
@@ -16,10 +16,9 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { fillData } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
-import { subtractArrays, transicoesList } from '../../utils/formatText';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
+import { subtractArrays, transicoesList } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
@@ -31,9 +30,10 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
-  RHFAutocompleteSimple,
-  RHFAutocompleteObject,
+  RHFAutocompleteSmp,
+  RHFAutocompleteObj,
 } from '../../components/hook-form';
+import GridItem from '../../components/GridItem';
 import ListSelect from '../../components/ListSelect';
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
@@ -104,35 +104,18 @@ export function FluxoForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFTextField name="assunto" label="Assunto" />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteSimple name="modelo" label="Modelo" options={['Série', 'Paralelo']} />
-              </Grid>
-              <Grid item xs={6} sm={isEdit ? 3 : 6}>
-                <RHFSwitch name="is_interno" label="Interno" />
-              </Grid>
-              {isEdit && (
-                <Grid item xs={6} sm={3}>
-                  <RHFSwitch name="is_ativo" label="Ativo" />
-                </Grid>
-              )}
-              <Grid item xs={6}>
-                <RHFSwitch name="is_credito" label="Crédito" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFSwitch name="credito_funcionario" label="Cré. colaborador" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFSwitch name="limpo" label="Limpo" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFSwitch name="is_con" label="CON" />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFTextField name="observacao" multiline minRows={3} maxRows={5} label="Observação" />
-              </Grid>
+              <GridItem children={<RHFTextField name="assunto" label="Assunto" />} />
+              <GridItem
+                sm={6}
+                children={<RHFAutocompleteSmp name="modelo" label="Modelo" options={['Série', 'Paralelo']} />}
+              />
+              <GridItem xs={6} sm={isEdit ? 3 : 6} children={<RHFSwitch name="is_interno" label="Interno" />} />
+              {isEdit && <GridItem xs={6} sm={3} children={<RHFSwitch name="is_ativo" label="Ativo" />} />}
+              <GridItem xs={6} children={<RHFSwitch name="is_credito" label="Crédito" />} />
+              <GridItem xs={6} children={<RHFSwitch name="credito_funcionario" label="Cré. colaborador" />} />
+              <GridItem xs={6} children={<RHFSwitch name="limpo" label="Limpo" />} />
+              <GridItem xs={6} children={<RHFSwitch name="is_con" label="CON" />} />
+              <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
             </Grid>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
@@ -202,20 +185,14 @@ export function ClonarFluxoForm({ onCancel }) {
       <DialogTitle>Clonar fluxo</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={1}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  Ao clonar este fluxo, será criada uma cópia que replicará o seu conteúdo e as transições associadas
-                  para um novo fluxo. Posteriormente pode ser editado.
-                </Alert>
-              </Grid>
-              <Grid item xs={12}>
-                <RHFTextField name="assunto" label="Assunto" />
-              </Grid>
-            </Grid>
-            <DialogButons label="Clonar" isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <Alert severity="info">
+              Ao clonar este fluxo, será criada uma cópia que replicará o seu conteúdo e as transições associadas para
+              um novo fluxo. Posteriormente pode ser editado.
+            </Alert>
+            <RHFTextField name="assunto" label="Assunto" />
+          </Stack>
+          <DialogButons label="Clonar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -286,27 +263,13 @@ export function EstadoForm({ onCancel }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFTextField name="nome" label="Nome" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="email" label="Email" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFAutocompleteObject name="uo_id" label="Unidade orgânica" options={uosList} />
-            </Grid>
-            <Grid item xs={4}>
-              <RHFSwitch name="is_inicial" label="Inicial" />
-            </Grid>
-            <Grid item xs={4}>
-              <RHFSwitch name="is_final" label="Final" />
-            </Grid>
-            <Grid item xs={4}>
-              <RHFSwitch name="is_decisao" label="Decisão" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
-            </Grid>
+            <GridItem children={<RHFTextField name="nome" label="Nome" />} />
+            <GridItem children={<RHFTextField name="email" label="Email" />} />
+            <GridItem children={<RHFAutocompleteObj name="uo_id" label="Unidade orgânica" options={uosList} />} />
+            <GridItem xs={4} children={<RHFSwitch name="is_inicial" label="Inicial" />} />
+            <GridItem xs={4} children={<RHFSwitch name="is_final" label="Final" />} />
+            <GridItem xs={4} children={<RHFSwitch name="is_decisao" label="Decisão" />} />
+            <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
           </Grid>
           <DialogButons
             edit={isEdit}
@@ -381,26 +344,18 @@ export function AcessoForm({ perfilIdA, onCancel }) {
       <DialogTitle>{selectedItem ? 'Editar acesso' : 'Adicionar acesso'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={2}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFAutocompleteObject name="objeto" label="Objeto" options={objetos} />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFAutocompleteObject name="acesso" label="Acesso" options={codacessos} />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFDatePicker dateTime name="datalimite" label="Data" />
-              </Grid>
-            </Grid>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? 'eliminar este acesso' : ''}
-            />
-          </ItemComponent>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFAutocompleteObj name="objeto" label="Objeto" options={objetos} />
+            <RHFAutocompleteObj name="acesso" label="Acesso" options={codacessos} />
+            <RHFDatePicker dateTime name="datalimite" label="Data" />
+          </Stack>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit ? 'eliminar este acesso' : ''}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -453,19 +408,17 @@ export function MotivoPendenciaForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={1}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="motivo" label="Designação" />
-              <RHFTextField name="obs" label="Observação" />
-            </Stack>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? 'eliminar este motivo' : ''}
-            />
-          </ItemComponent>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFTextField name="motivo" label="Designação" />
+            <RHFTextField name="obs" label="Observação" />
+          </Stack>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit ? 'eliminar este motivo' : ''}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -635,45 +588,40 @@ export function OrigemForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={5}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFTextField name="designacao" label="Designação" />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFTextField name="seguimento" label="Segmento" />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFTextField name="codigo" label="Código" />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteSimple name="tipo" label="Tipo" options={['Fiscal', 'Judicial']} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteSimple
-                  name="ilha"
-                  label="Ilha"
-                  onChange={(event, value) => {
-                    setValue('ilha', value);
-                    setValue('cidade', null);
-                  }}
-                  options={[...new Set(_concelhos.map((row) => row.ilha))]}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteSimple
-                  name="cidade"
-                  label="Concelho"
-                  options={_concelhos?.filter((row) => row?.ilha === values?.ilha)?.map((item) => item?.concelho)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFTextField name="email" label="Email" />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFTextField name="telefone" label="Telefone" />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFTextField name="observacao" multiline minRows={2} maxRows={4} label="Observação" />
-              </Grid>
+              <GridItem children={<RHFTextField name="designacao" label="Designação" />} />
+              <GridItem children={<RHFTextField name="seguimento" label="Segmento" />} />
+              <GridItem sm={6} children={<RHFTextField name="codigo" label="Código" />} />
+              <GridItem
+                sm={6}
+                children={<RHFAutocompleteSmp name="tipo" label="Tipo" options={['Fiscal', 'Judicial']} />}
+              />
+              <GridItem
+                sm={6}
+                children={
+                  <RHFAutocompleteSmp
+                    name="ilha"
+                    label="Ilha"
+                    onChange={(event, value) => {
+                      setValue('ilha', value);
+                      setValue('cidade', null);
+                    }}
+                    options={[...new Set(_concelhos.map((row) => row.ilha))]}
+                  />
+                }
+              />
+              <GridItem
+                sm={6}
+                children={
+                  <RHFAutocompleteSmp
+                    name="cidade"
+                    label="Concelho"
+                    options={_concelhos?.filter((row) => row?.ilha === values?.ilha)?.map((item) => item?.concelho)}
+                  />
+                }
+              />
+              <GridItem sm={6} children={<RHFTextField name="email" label="Email" />} />
+              <GridItem sm={6} children={<RHFTextField name="telefone" label="Telefone" />} />
+              <GridItem children={<RHFTextField name="observacao" multiline rows={2} label="Observação" />} />
             </Grid>
             <DialogButons
               edit={isEdit}
@@ -718,11 +666,9 @@ export function LinhaForm({ onCancel }) {
   const onSubmit = async () => {
     try {
       if (isEdit) {
-        dispatch(
-          updateItem('linhas', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Linha crédito atualizada' })
-        );
+        dispatch(updateItem('linhas', JSON.stringify(values), { mail, id: selectedItem.id, msg: 'Linha atualizada' }));
       } else {
-        dispatch(createItem('linhas', JSON.stringify(values), { mail, msg: 'Linha crédito adicionada' }));
+        dispatch(createItem('linhas', JSON.stringify(values), { mail, msg: 'Linha adicionada' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -730,9 +676,7 @@ export function LinhaForm({ onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(
-      deleteItem('linhas', { mail, perfilID: perfilId, linhaID: selectedItem?.id, msg: 'Linha crédito eliminada' })
-    );
+    dispatch(deleteItem('linhas', { mail, perfilID: perfilId, linhaID: selectedItem?.id, msg: 'Linha eliminada' }));
   };
 
   return (
@@ -740,24 +684,22 @@ export function LinhaForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={3}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="linha" label="Designação" />
-              <RHFAutocompleteSimple
-                name="descricao"
-                label="Segmento"
-                options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
-              />
-              <RHFSwitch name="funcionario" label="Funcionário" />
-            </Stack>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? 'eliminar esta linha de crédito' : ''}
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFTextField name="linha" label="Designação" />
+            <RHFAutocompleteSmp
+              name="descricao"
+              label="Segmento"
+              options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
             />
-          </ItemComponent>
+            <RHFSwitch name="funcionario" label="Funcionário" />
+          </Stack>
+          <DialogButons
+            edit={isEdit}
+            isSaving={isSaving}
+            onCancel={onCancel}
+            handleDelete={handleDelete}
+            desc={isEdit ? 'eliminar esta linha de crédito' : ''}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -897,8 +839,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   const formSchema = Yup.object().shape({
     modo: Yup.mixed().required().label('Modo'),
     prazoemdias: Yup.number().typeError().label('Prazo'),
-    estado_final: Yup.mixed().required().label('Estado final'),
-    estado_inicial: Yup.mixed().required().label('Estado inicial'),
+    estado_final: Yup.mixed().required().label('Destino'),
+    estado_inicial: Yup.mixed().required().label('Origem'),
   });
 
   const defaultValues = useMemo(
@@ -913,8 +855,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
       requer_parecer: selectedItem?.requer_parecer || false,
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
       is_after_devolucao: selectedItem?.is_after_devolucao || false,
-      estado_final: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
-      estado_inicial: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
+      destino: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
+      origem: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
     }),
     [fluxoId, selectedItem, perfilId, estadosList]
   );
@@ -930,8 +872,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
   const onSubmit = async () => {
     try {
-      values.estado_final_id = values?.estado_final?.id;
-      values.estado_inicial_id = values?.estado_inicial?.id;
+      values.estado_final_id = values?.destino?.id;
+      values.estado_inicial_id = values?.origem?.id;
       if (selectedItem) {
         dispatch(
           updateItem('transicoes', JSON.stringify(values), {
@@ -965,44 +907,19 @@ export function TransicaoForm({ onCancel, fluxoId }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteObject
-                  name="estado_inicial"
-                  label="Estado de origem"
-                  options={applySort(estadosList, getComparator('asc', 'label'))}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteObject
-                  name="estado_final"
-                  label="Estado de destino"
-                  options={applySort(estadosList, getComparator('asc', 'label'))}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteSimple name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFNumberField label="Prazo" name="prazoemdias" tipo="dia" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <RHFSwitch name="is_paralelo" label="Paralelo" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <RHFSwitch name="requer_parecer" label="Requer parecer" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <RHFSwitch name="is_after_devolucao" label="Depois de devolução" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <RHFSwitch name="to_alert" label="Notificar" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <RHFSwitch name="hasopnumero" label="Indicar nº de operação" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />
-              </Grid>
+              <GridItem sm={6} children={<RHFAutocompleteObj name="origem" label="Origem" options={estadosList} />} />
+              <GridItem sm={6} children={<RHFAutocompleteObj name="destino" label="Destino" options={estadosList} />} />
+              <GridItem
+                sm={6}
+                children={<RHFAutocompleteSmp name="modo" label="Modo" options={['Seguimento', 'Devolução']} />}
+              />
+              <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazoemdias" tipo="dia" />} />
+              <GridItem sm={4} children={<RHFSwitch name="is_paralelo" label="Paralelo" />} />
+              <GridItem sm={4} children={<RHFSwitch name="requer_parecer" label="Requer parecer" />} />
+              <GridItem sm={4} children={<RHFSwitch name="is_after_devolucao" label="Depois de devolução" />} />
+              <GridItem sm={4} children={<RHFSwitch name="to_alert" label="Notificar" />} />
+              <GridItem sm={4} children={<RHFSwitch name="hasopnumero" label="Indicar nº de operação" />} />
+              <GridItem sm={4} children={<RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />} />
             </Grid>
             <DialogButons
               edit={isEdit}
@@ -1030,23 +947,28 @@ export function DocumentoForm({ onCancel }) {
   const formSchema = Yup.object().shape({
     codigo: Yup.string().required().label('Código'),
     designacao: Yup.string().required().label('Designação'),
+    titulo: Yup.mixed().when('formulario', { is: true, then: () => Yup.string().required().label('Título') }),
+    sub_titulo: Yup.mixed().when('formulario', { is: true, then: () => Yup.string().required().label('Subtítulo') }),
+    data_formulario: Yup.mixed().when('formulario', {
+      is: true,
+      then: () => Yup.date().typeError().required().label('Data'),
+      otherwise: () => Yup.mixed().notRequired(),
+    }),
   });
 
   const defaultValues = useMemo(
     () => ({
       codigo: selectedItem?.codigo || '',
       pagina: selectedItem?.pagina || '',
+      titulo: selectedItem?.titulo || '',
       anexo: selectedItem?.anexo || false,
-      titulo: selectedItem?.titulo || null,
       designacao: selectedItem?.designacao || '',
-      sub_titulo: selectedItem?.sub_titulo || null,
+      sub_titulo: selectedItem?.sub_titulo || '',
       formulario: selectedItem?.formulario || false,
       ativo: selectedItem ? selectedItem?.ativo : true,
       identificador: selectedItem?.identificador || false,
+      data_formulario: fillData(selectedItem?.data_formulario, null),
       obriga_prazo_validade: selectedItem?.obriga_prazo_validade || false,
-      data_formulario: selectedItem?.data_formulario
-        ? add(new Date(selectedItem?.data_formulario), { hours: 2 })
-        : null,
     }),
     [selectedItem]
   );
@@ -1064,7 +986,10 @@ export function DocumentoForm({ onCancel }) {
     try {
       const formData = {
         ...values,
-        data_formulario: values?.data_formulario ? format(values.data_formulario, 'yyyy-MM-dd') : null,
+        titulo: values?.formulario ? values?.titulo : null,
+        sub_titulo: values?.formulario ? values?.sub_titulo : null,
+        data_formulario:
+          values?.formulario && values?.data_formulario ? format(values.data_formulario, 'yyyy-MM-dd') : null,
       };
       if (selectedItem) {
         dispatch(
@@ -1085,39 +1010,20 @@ export function DocumentoForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
             <Grid container spacing={3} sx={{ mt: 0 }} justifyContent="center">
-              <Grid item xs={12}>
-                <RHFTextField name="codigo" label="Código" />
-              </Grid>
-              <Grid item xs={12}>
-                <RHFTextField name="designacao" label="Designação" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFSwitch name="formulario" label="Formulário" />
-              </Grid>
+              <GridItem children={<RHFTextField name="codigo" label="Código" />} />
+              <GridItem children={<RHFTextField name="designacao" label="Designação" />} />
+              <GridItem xs={6} children={<RHFSwitch name="formulario" label="Formulário" />} />
               {values?.formulario && (
                 <>
-                  <Grid item xs={12}>
-                    <RHFTextField name="titulo" label="Título" />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <RHFTextField name="subt_titulo" label="Subtítulo" />
-                  </Grid>
+                  <GridItem xs={6} children={<RHFDatePicker name="data_formulario" label="Data" />} />
+                  <GridItem children={<RHFTextField name="titulo" label="Título" />} />
+                  <GridItem children={<RHFTextField name="sub_titulo" label="Subtítulo" />} />
                 </>
               )}
-              <Grid item xs={6}>
-                <RHFSwitch name="identificador" label="Identificador" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFSwitch name="obriga_prazo_validade" label="Validade" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFSwitch name="anexo" label="Anexo" />
-              </Grid>
-              {isEdit && (
-                <Grid item xs={6}>
-                  <RHFSwitch name="ativo" label="Ativo" />
-                </Grid>
-              )}
+              <GridItem xs={6} children={<RHFSwitch name="identificador" label="Identificador" />} />
+              <GridItem xs={6} children={<RHFSwitch name="obriga_prazo_validade" label="Validade" />} />
+              <GridItem xs={6} children={<RHFSwitch name="anexo" label="Anexo" />} />
+              {isEdit && <GridItem xs={6} children={<RHFSwitch name="ativo" label="Ativo" />} />}
             </Grid>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
@@ -1230,18 +1136,14 @@ export function ChecklistForm({ fluxo, onCancel }) {
           <ItemComponent item={selectedItem} rows={1}>
             {isEdit ? (
               <Grid container spacing={3} sx={{ mt: 0 }}>
-                <Grid item xs={12}>
-                  <RHFAutocompleteObject label="Documento" options={documentos} name="tipo_documento" />
-                </Grid>
-                <Grid item xs={12}>
-                  <RHFAutocompleteObject label="Transição" options={listaTransicoes} name="transicao" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <RHFSwitch name="obrigatorio" label="Obrigatório" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <RHFSwitch name="ativo" label="Ativo" />
-                </Grid>
+                <GridItem
+                  children={<RHFAutocompleteObj label="Documento" options={documentos} name="tipo_documento" />}
+                />
+                <GridItem
+                  children={<RHFAutocompleteObj label="Transição" options={listaTransicoes} name="transicao" />}
+                />
+                <GridItem sm={6} children={<RHFSwitch name="obrigatorio" label="Obrigatório" />} />
+                <GridItem sm={6} children={<RHFSwitch name="ativo" label="Ativo" />} />
               </Grid>
             ) : (
               <Stack spacing={2} sx={{ pt: 3 }} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
@@ -1249,7 +1151,7 @@ export function ChecklistForm({ fluxo, onCancel }) {
                   <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
                     <Stack spacing={2} sx={{ flexGrow: 1 }}>
                       <Stack direction="row" spacing={1}>
-                        <RHFAutocompleteObject
+                        <RHFAutocompleteObj
                           small
                           label="Documento"
                           options={documentos}
@@ -1259,7 +1161,7 @@ export function ChecklistForm({ fluxo, onCancel }) {
                           <RHFSwitch name={`documentos[${index}].obrigatorio`} label="Obrigatório" sx={{ mt: 0 }} />
                         </Stack>
                       </Stack>
-                      <RHFAutocompleteObject
+                      <RHFAutocompleteObj
                         small
                         label="Transição"
                         options={listaTransicoes}
@@ -1340,36 +1242,23 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFAutocompleteObject
-                  name="estado"
-                  label="Estado"
-                  disabled={isEdit}
-                  options={applySort(estadosList, getComparator('asc', 'label'))}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFDatePicker dateTime name="data_inicial" label="Data de início" />
-              </Grid>
-              <Grid item xs={6}>
-                <RHFDatePicker dateTime name="data_limite" label="Data de término" />
-              </Grid>
-              <Grid item xs={4}>
-                <RHFSwitch name="observador" label="Observador" />
-              </Grid>
-              <Grid item xs={4}>
-                <RHFSwitch name="gestor" label="Gestor" />
-              </Grid>
-              <Grid item xs={4}>
-                <RHFSwitch name="padrao" label="Padrão" />
-              </Grid>
+              <GridItem
+                children={<RHFAutocompleteObj name="estado" label="Estado" disabled={isEdit} options={estadosList} />}
+              />
+              <GridItem xs={6} children={<RHFDatePicker dateTime name="data_inicial" label="Data de início" />} />
+              <GridItem xs={6} children={<RHFDatePicker dateTime name="data_limite" label="Data de término" />} />
+              <GridItem xs={4} children={<RHFSwitch name="observador" label="Observador" />} />
+              <GridItem xs={4} children={<RHFSwitch name="gestor" label="Gestor" />} />
+              <GridItem xs={4} children={<RHFSwitch name="padrao" label="Padrão" />} />
               {isEdit && (
-                <Grid item xs={12}>
-                  <Alert severity="info">
-                    <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
-                    <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
-                  </Alert>
-                </Grid>
+                <GridItem
+                  children={
+                    <Alert severity="info">
+                      <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
+                      <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
+                    </Alert>
+                  }
+                />
               )}
             </Grid>
             <DialogButons
@@ -1437,20 +1326,16 @@ export function PerfisEstadoForm({ estado, onCancel }) {
     }
   };
 
-  const handleAdd = () => {
-    append({ perfil: null, data_limite: null, data_inicial: null, observador: false });
-  };
-
-  const handleRemove = (index) => {
-    remove(index);
-  };
-
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {`Adicionar colaborador ao estado » ${estado?.nome}`}
-          <AddItem small label="Colaborador" handleClick={handleAdd} />
+          <AddItem
+            small
+            label="Colaborador"
+            handleClick={() => append({ perfil: null, data_limite: null, data_inicial: null, observador: false })}
+          />
         </Stack>
       </DialogTitle>
       <DialogContent>
@@ -1462,11 +1347,7 @@ export function PerfisEstadoForm({ estado, onCancel }) {
                 <Stack sx={{ width: 1 }} spacing={1}>
                   <Stack direction={{ xs: 'column', md: 'row' }} key={item.id} spacing={1} alignItems="center">
                     <Stack direction="row" sx={{ width: { xs: 1, md: '50%' } }}>
-                      <RHFAutocompleteObject
-                        label="Colaborador"
-                        options={perfisFilter}
-                        name={`perfis[${index}].perfil`}
-                      />
+                      <RHFAutocompleteObj label="Colaborador" options={perfisFilter} name={`perfis[${index}].perfil`} />
                     </Stack>
                     <Stack direction="row" spacing={1}>
                       <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Início" />
@@ -1480,91 +1361,12 @@ export function PerfisEstadoForm({ estado, onCancel }) {
                   </Stack>
                 </Stack>
                 {values.perfis.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => handleRemove(index)} />
+                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
                 )}
               </Stack>
             ))}
           </Stack>
           <DialogButons isSaving={isSaving} onCancel={onCancel} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-AnexoDespesaForm.propTypes = { item: PropTypes.string, onCancel: PropTypes.func };
-
-export function AnexoDespesaForm({ item, onCancel }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { mail } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
-
-  const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
-  const defaultValues = useMemo(
-    () => ({
-      designacao: selectedItem?.designacao || '',
-      reutilizavel: selectedItem?.reutilizavel || false,
-      obriga_prazo_validade: selectedItem?.obriga_prazo_validade || false,
-    }),
-    [selectedItem]
-  );
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
-    try {
-      if (selectedItem) {
-        dispatch(updateItem(item, JSON.stringify(values), { mail, id: selectedItem?.id, msg: `${item} atualizado` }));
-      } else {
-        dispatch(createItem(item, JSON.stringify(values), { mail, msg: `${item} adicionado` }));
-      }
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  const handleDelete = () => {
-    dispatch(deleteItem(item, { mail, id: selectedItem?.id, msg: `${item} eliminado` }));
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? `Editar ${item}` : `Adicionar ${item}`}</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={item === 'Anexo' ? 3 : 1}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <RHFTextField name="designacao" label="Designação" />
-              </Grid>
-              {item === 'Anexo' && (
-                <>
-                  <Grid item xs={12} sm={6}>
-                    <RHFSwitch name="obriga_prazo_validade" label="Tem prazo de validade" />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <RHFSwitch name="reutilizavel" label="Reutilizável" />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? `eliminar ${item === 'Despesa' ? 'esta despesa' : 'este anexo'}` : ''}
-            />
-          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -1625,25 +1427,25 @@ export function RegraEstadoForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Grid item xs={12}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography sx={{ color: 'text.secondary' }}>Estado:</Typography>
-                  <Typography variant="subtitle1">{estado?.nome}</Typography>
-                </Stack>
-                <RHFSwitch
-                  name="destribuir"
-                  label="Destribuir peso da decisão"
-                  onChange={(event, value) => {
-                    setValue('pesos', []);
-                    setValue('destribuir', value);
-                  }}
-                />
-              </Grid>
-              {values?.destribuir && (
-                <Grid item xs={12}>
-                  <PesosDecisao perfisList={perfisList} />
-                </Grid>
-              )}
+              <GridItem
+                children={
+                  <>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Typography sx={{ color: 'text.secondary' }}>Estado:</Typography>
+                      <Typography variant="subtitle1">{estado?.nome}</Typography>
+                    </Stack>
+                    <RHFSwitch
+                      name="destribuir"
+                      label="Destribuir peso da decisão"
+                      onChange={(event, value) => {
+                        setValue('pesos', []);
+                        setValue('destribuir', value);
+                      }}
+                    />
+                  </>
+                }
+              />
+              {values?.destribuir && <GridItem children={<PesosDecisao perfisList={perfisList} />} />}
             </Grid>
             <DialogButons isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
@@ -1705,9 +1507,7 @@ export function RegraTransicaoForm({ transicao, onCancel }) {
           <ItemComponent item={selectedItem} rows={1}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
               <Transicao item={estado?.nome} transicao={transicao?.label} />
-              <Grid item xs={12}>
-                <PesosDecisao perfisList={perfisList} />
-              </Grid>
+              <GridItem children={<PesosDecisao perfisList={perfisList} />} />
             </Grid>
             <DialogButons isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
@@ -1780,15 +1580,9 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Transicao item={fluxo?.assunto} transicao={transicao?.label} fluxo />
-            <Grid item xs={12} sm={4}>
-              <RHFAutocompleteSimple name="via" label="Via" options={['Email', 'SMS']} />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              <RHFTextField name="assunto" label="Assunto" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFEditor simple name="corpo" />
-            </Grid>
+            <GridItem sm={4} children={<RHFAutocompleteSmp name="via" label="Via" options={['Email', 'SMS']} />} />
+            <GridItem sm={8} children={<RHFTextField name="assunto" label="Assunto" />} />
+            <GridItem children={<RHFEditor simple name="corpo" />} />
           </Grid>
           <DialogButons
             edit={isEdit}
@@ -1826,8 +1620,8 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
   const defaultValues = useMemo(
     () => ({
       telefone: selectedItem?.telefone || '',
-      data_inicio: selectedItem?.data_inicio ? add(new Date(selectedItem?.data_inicio), { hours: 2 }) : null,
-      data_termino: selectedItem?.data_termino ? add(new Date(selectedItem?.data_termino), { hours: 2 }) : null,
+      data_inicio: fillData(selectedItem?.data_inicio, null),
+      data_termino: fillData(selectedItem?.data_termino, null),
       perfil: isEdit
         ? perfisList?.find((row) => row?.email?.toLowerCase() === selectedItem?.email?.toLowerCase())
         : null,
@@ -1899,25 +1693,17 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
           <Grid container spacing={3} sx={{ mt: 0 }}>
             {isEdit ? (
               <>
-                <Grid item xs={12}>
-                  <RHFAutocompleteObject label="Colaborador" options={perfisList} name="perfil" />
-                </Grid>
-                <Grid item xs={12}>
-                  <RHFTextField label="Telefone" name="telefone" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <RHFDatePicker label="Data de início" name="data_inicio" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <RHFDatePicker label="Data de fim" name="data_termino" />
-                </Grid>
+                <GridItem children={<RHFAutocompleteObj label="Colaborador" options={perfisList} name="perfil" />} />
+                <GridItem children={<RHFTextField label="Telefone" name="telefone" />} />
+                <GridItem sm={6} children={<RHFDatePicker label="Data de início" name="data_inicio" />} />
+                <GridItem sm={6} children={<RHFDatePicker label="Data de fim" name="data_termino" />} />
               </>
             ) : (
               fields.map((item, index) => (
                 <Grid item xs={12} key={item.id}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={5}>
-                      <RHFAutocompleteObject
+                      <RHFAutocompleteObj
                         label="Colaborador"
                         options={perfisList}
                         name={`destinatarios[${index}].perfil`}
@@ -1962,9 +1748,7 @@ ItemComponent.propTypes = { item: PropTypes.object, rows: PropTypes.number, chil
 export function ItemComponent({ item, rows, children }) {
   const { isLoading, isEdit } = useSelector((state) => state.parametrizacao);
   return isLoading ? (
-    <Grid item xs={12}>
-      <FormLoading rows={rows} />
-    </Grid>
+    <GridItem children={<FormLoading rows={rows} />} />
   ) : (
     <>
       {isEdit && !item ? (

@@ -22,7 +22,7 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
-  RHFAutocompleteSimple,
+  RHFAutocompleteSmp,
 } from '../../../components/hook-form';
 import { DefaultAction } from '../../../components/Actions';
 //
@@ -200,7 +200,7 @@ export default function EntidadesRelacionadas({ entidades = [] }) {
                             />
                           </Grid>
                           <Grid item xs={12} sm={6} lg={3}>
-                            <RHFAutocompleteSimple
+                            <RHFAutocompleteSmp
                               label="Estado civil"
                               options={estadosCivil}
                               name={`entidades[${index}].estado_civil`}

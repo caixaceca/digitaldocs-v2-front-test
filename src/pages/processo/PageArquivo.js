@@ -12,7 +12,7 @@ import TableArquivo from '../../sections/arquivo/TableArquivo';
 
 // ----------------------------------------------------------------------
 
-export default function Arquivo() {
+export default function PageArquivo() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabArquivo') || 'Arquivos');
 

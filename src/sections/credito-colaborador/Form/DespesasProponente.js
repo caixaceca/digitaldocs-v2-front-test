@@ -14,7 +14,7 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import { updatePedidoForm, deleteAnexo } from '../../../redux/slices/cc';
 // components
 import { DefaultAction } from '../../../components/Actions';
-import { FormProvider, RHFNumberField, RHFAutocompleteObject } from '../../../components/hook-form';
+import { FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../../components/hook-form';
 //
 import { NextPrev } from './PedidoSteps';
 
@@ -99,7 +99,7 @@ export default function DespesasProponente({ despesasReg = [] }) {
           <Card key={item.id} sx={{ p: 2 }}>
             <Stack spacing={2} alignItems="center" justifyContent="center" direction="row">
               <Stack spacing={2} justifyContent="center" direction="row" sx={{ width: 1 }}>
-                <RHFAutocompleteObject
+                <RHFAutocompleteObj
                   options={despesasFiltered}
                   label={`Despesa ${index + 1}`}
                   name={`despesas[${index}].despesa`}

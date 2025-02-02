@@ -26,7 +26,7 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
-export default function EstadoDetail() {
+export default function PageDetalhesEstado() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();

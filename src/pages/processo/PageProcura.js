@@ -48,7 +48,7 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 
-export default function Procura() {
+export default function PageProcura() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();

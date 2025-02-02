@@ -7,7 +7,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // components
 import { AddItem, DefaultAction } from '../../components/Actions';
-import { RHFNumberField, RHFAutocompleteObject } from '../../components/hook-form';
+import { RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ export default function PesosDecisao({ perfisList }) {
       <Stack spacing={2}>
         {fields.map((item, index) => (
           <Stack spacing={2} key={item.id} alignItems="center" justifyContent="center" direction="row">
-            <RHFAutocompleteObject
+            <RHFAutocompleteObj
               size="small"
               options={perfisFiltered}
               name={`pesos[${index}].perfil`}

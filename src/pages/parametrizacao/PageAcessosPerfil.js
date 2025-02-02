@@ -34,7 +34,7 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function PerfilEstadosAcessos() {
+export default function PageAcessosPerfil() {
   const { id } = useParams();
   const { themeStretch } = useSettings();
   const { colaboradores } = useSelector((state) => state.intranet);

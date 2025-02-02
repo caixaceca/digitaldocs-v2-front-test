@@ -42,7 +42,7 @@ const STEPS = ['Dados Gerais', 'Anexos', 'Despesas', 'Responsabilidades', 'Garan
 
 // ----------------------------------------------------------------------
 
-export default function EditarPedidoCC() {
+export default function PageEditarPedidoCC() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();

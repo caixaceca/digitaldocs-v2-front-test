@@ -40,7 +40,7 @@ const navConfig = [
         path: PATH_DIGITALDOCS.general.contratos,
         roles: ['contratos-100', 'contratos-110'],
       },
-      { title: 'GAJi9', icon: <Contrato />, path: PATH_DIGITALDOCS.gaji9.root, roles: ['gaji9-111'] },
+      { title: 'GAJ-i9', icon: <Contrato />, path: PATH_DIGITALDOCS.gaji9.root },
       {
         title: 'Parametrização',
         icon: <Parametrizacao />,

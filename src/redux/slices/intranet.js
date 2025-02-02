@@ -105,7 +105,7 @@ export function getFromIntranet(item, params) {
             ?.map((row) => ({
               ...row,
               nome: row?.perfil?.displayName,
-              perfil: perfis?.data?.find((item) => item?.id === row?.perfil_id) || row?.perfil,
+              perfil: perfis?.data?.find((item) => Number(item?.id) === Number(row?.perfil_id)) || row?.perfil,
             }));
           dispatch(slice.actions.getSuccess({ item, dados: colaboradoresPerfis, label: 'nome' }));
 
@@ -129,7 +129,7 @@ export function getFromIntranet(item, params) {
             );
           }
         } else {
-          const _path =
+          const apiUrl =
             (item === 'ajuda' && `${BASEURL}/help/ajuda`) ||
             (item === 'uos' && `${BASEURL}/unidade_organica`) ||
             (item === 'frase' && `${BASEURL}/frase_semana/ativa`) ||
@@ -142,8 +142,8 @@ export function getFromIntranet(item, params) {
             (item === 'docIdentificacao' &&
               `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`) ||
             '';
-          if (_path) {
-            const response = await axios.get(_path, options);
+          if (apiUrl) {
+            const response = await axios.get(apiUrl, options);
             if (item === 'disposicao') {
               dispatch(slice.actions.getSuccess({ item, dados: !!response.data }));
             } else {
@@ -165,13 +165,13 @@ export function createItem(item, dados, params) {
   return async (dispatch) => {
     try {
       dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
-      const _path =
+      const apiUrl =
         (item === 'denuncia' && `${BASEURL}/denuncia`) ||
         (item === 'disposicao' && `${BASEURL}/disposicao`) ||
         (item === 'sugestao' && `${BASEURL}/sugestao/sugestao`) ||
         '';
-      if (_path) {
-        await axios.post(_path, dados, {
+      if (apiUrl) {
+        await axios.post(apiUrl, dados, {
           headers: {
             'Current-Colaborador': params?.mail,
             'content-type': item === 'disposicao' ? 'application/json' : 'multipart/form-data',

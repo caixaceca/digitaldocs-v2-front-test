@@ -31,7 +31,7 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
-export default function NovoEditarProcesso() {
+export default function PageNovoEditarProcesso() {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();

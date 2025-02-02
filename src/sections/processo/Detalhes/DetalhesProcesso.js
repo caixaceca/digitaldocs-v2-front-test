@@ -21,15 +21,15 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
 import { fNumber, fCurrency, fPercent } from '../../../utils/formatNumber';
-import { newLineText, entidadesParse, baralharString, numeroPorExtenso } from '../../../utils/formatText';
+import { newLineText, entidadesParse, baralharString, valorPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';
 // hooks
 import useToggle from '../../../hooks/useToggle';
 // components
 import Label from '../../../components/Label';
-import { Checked, Criado } from '../../../components/Panel';
 import { DefaultAction, DTFechar } from '../../../components/Actions';
+import { Checked, CellChecked, Criado } from '../../../components/Panel';
 //
 import { colorProcesso } from '../../tabela/TableProcessos';
 // _mock
@@ -393,7 +393,7 @@ function ValorItem({ title, valor, cativos }) {
       <Typography>
         {fCurrency(valor)}
         <Typography variant="spam" sx={{ typography: 'body2' }}>
-          &nbsp;({numeroPorExtenso(valor)})
+          &nbsp;({valorPorExtenso(Number(valor || 0))})
         </Typography>
       </Typography>
       {cativos?.length > 0 && (
@@ -424,9 +424,7 @@ function ValorItem({ title, valor, cativos }) {
                             {fNumber(row?.saldo)} {row?.moeda}
                           </TableCell>
                           <TableCell align="right">{fCurrency(row?.saldo_cve)}</TableCell>
-                          <TableCell align="center">
-                            <Checked check={row?.enviado_banka} />
-                          </TableCell>
+                          <CellChecked check={row.enviado_banka} />
                           <TableCell align="center">
                             {row?.executado ? (
                               <>

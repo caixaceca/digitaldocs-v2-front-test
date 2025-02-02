@@ -18,8 +18,8 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { useDispatch, useSelector } from '../../redux/store';
 import { openModal, getSuccess, closeModal, getFromParametrizacao } from '../../redux/slices/parametrizacao';
 // Components
-import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
+import { CellChecked } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { UpdateItem, DefaultAction } from '../../components/Actions';
@@ -180,12 +180,8 @@ export default function TableParametrizacao({ item, fluxo = null }) {
                           <>
                             <TableCell>{row.assunto}</TableCell>
                             <TableCell>{row.modelo}</TableCell>
-                            <TableCell align="center">
-                              <Checked check={row.is_interno} />
-                            </TableCell>
-                            <TableCell align="center">
-                              <Checked check={row.is_credito} />
-                            </TableCell>
+                            <CellChecked check={row.is_interno} />
+                            <CellChecked check={row.is_credito} />
                           </>
                         )) ||
                         (item === 'estados' && <EstadoDetail row={row} />) ||
@@ -204,18 +200,12 @@ export default function TableParametrizacao({ item, fluxo = null }) {
                         (item === 'documentos' && (
                           <>
                             <TableCell>{row.designacao}</TableCell>
-                            <TableCell align="center">
-                              <Checked check={row.obriga_prazo_validade} />
-                            </TableCell>
-                            <TableCell align="center">
-                              <Checked check={row.anexo} />
-                            </TableCell>
+                            <CellChecked check={row.obriga_prazo_validade} />
+                            <CellChecked check={row.anexo} />
                           </>
                         ))}
                       {item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens' && (
-                        <TableCell align="center">
-                          <Checked check={row?.is_ativo || row.ativo} />
-                        </TableCell>
+                        <CellChecked check={row?.is_ativo || row.ativo} />
                       )}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
@@ -289,12 +279,8 @@ export function EstadoDetail({ row = null }) {
           )}
         </Stack>
       </TableCell>
-      <TableCell align="center">
-        <Checked check={row.is_inicial} />
-      </TableCell>
-      <TableCell align="center">
-        <Checked check={row.is_final} />
-      </TableCell>
+      <CellChecked check={row.is_inicial} />
+      <CellChecked check={row.is_final} />
     </>
   );
 }

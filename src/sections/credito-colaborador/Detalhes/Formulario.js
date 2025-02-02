@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Page, View, Document } from '@react-pdf/renderer';
 // utils
 import { fCurrency } from '../../../utils/formatNumber';
-import { numeroPorExtenso } from '../../../utils/formatText';
+import { valorPorExtenso } from '../../../utils/formatText';
 import { ptDate, formatDistanceStrict_ } from '../../../utils/formatTime';
 // components
 import {
@@ -70,7 +70,7 @@ export function Adiantamento({ pedido, uo = '', colaborador = '' }) {
               <ItemAlt
                 label="Extenso"
                 style={[styles.tCell_70]}
-                value={numeroPorExtenso(pedido?.credito?.montante_solicitado)}
+                value={valorPorExtenso(Number(pedido?.credito?.montante_solicitado || 0))}
               />
             </Row>
             <Row mt>

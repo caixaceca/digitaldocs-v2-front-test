@@ -41,7 +41,7 @@ import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
 import { DTFechar, DialogButons } from '../../components/Actions';
 import { TableHeadCustom, SearchNotFoundSmall } from '../../components/table';
-import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObject } from '../../components/hook-form';
+import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObj } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -298,7 +298,7 @@ export function BalcaoEntregaForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFAutocompleteObject name="balcao" label="Balcão de entrega" options={uosList} />
+              <RHFAutocompleteObj name="balcao" label="Balcão de entrega" options={uosList} />
             </Grid>
           </Grid>
           <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
@@ -385,7 +385,7 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
           <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={8}>
-                <RHFAutocompleteObject name="uo" label="Balcão de entrega" options={uosList} />
+                <RHFAutocompleteObj name="uo" label="Balcão de entrega" options={uosList} />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <RHFDatePicker

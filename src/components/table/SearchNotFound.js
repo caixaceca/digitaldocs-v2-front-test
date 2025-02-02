@@ -34,7 +34,7 @@ export function SearchNotFoundSmall({ message }) {
     <Stack
       justifyContent="center"
       align="center"
-      sx={{ py: 2, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
+      sx={{ py: 3, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
     >
       <DocIllustration sx={{ height: 130, mb: { xs: 2, sm: 3 } }} />
       {message}

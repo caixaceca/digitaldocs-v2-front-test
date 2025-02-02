@@ -11,7 +11,7 @@ import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
 // utils
 import { emailCheck } from '../../../utils/validarAcesso';
-import { findColaborador } from '../../../utils/formatText';
+import { findColaborador } from '../../../utils/formatObject';
 import { getFileThumb, canPreview } from '../../../utils/formatFile';
 import { ptTime, ptDate, ptDateTime } from '../../../utils/formatTime';
 // redux

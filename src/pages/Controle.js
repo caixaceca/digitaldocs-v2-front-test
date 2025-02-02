@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { setItemValue } from '../utils/formatText';
+import { setItemValue } from '../utils/formatObject';
 import { temAcesso, estadoInicial } from '../utils/validarAcesso';
 // routes
 import useSettings from '../hooks/useSettings';

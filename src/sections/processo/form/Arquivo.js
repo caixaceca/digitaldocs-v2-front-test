@@ -28,7 +28,7 @@ import {
   RHFDatePicker,
   RHFNumberField,
   RHFUploadMultiFile,
-  RHFAutocompleteObject,
+  RHFAutocompleteObj,
 } from '../../../components/hook-form';
 import { DialogButons } from '../../../components/Actions';
 
@@ -206,7 +206,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFAutocompleteObject
+              <RHFAutocompleteObj
                 name="estado"
                 label="Estado"
                 options={(processo?.destinosDesarquivamento || [])?.map((row) => ({ id: row?.id, label: row?.nome }))}
@@ -214,7 +214,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
             </Grid>
             {values?.estado?.id && (
               <Grid item xs={12}>
-                <RHFAutocompleteObject name="perfil" label="Colaborador" options={colaboradoresList} />
+                <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradoresList} />
               </Grid>
             )}
             <Grid item xs={12}>

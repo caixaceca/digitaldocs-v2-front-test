@@ -22,8 +22,8 @@ import {
   RHFSwitch,
   FormProvider,
   RHFTextField,
-  RHFAutocompleteObject,
-  RHFAutocompleteSimple,
+  RHFAutocompleteObj,
+  RHFAutocompleteSmp,
 } from '../../../components/hook-form';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ export function EncaminharForm({ destinos, onCancel, dev }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12}>
-              <RHFAutocompleteObject name="acao" label="Ação" options={destinos} />
+              <RHFAutocompleteObj name="acao" label="Ação" options={destinos} />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
@@ -187,7 +187,7 @@ export function ParecerForm({ normal = false }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             <Grid item xs={12} sm={6}>
-              <RHFAutocompleteSimple name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
+              <RHFAutocompleteSmp name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFSwitch name="validado" label="Parecer final" />

@@ -9,12 +9,12 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 // utils
-import { setItemValue } from '../utils/formatText';
+import { setItemValue } from '../utils/formatObject';
 // redux
 import { useSelector } from '../redux/store';
 // sections
+import { FilterSwitch } from './hook-form';
 import { Ambiente, Fluxo } from '../sections/AmbienteFluxo';
-import { FilterSwitch } from '../sections/indicadores/Indicadores';
 // _mock_
 import { meses } from '../_mock';
 
@@ -476,15 +476,17 @@ SearchAutocomplete.propTypes = {
   setValue: PropTypes.func,
 };
 
-export function SearchAutocomplete({ value = null, label, valuel = '', setValue, dados = [], ...others }) {
+export function SearchAutocomplete({ value = null, label, valuel = null, setValue, dados = [], ...others }) {
   return (
     <Autocomplete
       fullWidth
       value={value}
       options={dados?.sort()}
       sx={{ maxWidth: { md: 300 } }}
+      getOptionLabel={(option) => option?.label}
       renderInput={(params) => <TextField {...params} label={label} />}
-      onChange={(event, newValue) => setItemValue(newValue, setValue, valuel)}
+      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      onChange={(event, newValue) => setItemValue(newValue, setValue, valuel, true)}
       {...others}
     />
   );
@@ -520,7 +522,7 @@ export function SearchField({ item, small = false, filter, setFilter }) {
 
 RemoverFiltros.propTypes = { removerFiltro: PropTypes.func };
 
-function RemoverFiltros({ removerFiltro }) {
+export function RemoverFiltros({ removerFiltro }) {
   return (
     <Stack>
       <Tooltip title="Remover filtros" arrow>

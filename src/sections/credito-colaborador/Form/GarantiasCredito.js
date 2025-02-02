@@ -14,7 +14,7 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import { updatePedidoForm, deleteAnexo } from '../../../redux/slices/cc';
 // components
 import { DefaultAction } from '../../../components/Actions';
-import { FormProvider, RHFSwitch, RHFTextField, RHFAutocompleteSimple } from '../../../components/hook-form';
+import { FormProvider, RHFSwitch, RHFTextField, RHFAutocompleteSmp } from '../../../components/hook-form';
 //
 import { NextPrev } from './PedidoSteps';
 import { AnexosGarantias } from './Anexos';
@@ -115,7 +115,7 @@ export default function GarantiasCredito({ garantias = [] }) {
             <Card key={item.id} sx={{ p: 2 }}>
               <Stack spacing={2} justifyContent="center" direction="row">
                 <Stack spacing={2} sx={{ width: 1 }} direction={{ xs: 'column', sm: 'row' }}>
-                  <RHFAutocompleteSimple
+                  <RHFAutocompleteSmp
                     label="Tipo"
                     name={`garantias[${index}].tipo`}
                     options={['Fiança', 'Aval', 'Hipoteca', 'Penhor DP']}

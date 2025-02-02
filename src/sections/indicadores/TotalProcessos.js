@@ -17,7 +17,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 // utils
 import { getFile } from '../../utils/getFile';
 import { useToggle1 } from '../../hooks/useToggle';
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 import { fNumber, fPercent } from '../../utils/formatNumber';
 import { ColaboradoresAcesso } from '../../utils/validarAcesso';
 import { fMShortYear, fYear, fMonthYear } from '../../utils/formatTime';
@@ -539,7 +539,7 @@ function indicadoresGroupBy(dados, item) {
       res[value[item]] = { item: value[item], processos: [] };
       dadosGrouped.push(res[value[item]]);
     }
-    res[value[item]].filaTrabalho.push({ assunto: value?.assunto, total: value?.total });
+    res[value[item]].processos.push({ assunto: value?.assunto, total: value?.total });
     return res;
   }, {});
 

@@ -37,7 +37,7 @@ const ContentStyle = styled('div')(() => ({
 
 // ----------------------------------------------------------------------
 
-export default function LoginPage() {
+export default function PageLoogin() {
   const referencia = createRef();
   const { enqueueSnackbar } = useSnackbar();
   const { instance, inProgress } = useMsal();

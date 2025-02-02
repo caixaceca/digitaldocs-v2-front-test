@@ -10,7 +10,7 @@ import Page from '../components/Page';
 import { SkeletonContainer } from '../components/skeleton';
 import HeaderBreadcrumbs from '../components/HeaderBreadcrumbs';
 // sections
-import { TolbarContrato, ContratoPdf, ContratoWord } from '../sections/contratos';
+import { ContratoPdf, ContratoWord } from '../sections/contratos';
 // guards
 import RoleBasedGuard from '../guards/RoleBasedGuard';
 
@@ -36,9 +36,6 @@ export default function Contrato() {
         />
         <RoleBasedGuard hasContent roles={['contratos-100', 'contratos-110']}>
           <Grid container spacing={3} justifyContent="center">
-            <Grid item xs={12}>
-              <TolbarContrato />
-            </Grid>
             {isLoading ? <SkeletonContainer /> : <ContratoPdf />}
           </Grid>
         </RoleBasedGuard>

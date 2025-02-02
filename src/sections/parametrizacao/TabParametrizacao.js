@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 // redux
 import { useSelector } from '../../redux/store';
 // Components

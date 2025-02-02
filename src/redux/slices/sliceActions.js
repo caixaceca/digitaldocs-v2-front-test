@@ -15,6 +15,9 @@ export function actionGet(state, payload) {
   }
   if (payload.label) {
     state[payload.item] = dadosLabel(payload?.dados, payload.label);
+  } else if (payload?.item === 'creditos') {
+    state.infoPag = { proximo_cursor: payload?.dados?.proximo_cursor, ha_mais: payload?.dados?.ha_mais };
+    state.creditos = [...state.creditos, ...payload?.dados?.objeto];
   } else {
     state[payload.item] = payload?.dados;
   }
@@ -25,7 +28,7 @@ export function actionCreate(state, payload) {
     state[payload.item1][payload.item] = [...state[payload.item1][payload.item], ...payload.dados];
   } else if (Array.isArray(payload.dados)) {
     state[payload.item] = [...state[payload.item], ...payload.dados];
-  } else if (payload.item1) {
+  } else if (payload.item && payload.item1) {
     state[payload.item1][payload.item].push(payload.dados);
   } else {
     state[payload.item].push(payload.dados);

@@ -15,7 +15,7 @@ import { deleteAnexo } from '../../../redux/slices/cc';
 import { useSelector, useDispatch } from '../../../redux/store';
 // components
 import { DefaultAction, AnexosExistente } from '../../../components/Actions';
-import { RHFDatePicker, RHFUploadFileSimple, RHFAutocompleteObject } from '../../../components/hook-form';
+import { RHFDatePicker, RHFUploadFileSimple, RHFAutocompleteObj } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ export default function Anexos({ anexos }) {
                   <Box sx={{ width: 1 }}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={anexoSel?.prazo ? 8 : 12} md={3}>
-                        <RHFAutocompleteObject
+                        <RHFAutocompleteObj
                           options={anexosFiltered}
                           label={`Anexo ${index + 1}`}
                           name={`anexos[${index}].descricao`}
@@ -173,7 +173,7 @@ export function AnexosGarantias({ indexGarantia, garantiaId }) {
                 <Box sx={{ width: 1 }}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={anexoSel?.prazo ? 8 : 12} md={3}>
-                      <RHFAutocompleteObject
+                      <RHFAutocompleteObj
                         small
                         options={anexosFiltered}
                         label={`Anexo ${index + 1}`}
@@ -282,7 +282,7 @@ export function AnexosEntidades({ indexEntidade, entidadeId }) {
                     <Box sx={{ width: 1 }}>
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={anexoSel?.prazo ? 8 : 12} md={3}>
-                          <RHFAutocompleteObject
+                          <RHFAutocompleteObj
                             small
                             options={anexosFiltered}
                             label={`Anexo ${index + 1}`}

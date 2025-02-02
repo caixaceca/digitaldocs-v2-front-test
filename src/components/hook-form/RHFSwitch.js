@@ -36,3 +36,32 @@ export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) 
     />
   );
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+FilterSwitch.propTypes = {
+  value: PropTypes.bool,
+  label: PropTypes.string,
+  localS: PropTypes.string,
+  setValue: PropTypes.func,
+};
+
+export function FilterSwitch({ label, value, setValue, localS = '' }) {
+  return (
+    <FormControlLabel
+      label={label}
+      sx={{ pr: 2, justifyContent: 'center' }}
+      control={
+        <Switch
+          checked={value}
+          onChange={(event, value) => {
+            setValue(value);
+            if (localS) {
+              localStorage.setItem(localS, value === true ? 'true' : 'false');
+            }
+          }}
+        />
+      }
+    />
+  );
+}

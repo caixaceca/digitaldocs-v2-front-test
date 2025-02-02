@@ -25,9 +25,9 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { RHFDateIF } from '../../components/hook-form';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { Checked, Criado, Registos } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { CellChecked, Criado, Registos } from '../../components/Panel';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
@@ -112,7 +112,7 @@ export default function TableCON({ item = 'con' }) {
   };
 
   const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${id}?from=Controle`);
+    navigate(`${PATH_DIGITALDOCS.controle.root}/${id}?from=Controle`);
   };
 
   return (
@@ -185,9 +185,7 @@ export default function TableCON({ item = 'con' }) {
                     )) || (
                       <>
                         <TableCell>{baralharString(row?.nome_cliente)}</TableCell>
-                        <TableCell align="center" width={10}>
-                          <Checked check={row.titular_ordenador} />
-                        </TableCell>
+                        <CellChecked check={row.titular_ordenador} />
                         <TableCell align="right">{baralharString(row?.conta_processo)}</TableCell>
                         <TableCell align="right">{row?.valor ? fCurrency(row?.valor) : noDados()}</TableCell>
                         <TableCell align="right">{row?.cdg_operacao || noDados()}</TableCell>

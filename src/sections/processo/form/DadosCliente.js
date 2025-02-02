@@ -22,14 +22,6 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
   const isPS = deGmkt(fluxo?.assunto);
 
-  const handleAdd = () => {
-    append({ numero: '' });
-  };
-
-  const handleRemove = (index) => {
-    remove(index);
-  };
-
   return (
     <Grid container spacing={3} justifyContent="center">
       {isInterno ? (
@@ -47,8 +39,8 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                   size="large"
                   variant="soft"
                   sx={{ py: 3.5 }}
-                  onClick={handleAdd}
                   startIcon={<AddCircleIcon />}
+                  onClick={() => append({ numero: '' })}
                 >
                   Entidade
                 </Button>
@@ -62,7 +54,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <DefaultAction small label="Remover" color="error" handleClick={() => handleRemove(index)} />
+                          <DefaultAction small label="Remover" color="error" handleClick={() => remove(index)} />
                         </InputAdornment>
                       ),
                       type: 'number',
@@ -138,8 +130,8 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
               size="large"
               variant="soft"
               sx={{ py: 3.5 }}
-              onClick={handleAdd}
               startIcon={<AddCircleIcon />}
+              onClick={() => append({ numero: '' })}
             >
               Entidade
             </Button>
@@ -154,7 +146,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
                   type: 'number',
                   endAdornment: (
                     <InputAdornment position="end">
-                      <DefaultAction small label="Remover" color="error" handleClick={() => handleRemove(index)} />
+                      <DefaultAction small label="Remover" color="error" handleClick={() => remove(index)} />
                     </InputAdornment>
                   ),
                 }}

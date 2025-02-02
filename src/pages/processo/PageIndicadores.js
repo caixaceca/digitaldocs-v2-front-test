@@ -15,7 +15,7 @@ import { TotalProcessos, Duracao, SGQ, FileSystem } from '../../sections/indicad
 
 // ----------------------------------------------------------------------
 
-export default function Indicadores() {
+export default function PageIndicadores() {
   const { themeStretch } = useSettings();
   const { isAdmin } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(

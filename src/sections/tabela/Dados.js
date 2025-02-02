@@ -6,7 +6,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { setDataUtil } from '../../utils/formatTime';
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 
 // ----------------------------------------------------------------------
 

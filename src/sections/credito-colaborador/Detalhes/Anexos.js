@@ -17,7 +17,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { ptDateTime, ptDate } from '../../../utils/formatTime';
-import { b64toBlob, getFileThumb } from '../../../utils/formatFile';
+import { b64toBlob, getFileThumb, downloadDoc } from '../../../utils/formatFile';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getFromCC, closeModal } from '../../../redux/slices/cc';
@@ -83,7 +83,7 @@ Anexo.propTypes = { anexo: PropTypes.object, viewAnexo: PropTypes.func, eliminad
 
 function Anexo({ anexo, viewAnexo, eliminado = false }) {
   const { colaboradores } = useSelector((state) => state.intranet);
-  const colaborador = colaboradores?.find((row) => row?.perfil?.mail === anexo?.criador);
+  const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === anexo?.criador?.toLowerCase());
 
   return (
     <Button
@@ -143,10 +143,7 @@ function AnexoPreview() {
   useEffect(() => {
     if (anexo?.preview !== 'pdf' && anexo?.preview !== 'image' && anexo?.anexo?.ficheiro) {
       const blob = b64toBlob(anexo?.anexo?.ficheiro, selectedAnexo.conteudo);
-      const link = document.createElement('a');
-      link.download = anexo?.anexo?.nome;
-      link.href = window.URL.createObjectURL(blob);
-      link.click();
+      downloadDoc(window.URL.createObjectURL(blob), anexo?.anexo?.nome);
       dispatch(closeModal());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

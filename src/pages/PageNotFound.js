@@ -23,7 +23,7 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function Page404() {
+export default function PageNotFound() {
   return (
     <Page title="Página não encontrada">
       <Container>

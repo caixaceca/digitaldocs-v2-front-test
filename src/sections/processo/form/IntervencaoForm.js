@@ -47,8 +47,8 @@ import {
   RHFTextField,
   RHFNumberField,
   RHFUploadMultiFile,
-  RHFAutocompleteSimple,
-  RHFAutocompleteObject,
+  RHFAutocompleteSmp,
+  RHFAutocompleteObj,
 } from '../../../components/hook-form';
 import Steps from '../../../components/Steps';
 import { DialogConfirmar } from '../../../components/CustomDialog';
@@ -174,7 +174,7 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={temNumOperacao ? 6 : 8}>
-          <RHFAutocompleteObject name="estado" label="Estado" disableClearable options={destinos} />
+          <RHFAutocompleteObj name="estado" label="Estado" disableClearable options={destinos} />
         </Grid>
         {aberturaSemEntGer ? (
           <Grid item xs={12}>
@@ -193,15 +193,11 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
               </Grid>
             )}
             <Grid item xs={12} sm={temNumOperacao ? 6 : 12} md={temNumOperacao ? 3 : 4}>
-              <RHFAutocompleteSimple
-                label="Parecer"
-                name="parecer_favoravel"
-                options={['Favorável', 'Não favorável']}
-              />
+              <RHFAutocompleteSmp label="Parecer" name="parecer_favoravel" options={['Favorável', 'Não favorável']} />
             </Grid>
             {title === 'DEVOLVER' && (
               <Grid item xs={12}>
-                <RHFAutocompleteObject name="motivo_devolucao" label="Motivo da devolução" options={motivosTransicao} />
+                <RHFAutocompleteObj name="motivo_devolucao" label="Motivo da devolução" options={motivosTransicao} />
               </Grid>
             )}
             <Grid item xs={12}>
@@ -373,7 +369,7 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
           <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
             <AccordionSummary sx={{ py: 0.75 }}>Atribuir processo</AccordionSummary>
             <AccordionDetails sx={{ pt: 2 }}>
-              <RHFAutocompleteObject name="colaborador" label="Colaborador" options={colaboradoresList} />
+              <RHFAutocompleteObj name="colaborador" label="Colaborador" options={colaboradoresList} />
             </AccordionDetails>
           </Accordion>
         )}
@@ -388,7 +384,7 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
               )}
               {!values?.pendenteLevantamento && (
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 2 }}>
-                  <RHFAutocompleteObject
+                  <RHFAutocompleteObj
                     label="Motivo"
                     name="motivo_pendencia"
                     options={motivosPendencia}
@@ -496,7 +492,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
               <Box variant="elevation" elevation={3} sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
-                    <RHFAutocompleteObject
+                    <RHFAutocompleteObj
                       label="Estado"
                       disableClearable
                       name={`destinos_par[${index}].estado`}
@@ -581,7 +577,7 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
         <Chip label="ATRIBUIR ACESSO" size="small" />
       </Divider>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
-        <RHFAutocompleteObject
+        <RHFAutocompleteObj
           multiple
           limitTags={1}
           label="Estados"
@@ -589,7 +585,7 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
           name={estadosIncluidos}
           options={estados?.map((row) => ({ id: row?.id, label: row?.nome }))}
         />
-        <RHFAutocompleteObject
+        <RHFAutocompleteObj
           multiple
           limitTags={1}
           disableCloseOnSelect
@@ -602,7 +598,7 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
         <Chip label="REMOVER ACESSO" size="small" />
       </Divider>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
-        <RHFAutocompleteObject
+        <RHFAutocompleteObj
           multiple
           limitTags={1}
           label="Estados"
@@ -610,7 +606,7 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
           name={estadosExcluidos}
           options={estados?.map((row) => ({ id: row?.id, label: row?.nome }))}
         />
-        <RHFAutocompleteObject
+        <RHFAutocompleteObj
           multiple
           limitTags={1}
           disableCloseOnSelect
@@ -822,7 +818,7 @@ export function ParecerForm({ onCancel, processoId, estado = false }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 1 }}>
             <Grid item xs={12} sm={estado ? 12 : 6}>
-              <RHFAutocompleteSimple name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
+              <RHFAutocompleteSmp name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
             </Grid>
             {!estado && (
               <Grid item xs={12} sm={6}>
@@ -997,7 +993,7 @@ export function AtribuirForm({ dados, onClose }) {
       <DialogTitle>Atribuir processo</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <RHFAutocompleteObject
+          <RHFAutocompleteObj
             name="perfil"
             sx={{ pt: 3 }}
             label="Colaborador"
@@ -1122,7 +1118,7 @@ export function ColocarPendenteForm() {
                   }}
                 />
               )}
-              <RHFAutocompleteObject
+              <RHFAutocompleteObj
                 name="motivo"
                 label="Motivo"
                 options={motivosPendencia}
@@ -1184,7 +1180,7 @@ export function DomiciliarForm({ id, estadoId, onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack direction="column" spacing={3} sx={{ pt: 3 }}>
-            <RHFAutocompleteObject
+            <RHFAutocompleteObj
               name="uo"
               label="Unidade orgânica"
               onChange={(event, newValue) => {
@@ -1194,7 +1190,7 @@ export function DomiciliarForm({ id, estadoId, onClose }) {
               options={uos?.map((row) => ({ id: row?.id, label: row?.label }))}
             />
             {values?.uo?.id && (
-              <RHFAutocompleteObject
+              <RHFAutocompleteObj
                 name="estado"
                 label="Estado"
                 options={estados

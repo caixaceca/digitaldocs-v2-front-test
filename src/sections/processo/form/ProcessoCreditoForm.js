@@ -15,8 +15,8 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
-  RHFAutocompleteSimple,
-  RHFAutocompleteObject,
+  RHFAutocompleteSmp,
+  RHFAutocompleteObj,
 } from '../../../components/hook-form';
 import { AnexosExistente } from '../../../components/Actions';
 //
@@ -52,10 +52,10 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
                 <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante solicitado" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFAutocompleteSimple name="segmento" label="Segmento" options={segmentos} />
+                <RHFAutocompleteSmp name="segmento" label="Segmento" options={segmentos} />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFAutocompleteObject
+                <RHFAutocompleteObj
                   disabled={!values?.segmento}
                   name="linha_id"
                   label="Linha de crédito"
@@ -93,7 +93,7 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
               <CardContent>
                 <Grid container spacing={3} justifyContent="center">
                   <Grid item xs={12} sm={3}>
-                    <RHFAutocompleteSimple
+                    <RHFAutocompleteSmp
                       label="Situação"
                       disableClearable
                       options={situacoes}
@@ -128,7 +128,7 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
                           <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                          <RHFAutocompleteSimple name="escalao_decisao" label="Escalão de decisão" options={escaloes} />
+                          <RHFAutocompleteSmp name="escalao_decisao" label="Escalão de decisão" options={escaloes} />
                         </Grid>
                         <Grid item xs={12} sm={9}>
                           <RHFTextField name="garantia" label="Garantia" />

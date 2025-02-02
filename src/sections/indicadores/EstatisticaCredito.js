@@ -33,7 +33,8 @@ import {
 } from '../../utils/formatTime';
 import { bgGradient } from '../../utils/cssStyles';
 import { UosAcesso } from '../../utils/validarAcesso';
-import { setItemValue, normalizeText } from '../../utils/formatText';
+import { normalizeText } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';

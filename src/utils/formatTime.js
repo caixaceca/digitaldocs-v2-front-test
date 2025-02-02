@@ -37,10 +37,12 @@ export function fYear(date) {
 }
 
 export function ptDateTime(date) {
+  if (!date) return '';
   return format(new Date(date), 'dd/MM/yyyy - HH:mm', { locale: pt });
 }
 
 export function ptDate(date) {
+  if (!date) return '';
   return format(add(new Date(date), { hours: 2 }), 'dd/MM/yyyy', { locale: pt });
 }
 

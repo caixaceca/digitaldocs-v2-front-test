@@ -19,8 +19,8 @@ import { getFromParametrizacao, closeModal } from '../../redux/slices/parametriz
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
-import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
+import { CellChecked } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import { AddItem, UpdateItem } from '../../components/Actions';
 import { Notificacao } from '../../components/NotistackProvider';
@@ -171,15 +171,9 @@ export default function TableAcessos({ tab }) {
                             <TableCell align="center">
                               {row?.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}
                             </TableCell>
-                            <TableCell align="center" width={10}>
-                              <Checked check={row.padrao} />
-                            </TableCell>
-                            <TableCell align="center" width={10}>
-                              <Checked check={row.gestor} />
-                            </TableCell>
-                            <TableCell align="center" width={10}>
-                              <Checked check={row.observador} />
-                            </TableCell>
+                            <CellChecked check={row.padrao} />
+                            <CellChecked check={row.gestor} />
+                            <CellChecked check={row.observador} />
                           </>
                         )}
                         <TableCell align="center" width={10}>

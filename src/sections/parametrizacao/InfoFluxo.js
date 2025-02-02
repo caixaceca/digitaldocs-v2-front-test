@@ -10,7 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
-import { transicoesList } from '../../utils/formatText';
+import { transicoesList } from '../../utils/formatObject';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -19,8 +19,8 @@ import { getFromParametrizacao, openModal, getSuccess } from '../../redux/slices
 // Components
 import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
-import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
+import { CellChecked } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { UpdateItem, DefaultAction } from '../../components/Actions';
@@ -157,13 +157,7 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
                             <TableCell align="center">{fPercent(row.percentagem)}</TableCell>
                           </>
                         ))}
-                      {(item === 'checklist' || item === 'regrasTransicao') && (
-                        <>
-                          <TableCell align="center">
-                            <Checked check={row.ativo} />
-                          </TableCell>
-                        </>
-                      )}
+                      {(item === 'checklist' || item === 'regrasTransicao') && <CellChecked check={row.ativo} />}
                       {item !== 'estados' && (
                         <TableCell align="center" width={50}>
                           <Stack direction="row" spacing={0.5} justifyContent="right">

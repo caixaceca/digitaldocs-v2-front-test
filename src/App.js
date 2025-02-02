@@ -8,7 +8,7 @@ import Router from './routes';
 // theme
 import ThemeProvider from './theme';
 // components
-import LoginPage from './pages/Login';
+import PageLogin from './pages/PageLogin';
 import { StyledChart } from './components/chart';
 import ThemeSettings from './components/settings';
 import ScrollToTop from './components/ScrollToTop';
@@ -32,7 +32,7 @@ export default function App() {
                 </Worker>
               </AuthenticatedTemplate>
               <UnauthenticatedTemplate>
-                <LoginPage />
+                <PageLogin />
               </UnauthenticatedTemplate>
             </NotistackProvider>
           </ThemeSettings>

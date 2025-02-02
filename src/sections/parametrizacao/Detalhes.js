@@ -23,7 +23,7 @@ import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
-import { Criado, Checked } from '../../components/Panel';
+import { Criado, CellChecked } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
 import { UpdateItem, DefaultAction, DTFechar } from '../../components/Actions';
 //
@@ -124,9 +124,10 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                     <TableRowItem title="Telefone:" text={dados?.telefone} />
                     <TableRowItem title="Título:" text={dados?.titulo} />
                     <TableRowItem title="Subtítulo:" text={dados?.sub_titulo} />
-                    <TableRowItem title="Telefone:" text={dados?.telefone} />
                     <TableRowItem title="Página:" text={dados?.pagina} />
-                    {dados?.data_formulario && <TableRowItem title="Telefone:" text={ptDate(dados?.data_formulario)} />}
+                    {dados?.data_formulario && (
+                      <TableRowItem title="Data formulário:" text={ptDate(dados?.data_formulario)} />
+                    )}
                     {'prazoemdias' in dados && (
                       <TableRowItem
                         title="Prazo:"
@@ -264,9 +265,7 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                               Fim: {row.data_fim ? ptDate(row.data_fim) : 'Sem data'}
                             </Typography>
                           </TableCell>
-                          <TableCell>
-                            <Checked check={row.ativo} />
-                          </TableCell>
+                          <CellChecked check={row.ativo} />
                           <TableCell>
                             <UpdateItem dados={{ small: true }} handleClick={() => setDestinatario(row)} />
                           </TableCell>
@@ -310,7 +309,7 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
 
 Resgisto.propTypes = { label: PropTypes.string, por: PropTypes.string, em: PropTypes.string };
 
-function Resgisto({ label, por = '', em = '' }) {
+export function Resgisto({ label, por = '', em = '' }) {
   return por || em ? (
     <Stack spacing={0.5}>
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -326,15 +325,22 @@ function Resgisto({ label, por = '', em = '' }) {
 
 // ----------------------------------------------------------------------
 
-TableRowItem.propTypes = { title: PropTypes.string, text: PropTypes.string, item: PropTypes.node };
+TableRowItem.propTypes = {
+  item: PropTypes.node,
+  id: PropTypes.number,
+  text: PropTypes.string,
+  title: PropTypes.string,
+};
 
-function TableRowItem({ title, text = '', item = null }) {
+export function TableRowItem({ title, id = 0, text = '', item = null }) {
   return text || item ? (
     <TableRow hover>
       <TableCell align="right" sx={{ color: 'text.secondary', pr: 0 }}>
         {title}
       </TableCell>
-      <TableCell sx={{ minWidth: '70% !important' }}>{text || item}</TableCell>
+      <TableCell sx={{ minWidth: '75% !important' }}>
+        {(!!text && !!id && `${text} (ID: ${id})`) || (text && text) || (item && item)}
+      </TableCell>
     </TableRow>
   ) : (
     ''
@@ -343,6 +349,6 @@ function TableRowItem({ title, text = '', item = null }) {
 
 LabelSN.propTypes = { item: PropTypes.bool };
 
-function LabelSN({ item = false }) {
+export function LabelSN({ item = false }) {
   return <Label color={item ? 'success' : 'default'}>{item ? 'Sim' : 'Não'}</Label>;
 }

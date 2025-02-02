@@ -21,7 +21,7 @@ import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
 import { SkeletonTable } from '../../../components/skeleton';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
-import { Checked, Criado, ColaboradorInfo } from '../../../components/Panel';
+import { CellChecked, Criado, ColaboradorInfo } from '../../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 
 // ----------------------------------------------------------------------
@@ -170,9 +170,7 @@ export default function TableDetalhes({ item }) {
                     )) ||
                       (item === 'responsabilidades' && (
                         <>
-                          <TableCell align="center" width={10}>
-                            <Checked check={row.na_caixa} />
-                          </TableCell>
+                          <CellChecked check={row.na_caixa} />
                           <TableCell align="right">{fCurrency(row?.montante)}</TableCell>
                           <TableCell align="right">{fCurrency(row?.capital_em_divida)}</TableCell>
                           <TableCell align="right">{fPercent(row?.taxa_juro)}</TableCell>
@@ -189,13 +187,13 @@ export default function TableDetalhes({ item }) {
                           <TableCell align="center">
                             {(row?.preso_em && row?.solto_em && fDistance(row?.preso_em, row?.solto_em)) ||
                               (row?.preso_em && !row?.solto_em && fToNow(row?.preso_em)) ||
-                              noDados(true)}
+                              noDados('--')}
                           </TableCell>
                           <TableCell align="center">{ptDateTime(row?.preso_em)}</TableCell>
                           <TableCell align="center">
-                            {row?.solto_em ? ptDateTime(row?.solto_em) : noDados(true)}
+                            {row?.solto_em ? ptDateTime(row?.solto_em) : noDados('--')}
                           </TableCell>
-                          <TableCell>{row?.solto_por || noDados(true)}</TableCell>
+                          <TableCell>{row?.solto_por || noDados('--')}</TableCell>
                         </>
                       )) ||
                       (item === 'hatribuicoes' && (
@@ -209,7 +207,7 @@ export default function TableDetalhes({ item }) {
                       (item === 'hpendencias' && (
                         <>
                           <TableCell>{row?.motivo}</TableCell>
-                          <TableCell>{row?.observacao || noDados(true)}</TableCell>
+                          <TableCell>{row?.observacao || noDados('--')}</TableCell>
                         </>
                       ))}
                     {item !== 'hretencoes' && item !== 'hatribuicoes' && item !== 'hpendencias' && (

@@ -14,7 +14,7 @@ import CardContent from '@mui/material/CardContent';
 import { updatePedidoForm } from '../../../redux/slices/cc';
 import { useSelector, useDispatch } from '../../../redux/store';
 // components
-import { FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObject } from '../../../components/hook-form';
+import { FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '../../../components/hook-form';
 //
 import { NextPrev } from './PedidoSteps';
 
@@ -107,7 +107,7 @@ export default function DadosGerais({ dados }) {
               <RHFTextField name="setor_atividade" label="Entidade patronal" />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <RHFAutocompleteObject
+              <RHFAutocompleteObj
                 name="linha"
                 label="Linha de crédito"
                 options={linhas

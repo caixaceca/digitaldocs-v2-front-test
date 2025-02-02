@@ -73,7 +73,7 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
   const criador = useMemo(
     () =>
       transicao?.domiciliacao || acao === 'Restauro'
-        ? colaboradores?.find((colab) => colab?.perfil?.mail === transicao?.perfil_id)
+        ? colaboradores?.find((colab) => colab?.perfil?.mail?.toLowerCase() === transicao?.perfil_id?.toLowerCase())
         : colaboradores?.find((colab) => colab?.perfil?.id === transicao?.perfil_id),
     [colaboradores, acao, transicao?.domiciliacao, transicao?.perfil_id]
   );

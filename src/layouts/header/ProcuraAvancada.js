@@ -16,7 +16,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 // redux
 import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
@@ -126,9 +126,9 @@ export default function ProcuraAvancada() {
                   <Grid item xs={12} sm={3}>
                     <TextFieldNumb
                       value={noperacao}
-                      setValue={setNoperacao}
-                      label="Nº de operação"
                       localS="noperacao"
+                      label="Nº de operação"
+                      setValue={setNoperacao}
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -193,13 +193,13 @@ export default function ProcuraAvancada() {
 // ----------------------------------------------------------------------
 
 TextFieldNumb.propTypes = {
-  value: PropTypes.number,
+  value: PropTypes.string,
   label: PropTypes.string,
   localS: PropTypes.string,
   setValue: PropTypes.func,
 };
 
-function TextFieldNumb({ value, setValue, label, localS }) {
+export function TextFieldNumb({ value = '', setValue, label, localS }) {
   return (
     <TextField
       fullWidth

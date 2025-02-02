@@ -37,6 +37,7 @@ export default function BlockContent({ multiple = false, small = false }) {
           <Typography gutterBottom variant={small ? 'subtitle1' : 'h6'}>
             Solte ou seleciona o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''}...
           </Typography>
+
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Solte o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''} nesta zona ou &nbsp;
             <Typography variant="body2" component="span" sx={{ color: 'primary.main', textDecoration: 'underline' }}>

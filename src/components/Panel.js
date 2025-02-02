@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -186,6 +187,16 @@ export function Checked({ check, color = '' }) {
     <CheckCircleOutlineOutlinedIcon sx={{ color: color || 'success.main', width: 20 }} />
   ) : (
     <CloseOutlinedIcon sx={{ color: color || 'focus.main', width: 20 }} />
+  );
+}
+
+CellChecked.propTypes = { check: PropTypes.bool };
+
+export function CellChecked({ check }) {
+  return (
+    <TableCell align="center">
+      <Checked check={check} />
+    </TableCell>
   );
 }
 

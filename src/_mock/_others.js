@@ -15,7 +15,7 @@ export const objetos = [
   { id: 'estado', label: 'Estado' },
   { id: 'entidades', label: 'Entidades' },
   { id: 'fluxo', label: 'Fluxo' },
-  { id: 'gaji9', label: 'GAJi9' },
+  { id: 'gaji9', label: 'GAJ-i9' },
   { id: 'origem', label: 'Origem' },
   { id: 'perfilestado', label: 'Perfil/Estado' },
   { id: 'transicao', label: 'Transição' },

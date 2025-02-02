@@ -31,7 +31,7 @@ const GREY = {
 const PRIMARY = {
   lighter: '#C8FACD',
   light: '#5BE584',
-  main: 'rgb(90, 170, 40)',
+  main: '#5AAA28',
   dark: '#007B55',
   darker: '#005249',
   contrastText: '#fff',
@@ -55,7 +55,7 @@ const INFO = {
 const SUCCESS = {
   lighter: '#edfae6',
   light: '#a8c997',
-  main: 'rgb(90, 170, 40)',
+  main: '#5AAA28',
   dark: '#2f690c',
   darker: '#08660D',
   contrastText: '#fff',

@@ -21,9 +21,9 @@ import { getFromParametrizacao, openModal, getSuccess } from '../../redux/slices
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
-import { Checked, ColaboradorInfo } from '../../components/Panel';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { UpdateItem, DefaultAction } from '../../components/Actions';
+import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from './applySortFilter';
@@ -135,9 +135,7 @@ export function TableInfoEstado({ item, onClose }) {
                           <TableCell>{nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}</TableCell>
                           <TableCell>{row.data_inicial ? ptDateTime(row.data_inicial) : 'Acesso permanente'}</TableCell>
                           <TableCell>{row.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}</TableCell>
-                          <TableCell align="center" width={10}>
-                            <Checked check={row.observador} />
-                          </TableCell>
+                          <CellChecked check={row.observador} />
                         </>
                       )) ||
                         (item === 'regrasEstado' && (

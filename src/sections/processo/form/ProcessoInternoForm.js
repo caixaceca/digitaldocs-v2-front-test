@@ -12,8 +12,8 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
-  RHFAutocompleteSimple,
-  RHFAutocompleteObject,
+  RHFAutocompleteSmp,
+  RHFAutocompleteObj,
 } from '../../../components/hook-form';
 import { AnexosExistente } from '../../../components/Actions';
 //
@@ -51,7 +51,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
                 {values.agendado && (
                   <>
                     <Grid item xs={6} md={3}>
-                      <RHFAutocompleteSimple
+                      <RHFAutocompleteSmp
                         name="periodicidade"
                         label="Periodicidade"
                         options={['Mensal', 'Trimestral', 'Semestral', 'Anual']}
@@ -116,7 +116,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
                       <RHFTextField name="ordenador" label="Nome" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFAutocompleteObject name="tipo_docid" label="Tipo doc. identificação" options={dis} />
+                      <RHFAutocompleteObj name="tipo_docid" label="Tipo doc. identificação" options={dis} />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
                       <RHFTextField name="docid" label="Nº doc. identificação" />
@@ -125,7 +125,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
                       <RHFTextField name="nif" label="NIF" />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
-                      <RHFAutocompleteObject name="estado_civil" label="Estado civil" options={estadosCivis} />
+                      <RHFAutocompleteObj name="estado_civil" label="Estado civil" options={estadosCivis} />
                     </Grid>
                     <Grid item xs={12} sm={6} xl={3}>
                       <RHFDatePicker name="data_nascimento" label="Data de nascimento" disableFuture />

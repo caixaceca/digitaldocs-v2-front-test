@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { setItemValue } from '../../utils/formatText';
+import { setItemValue } from '../../utils/formatObject';
 // routes
 import useSettings from '../../hooks/useSettings';
 // hooks
@@ -24,7 +24,7 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
-export default function Parametrizacao() {
+export default function PageParametrizacao() {
   const { themeStretch } = useSettings();
   const { handleCloseModal } = useModal(closeModal());
   const { done, error, isAdmin } = useSelector((state) => state.parametrizacao);

@@ -10,12 +10,13 @@ export function temAcesso(acessos, acessosList) {
 export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (
+    colaborador?.nomeacao === 'Diretor' ||
     colaborador?.nomeacao === 'Gerente' ||
-    colaborador?.nomeacao === 'Director' ||
     colaborador?.nomeacao === 'Sub-gerente' ||
-    colaborador?.nomeacao === 'Coordenador Adjunto' ||
-    colaborador?.nomeacao === 'Coordenador Gabinete' ||
-    colaborador?.nomeacao === 'Gerente Caixa Empresas'
+    colaborador?.nomeacao === 'Gerente Caixa Empresas' ||
+    colaborador?.nomeacao === 'Coordenador de Gabinete' ||
+    colaborador?.nomeacao === 'Coordenador de Serviço' ||
+    colaborador?.nomeacao === 'Coordenador Adjunto'
   ) {
     nomeacao = colaborador?.nomeacao;
   }
@@ -27,16 +28,16 @@ export function temNomeacao(colaborador) {
 export function nomeacaoBySexo(nomeacao, sexo) {
   let _nomeaca = nomeacao;
 
-  if (nomeacao === 'Director' && sexo === 'Feminino') {
+  if (nomeacao === 'Diretor' && sexo === 'Feminino') {
     _nomeaca = 'Diretora';
-  } else if (nomeacao === 'Coordenador Gabinete' && sexo === 'Feminino') {
+  } else if (nomeacao === 'Coordenador de Gabinete' && sexo === 'Feminino') {
     _nomeaca = 'Coordenadora de Gabinete';
+  } else if (nomeacao === 'Coordenador de Serviço' && sexo === 'Feminino') {
+    _nomeaca = 'Coordenadora de Serviço';
   } else if (nomeacao === 'Coordenador Adjunto' && sexo === 'Feminino') {
     _nomeaca = 'Coordenador Adjunta';
   } else if (nomeacao === 'Assessor' && sexo === 'Feminino') {
     _nomeaca = 'Assessora';
-  } else if (nomeacao === 'Director') {
-    _nomeaca = 'Diretor';
   } else if (nomeacao === 'Coordenador Gabinete') {
     _nomeaca = 'Coordenador de Gabinete';
   }

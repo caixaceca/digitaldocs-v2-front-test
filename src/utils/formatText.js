@@ -86,7 +86,7 @@ export function substituirTexto(string, parametros, valores) {
 
 // ----------------------------------------------------------------------
 
-export function numeroPorExtenso(valor) {
+export function valorPorExtenso(valor) {
   let _valor = '';
   if (valor > 1999 || valor < 1000) {
     _valor = numero.porExtenso(valor, numero.estilo.monetario);
@@ -94,7 +94,7 @@ export function numeroPorExtenso(valor) {
     _valor = 'mil escudos';
   } else if (
     (valor > 1000 && valor < 1101) ||
-    valor === 110 ||
+    valor === 1100 ||
     valor === 1200 ||
     valor === 1300 ||
     valor === 1400 ||
@@ -113,15 +113,6 @@ export function numeroPorExtenso(valor) {
 
 // ----------------------------------------------------------------------
 
-export function findColaborador(mail, colaboradores) {
-  const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
-  return colaborador
-    ? `${colaborador?.perfil?.displayName} ${colaborador?.uo?.label ? `(${colaborador?.uo?.label})` : ''}`
-    : mail;
-}
-
-// ----------------------------------------------------------------------
-
 export function contaCliEnt(dados) {
   return (
     (dados?.conta && baralharString(dados?.conta)) ||
@@ -133,53 +124,10 @@ export function contaCliEnt(dados) {
 
 // ----------------------------------------------------------------------
 
-export function noDados(vazio) {
+export function noDados(text) {
   return (
     <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-      {vazio ? '--' : '(Não identificado)'}
+      {text || '(Não identificado)'}
     </Typography>
   );
-}
-
-// ----------------------------------------------------------------------
-
-export function setItemValue(newValue, setItem, localS, id) {
-  if (setItem) {
-    setItem(newValue);
-  }
-  if (localS) {
-    localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
-  }
-}
-
-// ----------------------------------------------------------------------
-
-function objectsEqual(o1, o2) {
-  return o1.id === o2.id;
-}
-
-export function subtractArrays(a1, a2) {
-  const arr = [];
-  a1.forEach((o1) => {
-    let found = false;
-    a2.forEach((o2) => {
-      if (objectsEqual(o1, o2)) {
-        found = true;
-      }
-    });
-    if (!found) {
-      arr.push(o1);
-    }
-  });
-  return arr;
-}
-
-// ----------------------------------------------------------------------
-
-export function transicoesList(transicoes, estados) {
-  return transicoes?.map((row) => ({
-    ...row,
-    estado_final: estados?.find((item) => item.id === row.estado_final_id)?.nome,
-    estado_inicial: estados?.find((item) => item.id === row.estado_inicial_id)?.nome,
-  }));
 }

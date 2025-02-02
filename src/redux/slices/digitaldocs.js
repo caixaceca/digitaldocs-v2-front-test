@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
 import { errorMsg } from '../../utils/formatText';
+import { downloadDoc } from '../../utils/formatFile';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 
@@ -438,12 +439,12 @@ export function getAll(item, params) {
       }
       // LISTA DE PROCESSOS ESPECÍFICOS
       if (item === 'Finalizados' || item === 'Executados' || item === 'Agendados') {
-        const _path = `${BASEURLDD}/v2/processos/tarefas/situacao/${params?.perfilId}?pagina=`;
+        const apiUrl = `${BASEURLDD}/v2/processos/tarefas/situacao/${params?.perfilId}?pagina=`;
         const _item = (item === 'Finalizados' && 'finalizado') || (item === 'Executados' && 'executado') || 'agendado';
-        const response = await axios.get(`${_path}${params?.pagina}&situacao=${_item}`, options);
+        const response = await axios.get(`${apiUrl}${params?.pagina}&situacao=${_item}`, options);
         const dados = response.data;
         if (response?.data?.paginacao?.total_paginas === 2 && response?.data?.paginacao?.proxima_pagina === 1) {
-          const response1 = await axios.get(`${_path}${1}&situacao=${_item}`, options);
+          const response1 = await axios.get(`${apiUrl}${1}&situacao=${_item}`, options);
           dados.paginacao = response1?.data?.paginacao;
           dados.objeto.push(...response1?.data?.objeto);
         }
@@ -759,12 +760,7 @@ export function getAnexo(item, params) {
       if (item === 'filePreview') {
         await dispatch(slice.actions.getFilePreviewSuccess({ ...params?.anexo, url }));
       } else {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = params?.anexo?.nome;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        downloadDoc(url, params?.anexo?.nome);
       }
       if (item === 'filePreview') {
         dispatch(slice.actions.loadingPreview(false));

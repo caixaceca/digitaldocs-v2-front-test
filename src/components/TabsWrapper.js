@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 // utils
-import { setItemValue } from '../utils/formatText';
+import { setItemValue } from '../utils/formatObject';
 
 // ----------------------------------------------------------------------
 
@@ -90,8 +90,8 @@ export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
           value={currentTab}
           scrollButtons="auto"
           variant="scrollable"
-          allowScrollButtonsMobile
           onChange={changeTab}
+          allowScrollButtonsMobile
         >
           {tabsList.map((tab) => (
             <Tab

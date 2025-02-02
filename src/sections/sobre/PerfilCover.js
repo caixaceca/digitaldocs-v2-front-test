@@ -48,7 +48,6 @@ PerfilCover.propTypes = { perfilColaborador: PropTypes.object, isDeFeria: PropTy
 
 export default function PerfilCover({ perfilColaborador, isDeFeria }) {
   const { isLoading } = useSelector((state) => state.intranet);
-  console.log(perfilColaborador);
   return (
     <RootStyle>
       <InfoStyle>

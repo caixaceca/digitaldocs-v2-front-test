@@ -138,7 +138,7 @@ export default function TableDetalhes({ id, item }) {
                         <TableCell align="center">
                           {(row?.preso_em && row?.solto_em && fDistance(row?.preso_em, row?.solto_em)) ||
                             (row?.preso_em && !row?.solto_em && fToNow(row?.preso_em)) ||
-                            noDados(true)}
+                            noDados('--')}
                         </TableCell>
                         <TableCell align={row?.solto_em ? 'left' : 'center'}>
                           {row?.solto_em ? (
@@ -164,7 +164,7 @@ export default function TableDetalhes({ id, item }) {
                       (item === 'hpendencias' && (
                         <>
                           <TableCell>{row?.motivo}</TableCell>
-                          <TableCell>{row?.observacao || noDados(true)}</TableCell>
+                          <TableCell>{row?.observacao || noDados('--')}</TableCell>
                           <TableCell>
                             {(row?.data_pendente && row?.data_libertado && (
                               <Criado caption tipo="time" value={fDistance(row?.data_pendente, row?.data_libertado)} />
@@ -172,7 +172,7 @@ export default function TableDetalhes({ id, item }) {
                               (row?.data_pendente && !row?.data_libertado && (
                                 <Criado caption tipo="time" value={fToNow(row?.data_pendente)} />
                               )) ||
-                              noDados(true)}
+                              noDados('--')}
                             {row?.data_libertado && (
                               <Criado caption tipo="data" value={ptDateTime(row?.data_libertado)} />
                             )}

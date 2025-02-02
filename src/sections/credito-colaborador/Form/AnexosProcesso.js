@@ -16,7 +16,7 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import { updatePedidoForm, deleteAnexo } from '../../../redux/slices/cc';
 // components
 import { DefaultAction, AnexosExistente } from '../../../components/Actions';
-import { FormProvider, RHFDatePicker, RHFUploadFileSimple, RHFAutocompleteObject } from '../../../components/hook-form';
+import { FormProvider, RHFDatePicker, RHFUploadFileSimple, RHFAutocompleteObj } from '../../../components/hook-form';
 //
 import { applyFilter } from './Anexos';
 import { NextPrev } from './PedidoSteps';
@@ -103,7 +103,7 @@ export default function AnexosProcesso({ anexos = [] }) {
                 <Box sx={{ width: 1 }}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={anexoSel?.prazo ? 8 : 12} md={3}>
-                      <RHFAutocompleteObject
+                      <RHFAutocompleteObj
                         options={anexosFiltered}
                         label={`Anexo ${index + 1}`}
                         name={`anexos[${index}].descricao`}

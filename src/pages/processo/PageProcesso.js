@@ -43,7 +43,7 @@ import Intervencao, {
 
 // ----------------------------------------------------------------------
 
-export default function Processo() {
+export default function PageProcesso() {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();

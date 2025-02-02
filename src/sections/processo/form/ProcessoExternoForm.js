@@ -13,8 +13,8 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
-  RHFAutocompleteSimple,
-  RHFAutocompleteObject,
+  RHFAutocompleteSmp,
+  RHFAutocompleteObj,
 } from '../../../components/hook-form';
 import { AnexosExistente } from '../../../components/Actions';
 //
@@ -43,10 +43,10 @@ export default function ProcessoExternoForm({ processo, origensList }) {
                 <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <RHFAutocompleteSimple name="canal" label="Canal de entrada" options={['Email', 'Correspondência']} />
+                <RHFAutocompleteSmp name="canal" label="Canal de entrada" options={['Email', 'Correspondência']} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <RHFAutocompleteObject
+                <RHFAutocompleteObj
                   name="origem_id"
                   label="Origem"
                   options={applySort(origensList, getComparator('asc', 'label'))}
@@ -61,7 +61,7 @@ export default function ProcessoExternoForm({ processo, origensList }) {
                 sm={values.operacao === 'Cativo/Penhora' ? 6 : 12}
                 md={values.operacao === 'Cativo/Penhora' ? 3 : 6}
               >
-                <RHFAutocompleteSimple
+                <RHFAutocompleteSmp
                   name="operacao"
                   label="Operação"
                   options={[

@@ -50,14 +50,14 @@ export function RHFAutocomplete({ name, label, ...other }) {
 
 // ----------------------------------------------------------------------
 
-RHFAutocompleteSimple.propTypes = {
+RHFAutocompleteSmp.propTypes = {
   name: PropTypes.string,
   label: PropTypes.string,
   options: PropTypes.array,
   multiple: PropTypes.bool,
 };
 
-export function RHFAutocompleteSimple({ name, options, label, multiple = false, ...other }) {
+export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -81,14 +81,14 @@ export function RHFAutocompleteSimple({ name, options, label, multiple = false, 
 
 // ----------------------------------------------------------------------
 
-RHFAutocompleteObject.propTypes = {
+RHFAutocompleteObj.propTypes = {
   small: PropTypes.bool,
   name: PropTypes.string,
   label: PropTypes.string,
   options: PropTypes.array,
 };
 
-export function RHFAutocompleteObject({ name, options, label, small = false, ...other }) {
+export function RHFAutocompleteObj({ name, options, label, small = false, ...other }) {
   const { control } = useFormContext();
 
   return (
