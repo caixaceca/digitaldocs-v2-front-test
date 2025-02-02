@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
-import { useMemo } from 'react';
+import { add } from 'date-fns';
 import PropTypes from 'prop-types';
+import { useMemo, useEffect } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -16,7 +17,7 @@ import { formatDate } from '../../utils/formatTime';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { updateDados, resetDados } from '../../redux/slices/stepper';
-import { getFromGaji9, getDocumento, createItem } from '../../redux/slices/gaji9';
+import { getFromGaji9, getDocumento, createItem, updateItem } from '../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -36,11 +37,14 @@ import { listaTitrulares, listaGarantias, listaProdutos } from './applySortFilte
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-CreditForm.propTypes = { onCancel: PropTypes.func };
+CreditForm.propTypes = { dados: PropTypes.object, onCancel: PropTypes.func, isEdit: PropTypes.bool };
 
-export default function CreditForm({ onCancel }) {
+export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
   const dispatch = useDispatch();
   const { dadosStepper, activeStep } = useSelector((state) => state.stepper);
+  const { componentes, tiposTitulares } = useSelector((state) => state.gaji9);
+  const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
+  const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
 
   const onClose = () => {
     onCancel();
@@ -60,31 +64,43 @@ export default function CreditForm({ onCancel }) {
           <Cliente
             onCancel={onClose}
             dispatch={dispatch}
+            titularesList={titularesList}
             dados={{
-              cliente: dadosStepper?.cliente || '',
-              conta_do: dadosStepper?.conta_do || '',
-              morada_cliente: dadosStepper?.morada_cliente || '',
-              tipo_titular_id: dadosStepper?.tipo_titular_id || null,
-              morada_eletronico_cliente: dadosStepper?.morada_eletronico_cliente || '',
+              cliente: dadosStepper?.cliente || dados?.cliente || '',
+              conta_do: dadosStepper?.conta_do || dados?.conta_do || '',
+              morada_cliente: dadosStepper?.morada_cliente || dados?.morada_cliente || '',
+              tipo_titular_id:
+                dadosStepper?.tipo_titular_id ||
+                (dados?.tipo_titular_id && titularesList?.find(({ id }) => id === dados?.tipo_titular_id)) ||
+                null,
+              morada_eletronico_cliente:
+                dadosStepper?.morada_eletronico_cliente || dados?.morada_eletronico_cliente || '',
             }}
           />
         )}
         {activeStep === 1 && (
           <Credito
             dispatch={dispatch}
+            componentesList={componentesList}
             dados={{
-              moeda: dadosStepper?.moeda || '',
-              montante: dadosStepper?.montante || '',
-              finalidade: dadosStepper?.finalidade || '',
-              componente_id: dadosStepper?.componente_id || null,
-              numero_proposta: dadosStepper?.numero_proposta || '',
-              processo_origem: dadosStepper?.processo_origem || '',
-              meses_vencimento: dadosStepper?.meses_vencimento || '',
-              prazo_contratual: dadosStepper?.prazo_contratual || '',
-              numero_prestacao: dadosStepper?.numero_prestacao || '',
-              aplicacao_origem: dadosStepper?.aplicacao_origem || null,
-              valor_premio_seguro: dadosStepper?.valor_premio_seguro || '',
-              data_vencimento_prestacao1: dadosStepper?.data_vencimento_prestacao1 || null,
+              moeda: dadosStepper?.moeda || dados?.moeda || '',
+              montante: dadosStepper?.montante || dados?.montante || '',
+              finalidade: dadosStepper?.finalidade || dados?.finalidade || '',
+              componente_id:
+                dadosStepper?.componente_id ||
+                (dados?.componente_id && componentesList?.find(({ id }) => id === dados?.componente_id)) ||
+                null,
+              numero_proposta: dadosStepper?.numero_proposta || dados?.numero_proposta || '',
+              processo_origem: dadosStepper?.processo_origem || dados?.processo_origem || '',
+              meses_vencimento: dadosStepper?.meses_vencimento || dados?.meses_vencimento || '',
+              prazo_contratual: dadosStepper?.prazo_contratual || dados?.prazo_contratual || '',
+              numero_prestacao: dadosStepper?.numero_prestacao || dados?.numero_prestacao || '',
+              aplicacao_origem: dadosStepper?.aplicacao_origem || dados?.aplicacao_origem || null,
+              valor_premio_seguro: dadosStepper?.valor_premio_seguro || dados?.valor_premio_seguro || '',
+              data_vencimento_prestacao1:
+                dadosStepper?.data_vencimento_prestacao1 ||
+                (dados?.data_vencimento_prestacao1 && add(new Date(dados?.data_vencimento_prestacao1), { hours: 2 })) ||
+                null,
             }}
           />
         )}
@@ -92,21 +108,21 @@ export default function CreditForm({ onCancel }) {
           <Taxas
             dispatch={dispatch}
             dados={{
-              taeg: dadosStepper?.taeg || '',
-              valor_juro: dadosStepper?.valor_juro || '',
-              custo_total: dadosStepper?.custo_total || '',
-              valor_comissao: dadosStepper?.valor_comissao || '',
-              valor_prestacao: dadosStepper?.valor_prestacao || '',
-              valor_prestacao1: dadosStepper?.valor_prestacao1 || '',
-              comissao_abertura: dadosStepper?.comissao_abertura || '',
-              valor_imposto_selo: dadosStepper?.valor_imposto_selo || '',
-              taxa_juro_precario: dadosStepper?.taxa_juro_precario || '',
-              taxa_juro_desconto: dadosStepper?.taxa_juro_desconto || '',
-              taxa_juro_negociado: dadosStepper?.taxa_juro_negociado || '',
+              taeg: dadosStepper?.taeg || dados?.taeg || '',
+              valor_juro: dadosStepper?.valor_juro || dados?.valor_juro || '',
+              custo_total: dadosStepper?.custo_total || dados?.custo_total || '',
+              valor_comissao: dadosStepper?.valor_comissao || dados?.valor_comissao || '',
+              valor_prestacao: dadosStepper?.valor_prestacao || dados?.valor_prestacao || '',
+              valor_prestacao1: dadosStepper?.valor_prestacao1 || dados?.valor_prestacao1 || '',
+              comissao_abertura: dadosStepper?.comissao_abertura || dados?.comissao_abertura || '',
+              valor_imposto_selo: dadosStepper?.valor_imposto_selo || dados?.valor_imposto_selo || '',
+              taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || '',
+              taxa_juro_desconto: dadosStepper?.taxa_juro_desconto || dados?.taxa_Juro_desconto || '',
+              taxa_juro_negociado: dadosStepper?.taxa_juro_negociado || dados?.taxa_juro_negociado || '',
             }}
           />
         )}
-        {activeStep === 3 && <Garantias />}
+        {activeStep === 3 && <Garantias isEdit={isEdit} id={dados?.id} />}
       </DialogContent>
     </Dialog>
   );
@@ -114,12 +130,14 @@ export default function CreditForm({ onCancel }) {
 
 // ----------------------------------------------------------
 
-Cliente.propTypes = { onCancel: PropTypes.func, dados: PropTypes.object, dispatch: PropTypes.func };
+Cliente.propTypes = {
+  dados: PropTypes.object,
+  dispatch: PropTypes.func,
+  onCancel: PropTypes.func,
+  titularesList: PropTypes.array,
+};
 
-function Cliente({ dados, onCancel, dispatch }) {
-  const { tiposTitulares } = useSelector((state) => state.gaji9);
-  const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
-
+function Cliente({ dados, onCancel, dispatch, titularesList = [] }) {
   const formSchema = Yup.object().shape({
     tipo_titular_id: Yup.mixed().required().label('Titular'),
     morada_cliente: Yup.string().required().label('Endereço'),
@@ -162,12 +180,9 @@ function Cliente({ dados, onCancel, dispatch }) {
 
 // ----------------------------------------------------------
 
-Credito.propTypes = { dados: PropTypes.object, dispatch: PropTypes.func };
+Credito.propTypes = { dados: PropTypes.object, dispatch: PropTypes.func, componentesList: PropTypes.array };
 
-function Credito({ dados, dispatch }) {
-  const { componentes } = useSelector((state) => state.gaji9);
-  const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
-
+function Credito({ dados, dispatch, componentesList = [] }) {
   const formSchema = Yup.object().shape({
     moeda: Yup.string().required().label('Moeda'),
     finalidade: Yup.string().required().label('Finalidade'),
@@ -269,7 +284,9 @@ function Taxas({ dados, dispatch }) {
 
 // ----------------------------------------------------------
 
-function Garantias() {
+Garantias.propTypes = { isEdit: PropTypes.bool, id: PropTypes.number };
+
+function Garantias({ isEdit, id = 0 }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving, tiposGarantias } = useSelector((state) => state.gaji9);
@@ -295,7 +312,22 @@ function Garantias() {
         ? { garantias: values?.garantias?.map((row) => ({ ...row, tipo_garantia_id: row?.tipo_garantia_id?.id })) }
         : {}),
     };
-    dispatch(createItem('credito', JSON.stringify(formData), { msg: 'Crédito adicionado' }));
+    if (isEdit) {
+      dispatch(
+        updateItem('credito', JSON.stringify(formData), {
+          id,
+          msg: 'Crédito atualizado',
+          onCancel: () => dispatch(resetDados()),
+        })
+      );
+    } else {
+      dispatch(
+        createItem('credito', JSON.stringify(formData), {
+          msg: 'Crédito adicionado',
+          onCancel: () => dispatch(resetDados()),
+        })
+      );
+    }
   };
 
   return (
@@ -374,8 +406,8 @@ function Garantias() {
         </Stack>
       </Stack>
       <ButtonsStepper
-        label="Adicionar"
         isSaving={isSaving}
+        label={isEdit ? 'Guardar' : 'Adicionar'}
         onCancel={() => dispatch(updateDados({ backward: true, dados: values }))}
       />
     </FormProvider>
@@ -512,6 +544,10 @@ export function PreviewForm({ creditoId, onCancel }) {
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
+
+  useEffect(() => {
+    dispatch(getFromGaji9('minutasPublicas'));
+  }, [dispatch]);
 
   const onSubmit = async () => {
     dispatch(getDocumento('contrato', { creditoId, minutaId: values?.minuta?.id, item: 'previewFile' }));

@@ -222,10 +222,10 @@ export function getDocumento(item, params) {
         dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: false }));
       }
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
-      // const decodedString = new TextDecoder().decode(error.response.data);
-      // const errorData = JSON.parse(decodedString);
-      // hasError({ message: errorData.mensagem }, dispatch, slice.actions.responseMsg);
+      // hasError(error, dispatch, slice.actions.responseMsg);
+      const decodedString = new TextDecoder().decode(error.response.data);
+      const errorData = JSON.parse(decodedString);
+      hasError({ message: errorData.mensagem }, dispatch, slice.actions.responseMsg);
     }
     dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: false }));
   };
@@ -271,7 +271,7 @@ export function createItem(item, dados, params) {
           } else if (params?.getSuccess) {
             dispatch(getSuccess({ item: params?.item || item, dados: response.data?.objeto }));
             if (params?.onCancel) params?.onCancel();
-          } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas') {
+          } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas' || item === 'credito') {
             dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
           } else if (item === 'variaveis') {
             dispatch(getFromGaji9(item, { id: params?.id }));
@@ -318,6 +318,7 @@ export function updateItem(item, dados, params) {
           (item === 'tiposTitulares' && `${BASEURLGAJI9}/v1/tipos_titulares?id=${params?.id}`) ||
           (item === 'tiposGarantias' && `${BASEURLGAJI9}/v1/tipos_garantias?id=${params?.id}`) ||
           (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao?id=${params?.id}`) ||
+          (item === 'credito' && `${BASEURLGAJI9}/v1/suportes/creditos?credito_id=${params?.id}`) ||
           (item === 'Versionar' && `${BASEURLGAJI9}/v1/minutas/versionar?minuta_id=${params?.id}`) ||
           (item === 'colaboradorGrupo' && `${BASEURLGAJI9}/v1/acs/utilizadores/grupo?id=${params?.id}`) ||
           (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/update/recurso?id=${params?.id}`) ||
@@ -340,9 +341,9 @@ export function updateItem(item, dados, params) {
             const response = await axios.put(apiUrl, dados, options);
             if (item === 'prg') {
               await dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
-            } else if (item === 'infoCaixa') {
+            } else if (item === 'infoCaixa' || item === 'credito') {
               await dispatch(getSuccess({ item, dados: response.data?.objeto }));
-              params?.onCancel();
+              if (params?.onCancel) params?.onCancel();
             } else if (item === 'minutas' || item === 'coposicaoMinuta' || item === 'clausulaMinuta') {
               await dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto }));
             } else if (item === 'Versionar') {
@@ -385,6 +386,8 @@ export function deleteItem(item, params) {
           (item === 'clausulas' && `${BASEURLGAJI9}/v1/clausulas?id=${params?.id}`) ||
           (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos?grupo_id=${params?.id}`) ||
           (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos?recurso_id=${params?.id}`) ||
+          (item === 'participantes' &&
+            `${BASEURLGAJI9}/v1/suportes/creditos/fiadores?credito_id=${params?.id}&numero_entidade=${params?.numero}`) ||
           '';
 
         if (apiUrl) {

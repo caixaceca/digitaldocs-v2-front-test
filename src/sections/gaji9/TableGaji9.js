@@ -46,7 +46,7 @@ import {
 import MinutaForm from './form-minuta';
 import ClausulaForm from './form-clausula';
 import DetalhesGaji9 from './DetalhesGaji9';
-import CreditForm, { PropostaForm } from './form-credito';
+import { PropostaForm } from './form-credito';
 import { applySortFilter, listaTitrulares, listaGarantias, listaProdutos } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -332,7 +332,6 @@ export default function TableGaji9({ item, inativos }) {
         <>
           {item === 'grupos' && <GrupoForm onCancel={handleCloseModal} />}
           {item === 'funcoes' && <FuncaoForm onCancel={handleCloseModal} />}
-          {item === 'creditos' && <CreditForm onCancel={handleCloseModal} />}
           {item === 'recursos' && <RecursoForm onCancel={handleCloseModal} />}
           {item === 'entidades' && <EntidadeForm onCancel={handleCloseModal} />}
           {item === 'clausulas' && <ClausulaForm onCancel={handleCloseModal} />}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -19,8 +20,8 @@ import DialogPreviewDoc from '../../components/CustomDialog';
 import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
-import { FiadoresForm, PreviewForm } from '../../sections/gaji9/form-credito';
 import InfoCredito, { TableInfoCredito } from '../../sections/gaji9/info-credito';
+import CreditForm, { FiadoresForm, PreviewForm } from '../../sections/gaji9/form-credito';
 // guards
 // import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -39,13 +40,18 @@ export default function PageCreditoDetalhes() {
 
   useEffect(() => {
     if (credito?.id) {
-      dispatch(getFromGaji9('minutasPublicas'));
+      dispatch(getFromGaji9('componentes'));
+      dispatch(getFromGaji9('tiposTitulares'));
+      dispatch(getFromGaji9('tiposGarantias'));
     }
   }, [dispatch, credito?.id]);
 
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
-    { value: 'Participantes', component: <TableInfoCredito dados={credito?.participantes} isLoading={isLoading} /> },
+    {
+      value: 'Participantes',
+      component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} isLoading={isLoading} />,
+    },
   ];
 
   return (
@@ -70,18 +76,21 @@ export default function PageCreditoDetalhes() {
           ]}
           action={
             credito?.ativo && (
-              <>
+              <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' ? (
-                  <DefaultAction
-                    button
-                    icon="pdf"
-                    label="Previsualizar contrato"
-                    handleClick={() => dispatch(openModal('view'))}
-                  />
+                  <>
+                    <DefaultAction label="EDITAR" color="warning" handleClick={() => dispatch(openModal())} />
+                    <DefaultAction
+                      button
+                      icon="pdf"
+                      label="Previsualizar contrato"
+                      handleClick={() => dispatch(openModal('view'))}
+                    />
+                  </>
                 ) : (
                   <DefaultAction button icon="adicionar" label="Fiadores" handleClick={() => dispatch(openModal())} />
                 )}
-              </>
+              </Stack>
             )
           }
         />
@@ -95,8 +104,6 @@ export default function PageCreditoDetalhes() {
               return isMatched && <Box key={tab.value}>{tab.component}</Box>;
             })}
 
-            {isOpenModal && <FiadoresForm id={credito?.id} onCancel={() => dispatch(closeModal())} />}
-            {isOpenView && <PreviewForm creditoId={credito?.id} onCancel={() => dispatch(closeModal())} />}
             {previewFile && (
               <DialogPreviewDoc
                 url={previewFile}
@@ -104,6 +111,15 @@ export default function PageCreditoDetalhes() {
                 onClose={() => dispatch(getSuccess({ item: 'previewFile', dados: '' }))}
               />
             )}
+            {isOpenModal && (
+              <>
+                {currentTab === 'Dados' && (
+                  <CreditForm isEdit dados={credito} onCancel={() => dispatch(closeModal())} />
+                )}
+                {currentTab === 'Participantes' && <FiadoresForm id={id} onCancel={() => dispatch(closeModal())} />}
+              </>
+            )}
+            {isOpenView && <PreviewForm creditoId={id} onCancel={() => dispatch(closeModal())} />}
           </>
         )}
       </Container>

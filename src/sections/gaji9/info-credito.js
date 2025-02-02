@@ -21,13 +21,15 @@ import { ptDateTime, ptDate } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector, useDispatch } from '../../redux/store';
+import { getSuccess, deleteItem } from '../../redux/slices/gaji9';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { CellChecked, Criado } from '../../components/Panel';
+import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
@@ -190,9 +192,14 @@ export default function InfoCredito() {
 
 // ----------------------------------------------------------------------
 
-TableInfoCredito.propTypes = { item: PropTypes.string, dados: PropTypes.array, isLoading: PropTypes.array };
+TableInfoCredito.propTypes = {
+  id: PropTypes.number,
+  item: PropTypes.string,
+  dados: PropTypes.array,
+  isLoading: PropTypes.array,
+};
 
-export function TableInfoCredito({ item = 'participantes', dados = [], isLoading = false }) {
+export function TableInfoCredito({ id, item = 'participantes', dados = [], isLoading = false }) {
   const {
     page,
     order,
@@ -206,6 +213,9 @@ export function TableInfoCredito({ item = 'participantes', dados = [], isLoading
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({});
+
+  const dispatch = useDispatch();
+  const { isSaving, idDelete } = useSelector((state) => state.gaji9);
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
 
   useEffect(() => {
@@ -248,7 +258,13 @@ export function TableInfoCredito({ item = 'participantes', dados = [], isLoading
                           </TableCell>
                           <TableCell align="center" width={10}>
                             <Stack direction="row" spacing={0.5} justifyContent="right">
-                              <DefaultAction label="EDITAR" color="warning" handleClick={() => console.log('Piu')} />
+                              <DefaultAction
+                                label="ELIMINAR"
+                                color="error"
+                                handleClick={() =>
+                                  dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))
+                                }
+                              />
                             </Stack>
                           </TableCell>
                         </>
@@ -274,6 +290,15 @@ export function TableInfoCredito({ item = 'participantes', dados = [], isLoading
           />
         )}
       </Card>
+
+      {!!idDelete && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          desc="eliminar este participante"
+          onClose={() => dispatch(getSuccess({ item: 'idDelete', dados: false }))}
+          handleOk={() => dispatch(deleteItem('participantes', { id, numero: idDelete, item1: 'credito' }))}
+        />
+      )}
     </>
   );
 }

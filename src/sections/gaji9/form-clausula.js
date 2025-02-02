@@ -164,7 +164,7 @@ function Conteudo() {
     () => ({
       titulo: dadosStepper?.titulo || selectedItem?.titulo || '',
       conteudo: dadosStepper?.conteudo || selectedItem?.conteudo || '',
-      numero_ordem: dadosStepper?.numero_ordem || selectedItem?.numero_ordem || (dadosStepper?.seccao && 0) || 1,
+      numero_ordem: dadosStepper?.numero_ordem || selectedItem?.numero_ordem || 1,
     }),
     [dadosStepper, selectedItem]
   );
@@ -323,10 +323,10 @@ function Resumo({ minutaId }) {
       titulo: dadosStepper?.titulo,
       conteudo: dadosStepper?.conteudo,
       solta: dadosStepper?.seccao === 'Solta',
-      numero_ordem: dadosStepper?.numero_ordem,
       tipo_titular_id: dadosStepper?.titular?.id,
       componente_id: dadosStepper?.componente?.id,
       tipo_garantia_id: dadosStepper?.garantia?.id,
+      numero_ordem: dadosStepper?.seccao ? 0 : dadosStepper?.numero_ordem,
       seccao_identificacao: dadosStepper?.seccao === 'Secção de identificação',
       seccao_identificacao_caixa: dadosStepper?.seccao === 'Secção de identificação Caixa',
       ...(dadosStepper?.alineas?.length > 0

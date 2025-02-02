@@ -99,73 +99,63 @@ export default function PageMinutaDetalhes() {
           ]}
           action={
             // <RoleBasedGuard roles={['gaji9-111']}>
-            <>
-              <Stack direction="row" spacing={0.75} alignItems="center">
-                {minuta?.ativo && (
-                  <>
-                    {currentTab === 'Dados' && (
-                      <>
-                        <DefaultAction color="inherit" label="CLONAR" handleClick={() => handleAction('Clonar')} />
-                        {minuta?.em_analise && (
-                          <>
-                            <DefaultAction
-                              label="EDITAR"
-                              color="warning"
-                              handleClick={() => handleAction('Atualizar')}
-                            />
-                            {minuta?.clausulas?.length > 0 && (
-                              <DefaultAction label="PUBLICAR" handleClick={() => handleAction('Publicar')} />
-                            )}
-                          </>
-                        )}
-                        {minuta?.em_vigor && (
-                          <>
-                            <DefaultAction
-                              color="info"
-                              label="VERSIONAR"
-                              handleClick={() => handleAction('Versionar')}
-                            />
-                            <DefaultAction color="error" label="REVOGAR" handleClick={() => handleAction('Revogar')} />
-                          </>
-                        )}
-                      </>
-                    )}
-                    {minuta?.em_analise && (
-                      <>
-                        {currentTab === 'Tipos de garantia' && (
-                          <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal())} />
-                        )}
-                        {currentTab === 'Cláusulas' && (
-                          <>
-                            <DefaultAction label="ADICIONAR" handleClick={() => handleAction('compor')} />
-                            {minuta?.clausulas?.length > 0 && (
-                              <>
-                                <DefaultAction
-                                  icon="editar"
-                                  color="warning"
-                                  label="COMPOSIÇÂO"
-                                  handleClick={() => handleAction('composicao')}
-                                />
-                                <DefaultAction label="ORDENAR" handleClick={() => handleAction('ordenar')} />
-                              </>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
+            <Stack direction="row" spacing={0.75} alignItems="center">
+              {minuta?.ativo && (
+                <>
+                  {currentTab === 'Dados' && (
+                    <>
+                      <DefaultAction color="inherit" label="CLONAR" handleClick={() => handleAction('Clonar')} />
+                      {minuta?.em_analise && (
+                        <>
+                          <DefaultAction label="EDITAR" color="warning" handleClick={() => handleAction('Atualizar')} />
+                          {minuta?.clausulas?.length > 0 && (
+                            <DefaultAction label="PUBLICAR" handleClick={() => handleAction('Publicar')} />
+                          )}
+                        </>
+                      )}
+                      {minuta?.em_vigor && (
+                        <>
+                          <DefaultAction color="info" label="VERSIONAR" handleClick={() => handleAction('Versionar')} />
+                          <DefaultAction color="error" label="REVOGAR" handleClick={() => handleAction('Revogar')} />
+                        </>
+                      )}
+                    </>
+                  )}
+                  {minuta?.em_analise && (
+                    <>
+                      {currentTab === 'Tipos de garantia' && (
+                        <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal())} />
+                      )}
+                      {currentTab === 'Cláusulas' && (
+                        <>
+                          <DefaultAction label="ADICIONAR" handleClick={() => handleAction('compor')} />
+                          {minuta?.clausulas?.length > 0 && (
+                            <>
+                              <DefaultAction
+                                icon="editar"
+                                color="warning"
+                                label="COMPOSIÇÂO"
+                                handleClick={() => handleAction('composicao')}
+                              />
+                              <DefaultAction label="ORDENAR" handleClick={() => handleAction('ordenar')} />
+                            </>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
 
-                {minuta?.clausulas?.length > 0 && (
-                  <DefaultAction
-                    button
-                    icon="pdf"
-                    label="Previsualizar"
-                    handleClick={() => dispatch(getDocumento('previewFile', { id }))}
-                  />
-                )}
-              </Stack>
-            </>
+              {minuta?.clausulas?.length > 0 && (
+                <DefaultAction
+                  button
+                  icon="pdf"
+                  label="Previsualizar"
+                  handleClick={() => dispatch(getDocumento('previewFile', { id }))}
+                />
+              )}
+            </Stack>
             // </RoleBasedGuard>
           }
         />

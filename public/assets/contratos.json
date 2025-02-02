@@ -59,7 +59,7 @@
               {
                 "alinea": "a",
                 "parametros":["juros"],
-                "descricao": "Juros: «juros»;"
+                "descricao": "Juros: {{valor_juros}};"
               },
               {
                 "alinea": "b",

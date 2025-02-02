@@ -57,9 +57,8 @@ export default function PageGaji9Gestao() {
         afterSuccess={() => {
           dispatch(closeModal());
           dispatch(resetDados());
-          if (done === 'Minuta adicionada' && minutaId) {
-            navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
-          }
+          if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
+          if (done === 'Crédito adicionado' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
         }}
       />
       <Container maxWidth={themeStretch ? false : 'xl'}>
