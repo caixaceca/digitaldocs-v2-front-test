@@ -59,10 +59,8 @@ function AjudaDialog({ onClose }) {
   const { mail, perguntas, ajuda, isLoading } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (mail) {
-      dispatch(getFromIntranet('ajuda'));
-      dispatch(getFromIntranet('perguntas'));
-    }
+    if (mail) dispatch(getFromIntranet('ajuda'));
+    if (mail) dispatch(getFromIntranet('perguntas'));
   }, [dispatch, mail]);
 
   const isNotFound = !perguntas.length;

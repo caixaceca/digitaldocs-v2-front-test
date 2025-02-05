@@ -57,10 +57,10 @@ export default function NotistackProvider({ children }) {
         </IconButtonAnimate>
       )}
       Components={{
-        success: StyledMaterialDesignContent,
-        error: StyledMaterialDesignContent,
-        warning: StyledMaterialDesignContent,
         info: StyledMaterialDesignContent,
+        error: StyledMaterialDesignContent,
+        success: StyledMaterialDesignContent,
+        warning: StyledMaterialDesignContent,
       }}
     >
       {children}
@@ -98,27 +98,25 @@ function SnackbarIcon({ icon, color }) {
 
 // ----------------------------------------------------------------------
 
-Notificacao.propTypes = { done: PropTypes.string, error: PropTypes.string, afterSuccess: PropTypes.func };
-
 export function Notificacao({ done, error, afterSuccess = null }) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (done === 'Bem-vindo(a) a GAJ-i9') {
-      enqueueSnackbar(done, { variant: 'success' });
-    } else if (done) {
+    if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      if (afterSuccess) {
-        afterSuccess();
-      }
+      afterSuccess?.();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
 
-  useEffect(() => {
     if (error) {
       enqueueSnackbar(error, { variant: 'error' });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  }, [done, error, enqueueSnackbar, afterSuccess]);
+
+  return null;
 }
+
+Notificacao.propTypes = {
+  afterSuccess: PropTypes.func,
+  done: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]),
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]),
+};

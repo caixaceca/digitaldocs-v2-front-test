@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
+import { Viewer } from '@react-pdf-viewer/core';
 import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
-import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -15,6 +17,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
 //
 import { Fechar } from './Actions';
+import { SearchNotFound } from './table';
+import { Loading } from './LoadingScreen';
 
 // ----------------------------------------------------------------------
 
@@ -73,29 +77,48 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
 
 // ----------------------------------------------------------------------
 
-DialogPreviewDoc.propTypes = { titulo: PropTypes.string, url: PropTypes.string, onClose: PropTypes.func };
+DialogPreviewDoc.propTypes = {
+  url: PropTypes.string,
+  onClose: PropTypes.func,
+  titulo: PropTypes.string,
+  isLoading: PropTypes.bool,
+};
 
-export default function DialogPreviewDoc({ titulo, url, onClose }) {
+export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClose }) {
   const theme = useTheme();
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
 
   return (
-    <Dialog fullScreen open>
+    <Dialog fullScreen open sx={{ '& .MuiDialog-paper': { margin: 0 } }}>
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <DialogTitleAlt title={titulo} sx={{ pb: 2 }} />
-          <DialogActions sx={{ zIndex: 9, padding: '10px !important' }}>
-            <Fechar large handleClick={() => onClose()} />
-          </DialogActions>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1.75 }}>
+          <Typography variant="subtitle1">{titulo}</Typography>
+          <Fechar large handleClick={() => onClose()} />
         </Stack>
-        <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden' }}>
-          <Viewer
-            fileUrl={url}
-            localization={pt}
-            theme={{ theme: theme.palette.mode }}
-            plugins={[defaultLayoutPluginInstance]}
-            defaultScale={SpecialZoomLevel.ActualSize}
-          />
+        <Divider />
+        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Stack alignItems="center" justifyContent="center" sx={{ height: 1 }}>
+            {isLoading ? (
+              <>
+                <Loading />
+                <Typography sx={{ color: 'text.secondary', mt: 3 }}>Carregando o ficheiro...</Typography>
+              </>
+            ) : (
+              <>
+                {!url ? (
+                  <SearchNotFound message="Documento não encontrado..." />
+                ) : (
+                  <Viewer
+                    fileUrl={url}
+                    localization={pt}
+                    defaultScale={1.5}
+                    theme={{ theme: theme.palette.mode }}
+                    plugins={[defaultLayoutPluginInstance]}
+                  />
+                )}
+              </>
+            )}
+          </Stack>
         </Box>
       </Box>
     </Dialog>

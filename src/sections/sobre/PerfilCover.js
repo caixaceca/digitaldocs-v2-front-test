@@ -9,7 +9,7 @@ import { alpha, styled } from '@mui/material/styles';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { getFile } from '../../utils/getFile';
-import { nomeacaoBySexo } from '../../utils/validarAcesso';
+import { nomeacaoBySexo } from '../../utils/formatText';
 // redux
 import { getSuccess } from '../../redux/slices/banka';
 import { useDispatch, useSelector } from '../../redux/store';

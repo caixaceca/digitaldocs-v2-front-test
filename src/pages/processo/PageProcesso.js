@@ -62,9 +62,7 @@ export default function PageProcesso() {
   );
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getProcesso('processo', { id, mail, perfilId, historico }));
-    }
+    if (mail && id && perfilId) dispatch(getProcesso('processo', { id, mail, perfilId, historico }));
   }, [dispatch, perfilId, mail, historico, id]);
 
   const fluxoId = useMemo(() => processo?.fluxo_id, [processo?.fluxo_id]);
@@ -213,21 +211,16 @@ export default function PageProcesso() {
   }, [error]);
 
   useEffect(() => {
-    if (mail && processo?.id && !historico) {
-      dispatch(getAll('htransicoes', { id: processo?.id, mail, perfilId }));
-    }
+    if (mail && processo?.id && !historico) dispatch(getAll('htransicoes', { id: processo?.id, mail, perfilId }));
   }, [dispatch, mail, perfilId, historico, processo?.id]);
 
   useEffect(() => {
-    if (mail && processo?.estado_processo?._lock && estadoId && atribuidoAMim) {
+    if (mail && processo?.estado_processo?._lock && estadoId && atribuidoAMim)
       dispatch(getAll('destinos', { id, mail, perfilId, estadoId }));
-    }
   }, [atribuidoAMim, dispatch, estadoId, id, mail, perfilId, processo?.estado_processo?._lock]);
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
-      setCurrentTab(tabsList?.[0]?.value);
-    }
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
   }, [tabsList, currentTab]);
 
   return (

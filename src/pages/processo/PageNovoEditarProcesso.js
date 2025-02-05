@@ -45,9 +45,7 @@ export default function PageNovoEditarProcesso() {
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getProcesso('processo', { id, mail, perfilId, historico: false }));
-    }
+    if (mail && id && perfilId) dispatch(getProcesso('processo', { id, mail, perfilId, historico: false }));
   }, [dispatch, perfilId, mail, id]);
 
   useEffect(() => {

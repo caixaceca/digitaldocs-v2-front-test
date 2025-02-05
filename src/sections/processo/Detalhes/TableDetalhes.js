@@ -82,9 +82,7 @@ export default function TableDetalhes({ id, item }) {
   const { processo, isLoading, isOpenModal1 } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
-    if (mail && id && item && perfilId) {
-      dispatch(getAll(item, { mail, id, perfilId }));
-    }
+    if (mail && id && item && perfilId) dispatch(getAll(item, { mail, id, perfilId }));
   }, [dispatch, mail, item, perfilId, id]);
 
   useEffect(() => {

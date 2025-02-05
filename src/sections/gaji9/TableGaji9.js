@@ -167,7 +167,9 @@ export default function TableGaji9({ item, inativos }) {
       if (item === 'componentes') {
         dispatch(getSuccess({ item: 'selectedItem', dados }));
       } else {
-        dispatch(getFromGaji9(itemSingle, { id: dados?.id, item: 'selectedItem' }));
+        dispatch(
+          getFromGaji9(itemSingle, { id: item === 'funcoes' ? dados?.utilizador_id : dados?.id, item: 'selectedItem' })
+        );
       }
     }
   };
@@ -195,12 +197,9 @@ export default function TableGaji9({ item, inativos }) {
                         item === 'representantes') &&
                         4) ||
                       (item === 'creditos' && 6) ||
+                      (item === 'clausulas' && 8) ||
                       (item === 'componentes' && 5) ||
-                      ((item === 'minutas' ||
-                        item === 'entidades' ||
-                        item === 'clausulas' ||
-                        item === 'minutasPublicas') &&
-                        7) ||
+                      ((item === 'minutas' || item === 'entidades' || item === 'minutasPublicas') && 7) ||
                       3
                     }
                   />
@@ -233,10 +232,12 @@ export default function TableGaji9({ item, inativos }) {
                       </TableCell>
                       {(item === 'clausulas' && (
                         <>
+                          <TableCell align="right">{row?.numero_ordem}</TableCell>
                           <TableCell>
                             {row?.tipo_titular || noDados()}
                             {row?.consumidor ? ' (Consumidor)' : ''}
                           </TableCell>
+                          <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                           <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                           <TableCell>{row?.componente || noDados()}</TableCell>
                           <TableCell>
@@ -451,13 +452,15 @@ function headerTable(item) {
       ((item === 'tiposGarantias' || item === 'grupos') && [{ id: 'designacao', label: 'Designação' }]) ||
       (item === 'clausulas' && [
         { id: 'titulo', label: 'Título' },
+        { id: 'numero_ordem', label: 'Nº ordem', align: 'right' },
         { id: 'tipo_titular', label: 'Tipo titular' },
         { id: 'tipo_garantia', label: 'Tipo garantia' },
         { id: 'componente', label: 'Produto' },
         { id: '', label: 'Secção' },
       ]) ||
       (item === 'representantes' && [{ id: 'nome', label: 'Nome' }]) ||
-      ((item === 'variaveis' || item === 'recursos') && [
+      (item === 'recursos' && [{ id: 'nome', label: 'Nome' }]) ||
+      (item === 'variaveis' && [
         { id: 'nome', label: 'Nome' },
         { id: 'descritivo', label: 'Descritivo' },
       ]) ||

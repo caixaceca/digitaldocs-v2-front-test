@@ -68,16 +68,22 @@ export function ProdutoForm({ onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const params = useMemo(
+    () => ({ values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, afterSuccess: () => onCancel() }),
+    [values, isEdit, onCancel]
+  );
+
   const onSubmit = async () => {
     if (isEdit) {
       dispatch(
-        updateItem('componentes', JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]), {
-          values,
-          msg: 'Produto rotulado',
-        })
+        updateItem(
+          'componentes',
+          JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]),
+          params
+        )
       );
     } else {
-      dispatch(createItem('componentes', JSON.stringify({ codigo: values?.codigo }), { msg: 'Produto importado' }));
+      dispatch(createItem('componentes', JSON.stringify({ codigo: values?.codigo }), params));
     }
   };
 
@@ -130,10 +136,13 @@ export function EntidadeForm({ onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const params = useMemo(
+    () => ({ numero: selectedItem?.numero, msg: 'Morada atualizada', afterSuccess: () => onCancel() }),
+    [selectedItem?.numero, onCancel]
+  );
+
   const onSubmit = async () => {
-    dispatch(
-      updateItem('entidades', JSON.stringify(values), { numero: selectedItem?.numero, msg: 'Morada atualizada' })
-    );
+    dispatch(updateItem('entidades', JSON.stringify(values), params));
   };
 
   return (
@@ -202,7 +211,9 @@ export function TipoTitularForm({ onCancel }) {
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposTitulares'))}
+          onSubmit={handleSubmit(() =>
+            submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposTitulares', onCancel)
+          )}
         >
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -259,7 +270,9 @@ export function GarantiaForm({ onCancel }) {
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposGarantias'))}
+          onSubmit={handleSubmit(() =>
+            submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposGarantias', onCancel)
+          )}
         >
           <ItemComponent item={selectedItem} rows={2}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -313,7 +326,7 @@ export function MarcadorForm({ onCancel }) {
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'marcadores'))}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'marcadores', onCancel))}
         >
           <ItemComponent item={selectedItem} rows={2}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -461,7 +474,7 @@ export function GrupoForm({ onCancel }) {
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'grupos'))}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'grupos', onCancel))}
         >
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -530,34 +543,42 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const params = useMemo(
+    () => ({
+      getSuccess: true,
+      item: 'selectedItem',
+      afterSuccess: onCancel,
+      id: selectedItem?.action === 'add' ? grupoId : selectedItem?.id,
+      msg: selectedItem?.action === 'add' ? 'Recurso atualizado' : 'Recursos adicionados',
+    }),
+    [grupoId, onCancel, selectedItem?.action, selectedItem?.id]
+  );
+
   const onSubmit = async () => {
     if (selectedItem?.action === 'add') {
-      const formData = values?.recursos?.map((row) =>
-        removerPropriedades(
-          { ...row, recurso_id: row?.recurso?.id, ativo: true, data_inicio: row?.data_inicio || new Date() },
-          ['recurso']
-        )
-      );
-      dispatch(
-        createItem('recursosGrupo', JSON.stringify(formData), {
-          id: grupoId,
-          getSuccess: true,
-          item: 'selectedItem',
-          msg: 'Recursos adicionados',
-        })
-      );
+      const formData = values?.recursos?.map(({ recurso, permissao, data_inicio: di, data_termino: dt }) => {
+        const updatedPermissions = new Set(permissao);
+        updatedPermissions.add('READ');
+        return {
+          ativo: true,
+          data_termino: dt,
+          recurso_id: recurso?.id,
+          data_inicio: di || new Date(),
+          permissao: Array.from(updatedPermissions),
+        };
+      });
+      dispatch(createItem('recursosGrupo', JSON.stringify(formData), params));
     } else {
+      const recurso = values?.recursos?.[0];
       const formData = {
         grupo_id: grupoId,
-        ativo: values?.recursos?.[0]?.ativo,
-        permissao: values?.recursos?.[0]?.permissao,
-        recurso_id: values?.recursos?.[0]?.recurso?.id,
-        data_termino: values?.recursos?.[0]?.data_termino,
-        data_inicio: values?.recursos?.[0]?.data_inicio || new Date(),
+        ativo: recurso?.ativo,
+        permissao: recurso?.permissao,
+        recurso_id: recurso?.recurso?.id,
+        data_termino: recurso?.data_termino,
+        data_inicio: recurso?.data_inicio || new Date(),
       };
-      dispatch(
-        updateItem('recursosGrupo', JSON.stringify(formData), { id: selectedItem?.id, msg: 'Recurso atualizado' })
-      );
+      dispatch(updateItem('recursosGrupo', JSON.stringify(formData), params));
     }
   };
 
@@ -646,7 +667,7 @@ export function RecursoForm({ onCancel }) {
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'recursos'))}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'recursos', onCancel))}
         >
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -699,27 +720,21 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
+    const params = {
+      id: selectedItem?.id,
+      item: 'selectedItem',
+      item1: 'utilizadores',
+      afterSuccess: onCancel,
+      msg: `Utilizador ${selectedItem?.action === 'edit' ? 'atualizado' : 'adicionado'}`,
+    };
     const formData = removerPropriedades(
       { ...values, utilizador_id: values?.colaborador?.id, data_inicio: values?.data_inicio || new Date() },
       ['colaborador']
     );
     if (selectedItem?.action === 'edit') {
-      dispatch(
-        updateItem('colaboradorGrupo', JSON.stringify(formData), {
-          msg: 'Atualizado',
-          id: selectedItem?.id,
-          item: 'selectedItem',
-          item1: 'utilizadores',
-        })
-      );
+      dispatch(updateItem('colaboradorGrupo', JSON.stringify(formData), params));
     } else {
-      dispatch(
-        createItem('colaboradorGrupo', JSON.stringify(formData), {
-          msg: 'Adicionado',
-          item: 'selectedItem',
-          item1: 'utilizadores',
-        })
-      );
+      dispatch(createItem('colaboradorGrupo', JSON.stringify(formData), params));
     }
   };
 
@@ -798,7 +813,7 @@ export function FuncaoForm({ onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Atualizar função' : 'Adicionar função'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Atualizar utilizador' : 'Adicionar utilizador'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
@@ -902,7 +917,8 @@ export function RepresentanteForm({ onCancel }) {
               ),
               isEdit,
               dispatch,
-              'representantes'
+              'representantes',
+              onCancel
             )
           )}
         >
@@ -1038,10 +1054,11 @@ export function ItemComponent({ item, rows, children }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function submitDados(id, values, isEdit, dispatch, item) {
+export function submitDados(id, values, isEdit, dispatch, item, onCancel) {
+  const params = { id, msg: `Item ${isEdit ? 'adicionado' : 'atualizado'}`, afterSuccess: onCancel || null };
   if (isEdit) {
-    dispatch(updateItem(item, JSON.stringify(values), { id, msg: 'Item tualizado' }));
+    dispatch(updateItem(item, JSON.stringify(values), params));
   } else {
-    dispatch(createItem(item, JSON.stringify(values), { msg: 'Item idicionado' }));
+    dispatch(createItem(item, JSON.stringify(values), params));
   }
 }

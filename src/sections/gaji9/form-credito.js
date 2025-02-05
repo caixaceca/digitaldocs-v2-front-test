@@ -122,7 +122,7 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
             }}
           />
         )}
-        {activeStep === 3 && <Garantias isEdit={isEdit} id={dados?.id} />}
+        {activeStep === 3 && <Garantias isEdit={isEdit} id={dados?.id} onCancel={onCancel} />}
       </DialogContent>
     </Dialog>
   );
@@ -284,9 +284,9 @@ function Taxas({ dados, dispatch }) {
 
 // ----------------------------------------------------------
 
-Garantias.propTypes = { isEdit: PropTypes.bool, id: PropTypes.number };
+Garantias.propTypes = { isEdit: PropTypes.bool, id: PropTypes.number, onCancel: PropTypes.func };
 
-function Garantias({ isEdit, id = 0 }) {
+function Garantias({ isEdit, id = 0, onCancel }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving, tiposGarantias } = useSelector((state) => state.gaji9);
@@ -302,6 +302,18 @@ function Garantias({ isEdit, id = 0 }) {
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'garantias' });
 
+  const params = useMemo(
+    () => ({
+      id,
+      msg: `Crédito ${isEdit ? 'atualizado' : 'adicionado'}`,
+      afterSuccess: () => {
+        onCancel();
+        dispatch(resetDados());
+      },
+    }),
+    [dispatch, isEdit, onCancel, id]
+  );
+
   const onSubmit = async () => {
     const formData = {
       ...dadosStepper,
@@ -313,20 +325,9 @@ function Garantias({ isEdit, id = 0 }) {
         : {}),
     };
     if (isEdit) {
-      dispatch(
-        updateItem('credito', JSON.stringify(formData), {
-          id,
-          msg: 'Crédito atualizado',
-          onCancel: () => dispatch(resetDados()),
-        })
-      );
+      dispatch(updateItem('credito', JSON.stringify(formData), params));
     } else {
-      dispatch(
-        createItem('credito', JSON.stringify(formData), {
-          msg: 'Crédito adicionado',
-          onCancel: () => dispatch(resetDados()),
-        })
-      );
+      dispatch(createItem('credito', JSON.stringify(formData), params));
     }
   };
 
@@ -438,15 +439,13 @@ export function FiadoresForm({ id, onCancel }) {
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'fiadores' });
 
+  const params = useMemo(
+    () => ({ id, item: 'credito', getSuccess: true, msg: 'Fiadores adicionados', afterSuccess: () => onCancel() }),
+    [onCancel, id]
+  );
+
   const onSubmit = async () => {
-    dispatch(
-      createItem('fiadores', JSON.stringify(values?.fiadores?.map((row) => row)), {
-        id,
-        item: 'credito',
-        getSuccess: true,
-        msg: 'Fiadores adicionadas',
-      })
-    );
+    dispatch(createItem('fiadores', JSON.stringify(values?.fiadores?.map((row) => row)), params));
   };
 
   return (
@@ -554,7 +553,7 @@ export function PreviewForm({ creditoId, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitleAlt sx={{ mb: 2 }} title="Previsualizar contrato" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -562,7 +561,8 @@ export function PreviewForm({ creditoId, onCancel }) {
             <RHFAutocompleteObj
               name="minuta"
               label="Minuta"
-              options={minutasPublicas?.map(({ id, titulo }) => ({ id, label: titulo }))}
+              disableClearable
+              options={minutasPublicas?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` }))}
             />
           </Stack>
           <DialogButons isSaving={isSaving} onCancel={onCancel} label="Previsualizar" />

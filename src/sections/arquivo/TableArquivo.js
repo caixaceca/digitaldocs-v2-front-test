@@ -116,9 +116,7 @@ export default function TableArquivo({ tab }) {
   }, [dataf, datai, data, dispatch, mail, perfilId, tab]);
 
   useEffect(() => {
-    if (mail && perfilId && tab === 'arquivos') {
-      dispatch(getAll('indicadores arquivos', { mail, perfilId }));
-    }
+    if (mail && perfilId && tab === 'arquivos') dispatch(getAll('indicadores arquivos', { mail, perfilId }));
   }, [dispatch, mail, perfilId, tab]);
 
   useEffect(() => {

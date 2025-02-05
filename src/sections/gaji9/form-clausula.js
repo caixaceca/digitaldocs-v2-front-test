@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFormContext, useFieldArray } from 'react-hook-form';
@@ -12,15 +12,19 @@ import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
 import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
+import SearchIcon from '@mui/icons-material/Search';
+import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
+import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { newLineText } from '../../utils/formatText';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem } from '../../redux/slices/gaji9';
+import { getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
 import { updateDados, resetDados, backStep, gotoStep } from '../../redux/slices/stepper';
 // components
 import {
@@ -45,20 +49,56 @@ ClausulaForm.propTypes = { onCancel: PropTypes.func, minutaId: PropTypes.number 
 
 export default function ClausulaForm({ onCancel, minutaId = 0 }) {
   const dispatch = useDispatch();
+  const [variavel, setVariavel] = useState(null);
   const { activeStep } = useSelector((state) => state.stepper);
-  const { isEdit, selectedItem } = useSelector((state) => state.gaji9);
+  const { isEdit, variaveis, selectedItem } = useSelector((state) => state.gaji9);
+
+  console.log(variaveis);
 
   const onClose = useCallback(() => {
     onCancel();
     dispatch(resetDados());
   }, [onCancel, dispatch]);
 
+  useEffect(() => {
+    dispatch(getFromGaji9('variaveis'));
+  }, [dispatch]);
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt
         title={isEdit ? 'Editar cláusula' : 'Adicionar cláusula'}
         subtitle={
-          <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Alíneas', 'Resumo']} sx={{ mt: 3 }} />
+          <>
+            <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Alíneas', 'Resumo']} sx={{ mt: 3 }} />
+            {(activeStep === 1 || activeStep === 2) && (
+              <Stack sx={{ mb: 2 }}>
+                <Autocomplete
+                  fullWidth
+                  value={variavel}
+                  onChange={(event, newValue) => setVariavel(newValue)}
+                  sx={{ borderRadius: 1, bgcolor: 'background.neutral' }}
+                  options={variaveis
+                    ?.map(({ nome, descritivo }) => `${nome}${descritivo ? ` - ${descritivo}` : ''}`)
+                    ?.sort()}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Procurar varáveis..."
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+              </Stack>
+            )}
+          </>
         }
       />
       <DialogContent>
@@ -66,7 +106,7 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
           {activeStep === 0 && <Identificacao onCancel={onClose} />}
           {activeStep === 1 && <Conteudo />}
           {activeStep === 2 && <Alineas />}
-          {activeStep === 3 && <Resumo minutaId={minutaId} />}
+          {activeStep === 3 && <Resumo minutaId={minutaId} onClose={onClose} />}
         </ItemComponent>
       </DialogContent>
     </Dialog>
@@ -310,12 +350,24 @@ export function Subalineas({ alineaIndex }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-Resumo.propTypes = { minutaId: PropTypes.number };
+Resumo.propTypes = { minutaId: PropTypes.number, onClose: PropTypes.func };
 
-function Resumo({ minutaId }) {
+function Resumo({ minutaId, onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isEdit, selectedItem, isSaving } = useSelector((state) => state.gaji9);
+
+  console.log(selectedItem);
+
+  const params = useMemo(
+    () => ({
+      minutaId,
+      id: selectedItem?.id,
+      afterSuccess: onClose,
+      msg: `Cláusula ${isEdit ? 'atualizada' : 'adicionada'}`,
+    }),
+    [isEdit, minutaId, onClose, selectedItem?.id]
+  );
 
   const handleSubmit = async () => {
     const formData = {
@@ -350,15 +402,9 @@ function Resumo({ minutaId }) {
     };
 
     if (isEdit) {
-      dispatch(
-        updateItem(minutaId > 0 ? 'clausulaMinuta' : 'clausulas', JSON.stringify(formData), {
-          minutaId,
-          id: selectedItem?.id,
-          msg: 'Cláusula atualizada',
-        })
-      );
+      dispatch(updateItem(minutaId > 0 ? 'clausulaMinuta' : 'clausulas', JSON.stringify(formData), params));
     } else {
-      dispatch(createItem('clausulas', JSON.stringify(formData), { msg: 'Cláusula adicionada' }));
+      dispatch(createItem('clausulas', JSON.stringify(formData), params));
     }
   };
 

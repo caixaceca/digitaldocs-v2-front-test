@@ -20,10 +20,9 @@ import DialogPreviewDoc from '../../components/CustomDialog';
 import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
+import AcessoGaji9 from './acesso-gaji9';
 import InfoCredito, { TableInfoCredito } from '../../sections/gaji9/info-credito';
 import CreditForm, { FiadoresForm, PreviewForm } from '../../sections/gaji9/form-credito';
-// guards
-// import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -31,20 +30,18 @@ export default function PageCreditoDetalhes() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
+  const { cc } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabInfoCredito') || 'Dados');
-  const { credito, isLoading, isOpenModal, isOpenView, previewFile, done, error } = useSelector((state) => state.gaji9);
+  const { credito, isLoading, isOpenModal, isOpenView, isLoadingDoc, previewFile, utilizador, done, error } =
+    useSelector((state) => state.gaji9);
 
   useEffect(() => {
     dispatch(getFromGaji9('credito', { id }));
   }, [dispatch, id]);
 
   useEffect(() => {
-    if (credito?.id) {
-      dispatch(getFromGaji9('componentes'));
-      dispatch(getFromGaji9('tiposTitulares'));
-      dispatch(getFromGaji9('tiposGarantias'));
-    }
-  }, [dispatch, credito?.id]);
+    if (cc?.perfil?.id_aad) dispatch(getFromGaji9('utilizador', { id: cc?.perfil?.id_aad }));
+  }, [dispatch, cc?.perfil?.id_aad]);
 
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
@@ -59,8 +56,8 @@ export default function PageCreditoDetalhes() {
       <Notificacao done={done} error={error} afterSuccess={() => dispatch(closeModal())} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
-          tab="tabMinuta"
           tabsList={tabsList}
+          tab="tabInfoCredito"
           currentTab={currentTab}
           changeTab={setCurrentTab}
           title={credito ? `${credito?.rotulo || credito?.componente} - ${credito?.cliente}` : 'Detalhes do crédito'}
@@ -75,7 +72,8 @@ export default function PageCreditoDetalhes() {
             { name: currentTab === 'Dados' ? 'Detalhes do crédito' : currentTab },
           ]}
           action={
-            credito?.ativo && (
+            !!utilizador &&
+            !!credito?.ativo && (
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' ? (
                   <>
@@ -95,33 +93,36 @@ export default function PageCreditoDetalhes() {
           }
         />
 
-        {!isLoading && !credito ? (
-          <SearchNotFound404 message="Crédito não encontrado..." />
-        ) : (
-          <>
-            {tabsList.map((tab) => {
-              const isMatched = tab.value === currentTab;
-              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-            })}
+        <AcessoGaji9>
+          {!isLoading && !credito ? (
+            <SearchNotFound404 message="Crédito não encontrado..." />
+          ) : (
+            <>
+              {tabsList.map((tab) => {
+                const isMatched = tab.value === currentTab;
+                return isMatched && <Box key={tab.value}>{tab.component}</Box>;
+              })}
 
-            {previewFile && (
-              <DialogPreviewDoc
-                url={previewFile}
-                titulo={`Contrato - ${credito?.cliente}`}
-                onClose={() => dispatch(getSuccess({ item: 'previewFile', dados: '' }))}
-              />
-            )}
-            {isOpenModal && (
-              <>
-                {currentTab === 'Dados' && (
-                  <CreditForm isEdit dados={credito} onCancel={() => dispatch(closeModal())} />
-                )}
-                {currentTab === 'Participantes' && <FiadoresForm id={id} onCancel={() => dispatch(closeModal())} />}
-              </>
-            )}
-            {isOpenView && <PreviewForm creditoId={id} onCancel={() => dispatch(closeModal())} />}
-          </>
-        )}
+              {(isLoadingDoc || previewFile) && (
+                <DialogPreviewDoc
+                  url={previewFile}
+                  isLoading={isLoadingDoc}
+                  titulo={`Contrato - ${credito?.cliente}`}
+                  onClose={() => dispatch(getSuccess({ item: 'previewFile', dados: '' }))}
+                />
+              )}
+              {isOpenModal && (
+                <>
+                  {currentTab === 'Dados' && (
+                    <CreditForm isEdit dados={credito} onCancel={() => dispatch(closeModal())} />
+                  )}
+                  {currentTab === 'Participantes' && <FiadoresForm id={id} onCancel={() => dispatch(closeModal())} />}
+                </>
+              )}
+              {isOpenView && <PreviewForm creditoId={id} onCancel={() => dispatch(closeModal())} />}
+            </>
+          )}
+        </AcessoGaji9>
       </Container>
     </Page>
   );

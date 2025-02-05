@@ -31,6 +31,7 @@ const initialState = {
   infoPag: null,
   minutaId: null,
   infoCaixa: null,
+  utilizador: null,
   previewFile: null,
   selectedItem: null,
   estadoMinutas: localStorage.getItem('estadoMinutas') || 'Em análise',
@@ -112,9 +113,7 @@ export function getFromGaji9(item, params) {
       try {
         const apiUrl =
           // DETALHES
-          (item === 'admin' && `${BASEURLGAJI9}/v1/admin`) ||
           (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao`) ||
-          (item === 'funcao' && `${BASEURLGAJI9}/v1/acs/roles?id=${params?.id}`) ||
           (item === 'minuta' && `${BASEURLGAJI9}/v1/minutas/detail?id=${params?.id}`) ||
           (item === 'grupo' && `${BASEURLGAJI9}/v1/acs/grupos?grupo_id=${params?.id}`) ||
           (item === 'variavel' && `${BASEURLGAJI9}/v1/variaveis/detail?id=${params?.id}`) ||
@@ -125,7 +124,9 @@ export function getFromGaji9(item, params) {
           (item === 'tipoGarantia' && `${BASEURLGAJI9}/v1/tipos_garantias/detail?id=${params?.id}`) ||
           (item === 'representante' && `${BASEURLGAJI9}/v1/acs/representantes/detail?id=${params?.id}`) ||
           (item === 'grupo recurso' && `${BASEURLGAJI9}/v1/acs/grupos/recurso/detail?id=${params?.id}`) ||
+          (item === 'funcao' && `${BASEURLGAJI9}/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
           (item === 'credito' && `${BASEURLGAJI9}/v1/suportes/creditos/detail?credito_id=${params?.id}`) ||
+          (item === 'utilizador' && `${BASEURLGAJI9}/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
           (item === 'entidade' && `${BASEURLGAJI9}/v1/suportes/entidades/detail?entidade_id=${params?.id}`) ||
           (item === 'gerarDocumento' && `${BASEURLGAJI9}/v1/minutas/gerar/documento?minuta_id=${params?.id}`) ||
           (item === 'ordenarClausulas' && `${BASEURLGAJI9}/v1/minutas/ordenar/clausulas?minuta_id=${params?.id}`) ||
@@ -134,8 +135,8 @@ export function getFromGaji9(item, params) {
           // LISTA
           (item === 'minutasPublicas' && `${BASEURLGAJI9}/v1/minutas/publicas`) ||
           (item === 'importar componentes' && `${BASEURLGAJI9}/v1/produtos/importar`) ||
-          (item === 'gruposUtilizador' && `${BASEURLGAJI9}/v1/acs/grupos/utilizador`) ||
           (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos/lista?ativo=${!params?.inativos}`) ||
+          (item === 'funcoes' && `${BASEURLGAJI9}/v1/acs/roles/lista?ativo=${!params?.inativos}`) ||
           (item === 'variaveis' && `${BASEURLGAJI9}/v1/variaveis/lista?ativo=${!params?.inativos}`) ||
           (item === 'componentes' && `${BASEURLGAJI9}/v1/produtos/lista?ativo=${!params?.inativos}`) ||
           (item === 'marcadores' && `${BASEURLGAJI9}/v1/marcadores/lista?ativo=${!params?.inativos}`) ||
@@ -146,8 +147,6 @@ export function getFromGaji9(item, params) {
           (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/lista?ativo=${!params?.inativos}`) ||
           (item === 'creditos' &&
             `${BASEURLGAJI9}/v1/suportes/creditos/por_balcao?balcao=${params?.balcao}&cursor=${params?.cursor || 0}`) ||
-          (item === 'funcoes' &&
-            `${BASEURLGAJI9}/v1/acs/roles/lista?pagina=${params?.pagina || 0}&ativo=${!params?.inativos}`) ||
           (item === 'minutas' &&
             `${BASEURLGAJI9}/v1/minutas/lista?em_analise=${params?.emAnalise}&em_vigor=${params?.emVigor}&revogado=${params?.revogado}&ativo=${!params?.inativos}`) ||
           (item === 'searchEntidade' &&
@@ -162,19 +161,23 @@ export function getFromGaji9(item, params) {
           if (params?.resetLista) {
             dispatch(slice.actions.resetItem({ item, tipo: 'array' }));
           }
+          const headers = { headers: { Authorization: `Bearer ${accessToken}` } };
           dispatch(slice.actions.setLoading(true));
-          const response = await axios.get(apiUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
+          const response = await axios.get(apiUrl, headers);
 
-          if (item === 'admin') {
-            doneSucess('Bem-vindo(a) a GAJ-i9', dispatch, slice.actions.responseMsg);
-          } else if (item === 'grupo') {
-            const utilizadores = await axios.get(`${BASEURLGAJI9}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, {
-              headers: { Authorization: `Bearer ${accessToken}` },
-            });
+          if (item === 'grupo') {
+            const uts = await axios.get(`${BASEURLGAJI9}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, headers);
             dispatch(
               slice.actions.getSuccess({
                 item: 'selectedItem',
-                dados: { ...response.data?.objeto, utilizadores: utilizadores.data?.objeto },
+                dados: { ...response.data?.objeto, utilizadores: uts.data?.objeto },
+              })
+            );
+          } else if (item === 'funcao') {
+            dispatch(
+              slice.actions.getSuccess({
+                item: params?.item || item,
+                dados: { ...response.data?.objeto?.utilizador, grupos: response.data?.objeto?.grupos },
               })
             );
           } else {
@@ -222,12 +225,10 @@ export function getDocumento(item, params) {
         dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: false }));
       }
     } catch (error) {
-      // hasError(error, dispatch, slice.actions.responseMsg);
       const uint8Array = new Uint8Array(error.response.data);
       const decodedString = new TextDecoder('ISO-8859-1').decode(uint8Array);
       hasError({ message: JSON.parse(decodedString)?.mensagem || 'Erro' }, dispatch, slice.actions.responseMsg);
     }
-    dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: false }));
   };
 }
 
@@ -270,7 +271,6 @@ export function createItem(item, dados, params) {
             );
           } else if (params?.getSuccess) {
             dispatch(getSuccess({ item: params?.item || item, dados: response.data?.objeto }));
-            if (params?.onCancel) params?.onCancel();
           } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas' || item === 'credito') {
             dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
           } else if (item === 'variaveis') {
@@ -285,6 +285,7 @@ export function createItem(item, dados, params) {
             );
           }
         }
+        params?.afterSuccess?.();
         doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
       } catch (error) {
         hasError(error, dispatch, slice.actions.responseMsg);
@@ -329,7 +330,7 @@ export function updateItem(item, dados, params) {
           (item === 'removerGaranMinuta' && `${BASEURLGAJI9}/v1/minutas/remover/tipos_garantias?id=${params?.id}`) ||
           (item === 'coposicaoMinuta' && `${BASEURLGAJI9}/v1/minutas/atualizar/composicao?minuta_id=${params?.id}`) ||
           (item === 'clausulaMinuta' &&
-            `${BASEURLGAJI9}/v1/minutas/atualizar/clausula?minuta_id=${params?.minutaId}&clausula_id=2${params?.id}`) ||
+            `${BASEURLGAJI9}/v1/minutas/atualizar/clausula?minuta_id=${params?.minutaId}&clausula_id=${params?.id}`) ||
           '';
 
         if (apiUrl) {
@@ -343,7 +344,6 @@ export function updateItem(item, dados, params) {
               await dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
             } else if (item === 'infoCaixa' || item === 'credito') {
               await dispatch(getSuccess({ item, dados: response.data?.objeto }));
-              if (params?.onCancel) params?.onCancel();
             } else if (item === 'minutas' || item === 'coposicaoMinuta' || item === 'clausulaMinuta') {
               await dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto }));
             } else if (item === 'Versionar') {
@@ -366,6 +366,7 @@ export function updateItem(item, dados, params) {
             }
           }
         }
+        params?.afterSuccess?.();
         doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
       } catch (error) {
         hasError(error, dispatch, slice.actions.responseMsg);

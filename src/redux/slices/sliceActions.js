@@ -6,57 +6,92 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // ----------------------------------------------------------------------
 
 export function actionGet(state, payload) {
-  if (payload?.item === 'cc') {
-    state.dateUpdate = new Date();
-    state.perfilId = payload?.dados?.perfil_id || '';
-  }
-  if (payload?.item === 'accessToken') {
-    localStorage.setItem('accessToken', payload);
-  }
-  if (payload.label) {
-    state[payload.item] = dadosLabel(payload?.dados, payload.label);
-  } else if (payload?.item === 'creditos') {
-    state.infoPag = { proximo_cursor: payload?.dados?.proximo_cursor, ha_mais: payload?.dados?.ha_mais };
-    state.creditos = [...state.creditos, ...payload?.dados?.objeto];
-  } else {
-    state[payload.item] = payload?.dados;
+  if (!payload || !payload?.item) return;
+
+  const { item, dados, label } = payload;
+
+  switch (item) {
+    case 'cc':
+      state.dateUpdate = new Date();
+      state.perfilId = dados?.perfil_id || '';
+      state[item] = { ...dados, perfil: state.perfil };
+      break;
+
+    case 'accessToken':
+      if (dados) state[item] = dados;
+      if (dados) localStorage.setItem('accessToken', dados);
+      break;
+
+    case 'creditos':
+      state.creditos = [...(state.creditos || []), ...(dados?.objeto || [])];
+      state.infoPag = { proximo_cursor: dados?.proximo_cursor, ha_mais: dados?.ha_mais };
+      break;
+
+    default:
+      state[item] = label ? dadosLabel(dados, label) : dados;
+      break;
   }
 }
 
 export function actionCreate(state, payload) {
-  if (Array.isArray(payload.dados) && payload.item1) {
-    state[payload.item1][payload.item] = [...state[payload.item1][payload.item], ...payload.dados];
-  } else if (Array.isArray(payload.dados)) {
-    state[payload.item] = [...state[payload.item], ...payload.dados];
-  } else if (payload.item && payload.item1) {
-    state[payload.item1][payload.item].push(payload.dados);
+  if (!payload || !payload.item) return;
+
+  const { item, item1, dados } = payload;
+
+  if (Array.isArray(dados)) {
+    if (item1) {
+      state[item1] = state[item1] || {};
+      state[item1][item] = [...(state[item1][item] || []), ...dados];
+    } else {
+      state[item] = [...(state[item] || []), ...dados];
+    }
+  } else if (item1) {
+    state[item1] = state[item1] || {};
+    state[item1][item] = state[item1][item] || [];
+    state[item1][item].push(dados);
   } else {
-    state[payload.item].push(payload.dados);
+    state[item] = state[item] || [];
+    state[item].push(dados);
   }
 }
 
 export function actionUpdate(state, payload) {
-  if (payload.item1) {
-    const index = state?.[payload.item1]?.[payload.item].findIndex((row) => row.id === payload.dados.id);
-    if (index > -1) {
-      state[payload.item1][payload.item][index] = payload.dados;
-    }
-  } else {
-    const index = state?.[payload.item].findIndex((row) => row.id === payload.dados.id);
-    if (index > -1) {
-      state[payload.item][index] = payload.dados;
+  if (!payload?.item || !payload?.dados?.id) return;
+
+  const { item, item1, dados } = payload;
+  const target = item1 ? state?.[item1]?.[item] : state?.[item];
+
+  if (!Array.isArray(target)) return;
+
+  const index = target.findIndex((row) => row.id === dados.id);
+
+  if (index > -1) {
+    const updatedArray = [...target];
+    updatedArray[index] = dados;
+
+    if (item1) {
+      state[item1] = { ...state[item1], [item]: updatedArray };
+    } else {
+      state[item] = updatedArray;
     }
   }
 }
 
 export function actionDelete(state, payload) {
-  if (payload.item1) {
-    state[payload.item1][payload.item] = state[payload.item1][payload.item].filter((row) => row.id !== payload.id);
-  } else if (payload.desativar) {
-    const index = state[payload.item].findIndex((row) => row.id === payload.id);
-    state[payload.item][index].ativo = false;
+  if (!payload?.item || !payload?.id) return;
+
+  const { item, item1, id, desativar } = payload;
+  const target = item1 ? state?.[item1]?.[item] : state?.[item];
+
+  if (!Array.isArray(target)) return;
+
+  if (item1) {
+    state[item1][item] = target.filter((row) => row.id !== id);
+  } else if (desativar) {
+    const index = target.findIndex((row) => row.id === id);
+    state[item][index].ativo = false;
   } else {
-    state[payload.item] = state[payload.item].filter((row) => row.id !== payload.id);
+    state[item] = target.filter((row) => row.id !== id);
   }
 }
 

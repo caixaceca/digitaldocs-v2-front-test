@@ -33,15 +33,11 @@ export default function Versoes({ id }) {
   };
 
   useEffect(() => {
-    if (processo?.hversoes?.length > 0) {
-      setAccord(processo?.hversoes?.[0]?.updated_in);
-    }
+    if (processo?.hversoes?.length > 0) setAccord(processo?.hversoes?.[0]?.updated_in);
   }, [dispatch, processo?.hversoes]);
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getAll('hversoes', { mail, id, perfilId }));
-    }
+    if (mail && id && perfilId) dispatch(getAll('hversoes', { mail, id, perfilId }));
   }, [dispatch, id, mail, perfilId]);
 
   return (

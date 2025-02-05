@@ -1,36 +1,28 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 // @mui
-import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
-import Tooltip from '@mui/material/Tooltip';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
-import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
-import CloseIcon from '@mui/icons-material/Close';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { newLineText } from '../../utils/formatText';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { newLineText, noDados } from '../../utils/formatText';
 // redux
-import { updateItem } from '../../redux/slices/gaji9';
-import { useSelector, useDispatch } from '../../redux/store';
+import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
+import { DTFechar } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import { DefaultAction, DTFechar } from '../../components/Actions';
-import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 //
-import { RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
+import GrupoDetail from './detalhes-grupo';
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 
 // ----------------------------------------------------------------------
@@ -50,54 +42,6 @@ export default function DetalhesGaji9({ closeModal, item }) {
           )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-GrupoDetail.propTypes = { dados: PropTypes.object };
-
-function GrupoDetail({ dados }) {
-  const [currentTab, setCurrentTab] = useState('Info');
-  const { colaboradores } = useSelector((state) => state.intranet);
-
-  const tabsList = [
-    { value: 'Info', component: <DetalhesContent dados={dados} /> },
-    {
-      value: 'Recursos',
-      component: <RecursosUtilizadores id={dados?.id} dados={dados?.recursos_permissoes || []} recursos />,
-    },
-    {
-      value: 'Colaboradores',
-      component: (
-        <RecursosUtilizadores
-          id={dados?.id}
-          dados={dados?.utilizadores?.map((row) => ({
-            ...row,
-            colaborador: colaboradores?.find(
-              (item) =>
-                item?.perfil?.id_aad === row?.utilizador_id ||
-                item?.perfil?.mail?.toLowerCase() === row?.email?.toLowerCase()
-            ),
-          }))}
-        />
-      ),
-    },
-  ];
-
-  return (
-    <>
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        changeTab={(_, newValue) => setCurrentTab(newValue)}
-        sx={{ mt: 2, mb: 1 }}
-      />
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
-    </>
   );
 }
 
@@ -127,128 +71,6 @@ function ClausulaDetail({ dados }) {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;
       })}
-    </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-RecursosUtilizadores.propTypes = { id: PropTypes.string, dados: PropTypes.array, recursos: PropTypes.bool };
-
-function RecursosUtilizadores({ id, dados, recursos = false }) {
-  const dispatch = useDispatch();
-  const [item, setItem] = useState(null);
-
-  return (
-    <>
-      <Table size="small" sx={{ mt: 3 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell>{recursos ? 'Recurso' : 'Utilizador'}</TableCell>
-            <TableCell>Data</TableCell>
-            <TableCell>{recursos ? 'Permissões' : 'Função'}</TableCell>
-            {recursos && (
-              <TableCell align="center" width={10}>
-                Ativo
-              </TableCell>
-            )}
-            <TableCell width={10}>
-              {!!id && <DefaultAction label="ADICIONAR" small handleClick={() => setItem({ action: 'add' })} />}
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {dados?.map((row, index) => (
-            <TableRow hover key={`${row?.id}_${id}_${index}`}>
-              <TableCell>
-                {recursos ? (
-                  row?.recurso
-                ) : (
-                  <ColaboradorInfo
-                    labelAltCaption
-                    id={row?.colaborador?.id}
-                    labelAlt={row?.utilizador_id}
-                    foto={row?.colaborador?.foto_disk}
-                    caption={!row?.colaborador?.uo?.label}
-                    nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
-                    label={row?.colaborador?.uo?.desegnicao || 'Perfil sem ID_AAD na Intranet'}
-                  />
-                )}
-              </TableCell>
-              <TableCell>
-                <DataLabel data={row?.data_inicio || ''} />
-                <DataLabel data={row?.data_termino || ''} termino />
-              </TableCell>
-              <TableCell>
-                {recursos ? (
-                  <Stack direction="row" useFlexGap flexWrap="wrap" spacing={0.5}>
-                    {row?.permissoes?.map((item, index) => (
-                      <Label
-                        key={`${row?.id}_${item}_${id}_${index}`}
-                        color={
-                          (item === 'READ' && 'info') ||
-                          (item === 'DELETE' && 'error') ||
-                          (item === 'CREATE' && 'success') ||
-                          (item === 'UPDATE' && 'warning') ||
-                          'default'
-                        }
-                        endIcon={
-                          <Tooltip title="ELIMINAR" arrow>
-                            <Fab
-                              color="error"
-                              sx={{ width: 15, minHeight: 15, height: 15, m: 0.2 }}
-                              onClick={() =>
-                                dispatch(
-                                  updateItem(
-                                    'prg',
-                                    JSON.stringify({ grupo_id: id, recurso_id: row?.recurso_id, permissao: item }),
-                                    { grupoId: id }
-                                  )
-                                )
-                              }
-                            >
-                              <CloseIcon />
-                            </Fab>
-                          </Tooltip>
-                        }
-                      >
-                        {item}
-                      </Label>
-                    ))}
-                  </Stack>
-                ) : (
-                  row?._role || noDados()
-                )}
-              </TableCell>
-              {recursos && <CellChecked check={row.ativo} />}
-              <TableCell>
-                <DefaultAction
-                  small
-                  label="EDITAR"
-                  color="warning"
-                  handleClick={() => setItem({ action: 'edit', ...row })}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-          {dados?.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={5}>
-                <SearchNotFoundSmall message="Nenhum registo disponível..." />
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      {!!item && (
-        <>
-          {recursos ? (
-            <RecursoGrupoForm grupoId={id} selectedItem={item} onCancel={() => setItem(null)} />
-          ) : (
-            <UtilizadorGrupoForm grupoId={id} selectedItem={item} onCancel={() => setItem(null)} />
-          )}
-        </>
-      )}
     </>
   );
 }
@@ -371,7 +193,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="Tipo titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
                     <TableRowItem title="Tipo garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
                     <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
-                    <TableRowItem title="Conteúdo:" text={dados?.conteudo} />
+                    <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
                     {dados?.data_emissao && <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />}
                     {dados?.valido_ate && <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />}
                     {dados?.data_inicio && <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />}
@@ -436,20 +258,5 @@ export function DetalhesContent({ dados = null, item = '' }) {
         </>
       )}
     </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-DataLabel.propTypes = { data: PropTypes.string, termino: PropTypes.bool };
-
-function DataLabel({ data = '', termino = false }) {
-  return (
-    <Stack direction="row" spacing={0.5}>
-      <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>{termino ? 'Término' : 'Início'}:</Typography>
-      <Typography sx={{ typography: 'caption', fontStyle: !data && 'italic', pr: !data && 0.15 }}>
-        {data ? ptDateTime(data) : '(Não definido)'}
-      </Typography>
-    </Stack>
   );
 }

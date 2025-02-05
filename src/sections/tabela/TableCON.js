@@ -82,15 +82,12 @@ export default function TableCON({ item = 'con' }) {
   );
 
   useEffect(() => {
-    if (mail && item === 'con' && dataValido(datai) && dataValido(dataf)) {
+    if (mail && item === 'con' && dataValido(datai) && dataValido(dataf))
       dispatch(getAll('con', { mail, dataFim: format(dataf, 'yyyy-MM-dd'), dataInicio: format(datai, 'yyyy-MM-dd') }));
-    }
   }, [dispatch, mail, item, datai, dataf]);
 
   useEffect(() => {
-    if (mail && item === 'pjf') {
-      dispatch(getAll('pjf', { mail, pagina: 0 }));
-    }
+    if (mail && item === 'pjf') dispatch(getAll('pjf', { mail, pagina: 0 }));
   }, [dispatch, mail, item]);
 
   useEffect(() => {
@@ -106,9 +103,8 @@ export default function TableCON({ item = 'con' }) {
   const isNotFound = !dataFiltered.length;
 
   const mostrarMais = () => {
-    if (mail && item === 'pjf' && processosInfo?.proxima_pagina) {
+    if (mail && item === 'pjf' && processosInfo?.proxima_pagina)
       dispatch(getAll('pjf', { mail, pagina: processosInfo?.proxima_pagina }));
-    }
   };
 
   const handleView = (id) => {

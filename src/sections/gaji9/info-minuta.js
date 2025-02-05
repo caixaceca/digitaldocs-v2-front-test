@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -78,15 +78,19 @@ export function TableInfoMinuta({ item, onClose }) {
   });
   const isNotFound = !dataFiltered.length;
 
+  const params = useMemo(
+    () => ({
+      patch: true,
+      item: 'minuta',
+      id: minuta?.id,
+      msg: 'Tipo de garantia eliminado',
+      afterSuccess: () => dispatch(getSuccess({ item: 'idDelete', dados: false })),
+    }),
+    [minuta?.id, dispatch]
+  );
+
   const eliminarTipoGarantia = () => {
-    dispatch(
-      updateItem('removerGaranMinuta', JSON.stringify({ tipos_garantias: [idDelete] }), {
-        patch: true,
-        item: 'minuta',
-        id: minuta?.id,
-        msg: 'Tipos de garantia eliminado',
-      })
-    );
+    dispatch(updateItem('removerGaranMinuta', JSON.stringify({ tipos_garantias: [idDelete] }), params));
   };
 
   const viewActions = (modal, dados) => {

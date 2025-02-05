@@ -85,22 +85,25 @@ export function InfoForm({ onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
+    const params = {
+      onCancel,
+      getSuccess: true,
+      id: infoCaixa?.id,
+      afterSuccess: onCancel,
+      msg: `Informações ${infoCaixa ? 'atualizadas' : 'adicionadas'}`,
+    };
     if (infoCaixa) {
-      dispatch(
-        updateItem('infoCaixa', JSON.stringify(values), { onCancel, id: infoCaixa?.id, msg: 'Informações atualizadas' })
-      );
+      dispatch(updateItem('infoCaixa', JSON.stringify(values), params));
     } else {
-      dispatch(
-        createItem('infoCaixa', JSON.stringify(values), { getSuccess: true, onCancel, msg: 'Informações adicionadas' })
-      );
+      dispatch(createItem('infoCaixa', JSON.stringify(values), params));
     }
   };
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3} sx={{ pt: 3 }}>
-        <GridItem sm={4} children={<RHFTextField name="nome" label="Nome" />} />
-        <GridItem sm={8} children={<RHFTextField name="designacao" label="Designação" />} />
+        <GridItem sm={8} children={<RHFTextField name="nome" label="Nome" />} />
+        <GridItem sm={4} children={<RHFTextField name="designacao" label="Designação" />} />
         <GridItem sm={6} children={<RHFNumberField name="nif" label="NIF" />} />
         <GridItem sm={6} children={<RHFNumberField name="capital_social" label="Capital social" />} />
         <GridItem sm={6} children={<RHFNumberField name="num_matricula" label="Nº matricula" />} />

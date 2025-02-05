@@ -89,7 +89,14 @@ export function utilizadoresGaji9(colaboradores, funcoes, from) {
   const idsFuncoes = funcoes?.map((row) => row?.utilizador_id) || [];
 
   return perfisAad(
-    colaboradores?.filter((item) => idsFuncoes?.includes(item?.perfil?.id_aad)),
+    colaboradores?.filter((row) => idsFuncoes?.includes(row?.perfil?.id_aad)),
     from
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function sortPermissoes(actions) {
+  const fixedOrder = ['READ', 'CREATE', 'UPDATE', 'DELETE'];
+  return [...(actions || [])].sort((a, b) => fixedOrder.indexOf(a) - fixedOrder.indexOf(b));
 }

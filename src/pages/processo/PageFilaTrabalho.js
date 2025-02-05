@@ -100,15 +100,12 @@ export default function PageFilaTrabalho() {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabProcessos');
-    }
   }, [tabsList, currentTab]);
 
   useEffect(() => {
-    if (mail && perfilId && meusAmbientes?.length > 0) {
-      dispatch(getIndicadores('totalP', { mail, perfilId }));
-    }
+    if (mail && perfilId && meusAmbientes?.length > 0) dispatch(getIndicadores('totalP', { mail, perfilId }));
   }, [dispatch, mail, currentTab, perfilId, meusAmbientes?.length]);
 
   return (

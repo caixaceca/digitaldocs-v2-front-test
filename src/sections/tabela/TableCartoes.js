@@ -109,7 +109,7 @@ export default function TableCartoes() {
       onClose1();
       onClose2();
       setSelected([]);
-      if (mail && fase && datai && ((fase === 'Receção' && uo?.id) || fase === 'Emissão')) {
+      if (mail && fase && datai && ((fase === 'Receção' && uo?.id) || fase === 'Emissão'))
         dispatch(
           getAll(fase, {
             mail,
@@ -118,7 +118,6 @@ export default function TableCartoes() {
             dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
           })
         );
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -135,7 +134,7 @@ export default function TableCartoes() {
   }, [uosList, fase, uo, cc?.uo?.balcao]);
 
   useEffect(() => {
-    if (mail && datai && fase === 'Emissão') {
+    if (mail && datai && fase === 'Emissão')
       dispatch(
         getAll(fase, {
           mail,
@@ -143,11 +142,10 @@ export default function TableCartoes() {
           dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
         })
       );
-    }
   }, [dispatch, datai, dataf, fase, mail]);
 
   useEffect(() => {
-    if (mail && datai && uo?.id && fase === 'Receção') {
+    if (mail && datai && uo?.id && fase === 'Receção')
       dispatch(
         getAll(fase, {
           mail,
@@ -156,7 +154,6 @@ export default function TableCartoes() {
           dataInicio: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
         })
       );
-    }
   }, [dispatch, uo?.id, datai, dataf, fase, mail]);
 
   useEffect(() => {

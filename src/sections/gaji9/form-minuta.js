@@ -21,6 +21,8 @@ import { RHFSwitch, FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteO
 //
 import { listaTitrulares, listaProdutos, listaGarantias, listaClausulas } from './applySortFilter';
 
+const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 MinutaForm.propTypes = { onCancel: PropTypes.func, action: PropTypes.string, minuta: PropTypes.object };
@@ -223,7 +225,7 @@ export function ComposicaoForm({ onCancel, action }) {
       clausulasGarant: false,
       clausulas:
         action === 'compor'
-          ? [{ clausula: null, numero: (minuta?.clausulas?.length || 0) + 1 }]
+          ? [{ clausula: null, numero: '' }]
           : minuta?.clausulas?.map((row) => ({
               ativo: row?.ativo,
               numero: row?.numero_ordem,
@@ -233,7 +235,7 @@ export function ComposicaoForm({ onCancel, action }) {
     [action, minuta]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
+  const { watch, control, setValue, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'clausulas' });
 
@@ -265,56 +267,42 @@ export function ComposicaoForm({ onCancel, action }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitleAlt
-        sx={{ mb: 2 }}
-        title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'}
-        action={
-          action === 'compor' &&
-          clausulasList?.length > 0 && (
-            <AddItem
-              small
-              label="Cláusula"
-              handleClick={() =>
-                append({ clausula: null, numero: (minuta?.clausulas?.length || 0) + fields?.length + 1 })
-              }
-            />
-          )
-        }
-      />
+      <DialogTitleAlt sx={{ mb: 2 }} title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 1 }}>
             <PesquisarClausulas titularId={minuta?.tipo_titular_id} componenteId={minuta?.componente_id} />
-            {fields.map((item, index) => {
-              const clausulaSel = clausulasList?.find((row) => row?.id === values?.clausulas?.[index]?.clausula?.id);
-              return (
-                <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
-                  <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-                    <RHFNumberField label="Nº ordem" name={`clausulas[${index}].numero`} sx={{ width: 80 }} />
-                    <Stack sx={{ flexGrow: 1 }}>
-                      <RHFAutocompleteObj
-                        label="Cláusula"
-                        disableClearable
-                        options={clausulasList}
-                        readOnly={action !== 'compor'}
-                        name={`clausulas[${index}].clausula`}
-                      />
-                      <ItemInfoClausula label="Conteúdo" value={clausulaSel?.conteudo} />
-                      {/* <ItemInfoClausula label="Componente" value={clausulaSel?.componente} />
-                      <ItemInfoClausula label="Tipo de titular" value={clausulaSel?.titular} />
-                      <ItemInfoClausula label="Tipo de garantia" value={clausulaSel?.garantia} /> */}
-                    </Stack>
-                    {action !== 'compor' && (
-                      <RHFSwitch name={`clausulas[${index}].ativo`} label="Ativo" sx={{ width: 100 }} />
-                    )}
+            {fields.map((item, index) => (
+              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+                <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
+                  <Stack sx={{ flexGrow: 1 }}>
+                    <RHFAutocompleteObj
+                      label="Cláusula"
+                      disableClearable
+                      options={clausulasList}
+                      readOnly={action !== 'compor'}
+                      name={`clausulas[${index}].clausula`}
+                      onChange={(event, newValue) => {
+                        setValue(`clausulas[${index}].clausula`, newValue, vsv);
+                        setValue(`clausulas[${index}].numero`, newValue?.numero_ordem, vsv);
+                      }}
+                    />
                   </Stack>
-                  {action === 'compor' && values.clausulas.length > 1 && (
-                    <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                  <RHFNumberField label="Nº ordem" name={`clausulas[${index}].numero`} sx={{ width: 100 }} />
+                  {action !== 'compor' && (
+                    <RHFSwitch name={`clausulas[${index}].ativo`} label="Ativo" sx={{ width: 100 }} />
                   )}
                 </Stack>
-              );
-            })}
-            {action === 'compor' && <RHFSwitch name="clausulasGarant" label="Carregar cláusulas de garantias" />}
+                {action === 'compor' && values.clausulas.length > 1 && (
+                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                )}
+              </Stack>
+            ))}
+            {action === 'compor' && clausulasList?.length > 0 && (
+              <Stack alignItems="center">
+                <AddItem small label="Cláusula" handleClick={() => append({ clausula: null, numero: '' })} />
+              </Stack>
+            )}
           </Stack>
           <DialogButons edit={action !== 'compor'} isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
@@ -353,8 +341,6 @@ export function PesquisarClausulas({ componenteId = 0, titularId = 0 }) {
   const { watch } = methods;
   const values = watch();
 
-  console.log(values);
-
   useEffect(() => {
     dispatch(
       getFromGaji9('clausulas', {
@@ -384,25 +370,6 @@ export function PesquisarClausulas({ componenteId = 0, titularId = 0 }) {
         </Stack>
       </Stack>
     </FormProvider>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-ItemInfoClausula.propTypes = { label: PropTypes.string, value: PropTypes.string };
-
-export function ItemInfoClausula({ label, value = '' }) {
-  return value ? (
-    <Stack direction="row" spacing={0.5} alignItems="center">
-      <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-        {label}:
-      </Typography>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-        {value}
-      </Typography>
-    </Stack>
-  ) : (
-    ''
   );
 }
 

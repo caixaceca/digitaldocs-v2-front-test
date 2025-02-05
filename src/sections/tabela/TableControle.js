@@ -94,7 +94,7 @@ export default function TableControle({ from }) {
   }, [uosList, uo, cc?.uo?.id]);
 
   useEffect(() => {
-    if (mail && uo?.id && dataValido(dataf) && dataValido(datai) && (from === 'Entradas' || from === 'Devoluções')) {
+    if (mail && uo?.id && dataValido(dataf) && dataValido(datai) && (from === 'Entradas' || from === 'Devoluções'))
       dispatch(
         getAll(from, {
           mail,
@@ -104,19 +104,15 @@ export default function TableControle({ from }) {
           dataInicio: format(datai, 'yyyy-MM-dd'),
         })
       );
-    }
   }, [dispatch, perfilId, uo?.id, mail, datai, dataf, from]);
 
   useEffect(() => {
-    if (mail && data && uo?.id && dataValido(data) && from === 'Trabalhados') {
+    if (mail && data && uo?.id && dataValido(data) && from === 'Trabalhados')
       dispatch(getAll(from, { mail, uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
-    }
   }, [dispatch, uo?.id, data, from, mail]);
 
   useEffect(() => {
-    if (mail && perfilId && from === 'Por concluir') {
-      dispatch(getAll(from, { perfilId, mail }));
-    }
+    if (mail && perfilId && from === 'Por concluir') dispatch(getAll(from, { perfilId, mail }));
   }, [dispatch, perfilId, from, mail]);
 
   const dados = useMemo(

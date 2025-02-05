@@ -7,6 +7,12 @@ export function temAcesso(acessos, acessosList) {
   return !!acessosList?.find((row) => acessos?.includes(row));
 }
 
+// ----------------------------------------------------------------------
+
+export function acessoGaji9(acessos, acessosList) {
+  return !!acessosList?.find((row) => acessos?.includes(row));
+}
+
 export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (
@@ -21,28 +27,6 @@ export function temNomeacao(colaborador) {
     nomeacao = colaborador?.nomeacao;
   }
   return nomeacao;
-}
-
-// ----------------------------------------------------------------------
-
-export function nomeacaoBySexo(nomeacao, sexo) {
-  let _nomeaca = nomeacao;
-
-  if (nomeacao === 'Diretor' && sexo === 'Feminino') {
-    _nomeaca = 'Diretora';
-  } else if (nomeacao === 'Coordenador de Gabinete' && sexo === 'Feminino') {
-    _nomeaca = 'Coordenadora de Gabinete';
-  } else if (nomeacao === 'Coordenador de Serviço' && sexo === 'Feminino') {
-    _nomeaca = 'Coordenadora de Serviço';
-  } else if (nomeacao === 'Coordenador Adjunto' && sexo === 'Feminino') {
-    _nomeaca = 'Coordenador Adjunta';
-  } else if (nomeacao === 'Assessor' && sexo === 'Feminino') {
-    _nomeaca = 'Assessora';
-  } else if (nomeacao === 'Coordenador Gabinete') {
-    _nomeaca = 'Coordenador de Gabinete';
-  }
-
-  return _nomeaca;
 }
 
 // ----------------------------------------------------------------------

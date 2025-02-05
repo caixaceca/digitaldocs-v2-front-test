@@ -22,6 +22,7 @@ const initialState = {
   cc: null,
   frase: null,
   ajuda: null,
+  perfil: null,
   accessToken: null,
   docIdentificacao: null,
   dateUpdate: new Date(),

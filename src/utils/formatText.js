@@ -18,6 +18,7 @@ export function normalizeText(text) {
 // ----------------------------------------------------------------------
 
 export function newLineText(text) {
+  if (!text) return '';
   const newText = text.split('\n').map((str) => <p key={str}>{str}</p>);
   return newText;
 }
@@ -120,6 +121,26 @@ export function contaCliEnt(dados) {
     (dados?.entidades && baralharString(entidadesParse(dados?.entidades))) ||
     noDados()
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function nomeacaoBySexo(nomeacao, sexo) {
+  if (nomeacao === 'Diretor' && sexo === 'Feminino') {
+    nomeacao = 'Diretora';
+  } else if (nomeacao === 'Coordenador de Gabinete' && sexo === 'Feminino') {
+    nomeacao = 'Coordenadora de Gabinete';
+  } else if (nomeacao === 'Coordenador de Serviço' && sexo === 'Feminino') {
+    nomeacao = 'Coordenadora de Serviço';
+  } else if (nomeacao === 'Coordenador Adjunto' && sexo === 'Feminino') {
+    nomeacao = 'Coordenador Adjunta';
+  } else if (nomeacao === 'Assessor' && sexo === 'Feminino') {
+    nomeacao = 'Assessora';
+  } else if (nomeacao === 'Coordenador Gabinete') {
+    nomeacao = 'Coordenador de Gabinete';
+  }
+
+  return nomeacao;
 }
 
 // ----------------------------------------------------------------------

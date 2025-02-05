@@ -170,7 +170,7 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   }, [estadosList, estado]);
 
   useEffect(() => {
-    if (mail && perfilId && tab) {
+    if (mail && perfilId && tab)
       dispatch(
         getIndicadores(tab, {
           mail,
@@ -191,7 +191,6 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
           agrupamento: agrupamento === 'Colaborador' ? 'perfil' : 'uo',
         })
       );
-    }
   }, [
     tab,
     ano,
@@ -528,9 +527,7 @@ export function FileSystem() {
   });
 
   useEffect(() => {
-    if (mail && perfilId) {
-      dispatch(getIndicadores('fileSystem', { mail, perfilId }));
-    }
+    if (mail && perfilId) dispatch(getIndicadores('fileSystem', { mail, perfilId }));
   }, [dispatch, perfilId, mail]);
 
   return (

@@ -53,7 +53,7 @@ function SubTabsGaji9({ item, label, inativos, setInativos }) {
     localStorage.getItem(`subTabGaji9${item}`) ||
       (item === 'identificadores' && 'Produtos') ||
       (item === 'intervenientes' && 'Entidades') ||
-      'Grupos'
+      'Utilizadores'
   );
 
   const handleChangeTab = async (event, newValue) => {
@@ -62,8 +62,8 @@ function SubTabsGaji9({ item, label, inativos, setInativos }) {
 
   const tabsList = [
     ...((item === 'acessos' && [
+      { value: 'Utilizadores', component: <TableGaji9 item="funcoes" inativos={inativos} /> },
       { value: 'Grupos', component: <TableGaji9 item="grupos" inativos={inativos} /> },
-      { value: 'Funções', component: <TableGaji9 item="funcoes" inativos={inativos} /> },
       { value: 'Recursos', component: <TableGaji9 item="recursos" inativos={inativos} /> },
     ]) ||
       (item === 'intervenientes' && [
@@ -136,9 +136,6 @@ function HeaderBreadcrumb({ label, inativos, setInativos }) {
             )}
             {label !== 'Intervenientes - Entidades' && (
               <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal('add'))} />
-            )}
-            {label === 'Acessos - Grupos' && (
-              <DefaultAction label="ADMIN" handleClick={() => dispatch(getFromGaji9('admin'))} />
             )}
           </Stack>
         )

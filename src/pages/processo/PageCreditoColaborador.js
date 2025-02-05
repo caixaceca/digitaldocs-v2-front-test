@@ -159,21 +159,16 @@ export default function PageCreditoColaborador() {
   };
 
   useEffect(() => {
-    if (mail && id && perfilId) {
-      dispatch(getFromCC('pedido cc', { id, perfilId, mail }));
-    }
+    if (mail && id && perfilId) dispatch(getFromCC('pedido cc', { id, perfilId, mail }));
   }, [dispatch, id, perfilId, mail]);
 
   useEffect(() => {
-    if (mail && pedidoCC?.id) {
-      dispatch(getFromCC('htransicoes', { mail, id: pedidoCC?.id }));
-    }
+    if (mail && pedidoCC?.id) dispatch(getFromCC('htransicoes', { mail, id: pedidoCC?.id }));
   }, [dispatch, pedidoCC?.id, mail]);
 
   useEffect(() => {
-    if (mail && id && pedidoCC?.preso && pedidoCC?.perfil_id === perfilId) {
+    if (mail && id && pedidoCC?.preso && pedidoCC?.perfil_id === perfilId)
       dispatch(getFromCC('destinos', { id, perfilId, mail }));
-    }
   }, [dispatch, id, perfilId, mail, pedidoCC?.preso, pedidoCC?.perfil_id]);
 
   useEffect(() => {

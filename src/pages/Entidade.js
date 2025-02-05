@@ -55,9 +55,7 @@ export default function Entidade() {
   );
 
   useEffect(() => {
-    if (mail && perfilId && numEntidade) {
-      dispatch(getFromBanka('entidade', { mail, perfilId, numEntidade }));
-    }
+    if (mail && perfilId && numEntidade) dispatch(getFromBanka('entidade', { mail, perfilId, numEntidade }));
   }, [dispatch, perfilId, numEntidade, mail]);
 
   const changeNumero = () => {

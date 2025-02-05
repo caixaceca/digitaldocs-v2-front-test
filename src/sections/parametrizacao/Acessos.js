@@ -9,8 +9,7 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { normalizeText } from '../../utils/formatText';
-import { nomeacaoBySexo } from '../../utils/validarAcesso';
+import { normalizeText, nomeacaoBySexo } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux

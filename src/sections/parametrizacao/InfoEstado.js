@@ -12,7 +12,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
 import { ptDateTime } from '../../utils/formatTime';
-import { nomeacaoBySexo } from '../../utils/validarAcesso';
+import { nomeacaoBySexo } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
