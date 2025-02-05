@@ -238,7 +238,6 @@ export default function TableGaji9({ item, inativos }) {
                             {row?.consumidor ? ' (Consumidor)' : ''}
                           </TableCell>
                           <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
-                          <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                           <TableCell>{row?.componente || noDados()}</TableCell>
                           <TableCell>
                             {(row?.solta && 'Solta') ||
