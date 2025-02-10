@@ -66,3 +66,10 @@ export function listaClausulas(clausulas, idsClausulas) {
       //   : null),
     }));
 }
+
+export function dadosComColaborador(dados, colaboradores) {
+  return dados?.map((row) => ({
+    ...row,
+    nome: colaboradores?.find((item) => item?.perfil_id === row?.perfil_id)?.perfil?.displayName || row?.perfil_id,
+  }));
+}

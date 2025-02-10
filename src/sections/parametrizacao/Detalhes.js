@@ -327,9 +327,9 @@ export function Resgisto({ label, por = '', em = '' }) {
 
 TableRowItem.propTypes = {
   item: PropTypes.node,
-  text: PropTypes.string,
-  title: PropTypes.string,
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  text: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export function TableRowItem({ title, id = 0, text = '', item = null }) {

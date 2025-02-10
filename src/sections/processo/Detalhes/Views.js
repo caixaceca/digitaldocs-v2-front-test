@@ -9,9 +9,8 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
 // redux
-import { getFromCC } from '../../../redux/slices/cc';
-import { getAll } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
+import { getInfoProcesso } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { SkeletonBar } from '../../../components/skeleton';
@@ -20,18 +19,16 @@ import { ColaboradorInfo } from '../../../components/Panel';
 
 // ----------------------------------------------------------------------
 
-Views.propTypes = { id: PropTypes.number, from: PropTypes.string, isLoading: PropTypes.bool };
+Views.propTypes = { id: PropTypes.number, isLoading: PropTypes.bool };
 
-export default function Views({ id, from = '', isLoading }) {
+export default function Views({ id, isLoading }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { pedidoCC } = useSelector((state) => state.cc);
   const { processo } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const viewsGroupByColaborador = useMemo(
-    () =>
-      groupByColaborador(from === 'cc' ? pedidoCC?.hvisualizacoes || [] : processo?.hvisualizacoes || [], 'perfil_id'),
-    [from, pedidoCC?.hvisualizacoes, processo?.hvisualizacoes]
+    () => groupByColaborador(processo?.hvisualizacoes || [], 'perfil_id'),
+    [processo?.hvisualizacoes]
   );
 
   const handleAccord = (panel) => (event, isExpanded) => {
@@ -39,12 +36,8 @@ export default function Views({ id, from = '', isLoading }) {
   };
 
   useEffect(() => {
-    if (mail && id && from === 'cc') {
-      dispatch(getFromCC('hvisualizacoes', { mail, id }));
-    } else if (mail && id) {
-      dispatch(getAll('hvisualizacoes', { mail, id, perfilId }));
-    }
-  }, [dispatch, id, from, mail, perfilId]);
+    if (id) dispatch(getInfoProcesso('hvisualizacoes', { id }));
+  }, [dispatch, id]);
 
   return (
     <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>

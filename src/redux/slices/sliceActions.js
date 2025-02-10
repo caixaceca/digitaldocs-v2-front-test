@@ -17,11 +17,6 @@ export function actionGet(state, payload) {
       state[item] = { ...dados, perfil: state.perfil };
       break;
 
-    case 'accessToken':
-      if (dados) state[item] = dados;
-      if (dados) localStorage.setItem('accessToken', dados);
-      break;
-
     case 'creditos':
       state.creditos = [...(state.creditos || []), ...(dados?.objeto || [])];
       state.infoPag = { proximo_cursor: dados?.proximo_cursor, ha_mais: dados?.ha_mais };
@@ -144,3 +139,36 @@ function dadosLabel(dados, item) {
     getComparator('asc', 'label')
   );
 }
+
+// ----------------------------------------------------------------------
+
+export function headerOptions({ accessToken, mail = '', cc, ct, mfd }) {
+  if (cc) {
+    return {
+      headers: {
+        cc: mail,
+        Authorization: `Bearer ${accessToken}`,
+        ...(ct ? { 'content-type': mfd ? 'multipart/form-data' : 'application/json' } : {}),
+      },
+    };
+  }
+
+  return {
+    headers: {
+      'Current-Colaborador': mail,
+      Authorization: `Bearer ${accessToken}`,
+      ...(ct ? { 'content-type': mfd ? 'multipart/form-data' : 'application/json' } : {}),
+    },
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export const selectUtilizador = (state) => {
+  if (!state) return {};
+
+  const { mail, perfilId, cc } = state;
+  const idColaborador = cc ? cc.id : null;
+
+  return { mail, perfilId, idColaborador };
+};

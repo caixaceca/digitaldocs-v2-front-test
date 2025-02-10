@@ -34,7 +34,7 @@ import { getFile } from '../../utils/getFile';
 import { baralharString } from '../../utils/formatText';
 import { setItemValue } from '../../utils/formatObject';
 import { fNumber, fPercent, fNumber2, fData } from '../../utils/formatNumber';
-import { UosAcesso, EstadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
+import { UosAcesso, estadosAcesso, ColaboradoresAcesso } from '../../utils/validarAcesso';
 import { fYear, fMonthYear, ptDate, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
 // hooks
 import useToggle from '../../hooks/useToggle';
@@ -74,24 +74,8 @@ Cabecalho.propTypes = {
 export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsList = [], currentTab = '', changeTab }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const [datai, setDatai] = useState(getDataLS('dataIIndic', null));
-  const [dataf, setDataf] = useState(getDataLS('dataFIndic', null));
-  const [origem, setOrigem] = useState(localStorage.getItem('origem') || 'Interna');
-  const [entrada, setEntrada] = useState(localStorage.getItem('entrada') === 'true');
-  const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
-  const [agrEntradas, setAgrEntradas] = useState(localStorage.getItem('agrEntradas') || 'Balcão');
-  const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
-  const [ano, setAno] = useState(
-    localStorage.getItem('anoIndic') ? add(new Date(localStorage.getItem('anoIndic')), { hours: 2 }) : new Date()
-  );
-  const { mail, perfilId, cc, uos, colaboradores } = useSelector((state) => state.intranet);
+  const { perfilId, cc, uos, colaboradores } = useSelector((state) => state.intranet);
   const { isAdmin, isAuditoria, meusAmbientes, fluxos, estados } = useSelector((state) => state.parametrizacao);
-
-  const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
-  const [fluxo, setFluxo] = useState(
-    fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic'))) || null
-  );
-
   const uosList = useMemo(
     () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'id'),
     [cc, isAdmin, isAuditoria, meusAmbientes, uos]
@@ -102,24 +86,12 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
       null
   );
 
+  // LISTA DE ITEMS
+  const fluxosList = useMemo(() => fluxos?.map((row) => ({ id: row?.id, label: row?.assunto })), [fluxos]);
   const balcoesList = useMemo(
     () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'balcao'),
     [cc, isAdmin, isAuditoria, meusAmbientes, uos]
   );
-  const [balcao, setBalcao] = useState(
-    balcoesList?.find((row) => Number(row?.id) === Number(localStorage.getItem('balcaoIndic'))) ||
-      balcoesList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
-      null
-  );
-
-  const estadosList = useMemo(
-    () => EstadosAcesso(uos, cc, isAdmin || isAuditoria, estados, meusAmbientes),
-    [cc, estados, isAdmin, isAuditoria, meusAmbientes, uos]
-  );
-  const [estado, setEstado] = useState(
-    estadosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic'))) || null
-  );
-
   const colaboradoresList = useMemo(
     () =>
       uo?.id && tab !== 'execucao' && tab !== 'conclusao'
@@ -128,6 +100,33 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
           )
         : ColaboradoresAcesso(colaboradores, cc, isAdmin || isAuditoria, meusAmbientes),
     [cc, colaboradores, isAdmin, isAuditoria, meusAmbientes, tab, uo?.id]
+  );
+  const estadosList = useMemo(
+    () => estadosAcesso(uos, cc, isAdmin || isAuditoria, estados, meusAmbientes),
+    [cc, estados, isAdmin, isAuditoria, meusAmbientes, uos]
+  );
+
+  // VARIAVEIS
+  const [datai, setDatai] = useState(getDataLS('dataIIndic', null));
+  const [dataf, setDataf] = useState(getDataLS('dataFIndic', null));
+  const [origem, setOrigem] = useState(localStorage.getItem('origem') || 'Interna');
+  const [entrada, setEntrada] = useState(localStorage.getItem('entrada') === 'true');
+  const [momento, setMomento] = useState(localStorage.getItem('momento') || 'Criação no sistema');
+  const [agrEntradas, setAgrEntradas] = useState(localStorage.getItem('agrEntradas') || 'Balcão');
+  const [agrupamento, setAgrupamento] = useState(localStorage.getItem('agrupamento') || 'Unidade orgânica');
+  const [ano, setAno] = useState(
+    localStorage.getItem('anoIndic') ? add(new Date(localStorage.getItem('anoIndic')), { hours: 2 }) : new Date()
+  );
+  const [fluxo, setFluxo] = useState(
+    fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic'))) || null
+  );
+  const [balcao, setBalcao] = useState(
+    balcoesList?.find((row) => Number(row?.id) === Number(localStorage.getItem('balcaoIndic'))) ||
+      balcoesList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) ||
+      null
+  );
+  const [estado, setEstado] = useState(
+    estadosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic'))) || null
   );
   const [perfil, setPerfil] = useState(
     colaboradoresList?.find((row) => Number(row?.id) === Number(localStorage.getItem('colaboradorIndic'))) ||
@@ -170,14 +169,12 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   }, [estadosList, estado]);
 
   useEffect(() => {
-    if (mail && perfilId && tab)
+    if (perfilId && tab)
       dispatch(
         getIndicadores(tab, {
-          mail,
           origem,
           entrada,
           periodo,
-          perfilId,
           uo: uo?.id,
           agrEntradas,
           fluxo: fluxo?.id,
@@ -194,7 +191,6 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
   }, [
     tab,
     ano,
-    mail,
     datai,
     dataf,
     balcao,
@@ -466,8 +462,14 @@ export function Cabecalho({ title, tab, top, periodo, setTop, setPeriodo, tabsLi
 export function FileSystem() {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { perfilId } = useSelector((state) => state.intranet);
   const { fileSystem, isLoading } = useSelector((state) => state.indicadores);
+
+  useEffect(() => {
+    if (perfilId) dispatch(getIndicadores('fileSystem', null));
+  }, [dispatch, perfilId]);
+
+  const tamanho = 500000000000;
   const chartOptions = useChart({
     chart: { offsetY: -16, sparkline: { enabled: true } },
     grid: { padding: { top: 24, bottom: 24 } },
@@ -480,16 +482,10 @@ export function FileSystem() {
         dataLabels: {
           name: { offsetY: 8 },
           value: { offsetY: -50 },
-          total: {
-            color: theme.palette.text.disabled,
-            label: `Usado de ${fData(500000000000)}`,
-            fontSize: theme.typography.body2.fontSize,
-            fontWeight: theme.typography.body2.fontWeight,
-          },
+          total: { label: `Usado de ${fData(tamanho)}`, fontSize: theme.typography.body2.fontSize },
         },
       },
     },
-    fill: { type: 'gradient', gradient: { type: 'horizontal', opacityTo: 1, stops: [0, 100] } },
   });
 
   const total = { tipo: 'Total', qnt: 0, tamanho: 0, file: 'folder' };
@@ -526,10 +522,6 @@ export function FileSystem() {
     }
   });
 
-  useEffect(() => {
-    if (mail && perfilId) dispatch(getIndicadores('fileSystem', { mail, perfilId }));
-  }, [dispatch, perfilId, mail]);
-
   return (
     <Card>
       <IndicadorItem
@@ -542,7 +534,7 @@ export function FileSystem() {
                 height={500}
                 type="radialBar"
                 options={chartOptions}
-                series={[((total?.tamanho * 100) / 500000000000).toFixed(2)]}
+                series={[total?.tamanho > 0 ? ((total?.tamanho * 100) / tamanho).toFixed(2) : 0]}
               />
             </Grid>
             <Grid item xs={12} sm={6}>

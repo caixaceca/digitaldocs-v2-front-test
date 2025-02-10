@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+// utils
+import { setItemValue } from '../../utils/formatObject';
 // redux
 import { useSelector } from '../../redux/store';
 // hooks
@@ -32,6 +34,12 @@ export default function PageIndicadores() {
     ],
     [isAdmin]
   );
+
+  useEffect(() => {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabIndicadores', false);
+    }
+  }, [tabsList, currentTab]);
 
   // const handleNotificationClick = () => {
   //   if (Notification.permission === 'granted') {

@@ -10,6 +10,7 @@ export function temAcesso(acessos, acessosList) {
 // ----------------------------------------------------------------------
 
 export function acessoGaji9(acessos, acessosList) {
+  if (!acessos || acessos?.length === 0) return false;
   return !!acessosList?.find((row) => acessos?.includes(row));
 }
 
@@ -85,7 +86,7 @@ export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
 
 // ----------------------------------------------------------------------
 
-export function EstadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
+export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
   let estadosList = [];
   const uosDOP = uos?.filter((uo) => uo?.label?.includes('DOP'))?.map((row) => row?.id);
   const uosDCS = uos?.filter((uo) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Sul')?.map((row) => row?.id);

@@ -84,7 +84,7 @@ TabsWrapperSimple.propTypes = {
 
 export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
   return (
-    <Card sx={{ height: 50, position: 'relative', ...sx }}>
+    <Card sx={{ height: 50, position: 'relative', mb: 3, ...sx }}>
       <TabsWrapperStyleSimple sx={{ bgcolor: sx?.boxShadow === 'none' && 'background.neutral' }}>
         <Tabs
           value={currentTab}

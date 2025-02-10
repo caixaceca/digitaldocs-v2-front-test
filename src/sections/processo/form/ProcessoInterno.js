@@ -13,7 +13,7 @@ import { LoadingButton } from '@mui/lab';
 import { deGmkt } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
+import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
@@ -360,7 +360,7 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
       } else {
         formData.append('uo_origem_id', meuAmbiente?.uo_id);
         formData.append('estado_atual_id', meuAmbiente?.id);
-        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
+        dispatch(createProcesso('interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

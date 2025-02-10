@@ -1,7 +1,9 @@
 import { m } from 'framer-motion';
 // @mui
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 //
 import Logo from './Logo';
@@ -57,5 +59,16 @@ export function Loading() {
         </m.div>
       </Box>
     </Box>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+export function LoadingPanel({ ...other }) {
+  return (
+    <Stack direction="column" alignItems="center" justifyContent="center" sx={{ height: 1 }}>
+      <Loading />
+      <Typography sx={{ color: 'text.secondary', mt: 3 }}>{other?.msg}</Typography>
+    </Stack>
   );
 }

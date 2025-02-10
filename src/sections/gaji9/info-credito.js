@@ -17,6 +17,7 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { noDados } from '../../utils/formatText';
 import { fNumber } from '../../utils/formatNumber';
+import { acessoGaji9 } from '../../utils/validarAcesso';
 import { ptDateTime, ptDate } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -192,14 +193,9 @@ export default function InfoCredito() {
 
 // ----------------------------------------------------------------------
 
-TableInfoCredito.propTypes = {
-  id: PropTypes.number,
-  item: PropTypes.string,
-  dados: PropTypes.array,
-  isLoading: PropTypes.array,
-};
+TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, isLoading: PropTypes.array };
 
-export function TableInfoCredito({ id, item = 'participantes', dados = [], isLoading = false }) {
+export function TableInfoCredito({ id, dados = [], isLoading = false }) {
   const {
     page,
     order,
@@ -215,8 +211,8 @@ export function TableInfoCredito({ id, item = 'participantes', dados = [], isLoa
   } = useTable({});
 
   const dispatch = useDispatch();
-  const { isSaving, idDelete } = useSelector((state) => state.gaji9);
-  const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
+  const { isSaving, idDelete, utilizador } = useSelector((state) => state.gaji9);
+  const [filter, setFilter] = useState(localStorage.getItem('filterParticipante') || '');
 
   useEffect(() => {
     setPage(0);
@@ -229,46 +225,53 @@ export function TableInfoCredito({ id, item = 'participantes', dados = [], isLoa
   return (
     <>
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple item={`filter_${item}`} filter={filter} setFilter={setFilter} />
+        <SearchToolbarSimple item="filterParticipante" filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
+              <TableHeadCustom
+                order={order}
+                onSort={onSort}
+                orderBy={orderBy}
+                headLabel={[
+                  { id: 'numero_entidade', label: 'Nº entidade' },
+                  { id: 'nome', label: 'Nome' },
+                  { id: 'designacao', label: 'Designação' },
+                  { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
+                  { id: 'mutuario', label: 'Mutuário', align: 'center' },
+                  { id: 'fiador', label: 'Fiador', align: 'center' },
+                  { id: 'ativo', label: 'Ativo', align: 'center' },
+                  { id: 'modificado_em', label: 'Modificado' },
+                  { id: '', width: 10 },
+                ]}
+              />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={(item === 'participantes' && 9) || 4} />
+                  <SkeletonTable row={10} column={9} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                    <TableRow hover key={`${item}_${index}`}>
-                      {item === 'participantes' && (
-                        <>
-                          <TableCell>{row?.numero_entidade}</TableCell>
-                          <TableCell>{row?.nome}</TableCell>
-                          <TableCell>{row?.designacao}</TableCell>
-                          <TableCell align="right">{row?.numero_ordem}</TableCell>
-                          <CellChecked check={row.mutuario} />
-                          <CellChecked check={row.fiador} />
-                          <CellChecked check={row.ativo} />
-                          <TableCell>
-                            {!row?.modficiado_por && !row?.modificado_em && noDados('Sem modificações')}
-                            {row?.modficiado_por && <Criado caption tipo="user" value={row?.modficiado_por} />}
-                            {row?.modificado_em && (
-                              <Criado caption tipo="data" value={ptDateTime(row?.modificado_em)} />
-                            )}
-                          </TableCell>
-                          <TableCell align="center" width={10}>
-                            <Stack direction="row" spacing={0.5} justifyContent="right">
-                              <DefaultAction
-                                label="ELIMINAR"
-                                color="error"
-                                handleClick={() =>
-                                  dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))
-                                }
-                              />
-                            </Stack>
-                          </TableCell>
-                        </>
-                      )}
+                    <TableRow hover key={`participante_${index}`}>
+                      <TableCell>{row?.numero_entidade}</TableCell>
+                      <TableCell>{row?.nome}</TableCell>
+                      <TableCell>{row?.designacao}</TableCell>
+                      <TableCell align="right">{row?.numero_ordem}</TableCell>
+                      <CellChecked check={row.mutuario} />
+                      <CellChecked check={row.fiador} />
+                      <CellChecked check={row.ativo} />
+                      <TableCell>
+                        {!row?.modficiado_por && !row?.modificado_em && noDados('Sem modificações')}
+                        {row?.modficiado_por && <Criado caption tipo="user" value={row?.modficiado_por} />}
+                        {row?.modificado_em && <Criado caption tipo="data" value={ptDateTime(row?.modificado_em)} />}
+                      </TableCell>
+                      <TableCell align="center" width={10}>
+                        {(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_CREDITO'])) && (
+                          <DefaultAction
+                            label="ELIMINAR"
+                            color="error"
+                            handleClick={() => dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))}
+                          />
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -301,21 +304,4 @@ export function TableInfoCredito({ id, item = 'participantes', dados = [], isLoa
       )}
     </>
   );
-}
-
-function headerTable(item) {
-  return [
-    ...((item === 'participantes' && [
-      { id: 'numero_entidade', label: 'Nº entidade' },
-      { id: 'nome', label: 'Nome' },
-      { id: 'designacao', label: 'Designação' },
-      { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
-      { id: 'mutuario', label: 'Mutuário', align: 'center' },
-      { id: 'fiador', label: 'Fiador', align: 'center' },
-      { id: 'ativo', label: 'Ativo', align: 'center' },
-      { id: 'modificado_em', label: 'Modificado' },
-    ]) ||
-      []),
-    { id: '', width: 10 },
-  ];
 }

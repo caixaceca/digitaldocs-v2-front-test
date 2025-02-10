@@ -7,7 +7,7 @@ import { noEstado, podeArquivar, processoEstadoInicial } from '../../utils/valid
 import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
-import { selectAnexo, getAll, selectItem } from '../../redux/slices/digitaldocs';
+import { getInfoProcesso, selectAnexo, selectItem } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // routes
@@ -172,14 +172,13 @@ Desarquivar.propTypes = { id: PropTypes.number, colaboradoresList: PropTypes.arr
 
 export function Desarquivar({ id, colaboradoresList }) {
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isOpenModal1 } = useSelector((state) => state.digitaldocs);
   return (
     <>
       <DefaultAction
         color="error"
         label="DESARQUIVAR"
-        handleClick={() => dispatch(getAll('destinosDesarquivamento', { mail, id, perfilId }))}
+        handleClick={() => dispatch(getInfoProcesso('destinosDesarquivamento', { id }))}
       />
       {isOpenModal1 && <DesarquivarForm id={id} colaboradoresList={colaboradoresList} />}
     </>

@@ -17,7 +17,7 @@ import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getAll, selectParecer } from '../../../redux/slices/digitaldocs';
+import { getInfoProcesso, selectParecer } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
@@ -78,12 +78,12 @@ export default function TableDetalhes({ id, item }) {
   } = useTable();
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { processo, isLoading, isOpenModal1 } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
-    if (mail && id && item && perfilId) dispatch(getAll(item, { mail, id, perfilId }));
-  }, [dispatch, mail, item, perfilId, id]);
+    if (id && item) dispatch(getInfoProcesso(item, { id }));
+  }, [dispatch, item, id]);
 
   useEffect(() => {
     setPage(0);

@@ -66,7 +66,7 @@ function SubTabsParametrizacao({ item, label }) {
   return (
     <>
       <HeaderBreadcrumb label={`${label} - ${currentTab}`} fluxo={fluxo} setFluxo={setFluxo} fluxosList={fluxosList} />
-      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
+      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
       {tabsList.map((tab) => {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;

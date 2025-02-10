@@ -96,14 +96,6 @@ export default function PageProcura() {
   });
   const isNotFound = !dataFiltered.length;
 
-  const handleView = (id, isCC) => {
-    if (isCC) {
-      navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/cc/${id}?from=Pesquisa`);
-    } else {
-      navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${id}?from=Pesquisa`);
-    }
-  };
-
   const verMais = () => {
     if (mail && perfilId) {
       if (localStorage.getItem('tipoPesquisa') === 'avancada') {
@@ -213,7 +205,9 @@ export default function PageProcura() {
                         <TableCell align="center">
                           <DefaultAction
                             label="DETALHES"
-                            handleClick={() => handleView(row?.id, row?.credito_colaborador)}
+                            handleClick={() =>
+                              navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${row?.id}?from=Pesquisa`)
+                            }
                           />
                         </TableCell>
                       </TableRow>
@@ -247,26 +241,28 @@ export default function PageProcura() {
 
 // ----------------------------------------------------------------------
 
-function setDados({ pesquisa, uos }) {
-  const dados = [];
-  const estados = [];
-  const assuntos = [];
-  const uosOrigem = [];
-  pesquisa?.forEach((row) => {
-    const uo = uos?.find((uo) => uo?.id === row?.uo_origem_id);
-    if (uo && !uosOrigem.includes(uo?.label)) {
-      uosOrigem.push(uo?.label);
-    }
-    if (!estados.includes(row?.estado)) {
-      estados.push(row?.estado);
-    }
-    if (!assuntos.includes(row?.assunto)) {
-      assuntos.push(row?.assunto);
-    }
-    dados?.push({ ...row, uo: uo?.label, tipo: uo?.tipo, entidades: entidadesParse(row?.entidades) });
+function setDados({ pesquisa = [], uos = [] }) {
+  const uosMap = new Map(uos.map((uo) => [uo.id, uo]));
+
+  const estadosSet = new Set();
+  const assuntosSet = new Set();
+  const uosOrigemSet = new Set();
+
+  const dados = pesquisa.map((row) => {
+    const uo = uosMap.get(row?.uo_origem_id);
+    if (uo) uosOrigemSet.add(uo.label);
+    estadosSet.add(row?.estado);
+    assuntosSet.add(row?.assunto);
+
+    return { ...row, uo: uo?.label, tipo: uo?.tipo, entidades: entidadesParse(row?.entidades) };
   });
 
-  return { dados, assuntos, estados, uosOrigem };
+  return {
+    dados,
+    estados: Array.from(estadosSet),
+    assuntos: Array.from(assuntosSet),
+    uosOrigem: Array.from(uosOrigemSet),
+  };
 }
 
 // ----------------------------------------------------------------------
@@ -274,15 +270,10 @@ function setDados({ pesquisa, uos }) {
 function applySortFilter({ dados, comparator, uo, search, estado, assunto }) {
   dados = applySort(dados, comparator);
 
-  if (assunto) {
-    dados = dados.filter((row) => row?.assunto === assunto);
-  }
-  if (estado) {
-    dados = dados.filter((row) => row?.estado === estado);
-  }
-  if (uo) {
-    dados = dados.filter((row) => row?.uo === uo);
-  }
+  if (assunto) dados = dados.filter((row) => row?.assunto === assunto);
+  if (estado) dados = dados.filter((row) => row?.estado === estado);
+  if (uo) dados = dados.filter((row) => row?.uo === uo);
+
   if (search) {
     dados = dados.filter(
       (row) =>

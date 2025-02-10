@@ -27,9 +27,8 @@ import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple, SearchAutocomplete } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import CreditForm from './form-credito';
-import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter } from './applySortFilter';
+import CreditForm, { PropostaForm } from './form-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -153,7 +152,7 @@ export default function TableCredito() {
         )}
       </Card>
 
-      {isOpenView && <DetalhesGaji9 closeModal={() => dispatch(closeModal())} item="creditos" />}
+      {isOpenView && <PropostaForm onCancel={() => dispatch(closeModal())} />}
       {isOpenModal && <CreditForm onCancel={() => dispatch(closeModal())} />}
     </>
   );

@@ -120,10 +120,15 @@ export function DefaultAction({
       <Tooltip title={label} arrow>
         <Fab
           size="small"
-          color={color}
           variant={variant}
           onClick={handleClick}
           sx={{ ...(small ? whsmall : wh), boxShadow: label === 'Remover' && 'none' }}
+          color={
+            (label === 'REVOGAR' && 'error') ||
+            (label === 'VERSIONAR' && 'info') ||
+            ((label === 'EDITAR' || label === 'COMPOSIÇÃO') && 'warning') ||
+            color
+          }
         >
           {(label === 'FECHAR' && <CloseIcon />) ||
             (icon === 'parecer' && <NotesIcon />) ||
@@ -161,13 +166,15 @@ export function DefaultAction({
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             (label === 'OBTER DOCUMENTO' && <CloudDownloadOutlinedIcon sx={{ width: 20 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
-            ((label === 'EDITAR' || icon === 'editar') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
             ((label === 'Adicionar' || icon === 'adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+            ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || icon === 'editar') && (
+              <Editar sx={{ width: small ? 18 : 22 }} />
+            )) ||
             ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />)}
         </Fab>
       </Tooltip>

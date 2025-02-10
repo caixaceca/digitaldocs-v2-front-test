@@ -2,13 +2,10 @@ export const PATH_DIGITALDOCS = {
   root: '/indicadores',
   general: {
     noPath: '/',
-    entidade: '/entidade',
-    contratos: '/contratos',
     indicadores: '/indicadores',
   },
   filaTrabalho: {
     root: '/fila-trabalho',
-    cc: '/fila-trabalho/cc/:id',
     lista: '/fila-trabalho/lista',
     processo: '/fila-trabalho/:id',
     novoProcesso: '/fila-trabalho/novo',

@@ -9,6 +9,8 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
+// utils
+import { acessoGaji9 } from '../../utils/validarAcesso';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // redux
@@ -28,7 +30,7 @@ InfoCaixa.propTypes = { onCancel: PropTypes.func, item: PropTypes.string };
 
 export default function InfoCaixa({ onCancel, item }) {
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { isLoading, infoCaixa } = useSelector((state) => state.gaji9);
+  const { isLoading, infoCaixa, utilizador } = useSelector((state) => state.gaji9);
 
   return (
     <Dialog open onClose={() => onCancel()} fullWidth maxWidth="sm">
@@ -36,8 +38,18 @@ export default function InfoCaixa({ onCancel, item }) {
         title="Informações da Caixa"
         action={
           <Stack direction="row" spacing={1} alignItems="center">
-            {!open && !isLoading && !infoCaixa && <DefaultAction label="ADICIONAR" handleClick={onOpen} />}
-            {!open && !isLoading && infoCaixa && <DefaultAction color="warning" label="EDITAR" handleClick={onOpen} />}
+            {!open && !isLoading && (
+              <>
+                {!infoCaixa &&
+                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_INSTITUICAO'])) && (
+                    <DefaultAction label="ADICIONAR" handleClick={onOpen} />
+                  )}
+                {infoCaixa &&
+                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['UPDATE_INSTITUICAO'])) && (
+                    <DefaultAction color="warning" label="EDITAR" handleClick={onOpen} />
+                  )}
+              </>
+            )}
             <Fechar handleClick={() => onCancel()} />
           </Stack>
         }

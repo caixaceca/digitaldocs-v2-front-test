@@ -11,7 +11,6 @@ export {
   Eliminar,
   Detalhes,
   Controle,
-  Entidade,
   Contrato,
   Resgatar,
   Contraste,

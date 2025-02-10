@@ -1,8 +1,6 @@
 import { combineReducers } from 'redux';
 import storage from 'redux-persist/lib/storage';
 // slices
-import ccReducer from './slices/cc';
-import bankaReducer from './slices/banka';
 import gaji9Reducer from './slices/gaji9';
 import stepperReducer from './slices/stepper';
 import intranetReducer from './slices/intranet';
@@ -15,8 +13,6 @@ import parametrizacaoReducer from './slices/parametrizacao';
 const rootPersistConfig = { key: 'root', storage, keyPrefix: 'redux-', whitelist: [] };
 
 const rootReducer = combineReducers({
-  cc: ccReducer,
-  banka: bankaReducer,
   gaji9: gaji9Reducer,
   stepper: stepperReducer,
   intranet: intranetReducer,

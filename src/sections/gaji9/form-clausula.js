@@ -53,8 +53,6 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
   const { activeStep } = useSelector((state) => state.stepper);
   const { isEdit, variaveis, selectedItem } = useSelector((state) => state.gaji9);
 
-  console.log(variaveis);
-
   const onClose = useCallback(() => {
     onCancel();
     dispatch(resetDados());
@@ -476,7 +474,11 @@ function TitleResumo({ title, action }) {
 
 // ----------------------------------------------------------------------
 
-TableRowItem.propTypes = { title: PropTypes.string, text: PropTypes.string, item: PropTypes.node };
+TableRowItem.propTypes = {
+  item: PropTypes.node,
+  text: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
 
 function TableRowItem({ title, text = '', item = null }) {
   return text || item ? (

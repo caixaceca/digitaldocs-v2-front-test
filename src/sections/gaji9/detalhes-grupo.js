@@ -13,10 +13,10 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 // utils
-import { sortPermissoes } from '../../utils/formatObject';
-import { ptDateTime } from '../../utils/formatTime';
 import { noDados } from '../../utils/formatText';
+import { ptDateTime } from '../../utils/formatTime';
 import { colorLabel } from '../../utils/getColorPresets';
+import { sortPermissoes } from '../../utils/formatObject';
 // redux
 import { updateItem } from '../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../redux/store';
@@ -163,12 +163,7 @@ function RecursosUtilizadores({ id, dados, recursos = false }) {
                 )}
               </TableCell>
               <TableCell>
-                <DefaultAction
-                  small
-                  label="EDITAR"
-                  color="warning"
-                  handleClick={() => setItem({ action: 'edit', ...row })}
-                />
+                <DefaultAction small label="EDITAR" handleClick={() => setItem({ action: 'edit', ...row })} />
               </TableCell>
             </TableRow>
           ))}

@@ -108,7 +108,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
             {action !== 'Atualizar' && (
               <Stack spacing={1.5}>
                 <Stack direction="row" alignItems="end" justifyContent="space-between" spacing={2}>
-                  <Typography variant="subtitle2">Tipos de garantias</Typography>
+                  <Typography variant="subtitle2">Tipos de garantia</Typography>
                   <AddItem small handleClick={() => append({ garantia: null })} />
                 </Stack>
                 <Divider sx={{ mt: 0.5 }} />
@@ -158,7 +158,7 @@ export function GarantiasForm({ onCancel }) {
       updateItem(
         'garantiasMinuta',
         JSON.stringify({ tipos_garantias: values?.garantias?.map((row) => row?.garantia?.id) }),
-        { patch: true, item: 'minuta', id: minuta?.id, msg: 'Tipos de garantias adicionadas' }
+        { patch: true, item: 'minuta', id: minuta?.id, msg: 'Tipos de garantia adicionadas' }
       )
     );
   };

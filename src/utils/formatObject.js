@@ -96,7 +96,40 @@ export function utilizadoresGaji9(colaboradores, funcoes, from) {
 
 // ----------------------------------------------------------------------
 
-export function sortPermissoes(actions) {
+export function sortPermissoes(permissoes) {
+  if (!permissoes || permissoes?.length === 0) return [];
   const fixedOrder = ['READ', 'CREATE', 'UPDATE', 'DELETE'];
-  return [...(actions || [])].sort((a, b) => fixedOrder.indexOf(a) - fixedOrder.indexOf(b));
+
+  return [...permissoes].sort((a, b) => {
+    const [permissaoA] = a.split('_');
+    const [permissaoB] = b.split('_');
+
+    return fixedOrder.indexOf(permissaoA) - fixedOrder.indexOf(permissaoB);
+  });
+}
+
+// ----------------------------------------------------------------------
+
+export function meusAcessosGaji9(grupos) {
+  if (!grupos || grupos?.length === 0) return [];
+
+  const resultado = [];
+  const dataAtual = new Date();
+
+  grupos.forEach((grupo) => {
+    if (grupo.ativo) {
+      grupo.recursos_permissoes.forEach((item) => {
+        if (item.ativo) {
+          const inicio = new Date(item.data_inicio);
+          const termino = item.data_termino ? new Date(item.data_termino) : null;
+          if (dataAtual >= inicio && (!termino || dataAtual <= termino)) {
+            sortPermissoes(item.permissoes).forEach((permissao) => {
+              if (!resultado?.includes()) resultado.push(`${permissao}_${item.recurso}`);
+            });
+          }
+        }
+      });
+    }
+  });
+  return resultado;
 }

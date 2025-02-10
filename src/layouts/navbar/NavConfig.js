@@ -1,17 +1,7 @@
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // assets
-import {
-  Home,
-  Portal,
-  Arquivo,
-  Controle,
-  Entidade,
-  Contrato,
-  Dashboard,
-  FilaTrabalho,
-  Parametrizacao,
-} from '../../assets';
+import { Home, Portal, Arquivo, Controle, Contrato, Dashboard, FilaTrabalho, Parametrizacao } from '../../assets';
 
 // ----------------------------------------------------------------------
 
@@ -27,18 +17,6 @@ const navConfig = [
         title: 'Arquivo',
         path: PATH_DIGITALDOCS.arquivo.root,
         roles: ['arquivo-100', 'arquivo-110', 'arquivo-111'],
-      },
-      {
-        icon: <Entidade />,
-        title: 'Entidades',
-        path: PATH_DIGITALDOCS.general.entidade,
-        roles: ['entidades-100', 'entidades-110'],
-      },
-      {
-        icon: <Contrato />,
-        title: 'Contratos',
-        path: PATH_DIGITALDOCS.general.contratos,
-        roles: ['contratos-100', 'contratos-110'],
       },
       { title: 'GAJ-i9', icon: <Contrato />, path: PATH_DIGITALDOCS.gaji9.root },
       {

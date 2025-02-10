@@ -38,7 +38,7 @@ import { setItemValue } from '../../utils/formatObject';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores, resetItem } from '../../redux/slices/indicadores';
+import { getIndicadores, resetEstCredito } from '../../redux/slices/indicadores';
 // components
 import { BoxMask } from '../../components/Panel';
 import { RHFDateIF } from '../../components/hook-form';
@@ -56,7 +56,7 @@ const frSegmentoStyle = { pl: '12px !important', typography: 'subtitle2' };
 
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
-  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
+  const { perfilId, cc, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
   const [data, setData] = useState(getDataLS('dataEst', new Date()));
   const [vista, setVista] = useState(localStorage.getItem('vistaEst') || 'Mensal');
@@ -81,40 +81,49 @@ export default function EstatisticaCredito() {
       uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) || { id: -1, label: 'Caixa' }
   );
 
-  const tabsList = [
-    { value: 'Resumo', component: <Totais /> },
-    ...(vista === 'Mensal' && uo?.id > 0
-      ? [
-          { value: 'Entradas', component: <TableEstatistica from="entrada" /> },
-          { value: 'Aprovados', component: <TableEstatistica from="aprovado" /> },
-          { value: 'Contratados', component: <TableEstatistica from="contratado" /> },
-          { value: 'Indeferidos', component: <TableEstatistica from="indeferido" /> },
-          { value: 'Desistidos', component: <TableEstatistica from="desistido" /> },
-        ]
-      : []),
-  ];
+  const tabsList = useMemo(
+    () => [
+      { value: 'Resumo', component: <Totais /> },
+      ...(vista === 'Mensal' && uo?.id > 0
+        ? [
+            { value: 'Entradas', component: <TableEstatistica from="entrada" /> },
+            { value: 'Aprovados', component: <TableEstatistica from="aprovado" /> },
+            { value: 'Contratados', component: <TableEstatistica from="contratado" /> },
+            { value: 'Indeferidos', component: <TableEstatistica from="indeferido" /> },
+            { value: 'Desistidos', component: <TableEstatistica from="desistido" /> },
+          ]
+        : []),
+    ],
+    [uo?.id, vista]
+  );
 
   const handleChangeTab = async (event, newValue) => {
     setItemValue(newValue, setCurrentTab, 'tabEst');
   };
 
   useEffect(() => {
-    if (mail && perfilId && vista === 'Mensal' && uo?.id && dataValido(data)) {
-      dispatch(resetItem({ item: 'estCredito' }));
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabEst', false);
+    }
+  }, [tabsList, currentTab]);
+
+  useEffect(() => {
+    if (perfilId && vista === 'Mensal' && uo?.id && dataValido(data)) {
+      dispatch(resetEstCredito());
       const mes = formatDate(data, 'M');
       const ano = formatDate(data, 'yyyy');
       const intervalo = `?data_inicio=${formatDate(data, 'yyyy-MM')}-01&data_final=${formatDate(data, 'yyyy-MM')}-${ultimoDiaDoMes(data)}`;
-      dispatch(getIndicadores('estCreditoMensal', { mail, perfilId, uoID: uo?.id, mes, ano, intervalo }));
+      dispatch(getIndicadores('estCreditoMensal', { uoID: uo?.id, mes, ano, intervalo }));
     }
-  }, [dispatch, perfilId, data, uo, vista, mail]);
+  }, [dispatch, perfilId, data, uo?.id, vista]);
 
   useEffect(() => {
-    if (mail && perfilId && vista === 'Intervalo' && uo?.id && dataValido(datai) && dataValido(dataf)) {
-      dispatch(resetItem({ item: 'estCredito' }));
+    if (perfilId && vista === 'Intervalo' && uo?.id && dataValido(datai) && dataValido(dataf)) {
+      dispatch(resetEstCredito());
       const intervalo = `?data_inicio=${formatDate(datai, 'yyyy-MM-dd')}&data_final=${formatDate(dataf, 'yyyy-MM-dd')}`;
-      dispatch(getIndicadores('estCreditoIntervalo', { mail, perfilId, uoID: uo?.id, intervalo }));
+      dispatch(getIndicadores('estCreditoIntervalo', { uoID: uo?.id, intervalo }));
     }
-  }, [dispatch, perfilId, datai, dataf, uo, vista, mail]);
+  }, [dispatch, perfilId, datai, dataf, uo, vista]);
 
   return (
     <>
@@ -190,7 +199,7 @@ export default function EstatisticaCredito() {
           </Stack>
         }
       />
-      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} sx={{ mb: 3 }} />
+      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
       {tabsList.map((tab) => {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;

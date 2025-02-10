@@ -1,18 +1,14 @@
 import PropTypes from 'prop-types';
 // @mui
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { getFile } from '../../utils/getFile';
 import { nomeacaoBySexo } from '../../utils/formatText';
 // redux
-import { getSuccess } from '../../redux/slices/banka';
-import { useDispatch, useSelector } from '../../redux/store';
+import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import SvgIconStyle from '../../components/SvgIconStyle';
@@ -119,56 +115,5 @@ export default function PerfilCover({ perfilColaborador, isDeFeria }) {
         </Stack>
       </InfoStyle>
     </RootStyle>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-EntidadeCover.propTypes = { numero: PropTypes.number, entidade: PropTypes.object };
-
-export function EntidadeCover({ numero, entidade }) {
-  const dispatch = useDispatch();
-  const { dadosComValores } = useSelector((state) => state.banka);
-
-  const changeView = (newValue) => {
-    dispatch(getSuccess({ item: 'dadosComValores', dados: newValue }));
-  };
-
-  return (
-    <Stack direction="row" alignItems="center" spacing={3} sx={{ p: 2 }}>
-      <MyAvatar
-        sx={{
-          borderStyle: 'solid',
-          width: { xs: 80, md: 120 },
-          height: { xs: 80, md: 120 },
-          borderColor: 'common.white',
-        }}
-        src={getFile('colaborador', '')}
-      />
-      <Stack
-        useFlexGap
-        spacing={1}
-        direction="row"
-        flexWrap="wrap"
-        alignItems="center"
-        sx={{ flexGrow: 1 }}
-        justifyContent="space-between"
-      >
-        <Box sx={{ color: 'common.white' }}>
-          <Typography variant="h5">{numero}</Typography>
-          <Typography variant="h5">{entidade?.nomeDaEntidade}</Typography>
-          <Typography>
-            {entidade?.descritivoSectorial} - {entidade?.descritivoResidencia}
-          </Typography>
-        </Box>
-        <Box>
-          <FormControlLabel
-            label="Somente campos com valores"
-            sx={{ ml: 0, pr: 2, borderRadius: 1, color: 'text.secondary', bgcolor: 'background.paper' }}
-            control={<Switch checked={dadosComValores} onChange={(event, newValue) => changeView(newValue)} />}
-          />
-        </Box>
-      </Stack>
-    </Stack>
   );
 }

@@ -40,8 +40,6 @@ import { CollapseDrawerProvider } from './contexts/CollapseDrawerContext';
 //
 import App from './App';
 
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-
 // ----------------------------------------------------------------------
 
 setLocale({
@@ -86,5 +84,3 @@ root.render(
     </ReduxProvider>
   </HelmetProvider>
 );
-
-serviceWorkerRegistration.register();

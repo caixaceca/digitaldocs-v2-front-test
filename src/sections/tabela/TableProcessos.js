@@ -129,10 +129,6 @@ export default function TableProcessos({ from }) {
     );
   };
 
-  const handleView = (id, isCC) => {
-    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}${isCC ? '/cc/' : '/'}${id}`);
-  };
-
   return (
     <>
       <HeaderBreadcrumbs
@@ -204,7 +200,7 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center">
                         <DefaultAction
                           label="DETALHES"
-                          handleClick={() => handleView(row?.id, row?.credito_colaborador)}
+                          handleClick={() => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${row?.id}`)}
                         />
                       </TableCell>
                     </TableRow>

@@ -1,5 +1,4 @@
 import { add } from 'date-fns';
-import { useMsal } from '@azure/msal-react';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
@@ -18,9 +17,9 @@ import { pertencoAoEstado } from '../../utils/validarAcesso';
 import useSettings from '../../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
+import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
-import { getFromIntranet, acquireTokenAuthenticate } from '../../redux/slices/intranet';
 // components
 import Page from '../../components/Page';
 import { Notificacao } from '../../components/NotistackProvider';
@@ -45,17 +44,10 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 export default function PageFilaTrabalho() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { instance, accounts } = useMsal();
   const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, cc, dateUpdate } = useSelector((state) => state.intranet);
-
-  useEffect(() => {
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
-      dispatch(acquireTokenAuthenticate(instance, accounts[0]));
-    }
-  }, [dispatch, instance, cc?.id, dateUpdate, accounts]);
+  const { perfilId, cc, dateUpdate } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     if (perfilId && cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
@@ -105,8 +97,8 @@ export default function PageFilaTrabalho() {
   }, [tabsList, currentTab]);
 
   useEffect(() => {
-    if (mail && perfilId && meusAmbientes?.length > 0) dispatch(getIndicadores('totalP', { mail, perfilId }));
-  }, [dispatch, mail, currentTab, perfilId, meusAmbientes?.length]);
+    if (perfilId && meusAmbientes?.length > 0) dispatch(getIndicadores('totalP', null));
+  }, [dispatch, perfilId, meusAmbientes?.length]);
 
   return (
     <Page title="Fila de trabalho | DigitalDocs">

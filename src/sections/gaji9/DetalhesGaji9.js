@@ -13,7 +13,9 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { newLineText } from '../../utils/formatText';
+import { colorLabel } from '../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
+import { sortPermissoes } from '../../utils/formatObject';
 // redux
 import { useSelector } from '../../redux/store';
 // components
@@ -37,7 +39,7 @@ export default function DetalhesGaji9({ closeModal, item }) {
       <DTFechar title="Detalhes" handleClick={() => closeModal()} />
       <DialogContent>
         {(item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
-          (item === 'clausulas' && <ClausulaDetail dados={selectedItem} />) || (
+          ((item === 'clausulas' || item === 'funcoes') && <DetalhesTab item={item} dados={selectedItem} />) || (
             <DetalhesContent dados={selectedItem} item={item} />
           )}
       </DialogContent>
@@ -47,26 +49,30 @@ export default function DetalhesGaji9({ closeModal, item }) {
 
 // ----------------------------------------------------------------------
 
-ClausulaDetail.propTypes = { dados: PropTypes.object };
+DetalhesTab.propTypes = { item: PropTypes.string, dados: PropTypes.object };
 
-function ClausulaDetail({ dados }) {
+function DetalhesTab({ item, dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
 
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} /> },
-    { value: 'Alíneas', component: <AlineasClausula dados={dados?.alineas} /> },
+    ...((item === 'clausulas' && [{ value: 'Alíneas', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
+      (item === 'funcoes' && [
+        { value: 'Grupos', component: <UtilizadorInfo dados={dados?.grupos?.map(({ designacao }) => designacao)} /> },
+        { value: 'Permissões', component: <UtilizadorInfo dados={dados?.acessos} /> },
+      ]) ||
+      []),
   ];
 
   return (
     <>
-      {dados?.alineas?.length > 0 && (
-        <TabsWrapperSimple
-          tabsList={tabsList}
-          sx={{ mt: 2, mb: 1 }}
-          currentTab={currentTab}
-          changeTab={(_, newValue) => setCurrentTab(newValue)}
-        />
-      )}
+      <TabsWrapperSimple
+        tabsList={tabsList}
+        currentTab={currentTab}
+        sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
+        changeTab={(_, newValue) => setCurrentTab(newValue)}
+      />
+
       {tabsList.map((tab) => {
         const isMatched = tab.value === currentTab;
         return isMatched && <Box key={tab.value}>{tab.component}</Box>;
@@ -77,25 +83,53 @@ function ClausulaDetail({ dados }) {
 
 // ----------------------------------------------------------------------
 
-AlineasClausula.propTypes = { dados: PropTypes.object };
+UtilizadorInfo.propTypes = { dados: PropTypes.object };
 
-function AlineasClausula({ dados }) {
+function UtilizadorInfo({ dados = [] }) {
   return (
     <Stack sx={{ px: 0.5, mt: 3 }}>
-      {dados?.map((row, index) => (
-        <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
-          <Typography variant="subtitle2">{row?.numero_ordem}.</Typography>
-          <Stack>
-            <Typography variant="body2">{newLineText(row?.conteudo)}</Typography>
-            {row?.sub_alineas?.map((item, index1) => (
-              <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                <Typography variant="subtitle2">{item?.numero_ordem}.</Typography>
-                <Typography variant="body2">{newLineText(item?.conteudo)}</Typography>
-              </Stack>
-            ))}
-          </Stack>
+      {dados?.length === 0 ? (
+        <SearchNotFoundSmall message="Nenhum alínea adicionada..." />
+      ) : (
+        <Stack useFlexGap flexWrap="wrap" justifyContent="center" direction="row" spacing={1.5} sx={{ pt: 1 }}>
+          {sortPermissoes(dados)?.map((row, index) => (
+            <Label color={colorLabel(row, 'default')} key={`${row}_${index}`}>
+              {row}
+            </Label>
+          ))}
         </Stack>
-      ))}
+      )}
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+AlineasClausula.propTypes = { dados: PropTypes.object };
+
+function AlineasClausula({ dados = [] }) {
+  return (
+    <Stack sx={{ px: 0.5, mt: 3 }}>
+      {dados?.length === 0 ? (
+        <SearchNotFoundSmall message="Nenhum alínea adicionada..." />
+      ) : (
+        <>
+          {dados?.map((row, index) => (
+            <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
+              <Typography variant="subtitle2">{row?.numero_ordem}.</Typography>
+              <Stack>
+                <Typography variant="body2">{newLineText(row?.conteudo)}</Typography>
+                {row?.sub_alineas?.map((item, index1) => (
+                  <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
+                    <Typography variant="subtitle2">{item?.numero_ordem}.</Typography>
+                    <Typography variant="body2">{newLineText(item?.conteudo)}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+          ))}
+        </>
+      )}
     </Stack>
   );
 }
@@ -158,6 +192,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                       }
                     />
                     <TableRowItem title="Nº entidade:" text={dados?.numero} />
+                    <TableRowItem title="Sigla:" text={dados?.sigla} />
                     <TableRowItem title="Código:" text={dados?.codigo} />
                     <TableRowItem title="Nome:" text={dados?.nome} />
                     <TableRowItem title="Tipo:" text={dados?.tipo} />
@@ -202,9 +237,13 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     )}
                     <TableRowItem title="NIF:" text={dados?.nif} />
                     <TableRowItem title="Freguesia:" text={dados?.freguesia} />
+                    <TableRowItem title="Freguesia na banca:" text={dados?.freguesia_banca} />
                     <TableRowItem title="Concelho:" text={dados?.concelho} />
+                    <TableRowItem title="Naturalidade na banca:" text={dados?.naturalidade_banca} />
                     <TableRowItem title="Residência:" text={dados?.residencia} />
                     <TableRowItem title="Naturalidade:" text={dados?.naturalidade} />
+                    <TableRowItem title="Ilha:" text={dados?.ilha} />
+                    <TableRowItem title="Região:" text={dados?.regiao} />
 
                     <TableRowItem title="Nº matricula:" text={dados?.num_matricula} />
                     <TableRowItem title="Local matricula:" text={dados?.local_matricula} />

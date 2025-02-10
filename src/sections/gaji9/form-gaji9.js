@@ -1,23 +1,19 @@
 import * as Yup from 'yup';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fillData } from '../../utils/formatTime';
-import { perfisAad, utilizadoresGaji9, removerPropriedades, setItemValue } from '../../utils/formatObject';
+import { perfisAad, utilizadoresGaji9, removerPropriedades } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
@@ -33,11 +29,11 @@ import {
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
-import { RemoverFiltros } from '../../components/SearchToolbar';
-import { TextFieldNumb } from '../../layouts/header/ProcuraAvancada';
 import { DefaultAction, DialogButons } from '../../components/Actions';
 // _mock_
 import { freguesiasConcelhos } from '../../_mock';
+
+const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -103,70 +99,6 @@ export function ProdutoForm({ onCancel }) {
             )}
           </Stack>
           <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-EntidadeForm.propTypes = { onCancel: PropTypes.func };
-
-export function EntidadeForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({
-    residencia: Yup.string().required().label('Residência'),
-    naturalidade: Yup.string().required().label('Naturalidade'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({ residencia: selectedItem?.residencia, naturalidade: selectedItem?.naturalidade }),
-    [selectedItem]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const params = useMemo(
-    () => ({ numero: selectedItem?.numero, msg: 'Morada atualizada', afterSuccess: () => onCancel() }),
-    [selectedItem?.numero, onCancel]
-  );
-
-  const onSubmit = async () => {
-    dispatch(updateItem('entidades', JSON.stringify(values), params));
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitleAlt title="Atualizar morada" />
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={2}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <Stack sx={{ color: 'text.secondary' }}>
-                <Stack direction="row" spacing={1}>
-                  <Typography>Entidade:</Typography>
-                  <Typography variant="subtitle1">{selectedItem?.numero}</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1}>
-                  <Typography>Nome:</Typography>
-                  <Typography variant="subtitle1">{selectedItem?.nome}</Typography>
-                </Stack>
-              </Stack>
-              <RHFTextField name="residencia" label="Residência" />
-              <RHFTextField name="naturalidade" label="Naturalidade" />
-            </Stack>
-            <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -279,6 +211,76 @@ export function GarantiaForm({ onCancel }) {
               <RHFTextField name="codigo" label="Código" />
               <RHFTextField name="designacao" label="Designação" />
               <RHFTextField name="descritivo" label="Descritivo" />
+              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+FreguesiaForm.propTypes = { onCancel: PropTypes.func };
+
+export function FreguesiaForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({
+    ilha: Yup.string().required().label('Ilha'),
+    sigla: Yup.string().required().label('Sigla'),
+    regiao: Yup.string().required().label('Região'),
+    concelho: Yup.string().required().label('Concelho'),
+    freguesia: Yup.string().required().label('Freguesia'),
+    freguesia_banca: Yup.string().required().label('Freguesia na banca'),
+    naturalidade_banca: Yup.string().required().label('Naturalidade na banca'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      ilha: selectedItem?.ilha || '',
+      sigla: selectedItem?.sigla || '',
+      regiao: selectedItem?.regiao || '',
+      concelho: selectedItem?.concelho || '',
+      freguesia: selectedItem?.freguesia || '',
+      ativo: selectedItem ? selectedItem?.ativo : true,
+      freguesia_banca: selectedItem?.freguesia_banca || '',
+      naturalidade_banca: selectedItem?.naturalidade_banca || '',
+    }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar freguesia' : 'Adicionar freguesia'}</DialogTitle>
+      <DialogContent>
+        <FormProvider
+          methods={methods}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'freguesias', onCancel))}
+        >
+          <ItemComponent item={selectedItem} rows={5}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <Stack direction="row" spacing={3}>
+                <RHFTextField name="sigla" label="Sigla" />
+                <RHFTextField name="ilha" label="Ilha" />
+                <RHFTextField name="regiao" label="Região" />
+              </Stack>
+              <RHFTextField name="freguesia" label="Freguesia" />
+              <RHFTextField name="freguesia_banca" label="Freguesia na banca" />
+              <RHFTextField name="concelho" label="Concelho" />
+              <RHFTextField name="naturalidade_banca" label="Naturalidade na banca" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
@@ -929,11 +931,11 @@ export function RepresentanteForm({ onCancel }) {
                 label="Colaborador"
                 options={colaboradoresList}
                 onChange={(event, newValue) => {
-                  setValue('utilizador', newValue, { shouldValidate: true, shouldDirty: true });
-                  setValue('funcao', newValue?.funcao || null, { shouldValidate: true, shouldDirty: true });
-                  setValue('atua_como', newValue?.funcao || null, { shouldValidate: true, shouldDirty: true });
-                  setValue('concelho', newValue?.concelho || null, { shouldValidate: true, shouldDirty: true });
-                  setValue('residencia', newValue?.residencia || null, { shouldValidate: true, shouldDirty: true });
+                  setValue('utilizador', newValue, vsv);
+                  setValue('funcao', newValue?.funcao || null, vsv);
+                  setValue('atua_como', newValue?.funcao || null, vsv);
+                  setValue('concelho', newValue?.concelho || null, vsv);
+                  setValue('residencia', newValue?.residencia || null, vsv);
                 }}
               />
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
@@ -978,61 +980,6 @@ export function RepresentanteForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SearchEntidade() {
-  const dispatch = useDispatch();
-  const [nif, setNif] = useState(localStorage.getItem('nifEntidade') || '');
-  const [nome, setNome] = useState(localStorage.getItem('nomeEntidade') || '');
-  const [numero, setNumero] = useState(localStorage.getItem('numEntidade') || '');
-  const [documento, setDocumento] = useState(localStorage.getItem('docEntidade') || '');
-
-  return (
-    <Card sx={{ p: 1, mb: 3 }}>
-      <Grid container spacing={1}>
-        <Grid item xs={12} sm={4} md={2}>
-          <TextFieldNumb value={numero} setValue={setNumero} label="Nº de entidade" localS="numEntidade" />
-        </Grid>
-        <Grid item xs={12} sm={4} md={2}>
-          <TextFieldNumb value={documento} setValue={setDocumento} label="Doc. edentificação" localS="docEntidade" />
-        </Grid>
-        <Grid item xs={12} sm={4} md={2}>
-          <TextFieldNumb value={nif} setValue={setNif} label="NIF" localS="nifEntidade" />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="center" alignItems="center" spacing={1}>
-            <TextField
-              fullWidth
-              label="Nome"
-              value={nome}
-              onChange={(event) => setItemValue(event.target.value, setNome, 'nomeEntidade', false)}
-            />
-            {(nif || numero || nome || documento) && (
-              <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
-                <DefaultAction
-                  label="PROCURAR"
-                  handleClick={() =>
-                    dispatch(getFromGaji9('searchEntidade', { nif, numero, nome, documento, item: 'entidades' }))
-                  }
-                />
-                <RemoverFiltros
-                  removerFiltro={() => {
-                    setItemValue('', setNif, 'nifEntidade', false);
-                    setItemValue('', setNome, 'nomeEntidade', false);
-                    setItemValue('', setNumero, 'numEntidade', false);
-                    setItemValue('', setDocumento, 'docEntidade', false);
-                    dispatch(getFromGaji9('entidades', { resetLista: true }));
-                  }}
-                />
-              </Stack>
-            )}
-          </Stack>
-        </Grid>
-      </Grid>
-    </Card>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 ItemComponent.propTypes = { item: PropTypes.object, rows: PropTypes.number, children: PropTypes.node };
 
 export function ItemComponent({ item, rows, children }) {
@@ -1055,7 +1002,7 @@ export function ItemComponent({ item, rows, children }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function submitDados(id, values, isEdit, dispatch, item, onCancel) {
-  const params = { id, msg: `Item ${isEdit ? 'adicionado' : 'atualizado'}`, afterSuccess: onCancel || null };
+  const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, afterSuccess: onCancel || null };
   if (isEdit) {
     dispatch(updateItem(item, JSON.stringify(values), params));
   } else {

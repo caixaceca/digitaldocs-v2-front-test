@@ -9,8 +9,8 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
 // redux
-import { getAll } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
+import { getInfoProcesso } from '../../../redux/slices/digitaldocs';
 // components
 import { SkeletonBar } from '../../../components/skeleton';
 import { SearchNotFound } from '../../../components/table';
@@ -24,12 +24,12 @@ Versoes.propTypes = { id: PropTypes.number };
 
 export default function Versoes({ id }) {
   const dispatch = useDispatch();
-  const [accord, setAccord] = useState(false);
+  const [accord, setAccord] = useState('');
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, processo } = useSelector((state) => state.digitaldocs);
-  const { mail, colaboradores, perfilId } = useSelector((state) => state.intranet);
 
   const handleAccord = (panel) => (event, isExpanded) => {
-    setAccord(isExpanded ? panel : false);
+    setAccord(isExpanded ? panel : '');
   };
 
   useEffect(() => {
@@ -37,8 +37,8 @@ export default function Versoes({ id }) {
   }, [dispatch, processo?.hversoes]);
 
   useEffect(() => {
-    if (mail && id && perfilId) dispatch(getAll('hversoes', { mail, id, perfilId }));
-  }, [dispatch, id, mail, perfilId]);
+    if (id) dispatch(getInfoProcesso('hversoes', { id }));
+  }, [dispatch, id]);
 
   return (
     <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>

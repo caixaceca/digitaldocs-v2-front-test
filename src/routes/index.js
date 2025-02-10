@@ -1,4 +1,3 @@
-import { useMsal } from '@azure/msal-react';
 import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 // utils
@@ -6,7 +5,7 @@ import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, acquireTokenAuthenticate } from '../redux/slices/intranet';
+import { getFromIntranet, authenticateColaborador } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -22,21 +21,18 @@ const Loadable = (Component) => (props) => (
 
 export default function Router() {
   const dispatch = useDispatch();
-  const { instance, accounts } = useMsal();
-  const { cc, perfil, mail, perfilId, accessToken } = useSelector((state) => state.intranet);
+  const { cc, perfil, mail, perfilId } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (instance && accounts?.[0]) {
-      dispatch(acquireTokenAuthenticate(instance, accounts[0]));
-    }
-  }, [accounts, dispatch, instance]);
+    dispatch(authenticateColaborador());
+  }, [dispatch]);
 
   useEffect(() => {
-    if (perfil?.colaborador?.id && accessToken) {
+    if (perfil?.colaborador?.id) {
       dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id }));
-      dispatch(getFromIntranet('colaboradores', { accessToken }));
+      dispatch(getFromIntranet('colaboradores'));
     }
-  }, [dispatch, perfil?.colaborador?.id, accessToken]);
+  }, [dispatch, perfil?.colaborador?.id]);
 
   useEffect(() => {
     if (cc?.id) {
@@ -67,8 +63,6 @@ export default function Router() {
       children: [
         { element: <Navigate to="fila-trabalho" replace />, index: true },
         { path: 'indicadores', element: <PageIndicadores /> },
-        { path: 'entidade', element: <Entidade /> },
-        { path: 'contratos', element: <Contrato /> },
         {
           path: 'fila-trabalho',
           children: [
@@ -77,9 +71,7 @@ export default function Router() {
             { path: 'lista', element: <PageFilaTrabalho /> },
             { path: 'procurar', element: <PageProcura /> },
             { path: 'novo', element: <PageNovoEditarProcesso /> },
-            { path: 'cc/:id', element: <PageCreditoColaborador /> },
             { path: ':id/editar', element: <PageNovoEditarProcesso /> },
-            { path: 'cc/:id/editar', element: <PageEditarPedidoCC /> },
           ],
         },
         {
@@ -127,28 +119,24 @@ export default function Router() {
 
 // ------------------------------------------------------- PAGES -------------------------------------------------------
 
+const Controle = Loadable(lazy(() => import('../pages/Controle')));
 const PageNotFound = Loadable(lazy(() => import('../pages/PageNotFound')));
 
-const Contrato = Loadable(lazy(() => import('../pages/Contrato')));
-const Entidade = Loadable(lazy(() => import('../pages/Entidade')));
-const Controle = Loadable(lazy(() => import('../pages/Controle')));
-
 // ------------------------------------------------------ PROCESSO -----------------------------------------------------
+
 const PageArquivo = Loadable(lazy(() => import('../pages/processo/PageArquivo')));
 const PageProcura = Loadable(lazy(() => import('../pages/processo/PageProcura')));
 const PageProcesso = Loadable(lazy(() => import('../pages/processo/PageProcesso')));
 const PageIndicadores = Loadable(lazy(() => import('../pages/processo/PageIndicadores')));
 const PageFilaTrabalho = Loadable(lazy(() => import('../pages/processo/PageFilaTrabalho')));
-const PageEditarPedidoCC = Loadable(lazy(() => import('../pages/processo/PageEditarPedidoCC')));
-const PageCreditoColaborador = Loadable(lazy(() => import('../pages/processo/PageCreditoColaborador')));
 const PageNovoEditarProcesso = Loadable(lazy(() => import('../pages/processo/PageNovoEditarProcesso')));
 
 // --------------------------------------------------- PARAMETRIZAÇÃO --------------------------------------------------
 
-const PageAcessosPerfil = Loadable(lazy(() => import('../pages/parametrizacao/PageAcessosPerfil')));
-const PageDetalhesFluxo = Loadable(lazy(() => import('../pages/parametrizacao/PageDetalhesFluxo')));
-const PageDetalhesEstado = Loadable(lazy(() => import('../pages/parametrizacao/PageDetalhesEstado')));
-const PageParametrizacao = Loadable(lazy(() => import('../pages/parametrizacao/PageParametrizacao')));
+const PageAcessosPerfil = Loadable(lazy(() => import('../pages/parametrizacao/page-perfil-acessos')));
+const PageDetalhesFluxo = Loadable(lazy(() => import('../pages/parametrizacao/page-detalhes-fluxo')));
+const PageParametrizacao = Loadable(lazy(() => import('../pages/parametrizacao/page-parametrizacao')));
+const PageDetalhesEstado = Loadable(lazy(() => import('../pages/parametrizacao/page-detalhes-estado')));
 
 // ------------------------------------------------------- GAJ-i9 ------------------------------------------------------
 

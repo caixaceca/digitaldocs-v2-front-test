@@ -532,9 +532,9 @@ export function PropostaForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PreviewForm.propTypes = { creditoId: PropTypes.number, onCancel: PropTypes.func };
+PreviewForm.propTypes = { credito: PropTypes.object, onCancel: PropTypes.func };
 
-export function PreviewForm({ creditoId, onCancel }) {
+export function PreviewForm({ credito, onCancel }) {
   const dispatch = useDispatch();
   const { isSaving, minutasPublicas } = useSelector((state) => state.gaji9);
 
@@ -549,7 +549,7 @@ export function PreviewForm({ creditoId, onCancel }) {
   }, [dispatch]);
 
   const onSubmit = async () => {
-    dispatch(getDocumento('contrato', { creditoId, minutaId: values?.minuta?.id, item: 'previewFile' }));
+    dispatch(getDocumento('contrato', { creditoId: credito?.id, minutaId: values?.minuta?.id, item: 'previewFile' }));
   };
 
   return (
@@ -562,7 +562,9 @@ export function PreviewForm({ creditoId, onCancel }) {
               name="minuta"
               label="Minuta"
               disableClearable
-              options={minutasPublicas?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` }))}
+              options={minutasPublicas
+                // ?.filter((row) => row?.componente_id === credito?.componente_id)
+                ?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` }))}
             />
           </Stack>
           <DialogButons isSaving={isSaving} onCancel={onCancel} label="Previsualizar" />

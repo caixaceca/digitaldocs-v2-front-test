@@ -12,7 +12,7 @@ import { canPreview } from '../../utils/formatFile';
 import { temAcesso, findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, getProcesso, getAnexo, updateItem } from '../../redux/slices/digitaldocs';
+import { getInfoProcesso, getProcesso, getAnexo, updateItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -211,13 +211,13 @@ export default function PageProcesso() {
   }, [error]);
 
   useEffect(() => {
-    if (mail && processo?.id && !historico) dispatch(getAll('htransicoes', { id: processo?.id, mail, perfilId }));
-  }, [dispatch, mail, perfilId, historico, processo?.id]);
+    if (processo?.id && !historico) dispatch(getInfoProcesso('htransicoes', { id: processo?.id }));
+  }, [dispatch, historico, processo?.id]);
 
   useEffect(() => {
-    if (mail && processo?.estado_processo?._lock && estadoId && atribuidoAMim)
-      dispatch(getAll('destinos', { id, mail, perfilId, estadoId }));
-  }, [atribuidoAMim, dispatch, estadoId, id, mail, perfilId, processo?.estado_processo?._lock]);
+    if (processo?.estado_processo?._lock && estadoId && atribuidoAMim)
+      dispatch(getInfoProcesso('destinos', { id, estadoId }));
+  }, [atribuidoAMim, dispatch, estadoId, id, processo?.estado_processo?._lock]);
 
   useEffect(() => {
     if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);

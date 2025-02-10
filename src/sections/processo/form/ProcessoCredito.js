@@ -12,7 +12,7 @@ import { LoadingButton } from '@mui/lab';
 import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { createItem, updateItem } from '../../../redux/slices/digitaldocs';
+import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
@@ -232,7 +232,7 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
         dispatch(updateItem('processo', formData, { mail, perfilId, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
         formData.append('situacao_final_mes', 'Em análise');
-        dispatch(createItem('processo interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
+        dispatch(createProcesso('interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

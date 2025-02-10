@@ -4,6 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
+// utils
+import { acessoGaji9 } from '../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getSuccess, getDocumento, openModal, closeModal } from '../../redux/slices/gaji9';
@@ -32,7 +34,6 @@ export default function PageMinutaDetalhes() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const [action, setAction] = useState('');
-  const { cc } = useSelector((state) => state.intranet);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabMinuta') || 'Dados');
   const { minuta, isLoading, isLoadingDoc, isOpenModal, minutaId, previewFile, utilizador, done, error } = useSelector(
     (state) => state.gaji9
@@ -48,12 +49,9 @@ export default function PageMinutaDetalhes() {
   }, [done]);
 
   useEffect(() => {
-    dispatch(getFromGaji9('minuta', { id }));
-  }, [dispatch, id]);
-
-  useEffect(() => {
-    if (cc?.perfil?.id_aad) dispatch(getFromGaji9('utilizador', { id: cc?.perfil?.id_aad }));
-  }, [dispatch, cc?.perfil?.id_aad]);
+    if (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA']))
+      dispatch(getFromGaji9('minuta', { id }));
+  }, [dispatch, utilizador, id]);
 
   const handleClose = () => {
     setAction('');
@@ -97,62 +95,50 @@ export default function PageMinutaDetalhes() {
           ]}
           action={
             !!minuta &&
-            !!utilizador && (
+            (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA'])) && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {minuta?.ativo && (
-                  <>
-                    {currentTab === 'Dados' && (
-                      <>
-                        <DefaultAction color="inherit" label="CLONAR" handleClick={() => handleAction('Clonar')} />
-                        {minuta?.em_analise && (
-                          <>
-                            <DefaultAction
-                              label="EDITAR"
-                              color="warning"
-                              handleClick={() => handleAction('Atualizar')}
-                            />
-                            {minuta?.clausulas?.length > 0 && (
-                              <DefaultAction label="PUBLICAR" handleClick={() => handleAction('Publicar')} />
-                            )}
-                          </>
-                        )}
-                        {minuta?.em_vigor && (
-                          <>
-                            <DefaultAction
-                              color="info"
-                              label="VERSIONAR"
-                              handleClick={() => handleAction('Versionar')}
-                            />
-                            <DefaultAction color="error" label="REVOGAR" handleClick={() => handleAction('Revogar')} />
-                          </>
-                        )}
-                      </>
-                    )}
-                    {minuta?.em_analise && (
-                      <>
-                        {currentTab === 'Tipos de garantia' && (
-                          <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal())} />
-                        )}
-                        {currentTab === 'Cláusulas' && (
-                          <>
-                            <DefaultAction label="ADICIONAR" handleClick={() => handleAction('compor')} />
-                            {minuta?.clausulas?.length > 0 && (
-                              <>
-                                <DefaultAction
-                                  icon="editar"
-                                  color="warning"
-                                  label="COMPOSIÇÂO"
-                                  handleClick={() => handleAction('composicao')}
-                                />
-                                <DefaultAction label="ORDENAR" handleClick={() => handleAction('ordenar')} />
-                              </>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
+                {minuta?.ativo &&
+                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_MINUTA'])) && (
+                    <>
+                      {currentTab === 'Dados' && (
+                        <>
+                          <DefaultAction color="inherit" label="CLONAR" handleClick={() => handleAction('Clonar')} />
+                          {minuta?.em_analise && (
+                            <>
+                              <DefaultAction label="EDITAR" handleClick={() => handleAction('Atualizar')} />
+                              {minuta?.clausulas?.length > 0 && (
+                                <DefaultAction label="PUBLICAR" handleClick={() => handleAction('Publicar')} />
+                              )}
+                            </>
+                          )}
+                          {minuta?.em_vigor && (
+                            <>
+                              <DefaultAction label="VERSIONAR" handleClick={() => handleAction('Versionar')} />
+                              <DefaultAction label="REVOGAR" handleClick={() => handleAction('Revogar')} />
+                            </>
+                          )}
+                        </>
+                      )}
+                      {minuta?.em_analise && (
+                        <>
+                          {currentTab === 'Tipos de garantia' && (
+                            <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal())} />
+                          )}
+                          {currentTab === 'Cláusulas' && (
+                            <>
+                              <DefaultAction label="ADICIONAR" handleClick={() => handleAction('compor')} />
+                              {minuta?.clausulas?.length > 0 && (
+                                <>
+                                  <DefaultAction label="COMPOSIÇÃO" handleClick={() => handleAction('composicao')} />
+                                  <DefaultAction label="ORDENAR" handleClick={() => handleAction('ordenar')} />
+                                </>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
 
                 {minuta?.clausulas?.length > 0 && (
                   <DefaultAction
@@ -167,7 +153,7 @@ export default function PageMinutaDetalhes() {
           }
         />
 
-        <AcessoGaji9>
+        <AcessoGaji9 item="minuta">
           {!isLoading && !minuta ? (
             <SearchNotFound404 message="Minuta não encontrada..." />
           ) : (

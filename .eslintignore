@@ -9,10 +9,8 @@ public/*
 next.config.js
 
 src/service-worker.js
-src/serviceWorkerRegistration.js
 src/setupTests.js
 
 src/service-worker.ts
-src/serviceWorkerRegistration.ts
 src/setupTests.ts
 
