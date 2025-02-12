@@ -18,8 +18,8 @@ export function actionGet(state, payload) {
       break;
 
     case 'creditos':
-      state.creditos = [...(state.creditos || []), ...(dados?.objeto || [])];
-      state.infoPag = { proximo_cursor: dados?.proximo_cursor, ha_mais: dados?.ha_mais };
+      state.creditos = dados === 'reset' ? [] : [...(state.creditos || []), ...(dados?.objeto || [])];
+      state.infoPag = { proximo_cursor: dados?.proximo_cursor || null, ha_mais: dados?.ha_mais || null };
       break;
 
     default:
@@ -64,11 +64,8 @@ export function actionUpdate(state, payload) {
     const updatedArray = [...target];
     updatedArray[index] = dados;
 
-    if (item1) {
-      state[item1] = { ...state[item1], [item]: updatedArray };
-    } else {
-      state[item] = updatedArray;
-    }
+    if (item1) state[item1] = { ...state[item1], [item]: updatedArray };
+    else state[item] = updatedArray;
   }
 }
 
@@ -80,20 +77,16 @@ export function actionDelete(state, payload) {
 
   if (!Array.isArray(target)) return;
 
-  if (item1) {
-    state[item1][item] = target.filter((row) => row.id !== id);
-  } else if (desativar) {
+  if (item1) state[item1][item] = target.filter((row) => row.id !== id);
+  else if (desativar) {
     const index = target.findIndex((row) => row.id === id);
     state[item][index].ativo = false;
-  } else {
-    state[item] = target.filter((row) => row.id !== id);
-  }
+  } else state[item] = target.filter((row) => row.id !== id);
 }
 
 export function actionOpenModal(state, payload) {
-  if (payload === 'view') {
-    state.isOpenView = true;
-  } else {
+  if (payload === 'view') state.isOpenView = true;
+  else {
     state.isOpenModal = true;
     state.isEdit = payload === 'update';
   }
@@ -105,30 +98,18 @@ export function actionCloseModal(state) {
   state.selectedItem = null;
 }
 
-export function actionReset(state, payload) {
-  state[payload.item] = payload?.tipo === 'array' ? [] : null;
-}
-
-export function actionResponseMsg(state, payload) {
-  state.isSaving = false;
-  state.isLoading = false;
-  state[payload.item] = payload.msg;
-}
-
 // ----------------------------------------------------------------------
 
 export async function doneSucess(msg, dispatch, action) {
-  if (msg) {
-    dispatch(action({ item: 'done', msg }));
-  }
+  if (msg) dispatch(action({ item: 'done', dados: msg }));
   await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(action({ item: 'done', msg: '' }));
+  dispatch(action({ item: 'done', dados: '' }));
 }
 
 export async function hasError(error, dispatch, action) {
-  dispatch(action({ item: 'error', msg: errorMsg(error) }));
+  dispatch(action({ item: 'error', dados: errorMsg(error) }));
   await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(action({ item: 'error', msg: '' }));
+  dispatch(action({ item: 'error', dados: '' }));
 }
 
 // ----------------------------------------------------------------------

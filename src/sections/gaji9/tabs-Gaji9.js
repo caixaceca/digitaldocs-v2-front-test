@@ -105,13 +105,13 @@ function Identificadores({ inativos, setInativos }) {
 
   const tabsList = useMemo(
     () => [
-      ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_PRODUTO/COMPONENTE'])
+      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_PRODUTO/COMPONENTE'])
         ? [{ value: 'Produtos', component: <TableIdentificadores item="componentes" inativos={inativos} /> }]
         : []),
-      ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_TIPO TITULAR'])
+      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_TIPO TITULAR'])
         ? [{ value: 'Tipos de titular', component: <TableIdentificadores item="tiposTitulares" inativos={inativos} /> }]
         : []),
-      ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_TIPO GARANTIA'])
+      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
         ? [
             {
               value: 'Tipos de garantia',
@@ -119,14 +119,14 @@ function Identificadores({ inativos, setInativos }) {
             },
           ]
         : []),
-      ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_REPRESENTANTE'])
+      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_REPRESENTANTE'])
         ? [{ value: 'Representantes', component: <TableIdentificadores item="representantes" inativos={inativos} /> }]
         : []),
-      ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_DIVISAO ADMINISTRATIVA'])
+      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_DIVISAO ADMINISTRATIVA'])
         ? [{ value: 'Freguesias', component: <TableIdentificadores item="freguesias" inativos={inativos} /> }]
         : []),
     ],
-    [inativos, utilizador._role, utilizador.acessos]
+    [inativos, utilizador?._role, utilizador?.acessos]
   );
 
   useEffect(() => {
@@ -174,19 +174,21 @@ function Actions({ inativos, setInativos, label = '' }) {
         />
       )}
       {label !== 'Minutas públicas' &&
-        (utilizador._role === 'ADMIN' ||
-          (label === 'Minutas' && acessoGaji9(utilizador.acessos, ['CREATE_MINUTA'])) ||
-          (label === 'Créditos' && acessoGaji9(utilizador.acessos, ['CREATE_CREDITO'])) ||
-          (label === 'Cláusulas' && acessoGaji9(utilizador.acessos, ['CREATE_CLAUSULA'])) ||
-          (label === 'Produtos' && acessoGaji9(utilizador.acessos, ['CREATE_PRODUTO/COMPONENTE'])) ||
-          (label === 'Representantes' && acessoGaji9(utilizador.acessos, ['CREATE_REPRESENTANTE'])) ||
-          (label === 'Tipos de titular' && acessoGaji9(utilizador.acessos, ['CREATE_TIPO TITULAR'])) ||
-          (label === 'Tipos de garantia' && acessoGaji9(utilizador.acessos, ['CREATE_TIPO GARANTIA'])) ||
-          (label === 'Freguesias' && acessoGaji9(utilizador.acessos, ['CREATE_DIVISAO ADMINISTRATIVA']))) && (
+        (utilizador?._role === 'ADMIN' ||
+          (label === 'Minutas' && acessoGaji9(utilizador?.acessos, ['CREATE_MINUTA'])) ||
+          (label === 'Créditos' && acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) ||
+          (label === 'Cláusulas' && acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) ||
+          (label === 'Produtos' && acessoGaji9(utilizador?.acessos, ['CREATE_PRODUTO/COMPONENTE'])) ||
+          (label === 'Representantes' && acessoGaji9(utilizador?.acessos, ['CREATE_REPRESENTANTE'])) ||
+          (label === 'Tipos de titular' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO TITULAR'])) ||
+          (label === 'Tipos de garantia' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO GARANTIA'])) ||
+          (label === 'Freguesias' && acessoGaji9(utilizador?.acessos, ['CREATE_DIVISAO ADMINISTRATIVA']))) && (
           <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal('add'))} />
         )}
       {label === 'Representantes' &&
-        (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_INSTITUICAO'])) && <ButtonInfoCaixa />}
+        (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_INSTITUICAO'])) && (
+          <ButtonInfoCaixa />
+        )}
       {label === 'Créditos' && (
         <DefaultAction button label="Carregar proposta" handleClick={() => dispatch(openModal('view'))} />
       )}

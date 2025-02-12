@@ -97,7 +97,7 @@ export default function TableClausula({ inativos }) {
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`clausula_${index}`}>
-                      <TableCell>{row?.descritivo || noDados()}</TableCell>
+                      <TableCell>{row?.titulo || noDados()}</TableCell>
                       <TableCell align="right">{row?.numero_ordem}</TableCell>
                       <TableCell>
                         {row?.tipo_titular || noDados()}
@@ -113,8 +113,8 @@ export default function TableClausula({ inativos }) {
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['UPDATE_CLAUSULA'])) && (
-                            <DefaultAction label="EDITAR" color="warning" handleClick={() => viewItem('update', row)} />
+                          {(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['UPDATE_CLAUSULA'])) && (
+                            <DefaultAction label="EDITAR" handleClick={() => viewItem('update', row)} />
                           )}
                           <DefaultAction label="DETALHES" handleClick={() => viewItem('view', row)} />
                         </Stack>

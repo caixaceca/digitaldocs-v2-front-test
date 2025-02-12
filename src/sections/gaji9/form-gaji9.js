@@ -357,19 +357,7 @@ export function VariavelForm({ onCancel }) {
   });
 
   const defaultValues = useMemo(
-    () =>
-      isEdit
-        ? {
-            variaveis: [
-              {
-                id: selectedItem?.id,
-                ativo: selectedItem?.ativo,
-                nome: selectedItem?.nome || '',
-                descritivo: selectedItem?.descritivo || '',
-              },
-            ],
-          }
-        : { variaveis: [{ nome: '', descritivo: '', ativo: true }] },
+    () => (isEdit ? { variaveis: [selectedItem] } : { variaveis: [{ nome: '', descritivo: '', ativo: true }] }),
     [isEdit, selectedItem]
   );
 
@@ -384,18 +372,9 @@ export function VariavelForm({ onCancel }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
-    if (isEdit) {
-      dispatch(
-        updateItem('variaveis', JSON.stringify([values?.variaveis?.[0]]), {
-          values: values?.variaveis?.[0],
-          msg: 'Variável atualizado',
-        })
-      );
-    } else {
-      dispatch(
-        createItem('variaveis', JSON.stringify(values?.variaveis?.map((row) => row)), { msg: 'Variáveis adicionados' })
-      );
-    }
+    const params = { afterSuccess: onCancel, msg: `Variável ´${isEdit ? 'atualizado' : 'adicionado'}` };
+    if (isEdit) dispatch(updateItem('variaveis', JSON.stringify([values?.variaveis?.[0]]), params));
+    else dispatch(createItem('variaveis', JSON.stringify(values?.variaveis?.map((row) => row)), params));
   };
 
   return (
@@ -724,8 +703,8 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
   const onSubmit = async () => {
     const params = {
       id: selectedItem?.id,
-      item: 'selectedItem',
-      item1: 'utilizadores',
+      item: 'utilizadores',
+      item1: 'selectedItem',
       afterSuccess: onCancel,
       msg: `Utilizador ${selectedItem?.action === 'edit' ? 'atualizado' : 'adicionado'}`,
     };
@@ -733,11 +712,9 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
       { ...values, utilizador_id: values?.colaborador?.id, data_inicio: values?.data_inicio || new Date() },
       ['colaborador']
     );
-    if (selectedItem?.action === 'edit') {
-      dispatch(updateItem('colaboradorGrupo', JSON.stringify(formData), params));
-    } else {
-      dispatch(createItem('colaboradorGrupo', JSON.stringify(formData), params));
-    }
+
+    if (selectedItem?.action === 'edit') dispatch(updateItem('colaboradorGrupo', JSON.stringify(formData), params));
+    else dispatch(createItem('colaboradorGrupo', JSON.stringify(formData), params));
   };
 
   return (

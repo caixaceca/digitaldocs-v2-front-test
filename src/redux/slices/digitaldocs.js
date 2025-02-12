@@ -3,13 +3,12 @@ import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
-import { errorMsg } from '../../utils/formatText';
 import { downloadDoc } from '../../utils/formatFile';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 //
 import { getAccessToken } from './intranet';
-import { selectUtilizador, headerOptions, actionGet } from './sliceActions';
+import { selectUtilizador, headerOptions, actionGet, doneSucess, hasError } from './sliceActions';
 
 // ----------------------------------------------------------------------
 
@@ -44,56 +43,12 @@ const slice = createSlice({
   name: 'digitaldocs',
   initialState,
   reducers: {
-    startLoading(state) {
-      state.isLoading = true;
-    },
-
-    loadingProcesso(state, action) {
-      state.isLoadingP = action.payload;
-    },
-
-    startSaving(state) {
-      state.isSaving = true;
-    },
-
-    loadingPreview(state, action) {
-      state.isLoadingPreview = action.payload;
-    },
-
-    loadingFile(state, action) {
-      state.isLoadingFile = action.payload;
-    },
-
-    stopLoading(state) {
-      state.isLoading = false;
-    },
-
-    setDone(state, action) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.done = action.payload;
-    },
-
-    setError(state, action) {
-      state.isSaving = false;
-      state.isLoading = false;
-      state.isLoadingP = false;
-      state.isLoadingFile = '';
-      state.isLoadingPreview = false;
-      state.error = action.payload;
-    },
-
-    resetItem(state, action) {
-      const { item } = action.payload;
-      state[action.payload.item] = action.payload?.tipo === 'array' ? [] : null;
-      if (action.payload.item === 'processo') {
-        state.filePreview = null;
-        state.objectURLs.forEach(URL.revokeObjectURL);
-        state.objectURLs = [];
-      }
-      if (item === 'processo' || item === 'pesquisa' || item === 'arquivos' || item === 'pjf') {
-        state.processosInfo = null;
-      }
+    resetProcesso(state) {
+      state.objectURLs = [];
+      state.processo = null;
+      state.filePreview = null;
+      state.processosInfo = null;
+      state.objectURLs.forEach(URL.revokeObjectURL);
     },
 
     getProcessosSuccess(state, action) {
@@ -105,25 +60,13 @@ const slice = createSlice({
       actionGet(state, action.payload);
     },
 
-    getPedidosAcessoSuccess(state, action) {
-      state.pedidos = action.payload;
-    },
-
     getArquivosSuccess(state, action) {
       state.processosInfo = action.payload.paginacao;
       state.arquivos = [...state.arquivos, ...action.payload.objeto];
     },
 
-    getIndicadoresArquivoSuccess(state, action) {
-      state.indicadoresArquivo = action.payload;
-    },
-
     getCartoesSuccess(state, action) {
       state.cartoes = action.payload?.map((row) => ({ ...row, numero: row?.numero?.substring(9, 15) }));
-    },
-
-    getConSuccess(state, action) {
-      state.con = action.payload;
     },
 
     getPjfSuccess(state, action) {
@@ -132,6 +75,8 @@ const slice = createSlice({
     },
 
     getProcessoSuccess(state, action) {
+      if (!action.payload) return;
+
       if (action.payload?.estados?.length === 0) {
         action.payload.estado_processo = {
           _lock: action.payload?.preso,
@@ -167,14 +112,6 @@ const slice = createSlice({
       state.processo[item] = dados;
     },
 
-    getArquivadosSuccess(state, action) {
-      state.arquivos = action.payload;
-    },
-
-    getCartaoSuccess(state, action) {
-      state.selectedItem = action.payload;
-    },
-
     resgatarSuccess(state, action) {
       state.processo.preso = true;
       state.processo.perfil_id = action.payload.perfil_id;
@@ -189,10 +126,6 @@ const slice = createSlice({
         data_entrada: action.payload.data_ultima_transicao,
       };
       state.isLoadingP = false;
-    },
-
-    getFilePreviewSuccess(state, action) {
-      state.filePreview = action?.payload;
     },
 
     getFileSuccess(state, action) {
@@ -265,10 +198,6 @@ const slice = createSlice({
         state.processo.estados[index]._lock = true;
         state.processo.estados[index].perfil_id = action.payload.perfilId;
       }
-    },
-
-    createProcessoSuccess(state, action) {
-      state.processo = action.payload;
     },
 
     confirmarCartaoDopSuccess(state, action) {
@@ -355,15 +284,25 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { resetItem, openModal, closeModal, selectItem, selectAnexo, openDetalhes, selectParecer } = slice.actions;
+export const {
+  openModal,
+  getSuccess,
+  closeModal,
+  selectItem,
+  selectAnexo,
+  openDetalhes,
+  selectParecer,
+  resetProcesso,
+} = slice.actions;
 
 // ----------------------------------------------------------------------
 
 export function getAll(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.resetProcesso());
+    if (item !== 'indicadores arquivos') dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+
     try {
-      dispatch(slice.actions.resetItem({ item: 'processo' }));
-      if (item !== 'indicadores arquivos') dispatch(slice.actions.startLoading());
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
@@ -414,7 +353,7 @@ export function getAll(item, params) {
 
       switch (item) {
         case 'Entradas': {
-          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', tipo: [] }));
           const response = await axios.get(
             `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`,
             options
@@ -423,7 +362,7 @@ export function getAll(item, params) {
           break;
         }
         case 'Devoluções': {
-          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/ht_devolvidos?perfil_cc_id=${perfilId}&uo_id=${params?.uoId}&apartir_de=${params?.dataInicio}&ate=${params?.dataFim}`,
             options
@@ -432,13 +371,13 @@ export function getAll(item, params) {
           break;
         }
         case 'Por concluir': {
-          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
           const response = await axios.get(`${BASEURLDD}/v1/processos/porconcluir/${perfilId}`, options);
           dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
           break;
         }
         case 'Trabalhados': {
-          dispatch(slice.actions.resetItem({ item: 'dadosControle', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
           if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
@@ -458,7 +397,7 @@ export function getAll(item, params) {
         }
         case 'pedidosAcesso': {
           const response = await axios.get(`${BASEURLDD}/v1/arquivos/pedidos/${perfilId}`, options);
-          dispatch(slice.actions.getPedidosAcessoSuccess(response.data));
+          dispatch(slice.actions.getSuccess({ item: 'pedidos', dados: response.data }));
           break;
         }
         case 'restauros': {
@@ -471,11 +410,11 @@ export function getAll(item, params) {
         }
         case 'indicadores arquivos': {
           const response = await axios.get(`${BASEURLDD}/v1/indicadores/arquivo/mini/${perfilId}`, options);
-          dispatch(slice.actions.getIndicadoresArquivoSuccess(response.data));
+          dispatch(slice.actions.getSuccess({ item: 'indicadoresArquivo', dados: response.data }));
           break;
         }
         case 'Emissão': {
-          dispatch(slice.actions.resetItem({ item: 'cartoes', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'cartoes', dados: [] }));
           const response = await axios.get(
             `${BASEURLDD}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
               params?.dataFim ? `&data_final=${params?.dataFim}` : ''
@@ -486,7 +425,7 @@ export function getAll(item, params) {
           break;
         }
         case 'Receção': {
-          dispatch(slice.actions.resetItem({ item: 'cartoes', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'cartoes', dados: [] }));
           if (params?.uoId) {
             const response = await axios.get(
               `${BASEURLDD}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
@@ -499,19 +438,19 @@ export function getAll(item, params) {
           break;
         }
         case 'con': {
-          dispatch(slice.actions.resetItem({ item: 'con', tipo: 'array' }));
+          dispatch(slice.actions.getSuccess({ item: 'con', dados: [] }));
           const response = await axios.get(
             `${BASEURLDD}/v1/indicadores/export/con?data_inicio=${params?.dataInicio}${
               params?.dataFim ? `&data_final=${params?.dataFim}` : ''
             }`,
             options
           );
-          dispatch(slice.actions.getConSuccess(response.data));
+          dispatch(slice.actions.getSuccess({ item: 'con', dados: response.data }));
           break;
         }
         case 'pjf': {
           if (params?.pagina === 0) {
-            dispatch(slice.actions.resetItem({ item: 'pjf', tipo: 'array' }));
+            dispatch(slice.actions.getSuccess({ item: 'pjf', dados: [] }));
           }
           const response = await axios.get(
             `${BASEURLDD}/v2/processos/historico/pe/financas?pagina=${params?.pagina}`,
@@ -522,7 +461,7 @@ export function getAll(item, params) {
         }
         case 'cartao': {
           const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
-          dispatch(slice.actions.getCartaoSuccess(response.data));
+          dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
           break;
         }
 
@@ -530,9 +469,9 @@ export function getAll(item, params) {
           break;
       }
     } catch (error) {
-      hasError(error, dispatch);
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
-      dispatch(slice.actions.stopLoading());
+      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
     }
   };
 }
@@ -541,8 +480,9 @@ export function getAll(item, params) {
 
 export function getInfoProcesso(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+
     try {
-      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const idPerfilId = `${params?.id}?perfil_cc_id=${perfilId}`;
@@ -608,7 +548,7 @@ export function getInfoProcesso(item, params) {
         }
       }
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
       dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
     }
@@ -619,10 +559,10 @@ export function getInfoProcesso(item, params) {
 
 export function getProcesso(item, params) {
   return async (dispatch, getState) => {
-    try {
-      dispatch(slice.actions.loadingProcesso(true));
-      dispatch(slice.actions.resetItem({ item: 'processo' }));
+    dispatch(slice.actions.resetProcesso());
+    dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: true }));
 
+    try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
@@ -650,16 +590,15 @@ export function getProcesso(item, params) {
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      if (item === 'prevnext') {
-        dispatch(slice.actions.setError(`Sem mais processos disponíveis no estado ${params?.estado}`));
-      } else {
-        dispatch(slice.actions.setError(errorMsg(error)));
-      }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      dispatch(slice.actions.setError(''));
-      dispatch(slice.actions.resetItem({ item: 'processo' }));
+      if (item === 'prevnext')
+        hasError(
+          { message: `Sem mais processos disponíveis no estado ${params?.estado}` },
+          dispatch,
+          slice.actions.getSuccess
+        );
+      else hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
-      dispatch(slice.actions.loadingProcesso(false));
+      dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
     }
   };
 }
@@ -668,10 +607,10 @@ export function getProcesso(item, params) {
 
 export function getAnexo(item, params) {
   return async (dispatch, getState) => {
-    try {
-      if (item === 'filePreview') dispatch(slice.actions.loadingPreview(true));
-      dispatch(slice.actions.loadingFile(params?.anexo?.anexo));
+    if (item === 'filePreview') dispatch(slice.actions.getSuccess({ item: 'isLoadingPreview', dados: true }));
+    dispatch(slice.actions.getSuccess({ item: 'isLoadingFile', dados: params?.anexo?.anexo }));
 
+    try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
@@ -693,18 +632,14 @@ export function getAnexo(item, params) {
           })
         );
       }
-      if (item === 'filePreview') {
-        await dispatch(slice.actions.getFilePreviewSuccess({ ...params?.anexo, url }));
-      } else {
-        downloadDoc(url, params?.anexo?.nome);
-      }
+      if (item === 'filePreview')
+        await dispatch(slice.actions.getSuccess({ item: 'filePreview', dados: { ...params?.anexo, url } }));
+      else downloadDoc(url, params?.anexo?.nome);
     } catch (error) {
-      hasError(error, dispatch);
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
-      if (item === 'filePreview') {
-        dispatch(slice.actions.loadingPreview(false));
-      }
-      dispatch(slice.actions.loadingFile(''));
+      if (item === 'filePreview') dispatch(slice.actions.getSuccess({ item: 'isLoadingPreview', dados: false }));
+      dispatch(slice.actions.getSuccess({ item: 'isLoadingFile', dados: '' }));
     }
   };
 }
@@ -713,16 +648,19 @@ export function getAnexo(item, params) {
 
 export function createProcesso(item, dados, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
     try {
-      dispatch(slice.actions.startSaving());
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
       const response = await axios.post(`${BASEURLDD}/v2/processos/${item}/${perfilId}`, dados, options);
-      dispatch(slice.actions.createProcessoSuccess(response?.data?.objeto));
-      doneSucess(params?.msg, dispatch);
+      dispatch(slice.actions.getSuccess({ item: 'processo', dados: response?.data?.objeto }));
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
-      hasError(error, dispatch);
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
 }
@@ -731,8 +669,9 @@ export function createProcesso(item, dados, params) {
 
 export function updateItem(item, dados, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
     try {
-      dispatch(slice.actions.startSaving());
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: false });
@@ -931,25 +870,11 @@ export function updateItem(item, dados, params) {
         default:
           break;
       }
-      doneSucess(params?.msg, dispatch);
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
-      hasError(error, dispatch);
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
-}
-
-// ----------------------------------------------------------------------
-
-async function doneSucess(msg, dispatch) {
-  if (msg) {
-    dispatch(slice.actions.setDone(msg));
-  }
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(slice.actions.setDone(''));
-}
-
-async function hasError(error, dispatch) {
-  dispatch(slice.actions.setError(errorMsg(error)));
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(slice.actions.setError(''));
 }

@@ -18,7 +18,7 @@ import { normalizeText, entidadesParse, noDados } from '../../utils/formatText';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem } from '../../redux/slices/digitaldocs';
+import { getAll, resetProcesso } from '../../redux/slices/digitaldocs';
 // hooks
 import useSettings from '../../hooks/useSettings';
 // routes
@@ -76,7 +76,7 @@ export default function PageProcura() {
   });
 
   useEffect(() => {
-    dispatch(resetItem({ item: 'processo' }));
+    dispatch(resetProcesso());
   }, [dispatch]);
 
   useEffect(() => {

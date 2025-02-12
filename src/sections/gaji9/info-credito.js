@@ -17,13 +17,14 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { noDados } from '../../utils/formatText';
 import { fNumber } from '../../utils/formatNumber';
-import { acessoGaji9 } from '../../utils/validarAcesso';
 import { ptDateTime, ptDate } from '../../utils/formatTime';
+import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // hooks
+import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { getSuccess, deleteItem } from '../../redux/slices/gaji9';
+import { getSuccess, getDocumento, getFromGaji9, deleteItem, openModal, closeModal } from '../../redux/slices/gaji9';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
@@ -34,7 +35,9 @@ import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
+import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter } from './applySortFilter';
+import { FiadoresForm, DataContrato } from './form-credito';
 
 // ----------------------------------------------------------------------
 
@@ -99,7 +102,7 @@ export default function InfoCredito() {
         ],
       },
       content: [
-        { label: 'TAEG', value: `${credito?.taeg}%` },
+        { label: 'TAEG', value: `${credito?.taxa_taeg}%` },
         { label: 'Comissão', value: `${fNumber(credito?.valor_comissao)} ${credito?.moeda}` },
         { label: 'Comissão de abertura', value: `${fNumber(credito?.comissao_abertura)} ${credito?.moeda}` },
         { label: 'Imposto de selo', value: `${fNumber(credito?.valor_imposto_selo)} ${credito?.moeda}` },
@@ -193,9 +196,9 @@ export default function InfoCredito() {
 
 // ----------------------------------------------------------------------
 
-TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, isLoading: PropTypes.array };
+TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, contracts: PropTypes.string };
 
-export function TableInfoCredito({ id, dados = [], isLoading = false }) {
+export function TableInfoCredito({ id, dados = [], contracts = '' }) {
   const {
     page,
     order,
@@ -211,16 +214,33 @@ export function TableInfoCredito({ id, dados = [], isLoading = false }) {
   } = useTable({});
 
   const dispatch = useDispatch();
-  const { isSaving, idDelete, utilizador } = useSelector((state) => state.gaji9);
+  const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem('filterParticipante') || '');
+  const { isSaving, isLoading, isOpenModal, isOpenView, idDelete, utilizador, contratos } = useSelector(
+    (state) => state.gaji9
+  );
+
+  useEffect(() => {
+    if (id && contracts && (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CONTRATO'])))
+      dispatch(getFromGaji9('contratos', { id }));
+  }, [dispatch, utilizador, contracts, id]);
 
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const dataFiltered = applySortFilter({ filter, comparator: getComparator(order, orderBy), dados });
+  const dataFiltered = applySortFilter({
+    filter,
+    dados: contracts ? contratos : dados,
+    comparator: getComparator(order, orderBy),
+  });
   const isNotFound = !dataFiltered.length;
+
+  const openView = (view, dados) => {
+    dispatch(openModal(view));
+    dispatch(getSuccess({ item: 'selectedItem', dados }));
+  };
 
   return (
     <>
@@ -233,47 +253,90 @@ export function TableInfoCredito({ id, dados = [], isLoading = false }) {
                 order={order}
                 onSort={onSort}
                 orderBy={orderBy}
-                headLabel={[
-                  { id: 'numero_entidade', label: 'Nº entidade' },
-                  { id: 'nome', label: 'Nome' },
-                  { id: 'designacao', label: 'Designação' },
-                  { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
-                  { id: 'mutuario', label: 'Mutuário', align: 'center' },
-                  { id: 'fiador', label: 'Fiador', align: 'center' },
-                  { id: 'ativo', label: 'Ativo', align: 'center' },
-                  { id: 'modificado_em', label: 'Modificado' },
-                  { id: '', width: 10 },
-                ]}
+                headLabel={
+                  contracts
+                    ? [
+                        { id: 'codigo', label: 'Código' },
+                        { id: 'minuta', label: 'Minuta' },
+                        { id: 'representante', label: 'Representante' },
+                        { id: 'versao', label: 'Versão', align: 'center', width: 10 },
+                        { id: 'ativo', label: 'Ativo', align: 'center' },
+                        { id: '', width: 10 },
+                      ]
+                    : [
+                        { id: 'numero_entidade', label: 'Nº entidade' },
+                        { id: 'nome', label: 'Nome' },
+                        { id: 'designacao', label: 'Designação' },
+                        { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
+                        { id: 'mutuario', label: 'Mutuário', align: 'center' },
+                        { id: 'fiador', label: 'Fiador', align: 'center' },
+                        { id: 'ativo', label: 'Ativo', align: 'center' },
+                        { id: 'modificado_em', label: 'Modificado' },
+                        { id: '', width: 10 },
+                      ]
+                }
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={9} />
+                  <SkeletonTable row={10} column={contracts ? 6 : 9} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                    <TableRow hover key={`participante_${index}`}>
-                      <TableCell>{row?.numero_entidade}</TableCell>
-                      <TableCell>{row?.nome}</TableCell>
-                      <TableCell>{row?.designacao}</TableCell>
-                      <TableCell align="right">{row?.numero_ordem}</TableCell>
-                      <CellChecked check={row.mutuario} />
-                      <CellChecked check={row.fiador} />
-                      <CellChecked check={row.ativo} />
-                      <TableCell>
-                        {!row?.modficiado_por && !row?.modificado_em && noDados('Sem modificações')}
-                        {row?.modficiado_por && <Criado caption tipo="user" value={row?.modficiado_por} />}
-                        {row?.modificado_em && <Criado caption tipo="data" value={ptDateTime(row?.modificado_em)} />}
-                      </TableCell>
-                      <TableCell align="center" width={10}>
-                        {(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_CREDITO'])) && (
-                          <DefaultAction
-                            label="ELIMINAR"
-                            color="error"
-                            handleClick={() => dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))}
-                          />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
+                    contracts ? (
+                      <TableRow hover key={`participante_${index}`}>
+                        <TableCell>{row?.codigo}</TableCell>
+                        <TableCell>
+                          {row?.minuta}
+                          {row?.subtitulo ? ` - ${row?.subtitulo}` : ''}
+                        </TableCell>
+                        <TableCell>{row?.representante}</TableCell>
+                        <TableCell align="center">{row?.versao}</TableCell>
+                        <CellChecked check={row.ativo} />
+                        <TableCell align="center" width={10}>
+                          <Stack direction="row" spacing={0.75}>
+                            {(gestaoContrato(utilizador?._role) ||
+                              acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
+                              <DefaultAction label="EDITAR" handleClick={() => openView('form', row)} />
+                            )}
+                            <DefaultAction
+                              label="DOWNLOAD"
+                              handleClick={() =>
+                                dispatch(
+                                  getDocumento('contrato', { codigo: row?.codigo, titulo: `CONTRATO: ${row?.codigo}` })
+                                )
+                              }
+                            />
+                            <DefaultAction label="DETALHES" handleClick={() => openView('view', row)} />
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      <TableRow hover key={`participante_${index}`}>
+                        <TableCell>{row?.numero_entidade}</TableCell>
+                        <TableCell>{row?.nome}</TableCell>
+                        <TableCell>{row?.designacao}</TableCell>
+                        <TableCell align="right">{row?.numero_ordem}</TableCell>
+                        <CellChecked check={row.mutuario} />
+                        <CellChecked check={row.fiador} />
+                        <CellChecked check={row.ativo} />
+                        <TableCell>
+                          {!row?.modficiado_por && !row?.modificado_em && noDados('Sem modificações')}
+                          {row?.modficiado_por && <Criado caption tipo="user" value={row?.modficiado_por} />}
+                          {row?.modificado_em && <Criado caption tipo="data" value={ptDateTime(row?.modificado_em)} />}
+                        </TableCell>
+                        <TableCell align="center" width={10}>
+                          {(gestaoContrato(utilizador?._role) ||
+                            acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
+                            <DefaultAction
+                              label="ELIMINAR"
+                              handleClick={() =>
+                                dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))
+                              }
+                            />
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )
                 )}
               </TableBody>
               {!isLoading && isNotFound && <TableSearchNotFound message="Nenhum registo disponível..." />}
@@ -293,6 +356,12 @@ export function TableInfoCredito({ id, dados = [], isLoading = false }) {
           />
         )}
       </Card>
+
+      {isOpenView && <DetalhesGaji9 closeModal={handleCloseModal} item="contrato" />}
+      {isOpenModal && !contracts && <FiadoresForm id={id} onCancel={() => dispatch(closeModal())} />}
+      {isOpenModal && contracts && contracts !== 'contrato' && (
+        <DataContrato creditoId={id} onCancel={() => dispatch(closeModal())} />
+      )}
 
       {!!idDelete && (
         <DialogConfirmar

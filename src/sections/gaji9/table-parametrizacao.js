@@ -130,14 +130,7 @@ export default function TableParamsGaji9({ item, inativos }) {
                             label={row?.colaborador?.uo?.desegnicao || 'Perfil sem ID_AAD na Intranet'}
                           />
                         ) : (
-                          <>
-                            {row?.nome ||
-                              row?.titulo ||
-                              row?.prefixo ||
-                              row?.descritivo ||
-                              row?.designacao ||
-                              noDados()}
-                          </>
+                          <>{row?.nome || row?.prefixo || row?.designacao || noDados()}</>
                         )}
                       </TableCell>
                       {(item === 'variaveis' && <TableCell>{row?.descritivo}</TableCell>) ||

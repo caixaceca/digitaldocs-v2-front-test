@@ -49,7 +49,7 @@ export default function PageMinutaDetalhes() {
   }, [done]);
 
   useEffect(() => {
-    if (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA']))
+    if (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA']))
       dispatch(getFromGaji9('minuta', { id }));
   }, [dispatch, utilizador, id]);
 
@@ -95,10 +95,10 @@ export default function PageMinutaDetalhes() {
           ]}
           action={
             !!minuta &&
-            (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA'])) && (
+            (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])) && (
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {minuta?.ativo &&
-                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_MINUTA'])) && (
+                  (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['CREATE_MINUTA'])) && (
                     <>
                       {currentTab === 'Dados' && (
                         <>
@@ -145,7 +145,7 @@ export default function PageMinutaDetalhes() {
                     button
                     icon="pdf"
                     label="Previsualizar"
-                    handleClick={() => dispatch(getDocumento('previewFile', { id }))}
+                    handleClick={() => dispatch(getDocumento('minuta', { id }))}
                   />
                 )}
               </Stack>

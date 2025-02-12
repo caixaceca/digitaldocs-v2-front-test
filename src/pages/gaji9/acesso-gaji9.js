@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
-import { acessoGaji9 } from '../../utils/validarAcesso';
+import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // redux
 import { getFromGaji9 } from '../../redux/slices/gaji9';
 import { useDispatch, useSelector } from '../../redux/store';
@@ -22,11 +22,8 @@ export default function AcessoGaji9({ children, item }) {
   const temAcesso = useMemo(
     () =>
       (item === 'gestao' && utilizador) ||
-      (item === 'minuta' && (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA']))) ||
-      (item === 'credito' &&
-        (utilizador._role === 'ADMIN' ||
-          utilizador._role === 'GERENTE' ||
-          acessoGaji9(utilizador.acessos, ['READ_CREDITO']))),
+      (item === 'minuta' && (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA']))) ||
+      (item === 'credito' && (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO']))),
     [item, utilizador]
   );
 

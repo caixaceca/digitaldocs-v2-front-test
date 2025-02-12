@@ -22,10 +22,12 @@ import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { newLineText } from '../../utils/formatText';
+// hooks
+import useToggle from '../../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
 import { updateDados, resetDados, backStep, gotoStep } from '../../redux/slices/stepper';
+import { getFromGaji9, createItem, updateItem, deleteItem } from '../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -36,7 +38,7 @@ import {
   RHFAutocompleteSmp,
 } from '../../components/hook-form';
 import Steps from '../../components/Steps';
-import { DialogTitleAlt } from '../../components/CustomDialog';
+import { DialogTitleAlt, DialogConfirmar } from '../../components/CustomDialog';
 import { AddItem, DefaultAction, ButtonsStepper } from '../../components/Actions';
 //
 import { ItemComponent } from './form-gaji9';
@@ -115,8 +117,11 @@ Identificacao.propTypes = { onCancel: PropTypes.func };
 
 function Identificacao({ onCancel }) {
   const dispatch = useDispatch();
+  const { toggle: open, onOpen, onClose } = useToggle();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { tiposTitulares, tiposGarantias, componentes, selectedItem, isEdit } = useSelector((state) => state.gaji9);
+  const { tiposTitulares, tiposGarantias, componentes, selectedItem, isEdit, isSaving } = useSelector(
+    (state) => state.gaji9
+  );
   const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
@@ -158,32 +163,51 @@ function Identificacao({ onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const confirmDelete = () => {
+    dispatch(deleteItem('clausulas', { id: selectedItem?.id, afterSuccess: onCancel, msg: 'Cláusula eliminada' }));
+  };
+
   return (
-    <FormProvider
-      methods={methods}
-      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-    >
-      <Stack spacing={3} sx={{ pt: 1 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={{ xs: 1, sm: 3 }}>
-          <Stack direction="row" spacing={3} sx={{ flexGrow: 1 }}>
-            <RHFAutocompleteSmp
-              name="seccao"
-              label="Secção"
-              options={['Solta', 'Secção de identificação', 'Secção de identificação Caixa']}
-            />
-            {isEdit && (
-              <Stack>
-                <RHFSwitch name="ativo" label="Ativo" />
-              </Stack>
-            )}
+    <>
+      <FormProvider
+        methods={methods}
+        onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+      >
+        <Stack spacing={3} sx={{ pt: 1 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={{ xs: 1, sm: 3 }}>
+            <Stack direction="row" spacing={3} sx={{ flexGrow: 1 }}>
+              <RHFAutocompleteSmp
+                name="seccao"
+                label="Secção"
+                options={['Solta', 'Secção de identificação', 'Secção de identificação Caixa']}
+              />
+              {isEdit && (
+                <Stack>
+                  <RHFSwitch name="ativo" label="Ativo" />
+                </Stack>
+              )}
+            </Stack>
           </Stack>
+          <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
+          <RHFAutocompleteObj name="componente" label="Componente" options={componentesList} />
+          <RHFAutocompleteObj name="garantia" label="Tipo de garantia" options={garantiasList} />
         </Stack>
-        <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
-        <RHFAutocompleteObj name="componente" label="Componente" options={componentesList} />
-        <RHFAutocompleteObj name="garantia" label="Tipo de garantia" options={garantiasList} />
-      </Stack>
-      <ButtonsStepper onCancel={onCancel} labelCancel="Cancelar" />
-    </FormProvider>
+
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mt: 3 }}>
+          <DefaultAction small label="ELIMINAR" handleClick={() => onOpen()} />
+          <ButtonsStepper onCancel={onCancel} labelCancel="Cancelar" />
+        </Stack>
+      </FormProvider>
+
+      {open && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          onClose={() => onClose()}
+          desc="eliminar esta cláusula"
+          handleOk={() => confirmDelete()}
+        />
+      )}
+    </>
   );
 }
 
@@ -354,8 +378,6 @@ function Resumo({ minutaId, onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isEdit, selectedItem, isSaving } = useSelector((state) => state.gaji9);
-
-  console.log(selectedItem);
 
   const params = useMemo(
     () => ({

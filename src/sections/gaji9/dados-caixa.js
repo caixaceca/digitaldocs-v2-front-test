@@ -41,11 +41,11 @@ export default function InfoCaixa({ onCancel, item }) {
             {!open && !isLoading && (
               <>
                 {!infoCaixa &&
-                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_INSTITUICAO'])) && (
+                  (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['CREATE_INSTITUICAO'])) && (
                     <DefaultAction label="ADICIONAR" handleClick={onOpen} />
                   )}
                 {infoCaixa &&
-                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['UPDATE_INSTITUICAO'])) && (
+                  (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['UPDATE_INSTITUICAO'])) && (
                     <DefaultAction color="warning" label="EDITAR" handleClick={onOpen} />
                   )}
               </>

@@ -14,6 +14,10 @@ export function acessoGaji9(acessos, acessosList) {
   return !!acessosList?.find((row) => acessos?.includes(row));
 }
 
+export function gestaoContrato(funcao) {
+  return funcao === 'ADMIN' || funcao === 'GERENTE';
+}
+
 export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (

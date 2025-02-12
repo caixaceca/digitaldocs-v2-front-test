@@ -217,8 +217,17 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="Prefixo:" text={dados?.prefixo} />
                     <TableRowItem title="Sufixo:" text={dados?.sufixo} />
                     <TableRowItem title="Rótulo:" text={dados?.rotulo} />
+                    <TableRowItem title="Minuta:" text={dados?.minuta} />
                     <TableRowItem title="Título:" text={dados?.titulo} />
                     <TableRowItem title="Subtítulo:" text={dados?.subtitulo} />
+                    <TableRowItem title="Representante:" text={dados?.representante} />
+                    {dados?.data_entrega && (
+                      <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
+                    )}
+                    {dados?.data_recebido && (
+                      <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
+                    )}
+
                     {dados?.numero_ordem > -1 && (
                       <TableRowItem
                         title="Nº ordem:"
@@ -287,6 +296,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                       em={dados?.modificado_em || dados?.recarregado_em}
                       por={dados?.modificador || dados?.modificado_por || dados?.recarregado_por}
                     />
+                    <Resgisto label="Entrega" em={dados?.entrega_em} por={dados?.entrega_por} />
                   </Stack>
                 </List>
               )}

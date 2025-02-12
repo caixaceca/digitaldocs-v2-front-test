@@ -124,8 +124,8 @@ export function DefaultAction({
           onClick={handleClick}
           sx={{ ...(small ? whsmall : wh), boxShadow: label === 'Remover' && 'none' }}
           color={
-            (label === 'REVOGAR' && 'error') ||
             (label === 'VERSIONAR' && 'info') ||
+            ((label === 'REVOGAR' || label === 'ELIMINAR') && 'error') ||
             ((label === 'EDITAR' || label === 'COMPOSIÇÃO') && 'warning') ||
             color
           }

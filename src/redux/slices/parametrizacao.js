@@ -9,7 +9,6 @@ import {
   hasError,
   actionGet,
   doneSucess,
-  actionReset,
   actionCreate,
   actionUpdate,
   actionDelete,
@@ -17,7 +16,6 @@ import {
   actionOpenModal,
   selectUtilizador,
   actionCloseModal,
-  actionResponseMsg,
 } from './sliceActions';
 import { getAccessToken } from './intranet';
 
@@ -71,22 +69,6 @@ const slice = createSlice({
   name: 'parametrizacao',
   initialState,
   reducers: {
-    setLoading(state, action) {
-      state.isLoading = action.payload;
-    },
-
-    startSaving(state) {
-      state.isSaving = true;
-    },
-
-    responseMsg(state, action) {
-      actionResponseMsg(state, action.payload);
-    },
-
-    resetItem(state, action) {
-      actionReset(state, action.payload);
-    },
-
     getMeusAmbientesSuccess(state, action) {
       const ambientes = applySort(action?.payload || [], getComparator('asc', 'nome'))?.map((item) => ({
         ...item,
@@ -161,14 +143,15 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, resetItem, getSuccess, closeModal, changeMeuAmbiente } = slice.actions;
+export const { openModal, getSuccess, closeModal, changeMeuAmbiente } = slice.actions;
 
 // ----------------------------------------------------------------------
 
 export function getFromParametrizacao(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+
     try {
-      dispatch(slice.actions.setLoading(true));
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
@@ -348,7 +331,7 @@ export function getFromParametrizacao(item, params) {
           break;
         }
         case 'estado': {
-          dispatch(slice.actions.resetItem({ item: 'estado' }));
+          dispatch(slice.actions.getSuccess({ item: 'estado', dados: null }));
           const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`, options);
           if (params?.from === 'regrasTransicao') {
             dispatch(slice.actions.getSuccess({ item: 'perfisEstado', dados: response?.data?.perfis || [] }));
@@ -421,9 +404,9 @@ export function getFromParametrizacao(item, params) {
           break;
       }
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
-      dispatch(slice.actions.setLoading(false));
+      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
     }
   };
 }
@@ -432,8 +415,9 @@ export function getFromParametrizacao(item, params) {
 
 export function createItem(item, dados, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
     try {
-      dispatch(slice.actions.startSaving());
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: false });
@@ -492,9 +476,11 @@ export function createItem(item, dados, params) {
           );
         }
       }
-      doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
 }
@@ -503,8 +489,9 @@ export function createItem(item, dados, params) {
 
 export function updateItem(item, dados, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
     try {
-      dispatch(slice.actions.startSaving());
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: false });
@@ -543,9 +530,11 @@ export function updateItem(item, dados, params) {
           );
         }
       }
-      doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
 }
@@ -554,8 +543,9 @@ export function updateItem(item, dados, params) {
 
 export function deleteItem(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
     try {
-      dispatch(slice.actions.startSaving());
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
@@ -583,9 +573,11 @@ export function deleteItem(item, params) {
         );
       }
 
-      doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
 }

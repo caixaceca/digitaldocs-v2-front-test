@@ -22,7 +22,7 @@ export default function Breadcrumbs({ links, activeLast = false, ...other }) {
         <LinkItem link={link} />
       ) : (
         <Typography
-          variant="body2"
+          variant="caption"
           sx={{
             maxWidth: 260,
             overflow: 'hidden',
@@ -51,16 +51,14 @@ export default function Breadcrumbs({ links, activeLast = false, ...other }) {
 
 // ----------------------------------------------------------------------
 
-LinkItem.propTypes = {
-  link: PropTypes.shape({ href: PropTypes.string, icon: PropTypes.any, name: PropTypes.string }),
-};
+LinkItem.propTypes = { link: PropTypes.shape({ href: PropTypes.string, icon: PropTypes.any, name: PropTypes.string }) };
 
 function LinkItem({ link }) {
   const { href, name, icon } = link;
   return (
     <Link
       key={name}
-      variant="body2"
+      variant="caption"
       component={RouterLink}
       to={href || '#'}
       sx={{

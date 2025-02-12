@@ -108,7 +108,7 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
           <Taxas
             dispatch={dispatch}
             dados={{
-              taeg: dadosStepper?.taeg || dados?.taeg || '',
+              taxa_taeg: dadosStepper?.taxa_taeg || dados?.taxa_taeg || '',
               valor_juro: dadosStepper?.valor_juro || dados?.valor_juro || '',
               custo_total: dadosStepper?.custo_total || dados?.custo_total || '',
               valor_comissao: dadosStepper?.valor_comissao || dados?.valor_comissao || '',
@@ -241,7 +241,7 @@ Taxas.propTypes = { dados: PropTypes.object, dispatch: PropTypes.func };
 
 function Taxas({ dados, dispatch }) {
   const formSchema = Yup.object().shape({
-    taeg: Yup.number().min(0).required().label('TAEG'),
+    taxa_taeg: Yup.number().min(0).required().label('TAEG'),
     valor_comissao: Yup.number().min(0).required().label('Comissão'),
     custo_total: Yup.number().min(0).required().label('Custo total'),
     valor_juro: Yup.number().min(0).required().label('Valor do juro'),
@@ -268,7 +268,7 @@ function Taxas({ dados, dispatch }) {
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa juro negociado" name="taxa_juro_negociado" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa juro precário" name="taxa_juro_precario" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa juro desconto" name="taxa_juro_desconto" />} />
-        <GridItem xs={6} sm={3} children={<RHFNumberField label="TAEG" name="taeg" />} />
+        <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Comissão" name="valor_comissao" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Comissão de abertura" name="comissao_abertura" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Imposto selo" name="valor_imposto_selo" />} />
@@ -496,6 +496,76 @@ export function FiadoresForm({ id, onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+DataContrato.propTypes = { creditoId: PropTypes.number, onCancel: PropTypes.func };
+
+export function DataContrato({ creditoId, onCancel }) {
+  const dispatch = useDispatch();
+  const { selectedItem, isSaving } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({
+    data_entrega: Yup.date().typeError().required().label('Data de entrega ao cliente'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      data_entrega: selectedItem?.data_entrega ? new Date(selectedItem?.data_entrega) : null,
+      data_recebido: selectedItem?.data_recebido ? new Date(selectedItem?.data_recebido) : null,
+    }),
+    [selectedItem]
+  );
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, handleSubmit } = methods;
+  const values = watch();
+
+  const preencheData = (data, dataRef) =>
+    !dataRef || (data && formatDate(data, "yyyy-MM-dd'T'HH:mm:ss") !== formatDate(dataRef, "yyyy-MM-dd'T'HH:mm:ss"))
+      ? JSON.stringify({ data })
+      : null;
+
+  const onSubmit = async () => {
+    dispatch(
+      updateItem(
+        'datas contrato',
+        {
+          data_entrega: preencheData(values?.data_entrega, selectedItem?.data_entrega),
+          data_recebido: preencheData(values?.data_recebido, selectedItem?.data_recebido),
+        },
+        {
+          creditoId,
+          patch: true,
+          msg: 'Datas atualizado',
+          codigo: selectedItem?.codigo,
+          afterSuccess: () => onCancel(),
+        }
+      )
+    );
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+      <DialogTitleAlt sx={{ mb: 2 }} title="Atualizar datas do contrato" />
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <RHFDatePicker dateTime disableFuture name="data_entrega" label="Data de entrega ao cliente" />
+            <RHFDatePicker
+              dateTime
+              disableFuture
+              name="data_recebido"
+              disabled={!values?.data_entrega}
+              minDateTime={values?.data_entrega}
+              label="Data de receção do cliente"
+            />
+          </Stack>
+          <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 PropostaForm.propTypes = { onCancel: PropTypes.func };
 
 export function PropostaForm({ onCancel }) {
@@ -532,24 +602,60 @@ export function PropostaForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PreviewForm.propTypes = { credito: PropTypes.object, onCancel: PropTypes.func };
+PreviewForm.propTypes = { onCancel: PropTypes.func };
 
-export function PreviewForm({ credito, onCancel }) {
+export function PreviewForm({ onCancel }) {
   const dispatch = useDispatch();
-  const { isSaving, minutasPublicas } = useSelector((state) => state.gaji9);
+  const { isLoadingDoc, credito, minutasPublicas, representantes } = useSelector((state) => state.gaji9);
+  const representantesList = useMemo(
+    () =>
+      representantes
+        ?.filter(({ balcao }) => balcao === credito?.balcao_domicilio)
+        ?.map(({ id, nome }) => ({ id, label: nome })),
+    [credito?.balcao_domicilio, representantes]
+  );
 
-  const formSchema = Yup.object().shape({ minuta: Yup.mixed().required().label('Minuta') });
-  const defaultValues = useMemo(() => ({ minuta: null }), []);
+  const minutasList = useMemo(
+    () =>
+      minutasPublicas
+        ?.filter(
+          ({ componente_id: cp, tipo_titular_id: tt }) =>
+            cp === credito?.componente_id && tt === credito.tipo_titular_id
+        )
+        ?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` })),
+    [credito?.componente_id, credito.tipo_titular_id, minutasPublicas]
+  );
+
+  const formSchema = Yup.object().shape({
+    minuta: Yup.mixed().required().label('Minuta'),
+    representante: Yup.mixed().required().label('Representante'),
+  });
+  const defaultValues = useMemo(
+    () => ({
+      minuta: minutasList?.length === 1 ? minutasList[0] : null,
+      representante: representantesList?.length === 1 ? representantesList[0] : null,
+    }),
+    [minutasList, representantesList]
+  );
+
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
+    dispatch(getFromGaji9('representantes'));
     dispatch(getFromGaji9('minutasPublicas'));
   }, [dispatch]);
 
   const onSubmit = async () => {
-    dispatch(getDocumento('contrato', { creditoId: credito?.id, minutaId: values?.minuta?.id, item: 'previewFile' }));
+    dispatch(
+      getDocumento('prevContrato', {
+        creditoId: credito?.id,
+        minutaId: values?.minuta?.id,
+        representanteId: values?.representante?.id,
+        titulo: `Previsualização de contrato: Cliente ${credito?.cliente}`,
+      })
+    );
   };
 
   return (
@@ -557,17 +663,16 @@ export function PreviewForm({ credito, onCancel }) {
       <DialogTitleAlt sx={{ mb: 2 }} title="Previsualizar contrato" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack sx={{ pt: 1 }}>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <RHFAutocompleteObj name="minuta" label="Minuta" disableClearable options={minutasList} />
             <RHFAutocompleteObj
-              name="minuta"
-              label="Minuta"
               disableClearable
-              options={minutasPublicas
-                // ?.filter((row) => row?.componente_id === credito?.componente_id)
-                ?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` }))}
+              name="representante"
+              label="Representante"
+              options={representantesList}
             />
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} label="Previsualizar" />
+          <DialogButons isSaving={isLoadingDoc} onCancel={onCancel} label="Previsualizar" />
         </FormProvider>
       </DialogContent>
     </Dialog>

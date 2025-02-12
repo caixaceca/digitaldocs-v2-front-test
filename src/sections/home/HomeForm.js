@@ -26,7 +26,7 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import { ptDateTime } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { createItem, getFromIntranet, resetItem } from '../../redux/slices/intranet';
+import { getSuccess, createItem, getFromIntranet } from '../../redux/slices/intranet';
 // components
 import { Loading } from '../../components/LoadingScreen';
 import { DTFechar, DialogButons } from '../../components/Actions';
@@ -193,7 +193,7 @@ export function ValidarDocForm({ onCancel }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(resetItem({ item: 'docIdentificacao' }));
+      dispatch(getSuccess({ item: 'docIdentificacao', dados: null }));
       dispatch(getFromIntranet('docIdentificacao', { doc: values.documento, cache: values.cache }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -202,7 +202,7 @@ export function ValidarDocForm({ onCancel }) {
 
   const limparDados = () => {
     reset(defaultValues);
-    dispatch(resetItem({ item: 'docIdentificacao' }));
+    dispatch(getSuccess({ item: 'docIdentificacao', dados: null }));
   };
 
   return (

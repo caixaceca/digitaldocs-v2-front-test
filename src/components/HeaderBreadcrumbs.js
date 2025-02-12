@@ -22,7 +22,7 @@ export default function HeaderBreadcrumbs({ links, action, heading, moreLink = '
     <Box sx={{ mb: 3, color: 'text.secondary', ...sx }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={1}>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h4" gutterBottom sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+          <Typography variant="h4" gutterBottom sx={{ mb: 0, textAlign: { xs: 'center', sm: 'left' } }}>
             {heading}
           </Typography>
           {links && <Breadcrumbs links={links} {...other} />}

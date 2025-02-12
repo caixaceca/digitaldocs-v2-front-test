@@ -20,7 +20,7 @@ import { entidadesParse, noDados, baralharString, contaCliEnt } from '../../util
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem } from '../../redux/slices/digitaldocs';
+import { getAll, getSuccess } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
@@ -102,7 +102,7 @@ export default function TableArquivo({ tab }) {
   });
 
   useEffect(() => {
-    dispatch(resetItem({ item: 'arquivos', tipo: 'array' }));
+    dispatch(getSuccess({ item: 'arquivos', dados: [] }));
     dispatch(
       getAll(tab, {
         mail,

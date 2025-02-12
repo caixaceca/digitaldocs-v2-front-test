@@ -32,11 +32,11 @@ export default function PageGaji9Gestao() {
     () =>
       utilizador
         ? [
-            ...(utilizador._role === 'ADMIN'
+            ...(utilizador?._role === 'ADMIN'
               ? [{ value: 'Parametrização', component: <TabGaji9 item="parametrizacao" /> }]
               : []),
-            ...(utilizador._role === 'ADMIN' ||
-            acessoGaji9(utilizador.acessos, [
+            ...(utilizador?._role === 'ADMIN' ||
+            acessoGaji9(utilizador?.acessos, [
               'READ_TIPO TITULAR',
               'READ_TIPO GARANTIA',
               'READ_REPRESENTANTE',
@@ -49,13 +49,13 @@ export default function PageGaji9Gestao() {
                   },
                 ]
               : []),
-            ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_CLAUSULA'])
+            ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_CLAUSULA'])
               ? [{ value: 'Cláusulas', component: <TabGaji9 item="clausulas" label="Cláusulas" /> }]
               : []),
-            ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA'])
+            ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
               ? [{ value: 'Minutas', component: <TabGaji9 item="minutas" label="Minutas" /> }]
               : []),
-            // ...(utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_MINUTA'])
+            // ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
             //   ? [
             //       {
             //         value: 'Minutas públicas',
@@ -63,9 +63,9 @@ export default function PageGaji9Gestao() {
             //       },
             //     ]
             //   : []),
-            ...(utilizador._role === 'ADMIN' ||
-            utilizador._role === 'GERENTE' ||
-            acessoGaji9(utilizador.acessos, ['READ_CREDITO'])
+            ...(utilizador?._role === 'ADMIN' ||
+            utilizador?._role === 'GERENTE' ||
+            acessoGaji9(utilizador?.acessos, ['READ_CREDITO'])
               ? [{ value: 'Créditos', component: <TabGaji9 item="creditos" label="Créditos" /> }]
               : []),
           ]

@@ -4,7 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { BASEURLDD } from '../../utils/axios';
 //
 import { getAccessToken } from './intranet';
-import { selectUtilizador, headerOptions, actionGet, hasError, actionResponseMsg } from './sliceActions';
+import { selectUtilizador, headerOptions, actionGet, hasError } from './sliceActions';
 
 // Estado inicial
 const initialState = {
@@ -21,16 +21,15 @@ const slice = createSlice({
   name: 'indicadores',
   initialState,
   reducers: {
-    responseMsg(state, action) {
-      actionResponseMsg(state, action.payload);
-    },
     resetEstCredito(state) {
       state.resumoEstCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
       state.estCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
     },
+
     getSuccess(state, action) {
       actionGet(state, action.payload);
     },
+
     getResumoEstatisticaCreditoSuccess(state, action) {
       const { uoId, dados: allDados = [] } = action.payload || {};
       let dados = allDados;
@@ -69,9 +68,10 @@ const dispatchSuccess = (dispatch, item, data) => {
 
 export function getIndicadores(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    dispatch(slice.actions.getSuccess({ item: 'indicadores', dados: [] }));
+
     try {
-      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
-      dispatch(slice.actions.getSuccess({ item: 'indicadores', dados: [] }));
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
@@ -298,7 +298,7 @@ export function getIndicadores(item, params) {
           break;
       }
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
       dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
     }

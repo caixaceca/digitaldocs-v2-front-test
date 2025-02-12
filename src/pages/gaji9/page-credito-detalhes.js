@@ -5,10 +5,10 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { acessoGaji9 } from '../../utils/validarAcesso';
+import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/slices/gaji9';
+import { getFromGaji9, getSuccess, createItem, openModal, closeModal } from '../../redux/slices/gaji9';
 // routes
 import useSettings from '../../hooks/useSettings';
 // routes
@@ -23,8 +23,8 @@ import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
+import CreditForm, { PreviewForm } from '../../sections/gaji9/form-credito';
 import InfoCredito, { TableInfoCredito } from '../../sections/gaji9/info-credito';
-import CreditForm, { FiadoresForm, PreviewForm } from '../../sections/gaji9/form-credito';
 
 // ----------------------------------------------------------------------
 
@@ -32,22 +32,34 @@ export default function PageCreditoDetalhes() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
+  const [form, setSetForm] = useState('');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabInfoCredito') || 'Dados');
-  const { credito, isLoading, isOpenModal, isOpenView, isLoadingDoc, previewFile, utilizador, done, error } =
+  const { credito, isLoading, isOpenModal, isLoadingDoc, previewFile, utilizador, selectedItem, done, error } =
     useSelector((state) => state.gaji9);
 
   useEffect(() => {
-    if (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_CREDITO']))
+    if (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO']))
       dispatch(getFromGaji9('credito', { id }));
   }, [dispatch, utilizador, id]);
 
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
+    { value: 'Participantes', component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} /> },
     {
-      value: 'Participantes',
-      component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} isLoading={isLoading} />,
+      value: 'Contratos',
+      component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} contracts={form || 'noform'} />,
     },
   ];
+
+  const openForm = (action) => {
+    setSetForm(action);
+    dispatch(openModal());
+  };
+
+  const closeForm = () => {
+    setSetForm('');
+    dispatch(closeModal());
+  };
 
   return (
     <Page title="Estado | DigitalDocs">
@@ -70,23 +82,26 @@ export default function PageCreditoDetalhes() {
             { name: currentTab === 'Dados' ? 'Detalhes do crédito' : currentTab },
           ]}
           action={
-            (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['READ_CREDITO'])) &&
+            (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO'])) &&
             !!credito?.ativo && (
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' &&
-                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['UPDATE_CREDITO'])) && (
-                    <DefaultAction label="EDITAR" color="warning" handleClick={() => dispatch(openModal())} />
+                  (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['UPDATE_CREDITO'])) && (
+                    <DefaultAction label="EDITAR" color="warning" handleClick={() => openForm('credito')} />
                   )}
                 {currentTab === 'Participantes' &&
-                  (utilizador._role === 'ADMIN' || acessoGaji9(utilizador.acessos, ['CREATE_CREDITO'])) && (
+                  (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
                     <DefaultAction button icon="adicionar" label="Fiadores" handleClick={() => dispatch(openModal())} />
                   )}
-                <DefaultAction
-                  button
-                  icon="pdf"
-                  label="Previsualizar contrato"
-                  handleClick={() => dispatch(openModal('view'))}
-                />
+                {currentTab === 'Contratos' &&
+                  (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
+                    <DefaultAction
+                      button
+                      icon="pdf"
+                      label="Previsualizar contrato"
+                      handleClick={() => openForm('contrato')}
+                    />
+                  )}
               </Stack>
             )
           }
@@ -101,22 +116,32 @@ export default function PageCreditoDetalhes() {
                 const isMatched = tab.value === currentTab;
                 return isMatched && <Box key={tab.value}>{tab.component}</Box>;
               })}
+
               {(isLoadingDoc || previewFile) && (
                 <DialogPreviewDoc
                   url={previewFile}
                   isLoading={isLoadingDoc}
-                  titulo={`Contrato - ${credito?.cliente}`}
+                  titulo={selectedItem?.titulo}
                   onClose={() => dispatch(getSuccess({ item: 'previewFile', dados: '' }))}
+                  extra={
+                    previewFile && selectedItem?.titulo?.includes('Previsualização de contrato: Cliente') ? (
+                      <DefaultAction
+                        button
+                        variant="contained"
+                        label="GERAR CONTRATO"
+                        handleClick={() =>
+                          dispatch(
+                            createItem('contratos', null, { getList: true, ...selectedItem, msg: 'Contrato gerado' })
+                          )
+                        }
+                      />
+                    ) : null
+                  }
                 />
               )}
 
-              {isOpenView && <PreviewForm credito={credito} onCancel={() => dispatch(closeModal())} />}
-              {isOpenModal && currentTab === 'Dados' && (
-                <CreditForm isEdit dados={credito} onCancel={() => dispatch(closeModal())} />
-              )}
-              {isOpenModal && currentTab === 'Participantes' && (
-                <FiadoresForm id={id} onCancel={() => dispatch(closeModal())} />
-              )}
+              {isOpenModal && form === 'contrato' && <PreviewForm onCancel={closeForm} />}
+              {isOpenModal && form === 'credito' && <CreditForm isEdit dados={credito} onCancel={closeForm} />}
             </>
           )}
         </AcessoGaji9>

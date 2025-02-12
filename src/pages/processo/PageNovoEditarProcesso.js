@@ -12,7 +12,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { fYear } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getProcesso, selectAnexo, updateItem, resetItem } from '../../redux/slices/digitaldocs';
+import { getProcesso, selectAnexo, updateItem, resetProcesso } from '../../redux/slices/digitaldocs';
 import { getFromParametrizacao, changeMeuAmbiente, getSuccess } from '../../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -39,19 +39,17 @@ export default function PageNovoEditarProcesso() {
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
   const { linhas } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { perfilId, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
   const { processo, isLoadingP, selectedAnexoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
-    if (mail && id && perfilId) dispatch(getProcesso('processo', { id, mail, perfilId, historico: false }));
-  }, [dispatch, perfilId, mail, id]);
+    if (id && perfilId) dispatch(getProcesso('processo', { id, historico: false }));
+  }, [dispatch, perfilId, id]);
 
   useEffect(() => {
-    if (linhas?.length === 0 && meuFluxo?.iscredito) {
-      dispatch(getFromParametrizacao('linhas'));
-    }
+    if (linhas?.length === 0 && meuFluxo?.iscredito) dispatch(getFromParametrizacao('linhas'));
   }, [dispatch, linhas, meuFluxo]);
 
   useEffect(() => {
@@ -74,7 +72,7 @@ export default function PageNovoEditarProcesso() {
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado' || done === 'Processo atualizado') {
-      dispatch(resetItem({ item: 'processo' }));
+      dispatch(resetProcesso());
       navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${processo?.id}`);
     }
   };
@@ -82,8 +80,6 @@ export default function PageNovoEditarProcesso() {
   const eliminarAnexo = () => {
     dispatch(
       updateItem('anexo', null, {
-        mail,
-        perfilId,
         processo: true,
         processoId: id,
         individual: 'false',

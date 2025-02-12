@@ -79,12 +79,13 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
 
 DialogPreviewDoc.propTypes = {
   url: PropTypes.string,
+  extra: PropTypes.node,
   onClose: PropTypes.func,
   titulo: PropTypes.string,
   isLoading: PropTypes.bool,
 };
 
-export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClose }) {
+export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClose, extra = null }) {
   const theme = useTheme();
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
 
@@ -93,7 +94,10 @@ export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClo
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1.75 }}>
           <Typography variant="subtitle1">{titulo}</Typography>
-          <Fechar large handleClick={() => onClose()} />
+          <Stack direction="row" alignItems="center" spacing={3}>
+            {extra}
+            <Fechar large handleClick={() => onClose()} />
+          </Stack>
         </Stack>
         <Divider />
         <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>

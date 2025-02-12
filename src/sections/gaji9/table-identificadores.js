@@ -149,10 +149,8 @@ export default function TableIdentificadores({ item, inativos }) {
                             {(item === 'componentes' && row?.codigo) ||
                               (item === 'tiposGarantias' && row?.designacao) ||
                               row?.nome ||
-                              row?.titulo ||
                               row?.freguesia ||
                               row?.descritivo ||
-                              row?.designacao ||
                               noDados()}
                           </>
                         )}
@@ -179,14 +177,14 @@ export default function TableIdentificadores({ item, inativos }) {
                       <CellChecked check={row.ativo} />
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(utilizador._role === 'ADMIN' ||
-                            (item === 'tipoTitulares' && acessoGaji9(utilizador.acessos, ['UPDATE_TIPO TITULAR'])) ||
-                            (item === 'tiposGarantias' && acessoGaji9(utilizador.acessos, ['UPDATE_TIPO GARANTIA'])) ||
-                            (item === 'representantes' && acessoGaji9(utilizador.acessos, ['UPDATE_REPRESENTANTE'])) ||
+                          {(utilizador?._role === 'ADMIN' ||
+                            (item === 'tipoTitulares' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR'])) ||
+                            (item === 'tiposGarantias' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
+                            (item === 'representantes' && acessoGaji9(utilizador?.acessos, ['UPDATE_REPRESENTANTE'])) ||
                             (item === 'freguesias' &&
-                              acessoGaji9(utilizador.acessos, ['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
+                              acessoGaji9(utilizador?.acessos, ['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
                             (item === 'componentes' &&
-                              acessoGaji9(utilizador.acessos, ['UPDATE_PRODUTO/COMPONENTE']))) && (
+                              acessoGaji9(utilizador?.acessos, ['UPDATE_PRODUTO/COMPONENTE']))) && (
                             <DefaultAction label="EDITAR" color="warning" handleClick={() => viewItem('update', row)} />
                           )}
                           <DefaultAction label="DETALHES" handleClick={() => viewItem('view', row)} />

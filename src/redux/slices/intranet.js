@@ -6,15 +6,7 @@ import { loginRequest, msalInstance } from '../../config';
 // utils
 import { BASEURL, BASEURLSLIM } from '../../utils/axios';
 // hooks
-import {
-  hasError,
-  actionGet,
-  doneSucess,
-  actionReset,
-  headerOptions,
-  selectUtilizador,
-  actionResponseMsg,
-} from './sliceActions';
+import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ----------------------------------------------------------------------
 
@@ -45,20 +37,8 @@ const slice = createSlice({
   name: 'intranet',
   initialState,
   reducers: {
-    setLoading(state, action) {
-      state.isLoading = action.payload;
-    },
-
-    responseMsg(state, action) {
-      actionResponseMsg(state, action.payload);
-    },
-
     getSuccess(state, action) {
       actionGet(state, action.payload);
-    },
-
-    resetItem(state, action) {
-      actionReset(state, action.payload);
     },
   },
 });
@@ -67,7 +47,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { getSuccess, resetItem } = slice.actions;
+export const { getSuccess } = slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -83,7 +63,7 @@ export function authenticateColaborador() {
       });
       dispatch(slice.actions.getSuccess({ item: 'perfil', dados: perfil.data }));
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
     }
   };
 }
@@ -111,8 +91,9 @@ export async function getAccessToken() {
 
 export function getFromIntranet(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+
     try {
-      dispatch(slice.actions.setLoading(true));
       const accessToken = await getAccessToken();
       const { mail } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: false, ct: false, mfd: false });
@@ -172,9 +153,9 @@ export function getFromIntranet(item, params) {
         }
       }
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
-      dispatch(slice.actions.setLoading(false));
+      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
     }
   };
 }
@@ -183,8 +164,9 @@ export function getFromIntranet(item, params) {
 
 export function createItem(item, dados, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
     try {
-      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
       const accessToken = await getAccessToken();
       const { mail } = selectUtilizador(getState()?.intranet || {});
       const apiUrl =
@@ -193,15 +175,15 @@ export function createItem(item, dados, params) {
         (item === 'sugestao' && `${BASEURL}/sugestao/sugestao`) ||
         '';
       if (apiUrl) {
-        const options = headerOptions({ accessToken, mail, cc: false, ct: false, mfd: item !== 'disposicao' });
+        const options = headerOptions({ accessToken, mail, cc: false, ct: true, mfd: item !== 'disposicao' });
         await axios.post(apiUrl, dados, options);
-        if (item === 'disposicao') {
-          dispatch(slice.actions.getSuccess({ item, dados: true }));
-        }
+        if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: true }));
       }
-      doneSucess(params?.msg, dispatch, slice.actions.responseMsg);
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
-      hasError(error, dispatch, slice.actions.responseMsg);
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
 }

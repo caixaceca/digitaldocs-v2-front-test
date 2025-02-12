@@ -17,7 +17,7 @@ import { normalizeText, noDados, baralharString, contaCliEnt } from '../../utils
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetItem } from '../../redux/slices/digitaldocs';
+import { getAll, getSuccess } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
@@ -95,11 +95,11 @@ export default function TableProcessos({ from }) {
   }, [colaborador?.id, colaboradoresList, perfilId]);
 
   useEffect(() => {
-    if (mail && perfilId && meusAmbientes?.length > 0) {
-      dispatch(resetItem({ item: 'processos', tipo: 'array' }));
-      dispatch(getAll(from, { mail, fluxoId, estadoId, perfilId, colaboradorId, segmento, pagina: 0 }));
+    if (meusAmbientes?.length > 0) {
+      dispatch(getSuccess({ item: 'processos', dados: [] }));
+      dispatch(getAll(from, { fluxoId, estadoId, colaboradorId, segmento, pagina: 0 }));
     }
-  }, [dispatch, estadoId, fluxoId, perfilId, colaboradorId, segmento, from, mail, meusAmbientes?.length]);
+  }, [dispatch, estadoId, fluxoId, colaboradorId, segmento, from, meusAmbientes?.length]);
 
   const dataFiltered = applySortFilter({
     from,
