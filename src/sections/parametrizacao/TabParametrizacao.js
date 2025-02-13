@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -17,6 +17,7 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import TableParametrizacao from './TableParametrizacao';
 
 // ----------------------------------------------------------------------
+// Componente principal
 
 TabParametrizacao.propTypes = { item: PropTypes.string, label: PropTypes.string, subTabs: PropTypes.bool };
 
@@ -36,75 +37,101 @@ export default function TabParametrizacao({ item, label, subTabs }) {
 SubTabsParametrizacao.propTypes = { item: PropTypes.string, label: PropTypes.string };
 
 function SubTabsParametrizacao({ item, label }) {
-  const { fluxos } = useSelector((state) => state.parametrizacao);
-  const fluxosList = useMemo(
-    () => fluxos?.filter((item) => item?.is_ativo)?.map((row) => ({ id: row?.id, label: row?.assunto })),
-    [fluxos]
-  );
-  const [fluxo, setFluxo] = useState(
-    fluxosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoRegras'))) || null
-  );
-  const [currentTab, setCurrentTab] = useState((item === 'motivos' && 'Transição') || (item === 'credito' && 'Linhas'));
+  const [fluxo, setFluxo] = useState(null);
 
-  const handleChangeTab = async (event, newValue) => {
+  const initialTab = useMemo(() => {
+    if (item === 'motivos') return 'Transição';
+    if (item === 'credito') return 'Linhas';
+    return '';
+  }, [item]);
+
+  const [currentTab, setCurrentTab] = useState(initialTab);
+
+  const handleChangeTab = (event, newValue) => {
     setItemValue(newValue, setCurrentTab, '', false);
   };
 
-  const tabsList = [
-    ...((item === 'credito' && [
-      { value: 'Linhas', component: <TableParametrizacao item="linhas" /> },
-      { value: 'Despesas', component: <TableParametrizacao item="despesas" /> },
-      { value: 'Garantias', component: <TableParametrizacao item="garantias" /> },
-    ]) ||
-      (item === 'motivos' && [
+  const tabsList = useMemo(() => {
+    if (item === 'credito') {
+      return [
+        { value: 'Linhas', component: <TableParametrizacao item="linhas" /> },
+        { value: 'Despesas', component: <TableParametrizacao item="despesas" /> },
+        { value: 'Garantias', component: <TableParametrizacao item="garantias" /> },
+      ];
+    }
+    if (item === 'motivos') {
+      return [
         { value: 'Transição', component: <TableParametrizacao item="motivosTransicao" fluxo={fluxo} /> },
         { value: 'Pendência', component: <TableParametrizacao item="motivosPendencia" /> },
-      ]) ||
-      []),
-  ];
+      ];
+    }
+    return [];
+  }, [item, fluxo]);
+
+  const currentTabContent = useMemo(() => tabsList.find((tab) => tab.value === currentTab), [tabsList, currentTab]);
 
   return (
     <>
-      <HeaderBreadcrumb label={`${label} - ${currentTab}`} fluxo={fluxo} setFluxo={setFluxo} fluxosList={fluxosList} />
+      <HeaderBreadcrumb
+        label={`${label} - ${currentTab}`}
+        filter={currentTab === 'Transição' ? <Fluxos fluxo={fluxo} setFluxo={setFluxo} /> : null}
+      />
       <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      {currentTabContent && <Box key={currentTabContent.value}>{currentTabContent.component}</Box>}
     </>
   );
 }
 
 // ----------------------------------------------------------------------
 
-HeaderBreadcrumb.propTypes = {
-  label: PropTypes.string,
-  fluxo: PropTypes.object,
-  setFluxo: PropTypes.func,
-  fluxosList: PropTypes.array,
-};
+HeaderBreadcrumb.propTypes = { label: PropTypes.string.isRequired, filter: PropTypes.node };
 
-function HeaderBreadcrumb({ label, fluxo = null, setFluxo = null, fluxosList = [] }) {
+function HeaderBreadcrumb({ label, filter = null }) {
   return (
     <HeaderBreadcrumbs
       sx={{ px: 1 }}
       heading={label}
       action={
         <Stack direction="row" alignItems="center" spacing={1}>
-          {label === 'Motivos - Transição' && (
-            <Autocomplete
-              fullWidth
-              size="small"
-              options={fluxosList}
-              value={fluxo || null}
-              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-              onChange={(event, newValue) => setItemValue(newValue, setFluxo, 'fluxoRegras', true)}
-              renderInput={(params) => <TextField {...params} label="Fluxo" sx={{ width: { md: 250 } }} />}
-            />
-          )}
+          {filter}
           <AddItem />
         </Stack>
       }
+    />
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Fluxos.propTypes = { fluxo: PropTypes.object, setFluxo: PropTypes.func };
+
+function Fluxos({ fluxo = null, setFluxo }) {
+  const { fluxos } = useSelector((state) => state.parametrizacao);
+  const LOCAL_STORAGE_KEY = 'fluxoRegras';
+
+  const fluxosList = useMemo(
+    () => fluxos?.filter((item) => item?.is_ativo)?.map((row) => ({ id: row?.id, label: row?.assunto })) || [],
+    [fluxos]
+  );
+
+  useEffect(() => {
+    const storedFluxoId = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedFluxoId) {
+      const selectedFluxo = fluxosList.find((row) => Number(row?.id) === Number(storedFluxoId));
+      setFluxo(selectedFluxo || null);
+    }
+  }, [fluxosList, setFluxo]);
+
+  return (
+    <Autocomplete
+      fullWidth
+      size="small"
+      disableClearable
+      options={fluxosList}
+      value={fluxo || null}
+      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      onChange={(event, newValue) => setItemValue(newValue, setFluxo, LOCAL_STORAGE_KEY, true)}
+      renderInput={(params) => <TextField {...params} label="Fluxo" sx={{ width: { md: 250 } }} />}
     />
   );
 }

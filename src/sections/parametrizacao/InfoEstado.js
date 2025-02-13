@@ -93,14 +93,9 @@ export function TableInfoEstado({ item, onClose }) {
 
   const handleView = (dados) => {
     dispatch(openModal('view'));
-    if (item === 'notificacoes' && dados?.id) {
-      dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
-    }
-    if (item === 'checklist') {
-      dispatch(getFromParametrizacao('checklistitem', { id: dados?.id }));
-    } else {
-      dispatch(getSuccess({ item: 'selectedItem', dados }));
-    }
+    if (item === 'notificacoes' && dados?.id) dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
+    if (item === 'checklist') dispatch(getFromParametrizacao('checklistitem', { id: dados?.id, item: 'selectedItem' }));
+    else dispatch(getSuccess({ item: 'selectedItem', dados }));
   };
 
   return (

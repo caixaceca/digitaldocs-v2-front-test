@@ -625,7 +625,7 @@ export function PreviewForm({ onCancel }) {
         ?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` })),
     [credito?.componente_id, credito.tipo_titular_id, minutasPublicas]
   );
-
+  
   const formSchema = Yup.object().shape({
     minuta: Yup.mixed().required().label('Minuta'),
     representante: Yup.mixed().required().label('Representante'),

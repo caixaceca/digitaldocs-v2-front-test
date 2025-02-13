@@ -312,26 +312,14 @@ export function getAll(item, params) {
         const pathItem = `/v2/processos/tarefas/${item === 'Retidos' ? 'retidas/' : ''}${item === 'Pendentes' ? 'pendentes/' : ''}${item === 'Atribuídos' ? 'atribuidas/' : ''}${perfilId}?pagina=`;
         const query = `${(item === 'Retidos' || item === 'Atribuídos') && params?.colaboradorId ? `&perfil_id=${params?.colaboradorId}` : ''}${params?.estadoId ? `&estado_id=${params?.estadoId}` : ''}${params?.estadoId && params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}${params?.segmento ? `&segmento=${params?.segmento === 'Particulares' ? 'P' : 'E'}` : ''}`;
         const response = await axios.get(`${BASEURLDD}${pathItem}${params?.pagina || 0}${query}`, options);
-        const dados = response.data;
-        if (response?.data?.paginacao?.total_paginas === 2 && response?.data?.paginacao?.proxima_pagina === 1) {
-          const response1 = await axios.get(`${BASEURLDD}${pathItem}${1}${query}`, options);
-          dados.paginacao = response1?.data?.paginacao;
-          dados.objeto.push(...response1?.data?.objeto);
-        }
-        dispatch(slice.actions.getProcessosSuccess(dados));
+        dispatch(slice.actions.getProcessosSuccess(response.data));
       }
       // LISTA DE PROCESSOS ESPECÍFICOS
       if (item === 'Finalizados' || item === 'Executados' || item === 'Agendados') {
         const apiUrl = `${BASEURLDD}/v2/processos/tarefas/situacao/${perfilId}?pagina=`;
         const _item = (item === 'Finalizados' && 'finalizado') || (item === 'Executados' && 'executado') || 'agendado';
         const response = await axios.get(`${apiUrl}${params?.pagina}&situacao=${_item}`, options);
-        const dados = response.data;
-        if (response?.data?.paginacao?.total_paginas === 2 && response?.data?.paginacao?.proxima_pagina === 1) {
-          const response1 = await axios.get(`${apiUrl}${1}&situacao=${_item}`, options);
-          dados.paginacao = response1?.data?.paginacao;
-          dados.objeto.push(...response1?.data?.objeto);
-        }
-        dispatch(slice.actions.getProcessosSuccess(dados));
+        dispatch(slice.actions.getProcessosSuccess(response.data));
       }
       // PESQUISA LISTA DE PROCESSOS
       if (item === 'pesquisa global' || item === 'pesquisa avancada') {
@@ -339,16 +327,7 @@ export function getAll(item, params) {
           `${BASEURLDD}/v2/processos/pesquisa/${item === 'pesquisa global' ? 'base' : 'especifica'}/${perfilId}?pagina=${params?.pagina || 0}&em_historico=${params?.historico}${params?.chave ? `&search_param=${params?.chave}` : ''}${params?.uo?.id ? `&uo_id=${params?.uo?.id}` : ''}${params?.entrada ? `&nentrada=${params?.entrada}` : ''}${params?.noperacao ? `&noperacao=${params?.noperacao}` : ''}${params?.conta ? `&conta=${params?.conta}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.entidade ? `&entidade=${params?.entidade}` : ''}`,
           options
         );
-        const dados = response.data;
-        if (response?.data?.paginacao?.total_paginas === 2 && response?.data?.paginacao?.proxima_pagina === 1) {
-          const response1 = await axios.get(
-            `${BASEURLDD}/v2/processos/pesquisa/${item === 'pesquisa global' ? 'base' : 'especifica'}/${perfilId}?pagina=${1}&em_historico=${params?.historico}${params?.chave ? `&search_param=${params?.chave}` : ''}${params?.uo?.id ? `&uo_id=${params?.uo?.id}` : ''}${params?.entrada ? `&nentrada=${params?.entrada}` : ''}${params?.noperacao ? `&noperacao=${params?.noperacao}` : ''}${params?.conta ? `&conta=${params?.conta}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.entidade ? `&entidade=${params?.entidade}` : ''}`,
-            options
-          );
-          dados.paginacao = response1?.data?.paginacao;
-          dados.objeto.push(...response1?.data?.objeto);
-        }
-        dispatch(slice.actions.getPesquisaSuccess(dados));
+        dispatch(slice.actions.getPesquisaSuccess(response.data));
       }
 
       switch (item) {

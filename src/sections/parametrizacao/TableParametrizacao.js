@@ -95,9 +95,7 @@ export default function TableParametrizacao({ item, fluxo = null }) {
   }, [filter]);
 
   useEffect(() => {
-    if (item) {
-      dispatch(getFromParametrizacao(item, { fluxoId: fluxo?.id, gestao: true }));
-    }
+    if (item) dispatch(getFromParametrizacao(item, { fluxoId: fluxo?.id }));
   }, [dispatch, perfilId, item, fluxo, mail]);
 
   const dataFiltered = applySortFilter({
@@ -130,11 +128,8 @@ export default function TableParametrizacao({ item, fluxo = null }) {
       navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${dados?.id}`);
     } else {
       dispatch(openModal(modal));
-      if (itemSingle) {
-        dispatch(getFromParametrizacao(itemSingle, { id: dados?.id, from: 'listagem' }));
-      } else {
-        dispatch(getSuccess({ item: 'selectedItem', dados }));
-      }
+      if (itemSingle) dispatch(getFromParametrizacao(itemSingle, { id: dados?.id, item: 'selectedItem' }));
+      else dispatch(getSuccess({ item: 'selectedItem', dados }));
     }
   };
 
@@ -267,14 +262,15 @@ export function EstadoDetail({ row = null }) {
     <>
       <TableCell>{row.nome}</TableCell>
       <TableCell>
-        <Stack direction="row" spacing={0.5} alignItems="center">
-          <Typography variant="body2">{row.uo}</Typography> (
+        <Stack direction="row" alignItems="center">
+          <Typography variant="body2">{row.uo}</Typography>
           {!!row?.balcao && (
             <>
+              &nbsp;(
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                (Balc:
+                Balc:
               </Typography>
-              <Typography variant="body2">{row.balcao})</Typography>
+              <Typography variant="body2">&nbsp;{row.balcao})</Typography>
             </>
           )}
         </Stack>

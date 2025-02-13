@@ -28,6 +28,17 @@ export function actionGet(state, payload) {
   }
 }
 
+// ----------------------------------------------------------------------
+
+function dadosLabel(dados, item) {
+  if (!dados || !dados?.length === 0) return [];
+
+  return applySort(
+    dados?.map((row) => ({ ...row, label: row?.[item] })),
+    getComparator('asc', 'label')
+  );
+}
+
 export function actionCreate(state, payload) {
   if (!payload || !payload.item) return;
 
@@ -110,15 +121,6 @@ export async function hasError(error, dispatch, action) {
   dispatch(action({ item: 'error', dados: errorMsg(error) }));
   await new Promise((resolve) => setTimeout(resolve, 500));
   dispatch(action({ item: 'error', dados: '' }));
-}
-
-// ----------------------------------------------------------------------
-
-function dadosLabel(dados, item) {
-  return applySort(
-    dados?.map((row) => ({ ...row, label: row?.[item] })),
-    getComparator('asc', 'label')
-  );
 }
 
 // ----------------------------------------------------------------------

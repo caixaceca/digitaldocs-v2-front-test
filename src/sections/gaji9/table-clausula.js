@@ -12,6 +12,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { noDados } from '../../utils/formatText';
+import { ptDateTime } from '../../utils/formatTime';
 import { acessoGaji9 } from '../../utils/validarAcesso';
 // hooks
 import useModal from '../../hooks/useModal';
@@ -20,6 +21,7 @@ import useTable, { getComparator } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, openModal, closeModal } from '../../redux/slices/gaji9';
 // Components
+import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
@@ -83,17 +85,18 @@ export default function TableClausula({ inativos }) {
                 orderBy={orderBy}
                 headLabel={[
                   { id: 'titulo', label: 'Título' },
-                  { id: 'numero_ordem', label: 'Nº ordem', align: 'right' },
+                  { id: 'numero_ordem', label: 'Nº', align: 'right' },
                   { id: 'tipo_titular', label: 'Tipo titular' },
                   { id: 'tipo_garantia', label: 'Tipo garantia' },
                   { id: 'componente', label: 'Produto' },
                   { id: '', label: 'Secção' },
+                  { id: 'criado_em', label: 'Criado' },
                   { id: '', width: 10 },
                 ]}
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={7} />
+                  <SkeletonTable row={10} column={8} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`clausula_${index}`}>
@@ -110,6 +113,10 @@ export default function TableClausula({ inativos }) {
                           (row?.seccao_identificacao && 'Secção de identificação') ||
                           (row?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
                           noDados()}
+                      </TableCell>
+                      <TableCell width={10}>
+                        {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row.criado_em)} />}
+                        {row?.criado_por && <Criado tipo="user" value={row.criado_por} baralhar caption />}
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">

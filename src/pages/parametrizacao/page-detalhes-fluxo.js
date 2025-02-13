@@ -52,9 +52,7 @@ export default function PageDetalhesFluxo() {
   );
 
   useEffect(() => {
-    if (perfilId && id) {
-      dispatch(getFromParametrizacao('fluxo', { id }));
-    }
+    if (perfilId && id) dispatch(getFromParametrizacao('fluxo', { id }));
   }, [dispatch, perfilId, id]);
 
   useEffect(() => {

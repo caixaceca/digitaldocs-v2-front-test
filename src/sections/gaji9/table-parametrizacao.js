@@ -20,8 +20,8 @@ import { getFromGaji9, openModal, closeModal } from '../../redux/slices/gaji9';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import DetalhesGaji9 from './DetalhesGaji9';

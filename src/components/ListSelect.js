@@ -36,7 +36,7 @@ function union(a, b) {
 
 // ----------------------------------------------------------------------
 
-ListSelect.propTypes = { disponiveis: PropTypes.array, atribuidos: PropTypes.array, changeFluxos: PropTypes.array };
+ListSelect.propTypes = { disponiveis: PropTypes.array, atribuidos: PropTypes.array, changeFluxos: PropTypes.func };
 
 export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
   const [checked, setChecked] = useState([]);
@@ -55,22 +55,17 @@ export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
+    if (currentIndex === -1) newChecked.push(value);
+    else newChecked.splice(currentIndex, 1);
+
     setChecked(newChecked);
   };
 
   const numberOfChecked = (items) => intersection(checked, items).length;
 
   const handleToggleAll = (items) => () => {
-    if (numberOfChecked(items) === items.length) {
-      setChecked(not(checked, items));
-    } else {
-      setChecked(union(checked, items));
-    }
+    if (numberOfChecked(items) === items.length) setChecked(not(checked, items));
+    else setChecked(union(checked, items));
   };
 
   const handleCheckedRight = () => {

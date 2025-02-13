@@ -113,6 +113,8 @@ export function emptyRows(page, rowsPerPage, arrayLength) {
 }
 
 export function applySort(array, comparator) {
+  if (!array || array?.length === 0) return [];
+
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);

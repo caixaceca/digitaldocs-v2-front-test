@@ -104,20 +104,9 @@ export default function TableAcessos({ tab }) {
   }, [filter]);
 
   useEffect(() => {
-    if (id && tab === 'acessos') {
-      dispatch(getFromParametrizacao('acessos', { perfilId: id }));
-    }
+    if (id && tab === 'acessos') dispatch(getFromParametrizacao('acessos', { perfilId: id }));
+    if (id && tab === 'estados') dispatch(getFromParametrizacao('estadosPerfil', { estadoId: id }));
   }, [dispatch, id, tab]);
-
-  useEffect(() => {
-    if (id && tab === 'estados') {
-      dispatch(getFromParametrizacao('estadosPerfil', { estadoId: id }));
-    }
-  }, [dispatch, id, tab]);
-
-  const handleCloseModal = () => {
-    dispatch(closeModal());
-  };
 
   return (
     <>
@@ -136,7 +125,7 @@ export default function TableAcessos({ tab }) {
         }
       />
       <RoleBasedGuard hasContent roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
-        <Notificacao done={done} error={error} afterSuccess={handleCloseModal} />
+        <Notificacao done={done} error={error} afterSuccess={() => dispatch(closeModal())} />
         <Card sx={{ p: 1 }}>
           <SearchToolbarSimple item="filterAcesso" filter={filter} setFilter={setFilter} />
           <Scrollbar>
@@ -212,8 +201,12 @@ export default function TableAcessos({ tab }) {
           )}
         </Card>
 
-        {tab === 'acessos' && isOpenModal && <AcessoForm onCancel={handleCloseModal} perfilIdA={id} />}
-        {tab === 'estados' && isOpenModal && <EstadosPerfilForm onCancel={handleCloseModal} perfilIdE={id} />}
+        {isOpenModal && (
+          <>
+            {tab === 'acessos' && <AcessoForm onCancel={() => dispatch(closeModal())} perfilIdA={id} />}
+            {tab === 'estados' && <EstadosPerfilForm onCancel={() => dispatch(closeModal())} perfilIdE={id} />}
+          </>
+        )}
       </RoleBasedGuard>
     </>
   );

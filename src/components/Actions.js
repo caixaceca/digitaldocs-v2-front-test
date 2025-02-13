@@ -217,15 +217,11 @@ export function UpdateItem({ dados, handleClick = null }) {
   const dispatch = useDispatch();
 
   const handleUpdate = () => {
-    if (handleClick) {
-      handleClick();
-    } else {
+    if (handleClick) handleClick();
+    else {
       dispatch(openModal('update'));
-      if (dados?.dados) {
-        dispatch(getSuccess({ item: 'selectedItem', dados: dados?.dados }));
-      } else {
-        dispatch(getFromParametrizacao(dados?.item, { id: dados?.id, from: 'listagem' }));
-      }
+      if (dados?.dados) dispatch(getSuccess({ item: 'selectedItem', dados: dados?.dados }));
+      else dispatch(getFromParametrizacao(dados?.item, { id: dados?.id, item: 'selectedItem' }));
     }
   };
 

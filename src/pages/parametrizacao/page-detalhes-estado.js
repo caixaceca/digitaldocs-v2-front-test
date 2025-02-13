@@ -35,9 +35,7 @@ export default function PageDetalhesEstado() {
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Dados');
 
   useEffect(() => {
-    if (perfilId && id) {
-      dispatch(getFromParametrizacao('estado', { id }));
-    }
+    if (perfilId && id) dispatch(getFromParametrizacao('estado', { id }));
   }, [dispatch, perfilId, id]);
 
   const handleCloseModal = () => {

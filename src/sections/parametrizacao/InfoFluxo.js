@@ -104,14 +104,9 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
 
   const handleView = (dados) => {
     dispatch(openModal('view'));
-    if (item === 'notificacoes' && dados?.id) {
-      dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
-    }
-    if (item === 'checklist') {
-      dispatch(getFromParametrizacao('checklistitem', { id: dados?.id }));
-    } else {
-      dispatch(getSuccess({ item: 'selectedItem', dados }));
-    }
+    if (item === 'notificacoes' && dados?.id) dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
+    if (item === 'checklist') dispatch(getFromParametrizacao('checklistitem', { id: dados?.id, item: 'selectedItem' }));
+    else dispatch(getSuccess({ item: 'selectedItem', dados }));
   };
 
   return (
@@ -212,22 +207,30 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
 
 // ----------------------------------------------------------------------
 
-function estadosList(transicoes, estados, uos) {
-  const estadosId = [];
-  const estadosL = [];
-  transicoes?.forEach((row) => {
-    if (!estadosId.includes(row?.estado_inicial_id)) {
-      estadosId.push(row.estado_inicial_id);
-      const estado = estados.find((_row) => _row?.id === row?.estado_inicial_id);
-      estadosL.push({ ...estado, uo: uos?.find((item) => item?.id === estado?.uo_id)?.label || estado?.uo_id });
-    }
-    if (!estadosId.includes(row?.estado_final_id)) {
-      estadosId.push(row.estado_final_id);
-      const estado = estados.find((_row) => _row?.id === row?.estado_final_id);
-      estadosL.push({ ...estado, uo: uos?.find((item) => item?.id === estado?.uo_id)?.label || estado?.uo_id });
-    }
+function estadosList(transicoes = [], estados = [], uos = []) {
+  const estadosProcessados = new Set();
+  const estadosLista = [];
+
+  const estadosMap = new Map(estados.map((estado) => [estado.id, estado]));
+  const uosMap = new Map(uos.map((uo) => [uo.id, uo.label]));
+
+  const processarEstado = (id) => {
+    if (!id || estadosProcessados.has(id)) return;
+
+    const estado = estadosMap.get(id);
+    if (!estado) return;
+
+    const uoLabel = uosMap.get(estado.uo_id) ?? estado.uo_id;
+    estadosLista.push({ ...estado, uo: uoLabel });
+    estadosProcessados.add(id);
+  };
+
+  transicoes.forEach(({ estado_inicial_id: ei, estado_final_id: ef }) => {
+    processarEstado(ei);
+    processarEstado(ef);
   });
-  return estadosL;
+
+  return estadosLista;
 }
 
 function headerTable(item) {
