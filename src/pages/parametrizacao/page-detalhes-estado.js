@@ -34,8 +34,6 @@ export default function PageDetalhesEstado() {
   const { estado, done, error } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Dados');
 
-  console.log(estado);
-
   useEffect(() => {
     if (perfilId && id) dispatch(getFromParametrizacao('estado', { id }));
   }, [dispatch, perfilId, id]);

@@ -57,7 +57,7 @@ export function getIndicadores(item, params) {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     dispatch(slice.actions.getSuccess({ item: 'indicadores', dados: [] }));
     if (item === 'posicaoAtual') dispatch(slice.actions.getSuccess({ item: 'posicaoAtual', dados: null }));
-    if (item === 'totalP') await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (item === 'totalP') await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
       const accessToken = await getAccessToken();

@@ -128,6 +128,7 @@ export function DefaultAction({
           color={
             (label === 'VERSIONAR' && 'info') ||
             ((label === 'REVOGAR' || label === 'ELIMINAR') && 'error') ||
+            ((label === 'PRÓXIMO' || label === 'ANTERIOR') && 'inherit') ||
             ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || label === 'OPÇÕES') && 'warning') ||
             color
           }
@@ -136,9 +137,9 @@ export function DefaultAction({
             (icon === 'parecer' && <NotesIcon />) ||
             (icon === 'cancelar' && <ClearIcon />) ||
             (icon === 'history' && <HistoryIcon />) ||
-            (icon === 'ANTERIOR' && <ArrowBackIcon />) ||
             (label === 'RESTAURAR' && <RestoreIcon />) ||
-            (icon === 'PRÓXIMO' && <ArrowForwardIcon />) ||
+            (label === 'ANTERIOR' && <ArrowBackIcon />) ||
+            (label === 'PRÓXIMO' && <ArrowForwardIcon />) ||
             (label === 'PARECER' && <ChatOutlinedIcon />) ||
             (icon === 'views' && <PreviewOutlinedIcon />) ||
             (icon === 'acesso' && <TaskAltOutlinedIcon />) ||

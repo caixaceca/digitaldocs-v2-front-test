@@ -20,48 +20,22 @@ export function useProcesso({ id, perfilId }) {
 
 // ----------------------------------------------------------------------
 
-export function useNotificacao({ done, error, linkNavigate, proximoAnterior, setCurrentTab }) {
-  const { enqueueSnackbar } = useSnackbar();
+export function useNotificacao({ done, error, linkNavigate, proximo, irParaProcesso }) {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (done) enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-
-    if (
-      [
-        'Processo arquivado',
-        'Processo devolvido',
-        'Pendência eliminada',
-        'Processo finalizado',
-        'Processo encaminhado',
-        'Processo colocado pendente',
-      ].includes(done)
-    ) {
-      proximoAnterior('true');
-      setCurrentTab('Dados gerais');
-    }
-    if (
-      [
-        'Parecer enviado',
-        'Processo atribuído',
-        'Processo libertado',
-        'Processo domiciliado',
-        'Atribuição eliminada',
-        'Processo desarquivado',
-      ].includes(done)
-    ) {
-      navigate(linkNavigate);
+    if (done) {
+      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
+      if (proximo) irParaProcesso(proximo);
+      else navigate(linkNavigate);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
   useEffect(() => {
-    if (error && typeof error === 'string') {
-      const noMoreProcess = error.includes('Sem mais processos');
-      enqueueSnackbar(error, { variant: noMoreProcess ? 'info' : 'error' });
-      if (noMoreProcess) navigate(linkNavigate);
-    }
-  }, [error, enqueueSnackbar, linkNavigate, navigate]);
+    if (error && typeof error === 'string') enqueueSnackbar(error, { variant: 'error' });
+  }, [enqueueSnackbar, error]);
 }
 
 export function useIdentificacao({ id }) {
@@ -75,5 +49,3 @@ export function useIdentificacao({ id }) {
     processo?.criado_em ? `/${fYear(processo?.criado_em)}` : ''
   }`;
 }
-
-// ----------------------------------------------------------------------

@@ -59,8 +59,6 @@ export default function PageProcura() {
   const { uos } = useSelector((state) => state.intranet);
   const { pesquisa, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
 
-  console.log(processosInfo);
-
   const {
     page,
     order,

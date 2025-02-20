@@ -411,56 +411,50 @@ export function getProcesso(item, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
-      const apiUrl =
-        (item === 'processo' && `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`) ||
-        (item === 'prevnext' &&
-          `${BASEURLDD}/v2/processos/next/prev/${perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}&next=${params?.next}`);
+      const response = await axios.get(
+        `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
+        options
+      );
+      if (!response.data?.objeto) return;
+      const processo = response.data?.objeto;
 
-      if (apiUrl) {
-        const response = await axios.get(apiUrl, options);
-        if (!response.data?.objeto) return;
-        const processo = response.data?.objeto;
+      if (processo?.estados?.length === 0) {
+        processo.estado_processo = {
+          _lock: processo?.preso,
+          perfil_id: processo?.perfil_id,
+          estado: processo?.estado_atual,
+          estado_id: processo?.estado_atual_id,
+          data_entrada: processo?.data_ultima_transicao,
+        };
+      } else if (processo?.estados?.length === 1 && processo?.pareceres_estado?.length === 0) {
+        processo.estado_processo = processo.estados[0];
+        if (processo.estados[0]?.pareceres?.length > 0) processo.pareceres_estado = processo.estados[0].pareceres;
+        processo.estados = [];
+      } else if (processo?.estados?.length > 1) {
+        processo.estado_processo = processo.estados.find((row) => row?.estado_id === processo.estado_atual_id);
+        processo.estados = processo.estados.filter((row) => row?.estado_id !== processo.estado_atual_id);
+      }
+      const estado = processo?.estado_processo || null;
+      processo.perfilAtribuido = estado?.perfil_id || '';
+      processo.atribuidoAMim = estado?.perfil_id === perfilId;
+      dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
 
-        if (processo?.estados?.length === 0) {
-          processo.estado_processo = {
-            _lock: processo?.preso,
-            perfil_id: processo?.perfil_id,
-            estado: processo?.estado_atual,
-            estado_id: processo?.estado_atual_id,
-            data_entrada: processo?.data_ultima_transicao,
-          };
-        } else if (processo?.estados?.length === 1 && processo?.pareceres_estado?.length === 0) {
-          processo.estado_processo = processo.estados[0];
-          if (processo.estados[0]?.pareceres?.length > 0) processo.pareceres_estado = processo.estados[0].pareceres;
-          processo.estados = [];
-        } else if (processo?.estados?.length > 1) {
-          processo.estado_processo = processo.estados.find((row) => row?.estado_id === processo.estado_atual_id);
-          processo.estados = processo.estados.filter((row) => row?.estado_id !== processo.estado_atual_id);
-        }
-        const estado = processo?.estado_processo || null;
-        processo.perfilAtribuido = estado?.perfil_id || '';
-        processo.atribuidoAMim = estado?.perfil_id === perfilId;
-        dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+      const anexoPreview = (processo?.anexos || []).filter((item) => item?.ativo).find((row) => !!canPreview(row));
+      if (anexoPreview) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipo: canPreview(anexoPreview) } }));
+      }
+      dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
 
-        const anexoPreview = (processo?.anexos || []).filter((item) => item?.ativo).find((row) => !!canPreview(row));
-        if (anexoPreview)
-          dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipo: canPreview(anexoPreview) } }));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
 
-        dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
-
-        if (estado?._lock && estado?.estado_id && processo?.atribuidoAMim)
-          dispatch(getInfoProcesso('destinos', { id: processo?.id, estadoId: estado?.estado_id }));
+      if (estado?._lock && estado?.estado_id && processo?.atribuidoAMim) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        dispatch(getInfoProcesso('destinos', { id: processo?.id, estadoId: estado?.estado_id }));
       }
     } catch (error) {
-      if (item === 'prevnext') {
-        hasError(
-          { message: `Sem mais processos disponíveis no estado ${params?.estado}` },
-          dispatch,
-          slice.actions.getSuccess
-        );
-      } else {
-        hasError(error, dispatch, slice.actions.getSuccess);
-      }
+      hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
       dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
     }

@@ -184,7 +184,6 @@ export function SearchToolbarProcessos({
           {(tab === 'Retidos' || tab === 'Atribuídos') && (
             <Autocomplete
               fullWidth
-              disableClearable
               value={colaborador || null}
               options={colaboradoresList}
               sx={{ width: { md: 250, xl: 300 } }}

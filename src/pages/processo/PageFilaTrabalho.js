@@ -61,11 +61,10 @@ export default function PageFilaTrabalho() {
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 2 }) < new Date()) {
+    if (cc?.id && !!dateUpdate && add(new Date(dateUpdate), { minutes: 2 }) < new Date())
       dispatch(getFromIntranet('cc', { id: cc?.id }));
-      dispatch(getIndicadores('totalP', { item: 'totalP' }));
-    }
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
+
+    if (cc?.id && !!dateUpdate && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
       dispatch(getFromIntranet('colaboradores'));
       dispatch(getFromParametrizacao('meusacessos'));
       dispatch(getFromParametrizacao('meusambientes'));

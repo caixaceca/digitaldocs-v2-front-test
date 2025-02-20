@@ -133,3 +133,16 @@ export function meusAcessosGaji9(grupos) {
   });
   return resultado;
 }
+
+// ----------------------------------------------------------------------
+
+export const getProximoAnterior = (processos, selectedId) => {
+  const index = processos.findIndex((p) => p.id === selectedId);
+
+  if (index === -1) return { anterior: '', proximo: '' };
+
+  return {
+    anterior: index > 0 ? processos[index - 1]?.id : '',
+    proximo: index < processos.length - 1 ? processos[index + 1]?.id : '',
+  };
+};

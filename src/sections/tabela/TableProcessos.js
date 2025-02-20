@@ -17,6 +17,7 @@ import { normalizeText, noDados, baralharString, contaCliEnt } from '../../utils
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
+import { getIndicadores } from '../../redux/slices/indicadores';
 import { getListaProcessos } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -71,8 +72,14 @@ export default function TableProcessos({ from }) {
     [colaboradores, perfisProcessos]
   );
 
+  useEffect(() => {
+    const colabSearc = colaboradoresList?.find(({ id }) => id === Number(localStorage.getItem('colaboradorP')));
+    if (colabSearc) setColaborador(colabSearc);
+  }, [colaboradoresList]);
+
   const carregarProcessos = useCallback(
-    (item, estadoId, fluxoId, segmento, perfilId, cursor) => {
+    (item, estadoId, fluxoId, segmento, cursor) => {
+      dispatch(getIndicadores('totalP', { item: 'totalP' }));
       dispatch(
         getListaProcessos(item, {
           cursor,
@@ -80,7 +87,6 @@ export default function TableProcessos({ from }) {
           segmento: item === 'Tarefas' && segmento ? segmento : '',
           fluxoId: (item === 'Tarefas' || item === 'Pendentes') && fluxoId ? fluxoId : '',
           estadoId: (item === 'Tarefas' || item === 'Pendentes') && estadoId ? estadoId : '',
-          perfilId: (item === 'Atribuídos' || item === 'Retidos') && perfilId ? perfilId : '',
           situacao: { Agendados: 'agendado', Executados: 'executado', Finalizados: 'finalizado' }[item] || '',
         })
       );
@@ -89,17 +95,18 @@ export default function TableProcessos({ from }) {
   );
 
   useEffect(() => {
-    if (meusAmbientes?.length > 0) carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, colaborador?.id, 0);
-  }, [dispatch, carregarProcessos, from, segmento, colaborador?.id, meuAmbiente?.id, meuFluxo?.id, meusAmbientes]);
+    if (meusAmbientes?.length > 0) carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, 0);
+  }, [dispatch, carregarProcessos, from, segmento, meuAmbiente?.id, meuFluxo?.id, meusAmbientes]);
 
   const dataFiltered = applySortFilter({
     from,
     motivo,
     filter,
+    colaborador,
     comparator: getComparator(order, orderBy),
     dados: processos?.map((row) => ({
       ...row,
-      colaborador: colaboradores?.find(({ perfil_id: pid }) => row?.perfil_id === pid)?.nome,
+      colaborador: colaboradores?.find(({ perfil_id: pid }) => row?.perfil_id === pid)?.nome || row?.perfil_id,
     })),
   });
   const isNotFound = !dataFiltered.length;
@@ -110,21 +117,8 @@ export default function TableProcessos({ from }) {
   }, [filter, segmento, colaborador?.id, meuAmbiente?.id, meuFluxo?.id]);
 
   const verMais = () => {
-    carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, colaborador?.id, processosInfo);
+    carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, processosInfo);
   };
-
-  // ----------------------------------------------------------------------
-
-  const TABLE_HEAD = [
-    { id: 'entrada', label: 'Nº', align: 'right', width: 10 },
-    { id: 'titular', label: 'Titular' },
-    { id: 'entidades', label: 'Cliente/Entidade' },
-    { id: 'assunto', label: 'Assunto' },
-    { id: 'estado', label: 'Estado' },
-    ...(from === 'Pendentes' ? [{ id: 'motivo', label: 'Motivo' }] : []),
-    { id: 'transitado_em', label: 'Última transição', align: 'center', width: 170 },
-    { id: '', width: 10 },
-  ];
 
   return (
     <>
@@ -158,10 +152,28 @@ export default function TableProcessos({ from }) {
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={TABLE_HEAD} />
+              <TableHeadCustom
+                order={order}
+                onSort={onSort}
+                orderBy={orderBy}
+                headLabel={[
+                  { id: 'entrada', label: 'Nº', align: 'right', width: 10 },
+                  { id: 'titular', label: 'Titular' },
+                  { id: 'entidades', label: 'Cliente/Entidade' },
+                  { id: 'assunto', label: 'Assunto' },
+                  { id: 'estado', label: 'Estado' },
+                  ...(from === 'Pendentes' ? [{ id: 'motivo', label: 'Motivo' }] : []),
+                  ...(from === 'Retidos' || from === 'Atribuídos' ? [{ id: 'colaborador', label: 'Colaborador' }] : []),
+                  { id: 'transitado_em', label: 'Última transição', align: 'center', width: 170 },
+                  { id: '', width: 10 },
+                ]}
+              />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={from === 'Pendentes' || from === 'Atribuídos' ? 8 : 7} row={10} />
+                  <SkeletonTable
+                    row={10}
+                    column={from === 'Pendentes' || from === 'Retidos' || from === 'Atribuídos' ? 8 : 7}
+                  />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${row?.id}_${index}`}>
@@ -180,6 +192,7 @@ export default function TableProcessos({ from }) {
                           )}
                         </TableCell>
                       )}
+                      {(from === 'Retidos' || from === 'Atribuídos') && <TableCell>{row?.colaborador}</TableCell>}
                       <TableCell align="center" sx={{ width: 10 }}>
                         {row?.transitado_em && (
                           <>
@@ -241,7 +254,7 @@ function dadosList(processos) {
 
 // ----------------------------------------------------------------------
 
-function applySortFilter({ dados, comparator, filter, motivo, from }) {
+function applySortFilter({ dados, comparator, filter, motivo, colaborador, from }) {
   dados = applySort(dados, comparator);
 
   if (from === 'Pendentes' && motivo === 'Levantamento do pedido')
@@ -251,6 +264,9 @@ function applySortFilter({ dados, comparator, filter, motivo, from }) {
     dados = dados.filter(
       (row) => row?.motivo && row?.motivo === motivo && row?.observacao !== 'Para levantamento do pedido'
     );
+
+  if ((from === 'Retidos' || from === 'Atribuídos') && colaborador?.id)
+    dados = dados.filter(({ perfil_id: pid }) => pid === colaborador?.id);
 
   if (filter)
     dados = dados.filter(

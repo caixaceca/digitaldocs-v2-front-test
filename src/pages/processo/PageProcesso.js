@@ -1,16 +1,17 @@
-import { useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
+import { getProximoAnterior } from '../../utils/formatObject';
 import { findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
 // redux
 import { useAcesso } from '../../hooks/useAcesso';
+import { updateItem } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getProcesso, updateItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -37,12 +38,13 @@ import Intervencao, { Libertar, Atribuir, Resgatar, Cancelar, Desarquivar } from
 
 export default function PageProcesso() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [params] = useSearchParams();
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { done, error, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
+  const { processos, done, error, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
   const linkNavigate = useMemo(
@@ -56,11 +58,11 @@ export default function PageProcesso() {
 
   const identificador = useIdentificacao({ id });
   const processo = useProcesso({ id, perfilId });
+  const proxAnt = getProximoAnterior(processos, processo?.id);
   const fluxoId = useMemo(() => processo?.fluxo_id || '', [processo?.fluxo_id]);
   const estado = useMemo(() => processo?.estado_processo || null, [processo?.estado_processo]);
   const ultimaTransicao = useMemo(() => processo?.htransicoes?.[0] || null, [processo?.htransicoes]);
   const estadoId = useMemo(() => processo?.estado_processo?.estado_id || '', [processo?.estado_processo?.estado_id]);
-  const podeVerProxAnt = useMemo(() => meusAmbientes?.find((row) => row?.id === estadoId), [meusAmbientes, estadoId]);
 
   const colaboradoresList = useMemo(
     () => findColaboradores(colaboradores, colaboradoresEstado),
@@ -128,11 +130,11 @@ export default function PageProcesso() {
     if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
   }, [tabsList, currentTab]);
 
-  const proximoAnterior = (next) => {
-    dispatch(getProcesso('prevnext', { next, estadoId, id, estado: processo?.estado_atual }));
+  const irParaProcesso = (idProcesso) => {
+    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${idProcesso}`);
   };
 
-  useNotificacao({ done, error, linkNavigate, proximoAnterior, setCurrentTab });
+  useNotificacao({ done, error, linkNavigate, proximo: proxAnt?.proximo, irParaProcesso });
 
   return (
     <Page title="Processo | DigitalDocs">
@@ -149,16 +151,12 @@ export default function PageProcesso() {
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 3, md: 4 }} alignItems="center">
               {processo && (
                 <Stack spacing={0.5} direction={{ xs: 'row' }}>
-                  {!!podeVerProxAnt &&
-                    ['ANTERIOR', 'PRÓXIMO']?.map((row) => (
-                      <DefaultAction
-                        key={row}
-                        icon={row}
-                        color="inherit"
-                        label={`${row} (${podeVerProxAnt?.nome})`}
-                        handleClick={() => proximoAnterior(row === 'PRÓXIMO' ? 'true' : 'false')}
-                      />
-                    ))}
+                  {proxAnt?.anterior && (
+                    <DefaultAction label="ANTERIOR" handleClick={() => irParaProcesso(proxAnt?.anterior)} />
+                  )}
+                  {proxAnt?.proximo && (
+                    <DefaultAction label="PRÓXIMO" handleClick={() => irParaProcesso(proxAnt?.proximo)} />
+                  )}
                   {processo?.status === 'Arquivado' ? (
                     <>{acessoDesarquivar && <Desarquivar id={id} colaboradoresList={colaboradoresList} />}</>
                   ) : (
