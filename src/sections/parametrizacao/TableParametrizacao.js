@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -8,8 +8,12 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
+// utils
+import { setItemValue } from '../../utils/formatObject';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // routes
@@ -41,11 +45,12 @@ import { applySortFilter } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-TableParametrizacao.propTypes = { item: PropTypes.string, fluxo: PropTypes.object };
+TableParametrizacao.propTypes = { item: PropTypes.string };
 
-export default function TableParametrizacao({ item, fluxo = null }) {
+export default function TableParametrizacao({ item }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [fluxo, setFluxo] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
   const {
     done,
@@ -63,7 +68,7 @@ export default function TableParametrizacao({ item, fluxo = null }) {
     motivosTransicao,
     motivosPendencia,
   } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
 
   const {
     page,
@@ -96,7 +101,7 @@ export default function TableParametrizacao({ item, fluxo = null }) {
 
   useEffect(() => {
     if (item) dispatch(getFromParametrizacao(item, { fluxoId: fluxo?.id }));
-  }, [dispatch, perfilId, item, fluxo, mail]);
+  }, [dispatch, item, fluxo]);
 
   const dataFiltered = applySortFilter({
     filter,
@@ -136,7 +141,12 @@ export default function TableParametrizacao({ item, fluxo = null }) {
   return (
     <>
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple item={`filter${item}`} filter={filter} setFilter={setFilter} />
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          {item === 'motivosTransicao' && <Fluxos fluxo={fluxo} setFluxo={setFluxo} />}
+          <Stack sx={{ flexGrow: 1 }}>
+            <SearchToolbarSimple item={`filter${item}`} filter={filter} setFilter={setFilter} />
+          </Stack>
+        </Stack>
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -278,6 +288,37 @@ export function EstadoDetail({ row = null }) {
       <CellChecked check={row.is_inicial} />
       <CellChecked check={row.is_final} />
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Fluxos.propTypes = { fluxo: PropTypes.object, setFluxo: PropTypes.func };
+
+function Fluxos({ fluxo = null, setFluxo }) {
+  const { fluxos } = useSelector((state) => state.parametrizacao);
+
+  const fluxosList = useMemo(
+    () => fluxos?.filter((item) => item?.is_ativo)?.map((row) => ({ id: row?.id, label: row?.assunto })) || [],
+    [fluxos]
+  );
+
+  useEffect(() => {
+    if (localStorage.getItem('fluxoRegras'))
+      setFluxo(fluxosList.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoRegras'))) || null);
+  }, [fluxosList, setFluxo]);
+
+  return (
+    <Autocomplete
+      fullWidth
+      disableClearable
+      options={fluxosList}
+      value={fluxo || null}
+      sx={{ maxWidth: { sm: 250, md: 350 } }}
+      renderInput={(params) => <TextField {...params} label="Fluxo" />}
+      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      onChange={(event, newValue) => setItemValue(newValue, setFluxo, 'fluxoRegras', true)}
+    />
   );
 }
 

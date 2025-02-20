@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
+import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
@@ -12,16 +13,18 @@ import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
 import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField';
+import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 // utils
-import { newLineText } from '../../utils/formatText';
+import { fNumber } from '../../utils/formatNumber';
+import { newLineText, noDados } from '../../utils/formatText';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // redux
@@ -38,8 +41,11 @@ import {
   RHFAutocompleteSmp,
 } from '../../components/hook-form';
 import Steps from '../../components/Steps';
+import GridItem from '../../components/GridItem';
+import { CellChecked } from '../../components/Panel';
+import { TableSearchNotFound } from '../../components/table';
 import { DialogTitleAlt, DialogConfirmar } from '../../components/CustomDialog';
-import { AddItem, DefaultAction, ButtonsStepper } from '../../components/Actions';
+import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '../../components/Actions';
 //
 import { ItemComponent } from './form-gaji9';
 import { LabelSN } from '../parametrizacao/Detalhes';
@@ -128,7 +134,8 @@ function Identificacao({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      ativo: dadosStepper?.ativo || (selectedItem && selectedItem?.ativo) || true,
+      ativo: dadosStepper?.ativo || !!selectedItem?.ativo,
+      condicional: dadosStepper?.condicional || !!selectedItem?.condicional,
       titular:
         dadosStepper?.titular ||
         titularesList?.find((row) => Number(row?.id) === Number(selectedItem?.tipo_titular_id)) ||
@@ -181,11 +188,10 @@ function Identificacao({ onCancel }) {
                 label="Secção"
                 options={['Solta', 'Secção de identificação', 'Secção de identificação Caixa']}
               />
-              {isEdit && (
-                <Stack>
-                  <RHFSwitch name="ativo" label="Ativo" />
-                </Stack>
-              )}
+              <Stack direction="row" spacing={1}>
+                <RHFSwitch name="condicional" label="Condicional" />
+                {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
+              </Stack>
             </Stack>
           </Stack>
           <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
@@ -218,8 +224,9 @@ function Conteudo() {
 
   const formSchema = Yup.object().shape({
     numero_ordem: Yup.number().min(0).integer().required().label('Nº ordem'),
-    conteudo: dadosStepper?.seccao && Yup.string().required().label('Conteúdo'),
     titulo: dadosStepper?.seccao !== 'Solta' && Yup.string().required().label('Título'),
+    conteudo:
+      dadosStepper?.seccao && dadosStepper?.seccao !== 'Condicional' && Yup.string().required().label('Conteúdo'),
   });
 
   const defaultValues = useMemo(
@@ -243,7 +250,7 @@ function Conteudo() {
       <Stack spacing={3} sx={{ pt: 1 }}>
         {dadosStepper?.seccao !== 'Solta' && (
           <Stack direction="row" spacing={3}>
-            {!dadosStepper?.seccao && (
+            {(!dadosStepper?.seccao || dadosStepper?.seccao === 'Condicional') && (
               <RHFNumberField name="numero_ordem" label="Nº ordem" sx={{ width: { xs: 100, md: 150 } }} />
             )}
             <RHFTextField name="titulo" label="Título" />
@@ -328,8 +335,6 @@ function Alineas() {
   );
 }
 
-// ----------------------------------------------------------------------
-
 Subalineas.propTypes = { alineaIndex: PropTypes.number };
 
 export function Subalineas({ alineaIndex }) {
@@ -394,13 +399,14 @@ function Resumo({ minutaId, onClose }) {
       ativo: dadosStepper?.ativo,
       titulo: dadosStepper?.titulo,
       conteudo: dadosStepper?.conteudo,
+      condicional: dadosStepper?.condicional,
       solta: dadosStepper?.seccao === 'Solta',
       tipo_titular_id: dadosStepper?.titular?.id,
       componente_id: dadosStepper?.componente?.id,
       tipo_garantia_id: dadosStepper?.garantia?.id,
-      numero_ordem: dadosStepper?.seccao ? 0 : dadosStepper?.numero_ordem,
       seccao_identificacao: dadosStepper?.seccao === 'Secção de identificação',
       seccao_identificacao_caixa: dadosStepper?.seccao === 'Secção de identificação Caixa',
+      numero_ordem: dadosStepper?.seccao && dadosStepper?.seccao !== 'Condicional' ? 0 : dadosStepper?.numero_ordem,
       ...(dadosStepper?.alineas?.length > 0
         ? {
             alineas: dadosStepper?.alineas?.map((row) => ({
@@ -435,6 +441,7 @@ function Resumo({ minutaId, onClose }) {
         <TableBody>
           <TableRowItem title="Ativo:" item={<LabelSN item={dadosStepper?.ativo} />} />
           <TableRowItem title="Secção :" text={dadosStepper?.seccao || 'Sem secção'} />
+          <TableRowItem title="Condicional:" item={<LabelSN item={dadosStepper?.condicional} />} />
           <TableRowItem title="Titular:" text={dadosStepper?.titular?.label} />
           <TableRowItem title="Garantia:" text={dadosStepper?.garantia?.label} />
           <TableRowItem title="Componente:" text={dadosStepper?.componente?.label} />
@@ -514,5 +521,169 @@ function TableRowItem({ title, text = '', item = null }) {
     </TableRow>
   ) : (
     ''
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+OpcoesClausula.propTypes = { onCancel: PropTypes.func, minutaId: PropTypes.number };
+
+export function OpcoesClausula({ onCancel, minutaId }) {
+  const dispatch = useDispatch();
+  const [openForm, setOpenForm] = useState('');
+  const { isSaving, infoCaixa, clausulas } = useSelector((state) => state.gaji9);
+  const opcoes = infoCaixa?.opcoes || [];
+
+  useEffect(() => {
+    dispatch(getFromGaji9('clausulas', { condicional: true }));
+  }, [dispatch]);
+
+  const eliminarRegra = () => {
+    dispatch(
+      deleteItem('eliminarRegra', {
+        minutaId,
+        msg: 'Regra eliminada',
+        condicionalId: openForm,
+        clausulaId: infoCaixa?.clausula_id,
+        afterSuccess: () => setOpenForm(''),
+      })
+    );
+  };
+
+  return (
+    <>
+      <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+        <DialogTitleAlt
+          title="Opções da cláusula"
+          onClose={() => onCancel()}
+          action={<DefaultAction button small label="Adicionar" handleClick={() => setOpenForm('create')} />}
+        />
+        <DialogContent sx={{ mt: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Cláusula</TableCell>
+                <TableCell align="right">Montante</TableCell>
+                <TableCell align="right">Prazo</TableCell>
+                <TableCell>Taxa negociada</TableCell>
+                <TableCell>2ª habitação</TableCell>
+                <TableCell>Isenção comissão</TableCell>
+                <TableCell width={10}> </TableCell>
+              </TableRow>
+            </TableHead>
+            {opcoes?.length === 0 ? (
+              <TableSearchNotFound height={150} message="Nenhuma regra adicionada..." />
+            ) : (
+              <TableBody>
+                {opcoes?.map((row, index) => (
+                  <TableRow haver key={`regra_${index}`}>
+                    <TableCell>
+                      {clausulas?.find(({ id }) => id === row?.clausula_id)?.titulo || row?.clausula_id}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.montante_maior_que && <Typography>{`> ${fNumber(row?.montante_maior_que)}`}</Typography>}
+                      {row?.montante_menor_que && <Typography>{`< ${fNumber(row?.montante_menor_que)}`}</Typography>}
+                      {!row?.montante_maior_que && !row?.montante_menor_que && noDados('Não definido')}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.prazo_maior_que && <Typography>{`> ${fNumber(row?.prazo_maior_que)}`}</Typography>}
+                      {row?.prazo_menor_que && <Typography>{`< ${fNumber(row?.prazo_menor_que)}`}</Typography>}
+                      {!row?.prazo_maior_que && !row?.prazo_menor_que && noDados('Não definido')}
+                    </TableCell>
+                    <CellChecked check={row?.taxa_juros_negociado} />
+                    <CellChecked check={row?.segunda_habitacao} />
+                    <CellChecked check={row?.isencao_comissao} />
+                    <TableCell>
+                      <DefaultAction small label="ELIMINAR" handleClick={() => setOpenForm(row?.clausula_id)} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            )}
+          </Table>
+        </DialogContent>
+      </Dialog>
+      {openForm === 'create' && <RegraForm onCancel={() => setOpenForm('')} dados={infoCaixa} minutaId={minutaId} />}
+      {!!openForm && openForm !== 'create' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          desc="eliminar esta regra"
+          onClose={() => setOpenForm('')}
+          handleOk={() => eliminarRegra()}
+        />
+      )}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+RegraForm.propTypes = { dados: PropTypes.object, minutaId: PropTypes.number, onCancel: PropTypes.func };
+
+export function RegraForm({ dados, minutaId, onCancel }) {
+  const dispatch = useDispatch();
+  const { isSaving, clausulas } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({ clausula_id: Yup.mixed().required().label('Cláusula') });
+  const defaultValues = useMemo(
+    () => ({
+      clausula_id: null,
+      prazo_maior_que: null,
+      prazo_menor_que: null,
+      montante_maior_que: null,
+      montante_menor_que: null,
+      isencao_comissao: false,
+      segunda_habitacao: false,
+      taxa_juros_negociado: false,
+    }),
+    []
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, handleSubmit } = methods;
+  const values = watch();
+
+  const onSubmit = async () => {
+    dispatch(
+      createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), {
+        minutaId,
+        afterSuccess: () => onCancel(),
+        clausulaId: dados?.clausula_id,
+        msg: 'Regra adicionada com sucesso',
+      })
+    );
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitleAlt title="Adicionar regras" />
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3} sx={{ pt: 3 }}>
+            <GridItem
+              children={
+                <RHFAutocompleteObj
+                  label="Cláusula"
+                  name="clausula_id"
+                  options={clausulas
+                    ?.filter(({ titulo }) => titulo === dados?.titulo)
+                    ?.map(({ id, titulo }) => ({ id, label: `${titulo} (ID: ${id})` }))}
+                />
+              }
+            />
+            <GridItem xs={6} children={<RHFNumberField label="Montante maior que" name="montante_maior_que" />} />
+            <GridItem xs={6} children={<RHFNumberField label="Montante menor que" name="montante_menor_que" />} />
+            <GridItem xs={6} children={<RHFNumberField label="Prazo maior que" name="prazo_maior_que" />} />
+            <GridItem xs={6} children={<RHFNumberField label="Prazo menor que" name="prazo_menor_que" />} />
+            <GridItem sm={6} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" />} />
+            <GridItem sm={6} children={<RHFSwitch name="segunda_habitacao" label="Segunda habitação" />} />
+            <GridItem
+              children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" otherSx={{ mt: 0 }} />}
+            />
+          </Grid>
+          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
   );
 }

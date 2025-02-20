@@ -15,10 +15,9 @@ import {
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
-import { AnexosExistente } from '../../../components/Actions';
 //
+import Outros from './Outros';
 import DadosCliente from './DadosCliente';
-import { ObsNovosAnexos } from './Outros';
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
 
@@ -46,7 +45,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
             <CardContent>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <RHFSwitch name="agendado" label="Agendar" />
+                  <RHFSwitch name="agendado" label="Agendar" otherSx={{ mt: 0 }} />
                 </Grid>
                 {values.agendado && (
                   <>
@@ -174,20 +173,7 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
         </Grid>
       )}
 
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Grid container spacing={3}>
-              <ObsNovosAnexos />
-              {anexosAtivos?.length > 0 && (
-                <Grid item xs={12}>
-                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} anexo />
-                </Grid>
-              )}
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
+      <Outros anexos={anexosAtivos} />
     </Grid>
   );
 }

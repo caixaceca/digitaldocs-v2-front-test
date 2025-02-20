@@ -38,7 +38,7 @@ export default function Estados({ handleAceitar }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
+  const { perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
 
   const handleEditar = (item) => {
@@ -54,7 +54,7 @@ export default function Estados({ handleAceitar }) {
   };
 
   const viewAnexo = (anexo, transicaoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { mail, perfilId, anexo, transicaoId, parecerId }));
+    dispatch(getAnexo('fileDownload', { anexo, transicaoId, parecerId }));
   };
 
   return (

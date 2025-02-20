@@ -10,7 +10,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Grid from '@mui/material/Grid';
 import { LoadingButton } from '@mui/lab';
 // utils
-import { deGmkt } from '../../../utils/validarAcesso';
+import { fluxosGmkt, bancaDigital } from '../../../utils/validarAcesso';
+import { validacao, shapeText, shapeDate, shapeNumber, shapeMixed } from '../../../components/hook-form/yup-shape';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
@@ -28,146 +29,13 @@ ProcessoInterno.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, p
 export default function ProcessoInterno({ isEdit, processo, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { cc, uos } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { meuAmbiente } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
-  const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
-
-  const formSchema = Yup.object().shape({
-    anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
-    entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
-    data_entrada: fluxo?.modelo !== 'Paralelo' && Yup.date().typeError().required().label('Data de entrada'),
-    noperacao: (processo?.numero_operacao || fluxo?.iscon) && Yup.number().positive().label('Nº de operação'),
-    titular: deGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
-    email:
-      ((fluxo?.assunto === 'Banca Virtual - Adesão' || fluxo?.assunto === 'Banca Virtual - Novos Códigos') &&
-        Yup.string().email().required().label('Email')) ||
-      (fluxo?.assunto === 'Formulário' && Yup.string().required().label('Codificação/Nome')),
-    conta:
-      !fluxo?.limpo && fluxo?.assunto !== 'Abertura de conta' && Yup.number().positive().integer().label('Nº de conta'),
-    // agendamento
-    diadomes: Yup.mixed().when('agendado', {
-      is: (agendado) => agendado,
-      then: () => Yup.number().min(1).max(31).label('Dia do mês'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    periodicidade: Yup.mixed().when('agendado', {
-      is: (agendado) => agendado,
-      then: () => Yup.mixed().required().label('Periodicidade'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    data_inicio: Yup.mixed().when('agendado', {
-      is: (agendado) => agendado,
-      then: () => Yup.date().typeError().required().label('Data de início'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    data_arquivamento: Yup.mixed().when('agendado', {
-      is: (agendado) => agendado,
-      then: () => Yup.date().typeError().required().label('Data de término'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    // CON
-    valor: fluxo?.iscon && Yup.number().min(1000000).required().label('Valor'),
-    origem_fundo: fluxo?.iscon && Yup.string().required().label('Origem do fundo'),
-    finalidade_fundo: fluxo?.iscon && Yup.string().required().label('Finalidade do fundo'),
-    entidade_con:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => cliente,
-        then: () => Yup.number().positive().integer().label('Nº da entidade'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    nif:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () =>
-          Yup.number()
-            .min(100000000, 'NIF tem de ter 9 dígitos')
-            .min(999999999, 'NIF tem de ter 9 dígitos')
-            .integer()
-            .label('NIF'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    mae:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Mãe'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    pai:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Pai'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    data_nascimento:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.date().typeError().required().label('Data de nascimento'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    profissao:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Profissão'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    telefone:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Nº de telefone'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    estado_civil:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Estado civil'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    tipo_docid:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.mixed().required().label('Tipo doc. identificação'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    docid:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Doc. de identificação'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    nacionalidade:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Nacionalidade'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    local_pais_nascimento:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Local/País de nascimento'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-    ordenador:
-      fluxo?.iscon &&
-      Yup.mixed().when('is_cliente', {
-        is: (cliente) => !cliente,
-        then: () => Yup.string().required().label('Nome do ordenador'),
-        otherwise: () => Yup.mixed().notRequired(),
-      }),
-  });
-
+  const balcaoAmbiente = useMemo(
+    () => uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao),
+    [cc?.uo?.balcao, meuAmbiente?.uo_id, uos]
+  );
   const entidades = useMemo(
     () =>
       (processo?.entidade && processo?.entidade?.split(';')?.map((row) => ({ numero: row }))) ||
@@ -175,6 +43,41 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
       [],
     [fluxo?.assunto, processo]
   );
+
+  const formSchema = Yup.object().shape({
+    anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
+    titular: fluxosGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
+    entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
+    data_entrada: fluxo?.modelo !== 'Paralelo' && Yup.date().typeError().required().label('Data de entrada'),
+    noperacao: (processo?.numero_operacao || fluxo?.iscon) && Yup.number().positive().label('Nº de operação'),
+    email:
+      (fluxo?.assunto === 'Formulário' && Yup.string().required().label('Codificação/Nome')) ||
+      (bancaDigital(fluxo?.assunto) && Yup.string().email().required().label('Email')),
+    conta:
+      !fluxo?.limpo && fluxo?.assunto !== 'Abertura de conta' && Yup.number().positive().integer().label('Nº de conta'),
+    // agendamento
+    diadomes: shapeNumber('Dia do mês', true, '', 'agendado'),
+    data_inicio: shapeDate('Data de início', true, '', 'agendado'),
+    periodicidade: shapeMixed('Periodicidade', true, '', 'agendado'),
+    data_arquivamento: shapeDate('Data de término', true, '', 'agendado'),
+    // CON
+    nif: validacao(fluxo?.iscon, shapeNumber('NIF', false, '', 'is_cliente')),
+    mae: validacao(fluxo?.iscon, shapeText('Nome da Mãe', false, '', 'is_cliente')),
+    pai: validacao(fluxo?.iscon, shapeText('Nome do Pai', false, '', 'is_cliente')),
+    valor: validacao(fluxo?.iscon, Yup.number().positive().required().label('Valor')),
+    profissao: validacao(fluxo?.iscon, shapeText('Profissão', false, '', 'is_cliente')),
+    origem_fundo: validacao(fluxo?.iscon, Yup.string().required().label('Origem do fundo')),
+    telefone: validacao(fluxo?.iscon, shapeText('Nº de telefone', false, '', 'is_cliente')),
+    estado_civil: validacao(fluxo?.iscon, shapeMixed('Estado civil', false, '', 'is_cliente')),
+    docid: validacao(fluxo?.iscon, shapeText('Doc. de identificação', false, '', 'is_cliente')),
+    nacionalidade: validacao(fluxo?.iscon, shapeText('Nacionalidade', false, '', 'is_cliente')),
+    ordenador: validacao(fluxo?.iscon, shapeText('Nome do ordenador', false, '', 'is_cliente')),
+    entidade_con: validacao(fluxo?.iscon, shapeNumber('Nº da entidade', true, '', 'is_cliente')),
+    finalidade_fundo: validacao(fluxo?.iscon, Yup.string().required().label('Finalidade do fundo')),
+    data_nascimento: validacao(fluxo?.iscon, shapeDate('Data de nascimento', false, '', 'is_cliente')),
+    tipo_docid: validacao(fluxo?.iscon, shapeMixed('Tipo doc. identificação', false, '', 'is_cliente')),
+    local_pais_nascimento: validacao(fluxo?.iscon, shapeText('Local/País de nascimento', false, '', 'is_cliente')),
+  });
 
   const defaultValues = useMemo(
     () => ({
@@ -229,12 +132,8 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && processo) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    if (isEdit && processo) reset(defaultValues);
+    if (!isEdit) reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, fluxo?.id, processo]);
 
@@ -258,40 +157,29 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
         formData.append('data_arquivamento', null);
       }
       // optional
-      if (values.obs) {
-        formData.append('obs', values.obs);
-      }
+      if (values.obs) formData.append('obs', values.obs);
       if (fluxo?.assunto === 'Diário') {
         formData.append(
           'titular',
           `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
         );
-      } else if (values.titular) {
-        formData.append('titular', values.titular);
-      }
+      } else if (values.titular) formData.append('titular', values.titular);
       if (fluxo?.assunto === 'Abertura de conta') {
         formData.append('conta', '');
         formData.append('cliente', '');
       } else {
-        if (values.conta) {
-          formData.append('conta', values.conta);
-        }
-        if (values.cliente) {
-          formData.append('cliente', values.cliente);
-        }
+        if (values.conta) formData.append('conta', values.conta);
+        if (values.cliente) formData.append('cliente', values.cliente);
       }
-      if (values.email) {
-        formData.append('email', values.email);
-      }
-      if (values.noperacao) {
-        formData.append('noperacao', values.noperacao);
-      }
-      if (values?.entidades?.length !== 0) {
+      if (values.email) formData.append('email', values.email);
+      if (values.noperacao) formData.append('noperacao', values.noperacao);
+
+      if (values?.entidades?.length !== 0)
         formData.append(
           'entidades',
           values.entidades.map((row) => row?.numero)
         );
-      }
+
       // CON
       if (fluxo?.iscon) {
         formData.append('valor', values.valor);
@@ -299,68 +187,34 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
         formData.append('origem_fundo', values.origem_fundo);
         formData.append('finalidade_fundo', values.finalidade_fundo);
         formData.append('titular_ordenador', values.titular_ordenador);
-        if (values.nif) {
-          formData.append('nif', values.nif);
-        }
-        if (values.pai) {
-          formData.append('pai', values.pai);
-        }
-        if (values.mae) {
-          formData.append('mae', values.mae);
-        }
-        if (values.docid) {
-          formData.append('docid', values.docid);
-        }
-        if (values.morada) {
-          formData.append('morada', values.morada);
-        }
-        if (values.emails) {
-          formData.append('emails', values.emails);
-        }
-        if (values.telefone) {
-          formData.append('telefone', values.telefone);
-        }
-        if (values.telemovel) {
-          formData.append('telemovel', values.telemovel);
-        }
-        if (values.ordenador) {
-          formData.append('ordenador', values.ordenador);
-        }
-        if (values.profissao) {
-          formData.append('profissao', values.profissao);
-        }
-        if (values.tipo_docid?.id) {
-          formData.append('tipo_docid', values.tipo_docid?.id);
-        }
-        if (values.entidade_con) {
-          formData.append('entidade_con', values.entidade_con);
-        }
-        if (values.nacionalidade) {
-          formData.append('nacionalidade', values.nacionalidade);
-        }
-        if (values.local_trabalho) {
-          formData.append('local_trabalho', values.local_trabalho);
-        }
-        if (values.estado_civil?.id) {
-          formData.append('estado_civil', values.estado_civil?.id);
-        }
-        if (values.local_pais_nascimento) {
-          formData.append('local_pais_nascimento', values.local_pais_nascimento);
-        }
-        if (values.data_nascimento) {
-          formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
-        }
+        if (values.nif) formData.append('nif', values.nif);
+        if (values.pai) formData.append('pai', values.pai);
+        if (values.mae) formData.append('mae', values.mae);
+        if (values.docid) formData.append('docid', values.docid);
+        if (values.morada) formData.append('morada', values.morada);
+        if (values.emails) formData.append('emails', values.emails);
+        if (values.telefone) formData.append('telefone', values.telefone);
+        if (values.telemovel) formData.append('telemovel', values.telemovel);
+        if (values.ordenador) formData.append('ordenador', values.ordenador);
+        if (values.profissao) formData.append('profissao', values.profissao);
+        if (values.entidade_con) formData.append('entidade_con', values.entidade_con);
+        if (values.tipo_docid?.id) formData.append('tipo_docid', values.tipo_docid?.id);
+        if (values.nacionalidade) formData.append('nacionalidade', values.nacionalidade);
+        if (values.local_trabalho) formData.append('local_trabalho', values.local_trabalho);
+        if (values.estado_civil?.id) formData.append('estado_civil', values.estado_civil?.id);
+        if (values.local_pais_nascimento) formData.append('local_pais_nascimento', values.local_pais_nascimento);
+        if (values.data_nascimento) formData.append('data_nascimento', format(values.data_nascimento, 'yyyy-MM-dd'));
       }
       await values?.anexos?.forEach((row) => {
         formData.append('anexos', row);
       });
 
       if (processo) {
-        dispatch(updateItem('processo', formData, { mail, perfilId, id: processo?.id, msg: 'Processo atualizado' }));
+        dispatch(updateItem('processo', formData, { mfd: true, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
         formData.append('uo_origem_id', meuAmbiente?.uo_id);
         formData.append('estado_atual_id', meuAmbiente?.id);
-        dispatch(createProcesso('interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
+        dispatch(createProcesso('interno', formData, { msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

@@ -163,8 +163,12 @@ export function paraLevantamento(assunto) {
 
 // ----------------------------------------------------------------------
 
-export function deGmkt(assunto) {
+export function fluxosGmkt(assunto) {
   return assunto === 'Preçário' || assunto === 'Formulário' || assunto === 'Produtos e Serviços';
+}
+
+export function bancaDigital(assunto) {
+  return assunto === 'Banca Digital - Adesão' || assunto === 'Banca Digital - Novos Códigos';
 }
 
 // ----------------------------------------------------------------------

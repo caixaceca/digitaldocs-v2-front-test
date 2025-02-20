@@ -99,9 +99,9 @@ export function InfoForm({ onCancel }) {
   const onSubmit = async () => {
     const params = {
       onCancel,
-      getSuccess: true,
       id: infoCaixa?.id,
       afterSuccess: onCancel,
+      getSuccess: 'infoCaixa',
       msg: `Informações ${infoCaixa ? 'atualizadas' : 'adicionadas'}`,
     };
     if (infoCaixa) {

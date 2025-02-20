@@ -18,7 +18,6 @@ export default function PageArquivo() {
 
   const tabsList = [
     { value: 'Arquivos', component: <TableArquivo tab="arquivos" /> },
-    { value: 'Restauros', component: <TableArquivo tab="restauros" /> },
     { value: 'Pedidos', component: <TableArquivo tab="pedidosAcesso" /> },
   ];
 

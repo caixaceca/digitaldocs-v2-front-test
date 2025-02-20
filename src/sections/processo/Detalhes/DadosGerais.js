@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 // utils
-import { deGmkt } from '../../../utils/validarAcesso';
+import { fluxosGmkt } from '../../../utils/validarAcesso';
 // redux
 import { useSelector } from '../../../redux/store';
 // hooks
@@ -23,7 +23,9 @@ export default function DadosGerais() {
   const hasAnexos = useMemo(() => processo?.anexos && processo?.anexos?.length > 0, [processo?.anexos]);
   const isPS = useMemo(
     () =>
-      deGmkt(processo?.assunto) || processo?.assunto === 'Diário' || processo?.assunto === 'Receção de Cartões - DOP',
+      fluxosGmkt(processo?.assunto) ||
+      processo?.assunto === 'Diário' ||
+      processo?.assunto === 'Receção de Cartões - DOP',
     [processo?.assunto]
   );
 

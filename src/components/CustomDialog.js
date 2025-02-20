@@ -67,8 +67,10 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
     <DialogTitle sx={{ ...sx }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
         {title}
-        {onClose && <Fechar handleClick={onClose} />}
-        {action}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+          {action}
+          {onClose && <Fechar handleClick={onClose} />}
+        </Stack>
       </Stack>
       {subtitle}
     </DialogTitle>

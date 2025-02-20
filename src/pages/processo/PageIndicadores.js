@@ -11,22 +11,23 @@ import useSettings from '../../hooks/useSettings';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
+import { Notificacao } from '../../components/NotistackProvider';
 // sections
+import { DiscoFicheiros } from '../../sections/indicadores/disco-ficheiros';
 import EstatisticaCredito from '../../sections/indicadores/EstatisticaCredito';
-import { TotalProcessos, Duracao, SGQ, FileSystem } from '../../sections/indicadores/Indicadores';
+import { TotalProcessos, Duracao, SGQ } from '../../sections/indicadores/Indicadores';
 
 // ----------------------------------------------------------------------
 
 export default function PageIndicadores() {
   const { themeStretch } = useSettings();
+  const { error } = useSelector((state) => state.indicadores);
   const { isAdmin } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(
-    localStorage.getItem('tabIndicadores') || (isAdmin && 'files') || 'total'
-  );
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabIndicadores') || 'total');
 
   const tabsList = useMemo(
     () => [
-      ...(isAdmin ? [{ value: 'files', label: 'Ficheiros', component: <FileSystem /> }] : []),
+      ...(isAdmin ? [{ value: 'files', label: 'Ficheiros', component: <DiscoFicheiros /> }] : []),
       { value: 'total', label: 'Total de processos', component: <TotalProcessos /> },
       { value: 'duracao', label: 'Duração', component: <Duracao /> },
       { value: 'sgq', label: 'SGQ', component: <SGQ /> },
@@ -36,9 +37,8 @@ export default function PageIndicadores() {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabIndicadores', false);
-    }
   }, [tabsList, currentTab]);
 
   // const handleNotificationClick = () => {
@@ -63,6 +63,7 @@ export default function PageIndicadores() {
   return (
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
+        <Notificacao error={error} />
         {/* <Button onClick={handleNotificationClick}>Enviar Notificação</Button> */}
         <TabsWrapper
           title="Indicadores"

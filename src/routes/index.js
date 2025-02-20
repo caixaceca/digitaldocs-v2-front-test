@@ -21,7 +21,7 @@ const Loadable = (Component) => (props) => (
 
 export default function Router() {
   const dispatch = useDispatch();
-  const { cc, perfil, mail, perfilId } = useSelector((state) => state.intranet);
+  const { cc, perfil, perfilId } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     dispatch(authenticateColaborador());
@@ -46,7 +46,7 @@ export default function Router() {
   }, [dispatch, cc?.id]);
 
   useEffect(() => {
-    if (mail && perfilId) {
+    if (perfilId) {
       dispatch(getFromParametrizacao('fluxos'));
       dispatch(getFromParametrizacao('origens'));
       dispatch(getFromParametrizacao('estados'));
@@ -54,7 +54,7 @@ export default function Router() {
       dispatch(getFromParametrizacao('meusambientes'));
       dispatch(getFromParametrizacao('motivosPendencia'));
     }
-  }, [dispatch, mail, perfilId]);
+  }, [dispatch, perfilId]);
 
   return useRoutes([
     {

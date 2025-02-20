@@ -32,8 +32,8 @@ SearchNotFoundSmall.propTypes = { message: PropTypes.string.isRequired };
 export function SearchNotFoundSmall({ message }) {
   return (
     <Stack
-      justifyContent="center"
       align="center"
+      justifyContent="center"
       sx={{ py: 3, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
     >
       <DocIllustration sx={{ height: 130, mb: { xs: 2, sm: 3 } }} />
@@ -61,9 +61,9 @@ export function SearchNotFound404({ message, noShadow = false }) {
 
 // ----------------------------------------------------------------------
 
-TableSearchNotFound.propTypes = { message: PropTypes.string.isRequired };
+TableSearchNotFound.propTypes = { message: PropTypes.string, height: PropTypes.number };
 
-export function TableSearchNotFound({ message }) {
+export function TableSearchNotFound({ message, height = 220 }) {
   return (
     <TableBody>
       <TableRow>
@@ -72,7 +72,7 @@ export function TableSearchNotFound({ message }) {
           colSpan={11}
           sx={{ py: 7, typography: 'body2', fontStyle: 'italic', color: 'text.secondary', border: 'none !important' }}
         >
-          <DocIllustration sx={{ height: 220, mb: { xs: 4, sm: 7 } }} />
+          <DocIllustration sx={{ height, mb: { xs: 4, sm: 7 } }} />
           {message}
         </TableCell>
       </TableRow>

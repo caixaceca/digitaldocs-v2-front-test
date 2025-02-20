@@ -20,7 +20,7 @@ import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, openModal, selectItem, openDetalhes, closeModal } from '../../redux/slices/digitaldocs';
+import { getSuccess, getAll, openModal, selectItem, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
@@ -313,7 +313,7 @@ export default function TableCartoes() {
                             <DefaultAction
                               label="DETALHES"
                               handleClick={() => {
-                                dispatch(openDetalhes());
+                                dispatch(getSuccess({ item: 'isOpenModal1', dados: true }));
                                 dispatch(getAll('cartao', { mail, id: row?.id }));
                               }}
                             />

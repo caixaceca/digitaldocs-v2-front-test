@@ -115,7 +115,7 @@ export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
         <Scrollbar>
           {items.map((value) => (
             <ListItemButton key={value?.label} role="listitem" onClick={handleToggle(value)}>
-              <ListItemIcon>
+              <ListItemIcon sx={{ mr: 0.75 }}>
                 <Checkbox size="small" tabIndex={-1} disableRipple checked={checked.indexOf(value) !== -1} />
               </ListItemIcon>
               <ListItemText primary={value?.label} primaryTypographyProps={{ typography: 'caption' }} />

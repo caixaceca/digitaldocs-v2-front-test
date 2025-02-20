@@ -18,7 +18,7 @@ import { normalizeText, entidadesParse, noDados } from '../../utils/formatText';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getAll, resetProcesso } from '../../redux/slices/digitaldocs';
+import { getListaProcessos, resetProcesso } from '../../redux/slices/digitaldocs';
 // hooks
 import useSettings from '../../hooks/useSettings';
 // routes
@@ -27,9 +27,9 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import Page from '../../components/Page';
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
+import Panel, { Criado } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import Panel, { Criado, Registos } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -39,7 +39,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 const TABLE_HEAD = [
   { id: 'entrada', label: 'Nº', align: 'left' },
   { id: 'titular', label: 'Titular', align: 'left' },
-  { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
+  { id: 'entidades', label: 'Cliente/Entidade', align: 'left' },
   { id: 'assunto', label: 'Assunto', align: 'left' },
   { id: 'estado', label: 'Estado', align: 'left' },
   { id: 'criado_em', label: 'Criado' },
@@ -56,8 +56,10 @@ export default function PageProcura() {
   const [search, setSearch] = useState(localStorage.getItem('filterSearch') || '');
   const [estado, setEstado] = useState(localStorage.getItem('estadoSearch') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoSearch') || null);
-  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const { pesquisa, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
+
+  console.log(processosInfo);
 
   const {
     page,
@@ -97,34 +99,21 @@ export default function PageProcura() {
   const isNotFound = !dataFiltered.length;
 
   const verMais = () => {
-    if (mail && perfilId) {
-      if (localStorage.getItem('tipoPesquisa') === 'avancada') {
-        dispatch(
-          getAll('pesquisa avancada', {
-            mail,
-            perfilId,
-            pagina: processosInfo?.proxima_pagina,
-            uo: localStorage.getItem('uoSearch') || '',
-            conta: localStorage.getItem('conta') || '',
-            entrada: localStorage.getItem('entrada') || '',
-            cliente: localStorage.getItem('cliente') || '',
-            entidade: localStorage.getItem('entidade') || '',
-            noperacao: localStorage.getItem('noperacao') || '',
-            historico: localStorage.getItem('procHistorico') === 'true',
-          })
-        );
-      } else {
-        dispatch(
-          getAll('pesquisa global', {
-            mail,
-            perfilId,
-            pagina: processosInfo?.proxima_pagina,
-            chave: localStorage.getItem('chave'),
-            historico: localStorage.getItem('procHistorico') === 'true',
-          })
-        );
-      }
-    }
+    const avancada = localStorage.getItem('tipoPesquisa') === 'avancada';
+    dispatch(
+      getListaProcessos(avancada ? 'pesquisaAvancada' : 'pesquisaGlobal', {
+        item: 'pesquisa',
+        cursor: processosInfo,
+        fromArquivo: localStorage.getItem('fromArquivo'),
+        chave: avancada ? '' : localStorage.getItem('chave'),
+        uo: avancada ? localStorage.getItem('uoSearch') : '',
+        conta: avancada ? localStorage.getItem('conta') : '',
+        entrada: avancada ? localStorage.getItem('entrada') : '',
+        cliente: avancada ? localStorage.getItem('cliente') : '',
+        entidade: avancada ? localStorage.getItem('entidade') : '',
+        noperacao: avancada ? localStorage.getItem('noperacao') : '',
+      })
+    );
   };
 
   return (
@@ -132,11 +121,11 @@ export default function PageProcura() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
-          action={<Registos info={processosInfo} total={pesquisa?.length} handleClick={() => verMais()} />}
+          action={processosInfo && <DefaultAction button label="Mais processos" handleClick={() => verMais()} />}
           heading={
             <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
               <Typography variant="h4">Procura:</Typography>
-              {localStorage.getItem('procHistorico') === 'true' && <Label sx={{ mt: 0.5 }}>Histórico</Label>}
+              {localStorage.getItem('fromArquivo') === 'true' && <Label sx={{ mt: 0.5 }}>Arquivo</Label>}
               {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
                   <Panel
@@ -187,15 +176,13 @@ export default function PageProcura() {
                   {isLoading && isNotFound ? (
                     <SkeletonTable column={7} row={10} />
                   ) : (
-                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow hover key={row.id}>
+                    dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                      <TableRow hover key={`processo_${row.id}_${index}`}>
                         <TableCell>{`${row.entrada}${row.criado_em ? `/${fYear(row.criado_em)}` : ''}`}</TableCell>
                         <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
                         <TableCell>{row.assunto}</TableCell>
-                        <TableCell>
-                          {localStorage.getItem('procHistorico') === 'true' ? 'Histórico' : row.estado}
-                        </TableCell>
+                        <TableCell>{row.estado}</TableCell>
                         <TableCell sx={{ width: 10 }}>
                           {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.uo && (

@@ -7,7 +7,7 @@ import { noEstado, podeArquivar, processoEstadoInicial } from '../../utils/valid
 import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
-import { getInfoProcesso, selectAnexo, selectItem } from '../../redux/slices/digitaldocs';
+import { getInfoProcesso, getSuccess, selectItem } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle from '../../hooks/useToggle';
 // routes
@@ -26,7 +26,7 @@ import {
   EncaminharStepper,
   ColocarPendenteForm,
 } from './form/IntervencaoForm';
-import { RestaurarForm, ArquivarForm, DesarquivarForm } from './form/Arquivo';
+import { ArquivarForm, DesarquivarForm } from './form/Arquivo';
 
 // ----------------------------------------------------------------------
 
@@ -178,24 +178,12 @@ export function Desarquivar({ id, colaboradoresList }) {
       <DefaultAction
         color="error"
         label="DESARQUIVAR"
-        handleClick={() => dispatch(getInfoProcesso('destinosDesarquivamento', { id }))}
+        handleClick={() => {
+          dispatch(getSuccess({ item: 'isOpenModal1', dados: true }));
+          dispatch(getInfoProcesso('destinosDesarquivamento', { id }));
+        }}
       />
       {isOpenModal1 && <DesarquivarForm id={id} colaboradoresList={colaboradoresList} />}
-    </>
-  );
-}
-
-// --- RESTAURAR PROCESSO DO HISTÓRICO ---------------------------------------------------------------------------------
-
-Restaurar.propTypes = { id: PropTypes.number };
-
-export function Restaurar({ id }) {
-  const dispatch = useDispatch();
-  const { selectedAnexoId } = useSelector((state) => state.digitaldocs);
-  return (
-    <>
-      <DefaultAction color="error" label="RESTAURAR" handleClick={() => dispatch(selectAnexo(id))} />
-      {!!selectedAnexoId && <RestaurarForm id={id} />}
     </>
   );
 }

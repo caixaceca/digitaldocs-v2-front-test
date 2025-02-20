@@ -94,11 +94,6 @@ export default function DetalhesProcesso({ isPS, processo }) {
                           <Typography variant="subtitle1" sx={{ pr: 1 }}>
                             {row?.estado}
                           </Typography>
-                          {processo?.estado_processo?.estado === 'Arquivo' && processo?.historico && (
-                            <Label color="info" startIcon={<ErrorOutlineIcon sx={{ transform: 'rotate(180deg)' }} />}>
-                              Histórico
-                            </Label>
-                          )}
                           {devolvido && (
                             <Label color="error" startIcon={<ErrorOutlineIcon />}>
                               Devolvido

@@ -212,6 +212,12 @@ export function DetalhesContent({ dados = null, item = '' }) {
                         text={`${dados?.descritivo}${dados?.documento_tipo ? ` (${dados?.documento_tipo})` : ''}`}
                       />
                     )}
+                    {dados?.numero_ordem > -1 && (
+                      <TableRowItem
+                        title="Nº ordem:"
+                        text={`${dados?.numero_ordem}${dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''}`}
+                      />
+                    )}
                     <TableRowItem title="Doc. identificação:" text={dados?.cni} />
                     <TableRowItem title="Local emissão:" text={dados?.local_emissao || dados?.emissor} />
                     <TableRowItem title="Prefixo:" text={dados?.prefixo} />
@@ -226,13 +232,6 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     )}
                     {dados?.data_recebido && (
                       <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
-                    )}
-
-                    {dados?.numero_ordem > -1 && (
-                      <TableRowItem
-                        title="Nº ordem:"
-                        text={`${dados?.numero_ordem}${dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''}`}
-                      />
                     )}
                     <TableRowItem title="Tipo titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
                     <TableRowItem title="Tipo garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
@@ -263,6 +262,9 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     )}
                     {'instituicao' in dados && (
                       <TableRowItem title="Intituição:" item={<LabelSN item={dados?.instituicao} />} />
+                    )}
+                    {'condicional' in dados && (
+                      <TableRowItem title="Condicional:" item={<LabelSN item={dados?.condicional} />} />
                     )}
                     <TableRowItem
                       title="Data entrada em vigor:"

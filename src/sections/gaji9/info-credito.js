@@ -103,6 +103,7 @@ export default function InfoCredito() {
       },
       content: [
         { label: 'TAEG', value: `${credito?.taxa_taeg}%` },
+        { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
         { label: 'Comissão', value: `${fNumber(credito?.valor_comissao)} ${credito?.moeda}` },
         { label: 'Comissão de abertura', value: `${fNumber(credito?.comissao_abertura)} ${credito?.moeda}` },
         { label: 'Imposto de selo', value: `${fNumber(credito?.valor_imposto_selo)} ${credito?.moeda}` },
@@ -324,15 +325,16 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
                           {row?.modificado_em && <Criado caption tipo="data" value={ptDateTime(row?.modificado_em)} />}
                         </TableCell>
                         <TableCell align="center" width={10}>
-                          {(gestaoContrato(utilizador?._role) ||
-                            acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
-                            <DefaultAction
-                              label="ELIMINAR"
-                              handleClick={() =>
-                                dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))
-                              }
-                            />
-                          )}
+                          {row.fiador &&
+                            (gestaoContrato(utilizador?._role) ||
+                              acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
+                              <DefaultAction
+                                label="ELIMINAR"
+                                handleClick={() =>
+                                  dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))
+                                }
+                              />
+                            )}
                         </TableCell>
                       </TableRow>
                     )
@@ -368,7 +370,17 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
           isSaving={isSaving}
           desc="eliminar este participante"
           onClose={() => dispatch(getSuccess({ item: 'idDelete', dados: false }))}
-          handleOk={() => dispatch(deleteItem('participantes', { id, numero: idDelete, item1: 'credito' }))}
+          handleOk={() =>
+            dispatch(
+              deleteItem('participantes', {
+                id,
+                numero: idDelete,
+                getSuccess: 'credito',
+                msg: 'Participante do crédito eliminado',
+                afterSuccess: () => dispatch(getSuccess({ item: 'idDelete', dados: false })),
+              })
+            )
+          }
         />
       )}
     </>

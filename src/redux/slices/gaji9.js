@@ -137,7 +137,7 @@ export function getFromGaji9(item, params) {
         (item === 'minutas' &&
           `${BASEURLGAJI9}/v1/minutas/lista?em_analise=${params?.emAnalise}&em_vigor=${params?.emVigor}&revogado=${params?.revogado}&ativo=${!params?.inativos}`) ||
         (item === 'clausulas' &&
-          `${BASEURLGAJI9}/v1/clausulas/lista?ativo=${!params?.inativos}${params?.solta ? `&solta=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.componenteId ? `&componente_id=${params?.componenteId}` : ''}`) ||
+          `${BASEURLGAJI9}/v1/clausulas/lista?ativo=${!params?.inativos}${params?.solta ? `&solta=true` : ''}${params?.condicional ? `&condicional=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.componenteId ? `&componente_id=${params?.componenteId}` : ''}`) ||
         '';
       if (apiUrl) {
         if (params?.resetLista) dispatch(slice.actions.getSuccess({ item, dados: item === 'creditos' ? 'reset' : [] }));
@@ -254,6 +254,8 @@ export function createItem(item, dados, params) {
         (item === 'clonarMinuta' && `${BASEURLGAJI9}/v1/minutas/com/base?minuta_base_id=${params?.id}`) ||
         (item === 'fiadores' && `${BASEURLGAJI9}/v1/suportes/creditos/fiadores?credito_id=${params?.id}`) ||
         (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
+        (item === 'regrasClausula' &&
+          `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}`) ||
         (item === 'comporMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=${params?.clausulasGarant}`) ||
         (item === 'contratos' &&
@@ -262,8 +264,12 @@ export function createItem(item, dados, params) {
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
         const response = await axios.post(apiUrl, dados, options);
-        if (params?.getSuccess) {
-          dispatch(getSuccess({ item: params?.item || item, dados: response.data?.objeto }));
+        if (item === 'regrasClausula') {
+          const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
+          dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
+          dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
+        } else if (params?.getSuccess) {
+          dispatch(getSuccess({ item: params?.getSuccess, dados: response.data?.objeto }));
         } else if (params?.getList) {
           dispatch(getFromGaji9(item, { id: params?.creditoId || params?.id }));
         } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas' || item === 'credito') {
@@ -399,19 +405,19 @@ export function deleteItem(item, params) {
         (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos?recurso_id=${params?.id}`) ||
         (item === 'participantes' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/fiadores?credito_id=${params?.id}&numero_entidade=${params?.numero}`) ||
+        (item === 'eliminarRegra' &&
+          `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}&clausula_condicional_id=${params?.condicionalId}`) ||
         '';
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        await axios.delete(apiUrl, options);
-        dispatch(
-          slice.actions.deleteSuccess({
-            item,
-            id: params?.id,
-            item1: params?.item1 || '',
-            destaivar: item === 'anexos' || item === 'regra anexo' || item === 'destinatario',
-          })
-        );
+        const response = await axios.delete(apiUrl, options);
+        if (item === 'eliminarRegra') {
+          const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
+          dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
+          dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
+        } else if (params?.getSuccess) dispatch(getSuccess({ item: params?.getSuccess, dados: response.data?.objeto }));
+        else dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
       }
       params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);

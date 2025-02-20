@@ -25,7 +25,7 @@ export function ExportarDados({ titulo, dados, tabela }) {
         ? [
             { header: 'Nº entrada', key: 'num_entrada' },
             { header: 'Titular', key: 'titular' },
-            { header: 'Conta/Cliente/Entidade(s)', key: 'conta_cli_ent' },
+            { header: 'Cliente/Entidade', key: 'conta_cli_ent' },
             { header: 'Assunto', key: 'assunto' },
           ]
         : []),

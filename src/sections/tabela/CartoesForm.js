@@ -34,8 +34,8 @@ import { ptDate, ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable from '../../hooks/useTable';
 // redux
-import { updateItem } from '../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../redux/store';
+import { updateItem, alterarBalcaopSuccess } from '../../redux/slices/digitaldocs';
 // components
 import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
@@ -281,8 +281,8 @@ export function BalcaoEntregaForm({ onCancel }) {
           updateItem('alterar balcao', JSON.stringify({ balcaoEntrega: values?.balcao?.id }), {
             mail,
             id: selectedItem.id,
-            balcao: values?.balcao?.id,
             msg: 'Balcão de entrega alterado',
+            afterSuccess: () => dispatch(alterarBalcaopSuccess({ id: selectedItem.id, balcao: values?.balcao?.id })),
           })
         );
       }

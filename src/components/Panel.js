@@ -173,7 +173,7 @@ export function Registos({ info, total, handleClick }) {
       <Typography variant="subtitle1" sx={{ color: 'text.primary', pr: 0.5 }}>
         {info?.total_registos || 0}
       </Typography>
-      {info?.proxima_pagina > 0 && <DefaultAction small label="Mostrar mais processos" handleClick={handleClick} />}
+      {info?.proxima_pagina > 0 && <DefaultAction small label="Mais processos" handleClick={handleClick} />}
     </Stack>
   );
 }

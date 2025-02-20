@@ -25,8 +25,8 @@ ProcessoExterno.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, p
 export default function ProcessoExterno({ isEdit, processo, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { cc, uos } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId, cc, uos } = useSelector((state) => state.intranet);
   const { meuAmbiente, origens } = useSelector((state) => state.parametrizacao);
   const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
   const origensList = useMemo(
@@ -76,12 +76,8 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && processo) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    if (isEdit && processo) reset(defaultValues);
+    if (!isEdit) reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, processo]);
 
@@ -97,46 +93,30 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
       formData.append('origem_id', values?.origem_id?.id);
       formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
       // optional
-      if (values.obs) {
-        formData.append('obs', values.obs);
-      }
-      if (values.conta) {
-        formData.append('conta', values.conta);
-      }
-      if (values.valor) {
-        formData.append('valor', values.valor);
-      }
-      if (values.docidp) {
-        formData.append('docidp', values.docidp);
-      }
-      if (values.docids) {
-        formData.append('docids', values.docids);
-      }
-      if (values.cliente) {
-        formData.append('cliente', values.cliente);
-      }
-      if (values.titular) {
-        formData.append('titular', values.titular);
-      }
-      if (values.operacao) {
-        formData.append('operacao', values.operacao);
-      }
-      if (values?.entidades?.length !== 0) {
+      if (values.obs) formData.append('obs', values.obs);
+      if (values.conta) formData.append('conta', values.conta);
+      if (values.valor) formData.append('valor', values.valor);
+      if (values.docidp) formData.append('docidp', values.docidp);
+      if (values.docids) formData.append('docids', values.docids);
+      if (values.cliente) formData.append('cliente', values.cliente);
+      if (values.titular) formData.append('titular', values.titular);
+      if (values.operacao) formData.append('operacao', values.operacao);
+      if (values?.entidades?.length !== 0)
         formData.append(
           'entidades',
           values.entidades.map((row) => row?.numero)
         );
-      }
+
       await values?.anexos?.forEach((row) => {
         formData.append('anexos', row);
       });
 
       if (processo) {
-        dispatch(updateItem('processo', formData, { mail, perfilId, id: processo?.id, msg: 'Processo atualizado' }));
+        dispatch(updateItem('processo', formData, { mfd: true, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
         formData.append('uo_origem_id', meuAmbiente?.uo_id);
         formData.append('estado_atual_id', meuAmbiente?.id);
-        dispatch(createProcesso('externo', formData, { mail, perfilId, msg: 'Processo adicionado' }));
+        dispatch(createProcesso('externo', formData, { msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

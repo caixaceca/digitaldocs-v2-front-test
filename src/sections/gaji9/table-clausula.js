@@ -4,12 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Switch from '@mui/material/Switch';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
+import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { noDados } from '../../utils/formatText';
 import { ptDateTime } from '../../utils/formatTime';
@@ -57,13 +59,13 @@ export default function TableClausula({ inativos }) {
 
   const { clausulas, isLoading, isOpenView, isOpenModal, utilizador } = useSelector((state) => state.gaji9);
 
+  const dataFiltered = applySortFilter({ filter, comparator: getComparator(order, orderBy), dados: clausulas || [] });
+  const isNotFound = !dataFiltered.length;
+
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
-
-  const dataFiltered = applySortFilter({ filter, comparator: getComparator(order, orderBy), dados: clausulas || [] });
-  const isNotFound = !dataFiltered.length;
+  }, [filter, clausulas]);
 
   const viewItem = (modal, dados) => {
     dispatch(openModal(modal));
@@ -177,16 +179,17 @@ function FiltrarClausulas({ inativos }) {
   const getStoredValue = (key, list) =>
     list?.find((row) => Number(row?.id) === Number(localStorage.getItem(key))) || null;
 
+  const [condicional, setCondicional] = useState(() => getStoredValue(false));
   const [seccao, setSeccao] = useState(() => getStoredValue('clSeccao', seccoesList));
   const [titular, setTitular] = useState(() => getStoredValue('titularCl', titularesList));
   const [garantia, setGarantia] = useState(() => getStoredValue('garantiaCl', garantiasList));
   const [componente, setComponente] = useState(() => getStoredValue('componenteCl', componentesList));
 
-  // Atualiza os filtros quando qualquer valor relevante mudar
   useEffect(() => {
     dispatch(
       getFromGaji9('clausulas', {
         inativos,
+        condicional,
         titularId: titular?.id || null,
         solta: seccao?.label === 'Solta',
         garantiaId: garantia?.id || null,
@@ -195,11 +198,11 @@ function FiltrarClausulas({ inativos }) {
         identificacao: seccao?.label === 'Secção de identificação Caixa',
       })
     );
-  }, [dispatch, inativos, titular, garantia, seccao, componente]);
+  }, [componente?.id, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
 
   return (
     <Card sx={{ p: 1, mb: 3 }}>
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
         <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
           <SelectItem label="Secção" value={seccao} setItem={setSeccao} options={seccoesList} />
           <SelectItem label="Tipo de titular" value={titular} setItem={setTitular} options={titularesList} />
@@ -207,6 +210,12 @@ function FiltrarClausulas({ inativos }) {
         <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
           <SelectItem label="Componente" value={componente} setItem={setComponente} options={componentesList} />
           <SelectItem label="Tipo de garantia" value={garantia} setItem={setGarantia} options={garantiasList} />
+        </Stack>
+        <Stack sx={{ pl: 0.5 }}>
+          <FormControlLabel
+            label="Condicional"
+            control={<Switch checked={condicional} onChange={(event) => setCondicional(event.target.checked)} />}
+          />
         </Stack>
       </Stack>
     </Card>

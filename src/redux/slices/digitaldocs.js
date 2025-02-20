@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
 import { BASEURLDD } from '../../utils/axios';
-import { downloadDoc } from '../../utils/formatFile';
+import { downloadDoc, canPreview } from '../../utils/formatFile';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 //
@@ -28,8 +27,6 @@ const initialState = {
   processosInfo: null,
   selectedAnexoId: null,
   indicadoresArquivo: null,
-  con: [],
-  pjf: [],
   pedidos: [],
   cartoes: [],
   pesquisa: [],
@@ -47,13 +44,13 @@ const slice = createSlice({
       state.objectURLs = [];
       state.processo = null;
       state.filePreview = null;
-      state.processosInfo = null;
       state.objectURLs.forEach(URL.revokeObjectURL);
     },
 
-    getProcessosSuccess(state, action) {
-      state.processosInfo = action.payload.paginacao;
-      state.processos = [...state.processos, ...action.payload.objeto];
+    getListaProcessosSuccess(state, action) {
+      const { item, ha_mais: mais, proximo_cursor: proximo, objeto: dados } = action.payload;
+      state.processosInfo = mais && proximo ? proximo : null;
+      state[item] = [...state[item], ...(dados || [])];
     },
 
     getSuccess(state, action) {
@@ -67,39 +64,6 @@ const slice = createSlice({
 
     getCartoesSuccess(state, action) {
       state.cartoes = action.payload?.map((row) => ({ ...row, numero: row?.numero?.substring(9, 15) }));
-    },
-
-    getPjfSuccess(state, action) {
-      state.processosInfo = action.payload.paginacao;
-      state.pjf = [...state.pjf, ...action.payload.objeto];
-    },
-
-    getProcessoSuccess(state, action) {
-      if (!action.payload) return;
-
-      if (action.payload?.estados?.length === 0) {
-        action.payload.estado_processo = {
-          _lock: action.payload?.preso,
-          perfil_id: action.payload?.perfil_id,
-          estado: action.payload?.estado_atual,
-          estado_id: action.payload?.estado_atual_id,
-          data_entrada: action.payload?.data_ultima_transicao,
-        };
-      } else if (action.payload?.estados?.length === 1 && action.payload?.pareceres_estado?.length === 0) {
-        action.payload.estado_processo = action.payload?.estados[0];
-        if (action.payload?.estados[0]?.pareceres?.length > 0) {
-          action.payload.pareceres_estado = action.payload?.estados[0]?.pareceres;
-        }
-        action.payload.estados = [];
-      } else if (action.payload?.estados?.length > 1) {
-        action.payload.estado_processo = action.payload.estados?.find(
-          (row) => row?.estado_id === action.payload.estado_atual_id
-        );
-        action.payload.estados = action.payload.estados?.filter(
-          (row) => row?.estado_id !== action.payload.estado_atual_id
-        );
-      }
-      state.processo = action.payload;
     },
 
     getPesquisaSuccess(state, action) {
@@ -195,31 +159,16 @@ const slice = createSlice({
         state.processo.estado_processo.perfil_id = action.payload.perfilId;
       } else {
         const index = state.processo.estados.findIndex((row) => row.estado_id === action.payload.estadoId);
-        state.processo.estados[index]._lock = true;
-        state.processo.estados[index].perfil_id = action.payload.perfilId;
-      }
-    },
-
-    confirmarCartaoDopSuccess(state, action) {
-      const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
-      if (index !== -1) {
-        state.cartoes[index].confirmacao_dop = true;
-        state.cartoes[index].confirmado_por_dop = action.payload.perfilId;
-        state.cartoes[index].data_confirmacao_dop = format(new Date(), 'yyyy-MM-dd');
+        if (index !== -1) {
+          state.processo.estados[index]._lock = true;
+          state.processo.estados[index].perfil_id = action.payload.perfilId;
+        }
       }
     },
 
     alterarBalcaopSuccess(state, action) {
       const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
-      if (index !== -1) {
-        state.cartoes[index].balcao_entrega = action.payload.balcao;
-      }
-    },
-
-    restaurarSuccess(state, action) {
-      state.selectedAnexoId = null;
-      state.processo.historico = false;
-      state.pesquisa = state.pesquisa.filter((row) => Number(row.id) !== Number(action.payload));
+      if (index !== -1) state.cartoes[index].balcao_entrega = action.payload.balcao;
     },
 
     deleteAnexoSuccess(state, action) {
@@ -260,22 +209,14 @@ const slice = createSlice({
     },
 
     openModal(state) {
-      state.selectedItem = null;
       state.isOpenModal = true;
-    },
-
-    openDetalhes(state) {
-      state.isOpenModal1 = true;
+      state.selectedItem = null;
     },
 
     closeModal(state) {
       state.isOpenModal = false;
       state.isOpenModal1 = false;
       state.selectedItem = null;
-    },
-
-    selectAnexo(state, action) {
-      state.selectedAnexoId = action.payload;
     },
   },
 });
@@ -284,16 +225,8 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const {
-  openModal,
-  getSuccess,
-  closeModal,
-  selectItem,
-  selectAnexo,
-  openDetalhes,
-  selectParecer,
-  resetProcesso,
-} = slice.actions;
+export const { openModal, getSuccess, closeModal, selectItem, selectParecer, resetProcesso, alterarBalcaopSuccess } =
+  slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -306,29 +239,6 @@ export function getAll(item, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
-
-      // LISTA DE PROCESSOS
-      if (item === 'Tarefas' || item === 'Retidos' || item === 'Pendentes' || item === 'Atribuídos') {
-        const pathItem = `/v2/processos/tarefas/${item === 'Retidos' ? 'retidas/' : ''}${item === 'Pendentes' ? 'pendentes/' : ''}${item === 'Atribuídos' ? 'atribuidas/' : ''}${perfilId}?pagina=`;
-        const query = `${(item === 'Retidos' || item === 'Atribuídos') && params?.colaboradorId ? `&perfil_id=${params?.colaboradorId}` : ''}${params?.estadoId ? `&estado_id=${params?.estadoId}` : ''}${params?.estadoId && params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}${params?.segmento ? `&segmento=${params?.segmento === 'Particulares' ? 'P' : 'E'}` : ''}`;
-        const response = await axios.get(`${BASEURLDD}${pathItem}${params?.pagina || 0}${query}`, options);
-        dispatch(slice.actions.getProcessosSuccess(response.data));
-      }
-      // LISTA DE PROCESSOS ESPECÍFICOS
-      if (item === 'Finalizados' || item === 'Executados' || item === 'Agendados') {
-        const apiUrl = `${BASEURLDD}/v2/processos/tarefas/situacao/${perfilId}?pagina=`;
-        const _item = (item === 'Finalizados' && 'finalizado') || (item === 'Executados' && 'executado') || 'agendado';
-        const response = await axios.get(`${apiUrl}${params?.pagina}&situacao=${_item}`, options);
-        dispatch(slice.actions.getProcessosSuccess(response.data));
-      }
-      // PESQUISA LISTA DE PROCESSOS
-      if (item === 'pesquisa global' || item === 'pesquisa avancada') {
-        const response = await axios.get(
-          `${BASEURLDD}/v2/processos/pesquisa/${item === 'pesquisa global' ? 'base' : 'especifica'}/${perfilId}?pagina=${params?.pagina || 0}&em_historico=${params?.historico}${params?.chave ? `&search_param=${params?.chave}` : ''}${params?.uo?.id ? `&uo_id=${params?.uo?.id}` : ''}${params?.entrada ? `&nentrada=${params?.entrada}` : ''}${params?.noperacao ? `&noperacao=${params?.noperacao}` : ''}${params?.conta ? `&conta=${params?.conta}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.entidade ? `&entidade=${params?.entidade}` : ''}`,
-          options
-        );
-        dispatch(slice.actions.getPesquisaSuccess(response.data));
-      }
 
       switch (item) {
         case 'Entradas': {
@@ -379,14 +289,6 @@ export function getAll(item, params) {
           dispatch(slice.actions.getSuccess({ item: 'pedidos', dados: response.data }));
           break;
         }
-        case 'restauros': {
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/ht_restauro?perfil_cc_id=${perfilId}${params?.datai ? `&datai=${params?.datai}` : ''}${params?.dataf ? `&dataf=${params?.dataf}` : ''}&pagina=${params?.pagina}`,
-            options
-          );
-          dispatch(slice.actions.getArquivosSuccess(response.data));
-          break;
-        }
         case 'indicadores arquivos': {
           const response = await axios.get(`${BASEURLDD}/v1/indicadores/arquivo/mini/${perfilId}`, options);
           dispatch(slice.actions.getSuccess({ item: 'indicadoresArquivo', dados: response.data }));
@@ -416,28 +318,6 @@ export function getAll(item, params) {
           }
           break;
         }
-        case 'con': {
-          dispatch(slice.actions.getSuccess({ item: 'con', dados: [] }));
-          const response = await axios.get(
-            `${BASEURLDD}/v1/indicadores/export/con?data_inicio=${params?.dataInicio}${
-              params?.dataFim ? `&data_final=${params?.dataFim}` : ''
-            }`,
-            options
-          );
-          dispatch(slice.actions.getSuccess({ item: 'con', dados: response.data }));
-          break;
-        }
-        case 'pjf': {
-          if (params?.pagina === 0) {
-            dispatch(slice.actions.getSuccess({ item: 'pjf', dados: [] }));
-          }
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/historico/pe/financas?pagina=${params?.pagina}`,
-            options
-          );
-          dispatch(slice.actions.getPjfSuccess(response.data));
-          break;
-        }
         case 'cartao': {
           const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
@@ -457,75 +337,60 @@ export function getAll(item, params) {
 
 // ----------------------------------------------------------------------
 
-export function getInfoProcesso(item, params) {
+export function getListaProcessos(item, params) {
   return async (dispatch, getState) => {
+    dispatch(slice.actions.resetProcesso());
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    if (params?.cursor === 0) dispatch(slice.actions.getSuccess({ item: params?.item || item, dados: [] }));
 
     try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
-      const idPerfilId = `${params?.id}?perfil_cc_id=${perfilId}`;
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
-      if (item === 'htransicoes') {
-        const [htTransicoesRes, htDomiciliosRes, htRestauroRes] = await Promise.all([
-          axios.get(`${BASEURLDD}/v2/processos/ht_transicoes/${idPerfilId}`, options),
-          axios.get(`${BASEURLDD}/v2/processos/ht_domicilios/${idPerfilId}`, options),
-          axios.get(
-            `${BASEURLDD}/v2/processos/ht_restauro/processo?perfil_cc_id=${perfilId}&processo_id=${params?.id}`,
-            options
-          ),
-        ]);
+      const queryParams = new URLSearchParams({
+        cursor: params?.cursor ?? 0,
+        ...(params?.estadoId ? { estado_id: params?.estadoId } : null),
+        ...(params?.fluxoId ? { fluxo_id: params?.fluxoId } : null),
+        ...(params?.perfilId ? { perfil_id: params?.perfilId } : null),
+        ...(params?.situacao ? { situacao: params?.situacao } : null),
+        ...(params?.fromArquivo ? { em_arquivo: params?.fromArquivo } : null),
+        ...(params?.chave ? { search_param: params?.chave } : null),
+        ...(params?.conta ? { conta: params?.conta } : null),
+        ...(params?.cliente ? { cliente: params?.cliente } : null),
+        ...(params?.entidade ? { entidade: params?.entidade } : null),
+        ...(params?.noperacao ? { noperacao: params?.noperacao } : null),
+        ...(params?.nentrada ? { nentrada: params?.nentrada } : null),
+        ...(params?.uo ? { uo_id: params?.uo } : null),
+        ...(params?.segmento
+          ? { segmento: (params?.segmento === 'Particulares' && 'P') || (params?.segmento === 'Empresas' && 'E') }
+          : null),
+        ...(params?.dataInicio ? { data_inicio: params?.dataInicio } : null),
+        ...(params?.dataFim ? { data_final: params?.dataFim } : null),
+      });
 
-        const htTransicoes = htTransicoesRes?.data?.objeto ?? [];
-        const htDomicilios = htDomiciliosRes?.data?.objeto ?? [];
-        const htRestauro = htRestauroRes?.data?.objeto ?? [];
+      const apiPaths = {
+        con: `/v1/indicadores/export/con`,
+        pjf: `/v2/processos/historico/pe/financas`,
+        Tarefas: `/v2/processos/tarefas/${perfilId}`,
+        Retidos: `/v2/processos/tarefas/retidas/${perfilId}`,
+        Agendados: `/v2/processos/tarefas/situacao/${perfilId}`,
+        Executados: `/v2/processos/tarefas/situacao/${perfilId}`,
+        Pendentes: `/v2/processos/tarefas/pendentes/${perfilId}`,
+        Finalizados: `/v2/processos/tarefas/situacao/${perfilId}`,
+        pesquisaGlobal: `/v2/processos/pesquisa/base/${perfilId}`,
+        Atribuídos: `/v2/processos/tarefas/atribuidas/${perfilId}`,
+        pesquisaAvancada: `/v2/processos/pesquisa/especifica/${perfilId}`,
+      };
 
-        const transformDomicilio = (row) => ({
-          modo: 'Seguimento',
-          domiciliacao: true,
-          observacao: row?.observacao,
-          id: `domiciliacao_${row?.id}`,
-          perfil_id: row?.domiciliado_por,
-          data_saida: row?.domiciliado_em,
-          uo_origem_id: row?.uo_origem_id,
-          uo_destino_id: row?.uo_destino_id,
-          estado_final: row?.estado_destino,
-          estado_inicial: row?.estado_origem,
-        });
+      const apiUrl = apiPaths[item] || '';
+      if (!apiUrl) return;
 
-        const transformRestauro = (row) => ({
-          modo: 'Restauro',
-          perfil_id: row?.criador,
-          id: `restauro_${row?.id}`,
-          data_saida: row?.criado_em,
-          observacao: row?.observacao,
-        });
-
-        const ht = [...htTransicoes, ...htDomicilios.map(transformDomicilio), ...htRestauro.map(transformRestauro)];
-        dispatch(slice.actions.addItemProcesso({ item, dados: applySort(ht, getComparator('desc', 'data_saida')) }));
-      } else {
-        const apiUrl =
-          // DETALHES
-          (item === 'hretencoes' && `${BASEURLDD}/v2/processos/ht_retencoes/${idPerfilId}`) ||
-          (item === 'hpendencias' && `${BASEURLDD}/v2/processos/ht_pendencias/${idPerfilId}`) ||
-          (item === 'hatribuicoes' && `${BASEURLDD}/v2/processos/ht_atribuicoes/${idPerfilId}`) ||
-          (item === 'hversoes' && `${BASEURLDD}/v1/processos/versoes/${perfilId}?processoID=${params?.id}`) ||
-          (item === 'hvisualizacoes' &&
-            `${BASEURLDD}/v2/processos/visualizacoes/${perfilId}?processo_id=${params?.id}`) ||
-          (item === 'destinos' &&
-            `${BASEURLDD}/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
-          (item === 'confidencialidades' &&
-            `${BASEURLDD}/v2/processos/confidencialidades?perfil_cc_id=${perfilId}&processo_id=${params?.id}`) ||
-          (item === 'destinosDesarquivamento' &&
-            `${BASEURLDD}/v1/arquivos/destinos/desarquivamento/v2/${perfilId}?processo_id=${params?.id}`) ||
-          '';
-
-        if (apiUrl) {
-          const response = await axios.get(apiUrl, options);
-          dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
-        }
-      }
+      const response = await axios.get(`${BASEURLDD}${apiUrl}?${queryParams}`, options);
+      if (item === 'con')
+        dispatch(slice.actions.getListaProcessosSuccess({ item: 'dadosControle', objeto: response.data }));
+      else dispatch(slice.actions.getListaProcessosSuccess({ item: params?.item || item, ...response.data }));
+      params?.afterSuccess?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -546,38 +411,124 @@ export function getProcesso(item, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
-      switch (item) {
-        case 'processo': {
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}&from_historico=${params?.historico}`,
-            options
-          );
-          dispatch(slice.actions.getProcessoSuccess({ ...response.data?.objeto, historico: params?.historico }));
-          break;
-        }
-        case 'prevnext': {
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/next/prev/${perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}&next=${params?.next}`,
-            options
-          );
-          dispatch(slice.actions.getProcessoSuccess(response.data?.objeto));
-          break;
-        }
+      const apiUrl =
+        (item === 'processo' && `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`) ||
+        (item === 'prevnext' &&
+          `${BASEURLDD}/v2/processos/next/prev/${perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}&next=${params?.next}`);
 
-        default:
-          break;
+      if (apiUrl) {
+        const response = await axios.get(apiUrl, options);
+        if (!response.data?.objeto) return;
+        const processo = response.data?.objeto;
+
+        if (processo?.estados?.length === 0) {
+          processo.estado_processo = {
+            _lock: processo?.preso,
+            perfil_id: processo?.perfil_id,
+            estado: processo?.estado_atual,
+            estado_id: processo?.estado_atual_id,
+            data_entrada: processo?.data_ultima_transicao,
+          };
+        } else if (processo?.estados?.length === 1 && processo?.pareceres_estado?.length === 0) {
+          processo.estado_processo = processo.estados[0];
+          if (processo.estados[0]?.pareceres?.length > 0) processo.pareceres_estado = processo.estados[0].pareceres;
+          processo.estados = [];
+        } else if (processo?.estados?.length > 1) {
+          processo.estado_processo = processo.estados.find((row) => row?.estado_id === processo.estado_atual_id);
+          processo.estados = processo.estados.filter((row) => row?.estado_id !== processo.estado_atual_id);
+        }
+        const estado = processo?.estado_processo || null;
+        processo.perfilAtribuido = estado?.perfil_id || '';
+        processo.atribuidoAMim = estado?.perfil_id === perfilId;
+        dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+
+        const anexoPreview = (processo?.anexos || []).filter((item) => item?.ativo).find((row) => !!canPreview(row));
+        if (anexoPreview)
+          dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipo: canPreview(anexoPreview) } }));
+
+        dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
+
+        if (estado?._lock && estado?.estado_id && processo?.atribuidoAMim)
+          dispatch(getInfoProcesso('destinos', { id: processo?.id, estadoId: estado?.estado_id }));
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      if (item === 'prevnext')
+      if (item === 'prevnext') {
         hasError(
           { message: `Sem mais processos disponíveis no estado ${params?.estado}` },
           dispatch,
           slice.actions.getSuccess
         );
-      else hasError(error, dispatch, slice.actions.getSuccess);
+      } else {
+        hasError(error, dispatch, slice.actions.getSuccess);
+      }
     } finally {
       dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export function getInfoProcesso(item, params) {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+
+    try {
+      const accessToken = await getAccessToken();
+      const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
+      const idPerfilId = `${params?.id}?perfil_cc_id=${perfilId}`;
+      const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
+
+      if (item === 'htransicoes') {
+        const [htTransicoesRes, htDomiciliosRes] = await Promise.all([
+          axios.get(`${BASEURLDD}/v2/processos/ht_transicoes/${idPerfilId}`, options),
+          axios.get(`${BASEURLDD}/v2/processos/ht_domicilios/${idPerfilId}`, options),
+        ]);
+
+        const htTransicoes = htTransicoesRes?.data?.objeto ?? [];
+        const htDomicilios = htDomiciliosRes?.data?.objeto ?? [];
+
+        const transformDomicilio = (row) => ({
+          modo: 'Seguimento',
+          domiciliacao: true,
+          observacao: row?.observacao,
+          id: `domiciliacao_${row?.id}`,
+          perfil_id: row?.domiciliado_por,
+          data_saida: row?.domiciliado_em,
+          uo_origem_id: row?.uo_origem_id,
+          uo_destino_id: row?.uo_destino_id,
+          estado_final: row?.estado_destino,
+          estado_inicial: row?.estado_origem,
+        });
+
+        const ht = [...htTransicoes, ...htDomicilios.map(transformDomicilio)];
+        dispatch(slice.actions.addItemProcesso({ item, dados: applySort(ht, getComparator('desc', 'data_saida')) }));
+      } else {
+        const apiUrl =
+          // DETALHES
+          (item === 'hretencoes' && `${BASEURLDD}/v2/processos/ht_retencoes/${idPerfilId}`) ||
+          (item === 'hpendencias' && `${BASEURLDD}/v2/processos/ht_pendencias/${idPerfilId}`) ||
+          (item === 'hatribuicoes' && `${BASEURLDD}/v2/processos/ht_atribuicoes/${idPerfilId}`) ||
+          (item === 'hversoes' && `${BASEURLDD}/v1/processos/versoes/${perfilId}?processoID=${params?.id}`) ||
+          (item === 'hvisualizacoes' &&
+            `${BASEURLDD}/v2/processos/visualizacoes/${perfilId}?processo_id=${params?.id}`) ||
+          (item === 'destinosDesarquivamento' &&
+            `${BASEURLDD}/v1/arquivos/destinos/desarquivamento/v2/${perfilId}?processo_id=${params?.id}`) ||
+          (item === 'destinos' &&
+            `${BASEURLDD}/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
+          (item === 'confidencialidades' &&
+            `${BASEURLDD}/v2/processos/confidencialidades?perfil_cc_id=${perfilId}&processo_id=${params?.id}`) ||
+          '';
+
+        if (apiUrl) {
+          const response = await axios.get(apiUrl, options);
+          dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
+        }
+      }
+    } catch (error) {
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
     }
   };
 }
@@ -653,202 +604,103 @@ export function updateItem(item, dados, params) {
     try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
-      const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: false });
-      const options1 = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
+      const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: params?.mfd });
 
-      switch (item) {
-        case 'processo': {
-          await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options1);
-          break;
-        }
-        case 'encaminhar serie': {
-          await axios.patch(`${BASEURLDD}/v2/processos/encaminhar/serie/${perfilId}/${params?.id}`, dados, options1);
-          break;
-        }
-        case 'encaminhar paralelo': {
-          await axios.patch(`${BASEURLDD}/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}`, dados, options);
-          break;
-        }
-        case 'arquivar': {
-          if (params?.anexos?.get('anexos')) {
-            await axios.patch(
-              `${BASEURLDD}/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`,
-              params?.anexos,
-              options1
-            );
+      if (params?.anexos?.get('anexos')) {
+        await axios.patch(
+          `${BASEURLDD}/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`,
+          params?.anexos,
+          options
+        );
+      }
+
+      const apiUrl =
+        // DETALHES
+        (item === 'confirmar emissao multiplo' && `${BASEURLDD}/v1/cartoes/validar/emissoes`) ||
+        (item === 'arquivar' && `${BASEURLDD}/v2/processos/arquivar/${perfilId}/${params?.id}`) ||
+        (item === 'finalizar' && `${BASEURLDD}/v2/processos/finalizar/${perfilId}/${params?.id}`) ||
+        (item === 'confirmar emissao por data' && `${BASEURLDD}/v1/cartoes/validar/todas/emissoes`) ||
+        (item === 'desarquivar' && `${BASEURLDD}/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
+        (item === 'alterar balcao' && `${BASEURLDD}/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
+        (item === 'encaminhar serie' && `${BASEURLDD}/v2/processos/encaminhar/serie/${perfilId}/${params?.id}`) ||
+        (item === 'domiciliar' && `${BASEURLDD}/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
+        (item === 'encaminhar paralelo' && `${BASEURLDD}/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}`) ||
+        (item === 'confirmar rececao multiplo' &&
+          `${BASEURLDD}/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||
+        (item === 'confirmar emissao por data' &&
+          `${BASEURLDD}/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`) ||
+        (item === 'anular por balcao e data' &&
+          `${BASEURLDD}/v1/cartoes/anular/validacao/todas?emissao=${params?.emissao}`) ||
+        (item === 'anular multiplo' &&
+          `${BASEURLDD}/v1/cartoes/anular/validacao/listagem?emissao=${params?.emissao}`) ||
+        (item === 'parecer individual' &&
+          `${BASEURLDD}/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`) ||
+        (item === 'parecer estado' &&
+          `${BASEURLDD}/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`) ||
+        (item === 'confidencialidade' &&
+          `${BASEURLDD}/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
+        (item === 'libertar' &&
+          `${BASEURLDD}/v2/processos/abandonar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
+        (item === 'cancelar' &&
+          `${BASEURLDD}/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
+        (item === 'anexo' &&
+          `${BASEURLDD}/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&anexo=${params?.anexo}&parecer_individual=${!!params?.individual}`) ||
+        (item === 'atribuir' &&
+          `${BASEURLDD}/v2/processos/atribuicao/mista/${perfilId}?perfil_afeto_id=${params?.id}&processo_id=${params?.processoId}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
+        '';
+
+      if (apiUrl) {
+        await axios.patch(apiUrl, dados, options);
+        if (item === 'anexo') dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
+      } else {
+        switch (item) {
+          case 'processo': {
+            await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
+            break;
           }
-          await axios.patch(`${BASEURLDD}/v2/processos/arquivar/${perfilId}/${params?.id}`, dados, options);
-          break;
-        }
-        case 'desarquivar': {
-          await axios.patch(`${BASEURLDD}/v2/processos/desarquivar/${perfilId}/${params?.id}`, dados, options);
-          dispatch(slice.actions.closeModal());
-          break;
-        }
-        case 'restaurar': {
-          await axios.post(
-            `${BASEURLDD}/v2/processos/restaurar/from/historico/${perfilId}?processo_id=${params?.id}`,
-            dados,
-            options
-          );
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          dispatch(slice.actions.restaurarSuccess(params?.id));
-          break;
-        }
-        case 'parecer individual': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`,
-            dados,
-            options1
-          );
-          dispatch(slice.actions.closeModal());
-          break;
-        }
-        case 'parecer estado': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`,
-            dados,
-            options1
-          );
-          dispatch(slice.actions.closeModal());
-          break;
-        }
-        case 'aceitar': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/aceitar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-            null,
-            options
-          );
-          dispatch(slice.actions.aceitarSuccess(params));
-          break;
-        }
-        case 'resgatar': {
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/resgatar/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-            options
-          );
-          dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
-          break;
-        }
-        case 'dar aceso': {
-          await axios.post(`${BASEURLDD}/v1/arquivos/dar/acesso/${params?.id}`, dados, options);
-          break;
-        }
-        case 'atribuir': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/atribuicao/mista/${perfilId}?perfil_afeto_id=${params?.id}&processo_id=${params?.processoId}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-            '',
-            options
-          );
-          break;
-        }
-        case 'cancelar': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`,
-            dados,
-            options
-          );
-          break;
-        }
-        case 'finalizar': {
-          await axios.patch(`${BASEURLDD}/v2/processos/finalizar/${perfilId}/${params?.id}`, dados, options);
-          break;
-        }
-        case 'libertar': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/abandonar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-            null,
-            options
-          );
-          break;
-        }
-        case 'domiciliar': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`,
-            dados,
-            options
-          );
-          break;
-        }
-        case 'pendencia': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/pender/misto/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}`,
-            dados,
-            options
-          );
-          if (params?.atribuir) {
+          case 'aceitar': {
             await axios.patch(
-              `${BASEURLDD}/v2/processos/atribuicao/mista/${perfilId}?perfil_afeto_id=${perfilId}&processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-              '',
+              `${BASEURLDD}/v2/processos/aceitar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
+              null,
               options
             );
+            dispatch(slice.actions.aceitarSuccess({ ...params, perfilId }));
+            if (params?.modo === 'serie') {
+              dispatch(slice.actions.addItemProcesso({ item: 'atribuidoAMim', dados: true }));
+              dispatch(getInfoProcesso('destinos', { id: params?.id, estadoId: params?.estadoId }));
+            }
+            break;
           }
-          dispatch(slice.actions.closeModal());
-          break;
-        }
-        case 'alterar balcao': {
-          await axios.patch(`${BASEURLDD}/v1/cartoes/alterar/balcao/entrega/${params?.id}`, dados, options);
-          dispatch(slice.actions.alterarBalcaopSuccess({ id: params?.id, balcao: params?.balcao }));
-          break;
-        }
-        case 'confirmar emissao multiplo': {
-          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/emissoes`, dados, options);
-          break;
-        }
-        case 'confirmar emissao por data': {
-          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/todas/emissoes`, dados, options);
-          break;
-        }
-        case 'confirmar rececao multiplo': {
-          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`, dados, options);
-          break;
-        }
-        case 'confirmar rececao por data': {
-          await axios.patch(`${BASEURLDD}/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`, dados, options);
-          break;
-        }
-        case 'anular por balcao e data': {
-          await axios.patch(
-            `${BASEURLDD}/v1/cartoes/anular/validacao/todas?emissao=${params?.emissao}`,
-            dados,
-            options
-          );
-          break;
-        }
-        case 'anular multiplo': {
-          await axios.patch(
-            `${BASEURLDD}/v1/cartoes/anular/validacao/listagem?emissao=${params?.emissao}`,
-            dados,
-            options
-          );
-          break;
-        }
-        case 'anexo': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&anexo=${params?.anexo}&parecer_individual=${params?.individual}`,
-            dados,
-            options
-          );
-          dispatch(slice.actions.deleteAnexoSuccess(params));
-          break;
-        }
-        case 'confidencialidade': {
-          await axios.patch(
-            `${BASEURLDD}/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`,
-            dados,
-            options
-          );
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/confidencialidades?perfil_cc_id=${perfilId}&processo_id=${params?.processoId}`,
-            options
-          );
-          dispatch(slice.actions.addItemProcesso({ item: 'confidencialidades', dados: response.data.objeto }));
-          break;
-        }
+          case 'resgatar': {
+            const response = await axios.get(
+              `${BASEURLDD}/v2/processos/resgatar/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
+              options
+            );
+            dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
+            break;
+          }
+          case 'pendencia': {
+            await axios.patch(
+              `${BASEURLDD}/v2/processos/pender/misto/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}`,
+              dados,
+              options
+            );
+            if (params?.atribuir) {
+              await axios.patch(
+                `${BASEURLDD}/v2/processos/atribuicao/mista/${perfilId}?perfil_afeto_id=${perfilId}&processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
+                '',
+                options
+              );
+            }
+            dispatch(slice.actions.closeModal());
+            break;
+          }
 
-        default:
-          break;
+          default:
+            break;
+        }
       }
+      params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);

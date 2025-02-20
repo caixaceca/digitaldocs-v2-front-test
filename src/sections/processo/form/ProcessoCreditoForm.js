@@ -1,5 +1,5 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { useEffect, useMemo } from 'react';
 // form
 import { useFormContext } from 'react-hook-form';
 // @mui
@@ -18,9 +18,8 @@ import {
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
-import { AnexosExistente } from '../../../components/Actions';
 //
-import { ObsNovosAnexos } from './Outros';
+import Outros from './Outros';
 // _mock
 import { segmentos, escaloes, situacoes } from '../../../_mock';
 
@@ -33,11 +32,6 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
   const values = watch();
   const { linhas } = useSelector((state) => state.parametrizacao);
   const anexosAtivos = useMemo(() => processo?.anexos?.filter((row) => row?.ativo), [processo?.anexos]);
-
-  useEffect(() => {
-    setValue('linha_id', null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.segmento]);
 
   return (
     <Grid container spacing={3}>
@@ -52,7 +46,15 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
                 <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante solicitado" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <RHFAutocompleteSmp name="segmento" label="Segmento" options={segmentos} />
+                <RHFAutocompleteSmp
+                  name="segmento"
+                  label="Segmento"
+                  options={segmentos}
+                  onChange={(event, newValue) => {
+                    setValue('linha_id', null, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+                    setValue('segmento', newValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <RHFAutocompleteObj
@@ -153,20 +155,7 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
         </>
       )}
 
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Grid container spacing={3}>
-              <ObsNovosAnexos />
-              {anexosAtivos?.length > 0 && (
-                <Grid item xs={12}>
-                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} anexo />
-                </Grid>
-              )}
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
+      <Outros anexos={anexosAtivos} />
     </Grid>
   );
 }

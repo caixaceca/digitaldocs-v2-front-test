@@ -17,8 +17,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
+import { updateItem, closeModal } from '../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
-import { updateItem, selectAnexo, closeModal } from '../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../hooks/useAnexos';
 // components
@@ -39,7 +39,6 @@ ArquivarForm.propTypes = { naoFinal: PropTypes.array, onClose: PropTypes.func };
 export function ArquivarForm({ naoFinal, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
 
@@ -95,9 +94,8 @@ export function ArquivarForm({ naoFinal, onClose }) {
 
       dispatch(
         updateItem('arquivar', JSON.stringify(formData), {
-          mail,
           anexos,
-          perfilId,
+          mfd: true,
           id: processo?.id,
           msg: 'Processo arquivado',
           estadoId: processo?.estado_atual_id,
@@ -193,7 +191,13 @@ export function DesarquivarForm({ id, colaboradoresList }) {
         estado_id: values?.estado?.id,
         observacao: values?.observacao,
       };
-      dispatch(updateItem('desarquivar', JSON.stringify(dados), { id, msg: 'Processo desarquivado' }));
+      dispatch(
+        updateItem('desarquivar', JSON.stringify(dados), {
+          id,
+          msg: 'Processo desarquivado',
+          afterSuccess: () => dispatch(closeModal()),
+        })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -222,56 +226,6 @@ export function DesarquivarForm({ id, colaboradoresList }) {
             </Grid>
           </Grid>
           <DialogButons color="error" label="Desarquivar" isSaving={isSaving} onCancel={() => dispatch(closeModal())} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// --- RESTAURAR PROCESSO DO HISTÓRICO ---------------------------------------------------------------------------------
-
-RestaurarForm.propTypes = { id: PropTypes.number };
-
-export function RestaurarForm({ id }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
-
-  const defaultValues = useMemo(() => ({ estado: null, perfil: null, observacao: '' }), []);
-  const methods = useForm({ defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
-
-  const onSubmit = async () => {
-    try {
-      dispatch(
-        updateItem('restaurar', JSON.stringify({ observacao: values?.observacao }), {
-          id,
-          mail,
-          perfilId,
-          msg: 'Processo restaurado',
-        })
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  return (
-    <Dialog open onClose={() => dispatch(selectAnexo(null))} fullWidth maxWidth="sm">
-      <DialogTitle>Restaurar</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack sx={{ pt: 3 }}>
-            <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
-            <DialogButons
-              color="error"
-              label="Restaurar"
-              isSaving={isSaving}
-              onCancel={() => dispatch(selectAnexo(null))}
-            />
-          </Stack>
         </FormProvider>
       </DialogContent>
     </Dialog>

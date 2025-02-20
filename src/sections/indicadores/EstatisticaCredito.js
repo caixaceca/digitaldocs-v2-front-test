@@ -38,7 +38,7 @@ import { setItemValue } from '../../utils/formatObject';
 import { fCurrency, fPercent, fNumber } from '../../utils/formatNumber';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores, resetEstCredito } from '../../redux/slices/indicadores';
+import { getEstatisticaCredito } from '../../redux/slices/indicadores';
 // components
 import { BoxMask } from '../../components/Panel';
 import { RHFDateIF } from '../../components/hook-form';
@@ -109,19 +109,17 @@ export default function EstatisticaCredito() {
 
   useEffect(() => {
     if (perfilId && vista === 'Mensal' && uo?.id && dataValido(data)) {
-      dispatch(resetEstCredito());
       const mes = formatDate(data, 'M');
       const ano = formatDate(data, 'yyyy');
       const intervalo = `?data_inicio=${formatDate(data, 'yyyy-MM')}-01&data_final=${formatDate(data, 'yyyy-MM')}-${ultimoDiaDoMes(data)}`;
-      dispatch(getIndicadores('estCreditoMensal', { uoID: uo?.id, mes, ano, intervalo }));
+      dispatch(getEstatisticaCredito('estCreditoMensal', { uoID: uo?.id, mes, ano, intervalo }));
     }
   }, [dispatch, perfilId, data, uo?.id, vista]);
 
   useEffect(() => {
     if (perfilId && vista === 'Intervalo' && uo?.id && dataValido(datai) && dataValido(dataf)) {
-      dispatch(resetEstCredito());
       const intervalo = `?data_inicio=${formatDate(datai, 'yyyy-MM-dd')}&data_final=${formatDate(dataf, 'yyyy-MM-dd')}`;
-      dispatch(getIndicadores('estCreditoIntervalo', { uoID: uo?.id, intervalo }));
+      dispatch(getEstatisticaCredito('estCreditoIntervalo', { uoID: uo?.id, intervalo }));
     }
   }, [dispatch, perfilId, datai, dataf, uo, vista]);
 

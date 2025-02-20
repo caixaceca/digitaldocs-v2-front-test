@@ -36,7 +36,7 @@ import { paraLevantamento, noEstado, findColaboradores } from '../../../utils/va
 import { useSelector, useDispatch } from '../../../redux/store';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
 import { backStep, resetStep, updateDados } from '../../../redux/slices/stepper';
-import { updateItem, selectAnexo, closeModal } from '../../../redux/slices/digitaldocs';
+import { getSuccess, getInfoProcesso, updateItem, closeModal } from '../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../hooks/useAnexos';
 import { getComparator, applySort } from '../../../hooks/useTable';
@@ -226,9 +226,9 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { dadosStepper } = useSelector((state) => state.stepper);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { motivosPendencia } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
   const cliente = useMemo(() => motivosPendencia?.find((row) => row?.label === 'Cliente'), [motivosPendencia]);
   const criador = useMemo(
     () => colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
@@ -324,8 +324,7 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
 
       dispatch(
         updateItem('encaminhar serie', formData, {
-          mail,
-          perfilId,
+          mfd: true,
           id: processo.id,
           msg: title === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado',
         })
@@ -417,7 +416,6 @@ EncaminharEmParalelo.propTypes = { onClose: PropTypes.func, destinos: PropTypes.
 export function EncaminharEmParalelo({ destinos, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
@@ -471,12 +469,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
         });
       });
       dispatch(
-        updateItem('encaminhar paralelo', JSON.stringify(formData), {
-          mail,
-          perfilId,
-          id: processo.id,
-          msg: 'Processo encaminhado',
-        })
+        updateItem('encaminhar paralelo', JSON.stringify(formData), { id: processo.id, msg: 'Processo encaminhado' })
       );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -628,7 +621,6 @@ export function FinalizarForm({ id, cativos, onClose }) {
   const { enqueueSnackbar } = useSnackbar();
   const [selecionados, setSelecionados] = useState([]);
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
 
   const defaultValues = useMemo(() => ({ cativos: [] }), []);
   const methods = useForm({ defaultValues });
@@ -644,8 +636,6 @@ export function FinalizarForm({ id, cativos, onClose }) {
         dispatch(
           updateItem('finalizar', JSON.stringify({ cativos: [selecionados.map((row) => row?.id)] }), {
             id,
-            mail,
-            perfilId,
             msg: 'Processo finalizado',
           })
         );
@@ -728,7 +718,6 @@ ParecerForm.propTypes = { estado: PropTypes.bool, onCancel: PropTypes.func, proc
 export function ParecerForm({ onCancel, processoId, estado = false }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { selectedItem, selectedAnexoId, isSaving } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = useMemo(() => selectedItem?.anexos?.filter((row) => row?.ativo), [selectedItem?.anexos]);
   const isEdit =
@@ -757,20 +746,18 @@ export function ParecerForm({ onCancel, processoId, estado = false }) {
   const values = watch();
 
   useEffect(() => {
-    if (selectedItem) {
-      reset(defaultValues);
-    }
+    if (selectedItem) reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
   const enviarParecer = async (formData) => {
     dispatch(
       updateItem(estado ? 'parecer estado' : 'parecer individual', formData, {
-        mail,
-        perfilId,
+        mdf: true,
         processoId,
         id: selectedItem.id,
         msg: 'Parecer enviado',
+        afterSuccess: () => onCancel(),
       })
     );
   };
@@ -799,12 +786,10 @@ export function ParecerForm({ onCancel, processoId, estado = false }) {
   const eliminarAnexo = () => {
     dispatch(
       updateItem('anexo', null, {
-        mail,
-        perfilId,
         processoId,
+        individual: !estado,
         msg: 'Anexo eliminado',
         anexo: selectedAnexoId,
-        individual: estado ? 'false' : 'true',
         parecerId: estado ? '' : selectedItem?.id,
         estadoId: estado ? selectedItem?.id : selectedItem?.processo_estado_id,
       })
@@ -850,7 +835,7 @@ export function ParecerForm({ onCancel, processoId, estado = false }) {
             isSaving={isSaving}
             handleOk={eliminarAnexo}
             desc="eliminar este anexo"
-            onClose={() => dispatch(selectAnexo(null))}
+            onClose={() => dispatch(getSuccess({ item: 'selectedAnexoId', dados: null }))}
           />
         )}
       </DialogContent>
@@ -865,10 +850,9 @@ ResgatarForm.propTypes = { dados: PropTypes.object, onClose: PropTypes.func };
 export function ResgatarForm({ dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
 
   const resgatarClick = () => {
-    dispatch(updateItem('resgatar', null, { mail, ...dados, perfilId, msg: 'Processo resgatado' }));
+    dispatch(updateItem('resgatar', null, { ...dados, msg: 'Processo resgatado' }));
     onClose();
   };
 
@@ -897,7 +881,6 @@ export function CancelarForm({ id, estadoId, fechar = false, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const formSchema = Yup.object().shape({ observacao: Yup.string().required('Observação não pode ficar vazio') });
   const defaultValues = useMemo(
     () => ({ observacao: fechar ? '' : 'Resgatar envio em paralelo.', estado_id: estadoId }),
@@ -912,9 +895,7 @@ export function CancelarForm({ id, estadoId, fechar = false, onClose }) {
       dispatch(
         updateItem('cancelar', JSON.stringify(values), {
           id,
-          mail,
           fechar,
-          perfilId,
           msg: fechar ? 'Pareceres fechado' : 'Processo resgatado',
         })
       );
@@ -952,8 +933,8 @@ export function AtribuirForm({ dados, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { colaboradoresEstado } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
   const colaboradoresList = useMemo(
     () => findColaboradores(colaboradores, colaboradoresEstado),
     [colaboradores, colaboradoresEstado]
@@ -976,8 +957,6 @@ export function AtribuirForm({ dados, onClose }) {
     try {
       dispatch(
         updateItem('atribuir', '', {
-          mail,
-          perfilId,
           ...dados,
           id: values?.perfil?.id || '',
           msg: values?.perfil?.id ? 'Processo atribuído' : 'Atribuição eliminada',
@@ -1012,19 +991,15 @@ LibertarForm.propTypes = { dados: PropTypes.func, isSaving: PropTypes.bool, onCl
 
 export function LibertarForm({ dados, isSaving, onClose }) {
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
-  const libertarClick = () => {
-    dispatch(updateItem('libertar', null, { mail, perfilId, msg: 'Processo libertado', ...dados }));
-  };
 
   return (
     <DialogConfirmar
       onClose={onClose}
       isSaving={isSaving}
-      handleOk={() => libertarClick()}
       color="warning"
       title="Libertar"
       desc="libertar este processo"
+      handleOk={() => dispatch(updateItem('libertar', null, { msg: 'Processo libertado', ...dados }))}
     />
   );
 }
@@ -1034,7 +1009,6 @@ export function LibertarForm({ dados, isSaving, onClose }) {
 export function ColocarPendenteForm() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { processo, isSaving } = useSelector((state) => state.digitaldocs);
   const { motivosPendencia } = useSelector((state) => state.parametrizacao);
   const cliente = useMemo(() => motivosPendencia?.find((row) => row?.label === 'Cliente'), [motivosPendencia]);
@@ -1057,8 +1031,6 @@ export function ColocarPendenteForm() {
             mobs: values?.motivo?.id && values?.mobs ? values?.mobs : '',
           }),
           {
-            mail,
-            perfilId,
             id: processo?.id,
             fluxoId: processo?.fluxo_id,
             msg: 'Processo colocado pendente',
@@ -1079,7 +1051,7 @@ export function ColocarPendenteForm() {
       updateItem(
         'pendencia',
         JSON.stringify({ pender: false, fluxo_id: processo?.fluxo_id, mpendencia: '', mobs: '' }),
-        { mail, perfilId, id: processo?.id, fluxoId: processo?.fluxo_id, msg: 'Pendência eliminada' }
+        { id: processo?.id, fluxoId: processo?.fluxo_id, msg: 'Pendência eliminada' }
       )
     );
   };
@@ -1141,9 +1113,9 @@ DomiciliarForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func, esta
 export function DomiciliarForm({ id, estadoId, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { uos } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { estados } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, uos } = useSelector((state) => state.intranet);
 
   const formSchema = Yup.object().shape({
     estado: Yup.mixed().required('Estado não pode ficar vazio'),
@@ -1166,7 +1138,7 @@ export function DomiciliarForm({ id, estadoId, onClose }) {
             observacao: values?.observacao,
             estado_destino_id: values?.estado?.id,
           }),
-          { mail, perfilId, id, msg: 'Processo domiciliado' }
+          { id, msg: 'Processo domiciliado' }
         )
       );
     } catch (error) {
@@ -1213,21 +1185,17 @@ FinalizarOPForm.propTypes = { id: PropTypes.number, isSaving: PropTypes.bool, on
 
 export function FinalizarOPForm({ id, isSaving, onClose }) {
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
-  const handleFinalizar = () => {
-    dispatch(
-      updateItem('finalizar', JSON.stringify({ cativos: [] }), { id, mail, perfilId, msg: 'Processo finalizado' })
-    );
-  };
 
   return (
     <DialogConfirmar
       onClose={onClose}
       isSaving={isSaving}
-      handleOk={() => handleFinalizar()}
       color="success"
       title="Finalizar"
       desc="finalizar este processo"
+      handleOk={() =>
+        dispatch(updateItem('finalizar', JSON.stringify({ cativos: [] }), { id, msg: 'Processo finalizado' }))
+      }
     />
   );
 }
@@ -1239,8 +1207,8 @@ ConfidencialidadesForm.propTypes = { processoId: PropTypes.number };
 export function ConfidencialidadesForm({ processoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
-  const { mail, perfilId, colaboradores } = useSelector((state) => state.intranet);
 
   const defaultValues = useMemo(
     () => ({
@@ -1268,11 +1236,10 @@ export function ConfidencialidadesForm({ processoId }) {
 
       dispatch(
         updateItem('confidencialidade', JSON.stringify(formData), {
-          mail,
-          perfilId,
           processoId,
           id: selectedItem?.id,
           msg: 'Confidencialidade atualizado',
+          afterSuccess: () => dispatch(getInfoProcesso('confidencialidades', { id: processoId })),
         })
       );
     } catch (error) {

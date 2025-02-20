@@ -22,9 +22,9 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import ClausulaForm from './form-clausula';
 import { GarantiasForm } from './form-minuta';
 import { applySortFilter } from './applySortFilter';
+import ClausulaForm, { OpcoesClausula } from './form-clausula';
 import DetalhesGaji9, { DetalhesContent } from './DetalhesGaji9';
 
 // ----------------------------------------------------------------------
@@ -59,7 +59,7 @@ export function TableInfoMinuta({ item, onClose }) {
   } = useTable({});
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
-  const { minuta, isOpenModal, isOpenView, isSaving, idDelete, isLoading, isEdit } = useSelector(
+  const { minuta, infoCaixa, isOpenModal, isOpenView, isSaving, idDelete, isLoading, isEdit } = useSelector(
     (state) => state.gaji9
   );
 
@@ -93,9 +93,9 @@ export function TableInfoMinuta({ item, onClose }) {
     dispatch(updateItem('removerGaranMinuta', JSON.stringify({ tipos_garantias: [idDelete] }), params));
   };
 
-  const viewActions = (modal, dados) => {
+  const viewActions = (modal, id) => {
     dispatch(openModal(modal));
-    dispatch(getFromGaji9('clausula', { id: dados?.clausula_id, item: 'selectedItem' }));
+    dispatch(getFromGaji9('clausula', { id, item: 'selectedItem' }));
   };
 
   return (
@@ -125,6 +125,12 @@ export function TableInfoMinuta({ item, onClose }) {
                       <CellChecked check={row.ativo} />
                       <TableCell align="center" width={50}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
+                          {item === 'clausulas' && minuta?.ativo && row?.ativo && (
+                            <DefaultAction
+                              label="OPÇÕES"
+                              handleClick={() => dispatch(getSuccess({ item: 'infoCaixa', dados: row }))}
+                            />
+                          )}
                           {minuta?.ativo && minuta?.em_analise && (
                             <>
                               {item === 'tiposGarantias' && row.ativo && minuta?.ativo && (
@@ -135,13 +141,12 @@ export function TableInfoMinuta({ item, onClose }) {
                                 />
                               )}
                               {item === 'clausulas' && row?.ativo && (
-                                <UpdateItem handleClick={() => viewActions('update', row)} />
+                                <UpdateItem handleClick={() => viewActions('update', row?.clausula_id)} />
                               )}
                             </>
                           )}
-
                           {item === 'clausulas' && (
-                            <DefaultAction label="DETALHES" handleClick={() => viewActions('view', row)} />
+                            <DefaultAction label="DETALHES" handleClick={() => viewActions('view', row?.clausula_id)} />
                           )}
                         </Stack>
                       </TableCell>
@@ -168,6 +173,12 @@ export function TableInfoMinuta({ item, onClose }) {
       </Card>
 
       {isOpenView && <DetalhesGaji9 closeModal={onClose} item={item} />}
+      {!!infoCaixa && (
+        <OpcoesClausula
+          minutaId={minuta?.id}
+          onCancel={() => dispatch(getSuccess({ item: 'infoCaixa', dados: null }))}
+        />
+      )}
       {isOpenModal && (
         <>
           {item === 'tiposGarantias' && <GarantiasForm onCancel={onClose} />}

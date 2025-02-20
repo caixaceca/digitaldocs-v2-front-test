@@ -44,6 +44,7 @@ TableControle.propTypes = { from: PropTypes.string };
 export default function TableControle({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [uo, setUo] = useState(null);
   const [data, setData] = useState(getDataLS('dataC', new Date()));
   const [datai, setDatai] = useState(getDataLS('dataIC', new Date()));
   const [dataf, setDataf] = useState(getDataLS('dataFC', new Date()));
@@ -54,15 +55,10 @@ export default function TableControle({ from }) {
 
   const { dadosControle, isLoading } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
-  const { mail, perfilId, cc, colaboradores, uos } = useSelector((state) => state.intranet);
+  const { cc, colaboradores, uos } = useSelector((state) => state.intranet);
   const uosList = useMemo(
     () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'id'),
     [cc, isAdmin, isAuditoria, meusAmbientes, uos]
-  );
-  const [uo, setUo] = useState(
-    uosList?.find((row) => row?.id === Number(localStorage.getItem('uoC'))) ||
-      uosList?.find((row) => row?.id === cc?.uo?.id) ||
-      null
   );
 
   const {
@@ -94,26 +90,21 @@ export default function TableControle({ from }) {
   }, [uosList, uo, cc?.uo?.id]);
 
   useEffect(() => {
-    if (mail && uo?.id && dataValido(dataf) && dataValido(datai) && (from === 'Entradas' || from === 'Devoluções'))
-      dispatch(
-        getAll(from, {
-          mail,
-          perfilId,
-          uoId: uo?.id,
-          dataFim: format(dataf, 'yyyy-MM-dd'),
-          dataInicio: format(datai, 'yyyy-MM-dd'),
-        })
-      );
-  }, [dispatch, perfilId, uo?.id, mail, datai, dataf, from]);
+    if (uo?.id && dataValido(dataf) && dataValido(datai) && (from === 'Entradas' || from === 'Devoluções')) {
+      const dataFim = format(dataf, 'yyyy-MM-dd');
+      const dataInicio = format(datai, 'yyyy-MM-dd');
+      dispatch(getAll(from, { uoId: uo?.id, dataFim, dataInicio }));
+    }
+  }, [dispatch, uo?.id, datai, dataf, from]);
 
   useEffect(() => {
-    if (mail && data && uo?.id && dataValido(data) && from === 'Trabalhados')
-      dispatch(getAll(from, { mail, uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
-  }, [dispatch, uo?.id, data, from, mail]);
+    if (from === 'Trabalhados' && data && uo?.id && dataValido(data))
+      dispatch(getAll(from, { uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
+  }, [dispatch, uo?.id, data, from]);
 
   useEffect(() => {
-    if (mail && perfilId && from === 'Por concluir') dispatch(getAll(from, { perfilId, mail }));
-  }, [dispatch, perfilId, from, mail]);
+    if (from === 'Por concluir') dispatch(getAll(from, null));
+  }, [dispatch, from]);
 
   const dados = useMemo(
     () => dadosList(dadosControle, colaboradores, uos, from),
@@ -330,7 +321,7 @@ function tableHeaders(item) {
   return [
     { id: item === 'Devoluções' ? 'entrada' : 'nentrada', label: 'Nº', align: 'left' },
     { id: 'titular', label: 'Titular', align: 'left' },
-    { id: 'entidades', label: 'Conta/Cliente/Entidade(s)', align: 'left' },
+    { id: 'entidades', label: 'Cliente/Entidade', align: 'left' },
     { id: 'assunto', label: 'Assunto', align: 'left' },
     {
       id: item === 'Devoluções' ? 'estado_inicial' : 'nome',

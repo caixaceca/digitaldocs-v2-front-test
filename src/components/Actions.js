@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
+import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
@@ -60,7 +61,7 @@ import { ptDate, ptDateTime } from '../utils/formatTime';
 import useToggle from '../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../redux/store';
-import { selectAnexo } from '../redux/slices/digitaldocs';
+import { getSuccess as gSDD } from '../redux/slices/digitaldocs';
 import { getFromParametrizacao, openModal, getSuccess } from '../redux/slices/parametrizacao';
 // assets
 import { Editar, Arquivo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
@@ -106,6 +107,7 @@ export function DefaultAction({
           (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
           (icon === 'pdf' && getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
           (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
+          (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
           ((label === 'Mostrar detalhes' || label === 'Adicionar' || icon === 'adicionar') && (
             <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
@@ -126,7 +128,7 @@ export function DefaultAction({
           color={
             (label === 'VERSIONAR' && 'info') ||
             ((label === 'REVOGAR' || label === 'ELIMINAR') && 'error') ||
-            ((label === 'EDITAR' || label === 'COMPOSIÇÃO') && 'warning') ||
+            ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || label === 'OPÇÕES') && 'warning') ||
             color
           }
         >
@@ -145,6 +147,7 @@ export function DefaultAction({
             (label === 'Colaboradores' && <GroupOutlinedIcon />) ||
             (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
             (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
+            (label === 'OPÇÕES' && <TuneIcon sx={{ width: 20 }} />) ||
             (label === 'ADMIN' && <AdminPanelSettingsOutlinedIcon />) ||
             (label === 'ORDENAR' && <SwapVertOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'PUBLICAR' && <PublishOutlinedIcon sx={{ width: 20 }} />) ||
@@ -160,18 +163,18 @@ export function DefaultAction({
             (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
             (label === 'BAIXANDO...' && <CircularProgress size={24} thickness={5} />) ||
             (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
-            (label === 'INFO. DAS CONTAS' && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'ADICIONAR' && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             (icon === 'arquivo' && <ArchiveOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
             (label === 'OBTER DOCUMENTO' && <CloudDownloadOutlinedIcon sx={{ width: 20 }} />) ||
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
+            (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
-            (label === 'Mostrar mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
             ((label === 'Adicionar' || icon === 'adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+            ((label === 'INFO. DAS CONTAS' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
             ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || icon === 'editar') && (
               <Editar sx={{ width: small ? 18 : 22 }} />
             )) ||
@@ -232,7 +235,7 @@ export function UpdateItem({ dados, handleClick = null }) {
           Editar
         </Button>
       ) : (
-        <Tooltip title="Editar" arrow>
+        <Tooltip title="EDITAR" arrow>
           <Fab
             size="small"
             variant="soft"
@@ -431,11 +434,8 @@ export function AnexosExistente({ mt = 3, anexos, onOpen = null, anexo = false }
                 label="ELIMINAR"
                 small
                 handleClick={() => {
-                  if (onOpen) {
-                    onOpen(row.id);
-                  } else {
-                    dispatch(selectAnexo(anexo ? row.anexo : row.id));
-                  }
+                  if (onOpen) onOpen(row.id);
+                  else dispatch(gSDD({ item: 'selectedAnexoId', dados: anexo ? row.anexo : row.id }));
                 }}
               />
             </ListItemSecondaryAction>

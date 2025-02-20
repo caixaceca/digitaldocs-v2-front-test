@@ -9,7 +9,7 @@ import { acessoGaji9 } from '../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getSuccess, getDocumento, openModal, closeModal } from '../../redux/slices/gaji9';
-// routes
+// hooks
 import useSettings from '../../hooks/useSettings';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -40,15 +40,14 @@ export default function PageMinutaDetalhes() {
   );
 
   useEffect(() => {
-    if (done === 'Minuta publicada' || done === 'Minuta revogada') {
-      navigate(PATH_DIGITALDOCS.gaji9.root);
-    } else if (done === 'Minuta clonada' || (done === 'Minuta versionada' && minutaId)) {
+    if (done === 'Minuta publicada' || done === 'Minuta revogada') navigate(PATH_DIGITALDOCS.gaji9.root);
+    else if (done === 'Minuta clonada' || (done === 'Minuta versionada' && minutaId))
       navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
   useEffect(() => {
+    dispatch(getSuccess({ item: 'infoCaixa', dados: null }));
     if (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA']))
       dispatch(getFromGaji9('minuta', { id }));
   }, [dispatch, utilizador, id]);

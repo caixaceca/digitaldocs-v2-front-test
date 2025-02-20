@@ -113,6 +113,7 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
               custo_total: dadosStepper?.custo_total || dados?.custo_total || '',
               valor_comissao: dadosStepper?.valor_comissao || dados?.valor_comissao || '',
               valor_prestacao: dadosStepper?.valor_prestacao || dados?.valor_prestacao || '',
+              isento_comissao: dadosStepper?.isento_comissao || dados?.isento_comissao || false,
               valor_prestacao1: dadosStepper?.valor_prestacao1 || dados?.valor_prestacao1 || '',
               comissao_abertura: dadosStepper?.comissao_abertura || dados?.comissao_abertura || '',
               valor_imposto_selo: dadosStepper?.valor_imposto_selo || dados?.valor_imposto_selo || '',
@@ -265,6 +266,7 @@ function Taxas({ dados, dispatch }) {
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
       <Grid container spacing={3} sx={{ pt: 1 }}>
+        <GridItem children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa juro negociado" name="taxa_juro_negociado" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa juro precário" name="taxa_juro_precario" />} />
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa juro desconto" name="taxa_juro_desconto" />} />
@@ -440,7 +442,7 @@ export function FiadoresForm({ id, onCancel }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'fiadores' });
 
   const params = useMemo(
-    () => ({ id, item: 'credito', getSuccess: true, msg: 'Fiadores adicionados', afterSuccess: () => onCancel() }),
+    () => ({ id, getSuccess: 'credito', msg: 'Fiadores adicionados', afterSuccess: () => onCancel() }),
     [onCancel, id]
   );
 
@@ -625,7 +627,7 @@ export function PreviewForm({ onCancel }) {
         ?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` })),
     [credito?.componente_id, credito.tipo_titular_id, minutasPublicas]
   );
-  
+
   const formSchema = Yup.object().shape({
     minuta: Yup.mixed().required().label('Minuta'),
     representante: Yup.mixed().required().label('Representante'),

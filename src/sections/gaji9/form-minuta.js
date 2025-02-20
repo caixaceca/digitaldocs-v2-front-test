@@ -246,9 +246,8 @@ export function ComposicaoForm({ onCancel, action }) {
       };
       dispatch(
         createItem('comporMinuta', JSON.stringify(formData), {
-          item: 'minuta',
           id: minuta?.id,
-          getSuccess: true,
+          getSuccess: 'minuta',
           msg: 'Cláusulas adicionadas',
           clausulasGarant: values?.clausulasGarant,
         })
@@ -271,7 +270,7 @@ export function ComposicaoForm({ onCancel, action }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 1 }}>
-            <PesquisarClausulas titularId={minuta?.tipo_titular_id} componenteId={minuta?.componente_id} />
+            <PesquisarClausulas />
             {fields.map((item, index) => (
               <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
                 <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
@@ -313,9 +312,7 @@ export function ComposicaoForm({ onCancel, action }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PesquisarClausulas.propTypes = { titularId: PropTypes.number, componenteId: PropTypes.number };
-
-export function PesquisarClausulas({ componenteId = 0, titularId = 0 }) {
+export function PesquisarClausulas() {
   const dispatch = useDispatch();
   const { tiposTitulares, componentes, tiposGarantias } = useSelector((state) => state.gaji9);
   const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
@@ -327,16 +324,7 @@ export function PesquisarClausulas({ componenteId = 0, titularId = 0 }) {
     { id: 'caixa', label: 'Secção de identificação Caixa' },
   ];
 
-  const defaultValues = useMemo(
-    () => ({
-      seccao: null,
-      garantia: null,
-      titular: titularesList?.find((row) => Number(row?.id) === Number(titularId)),
-      componente: componentesList?.find((row) => Number(row?.id) === Number(componenteId)),
-    }),
-    [componenteId, componentesList, titularId, titularesList]
-  );
-
+  const defaultValues = useMemo(() => ({ seccao: null, garantia: null, titular: null, componente: null }), []);
   const methods = useForm({ defaultValues });
   const { watch } = methods;
   const values = watch();

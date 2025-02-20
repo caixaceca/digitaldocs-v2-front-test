@@ -1,19 +1,26 @@
 import { add } from 'date-fns';
+import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Tabs from '@mui/material/Tabs';
-import Badge from '@mui/material/Badge';
+import Stack from '@mui/material/Stack';
+import Dialog from '@mui/material/Dialog';
 import { styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
+import DialogContent from '@mui/material/DialogContent';
 // utils
+import { fNumber } from '../../utils/formatNumber';
 import { setItemValue } from '../../utils/formatObject';
 import { colorLabel } from '../../utils/getColorPresets';
 import { pertencoAoEstado } from '../../utils/validarAcesso';
-// routes
+// hooks
+import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -22,6 +29,9 @@ import { getIndicadores } from '../../redux/slices/indicadores';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
 // components
 import Page from '../../components/Page';
+import Label from '../../components/Label';
+import { DefaultAction } from '../../components/Actions';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 import { Notificacao } from '../../components/NotistackProvider';
 // sections
 import { TableProcessos } from '../../sections/tabela';
@@ -44,103 +54,90 @@ const TabsWrapperStyle = styled('div')(({ theme }) => ({
 export default function PageFilaTrabalho() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
+  const { toggle: open, onOpen, onClose } = useToggle();
   const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
-  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { perfilId, cc, dateUpdate } = useSelector((state) => state.intranet);
+  const { cc, dateUpdate } = useSelector((state) => state.intranet);
+  const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
-    if (perfilId && cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 2 }) < new Date()) {
+      dispatch(getFromIntranet('cc', { id: cc?.id }));
+      dispatch(getIndicadores('totalP', { item: 'totalP' }));
+    }
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
       dispatch(getFromIntranet('colaboradores'));
       dispatch(getFromParametrizacao('meusacessos'));
-      dispatch(getFromIntranet('cc', { id: cc?.id }));
       dispatch(getFromParametrizacao('meusambientes'));
       dispatch(getFromParametrizacao('motivosPendencia'));
     }
-  }, [dispatch, perfilId, cc?.id, dateUpdate]);
+  }, [dispatch, cc?.id, dateUpdate]);
 
-  const tabsList = useMemo(
-    () =>
-      [
-        { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="Tarefas" /> },
-        { value: 'Retidos', num: totalP?.total_retido || 0, component: <TableProcessos from="Retidos" /> },
-        { value: 'Atribuídos', num: totalP?.total_afeto || 0, component: <TableProcessos from="Atribuídos" /> },
-        { value: 'Pendentes', num: totalP?.total_pendente || 0, component: <TableProcessos from="Pendentes" /> },
-        ...(pertencoAoEstado(meusAmbientes, ['Validação OPE', 'Execução OPE'])
-          ? [{ value: 'Agendados', num: totalP?.total_agendado || 0, component: <TableProcessos from="Agendados" /> }]
-          : []),
-        ...(pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas'])
-          ? [
-              {
-                value: 'Finalizados',
-                num: totalP?.total_finalizado || 0,
-                component: <TableProcessos from="Finalizados" />,
-              },
-              {
-                value: 'Executados',
-                num: totalP?.total_executado || 0,
-                component: <TableProcessos from="Executados" />,
-              },
-            ]
-          : []),
-      ] || [],
-    [totalP, meusAmbientes]
-  );
+  const tabs = useMemo(() => {
+    const baseTabs = [
+      { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="Tarefas" /> },
+      { value: 'Retidos', num: totalP?.total_retido || 0, component: <TableProcessos from="Retidos" /> },
+      { value: 'Atribuídos', num: totalP?.total_afeto || 0, component: <TableProcessos from="Atribuídos" /> },
+      { value: 'Pendentes', num: totalP?.total_pendente || 0, component: <TableProcessos from="Pendentes" /> },
+    ];
 
-  const [currentTab, setCurrentTab] = useState(
-    tabsList?.map((row) => row?.value)?.find((item) => item === localStorage.getItem('tabProcessos')) || 'Tarefas'
-  );
+    if (pertencoAoEstado(meusAmbientes, ['Validação OPE', 'Execução OPE'])) {
+      baseTabs.push({
+        value: 'Agendados',
+        num: totalP?.total_agendado || 0,
+        component: <TableProcessos from="Agendados" />,
+      });
+    }
+
+    if (pertencoAoEstado(meusAmbientes, ['DOP - Validação Notas Externas', 'DOP - Execução Notas Externas'])) {
+      baseTabs.push(
+        { value: 'Finalizados', num: totalP?.total_finalizado || 0, component: <TableProcessos from="Finalizados" /> },
+        { value: 'Executados', num: totalP?.total_executado || 0, component: <TableProcessos from="Executados" /> }
+      );
+    }
+
+    return baseTabs;
+  }, [totalP, meusAmbientes]);
+
+  const storedTab = localStorage.getItem('tabProcessos');
+  const defaultTab = tabs.map((tab) => tab.value).includes(storedTab) ? storedTab : tabs[0]?.value || 'Tarefas';
+  const [currentTab, setCurrentTab] = useState(defaultTab);
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabProcessos');
-  }, [tabsList, currentTab]);
-
-  useEffect(() => {
-    if (perfilId && meusAmbientes?.length > 0) dispatch(getIndicadores('totalP', null));
-  }, [dispatch, perfilId, meusAmbientes?.length]);
+    if (!tabs.map((tab) => tab.value).includes(currentTab)) setItemValue(tabs[0]?.value, setCurrentTab, 'tabProcessos');
+  }, [tabs, currentTab]);
 
   return (
     <Page title="Fila de trabalho | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Notificacao error={error} />
+        {meuAmbiente?.id && <Notificacao error={error} />}
+
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-          <Box sx={{ px: 2, py: 1, color: 'common.white', backgroundColor: 'primary.main' }}>
+          <Stack direction="row" spacing={1} sx={{ px: 2, py: 1, color: 'common.white', bgcolor: 'primary.main' }}>
             <Typography variant="h4">Fila de trabalho</Typography>
-          </Box>
+            <DefaultAction variant="outlined" label="Nº PROCESSOS" color="inherit" handleClick={() => onOpen()} />
+            {open && <TotalProcessos onCancel={() => onClose()} />}
+          </Stack>
 
           <TabsWrapperStyle>
             <Tabs
               value={currentTab}
-              scrollButtons="auto"
               variant="scrollable"
               allowScrollButtonsMobile
               onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabProcessos')}
             >
-              {tabsList.map((tab) => (
+              {tabs.map((tab) => (
                 <Tab
                   disableRipple
                   key={tab.value}
                   value={tab.value}
                   label={
-                    <Badge
-                      showZero
-                      max={9999}
-                      badgeContent={tab.num}
-                      color={colorLabel(tab.value)}
-                      sx={{
-                        ml: 0.5,
-                        '& .MuiBadge-badge': {
-                          top: 10,
-                          padding: '0 4px',
-                          color: 'common.white',
-                          right: (tab.num > 999 && -25) || (tab.num > 99 && -20) || -15,
-                        },
-                        mr: (tab.num < 100 && 3.5) || (tab.num < 1000 && 4.5) || 5.5,
-                      }}
-                    >
-                      {tab.value}
-                    </Badge>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Box>{tab.value}</Box>
+                      <Label color={colorLabel(tab.value)} sx={{ p: 0.75, height: 20 }}>
+                        {fNumber(tab.num)}
+                      </Label>
+                    </Stack>
                   }
                 />
               ))}
@@ -148,11 +145,76 @@ export default function PageFilaTrabalho() {
           </TabsWrapperStyle>
         </Card>
 
-        {tabsList.map((tab) => {
-          const isMatched = tab.value === currentTab;
-          return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-        })}
+        {tabs.map((tab) => tab.value === currentTab && <Box key={tab.value}>{tab.component}</Box>)}
       </Container>
     </Page>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+TotalProcessos.propTypes = { onCancel: PropTypes.func };
+
+export function TotalProcessos({ onCancel }) {
+  const dispatch = useDispatch();
+  const { posicaoAtual } = useSelector((state) => state.indicadores);
+  const { meuAmbiente, meusAmbientes } = useSelector((state) => state.parametrizacao);
+
+  const [fluxo, setFluxo] = useState(null);
+  const [estado, setEstaddo] = useState(meuAmbiente);
+
+  useEffect(() => {
+    if (estado?.id || fluxo?.id) {
+      dispatch(
+        getIndicadores('posicaoAtual', {
+          item: 'posicaoAtual',
+          fluxoId: fluxo?.id,
+          fluxoKey: 'fluxo_id',
+          estadoId: estado?.id,
+          estadoKey: 'estado_id',
+        })
+      );
+    }
+  }, [dispatch, estado?.id, fluxo?.id]);
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+      <DialogTitleAlt title="Nº de processos" onClose={() => onCancel()} />
+      <DialogContent sx={{ mt: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ pt: 2 }}>
+          <Autocomplete
+            fullWidth
+            value={estado}
+            disableClearable
+            options={meusAmbientes}
+            getOptionLabel={(option) => option?.nome}
+            onChange={(event, newValue) => {
+              setFluxo(null);
+              setEstaddo(newValue);
+            }}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
+          />
+          <Autocomplete
+            fullWidth
+            value={fluxo}
+            getOptionLabel={(option) => option?.assunto}
+            onChange={(event, newValue) => setFluxo(newValue)}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
+            options={estado?.fluxos?.map(({ fluxo_id: id, assunto }) => ({ id, assunto }))}
+          />
+        </Stack>
+        <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mt: 3 }}>
+          <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+            Total:
+          </Typography>
+          <Typography variant="h5">{fNumber(posicaoAtual?.total)}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 300 }}>
+            processo{posicaoAtual?.total > 1 ? 's' : ''}
+          </Typography>
+        </Stack>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -12,7 +12,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { fYear } from '../../utils/formatTime';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getProcesso, selectAnexo, updateItem, resetProcesso } from '../../redux/slices/digitaldocs';
+import { getSuccess as gSDD, getProcesso, updateItem, resetProcesso } from '../../redux/slices/digitaldocs';
 import { getFromParametrizacao, changeMeuAmbiente, getSuccess } from '../../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -38,25 +38,23 @@ export default function PageNovoEditarProcesso() {
   const { pathname } = useLocation();
   const { themeStretch } = useSettings();
   const isEdit = pathname.includes('edit');
-  const { linhas } = useSelector((state) => state.parametrizacao);
   const { perfilId, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
   const { processo, isLoadingP, selectedAnexoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
-    if (id && perfilId) dispatch(getProcesso('processo', { id, historico: false }));
+    if (id && perfilId) dispatch(getProcesso('processo', { id }));
   }, [dispatch, perfilId, id]);
 
   useEffect(() => {
-    if (linhas?.length === 0 && meuFluxo?.iscredito) dispatch(getFromParametrizacao('linhas'));
-  }, [dispatch, linhas, meuFluxo]);
+    if (meuFluxo?.iscredito) dispatch(getFromParametrizacao('linhas'));
+  }, [dispatch, meuFluxo]);
 
   useEffect(() => {
     if (processo?.fluxo_id && meusFluxos?.length > 0) {
-      dispatch(
-        getSuccess({ item: 'meuFluxo', dados: meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null })
-      );
+      const fluxoProcesso = meusFluxos?.find((row) => row?.id === processo?.fluxo_id) || null;
+      dispatch(getSuccess({ item: 'meuFluxo', dados: fluxoProcesso }));
     }
   }, [dispatch, meusFluxos, processo?.fluxo_id]);
 
@@ -78,15 +76,8 @@ export default function PageNovoEditarProcesso() {
   };
 
   const eliminarAnexo = () => {
-    dispatch(
-      updateItem('anexo', null, {
-        processo: true,
-        processoId: id,
-        individual: 'false',
-        anexo: selectedAnexoId,
-        msg: 'Anexo eliminado',
-      })
-    );
+    const params = { processo: true, processoId: id, anexo: selectedAnexoId, msg: 'Anexo eliminado' };
+    dispatch(updateItem('anexo', null, params));
   };
 
   return (
@@ -188,7 +179,7 @@ export default function PageNovoEditarProcesso() {
                 isSaving={isSaving}
                 handleOk={eliminarAnexo}
                 desc="eliminar este anexo"
-                onClose={() => dispatch(selectAnexo(null))}
+                onClose={() => dispatch(gSDD({ item: 'selectedAnexoId', dados: null }))}
               />
             )}
           </>

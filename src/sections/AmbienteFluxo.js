@@ -7,7 +7,7 @@ import { changeMeuAmbiente, getSuccess } from '../redux/slices/parametrizacao';
 
 // ----------------------------------------------------------------------
 
-export function Ambiente() {
+export function Ambiente({ ...other }) {
   const dispatch = useDispatch();
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
@@ -24,13 +24,14 @@ export function Ambiente() {
         dispatch(changeMeuAmbiente(newValue));
         localStorage.setItem('meuAmbiente', newValue?.id);
       }}
+      {...other}
     />
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function Fluxo() {
+export function Fluxo({ ...other }) {
   const dispatch = useDispatch();
   const { meusFluxos, meuFluxo } = useSelector((state) => state.parametrizacao);
 
@@ -44,6 +45,7 @@ export function Fluxo() {
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
       renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
       onChange={(event, newValue) => dispatch(getSuccess({ item: 'meuFluxo', dados: newValue }))}
+      {...other}
     />
   );
 }

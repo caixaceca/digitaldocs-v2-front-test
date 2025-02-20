@@ -33,19 +33,14 @@ Pareceres.propTypes = {
 export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { mail, perfilId } = useSelector((state) => state.intranet);
   const { isOpenModal1 } = useSelector((state) => state.digitaldocs);
-
-  const handleEditar = (item) => {
-    dispatch(selectParecer(item));
-  };
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
   };
 
   const viewAnexo = (anexo, transicaoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { mail, perfilId, anexo, transicaoId, parecerId }));
+    dispatch(getAnexo('fileDownload', { anexo, transicaoId, parecerId }));
   };
 
   return (
@@ -57,8 +52,8 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
           estadoId={estadoId}
           viewAnexo={viewAnexo}
           key={`parecer_${row?.id}`}
-          handleEditar={handleEditar}
           handleAccord={handleAccord}
+          handleEditar={(item) => dispatch(selectParecer(item))}
           parecer={{ ...row, estado, observacao: row?.descritivo }}
         />
       ))}

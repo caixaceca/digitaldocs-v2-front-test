@@ -19,15 +19,15 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
-import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getListaProcessos } from '../../redux/slices/digitaldocs';
 // Components
 import { RHFDateIF } from '../../components/hook-form';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
+import { CellChecked, Criado } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, Criado, Registos } from '../../components/Panel';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
@@ -72,23 +72,25 @@ export default function TableCON({ item = 'con' }) {
   } = useTable({});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mail } = useSelector((state) => state.intranet);
-  const { con, pjf, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
   const [dataf, setDataf] = useState(getDataLS('dataFCon', new Date()));
   const [filter, setFilter] = useState(localStorage.getItem('filterCon') || '');
   const title = (item === 'pjf' && 'Processos Judiciais e Fiscais') || 'Comunicação Operação Numerário';
   const [datai, setDatai] = useState(
     getDataLS('dataICon', new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   );
+  const { dadosControle, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
-    if (mail && item === 'con' && dataValido(datai) && dataValido(dataf))
-      dispatch(getAll('con', { mail, dataFim: format(dataf, 'yyyy-MM-dd'), dataInicio: format(datai, 'yyyy-MM-dd') }));
-  }, [dispatch, mail, item, datai, dataf]);
+    if (item === 'con' && dataValido(datai) && dataValido(dataf)) {
+      const dataFim = format(dataf, 'yyyy-MM-dd');
+      const dataInicio = format(datai, 'yyyy-MM-dd');
+      dispatch(getListaProcessos('con', { item: 'dadosControle', cursor: 0, dataFim, dataInicio }));
+    }
+  }, [dispatch, item, datai, dataf]);
 
   useEffect(() => {
-    if (mail && item === 'pjf') dispatch(getAll('pjf', { mail, pagina: 0 }));
-  }, [dispatch, mail, item]);
+    if (item === 'pjf') dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor: 0 }));
+  }, [dispatch, item]);
 
   useEffect(() => {
     setPage(0);
@@ -97,15 +99,10 @@ export default function TableCON({ item = 'con' }) {
 
   const dataFiltered = applySortFilter({
     filter,
-    dados: (item === 'pjf' && pjf) || con,
+    dados: dadosControle,
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
-
-  const mostrarMais = () => {
-    if (mail && item === 'pjf' && processosInfo?.proxima_pagina)
-      dispatch(getAll('pjf', { mail, pagina: processosInfo?.proxima_pagina }));
-  };
 
   const handleView = (id) => {
     navigate(`${PATH_DIGITALDOCS.controle.root}/${id}?from=Controle`);
@@ -128,15 +125,18 @@ export default function TableCON({ item = 'con' }) {
                 setDataf={setDataf}
               />
             )}
-            {item === 'pjf' && <Registos info={processosInfo} total={pjf?.length} handleClick={() => mostrarMais()} />}
+            {processosInfo && (
+              <DefaultAction
+                button
+                label="Mais processos"
+                handleClick={() => dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor: processosInfo }))}
+              />
+            )}
             {!isNotFound && (
               <ExportarDados
-                tabela={item === 'pjf' ? 'PJF' : 'CON'}
                 dados={dataFiltered}
-                titulo={
-                  (item === 'pjf' && 'Processos Judiciais e Fiscais') ||
-                  `Comunicação de operações de Numerário  - ${dataLabel(datai, dataf)}`
-                }
+                tabela={item === 'pjf' ? 'PJF' : 'CON'}
+                titulo={(item === 'pjf' && title) || `${title}  - ${dataLabel(datai, dataf)}`}
               />
             )}
           </Stack>

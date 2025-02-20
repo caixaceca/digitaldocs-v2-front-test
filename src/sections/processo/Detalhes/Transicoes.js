@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // @mui
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -25,11 +24,11 @@ Transicoes.propTypes = { transicoes: PropTypes.array, assunto: PropTypes.string 
 
 export default function Transicoes({ transicoes, assunto }) {
   const dispatch = useDispatch();
+  const { colaboradores, uos } = useSelector((state) => state.intranet);
   const transicoesFiltered = useMemo(() => removeDuplicates(transicoes), [transicoes]);
-  const { mail, perfilId, colaboradores, uos } = useSelector((state) => state.intranet);
 
   const viewAnexo = (anexo, transicaoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { mail, perfilId, anexo, transicaoId, parecerId }));
+    dispatch(getAnexo('fileDownload', { anexo, transicaoId, parecerId }));
   };
 
   return (
@@ -73,8 +72,8 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
   const criador = useMemo(
     () =>
       transicao?.domiciliacao || acao === 'Restauro'
-        ? colaboradores?.find((colab) => colab?.perfil?.mail?.toLowerCase() === transicao?.perfil_id?.toLowerCase())
-        : colaboradores?.find((colab) => colab?.perfil?.id === transicao?.perfil_id),
+        ? colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === transicao?.perfil_id?.toLowerCase())
+        : colaboradores?.find(({ perfil }) => perfil?.id === transicao?.perfil_id),
     [colaboradores, acao, transicao?.domiciliacao, transicao?.perfil_id]
   );
   const arqSistema = useMemo(
@@ -147,26 +146,16 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
             )}
             {acao !== 'Resgate' && (
               <Stack sx={{ pl: { md: criador && !temPareceres && !arqSistema ? 6.5 : 0 } }}>
-                {transicao?.domiciliacao && !!transicao?.uo_origem_id && !!transicao?.uo_destino_id && (
-                  <Stack sx={{ mt: 2 }}>
-                    <Box>
-                      <Label color="info">Domiciliação do processo</Label>
-                    </Box>
+                {transicao?.domiciliacao && (
+                  <Stack sx={{ mt: 1 }} alignItems="center" spacing={0.5} direction="row">
+                    <Label color="info">Domiciliação do processo</Label>
                     <Stack alignItems="center" spacing={0.5} direction="row">
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        U.O. origem:
+                      <Typography variant="body2">
+                        {uos?.find(({ id }) => id === transicao?.uo_origem_id)?.desegnicao || transicao?.uo_origem_id}
                       </Typography>
-                      <Typography>
-                        {uos?.find((row) => row?.id === transicao?.uo_origem_id)?.desegnicao || transicao?.uo_origem_id}
-                      </Typography>
-                    </Stack>
-                    <Stack alignItems="center" spacing={0.5} direction="row">
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        U.O. destino:
-                      </Typography>
-                      <Typography>
-                        {uos?.find((row) => row?.id === transicao?.uo_destino_id)?.desegnicao ||
-                          transicao?.uo_destino_id}
+                      <DoubleArrowIcon color="success" sx={{ width: 20, height: 20 }} />
+                      <Typography variant="body2">
+                        {uos?.find(({ id }) => id === transicao?.uo_destino_id)?.desegnicao || transicao?.uo_destino_id}
                       </Typography>
                     </Stack>
                   </Stack>

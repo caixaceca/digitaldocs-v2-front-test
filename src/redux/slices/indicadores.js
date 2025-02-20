@@ -9,8 +9,9 @@ import { selectUtilizador, headerOptions, actionGet, hasError } from './sliceAct
 // Estado inicial
 const initialState = {
   error: '',
-  totalP: null,
   isLoading: false,
+  totalP: null,
+  posicaoAtual: null,
   fileSystem: [],
   indicadores: [],
   estCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
@@ -33,11 +34,8 @@ const slice = createSlice({
     getResumoEstatisticaCreditoSuccess(state, action) {
       const { uoId, dados: allDados = [] } = action.payload || {};
       let dados = allDados;
-      if (uoId === -2) {
-        dados = dados.filter((row) => row?.regiao === 'Norte');
-      } else if (uoId === -3) {
-        dados = dados.filter((row) => row?.regiao === 'Sul');
-      }
+      if (uoId === -2) dados = dados.filter((row) => row?.regiao === 'Norte');
+      else if (uoId === -3) dados = dados.filter((row) => row?.regiao === 'Sul');
 
       const transform = (fase, montanteKey) =>
         dados.filter((row) => row.fase === fase).map((row) => ({ ...row, [montanteKey]: row?.montante }));
@@ -53,150 +51,80 @@ const slice = createSlice({
 
 // Reducer
 export default slice.reducer;
-export const { resetEstCredito } = slice.actions;
-
-// Função auxiliar para construir query strings a partir de um objeto
-const buildQueryString = (paramsObj) => {
-  const queryString = new URLSearchParams(paramsObj).toString();
-  return queryString ? `?${queryString}` : '';
-};
-
-// Função auxiliar para despachar sucesso
-const dispatchSuccess = (dispatch, item, data) => {
-  dispatch(slice.actions.getSuccess({ item, dados: data }));
-};
 
 export function getIndicadores(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     dispatch(slice.actions.getSuccess({ item: 'indicadores', dados: [] }));
+    if (item === 'posicaoAtual') dispatch(slice.actions.getSuccess({ item: 'posicaoAtual', dados: null }));
+    if (item === 'totalP') await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
-      const dateQuery = buildQueryString({
-        ...(params?.datai && { datai: params?.datai }),
-        ...(params?.dataf && { dataf: params?.dataf }),
+      const queryParams = new URLSearchParams({
+        ...(params?.de ? { de: params?.de } : null),
+        ...(params?.ano ? { ano: params?.ano } : null),
+        ...(params?.entrada ? { entrada: params?.entrada } : null),
+        ...(params?.distinto ? { distinto: params?.distinto } : null),
+        ...(params?.vista ? { vista: params?.vista?.toLowerCase() } : null),
+        ...(params?.uoId && params?.uoKey ? { [params.uoKey]: params?.uoId } : null),
+        ...(params?.escopo ? { escopo: params?.escopo } : null),
+        ...(params?.fluxoId && params?.fluxoKey ? { [params.fluxoKey]: params?.fluxoId } : null),
+        ...(params?.estadoId && params?.estadoKey ? { [params.estadoKey]: params?.estadoId } : null),
+        ...(params?.perfilId && params?.perfilKey ? { [params.perfilKey]: params?.perfilId } : null),
+        ...(params?.dataInicial ? { datai: params?.dataInicial } : null),
+        ...(params?.dataFinal ? { dataf: params?.dataFinal } : null),
       });
-      const uoQuery = params?.uo && params?.agrEntradas === 'Balcão' ? params?.uo : null;
-      const estadoQuery = params?.estado && params?.agrEntradas === 'Estado' ? params?.estado : null;
+
+      const apiPaths = {
+        tipos: `/v1/indicadores/fluxo/${perfilId}`,
+        totalP: `/v2/indicadores/default/${perfilId}`,
+        equipa: `/v2/indicadores/duracao/${perfilId}`,
+        posicaoAtual: `/v2/indicadores/posicao/atual`,
+        conclusao: `/v1/indicadores/duracao/${perfilId}`,
+        origem: `/v1/indicadores/top/criacao/${perfilId}`,
+        criacao: `/v1/indicadores/entrada/${params?.uoId}`,
+        data: `/v1/indicadores/padrao/criacao/${perfilId}`,
+        fileSystem: `/v1/indicadores/filesystem/${perfilId}`,
+        execucao: `/v1/indicadores/tempo/execucao/${perfilId}`,
+        trabalhados: `/v1/indicadores/trabalhado/${params?.estadoId}`,
+        acao: `/v2/indicadores/racio/unidirecional/anual/${perfilId}`,
+        colaboradores: `/v2/indicadores/racio/es/anual/individual/${perfilId}`,
+        entradaTrabalhado: `/v2/indicadores/racio/es/anual/default/${perfilId}`,
+        entradas: `/v1/indicadores/chegaram/${params?.destino}/${params?.destinoId}`,
+        totalTrabalhados: `/v2/indicadores/racio/unidirecional/fluxo/anual/${perfilId}`,
+        devolucoes: `/v1/indicadores/devolucao${params?.origem === 'Interna' ? '/interno' : ''}/${params?.estadoId}`,
+      };
+
+      const apiUrl = apiPaths[item] || '';
+      if (!apiUrl) return;
+
+      const response = await axios.get(`${BASEURLDD}${apiUrl}?${queryParams}`, options);
+      dispatch(
+        slice.actions.getSuccess({ item: params?.item || 'indicadores', dados: response.data?.objeto || response.data })
+      );
+    } catch (error) {
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: false }));
+    }
+  };
+}
+
+export function getEstatisticaCredito(item, params) {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    dispatch(slice.actions.resetEstCredito());
+
+    try {
+      const accessToken = await getAccessToken();
+      const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
+      const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
       switch (item) {
-        case 'totalP': {
-          const url = `${BASEURLDD}/v2/indicadores/default/${perfilId}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, item, response.data.objeto);
-          break;
-        }
-        case 'fileSystem': {
-          const url = `${BASEURLDD}/v1/indicadores/filesystem/${perfilId}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, item, response.data);
-          break;
-        }
-        case 'data': {
-          const queryParams = {
-            vista: params?.periodo?.toLowerCase(),
-            ...(params?.uo && { uoID: params?.uo }),
-            ...(params?.perfil && { perfilID1: params?.perfil }),
-          };
-          const url = `${BASEURLDD}/v1/indicadores/padrao/criacao/${perfilId}${buildQueryString(queryParams)}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data);
-          break;
-        }
-        case 'criacao': {
-          if (params?.uo) {
-            const url = `${BASEURLDD}/v1/indicadores/entrada/${params?.uo}${dateQuery}`;
-            const response = await axios.get(url, options);
-            dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          }
-          break;
-        }
-        case 'entradas': {
-          if ((params?.agrEntradas === 'Estado' && params?.estado) || params?.balcao) {
-            const key = params?.agrEntradas === 'Estado' ? 'num_estado' : 'num_balcao';
-            const idValue = params?.agrEntradas === 'Estado' ? params?.estado : params?.balcao;
-            const url = `${BASEURLDD}/v1/indicadores/chegaram/${key}/${idValue}${dateQuery}`;
-            const response = await axios.get(url, options);
-            dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          }
-          break;
-        }
-        case 'trabalhados': {
-          if (params?.estado) {
-            const url = `${BASEURLDD}/v1/indicadores/trabalhado/${params?.estado}${dateQuery}`;
-            const response = await axios.get(url, options);
-            dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          }
-          break;
-        }
-        case 'devolucoes': {
-          if (params?.estado) {
-            const interno = params?.origem === 'Interna' ? '/interno' : '';
-            const url = `${BASEURLDD}/v1/indicadores/devolucao${interno}/${params?.estado}${dateQuery}`;
-            const response = await axios.get(url, options);
-            dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          }
-          break;
-        }
-        case 'origem': {
-          const url = `${BASEURLDD}/v1/indicadores/top/criacao/${perfilId}${buildQueryString({ escopo: params?.agrupamento })}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data);
-          break;
-        }
-        case 'tipos': {
-          const queryParams = {
-            ...(params?.uo && { uoID: params?.uo }),
-            ...(params?.perfil && { perfilPID: params?.perfil }),
-            ...(params?.datai && { datai: params?.datai }),
-            ...(params?.dataf && { uoID: params?.dataf }),
-          };
-          const url = `${BASEURLDD}/v1/indicadores/fluxo/${perfilId}${buildQueryString(queryParams)}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data);
-          break;
-        }
-        case 'execucao': {
-          if (params?.estado || params?.perfil || params?.fluxo) {
-            const queryParams = {
-              ...(params?.estado && { estadoIDFilter: params?.estado }),
-              ...(params?.fluxo && { fluxoIDFilter: params?.fluxo }),
-              ...(params?.perfil && { perfilIDFilter: params?.perfil }),
-            };
-            const url = `${BASEURLDD}/v1/indicadores/tempo/execucao/${perfilId}${buildQueryString(queryParams)}`;
-            const response = await axios.get(url, options);
-            dispatchSuccess(dispatch, 'indicadores', response.data);
-          }
-          break;
-        }
-        case 'conclusao': {
-          const queryParams = {
-            de: params?.momento,
-            ...(params?.perfil && { perfilPID: params?.perfil }),
-            ...(params?.fluxo && { fluxoID: params?.fluxo }),
-            ...(params?.datai && { datai: params?.datai }),
-            ...(params?.dataf && { dataf: params?.dataf }),
-          };
-          const url = `${BASEURLDD}/v1/indicadores/duracao/${perfilId}${buildQueryString(queryParams)}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data);
-          break;
-        }
-        case 'equipa': {
-          const queryParams = {
-            ano: params?.ano,
-            ...(params?.agrEntradas === 'Balcão' && uoQuery && { uo_id: uoQuery }),
-            ...(params?.agrEntradas === 'Estado' && estadoQuery && { estado_id: estadoQuery }),
-          };
-          const url = `${BASEURLDD}/v2/indicadores/duracao/${perfilId}${buildQueryString(queryParams)}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          break;
-        }
         case 'estCreditoMensal': {
           const basePath = `${BASEURLDD}/v1/indicadores/estatistica/credito/${perfilId}`;
           const uoParam = `uoID=${params?.uoID}`;
@@ -213,85 +141,23 @@ export function getIndicadores(item, params) {
             ),
           ];
           const responses = await Promise.all(requests);
-          dispatchSuccess(dispatch, 'estCredito', {
-            entrada: responses[0].data || [],
-            aprovado: responses[1].data || [],
-            contratado: responses[2].data || [],
-            indeferido: responses[3].data || [],
-            desistido: responses[4].data || [],
+          slice.actions.getSuccess({
+            item: 'estCredito',
+            dados: {
+              entrada: responses[0].data || [],
+              aprovado: responses[1].data || [],
+              contratado: responses[2].data || [],
+              indeferido: responses[3].data || [],
+              desistido: responses[4].data || [],
+            },
           });
-          dispatch(
-            slice.actions.getResumoEstatisticaCreditoSuccess({
-              dados: responses[5].data,
-              uoId: params?.uoID,
-            })
-          );
+          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: responses[5].data, uoId: params?.uoID }));
           break;
         }
         case 'estCreditoIntervalo': {
           const url = `${BASEURLDD}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
           const response = await axios.get(url, options);
-          dispatch(
-            slice.actions.getResumoEstatisticaCreditoSuccess({
-              dados: response.data,
-              uoId: params?.uoID,
-            })
-          );
-          break;
-        }
-        case 'entradaTrabalhado': {
-          const queryParams = {
-            ano: params?.ano,
-            distinto: params?.entrada,
-            ...(uoQuery && { uo_id: params?.uo }),
-            ...(estadoQuery && { estado_id: params?.estado }),
-          };
-          const url = `${BASEURLDD}/v2/indicadores/racio/es/anual/default/${perfilId}${buildQueryString(queryParams)}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data);
-          break;
-        }
-        case 'totalTrabalhados': {
-          const queryParams = {
-            ano: params?.ano,
-            entrada: params?.entrada,
-            ...(uoQuery && { uo_id: params?.uo }),
-            ...(estadoQuery && { estado_id: params?.estado }),
-            ...(params?.perfil && { perfil_id: params?.perfil }),
-          };
-          const url = `${BASEURLDD}/v2/indicadores/racio/unidirecional/fluxo/anual/${perfilId}${buildQueryString(
-            queryParams
-          )}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          break;
-        }
-        case 'acao': {
-          const queryParams = {
-            ano: params?.ano,
-            entrada: params?.entrada,
-            ...(uoQuery && { uo_id: params?.uo }),
-            ...(estadoQuery && { estado_id: params?.estado }),
-            ...(params?.perfil && { perfil_id: params?.perfil }),
-          };
-          const url = `${BASEURLDD}/v2/indicadores/racio/unidirecional/anual/${perfilId}${buildQueryString(
-            queryParams
-          )}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
-          break;
-        }
-        case 'colaboradores': {
-          const queryParams = {
-            ano: params?.ano,
-            ...(uoQuery && { uo_id: params?.uo }),
-            ...(estadoQuery && { estado_id: params?.estado }),
-          };
-          const url = `${BASEURLDD}/v2/indicadores/racio/es/anual/individual/${perfilId}${buildQueryString(
-            queryParams
-          )}`;
-          const response = await axios.get(url, options);
-          dispatchSuccess(dispatch, 'indicadores', response.data.objeto);
+          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response.data, uoId: params?.uoID }));
           break;
         }
         default:

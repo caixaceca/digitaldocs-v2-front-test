@@ -16,10 +16,9 @@ import {
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
-import { AnexosExistente } from '../../../components/Actions';
 //
+import Outros from './Outros';
 import DadosCliente from './DadosCliente';
-import { ObsNovosAnexos } from './Outros';
 
 // ----------------------------------------------------------------------
 
@@ -47,8 +46,8 @@ export default function ProcessoExternoForm({ processo, origensList }) {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <RHFAutocompleteObj
-                  name="origem_id"
                   label="Origem"
+                  name="origem_id"
                   options={applySort(origensList, getComparator('asc', 'label'))}
                 />
               </Grid>
@@ -91,20 +90,7 @@ export default function ProcessoExternoForm({ processo, origensList }) {
         </Card>
       </Grid>
 
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Grid container spacing={3}>
-              <ObsNovosAnexos />
-              {anexosAtivos?.length > 0 && (
-                <Grid item xs={12}>
-                  <AnexosExistente anexos={anexosAtivos?.map((row) => ({ ...row, name: row?.nome }))} mt={0} anexo />
-                </Grid>
-              )}
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
+      <Outros anexos={anexosAtivos} />
     </Grid>
   );
 }

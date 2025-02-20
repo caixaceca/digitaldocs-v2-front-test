@@ -50,9 +50,9 @@ export function ProdutoForm({ onCancel }) {
       codigo: selectedItem?.codigo || '',
       rotulo: selectedItem?.rotulo || '',
       descritivo: selectedItem?.descritivo || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -64,12 +64,8 @@ export function ProdutoForm({ onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const params = useMemo(
-    () => ({ values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, afterSuccess: () => onCancel() }),
-    [values, isEdit, onCancel]
-  );
-
   const onSubmit = async () => {
+    const params = { values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, afterSuccess: () => onCancel() };
     if (isEdit) {
       dispatch(
         updateItem(
@@ -123,9 +119,9 @@ export function TipoTitularForm({ onCancel }) {
       codigo: selectedItem?.codigo || '',
       consumidor: !!selectedItem?.consumidor,
       descritivo: selectedItem?.descritivo || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -182,9 +178,9 @@ export function GarantiaForm({ onCancel }) {
       codigo: selectedItem?.codigo || '',
       designacao: selectedItem?.designacao || '',
       descritivo: selectedItem?.descritivo || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -246,11 +242,11 @@ export function FreguesiaForm({ onCancel }) {
       regiao: selectedItem?.regiao || '',
       concelho: selectedItem?.concelho || '',
       freguesia: selectedItem?.freguesia || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
       freguesia_banca: selectedItem?.freguesia_banca || '',
       naturalidade_banca: selectedItem?.naturalidade_banca || '',
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -308,9 +304,9 @@ export function MarcadorForm({ onCancel }) {
     () => ({
       sufixo: selectedItem?.sufixo || '',
       prefixo: selectedItem?.prefixo || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -435,9 +431,9 @@ export function GrupoForm({ onCancel }) {
       email: selectedItem?.email || '',
       descricao: selectedItem?.descricao || '',
       designacao: selectedItem?.designacao || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -526,9 +522,8 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
 
   const params = useMemo(
     () => ({
-      getSuccess: true,
-      item: 'selectedItem',
       afterSuccess: onCancel,
+      getSuccess: 'selectedItem',
       id: selectedItem?.action === 'add' ? grupoId : selectedItem?.id,
       msg: selectedItem?.action === 'add' ? 'Recurso atualizado' : 'Recursos adicionados',
     }),
@@ -628,9 +623,9 @@ export function RecursoForm({ onCancel }) {
       nome: selectedItem?.nome || '',
       tipo: selectedItem?.tipo || null,
       descricao: selectedItem?.descricao || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
     }),
-    [selectedItem]
+    [selectedItem, isEdit]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -756,12 +751,12 @@ export function FuncaoForm({ onCancel }) {
   const defaultValues = useMemo(
     () => ({
       role: selectedItem?._role || null,
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
       data_inicio: selectedItem?.data_inicio ? new Date(selectedItem?.data_inicio) : null,
       data_termino: selectedItem?.data_termino ? new Date(selectedItem?.data_termino) : null,
       utilizador: colaboradoresList?.find((row) => row?.id === selectedItem?.utilizador_id) || null,
     }),
-    [selectedItem, colaboradoresList]
+    [selectedItem, isEdit, colaboradoresList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -855,12 +850,12 @@ export function RepresentanteForm({ onCancel }) {
       freguesia: selectedItem?.freguesia || null,
       residencia: selectedItem?.residencia || '',
       observacao: selectedItem?.observacao || '',
-      ativo: selectedItem ? selectedItem?.ativo : true,
+      ativo: isEdit ? selectedItem?.ativo : true,
       local_emissao: selectedItem?.local_emissao || null,
       data_emissao: fillData(selectedItem?.data_emissao, null),
       utilizador: colaboradoresList?.find((row) => row?.id === selectedItem?.utilizador_id) || null,
     }),
-    [colaboradoresList, selectedItem]
+    [colaboradoresList, isEdit, selectedItem]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });

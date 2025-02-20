@@ -43,7 +43,7 @@ Anexos.propTypes = { anexos: PropTypes.array };
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { mail } = useSelector((state) => state.intranet);
   const { filePreview, isLoadingPreview, processo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = useMemo(
     () => anexos?.filter((row) => row.ativo && row?.anexo !== filePreview?.anexo),
@@ -56,11 +56,7 @@ export default function Anexos({ anexos }) {
 
   const viewAnexo = (anexo) => {
     dispatch(
-      getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', {
-        mail,
-        perfilId,
-        anexo: { ...anexo, tipo: canPreview(anexo) },
-      })
+      getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', { anexo: { ...anexo, tipo: canPreview(anexo) } })
     );
   };
 
@@ -168,11 +164,11 @@ export function AnexoItem({
       }}
     >
       <ListItemText
+        primary={anexo?.nome}
         primaryTypographyProps={{ variant: 'subtitle2' }}
         sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 }}
-        primary={`${anexo?.nome} ${preview ? '(Em pré-vizualização)' : ''}`}
         secondary={
-          <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ mt: 0.15 }} spacing={{ xs: 0.5, sm: 1.5 }}>
+          <Stack useFlexGap flexWrap="wrap" direction="row" spacing={{ xs: 0.5, sm: 1.5 }}>
             {anexo?.criador && (
               <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} baralhar />
             )}

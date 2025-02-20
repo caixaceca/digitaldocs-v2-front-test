@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
+import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useMemo, useEffect } from 'react';
 // form
@@ -8,13 +9,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
 import { LoadingButton } from '@mui/lab';
-// utils
-import { format, add } from 'date-fns';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
 // components
 import { FormProvider } from '../../../components/hook-form';
+import { shapeText, shapeDate, shapeNumber } from '../../../components/hook-form/yup-shape';
 // sections
 import ProcessoCreditoForm from './ProcessoCreditoForm';
 
@@ -25,80 +25,32 @@ ProcessoCredito.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, p
 export default function ProcessoCredito({ isEdit, processo, fluxo }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId, cc } = useSelector((state) => state.intranet);
-  const { meuAmbiente, linhas } = useSelector((state) => state.parametrizacao);
+  const { cc } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { meuAmbiente, linhas } = useSelector((state) => state.parametrizacao);
   const credito = processo?.credito || null;
 
   const formSchema = Yup.object().shape({
     linha_id: Yup.mixed().required().label('Linha'),
     segmento: Yup.string().required().label('Segmento'),
+    titular: shapeText('Proponente', '', false, 'cliente'),
     finalidade: Yup.string().required().label('Finalidade'),
     setor_atividade: Yup.string().required().label('Entidade patronal'),
     situacao_final_mes: isEdit && Yup.mixed().required().label('Situação'),
+    garantia: shapeText('Garantia', 'Contratado', '', 'situacao_final_mes'),
     data_entrada: Yup.date().typeError().required().label('Data de entrada'),
+    cliente: shapeNumber('Nº de cliente', 'Contratado', '', 'situacao_final_mes'),
+    taxa_juro: shapeNumber('Taxa de juro', 'Contratado', '', 'situacao_final_mes'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo').label(''),
     montante_solicitado: Yup.number().positive().required().label('Montante solicitado'),
-    titular: Yup.mixed().when('cliente', {
-      is: (cliente) => !cliente,
-      then: () => Yup.string().required().label('Proponente'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    data_aprovacao: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Aprovado' || sit === 'Contratado',
-      then: () => Yup.date().typeError().required().label('Data de aprovação'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    montante_aprovado: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Aprovado' || sit === 'Contratado',
-      then: () => Yup.number().positive().label('Montante aprovado'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    data_desistido: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Desistido',
-      then: () => Yup.date().typeError().required().label('Data de desistência'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    data_indeferido: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Indeferido',
-      then: () => Yup.date().typeError().required().label('Data de indeferimento'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    garantia: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.string().required().label('Garantia'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    cliente: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.number().positive().label('Nº de cliente'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    montante_contratado: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.number().positive().label('Montante contratado'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    prazo_amortizacao: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.string().required().label('Prazo de amortização'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    escalao_decisao: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.string().required('').label('Escalão de decisão'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    taxa_juro: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.number().positive().label('Taxa de juro'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    data_contratacao: Yup.mixed().when('situacao_final_mes', {
-      is: (sit) => sit === 'Contratado',
-      then: () => Yup.date().typeError().required().label('Data de contratação'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
+    data_desistido: shapeDate('Data de desistência', 'Desistido', '', 'situacao_final_mes'),
+    escalao_decisao: shapeText('Escalão de decisão', 'Contratado', '', 'situacao_final_mes'),
+    data_contratacao: shapeDate('Data de contratação', 'Contratado', '', 'situacao_final_mes'),
+    data_indeferido: shapeDate('Data de indeferimento', 'Indeferido', '', 'situacao_final_mes'),
+    prazo_amortizacao: shapeText('Prazo de amortização', 'Contratado', '', 'situacao_final_mes'),
+    data_aprovacao: shapeDate('Data de aprovação', 'Aprovado', 'Contratado', 'situacao_final_mes'),
+    montante_contratado: shapeNumber('Montante contratado', 'Contratado', '', 'situacao_final_mes'),
+    montante_aprovado: shapeNumber('Montante aprovado', 'Aprovado', 'Contratado', 'situacao_final_mes'),
   });
 
   const defaultValues = useMemo(
@@ -138,12 +90,8 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && processo) {
-      reset(defaultValues);
-    }
-    if (!isEdit) {
-      reset(defaultValues);
-    }
+    if (isEdit && processo) reset(defaultValues);
+    if (!isEdit) reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, fluxo?.id, linhas, processo]);
 
@@ -163,24 +111,16 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
       formData.append('montante_solicitado', values.montante_solicitado);
       formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
       // optional
-      if (values.obs) {
-        formData.append('obs', values.obs);
-      }
-      if (values.conta) {
-        formData.append('conta', values.conta);
-      }
-      if (values.cliente) {
-        formData.append('cliente', values.cliente);
-      }
-      if (values?.numero_proposta) {
-        formData.append('numero_proposta', values.numero_proposta);
-      }
-      if (values?.entidades?.length > 0) {
+      if (values.obs) formData.append('obs', values.obs);
+      if (values.conta) formData.append('conta', values.conta);
+      if (values.cliente) formData.append('cliente', values.cliente);
+      if (values?.numero_proposta) formData.append('numero_proposta', values.numero_proposta);
+      if (values?.entidades?.length > 0)
         formData.append(
           'entidades',
           values.entidades.map((row) => row?.numero)
         );
-      }
+
       await values?.anexos?.forEach((row) => {
         formData.append('anexos', row);
       });
@@ -229,10 +169,10 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
           formData.append('data_contratacao', '');
           formData.append('montante_contratado', '');
         }
-        dispatch(updateItem('processo', formData, { mail, perfilId, id: processo?.id, msg: 'Processo atualizado' }));
+        dispatch(updateItem('processo', formData, { mfd: true, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
         formData.append('situacao_final_mes', 'Em análise');
-        dispatch(createProcesso('interno', formData, { mail, perfilId, msg: 'Processo adicionado' }));
+        dispatch(createProcesso('interno', formData, { msg: 'Processo adicionado' }));
       }
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

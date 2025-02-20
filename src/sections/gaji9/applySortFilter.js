@@ -56,7 +56,7 @@ export function listaClausulas(clausulas, idsClausulas) {
     ?.map((row) => ({
       id: row?.id,
       numero_ordem: row?.numero_ordem,
-      label: `${row?.solta ? 'Cláusula solta' : row?.titulo} ${row?.numero_ordem ? `(ID: ${row?.id})` : ''}`,
+      label: `${row?.solta ? 'Cláusula solta' : row?.titulo} (ID: ${row?.id})`,
       // ...(extra
       //   ? {
       //       componente: row?.componente,

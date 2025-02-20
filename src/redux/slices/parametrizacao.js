@@ -62,7 +62,6 @@ const initialState = {
   motivosPendencia: [],
   motivosTransicao: [],
   colaboradoresEstado: [],
-  colaboradoresGestor: [],
 };
 
 const slice = createSlice({
@@ -70,17 +69,16 @@ const slice = createSlice({
   initialState,
   reducers: {
     getMeusAmbientesSuccess(state, action) {
-      const ambientes = applySort(action?.payload ?? [], getComparator('asc', 'nome')).map((item) => ({
+      if (action?.payload?.length === 0) return;
+      const ambientes = applySort(action?.payload, getComparator('asc', 'nome')).map((item) => ({
         ...item,
         id: item.estado_id,
       }));
+      const meuAmbiente = ambientes.find((row) => row.padrao) ?? ambientes[0];
 
       state.meusAmbientes = ambientes;
-      state.meuAmbiente = ambientes.find((row) => row.padrao) ?? ambientes[0];
-      state.meusFluxos = applySort(state.meuAmbiente?.fluxos ?? [], getComparator('asc', 'assunto')).map((item) => ({
-        ...item,
-        id: item.fluxo_id,
-      }));
+      state.meuAmbiente = meuAmbiente;
+      state.meusFluxos = meusFluxos(meuAmbiente?.fluxos ?? []);
     },
 
     getMeusAcessosSuccess(state, action) {
@@ -123,10 +121,7 @@ const slice = createSlice({
 
     changeMeuAmbiente(state, action) {
       state.meuAmbiente = action.payload;
-      state.meusFluxos = applySort(action.payload?.fluxos ?? [], getComparator('asc', 'assunto')).map((item) => ({
-        ...item,
-        id: item.fluxo_id,
-      }));
+      state.meusFluxos = meusFluxos(action.payload?.fluxos ?? []);
       state.meuFluxo = null;
     },
   },
@@ -169,9 +164,11 @@ export function getFromParametrizacao(item, params) {
         (item === 'origens' && `${BASEURLDD}/v1/origens/${perfilId}`) ||
         (item === 'acessos' && `${BASEURLDD}/v1/acessos?perfilID=${perfilId}`) ||
         (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/all/${perfilId}`) ||
+        (item === 'meusacessos' && `${BASEURLDD}/v1/acessos?perfilID=${perfilId}`) ||
+        (item === 'meusambientes' && `${BASEURLDD}/v1/fluxos/meusambientes/v2/${perfilId}`) ||
         (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes/transicao/${params?.id}`) ||
+        (item === 'colaboradoresEstado' && `${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
-        (item === 'regrasEstado' && `${BASEURLCC}/v1/suportes/regra_parecer/estado/${params?.estadoId}`) ||
         (item === 'regrasTransicao' && `${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.id}`) ||
         (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||
         (item === 'despesas' &&
@@ -194,49 +191,18 @@ export function getFromParametrizacao(item, params) {
           (item === 'motivosPendencia' && 'motivo') ||
           ((item === 'motivosTransicao' || item === 'despesas' || item === 'documentos') && 'designacao') ||
           '';
-        dispatch(
-          slice.actions.getSuccess({
-            item: params?.item || item,
-            dados: response?.data?.objeto || response?.data,
-            label,
-          })
-        );
-      }
-
-      switch (item) {
-        // ---- LISTA --------------------------------------------------------------------------------------------------
-        case 'meusacessos': {
-          const response = await axios.get(`${BASEURLDD}/v1/acessos?perfilID=${perfilId}`, options);
-          dispatch(slice.actions.getMeusAcessosSuccess(response.data));
-          break;
-        }
-        case 'meusambientes': {
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/meusambientes/v2/${perfilId}`, options);
-          dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
-
-          const estadosGestor = response.data?.objeto?.filter((item) => item?.gestor);
-          const estadosPromises = estadosGestor.map(async (row) => {
-            const estado = axios.get(`${BASEURLDD}/v1/estados/${row?.estado_id}/${perfilId}`, options);
-            return estado;
-          });
-          const estados = await Promise.all(estadosPromises);
-          const colaboradoresIds = [perfilId];
-          await estados?.forEach((row) => {
-            row?.data?.perfis?.forEach((item) => {
-              if (!colaboradoresIds?.includes(item?.perfil_id)) colaboradoresIds?.push(item?.perfil_id);
-            });
-          });
-          dispatch(slice.actions.getSuccess({ item: 'colaboradoresGestor', dados: colaboradoresIds }));
-          break;
-        }
-        case 'colaboradoresEstado': {
-          const response = await axios.get(`${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`, options);
-          dispatch(slice.actions.getSuccess({ item, dados: response.data.perfis }));
-          break;
-        }
-
-        default:
-          break;
+        if (item === 'meusacessos') dispatch(slice.actions.getMeusAcessosSuccess(response.data));
+        else if (item === 'meusambientes') dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
+        else if (item === 'colaboradoresEstado')
+          dispatch(slice.actions.getSuccess({ item, dados: response?.data?.perfis || [] }));
+        else
+          dispatch(
+            slice.actions.getSuccess({
+              item: params?.item || item,
+              dados: response?.data?.objeto || response?.data,
+              label,
+            })
+          );
       }
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -353,17 +319,9 @@ export function updateItem(item, dados, params) {
 
       if (apiUrl) {
         const response = await axios.put(apiUrl, dados, options);
-        if (item === 'fluxo' || item === 'estado') {
-          dispatch(slice.actions.getSuccess({ item, dados: response.data }));
-        } else {
-          dispatch(
-            slice.actions.updateSuccess({
-              item,
-              item1: params?.item1 || '',
-              dados: response.data?.objeto || response.data,
-            })
-          );
-        }
+        const dadosR = response.data?.objeto || response.data || null;
+        if (item === 'fluxo' || item === 'estado') dispatch(slice.actions.getSuccess({ item, dados: dadosR }));
+        else dispatch(slice.actions.updateSuccess({ item, item1: params?.item1 || '', dados: dadosR }));
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
@@ -416,3 +374,8 @@ export function deleteItem(item, params) {
     }
   };
 }
+
+// ----------------------------------------------------------------------
+
+export const meusFluxos = (fluxos) =>
+  applySort(fluxos ?? [], getComparator('asc', 'assunto')).map((item) => ({ ...item, id: item.fluxo_id }));

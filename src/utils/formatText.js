@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 // @mui
 import Typography from '@mui/material/Typography';
 // config
@@ -57,24 +58,27 @@ export function entidadesParse(entidades) {
 
 // ----------------------------------------------------------------------
 
-export function errorMsg(error) {
+export const errorMsg = (error) => {
+  const paths = [
+    'response.data.erro',
+    'response.data.error',
+    'response.data.errot',
+    'response.data.errop',
+    'response.data.mensagem',
+    'error.0.message',
+    'error.1.message',
+    'response.mensagem',
+    'response.data',
+    'mensagem',
+    '0.msg',
+    'message',
+    'error',
+  ];
+
   return (
-    error?.response?.data?.erro ||
-    error?.response?.data?.error ||
-    error?.response?.data?.errot ||
-    error?.response?.data?.errop ||
-    error?.response?.data?.mensagem ||
-    error?.error?.[0]?.message ||
-    error?.error?.[1]?.message ||
-    error?.response?.mensagem ||
-    error?.response?.data ||
-    error?.mensagem ||
-    error?.[0]?.msg ||
-    error?.message ||
-    error?.error ||
-    'Ocorreu um erro...'
+    paths.map((path) => get(error, path)).find((msg) => typeof msg === 'string' && msg.trim()) || 'Ocorreu um erro...'
   );
-}
+};
 
 // ----------------------------------------------------------------------
 
