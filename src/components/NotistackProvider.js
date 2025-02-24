@@ -1,6 +1,6 @@
+import { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useEffect, useRef } from 'react';
-import { SnackbarProvider, MaterialDesignContent, useSnackbar } from 'notistack';
+import { SnackbarProvider, MaterialDesignContent } from 'notistack';
 // @mui
 import Box from '@mui/material/Box';
 import InfoIcon from '@mui/icons-material/Info';
@@ -95,28 +95,3 @@ function SnackbarIcon({ icon, color }) {
     </Box>
   );
 }
-
-// ----------------------------------------------------------------------
-
-export function Notificacao({ done, error, afterSuccess = null }) {
-  const { enqueueSnackbar } = useSnackbar();
-
-  useEffect(() => {
-    if (done) {
-      enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      afterSuccess?.();
-    }
-
-    if (error) {
-      enqueueSnackbar(error, { variant: 'error' });
-    }
-  }, [done, error, enqueueSnackbar, afterSuccess]);
-
-  return null;
-}
-
-Notificacao.propTypes = {
-  afterSuccess: PropTypes.func,
-  done: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]),
-  error: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]),
-};

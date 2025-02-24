@@ -9,6 +9,8 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
 import { setItemValue } from '../../utils/formatObject';
+// hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, openModal, getSuccess, closeModal } from '../../redux/slices/parametrizacao';
@@ -20,7 +22,6 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
 import { SearchNotFound404 } from '../../components/table';
-import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { AddItem, UpdateItem, DefaultAction } from '../../components/Actions';
 // sections
@@ -37,7 +38,7 @@ export default function PageDetalhesFluxo() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { perfilId } = useSelector((state) => state.intranet);
-  const { fluxo, estados, done, error } = useSelector((state) => state.parametrizacao);
+  const { fluxo, estados, done } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
   const transicoes = useMemo(
     () =>
@@ -70,25 +71,25 @@ export default function PageDetalhesFluxo() {
     }
   }, [dispatch, currentTab, transicao?.id]);
 
-  const handleCloseModal = () => {
-    dispatch(closeModal());
-  };
-
   const tabsList = [
-    { value: 'Dados', component: <InfoFluxo onClose={handleCloseModal} /> },
-    { value: 'Estados', component: <TableInfoFluxo item="estados" onClose={handleCloseModal} /> },
-    { value: 'Transições', component: <TableInfoFluxo item="transicoes" onClose={handleCloseModal} /> },
-    { value: 'Regras transições', component: <TableInfoFluxo item="regrasTransicao" onClose={handleCloseModal} /> },
-    { value: 'Checklist', component: <TableInfoFluxo item="checklist" onClose={handleCloseModal} /> },
+    { value: 'Dados', component: <InfoFluxo onClose={() => dispatch(closeModal())} /> },
+    { value: 'Transições', component: <TableInfoFluxo item="transicoes" onClose={() => dispatch(closeModal())} /> },
+    { value: 'Estados', component: <TableInfoFluxo item="estados" onClose={() => dispatch(closeModal())} /> },
+    {
+      value: 'Regras transições',
+      component: <TableInfoFluxo item="regrasTransicao" onClose={() => dispatch(closeModal())} />,
+    },
+    { value: 'Checklist', component: <TableInfoFluxo item="checklist" onClose={() => dispatch(closeModal())} /> },
     {
       value: 'Notificações',
-      component: <TableInfoFluxo item="notificacoes" transicao={transicao} onClose={handleCloseModal} />,
+      component: <TableInfoFluxo item="notificacoes" transicao={transicao} onClose={() => dispatch(closeModal())} />,
     },
   ];
 
+  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+
   return (
     <Page title="Fluxo | DigitalDocs">
-      <Notificacao done={done} error={error} afterSuccess={() => handleCloseModal()} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tab="tabFluxo"
@@ -152,10 +153,7 @@ export default function PageDetalhesFluxo() {
           </Grid>
         ) : (
           <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
-            {tabsList.map((tab) => {
-              const isMatched = tab.value === currentTab;
-              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-            })}
+            <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
           </RoleBasedGuard>
         )}
       </Container>

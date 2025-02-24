@@ -13,7 +13,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
+import { getFromGaji9, getDocumento, createItem, updateItem } from '../../redux/slices/gaji9';
 // components
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
@@ -399,6 +399,40 @@ export function PublicarRevogarForm({ onCancel, action }) {
             onCancel={onCancel}
             color={action === 'Revogar' ? 'error' : 'primary'}
           />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+PreviewForm.propTypes = { id: PropTypes.number, onCancel: PropTypes.func };
+
+export function PreviewForm({ id, onCancel }) {
+  const dispatch = useDispatch();
+  const { isSaving } = useSelector((state) => state.gaji9);
+  const defaultValues = useMemo(() => ({ taxa: '', prazo: '', montante: '', isento: false }), []);
+  const methods = useForm({ defaultValues });
+  const { watch, handleSubmit } = methods;
+  const values = watch();
+
+  const onSubmit = async () => {
+    dispatch(getDocumento('minuta', { id, ...values }));
+  };
+
+  return (
+    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+      <DialogTitle sx={{ mb: 2 }}>Pré-visualizar minuta</DialogTitle>
+      <DialogContent sx={{ pt: 1 }}>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack sx={{ pt: 1 }} spacing={3}>
+            <RHFNumberField name="montante" label="Montante" />
+            <RHFNumberField name="prazo" label="Prazo" />
+            <RHFNumberField name="taxa" label="Taxa de juros negociado" />
+            <RHFSwitch name="isento" label="Isento comissão" />
+          </Stack>
+          <DialogButons label="Pré-visualizar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>

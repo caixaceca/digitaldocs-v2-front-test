@@ -74,11 +74,7 @@ export function TotalProcessos() {
         changeTab={handleChangeTab}
         title={`Total de processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
       />
-
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -105,11 +101,7 @@ export function Duracao() {
         changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tadDuracao')}
         title={`Duração dos processos - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
       />
-
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -161,11 +153,7 @@ export function SGQ() {
         title={`SGQ - ${tabsList?.find((row) => row?.value === currentTab)?.label}`}
         changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabSgq')}
       />
-
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }

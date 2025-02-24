@@ -18,11 +18,11 @@ import { getFromParametrizacao, changeMeuAmbiente, getSuccess } from '../../redu
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
+import { useNotificacao } from '../../hooks/useNotificacao';
 // components
 import Page from '../../components/Page';
 import { SearchNotFound } from '../../components/table';
 import { DialogConfirmar } from '../../components/CustomDialog';
-import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import { ProcessoInterno, ProcessoExterno, ProcessoCredito } from '../../sections/processo/form';
@@ -40,7 +40,7 @@ export default function PageNovoEditarProcesso() {
   const isEdit = pathname.includes('edit');
   const { perfilId, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, meusFluxos, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
-  const { processo, isLoadingP, selectedAnexoId, isSaving, done, error } = useSelector((state) => state.digitaldocs);
+  const { processo, isLoadingP, selectedAnexoId, isSaving, done } = useSelector((state) => state.digitaldocs);
   const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   useEffect(() => {
@@ -80,10 +80,11 @@ export default function PageNovoEditarProcesso() {
     dispatch(updateItem('anexo', null, params));
   };
 
+  useNotificacao({ done, afterSuccess: () => navigateToProcess() });
+
   return (
     <Page title={!isEdit ? 'Novo processo | DigitalDocs' : 'Editar processo | DigitalDocs'}>
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Notificacao done={done} error={error} afterSuccess={navigateToProcess} />
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
           heading={!isEdit ? 'Novo processo' : 'Editar processo'}

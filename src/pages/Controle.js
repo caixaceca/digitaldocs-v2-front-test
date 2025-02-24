@@ -22,18 +22,6 @@ export default function Controle() {
   const { cc } = useSelector((state) => state.intranet);
   const { isAdmin, isAuditoria, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
 
-  useEffect(() => {
-    if (cc?.uo?.id && !localStorage.getItem('uoSearch')) {
-      localStorage.setItem('uoSearch', cc?.uo?.id);
-    }
-  }, [cc?.uo?.id]);
-
-  useEffect(() => {
-    if (cc?.perfil?.displayName && !localStorage.getItem('colaboradorControle')) {
-      localStorage.setItem('colaboradorControle', cc?.perfil?.displayName);
-    }
-  }, [cc?.perfil?.displayName]);
-
   const tabsList = useMemo(
     () =>
       [
@@ -45,11 +33,7 @@ export default function Controle() {
             ]
           : []),
         { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
-        ...(isAdmin ||
-        isAuditoria ||
-        cc?.uo?.tipo === 'Agências' ||
-        cc?.uo?.label === 'DOP-CE' ||
-        temAcesso(['emissao-cartoes-100'], meusacessos)
+        ...(isAdmin || isAuditoria || cc?.uo?.label === 'DOP-CE' || cc?.uo?.tipo === 'Agências'
           ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
         ...(isAdmin || isAuditoria || temAcesso(['con-100'], meusacessos)
@@ -67,9 +51,8 @@ export default function Controle() {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabControle');
-    }
   }, [tabsList, currentTab]);
 
   return (
@@ -82,10 +65,7 @@ export default function Controle() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        {tabsList.map((tab) => {
-          const isMatched = tab.value === currentTab;
-          return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-        })}
+        <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
       </Container>
     </Page>
   );

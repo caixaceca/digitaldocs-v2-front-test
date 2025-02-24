@@ -6,6 +6,8 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
+// hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getSuccess, createItem, openModal, closeModal } from '../../redux/slices/gaji9';
@@ -19,7 +21,6 @@ import TabsWrapper from '../../components/TabsWrapper';
 import { DefaultAction } from '../../components/Actions';
 import { SearchNotFound404 } from '../../components/table';
 import DialogPreviewDoc from '../../components/CustomDialog';
-import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
@@ -34,8 +35,9 @@ export default function PageCreditoDetalhes() {
   const { themeStretch } = useSettings();
   const [form, setSetForm] = useState('');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabInfoCredito') || 'Dados');
-  const { credito, isLoading, isOpenModal, isLoadingDoc, previewFile, utilizador, selectedItem, done, error } =
-    useSelector((state) => state.gaji9);
+  const { credito, isLoading, isOpenModal, isLoadingDoc, previewFile, utilizador, selectedItem, done } = useSelector(
+    (state) => state.gaji9
+  );
 
   useEffect(() => {
     if (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO']))
@@ -61,9 +63,10 @@ export default function PageCreditoDetalhes() {
     dispatch(closeModal());
   };
 
+  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+
   return (
     <Page title="Estado | DigitalDocs">
-      <Notificacao done={done} error={error} afterSuccess={() => dispatch(closeModal())} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tabsList={tabsList}
@@ -112,10 +115,7 @@ export default function PageCreditoDetalhes() {
             <SearchNotFound404 message="Crédito não encontrado..." />
           ) : (
             <>
-              {tabsList.map((tab) => {
-                const isMatched = tab.value === currentTab;
-                return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-              })}
+              <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
 
               {(isLoadingDoc || previewFile) && (
                 <DialogPreviewDoc

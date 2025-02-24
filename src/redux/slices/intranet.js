@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 //
 import { callMsGraph } from '../../graph';
@@ -85,6 +86,25 @@ export async function getAccessToken() {
     await msalInstance.acquireTokenRedirect(tokenRequest);
     throw new Error('Redirecionado para login.');
   }
+}
+
+// ----------------------------------------------------------------------
+
+export function getInfoIntranet(id) {
+  return async (dispatch) => {
+    dispatch(getFromIntranet('disposicao', { id, data: format(new Date(), 'yyyy-MM-dd') }));
+    dispatch(getFromIntranet('frase'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromIntranet('colaboradores'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromIntranet('links', { label: 'nome' }));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromIntranet('uos', { label: 'label' }));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromIntranet('certificacoes'));
+  };
 }
 
 // ----------------------------------------------------------------------

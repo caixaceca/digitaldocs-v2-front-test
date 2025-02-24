@@ -21,7 +21,7 @@ import { UosAcesso, estadosAcesso, ColaboradoresAcesso } from '../../utils/valid
 import useToggle from '../../hooks/useToggle';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/indicadores';
+import { getSuccess, getIndicadores } from '../../redux/slices/indicadores';
 // components
 import Panel from '../../components/Panel';
 import { DTFechar } from '../../components/Actions';
@@ -29,7 +29,13 @@ import { FilterSwitch } from '../../components/hook-form';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+const vistas = ['Mensal', 'Anual'];
+const origens = ['Balcão', 'Estado'];
+const tops = ['Todos', 'Top 5', 'Top 10', 'Top 20'];
+const agrupamentos = ['Unidade orgânica', 'Colaborador'];
+const momentos = ['Criação no sistema', 'Data de entrada'];
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 Cabecalho.propTypes = {
   tab: PropTypes.string,
@@ -141,62 +147,62 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   }, [estadosList, estado]);
 
   useEffect(() => {
-    if (tab) {
-      const uoId = uo?.id || '';
-      const fluxoId = fluxo?.id || '';
-      const perfilId = perfil?.id || '';
-      const estadoId = estado?.id || '';
-      const porEstado = agrEntradas === 'Estado';
-      const validarDistinto = tab === 'entradaTrabalhado';
-      const destinoId = porEstado ? estado?.id : balcao?.id;
-      const destino = porEstado ? 'num_estado' : 'num_balcao';
-      const de = momento === 'Criação no sistema' ? 'c' : 'e';
-      const validarEntrada = tab === 'totalTrabalhados' || tab === 'acao';
+    dispatch(getSuccess({ item: 'indicadores', dados: [] }));
 
-      const fluxoKey = (tab === 'execucao' && 'fluxoIDFilter') || 'fluxoID';
-      const uoKey = ((tab === 'data' || tab === 'tipos') && 'uoID') || 'uo_id';
-      const estadoKey = (tab === 'execucao' && 'estadoIDFilter') || 'estado_id';
-      const perfilKey = (tab === 'execucao' && 'perfilIDFilter') || (tab === 'data' && 'perfilID1') || 'perfilPID';
+    const uoId = uo?.id || '';
+    const fluxoId = fluxo?.id || '';
+    const perfilId = perfil?.id || '';
+    const estadoId = estado?.id || '';
+    const porEstado = agrEntradas === 'Estado';
+    const validarDistinto = tab === 'entradaTrabalhado';
+    const destinoId = porEstado ? estado?.id : balcao?.id;
+    const destino = porEstado ? 'num_estado' : 'num_balcao';
+    const de = momento === 'Criação no sistema' ? 'c' : 'e';
+    const validarEntrada = tab === 'totalTrabalhados' || tab === 'acao';
 
-      const datas = {
-        dataFinal: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
-        dataInicial: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
-      };
+    const fluxoKey = (tab === 'execucao' && 'fluxoIDFilter') || 'fluxoID';
+    const uoKey = ((tab === 'data' || tab === 'tipos') && 'uoID') || 'uo_id';
+    const estadoKey = (tab === 'execucao' && 'estadoIDFilter') || 'estado_id';
+    const perfilKey = (tab === 'execucao' && 'perfilIDFilter') || (tab === 'data' && 'perfilID1') || 'perfilPID';
 
-      if (tab === 'data') dispatch(getIndicadores(tab, { vista, uoId, uoKey, perfilId, perfilKey }));
-      if (tab === 'criacao' && uo?.id) dispatch(getIndicadores(tab, { uoId, ...datas }));
-      if (tab === 'trabalhados' && estadoId) dispatch(getIndicadores(tab, { estadoId, ...datas }));
-      if (tab === 'devolucoes' && estadoId) dispatch(getIndicadores(tab, { estadoId, origem, ...datas }));
-      if (tab === 'origem') dispatch(getIndicadores(tab, { escopo: agrupamento === 'Colaborador' ? 'perfil' : 'uo' }));
-      if (tab === 'tipos') dispatch(getIndicadores(tab, { uoId, uoKey, perfilId, perfilKey, ...datas }));
-      if (tab === 'conclusao') dispatch(getIndicadores(tab, { de, perfilId, perfilKey, fluxoId, fluxoKey, ...datas }));
-      if (tab === 'entradas' && ((porEstado && estadoId) || balcao?.id))
-        dispatch(getIndicadores(tab, { destino, destinoId, ...datas }));
-      if (tab === 'execucao' && (perfilId || fluxoId || estadoId))
-        dispatch(getIndicadores(tab, { perfilId, perfilKey, fluxoId, fluxoKey, estadoId, estadoKey }));
-      if (
-        (tab === 'acao' ||
-          tab === 'equipa' ||
-          tab === 'colaboradores' ||
-          tab === 'totalTrabalhados' ||
-          tab === 'entradaTrabalhado') &&
-        ((porEstado && estadoId) || (!porEstado && uoId)) &&
-        dataValido(ano)
-      )
-        dispatch(
-          getIndicadores(tab, {
-            uoKey,
-            perfilKey,
-            estadoKey,
-            ano: format(ano, 'yyyy'),
-            uoId: !porEstado && uoId ? uoId : '',
-            estadoId: porEstado && estadoId ? estadoId : '',
-            perfilId: validarEntrada && perfilId ? perfilId : '',
-            entrada: (validarEntrada && entrada && 'true') || (validarEntrada && !entrada && 'false') || '',
-            distinto: (validarDistinto && entrada && 'true') || (validarDistinto && !entrada && 'false') || '',
-          })
-        );
-    }
+    const datas = {
+      dataFinal: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+      dataInicial: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+    };
+
+    if (tab === 'data') dispatch(getIndicadores(tab, { vista, uoId, uoKey, perfilId, perfilKey }));
+    if (tab === 'criacao' && uo?.id) dispatch(getIndicadores(tab, { uoId, ...datas }));
+    if (tab === 'trabalhados' && estadoId) dispatch(getIndicadores(tab, { estadoId, ...datas }));
+    if (tab === 'devolucoes' && estadoId) dispatch(getIndicadores(tab, { estadoId, origem, ...datas }));
+    if (tab === 'origem') dispatch(getIndicadores(tab, { escopo: agrupamento === 'Colaborador' ? 'perfil' : 'uo' }));
+    if (tab === 'tipos') dispatch(getIndicadores(tab, { uoId, uoKey, perfilId, perfilKey, ...datas }));
+    if (tab === 'conclusao') dispatch(getIndicadores(tab, { de, perfilId, perfilKey, fluxoId, fluxoKey, ...datas }));
+    if (tab === 'entradas' && ((porEstado && estadoId) || (!porEstado && balcao?.id)))
+      dispatch(getIndicadores(tab, { destino, destinoId, ...datas }));
+    if (tab === 'execucao' && (perfilId || fluxoId || estadoId))
+      dispatch(getIndicadores(tab, { perfilId, perfilKey, fluxoId, fluxoKey, estadoId, estadoKey }));
+    if (
+      (tab === 'acao' ||
+        tab === 'equipa' ||
+        tab === 'colaboradores' ||
+        tab === 'totalTrabalhados' ||
+        tab === 'entradaTrabalhado') &&
+      ((porEstado && estadoId) || (!porEstado && uoId)) &&
+      dataValido(ano)
+    )
+      dispatch(
+        getIndicadores(tab, {
+          uoKey,
+          perfilKey,
+          estadoKey,
+          ano: format(ano, 'yyyy'),
+          uoId: !porEstado && uoId ? uoId : '',
+          estadoId: porEstado && estadoId ? estadoId : '',
+          perfilId: validarEntrada && perfilId ? perfilId : '',
+          entrada: (validarEntrada && entrada && 'true') || (validarEntrada && !entrada && 'false') || '',
+          distinto: (validarDistinto && entrada && 'true') || (validarDistinto && !entrada && 'false') || '',
+        })
+      );
   }, [
     tab,
     ano,
@@ -240,6 +246,12 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
     tab === 'devolucoes' ||
     tab === 'trabalhados' ||
     tab === 'conclusao';
+  const temAno =
+    tab === 'acao' ||
+    tab === 'equipa' ||
+    tab === 'colaboradores' ||
+    tab === 'totalTrabalhados' ||
+    tab === 'entradaTrabalhado';
 
   return (
     <>
@@ -267,23 +279,9 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
             </>
           )}
           {tab === 'data' && vista && <Panel label="Vista" value={vista} />}
-          {(tab === 'acao' ||
-            tab === 'equipa' ||
-            tab === 'colaboradores' ||
-            tab === 'totalTrabalhados' ||
-            tab === 'entradaTrabalhado') &&
-            ano &&
-            dataValido(ano) && <Panel label="Ano" value={format(ano, 'yyyy')} />}
+          {temAno && ano && dataValido(ano) && <Panel label="Ano" value={format(ano, 'yyyy')} />}
 
-          {(tab === 'data' ||
-            tab === 'tipos' ||
-            tab === 'criacao' ||
-            ((tab === 'acao' ||
-              tab === 'equipa' ||
-              tab === 'entradaTrabalhado' ||
-              tab === 'totalTrabalhados' ||
-              tab === 'colaboradores') &&
-              agrEntradas === 'Balcão')) &&
+          {(tab === 'data' || tab === 'tipos' || tab === 'criacao' || (temAno && agrEntradas === 'Balcão')) &&
             uo?.label && <Panel label="Balcão/U.O" value={uo?.label} />}
           {tab === 'entradas' && balcao?.label && agrEntradas === 'Balcão' && (
             <Panel label="Balcão" value={balcao?.label} />
@@ -319,56 +317,21 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
                 <FilterRG localS="origem" value={origem} setValue={setOrigem} options={['Interna', 'Externa']} />
               )}
               {tab === 'conclusao' && (
-                <FilterRG
-                  localS="momento"
-                  value={momento}
-                  setValue={setMomento}
-                  options={['Criação no sistema', 'Data de entrada']}
-                />
+                <FilterRG value={momento} localS="momento" setValue={setMomento} options={momentos} />
               )}
-              {(tab === 'acao' ||
-                tab === 'equipa' ||
-                tab === 'entradas' ||
-                tab === 'colaboradores' ||
-                tab === 'totalTrabalhados' ||
-                tab === 'entradaTrabalhado') && (
-                <FilterRG
-                  localS="agrEntradas"
-                  value={agrEntradas}
-                  setValue={setAgrEntradas}
-                  options={['Balcão', 'Estado']}
-                />
+              {(temAno || tab === 'entradas') && (
+                <FilterRG localS="agrEntradas" value={agrEntradas} setValue={setAgrEntradas} options={origens} />
               )}
               {tab === 'origem' && (
                 <>
-                  <FilterRG
-                    localS="agrupamento"
-                    value={agrupamento}
-                    setValue={setAgrupamento}
-                    options={['Unidade orgânica', 'Colaborador']}
-                  />
-                  <FilterRG
-                    localS="top"
-                    value={top}
-                    setValue={setTop}
-                    options={['Todos', 'Top 5', 'Top 10', 'Top 20']}
-                  />
+                  <FilterRG localS="agrupamento" value={agrupamento} setValue={setAgrupamento} options={agrupamentos} />
+                  <FilterRG localS="top" value={top} setValue={setTop} options={tops} />
                 </>
               )}
               {tab === 'data' && (
-                <FilterRG
-                  value={vista}
-                  label="Vista"
-                  localS="vista"
-                  setValue={setVista}
-                  options={['Mensal', 'Anual']}
-                />
+                <FilterRG value={vista} label="Vista" localS="vista" setValue={setVista} options={vistas} />
               )}
-              {(tab === 'acao' ||
-                tab === 'equipa' ||
-                tab === 'colaboradores' ||
-                tab === 'totalTrabalhados' ||
-                tab === 'entradaTrabalhado') && (
+              {temAno && (
                 <DatePicker
                   value={ano}
                   label="Ano"
@@ -377,15 +340,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
                   onChange={(newValue) => setDataUtil(newValue, setAno, 'anoIndic', null, '', null)}
                 />
               )}
-              {(tab === 'data' ||
-                tab === 'tipos' ||
-                tab === 'criacao' ||
-                ((tab === 'acao' ||
-                  tab === 'equipa' ||
-                  tab === 'colaboradores' ||
-                  tab === 'totalTrabalhados' ||
-                  tab === 'entradaTrabalhado') &&
-                  agrEntradas === 'Balcão')) && (
+              {(tab === 'data' || tab === 'tipos' || tab === 'criacao' || (temAno && agrEntradas === 'Balcão')) && (
                 <FilterAutocomplete
                   value={uo}
                   setValue={setUo}
@@ -424,9 +379,9 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
               {(tab === 'conclusao' || tab === 'execucao') && (
                 <FilterAutocomplete
                   value={fluxo}
+                  label="Assunto"
                   setValue={setFluxo}
                   options={fluxosList}
-                  label="Assunto"
                   disableClearable={tab === 'execucao' && !perfil && !estado}
                 />
               )}

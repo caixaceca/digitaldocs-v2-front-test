@@ -8,16 +8,15 @@ import { setItemValue } from '../../utils/formatObject';
 import useSettings from '../../hooks/useSettings';
 // hooks
 import useModal from '../../hooks/useModal';
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useSelector } from '../../redux/store';
 import { closeModal } from '../../redux/slices/parametrizacao';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
-import { Notificacao } from '../../components/NotistackProvider';
 // sections
 import Acessos from '../../sections/parametrizacao/Acessos';
-// import ParametrizacaoItem from '../../sections/parametrizacao/ParametrizacaoItem';
 import TabParametrizacao from '../../sections/parametrizacao/TabParametrizacao';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -27,7 +26,7 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 export default function PageParametrizacao() {
   const { themeStretch } = useSettings();
   const { handleCloseModal } = useModal(closeModal());
-  const { done, error, isAdmin } = useSelector((state) => state.parametrizacao);
+  const { done, isAdmin } = useSelector((state) => state.parametrizacao);
 
   const tabsList = useMemo(
     () =>
@@ -57,9 +56,10 @@ export default function PageParametrizacao() {
     }
   }, [tabsList, currentTab]);
 
+  useNotificacao({ done, afterSuccess: () => handleCloseModal() });
+
   return (
     <Page title="Parametrização | DigitalDocs">
-      <Notificacao done={done} error={error} afterSuccess={handleCloseModal} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tab="tabParams"
@@ -68,10 +68,7 @@ export default function PageParametrizacao() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        {tabsList?.map((tab) => {
-          const isMatched = tab?.value === currentTab;
-          return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-        })}
+        <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         {tabsList?.length === 0 && <RoleBasedGuard hasContent roles={['XXXXXX']} />}
       </Container>
     </Page>

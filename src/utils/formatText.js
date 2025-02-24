@@ -27,9 +27,8 @@ export function newLineText(text) {
 // ----------------------------------------------------------------------
 
 export function baralharString(str) {
-  if (!str || ambiente === 'producao') {
-    return str;
-  }
+  if (!str || ambiente === 'producao') return str;
+
   return str;
 
   // if (foto) {
@@ -93,11 +92,9 @@ export function substituirTexto(string, parametros, valores) {
 
 export function valorPorExtenso(valor) {
   let _valor = '';
-  if (valor > 1999 || valor < 1000) {
-    _valor = numero.porExtenso(valor, numero.estilo.monetario);
-  } else if (valor === 1000) {
-    _valor = 'mil escudos';
-  } else if (
+  if (valor > 1999 || valor < 1000) _valor = numero.porExtenso(valor, numero.estilo.monetario);
+  else if (valor === 1000) _valor = 'mil escudos';
+  else if (
     (valor > 1000 && valor < 1101) ||
     valor === 1100 ||
     valor === 1200 ||
@@ -130,20 +127,12 @@ export function contaCliEnt(dados) {
 // ----------------------------------------------------------------------
 
 export function nomeacaoBySexo(nomeacao, sexo) {
-  if (nomeacao === 'Diretor' && sexo === 'Feminino') {
-    nomeacao = 'Diretora';
-  } else if (nomeacao === 'Coordenador de Gabinete' && sexo === 'Feminino') {
-    nomeacao = 'Coordenadora de Gabinete';
-  } else if (nomeacao === 'Coordenador de Serviço' && sexo === 'Feminino') {
-    nomeacao = 'Coordenadora de Serviço';
-  } else if (nomeacao === 'Coordenador Adjunto' && sexo === 'Feminino') {
-    nomeacao = 'Coordenador Adjunta';
-  } else if (nomeacao === 'Assessor' && sexo === 'Feminino') {
-    nomeacao = 'Assessora';
-  } else if (nomeacao === 'Coordenador Gabinete') {
-    nomeacao = 'Coordenador de Gabinete';
-  }
-
+  if (nomeacao === 'Diretor' && sexo === 'Feminino') nomeacao = 'Diretora';
+  else if (nomeacao === 'Coordenador de Gabinete' && sexo === 'Feminino') nomeacao = 'Coordenadora de Gabinete';
+  else if (nomeacao === 'Coordenador de Serviço' && sexo === 'Feminino') nomeacao = 'Coordenadora de Serviço';
+  else if (nomeacao === 'Coordenador Adjunto' && sexo === 'Feminino') nomeacao = 'Coordenador Adjunta';
+  else if (nomeacao === 'Assessor' && sexo === 'Feminino') nomeacao = 'Assessora';
+  else if (nomeacao === 'Coordenador Gabinete') nomeacao = 'Coordenador de Gabinete';
   return nomeacao;
 }
 

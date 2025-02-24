@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD, BASEURLCC } from '../../utils/axios';
+import { BASEURLDD } from '../../utils/axios';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 //
@@ -135,6 +135,22 @@ export const { openModal, getSuccess, closeModal, changeMeuAmbiente } = slice.ac
 
 // ----------------------------------------------------------------------
 
+export function geParamsUtil() {
+  return async (dispatch) => {
+    dispatch(getFromParametrizacao('meusambientes'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromParametrizacao('meusacessos'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromParametrizacao('fluxos'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromParametrizacao('estados'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromParametrizacao('origens'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    dispatch(getFromParametrizacao('motivosPendencia'));
+  };
+}
+
 export function getFromParametrizacao(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
@@ -146,45 +162,42 @@ export function getFromParametrizacao(item, params) {
 
       const apiUrl =
         // DETALHES
-        (item === 'fluxo' && `${BASEURLDD}/v1/fluxos/${params?.id}/${perfilId}`) ||
-        (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`) ||
-        (item === 'origem' && `${BASEURLDD}/v1/origens/${params?.id}/${perfilId}`) ||
-        (item === 'acesso' && `${BASEURLDD}/v1/acessos/${perfilId}/${params?.id}`) ||
-        (item === 'documento' && `${BASEURLDD}/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'motivoTransicao' && `${BASEURLDD}/v1/motivos_transicoes/detalhe/${perfilId}?id=${params?.id}`) ||
-        (item === 'despesa' && `${BASEURLDD}/v1/despesas/tipos/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'grantia' &&
-          `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
+        (item === 'fluxo' && `/v1/fluxos/${params?.id}/${perfilId}`) ||
+        (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
+        (item === 'origem' && `/v1/origens/${params?.id}/${perfilId}`) ||
+        (item === 'acesso' && `/v1/acessos/${perfilId}/${params?.id}`) ||
+        (item === 'documento' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+        (item === 'motivoTransicao' && `/v1/motivos_transicoes/detalhe/${perfilId}?id=${params?.id}`) ||
+        (item === 'despesa' && `/v1/despesas/tipos/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+        (item === 'grantia' && `/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
         (item === 'checklistitem' &&
-          `${BASEURLDD}/v1/tipos_documentos/checklist/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+          `/v1/tipos_documentos/checklist/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         // LISTA
-        (item === 'linhas' && `${BASEURLDD}/v1/linhas/${perfilId}`) ||
-        (item === 'fluxos' && `${BASEURLDD}/v1/fluxos/${perfilId}`) ||
-        (item === 'estados' && `${BASEURLDD}/v1/estados/${perfilId}`) ||
-        (item === 'origens' && `${BASEURLDD}/v1/origens/${perfilId}`) ||
-        (item === 'acessos' && `${BASEURLDD}/v1/acessos?perfilID=${perfilId}`) ||
-        (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/all/${perfilId}`) ||
-        (item === 'meusacessos' && `${BASEURLDD}/v1/acessos?perfilID=${perfilId}`) ||
-        (item === 'meusambientes' && `${BASEURLDD}/v1/fluxos/meusambientes/v2/${perfilId}`) ||
-        (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes/transicao/${params?.id}`) ||
-        (item === 'colaboradoresEstado' && `${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`) ||
-        (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
-        (item === 'regrasTransicao' && `${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.id}`) ||
-        (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||
-        (item === 'despesas' &&
-          `${BASEURLDD}/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
-        (item === 'documentos' &&
-          `${BASEURLDD}/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
+        (item === 'linhas' && `/v1/linhas/${perfilId}`) ||
+        (item === 'fluxos' && `/v1/fluxos/${perfilId}`) ||
+        (item === 'estados' && `/v1/estados/${perfilId}`) ||
+        (item === 'origens' && `/v1/origens/${perfilId}`) ||
+        (item === 'acessos' && `/v1/acessos?perfilID=${perfilId}`) ||
+        (item === 'motivosPendencia' && `/v1/motivos/all/${perfilId}`) ||
+        (item === 'meusacessos' && `/v1/acessos?perfilID=${perfilId}`) ||
+        (item === 'meusambientes' && `/v1/fluxos/meusambientes/v2/${perfilId}`) ||
+        (item === 'notificacoes' && `/v1/notificacoes/transicao/${params?.id}`) ||
+        (item === 'colaboradoresEstado' && `/v1/estados/${params?.id}/${perfilId}`) ||
+        (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
+        (item === 'regrasTransicao' && `/v1/suportes/regra_parecer/transicao/${params?.id}`) ||
+        (item === 'estadosPerfil' && `/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||
+        (item === 'despesas' && `/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
+        (item === 'documentos' && `/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'garantias' &&
-          `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
+          `/v1/tipos_garantias/tipo_garantia/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'motivosTransicao' &&
           !!params?.fluxoId &&
-          `${BASEURLDD}/v1/motivos_transicoes/lista/${perfilId}?fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
+          `/v1/motivos_transicoes/lista/${perfilId}?fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
         (item === 'checklist' &&
-          `${BASEURLDD}/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
+          `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
         '';
       if (apiUrl) {
-        const response = await axios.get(apiUrl, options);
+        const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
         const label =
           (item === 'estados' && 'nome') ||
           (item === 'fluxos' && 'assunto') ||
@@ -224,33 +237,32 @@ export function createItem(item, dados, params) {
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: false });
 
       const apiUrl =
-        (item === 'fluxo' && `${BASEURLDD}/v1/fluxos`) ||
-        (item === 'linhas' && `${BASEURLDD}/v1/linhas`) ||
-        (item === 'estado' && `${BASEURLDD}/v1/estados`) ||
-        (item === 'acessos' && `${BASEURLDD}/v1/acessos`) ||
-        (item === 'origens' && `${BASEURLDD}/v1/origens`) ||
-        (item === 'acessos' && `${BASEURLDD}/v1/acessos`) ||
-        (item === 'clonar fluxo' && `${BASEURLDD}/v1/fluxos`) ||
-        (item === 'transicoes' && `${BASEURLDD}/v1/transicoes`) ||
-        (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes`) ||
-        (item === 'perfisEstado' && `${BASEURLDD}/v1/estados/asscc/perfis`) ||
-        (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil`) ||
-        (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}`) ||
-        (item === 'motivosTransicao' && `${BASEURLDD}/v1/motivos_transicoes/${perfilId}`) ||
-        (item === 'despesas' && `${BASEURLDD}/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
-        (item === 'regrasEstado' && `${BASEURLCC}/v1/suportes/regra_parecer/estado/default`) ||
-        (item === 'documentos' && `${BASEURLDD}/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
-        (item === 'destinatario' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
-        (item === 'checklist' && `${BASEURLDD}/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
-        (item === 'garantias' && `${BASEURLDD}/v1/tipos_garantias/tipo_garantia?perfil_cc_id=${perfilId}`) ||
-        (item === 'regra estado destribuido' &&
-          `${BASEURLCC}/v1/suportes/regra_parecer/estado/coru/${params?.estadoId}`) ||
+        (item === 'fluxo' && `/v1/fluxos`) ||
+        (item === 'linhas' && `/v1/linhas`) ||
+        (item === 'estado' && `/v1/estados`) ||
+        (item === 'acessos' && `/v1/acessos`) ||
+        (item === 'origens' && `/v1/origens`) ||
+        (item === 'acessos' && `/v1/acessos`) ||
+        (item === 'clonar fluxo' && `/v1/fluxos`) ||
+        (item === 'transicoes' && `/v1/transicoes`) ||
+        (item === 'notificacoes' && `/v1/notificacoes`) ||
+        (item === 'perfisEstado' && `/v1/estados/asscc/perfis`) ||
+        (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
+        (item === 'motivosPendencia' && `/v1/motivos/${perfilId}`) ||
+        (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}`) ||
+        (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
+        (item === 'regrasEstado' && `/v1/suportes/regra_parecer/estado/default`) ||
+        (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
+        (item === 'destinatario' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
+        (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
+        (item === 'garantias' && `/v1/tipos_garantias/tipo_garantia?perfil_cc_id=${perfilId}`) ||
+        (item === 'regra estado destribuido' && `/v1/suportes/regra_parecer/estado/coru/${params?.estadoId}`) ||
         (item === 'regrasTransicao' &&
-          `${BASEURLCC}/v1/suportes/regra_parecer/transicao/${params?.estadoId}/${params?.transicaoId}`) ||
+          `/v1/suportes/regra_parecer/transicao/${params?.estadoId}/${params?.transicaoId}`) ||
         '';
 
       if (apiUrl) {
-        const response = await axios.post(apiUrl, dados, options);
+        const response = await axios.post(`${BASEURLDD}${apiUrl}`, dados, options);
         if (item === 'clonar fluxo') {
           if (params?.transicoes?.length > 0)
             await axios.post(
@@ -267,6 +279,8 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
         } else if (item === 'fluxo' || item === 'estado') {
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
+        } else if (item === 'acessos') {
+          dispatch(slice.actions.createSuccess({ item, dados: response.data }));
         } else if (item !== 'regra estado destribuido') {
           dispatch(
             slice.actions.createSuccess({
@@ -298,28 +312,26 @@ export function updateItem(item, dados, params) {
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: false });
 
       const apiUrl =
-        (item === 'fluxo' && `${BASEURLDD}/v1/fluxos/${params?.id}`) ||
-        (item === 'linhas' && `${BASEURLDD}/v1/linhas/${params?.id}`) ||
-        (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}`) ||
-        (item === 'acessos' && `${BASEURLDD}/v1/acessos/${params?.id}`) ||
-        (item === 'origens' && `${BASEURLDD}/v1/origens/${params?.id}`) ||
-        (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil`) ||
-        (item === 'transicoes' && `${BASEURLDD}/v1/transicoes/${params?.id}`) ||
-        (item === 'notificacoes' && `${BASEURLDD}/v1/notificacoes/${params?.id}`) ||
-        (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
-        (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
-        (item === 'motivosTransicao' && `${BASEURLDD}/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
-        (item === 'despesas' && `${BASEURLDD}/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'documentos' && `${BASEURLDD}/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'garantias' &&
-          `${BASEURLDD}/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
-        (item === 'checklist' &&
-          `${BASEURLDD}/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+        (item === 'fluxo' && `/v1/fluxos/${params?.id}`) ||
+        (item === 'linhas' && `/v1/linhas/${params?.id}`) ||
+        (item === 'estado' && `/v1/estados/${params?.id}`) ||
+        (item === 'acessos' && `/v1/acessos/${params?.id}`) ||
+        (item === 'origens' && `/v1/origens/${params?.id}`) ||
+        (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
+        (item === 'transicoes' && `/v1/transicoes/${params?.id}`) ||
+        (item === 'notificacoes' && `/v1/notificacoes/${params?.id}`) ||
+        (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
+        (item === 'motivosPendencia' && `/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
+        (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
+        (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+        (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+        (item === 'garantias' && `/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
+        (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         '';
 
       if (apiUrl) {
-        const response = await axios.put(apiUrl, dados, options);
-        const dadosR = response.data?.objeto || response.data || null;
+        const response = await axios.put(`${BASEURLDD}${apiUrl}`, dados, options);
+        const dadosR = (item === 'acessos' && response.data) || response.data?.objeto || response.data || null;
         if (item === 'fluxo' || item === 'estado') dispatch(slice.actions.getSuccess({ item, dados: dadosR }));
         else dispatch(slice.actions.updateSuccess({ item, item1: params?.item1 || '', dados: dadosR }));
       }
@@ -344,18 +356,18 @@ export function deleteItem(item, params) {
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
       const apiUrl =
-        (item === 'estado' && `${BASEURLDD}/v1/estados/${params?.id}/${perfilId}`) ||
-        (item === 'acessos' && `${BASEURLDD}/v1/acessos/${perfilId}/${params?.id}`) ||
-        (item === 'origens' && `${BASEURLDD}/v1/origens/${params?.id}/${perfilId}`) ||
-        (item === 'transicoes' && `${BASEURLDD}/v1/transicoes/${params?.id}/${perfilId}`) ||
-        (item === 'linhas' && `${BASEURLDD}/v1/linhas/${params?.linhaID}/${params?.perfilID}`) ||
-        (item === 'destinatarios' && `${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`) ||
-        (item === 'motivosPendencia' && `${BASEURLDD}/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
-        (item === 'estadosPerfil' && `${BASEURLDD}/v1/estados/asscc/perfil/${perfilId}?peID=${params?.id}`) ||
+        (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
+        (item === 'acessos' && `/v1/acessos/${perfilId}/${params?.id}`) ||
+        (item === 'origens' && `/v1/origens/${params?.id}/${perfilId}`) ||
+        (item === 'transicoes' && `/v1/transicoes/${params?.id}/${perfilId}`) ||
+        (item === 'linhas' && `/v1/linhas/${params?.linhaID}/${params?.perfilID}`) ||
+        (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
+        (item === 'motivosPendencia' && `/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
+        (item === 'estadosPerfil' && `/v1/estados/asscc/perfil/${perfilId}?peID=${params?.id}`) ||
         '';
 
       if (apiUrl) {
-        await axios.delete(apiUrl, options);
+        await axios.delete(`${BASEURLDD}${apiUrl}`, options);
         dispatch(
           slice.actions.deleteSuccess({
             item,

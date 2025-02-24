@@ -6,9 +6,11 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { acessoGaji9 } from '../../utils/validarAcesso';
+// hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, getSuccess, getDocumento, openModal, closeModal } from '../../redux/slices/gaji9';
+import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/slices/gaji9';
 // hooks
 import useSettings from '../../hooks/useSettings';
 // routes
@@ -19,12 +21,11 @@ import TabsWrapper from '../../components/TabsWrapper';
 import { DefaultAction } from '../../components/Actions';
 import { SearchNotFound404 } from '../../components/table';
 import DialogPreviewDoc from '../../components/CustomDialog';
-import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
 import InfoMinuta, { TableInfoMinuta } from '../../sections/gaji9/info-minuta';
-import MinutaForm, { ComposicaoForm, PublicarRevogarForm } from '../../sections/gaji9/form-minuta';
+import MinutaForm, { ComposicaoForm, PublicarRevogarForm, PreviewForm } from '../../sections/gaji9/form-minuta';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +36,7 @@ export default function PageMinutaDetalhes() {
   const { themeStretch } = useSettings();
   const [action, setAction] = useState('');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabMinuta') || 'Dados');
-  const { minuta, isLoading, isLoadingDoc, isOpenModal, minutaId, previewFile, utilizador, done, error } = useSelector(
+  const { minuta, isLoading, isLoadingDoc, isOpenModal, minutaId, previewFile, utilizador, done } = useSelector(
     (state) => state.gaji9
   );
 
@@ -72,9 +73,10 @@ export default function PageMinutaDetalhes() {
     { value: 'Cláusulas', component: <TableInfoMinuta item="clausulas" onClose={handleClose} /> },
   ];
 
+  useNotificacao({ done, afterSuccess: () => handleClose() });
+
   return (
     <Page title="Estado | DigitalDocs">
-      <Notificacao done={done} error={error} afterSuccess={() => handleClose()} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tab="tabMinuta"
@@ -139,13 +141,8 @@ export default function PageMinutaDetalhes() {
                     </>
                   )}
 
-                {minuta?.clausulas?.length > 0 && (
-                  <DefaultAction
-                    button
-                    icon="pdf"
-                    label="Previsualizar"
-                    handleClick={() => dispatch(getDocumento('minuta', { id }))}
-                  />
+                {minuta?.clausulas?.length > 0 && currentTab !== 'Tipos de garantia' && (
+                  <DefaultAction button icon="pdf" label="Previsualizar" handleClick={() => handleAction('preview')} />
                 )}
               </Stack>
             )
@@ -157,10 +154,7 @@ export default function PageMinutaDetalhes() {
             <SearchNotFound404 message="Minuta não encontrada..." />
           ) : (
             <>
-              {tabsList.map((tab) => {
-                const isMatched = tab.value === currentTab;
-                return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-              })}
+              <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
 
               {isOpenModal && (
                 <>
@@ -173,6 +167,7 @@ export default function PageMinutaDetalhes() {
                   {(action === 'Publicar' || action === 'Revogar') && (
                     <PublicarRevogarForm onCancel={() => handleClose()} action={action} />
                   )}
+                  {action === 'preview' && <PreviewForm onCancel={() => handleClose()} id={id} />}
                 </>
               )}
             </>

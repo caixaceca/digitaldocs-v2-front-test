@@ -190,13 +190,15 @@ export function getDocumento(item, params) {
     dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: null }));
     dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: true }));
     dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: params }));
+
     try {
       const accessToken = await getAccessToken();
       const apiUrl =
-        (item === 'minuta' && `${BASEURLGAJI9}/v1/minutas/documento/preview?id=${params?.id}`) ||
         (item === 'contrato' && `${BASEURLGAJI9}/v1/contratos/download?codigo=${params?.codigo}`) ||
         (item === 'prevContrato' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}`) ||
+        (item === 'minuta' &&
+          `${BASEURLGAJI9}/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}${params?.isento ? `&isento_comissao=true` : ''}`) ||
         '';
       if (apiUrl) {
         const response = await axios.get(apiUrl, {

@@ -19,6 +19,8 @@ import DialogContent from '@mui/material/DialogContent';
 import { fillData } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
 import { subtractArrays, transicoesList } from '../../utils/formatObject';
+// hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
@@ -37,7 +39,6 @@ import GridItem from '../../components/GridItem';
 import ListSelect from '../../components/ListSelect';
 import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table';
-import { Notificacao } from '../../components/NotistackProvider';
 import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
@@ -829,27 +830,29 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
-  const { selectedItem, estados, done, error, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
+  const { selectedItem, estados, done, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
   const estadosList = useMemo(() => estados.map((row) => ({ id: row?.id, label: row?.nome })), [estados]);
+
+  useNotificacao({ done, afterSuccess: () => onCancel() });
 
   const formSchema = Yup.object().shape({
     modo: Yup.mixed().required().label('Modo'),
+    origem: Yup.mixed().required().label('Origem'),
+    destino: Yup.mixed().required().label('Destino'),
     prazoemdias: Yup.number().typeError().label('Prazo'),
-    estado_final: Yup.mixed().required().label('Destino'),
-    estado_inicial: Yup.mixed().required().label('Origem'),
   });
 
   const defaultValues = useMemo(
     () => ({
       perfilIDCC: perfilId,
       modo: selectedItem?.modo || null,
-      to_alert: selectedItem?.to_alert || false,
       fluxo_id: selectedItem?.fluxo_id || fluxoId,
       prazoemdias: selectedItem?.prazoemdias || 0,
       hasopnumero: selectedItem?.hasopnumero || false,
       is_paralelo: selectedItem?.is_paralelo || false,
       requer_parecer: selectedItem?.requer_parecer || false,
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
+      to_alert: selectedItem ? selectedItem?.to_alert : true,
       is_after_devolucao: selectedItem?.is_after_devolucao || false,
       destino: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
       origem: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
@@ -894,7 +897,6 @@ export function TransicaoForm({ onCancel, fluxoId }) {
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
-        <Notificacao done={done} error={error} afterSuccess={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Grid container spacing={3} sx={{ mt: 0 }}>
@@ -1264,8 +1266,10 @@ PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.objec
 export function PerfisEstadoForm({ estado, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { isSaving, done } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { isSaving, done, error } = useSelector((state) => state.parametrizacao);
+
+  useNotificacao({ done, afterSuccess: () => onCancel() });
 
   const defaultValues = useMemo(
     () => ({
@@ -1319,7 +1323,6 @@ export function PerfisEstadoForm({ estado, onCancel }) {
         </Stack>
       </DialogTitle>
       <DialogContent>
-        <Notificacao done={done} error={error} afterSuccess={onCancel} />
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack direction="column" divider={<Divider sx={{ borderStyle: 'dashed' }} />} spacing={2} sx={{ mt: 3 }}>
             {fields.map((item, index) => (

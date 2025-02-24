@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 // hooks
 import useSettings from '../hooks/useSettings';
 import useResponsive from '../hooks/useResponsive';
+import { useNotificacao } from '../hooks/useNotificacao';
 import useCollapseDrawer from '../hooks/useCollapseDrawer';
 // redux
 import { useSelector } from '../redux/store';
@@ -45,7 +46,13 @@ export default function IntranetLayout() {
   const isDesktop = useResponsive('up', 'lg');
   const verticalLayout = themeLayout === 'vertical';
   const { collapseClick, isCollapse } = useCollapseDrawer();
-  const { disposicao } = useSelector((state) => state.intranet);
+  const { error } = useSelector((state) => state.digitaldocs);
+  const { error: erroGaji9 } = useSelector((state) => state.gaji9);
+  const { error: erroIndic } = useSelector((state) => state.indicadores);
+  const { error: erroParam } = useSelector((state) => state.parametrizacao);
+  const { disposicao, error: erroIntranet } = useSelector((state) => state.intranet);
+
+  useNotificacao({ error: error || erroIntranet || erroGaji9 || erroParam || erroIndic });
 
   if (verticalLayout) {
     return (

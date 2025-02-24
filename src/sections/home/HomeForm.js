@@ -24,13 +24,14 @@ import InputAdornment from '@mui/material/InputAdornment';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // utils
 import { ptDateTime } from '../../utils/formatTime';
+// hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getSuccess, createItem, getFromIntranet } from '../../redux/slices/intranet';
 // components
 import { Loading } from '../../components/LoadingScreen';
 import { DTFechar, DialogButons } from '../../components/Actions';
-import { Notificacao } from '../../components/NotistackProvider';
 import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -41,7 +42,9 @@ export function FormSugestao({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
-  const { done, error, isSaving } = useSelector((state) => state.intranet);
+  const { done, isSaving } = useSelector((state) => state.intranet);
+
+  useNotificacao({ done, afterSuccess: () => onCancel() });
 
   const formSchema = Yup.object().shape({
     titulo: Yup.string().required('Título não pode ficar vazio'),
@@ -79,7 +82,6 @@ export function FormSugestao({ onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <Notificacao error={error} afterSuccess={onCancel} done={done} />
       <DialogTitle>Deixe-nos a tua sugestão/feedback</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -108,7 +110,9 @@ DenunciaForm.propTypes = { onCancel: PropTypes.func };
 export function DenunciaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, done, error, isSaving } = useSelector((state) => state.intranet);
+  const { mail, done, isSaving } = useSelector((state) => state.intranet);
+
+  useNotificacao({ done, afterSuccess: () => onCancel() });
 
   const formSchema = Yup.object().shape({
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
@@ -151,7 +155,6 @@ export function DenunciaForm({ onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-      <Notificacao error={error} afterSuccess={onCancel} done={done} />
       <DialogTitle>Denúncia</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>

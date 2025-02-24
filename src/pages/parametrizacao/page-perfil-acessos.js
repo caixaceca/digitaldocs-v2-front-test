@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
@@ -64,15 +63,10 @@ export default function PageAcessosPerfil() {
             </Tabs>
           </TabsWrapperStyle>
         </Card>
-        {!colaborador ? (
-          <Grid item xs={12}>
-            <SearchNotFound404 message="Colaborador não encontrado..." />
-          </Grid>
+        {colaborador ? (
+          <Box>{TABS?.find((tab) => tab?.value === currentTab)?.component}</Box>
         ) : (
-          TABS.map((tab) => {
-            const isMatched = tab.value === currentTab;
-            return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-          })
+          <SearchNotFound404 message="Colaborador não encontrado..." />
         )}
       </Container>
     </Page>

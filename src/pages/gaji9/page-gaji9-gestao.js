@@ -10,12 +10,12 @@ import { acessoGaji9 } from '../../utils/validarAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useSelector } from '../../redux/store';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
-import { Notificacao } from '../../components/NotistackProvider';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
 import TabGaji9 from '../../sections/gaji9/tabs-Gaji9';
@@ -25,7 +25,7 @@ import TabGaji9 from '../../sections/gaji9/tabs-Gaji9';
 export default function PageGaji9Gestao() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
-  const { done, error, minutaId, utilizador } = useSelector((state) => state.gaji9);
+  const { done, minutaId, utilizador } = useSelector((state) => state.gaji9);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabGaji9') || 'Parametrização');
 
   const tabsList = useMemo(
@@ -74,21 +74,19 @@ export default function PageGaji9Gestao() {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Identificadores', false);
-    }
   }, [tabsList, currentTab]);
+
+  const afterSuccess = () => {
+    if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
+    if (done === 'Crédito adicionado' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
+  };
+
+  useNotificacao({ done, afterSuccess });
 
   return (
     <Page title="GAJ-i9 | DigitalDocs">
-      <Notificacao
-        done={done}
-        error={error}
-        afterSuccess={() => {
-          if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
-          if (done === 'Crédito adicionado' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
-        }}
-      />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           title="GAJ-i9"
@@ -98,10 +96,7 @@ export default function PageGaji9Gestao() {
           changeTab={setCurrentTab}
         />
         <AcessoGaji9 item="gestao">
-          {tabsList?.map((tab) => {
-            const isMatched = tab?.value === currentTab;
-            return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-          })}
+          <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         </AcessoGaji9>
       </Container>
     </Page>

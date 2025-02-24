@@ -5,6 +5,8 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
+// hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
@@ -16,9 +18,8 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
 import { SearchNotFound404 } from '../../components/table';
-import { Notificacao } from '../../components/NotistackProvider';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { AddItem, UpdateItem } from '../../components/Actions';
+import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import InfoEstado, { TableInfoEstado } from '../../sections/parametrizacao/InfoEstado';
 // guards
@@ -31,7 +32,7 @@ export default function PageDetalhesEstado() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { perfilId } = useSelector((state) => state.intranet);
-  const { estado, done, error } = useSelector((state) => state.parametrizacao);
+  const { estado, done } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Dados');
 
   useEffect(() => {
@@ -48,9 +49,10 @@ export default function PageDetalhesEstado() {
     { value: 'Regras parecer', component: <TableInfoEstado item="regrasEstado" onClose={handleCloseModal} /> },
   ];
 
+  useNotificacao({ done, afterSuccess: () => handleCloseModal() });
+
   return (
     <Page title="Estado | DigitalDocs">
-      <Notificacao done={done} error={error} afterSuccess={() => handleCloseModal()} />
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tab="tabEstado"
@@ -85,10 +87,7 @@ export default function PageDetalhesEstado() {
           </Grid>
         ) : (
           <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
-            {tabsList.map((tab) => {
-              const isMatched = tab.value === currentTab;
-              return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-            })}
+            <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
           </RoleBasedGuard>
         )}
       </Container>

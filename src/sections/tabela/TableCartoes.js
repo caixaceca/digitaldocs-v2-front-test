@@ -16,6 +16,7 @@ import { UosAcesso } from '../../utils/validarAcesso';
 import { ptDate, dataValido } from '../../utils/formatTime';
 import { normalizeText, baralharString } from '../../utils/formatText';
 // hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -26,7 +27,6 @@ import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -84,8 +84,8 @@ export default function TableCartoes() {
   const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
   const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
   const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
+  const { cartoes, done, isLoading, isOpenModal, isOpenModal1 } = useSelector((state) => state.digitaldocs);
   const { isAdmin, isAuditoria, confirmarCartoes, meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { cartoes, done, error, isLoading, isOpenModal, isOpenModal1 } = useSelector((state) => state.digitaldocs);
   const uosList = useMemo(
     () =>
       UosAcesso(
@@ -193,9 +193,10 @@ export default function TableCartoes() {
     [dataFiltered, fase]
   );
 
+  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+
   return (
     <>
-      <Notificacao done={done} error={error} afterSuccess={() => dispatch(closeModal())} />
       <HeaderBreadcrumbs
         sx={{ px: 1 }}
         heading="Receção de cartões"

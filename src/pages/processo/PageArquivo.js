@@ -31,10 +31,7 @@ export default function PageArquivo() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        {tabsList.map((tab) => {
-          const isMatched = tab.value === currentTab;
-          return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-        })}
+        <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
       </Container>
     </Page>
   );

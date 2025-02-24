@@ -87,10 +87,7 @@ function Parametrizacao({ inativos, setInativos }) {
         currentTab={currentTab}
         changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'gaji9Parametrizacao', false)}
       />
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -147,10 +144,7 @@ function Identificadores({ inativos, setInativos }) {
         currentTab={currentTab}
         changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'gaji9Identificadores', false)}
       />
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }

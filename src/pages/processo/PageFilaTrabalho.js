@@ -26,13 +26,12 @@ import useSettings from '../../hooks/useSettings';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
-import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
+import { geParamsUtil } from '../../redux/slices/parametrizacao';
 // components
 import Page from '../../components/Page';
 import Label from '../../components/Label';
 import { DefaultAction } from '../../components/Actions';
 import { DialogTitleAlt } from '../../components/CustomDialog';
-import { Notificacao } from '../../components/NotistackProvider';
 // sections
 import { TableProcessos } from '../../sections/tabela';
 
@@ -55,20 +54,17 @@ export default function PageFilaTrabalho() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { error } = useSelector((state) => state.digitaldocs);
   const { totalP } = useSelector((state) => state.indicadores);
   const { cc, dateUpdate } = useSelector((state) => state.intranet);
-  const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
-    if (cc?.id && !!dateUpdate && add(new Date(dateUpdate), { minutes: 2 }) < new Date())
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 2 }) < new Date())
       dispatch(getFromIntranet('cc', { id: cc?.id }));
 
-    if (cc?.id && !!dateUpdate && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
       dispatch(getFromIntranet('colaboradores'));
-      dispatch(getFromParametrizacao('meusacessos'));
-      dispatch(getFromParametrizacao('meusambientes'));
-      dispatch(getFromParametrizacao('motivosPendencia'));
+      dispatch(geParamsUtil());
     }
   }, [dispatch, cc?.id, dateUpdate]);
 
@@ -109,8 +105,6 @@ export default function PageFilaTrabalho() {
   return (
     <Page title="Fila de trabalho | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        {meuAmbiente?.id && <Notificacao error={error} />}
-
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
           <Stack direction="row" spacing={1} sx={{ px: 2, py: 1, color: 'common.white', bgcolor: 'primary.main' }}>
             <Typography variant="h4">Fila de trabalho</Typography>

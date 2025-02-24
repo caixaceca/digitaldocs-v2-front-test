@@ -11,7 +11,6 @@ import useSettings from '../../hooks/useSettings';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
-import { Notificacao } from '../../components/NotistackProvider';
 // sections
 import { DiscoFicheiros } from '../../sections/indicadores/disco-ficheiros';
 import EstatisticaCredito from '../../sections/indicadores/EstatisticaCredito';
@@ -21,7 +20,6 @@ import { TotalProcessos, Duracao, SGQ } from '../../sections/indicadores/Indicad
 
 export default function PageIndicadores() {
   const { themeStretch } = useSettings();
-  const { error } = useSelector((state) => state.indicadores);
   const { isAdmin } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabIndicadores') || 'total');
 
@@ -63,7 +61,6 @@ export default function PageIndicadores() {
   return (
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Notificacao error={error} />
         {/* <Button onClick={handleNotificationClick}>Enviar Notificação</Button> */}
         <TabsWrapper
           title="Indicadores"
@@ -72,10 +69,7 @@ export default function PageIndicadores() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        {tabsList.map((tab) => {
-          const isMatched = tab.value === currentTab;
-          return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-        })}
+        <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
       </Container>
     </Page>
   );

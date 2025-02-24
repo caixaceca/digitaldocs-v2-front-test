@@ -9,12 +9,12 @@ import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import SearchIcon from '@mui/icons-material/Search';
 import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 // utils
 import { setItemValue } from '../../utils/formatObject';
 // redux
@@ -24,8 +24,6 @@ import { getListaProcessos } from '../../redux/slices/digitaldocs';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useToggle from '../../hooks/useToggle';
-// components
-import { Notificacao } from '../../components/NotistackProvider';
 
 // ----------------------------------------------------------------------
 
@@ -34,7 +32,6 @@ export default function ProcuraAvancada() {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { cc, uos } = useSelector((state) => state.intranet);
-  const { error } = useSelector((state) => state.digitaldocs);
 
   const [uo, setUo] = useState(null);
   const [conta, setConta] = useState(localStorage.getItem('conta') || '');
@@ -48,13 +45,10 @@ export default function ProcuraAvancada() {
   const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, label: row?.label })) || [], [uos]);
 
   useEffect(() => {
-    if (uosList?.length > 0 && (localStorage.getItem('uoSearch') || cc?.uo?.id))
-      setUo(
-        uosList?.find((row) => row?.id === Number(localStorage.getItem('uoSearch'))) ||
-          uosList?.find((row) => row?.id === cc?.uo?.id) ||
-          null
-      );
-  }, [cc?.uo?.id, dispatch, uosList]);
+    const storedUoId = Number(localStorage.getItem('uoSearch'));
+    const selectedUo = uosList.find(({ id }) => id === storedUoId) || uosList.find(({ id }) => id === cc?.uo?.id);
+    if (selectedUo) setUo(selectedUo);
+  }, [cc?.uo?.id, uosList]);
 
   const searchProcessos = () => {
     dispatch(
@@ -79,14 +73,13 @@ export default function ProcuraAvancada() {
 
   return (
     <>
-      <Notificacao error={error} />
       <Button
         size="large"
         onClick={onOpen}
         sx={{ fontSize: { md: 18 } }}
-        startIcon={<SearchIcon sx={{ width: 28, height: 28 }} />}
+        startIcon={<SearchOutlinedIcon sx={{ width: 28, height: 28 }} />}
       >
-        Procurar...
+        Procurar...&nbsp;&nbsp;
       </Button>
 
       {open && (

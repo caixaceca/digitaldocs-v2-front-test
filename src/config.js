@@ -67,13 +67,3 @@ export const defaultSettings = {
 
 export const allLangs = [{ label: 'Português', value: 'pt', systemValue: ptPT }];
 export const defaultLang = allLangs[0];
-export const presenceColorMap = {
-  Available: 'success.main',
-  Busy: 'error.main',
-  DoNotDisturb: 'error.dark',
-  Away: 'warning.main',
-  BeRightBack: 'warning.main',
-  Offline: 'focus.main',
-  OutOfOffice: 'purple',
-  PresenceUnknown: 'lightgray',
-};

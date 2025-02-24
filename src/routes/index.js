@@ -1,11 +1,9 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
-// utils
-import { format } from 'date-fns';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { getFromParametrizacao } from '../redux/slices/parametrizacao';
-import { getFromIntranet, authenticateColaborador } from '../redux/slices/intranet';
+import { geParamsUtil } from '../redux/slices/parametrizacao';
+import { authenticateColaborador, getFromIntranet, getInfoIntranet } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -28,32 +26,15 @@ export default function Router() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (perfil?.colaborador?.id) {
-      dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id }));
-      dispatch(getFromIntranet('colaboradores'));
-    }
+    if (perfil?.colaborador?.id) dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id }));
   }, [dispatch, perfil?.colaborador?.id]);
 
   useEffect(() => {
-    if (cc?.id) {
-      dispatch(getFromIntranet('frase'));
-      dispatch(getFromIntranet('certificacoes'));
-      dispatch(getFromIntranet('uos', { label: 'label' }));
-      dispatch(getFromIntranet('links', { label: 'nome' }));
-      dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
-      dispatch(getFromIntranet('disposicao', { id: cc?.id, data: format(new Date(), 'yyyy-MM-dd') }));
-    }
+    if (cc?.id) dispatch(getInfoIntranet(cc?.id));
   }, [dispatch, cc?.id]);
 
   useEffect(() => {
-    if (perfilId) {
-      dispatch(getFromParametrizacao('fluxos'));
-      dispatch(getFromParametrizacao('origens'));
-      dispatch(getFromParametrizacao('estados'));
-      dispatch(getFromParametrizacao('meusacessos'));
-      dispatch(getFromParametrizacao('meusambientes'));
-      dispatch(getFromParametrizacao('motivosPendencia'));
-    }
+    if (perfilId) dispatch(geParamsUtil());
   }, [dispatch, perfilId]);
 
   return useRoutes([

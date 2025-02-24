@@ -126,6 +126,16 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
   const formSchema = Yup.object().shape({
     estado: Yup.mixed().required('Escolhe o estado'),
     motivo_devolucao: title === 'DEVOLVER' && Yup.mixed().required('Indica o motivo da devolução'),
+    parecer_favoravel: Yup.mixed().when(['estado'], {
+      is: (estado) => estado?.requer_parecer,
+      then: () => Yup.mixed().required().label('Parecer'),
+      otherwise: () => Yup.mixed().notRequired(),
+    }),
+    noperacao: Yup.mixed().when(['estado'], {
+      is: (estado) => estado?.hasopnumero,
+      then: () => Yup.number().positive().typeError('Introduza um Nº de operação válido').label('Nº de operação'),
+      otherwise: () => Yup.mixed().notRequired(),
+    }),
   });
 
   const defaultValues = useMemo(
@@ -145,7 +155,6 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
   const { watch, setValue, handleSubmit } = methods;
   const values = watch();
 
-  const temNumOperacao = useMemo(() => values?.estado?.hasopnumero, [values?.estado?.hasopnumero]);
   const aberturaSemEntGer = useMemo(
     () =>
       gerencia &&
@@ -156,6 +165,8 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
       !values?.estado?.label?.includes('Atendimento'),
     [gerencia, processo?.assunto, processo?.entidade, title, values?.estado]
   );
+  const numOperacao = useMemo(() => !!values?.estado?.hasopnumero, [values?.estado?.hasopnumero]);
+  const parecer = useMemo(() => !!values?.estado?.requer_parecer, [values?.estado?.requer_parecer]);
 
   const onSubmit = async () => {
     dispatch(updateDados({ forward: true, dados: values }));
@@ -173,7 +184,7 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={temNumOperacao ? 6 : 8}>
+        <Grid item xs={12} md={(parecer && numOperacao && 6) || ((parecer || numOperacao) && 8) || 12}>
           <RHFAutocompleteObj name="estado" label="Estado" disableClearable options={destinos} />
         </Grid>
         {aberturaSemEntGer ? (
@@ -187,14 +198,16 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
           </Grid>
         ) : (
           <>
-            {temNumOperacao && (
-              <Grid item xs={12} sm={6} md={3}>
-                <RHFNumberField name="noperacao" required label="Nº de operação" />
+            {parecer && (
+              <Grid item xs={12} sm={numOperacao ? 6 : 12} md={numOperacao ? 3 : 4}>
+                <RHFAutocompleteSmp label="Parecer" name="parecer_favoravel" options={['Favorável', 'Não favorável']} />
               </Grid>
             )}
-            <Grid item xs={12} sm={temNumOperacao ? 6 : 12} md={temNumOperacao ? 3 : 4}>
-              <RHFAutocompleteSmp label="Parecer" name="parecer_favoravel" options={['Favorável', 'Não favorável']} />
-            </Grid>
+            {numOperacao && (
+              <Grid item xs={12} sm={parecer ? 6 : 12} md={parecer ? 3 : 4}>
+                <RHFNumberField name="noperacao" label="Nº de operação" />
+              </Grid>
+            )}
             {title === 'DEVOLVER' && (
               <Grid item xs={12}>
                 <RHFAutocompleteObj name="motivo_devolucao" label="Motivo da devolução" options={motivosTransicao} />
@@ -216,11 +229,7 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
 
 // --- CONFIDENCILAIDADE E OUTROS --------------------------------------------------------------------------------------
 
-OutrosEmSerie.propTypes = {
-  title: PropTypes.string,
-  gerencia: PropTypes.bool,
-  colaboradoresList: PropTypes.array,
-};
+OutrosEmSerie.propTypes = { title: PropTypes.string, gerencia: PropTypes.bool, colaboradoresList: PropTypes.array };
 
 export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] }) {
   const dispatch = useDispatch();
@@ -278,14 +287,11 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
       formData.append('noperacao', dadosStepper?.noperacao);
       formData.append('observacao', dadosStepper?.observacao);
       formData.append('transicao_id ', dadosStepper?.estado?.id);
-      if (dadosStepper?.motivo_devolucao?.id) {
-        formData.append('motivo_id ', dadosStepper?.motivo_devolucao?.id);
-      }
-      if (dadosStepper?.parecer_favoravel === 'Favorável') {
-        formData.append('parecer_favoravel', true);
-      } else if (dadosStepper?.parecer_favoravel === 'Não favorável') {
-        formData.append('parecer_favoravel', false);
-      }
+      if (dadosStepper?.motivo_devolucao?.id) formData.append('motivo_id ', dadosStepper?.motivo_devolucao?.id);
+
+      if (dadosStepper?.parecer_favoravel === 'Favorável') formData.append('parecer_favoravel', true);
+      else if (dadosStepper?.parecer_favoravel === 'Não favorável') formData.append('parecer_favoravel', false);
+
       if (values.atribuir && values?.colaborador) {
         formData.append('perfil_afeto_id', values?.colaborador?.id);
       } else if (
@@ -624,15 +630,13 @@ export function FinalizarForm({ id, cativos, onClose }) {
 
   const defaultValues = useMemo(() => ({ cativos: [] }), []);
   const methods = useForm({ defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
   const onSubmit = async () => {
     try {
       if (selecionados?.length === 0) {
         enqueueSnackbar('Por favor selecionar as contas a serem cativadas', { variant: 'error' });
       } else {
-        values.cativos = selecionados.map((row) => row?.id);
         dispatch(
           updateItem('finalizar', JSON.stringify({ cativos: [selecionados.map((row) => row?.id)] }), {
             id,
@@ -648,11 +652,8 @@ export function FinalizarForm({ id, cativos, onClose }) {
   const handleToggle = (value) => () => {
     const currentIndex = selecionados.indexOf(value);
     const novaLista = [...selecionados];
-    if (currentIndex === -1) {
-      novaLista.push(value);
-    } else {
-      novaLista.splice(currentIndex, 1);
-    }
+    if (currentIndex === -1) novaLista.push(value);
+    else novaLista.splice(currentIndex, 1);
     setSelecionados(novaLista);
   };
 
@@ -851,19 +852,16 @@ export function ResgatarForm({ dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
-  const resgatarClick = () => {
-    dispatch(updateItem('resgatar', null, { ...dados, msg: 'Processo resgatado' }));
-    onClose();
-  };
-
   return (
     <DialogConfirmar
       onClose={onClose}
       isSaving={isSaving}
-      handleOk={() => resgatarClick()}
       color="warning"
       title="Resgatar"
       desc="resgatar este processo"
+      handleOk={() =>
+        dispatch(updateItem('resgatar', null, { ...dados, msg: 'Processo resgatado', afterSuccess: () => onClose() }))
+      }
     />
   );
 }
@@ -892,13 +890,8 @@ export function CancelarForm({ id, estadoId, fechar = false, onClose }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(
-        updateItem('cancelar', JSON.stringify(values), {
-          id,
-          fechar,
-          msg: fechar ? 'Pareceres fechado' : 'Processo resgatado',
-        })
-      );
+      const parmas = { id, fechar, msg: fechar ? 'Pareceres fechado' : 'Processo resgatado' };
+      dispatch(updateItem('cancelar', JSON.stringify(values), { ...parmas, afterSuccess: () => onClose() }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -1129,18 +1122,13 @@ export function DomiciliarForm({ id, estadoId, onClose }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(
-        updateItem(
-          'domiciliar',
-          JSON.stringify({
-            estado_id: estadoId,
-            uo_destino_id: values?.uo?.id,
-            observacao: values?.observacao,
-            estado_destino_id: values?.estado?.id,
-          }),
-          { id, msg: 'Processo domiciliado' }
-        )
-      );
+      const formData = {
+        estado_id: estadoId,
+        uo_destino_id: values?.uo?.id,
+        observacao: values?.observacao,
+        estado_destino_id: values?.estado?.id,
+      };
+      dispatch(updateItem('domiciliar', JSON.stringify(formData), { id, msg: 'Processo domiciliado' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

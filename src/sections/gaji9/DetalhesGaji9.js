@@ -72,11 +72,7 @@ function DetalhesTab({ item, dados }) {
         sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
         changeTab={(_, newValue) => setCurrentTab(newValue)}
       />
-
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }

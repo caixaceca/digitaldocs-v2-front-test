@@ -198,10 +198,7 @@ export default function EstatisticaCredito() {
         }
       />
       <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
-      {tabsList.map((tab) => {
-        const isMatched = tab.value === currentTab;
-        return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-      })}
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
     </>
   );
 }

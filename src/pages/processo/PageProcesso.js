@@ -16,7 +16,8 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
-import { useProcesso, useNotificacao, useIdentificacao } from '../../hooks/useProcesso';
+import { useNotificacao } from '../../hooks/useNotificacao';
+import { useProcesso, useIdentificacao } from '../../hooks/useProcesso';
 // components
 import Page from '../../components/Page';
 import { TabCard } from '../../components/TabsWrapper';
@@ -44,7 +45,7 @@ export default function PageProcesso() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { processos, done, error, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
+  const { processos, done, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
   const linkNavigate = useMemo(
@@ -79,9 +80,8 @@ export default function PageProcesso() {
     const tabs = [];
     tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
 
-    if (processo?.estados && processo.estados?.length > 0) {
+    if (processo?.estados && processo.estados?.length > 0)
       tabs.push({ value: 'Pareceres', component: <Estados handleAceitar={handleAceitar} /> });
-    }
 
     if (estado?.pareceres && estado.pareceres?.length > 0) {
       tabs.push({
@@ -134,7 +134,23 @@ export default function PageProcesso() {
     navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${idProcesso}`);
   };
 
-  useNotificacao({ done, error, linkNavigate, proximo: proxAnt?.proximo, irParaProcesso });
+  useNotificacao({
+    done,
+    afterSuccess: () => {
+      if (
+        done !== 'Processo aceitado' &&
+        done !== 'Pareceres fechado' &&
+        done !== 'Processo resgatado' &&
+        done !== 'Confidencialidade atualizado'
+      ) {
+        console.log(done);
+      } else if (proxAnt?.proximo) {
+        irParaProcesso(proxAnt?.proximo);
+      } else {
+        navigate(linkNavigate);
+      }
+    },
+  });
 
   return (
     <Page title="Processo | DigitalDocs">
@@ -224,10 +240,7 @@ export default function PageProcesso() {
         />
         <Card sx={{ height: 1 }}>
           <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
-          {tabsList.map((tab) => {
-            const isMatched = tab.value === currentTab;
-            return isMatched && <Box key={tab.value}>{tab.component}</Box>;
-          })}
+          <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         </Card>
       </Container>
     </Page>

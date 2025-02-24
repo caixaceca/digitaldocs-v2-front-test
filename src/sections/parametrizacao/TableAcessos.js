@@ -12,6 +12,7 @@ import TableContainer from '@mui/material/TableContainer';
 import { ptDateTime } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
 // hooks
+import { useNotificacao } from '../../hooks/useNotificacao';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -23,7 +24,6 @@ import Scrollbar from '../../components/Scrollbar';
 import { CellChecked } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import { AddItem, UpdateItem } from '../../components/Actions';
-import { Notificacao } from '../../components/NotistackProvider';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -77,9 +77,11 @@ export default function TableAcessos({ tab }) {
   const dispatch = useDispatch();
   const { mail } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
-  const { done, error, acessos, isLoading, isOpenModal, estados, estadosPerfil } = useSelector(
+  const { done, acessos, isLoading, isOpenModal, estados, estadosPerfil } = useSelector(
     (state) => state.parametrizacao
   );
+
+  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
 
   const dataFiltered = applySortFilter({
     filter,
@@ -125,7 +127,6 @@ export default function TableAcessos({ tab }) {
         }
       />
       <RoleBasedGuard hasContent roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
-        <Notificacao done={done} error={error} afterSuccess={() => dispatch(closeModal())} />
         <Card sx={{ p: 1 }}>
           <SearchToolbarSimple item="filterAcesso" filter={filter} setFilter={setFilter} />
           <Scrollbar>
