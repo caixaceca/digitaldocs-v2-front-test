@@ -123,13 +123,10 @@ export function SearchToolbarProcura({
 
 SearchToolbarProcessos.propTypes = {
   tab: PropTypes.string,
-  motivo: PropTypes.string,
   filter: PropTypes.string,
-  setMotivo: PropTypes.func,
   setFilter: PropTypes.func,
   segmento: PropTypes.string,
   setSegmento: PropTypes.func,
-  motivosList: PropTypes.array,
   colaborador: PropTypes.object,
   meuAmbiente: PropTypes.object,
   setColaborador: PropTypes.func,
@@ -138,14 +135,11 @@ SearchToolbarProcessos.propTypes = {
 
 export function SearchToolbarProcessos({
   tab,
-  motivo,
   filter,
   segmento,
-  setMotivo,
   setFilter,
   colaborador,
   setSegmento,
-  motivosList,
   setColaborador,
   colaboradoresList,
   meuAmbiente = null,
@@ -160,16 +154,6 @@ export function SearchToolbarProcessos({
               <Ambiente />
               {!!meuAmbiente && <Fluxo />}
             </>
-          )}
-          {tab === 'Pendentes' && (
-            <Autocomplete
-              fullWidth
-              value={motivo || null}
-              options={motivosList?.sort()}
-              sx={{ width: { md: 150, xl: 200 } }}
-              renderInput={(params) => <TextField {...params} label="Motivo" />}
-              onChange={(event, newValue) => setItemValue(newValue, setMotivo, 'motivoP')}
-            />
           )}
           {tab === 'Tarefas' && (
             <Autocomplete

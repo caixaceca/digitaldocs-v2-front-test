@@ -32,7 +32,7 @@ CustomAvatar.propTypes = { sx: PropTypes.object, name: PropTypes.string };
 
 // ----------------------------------------------------------------------
 
-AvatarBedge.propTypes = { id: PropTypes.string, children: PropTypes.node, sx: PropTypes.object };
+AvatarBedge.propTypes = { id: PropTypes.number, children: PropTypes.node, sx: PropTypes.object };
 
 export function AvatarBedge({ id, children, sx = null }) {
   const { colaboradores } = useSelector((state) => state.intranet);

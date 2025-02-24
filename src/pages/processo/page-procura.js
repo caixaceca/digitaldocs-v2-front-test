@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -12,7 +12,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime, fYear } from '../../utils/formatTime';
+import { ptDateTime, fToNow, fYear } from '../../utils/formatTime';
 import { normalizeText, entidadesParse, noDados } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
@@ -28,10 +28,10 @@ import Page from '../../components/Page';
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import Panel, { Criado } from '../../components/Panel';
-import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcura } from '../../components/SearchToolbar';
+import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // ----------------------------------------------------------------------
@@ -72,6 +72,7 @@ export default function PageProcura() {
     onChangeDense,
     onChangeRowsPerPage,
   } = useTable({
+    defaultOrderBy: 'criado_em',
     defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
   });
 
@@ -84,16 +85,62 @@ export default function PageProcura() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uo, search, assunto, estado, pesquisa]);
 
-  const dados = useMemo(() => setDados({ pesquisa, uos }), [pesquisa, uos]);
+  const setDados = useCallback(({ pesquisa = [], uos = [] }) => {
+    const uosMap = new Map(uos.map((uo) => [uo.id, uo]));
 
-  const dataFiltered = applySortFilter({
-    uo,
-    search,
-    estado,
-    assunto,
-    dados: dados?.dados,
-    comparator: getComparator(order, orderBy),
-  });
+    const estadosSet = new Set();
+    const assuntosSet = new Set();
+    const uosOrigemSet = new Set();
+
+    const dados = pesquisa.map((row) => {
+      const uo = uosMap.get(row?.uo_origem_id);
+      if (uo) uosOrigemSet.add(uo.label);
+      estadosSet.add(row?.estado);
+      assuntosSet.add(row?.assunto);
+
+      return { ...row, uo: uo?.label, tipo: uo?.tipo, entidades: entidadesParse(row?.entidades) };
+    });
+
+    return {
+      dados,
+      estados: Array.from(estadosSet),
+      assuntos: Array.from(assuntosSet),
+      uosOrigem: Array.from(uosOrigemSet),
+    };
+  }, []);
+
+  const dados = useMemo(() => setDados({ pesquisa, uos }), [pesquisa, uos, setDados]);
+
+  const applySortFilter = useCallback(({ dados, comparator, uo, search, estado, assunto }) => {
+    const sortedData = applySort(dados, comparator);
+    return sortedData.filter((row) => {
+      const matchesAssunto = !assunto || row?.assunto === assunto;
+      const matchesEstado = !estado || row?.estado === estado;
+      const matchesUo = !uo || row?.uo === uo;
+      const matchesSearch =
+        !search ||
+        (row?.conta && normalizeText(row?.conta).includes(normalizeText(search))) ||
+        (row?.entrada && normalizeText(row?.entrada).includes(normalizeText(search))) ||
+        (row?.titular && normalizeText(row?.titular).includes(normalizeText(search))) ||
+        (row?.cliente && normalizeText(row?.cliente).includes(normalizeText(search))) ||
+        (row?.noperacao && normalizeText(row?.noperacao).includes(normalizeText(search))) ||
+        (row?.entidades && normalizeText(row?.entidades).includes(normalizeText(search)));
+      return matchesAssunto && matchesEstado && matchesUo && matchesSearch;
+    });
+  }, []);
+
+  const dataFiltered = useMemo(
+    () =>
+      applySortFilter({
+        dados: dados?.dados,
+        comparator: getComparator(order, orderBy),
+        uo,
+        search,
+        estado,
+        assunto,
+      }),
+    [dados, order, orderBy, uo, search, estado, assunto, applySortFilter]
+  );
   const isNotFound = !dataFiltered.length;
 
   const verMais = () => {
@@ -119,7 +166,6 @@ export default function PageProcura() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <HeaderBreadcrumbs
           sx={{ color: 'text.secondary' }}
-          action={processosInfo && <DefaultAction button label="Mais processos" handleClick={() => verMais()} />}
           heading={
             <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
               <Typography variant="h4">Procura:</Typography>
@@ -180,12 +226,24 @@ export default function PageProcura() {
                         <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
                         <TableCell>{row.conta || row.cliente || row?.entidades || noDados()}</TableCell>
                         <TableCell>{row.assunto}</TableCell>
-                        <TableCell>{row.estado}</TableCell>
+                        <TableCell>
+                          {row.estado}
+                          {row?.transitado_em && (
+                            <Stack direction="row" spacing={0.5}>
+                              <Criado caption tipo="time" value={ptDateTime(row.transitado_em)} />
+                              <Criado
+                                caption
+                                sx={{ color: 'text.secondary' }}
+                                value={`(${fToNow(row.transitado_em)})`}
+                              />
+                            </Stack>
+                          )}
+                        </TableCell>
                         <TableCell sx={{ width: 10 }}>
-                          {row?.criado_em && <Criado tipo="time" value={ptDateTime(row.criado_em)} />}
                           {row?.uo && (
                             <Criado tipo="company" value={row?.tipo === 'Agências' ? `Agência ${row?.uo}` : row?.uo} />
                           )}
+                          {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row.criado_em)} />}
                         </TableCell>
                         <TableCell align="center">
                           <DefaultAction
@@ -219,58 +277,10 @@ export default function PageProcura() {
             />
           )}
         </Card>
+        {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
+          <MaisProcessos verMais={verMais} />
+        )}
       </Container>
     </Page>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function setDados({ pesquisa = [], uos = [] }) {
-  const uosMap = new Map(uos.map((uo) => [uo.id, uo]));
-
-  const estadosSet = new Set();
-  const assuntosSet = new Set();
-  const uosOrigemSet = new Set();
-
-  const dados = pesquisa.map((row) => {
-    const uo = uosMap.get(row?.uo_origem_id);
-    if (uo) uosOrigemSet.add(uo.label);
-    estadosSet.add(row?.estado);
-    assuntosSet.add(row?.assunto);
-
-    return { ...row, uo: uo?.label, tipo: uo?.tipo, entidades: entidadesParse(row?.entidades) };
-  });
-
-  return {
-    dados,
-    estados: Array.from(estadosSet),
-    assuntos: Array.from(assuntosSet),
-    uosOrigem: Array.from(uosOrigemSet),
-  };
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ dados, comparator, uo, search, estado, assunto }) {
-  dados = applySort(dados, comparator);
-
-  if (assunto) dados = dados.filter((row) => row?.assunto === assunto);
-  if (estado) dados = dados.filter((row) => row?.estado === estado);
-  if (uo) dados = dados.filter((row) => row?.uo === uo);
-
-  if (search) {
-    dados = dados.filter(
-      (row) =>
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(search)) !== -1) ||
-        (row?.entrada && normalizeText(row?.entrada).indexOf(normalizeText(search)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(search)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(search)) !== -1) ||
-        (row?.noperacao && normalizeText(row?.noperacao).indexOf(normalizeText(search)) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(search)) !== -1)
-    );
-  }
-
-  return dados;
 }

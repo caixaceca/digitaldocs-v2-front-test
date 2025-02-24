@@ -839,7 +839,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
     modo: Yup.mixed().required().label('Modo'),
     origem: Yup.mixed().required().label('Origem'),
     destino: Yup.mixed().required().label('Destino'),
-    prazoemdias: Yup.number().typeError().label('Prazo'),
+    prazoemdias: Yup.number().min(0).typeError().label('Prazo'),
   });
 
   const defaultValues = useMemo(

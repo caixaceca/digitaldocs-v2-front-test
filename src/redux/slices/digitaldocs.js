@@ -679,14 +679,6 @@ export function updateItem(item, dados, params) {
               dados,
               options
             );
-            if (params?.atribuir) {
-              await axios.patch(
-                `${BASEURLDD}/v2/processos/atribuicao/mista/${perfilId}?perfil_afeto_id=${perfilId}&processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-                '',
-                options
-              );
-            }
-            dispatch(slice.actions.closeModal());
             break;
           }
 

@@ -23,11 +23,11 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getListaProcessos } from '../../redux/slices/digitaldocs';
 // Components
 import { RHFDateIF } from '../../components/hook-form';
-import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { CellChecked, Criado } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
@@ -108,6 +108,10 @@ export default function TableCON({ item = 'con' }) {
     navigate(`${PATH_DIGITALDOCS.controle.root}/${id}?from=Controle`);
   };
 
+  const verMais = () => {
+    dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor: processosInfo }));
+  };
+
   return (
     <>
       <HeaderBreadcrumbs
@@ -123,13 +127,6 @@ export default function TableCON({ item = 'con' }) {
                 labelf="dataFCon"
                 setDatai={setDatai}
                 setDataf={setDataf}
-              />
-            )}
-            {processosInfo && (
-              <DefaultAction
-                button
-                label="Mais processos"
-                handleClick={() => dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor: processosInfo }))}
               />
             )}
             {!isNotFound && (
@@ -216,6 +213,9 @@ export default function TableCON({ item = 'con' }) {
           />
         )}
       </Card>
+      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
+        <MaisProcessos verMais={verMais} />
+      )}
     </>
   );
 }

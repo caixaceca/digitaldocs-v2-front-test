@@ -31,7 +31,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import DialogContentText from '@mui/material/DialogContentText';
 // utils
 import { fNumber, fCurrency } from '../../../utils/formatNumber';
-import { paraLevantamento, noEstado, findColaboradores } from '../../../utils/validarAcesso';
+import { paraLevantamento, findColaboradores } from '../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
@@ -53,6 +53,8 @@ import {
 import Steps from '../../../components/Steps';
 import { DialogConfirmar } from '../../../components/CustomDialog';
 import { DefaultAction, DialogButons, ButtonsStepper, AnexosExistente } from '../../../components/Actions';
+
+const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // --- ENCAMINHAR/DEVOLVER PROCESSO ------------------------------------------------------------------------------------
 
@@ -1004,7 +1006,6 @@ export function ColocarPendenteForm() {
   const { enqueueSnackbar } = useSnackbar();
   const { processo, isSaving } = useSelector((state) => state.digitaldocs);
   const { motivosPendencia } = useSelector((state) => state.parametrizacao);
-  const cliente = useMemo(() => motivosPendencia?.find((row) => row?.label === 'Cliente'), [motivosPendencia]);
 
   const formSchema = Yup.object().shape({ motivo: Yup.mixed().required('Motivo de pendência não pode ficar vazio') });
   const defaultValues = useMemo(() => ({ pendenteLevantamento: false, mobs: '', motivo: null }), []);
@@ -1012,41 +1013,24 @@ export function ColocarPendenteForm() {
   const { watch, setValue, handleSubmit } = methods;
   const values = watch();
 
-  const onSubmit = async () => {
+  const onSubmit = (action) => {
     try {
+      const params = { id: processo?.id, fluxoId: processo?.fluxo_id, afterSuccess: () => dispatch(closeModal()) };
       dispatch(
         updateItem(
           'pendencia',
           JSON.stringify({
-            pender: !!values?.motivo?.id,
+            pender: action !== 'eliminar',
             fluxo_id: processo?.fluxo_id,
-            mpendencia: values?.motivo?.id || '',
-            mobs: values?.motivo?.id && values?.mobs ? values?.mobs : '',
+            mobs: action === 'eliminar' ? '' : values?.mobs,
+            mpendencia: action === 'eliminar' ? '' : values?.motivo?.id,
           }),
-          {
-            id: processo?.id,
-            fluxoId: processo?.fluxo_id,
-            msg: 'Processo colocado pendente',
-            estadoId: processo?.estado_atual_id || processo?.estado_id,
-            atribuir:
-              (noEstado(processo?.estado_processo?.estado, ['Atendimento']) && !paraLevantamento(processo?.assunto)) ||
-              !noEstado(processo?.estado_processo?.estado, ['Atendimento', 'Gerência', 'Caixa Principal']),
-          }
+          { ...params, msg: action === 'eliminar' ? 'Pendência eliminada' : 'Processo colocado pendente' }
         )
       );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
-  };
-
-  const eliminarPendencia = () => {
-    dispatch(
-      updateItem(
-        'pendencia',
-        JSON.stringify({ pender: false, fluxo_id: processo?.fluxo_id, mpendencia: '', mobs: '' }),
-        { id: processo?.id, fluxoId: processo?.fluxo_id, msg: 'Pendência eliminada' }
-      )
-    );
   };
 
   return (
@@ -1056,7 +1040,7 @@ export function ColocarPendenteForm() {
         {processo?.pendente && processo?.motivo_pendencia_id && processo?.motivo ? (
           <Stack direction="column" spacing={1} sx={{ pt: 3 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography sx={{ color: 'text.secondary' }}>Motivo:</Typography>
+              <Typography sx={{ color: 'text.secondary', width: '85px', textAlign: 'right' }}>Motivo:</Typography>
               <Typography>{processo?.motivo}</Typography>
             </Stack>
             {processo?.observacao_motivo_pendencia && (
@@ -1065,8 +1049,8 @@ export function ColocarPendenteForm() {
                 <Typography>{processo?.observacao_motivo_pendencia}</Typography>
               </Stack>
             )}
-            <Stack direction="row" sx={{ pt: 2 }} justifyContent="end">
-              <DefaultAction color="error" button handleClick={() => eliminarPendencia()} label="Eliminar" />
+            <Stack direction="row" sx={{ pt: 3 }} justifyContent="end">
+              <DefaultAction color="error" button handleClick={() => onSubmit('eliminar')} label="Eliminar" />
             </Stack>
           </Stack>
         ) : (
@@ -1076,10 +1060,10 @@ export function ColocarPendenteForm() {
                 <RHFSwitch
                   name="pendenteLevantamento"
                   label="Pendente de levantamento"
-                  onChange={(event, newValue) => {
-                    setValue('pendenteLevantamento', newValue);
-                    setValue('mobs', newValue ? 'Para levantamento do pedido' : '');
-                    setValue('motivo', newValue ? { id: cliente?.id, label: cliente?.motivo } : null);
+                  onChange={(event, newVal) => {
+                    setValue('pendenteLevantamento', newVal, vsv);
+                    setValue('mobs', newVal ? 'Para levantamento do pedido' : '', vsv);
+                    setValue('motivo', newVal ? motivosPendencia?.find(({ label }) => label === 'Cliente') : null, vsv);
                   }}
                 />
               )}
@@ -1087,9 +1071,10 @@ export function ColocarPendenteForm() {
                 name="motivo"
                 label="Motivo"
                 options={motivosPendencia}
-                readOnly={values?.pendenteLevantamento}
+                disabled={values?.pendenteLevantamento}
+                onChange={(event, newVal) => setValue('motivo', newVal, vsv)}
               />
-              <RHFTextField name="mobs" label="Observação" inputProps={{ readOnly: values?.pendenteLevantamento }} />
+              <RHFTextField name="mobs" label="Observação" disabled={values?.pendenteLevantamento} />
             </Stack>
             <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(closeModal())} />
           </FormProvider>
@@ -1143,19 +1128,19 @@ export function DomiciliarForm({ id, estadoId, onClose }) {
             <RHFAutocompleteObj
               name="uo"
               label="Unidade orgânica"
+              options={uos?.map(({ id, label }) => ({ id, label }))}
               onChange={(event, newValue) => {
                 setValue('estado', null);
                 setValue('uo', newValue);
               }}
-              options={uos?.map((row) => ({ id: row?.id, label: row?.label }))}
             />
             {values?.uo?.id && (
               <RHFAutocompleteObj
                 name="estado"
                 label="Estado"
                 options={estados
-                  ?.filter((item) => item?.uo_id === values?.uo?.id)
-                  ?.map((row) => ({ id: row?.id, label: row?.nome }))}
+                  ?.filter(({ uo_id: uoId }) => uoId === values?.uo?.id)
+                  ?.map(({ id, nome }) => ({ id, label: nome }))}
               />
             )}
             <RHFTextField name="observacao" multiline rows={3} label="Observação" />

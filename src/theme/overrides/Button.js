@@ -11,17 +11,11 @@ export default function Button(theme) {
 
   const rootStyle = (ownerState) => {
     const inheritColor = ownerState.color === 'inherit';
-
     const containedVariant = ownerState.variant === 'contained';
-
     const outlinedVariant = ownerState.variant === 'outlined';
-
     const textVariant = ownerState.variant === 'text';
-
     const softVariant = ownerState.variant === 'soft';
-
     const smallSize = ownerState.size === 'small';
-
     const largeSize = ownerState.size === 'large';
 
     const defaultStyle = {
@@ -30,33 +24,23 @@ export default function Button(theme) {
         // CONTAINED
         ...(containedVariant && {
           color: theme.palette.grey[800],
-          '&:hover': {
-            boxShadow: theme.customShadows.z8,
-            backgroundColor: theme.palette.grey[400],
-          },
+          '&:hover': { boxShadow: theme.customShadows.z8, backgroundColor: theme.palette.grey[400] },
         }),
         // OUTLINED
         ...(outlinedVariant && {
           borderColor: alpha(theme.palette.grey[500], 0.32),
-          '&:hover': {
-            borderColor: theme.palette.text.primary,
-            backgroundColor: theme.palette.action.hover,
-          },
+          '&:hover': { borderColor: theme.palette.text.primary, backgroundColor: theme.palette.action.hover },
         }),
         // TEXT
         ...(textVariant && {
-          '&:hover': {
-            backgroundColor: theme.palette.action.hover,
-          },
+          '&:hover': { backgroundColor: theme.palette.action.hover },
         }),
         // SOFT
         ...(softVariant && {
           boxShadow: theme.customShadows.z8,
           color: theme.palette.text.primary,
           backgroundColor: alpha(theme.palette.grey[500], 0.08),
-          '&:hover': {
-            backgroundColor: alpha(theme.palette.grey[500], 0.24),
-          },
+          '&:hover': { backgroundColor: alpha(theme.palette.grey[500], 0.24) },
         }),
       }),
     };
@@ -65,17 +49,13 @@ export default function Button(theme) {
       ...(ownerState.color === color && {
         // CONTAINED
         ...(containedVariant && {
-          '&:hover': {
-            boxShadow: theme.customShadows[color],
-          },
+          '&:hover': { boxShadow: theme.customShadows[color] },
         }),
         // SOFT
         ...(softVariant && {
           color: theme.palette[color][isLight ? 'main' : 'main'],
           backgroundColor: alpha(theme.palette[color].main, 0.16),
-          '&:hover': {
-            backgroundColor: alpha(theme.palette[color].main, 0.32),
-          },
+          '&:hover': { backgroundColor: alpha(theme.palette[color].main, 0.32) },
         }),
       }),
     }));
@@ -83,27 +63,13 @@ export default function Button(theme) {
     const disabledState = {
       '&.Mui-disabled': {
         // SOFT
-        ...(softVariant && {
-          backgroundColor: theme.palette.action.disabledBackground,
-        }),
+        ...(softVariant && { backgroundColor: theme.palette.action.disabledBackground }),
       },
     };
 
     const size = {
-      ...(smallSize && {
-        height: 30,
-        fontSize: 13,
-        ...(softVariant && {
-          padding: '4px 10px',
-        }),
-      }),
-      ...(largeSize && {
-        height: 48,
-        fontSize: 15,
-        ...(softVariant && {
-          padding: '8px 22px',
-        }),
-      }),
+      ...(smallSize && { height: 30, fontSize: 13, ...(softVariant && { padding: '4px 10px' }) }),
+      ...(largeSize && { height: 48, fontSize: 15, ...(softVariant && { padding: '8px 22px' }) }),
     };
 
     return [...colorStyle, defaultStyle, disabledState, size];
@@ -111,13 +77,9 @@ export default function Button(theme) {
 
   return {
     MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-      },
+      defaultProps: { disableElevation: true },
 
-      styleOverrides: {
-        root: ({ ownerState }) => rootStyle(ownerState),
-      },
+      styleOverrides: { root: ({ ownerState }) => rootStyle(ownerState) },
     },
   };
 }

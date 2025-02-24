@@ -101,6 +101,7 @@ export function DefaultAction({
         variant={variant}
         onClick={handleClick}
         size={small ? 'small' : 'medium'}
+        sx={{ color: variant === 'contained' && color === 'success' && 'common.white' }}
         startIcon={
           (label === 'Clonar' && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
           (label === 'Procurar' && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
@@ -508,5 +509,17 @@ export function DownloadDoc({ temUrl = false, isLoading, funcDownload, funcObter
         </>
       )}
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+MaisProcessos.propTypes = { verMais: PropTypes.func };
+
+export function MaisProcessos({ verMais }) {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'right', mt: 3 }}>
+      <DefaultAction button label="Mais processos" handleClick={() => verMais()} variant="contained" />
+    </Box>
   );
 }

@@ -100,17 +100,17 @@ export default function Router() {
 
 // ------------------------------------------------------- PAGES -------------------------------------------------------
 
-const Controle = Loadable(lazy(() => import('../pages/Controle')));
-const PageNotFound = Loadable(lazy(() => import('../pages/PageNotFound')));
+const Controle = Loadable(lazy(() => import('../pages/page-controle')));
+const PageNotFound = Loadable(lazy(() => import('../pages/page-not-found')));
 
 // ------------------------------------------------------ PROCESSO -----------------------------------------------------
 
-const PageArquivo = Loadable(lazy(() => import('../pages/processo/PageArquivo')));
-const PageProcura = Loadable(lazy(() => import('../pages/processo/PageProcura')));
-const PageProcesso = Loadable(lazy(() => import('../pages/processo/PageProcesso')));
-const PageIndicadores = Loadable(lazy(() => import('../pages/processo/PageIndicadores')));
-const PageFilaTrabalho = Loadable(lazy(() => import('../pages/processo/PageFilaTrabalho')));
-const PageNovoEditarProcesso = Loadable(lazy(() => import('../pages/processo/PageNovoEditarProcesso')));
+const PageArquivo = Loadable(lazy(() => import('../pages/processo/page-arquivo')));
+const PageProcura = Loadable(lazy(() => import('../pages/processo/page-procura')));
+const PageIndicadores = Loadable(lazy(() => import('../pages/processo/page-indicadores')));
+const PageFilaTrabalho = Loadable(lazy(() => import('../pages/processo/page-fila-trabalho')));
+const PageProcesso = Loadable(lazy(() => import('../pages/processo/page-detalhes-processo')));
+const PageNovoEditarProcesso = Loadable(lazy(() => import('../pages/processo/page-novo-editar-processo')));
 
 // --------------------------------------------------- PARAMETRIZAÇÃO --------------------------------------------------
 

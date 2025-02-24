@@ -25,9 +25,9 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
-import { AddItem, DefaultAction } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarProcessos } from '../../components/SearchToolbar';
+import { AddItem, DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // ----------------------------------------------------------------------
@@ -55,7 +55,6 @@ export default function TableProcessos({ from }) {
   });
   const [colaborador, setColaborador] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
-  const [motivo, setMotivo] = useState(localStorage.getItem('motivoP') || null);
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
 
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -63,7 +62,6 @@ export default function TableProcessos({ from }) {
   const { meusAmbientes, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
 
   const perfisProcessos = useMemo(() => [...new Set(processos.map((p) => p.perfil_id))], [processos]);
-  const motivosList = useMemo(() => (from === 'Pendentes' ? dadosList(processos) : []), [from, processos]);
   const colaboradoresList = useMemo(
     () =>
       colaboradores
@@ -79,7 +77,6 @@ export default function TableProcessos({ from }) {
 
   const carregarProcessos = useCallback(
     (item, estadoId, fluxoId, segmento, cursor) => {
-      dispatch(getIndicadores('totalP', { item: 'totalP' }));
       dispatch(
         getListaProcessos(item, {
           cursor,
@@ -95,12 +92,14 @@ export default function TableProcessos({ from }) {
   );
 
   useEffect(() => {
-    if (meusAmbientes?.length > 0) carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, 0);
+    if (meusAmbientes?.length > 0) {
+      dispatch(getIndicadores('totalP', { item: 'totalP' }));
+      carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, 0);
+    }
   }, [dispatch, carregarProcessos, from, segmento, meuAmbiente?.id, meuFluxo?.id, meusAmbientes]);
 
   const dataFiltered = applySortFilter({
     from,
-    motivo,
     filter,
     colaborador,
     comparator: getComparator(order, orderBy),
@@ -126,8 +125,7 @@ export default function TableProcessos({ from }) {
         heading={from}
         sx={{ px: 1 }}
         action={
-          <Stack direction="row" spacing={1.5}>
-            {processosInfo && <DefaultAction button label="Mais processos" handleClick={() => verMais()} />}
+          <Stack direction="row" spacing={0.75}>
             {!meuAmbiente?.observador && meuAmbiente?.isinicial && (
               <AddItem button handleClick={() => navigate(PATH_DIGITALDOCS.filaTrabalho.novoProcesso)} />
             )}
@@ -137,15 +135,12 @@ export default function TableProcessos({ from }) {
       <Card sx={{ p: 1 }}>
         <SearchToolbarProcessos
           tab={from}
-          motivo={motivo}
           filter={filter}
           segmento={segmento}
-          setMotivo={setMotivo}
           setFilter={setFilter}
           meuAmbiente={meuAmbiente}
           setSegmento={setSegmento}
           colaborador={colaborador}
-          motivosList={motivosList}
           setColaborador={setColaborador}
           colaboradoresList={colaboradoresList}
         />
@@ -236,34 +231,17 @@ export default function TableProcessos({ from }) {
           />
         )}
       </Card>
+      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
+        <MaisProcessos verMais={verMais} />
+      )}
     </>
   );
 }
 
 // ----------------------------------------------------------------------
 
-function dadosList(processos) {
-  const motivosList = [];
-  processos?.forEach((row) => {
-    if (row?.observacao === 'Para levantamento do pedido' && !motivosList.includes('Levantamento do pedido'))
-      motivosList.push('Levantamento do pedido');
-    else if (row?.motivo && !motivosList.includes(row?.motivo)) motivosList.push(row?.motivo);
-  });
-  return motivosList;
-}
-
-// ----------------------------------------------------------------------
-
-function applySortFilter({ dados, comparator, filter, motivo, colaborador, from }) {
+function applySortFilter({ dados, comparator, filter, colaborador, from }) {
   dados = applySort(dados, comparator);
-
-  if (from === 'Pendentes' && motivo === 'Levantamento do pedido')
-    dados = dados.filter((row) => row?.observacao && row?.observacao === 'Para levantamento do pedido');
-
-  if (from === 'Pendentes' && motivo && motivo !== 'Levantamento do pedido')
-    dados = dados.filter(
-      (row) => row?.motivo && row?.motivo === motivo && row?.observacao !== 'Para levantamento do pedido'
-    );
 
   if ((from === 'Retidos' || from === 'Atribuídos') && colaborador?.id)
     dados = dados.filter(({ perfil_id: pid }) => pid === colaborador?.id);

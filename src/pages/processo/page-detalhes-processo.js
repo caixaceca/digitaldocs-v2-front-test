@@ -143,11 +143,8 @@ export default function PageProcesso() {
         done !== 'Processo resgatado' &&
         done !== 'Confidencialidade atualizado'
       ) {
-        console.log(done);
-      } else if (proxAnt?.proximo) {
-        irParaProcesso(proxAnt?.proximo);
-      } else {
-        navigate(linkNavigate);
+        if (proxAnt?.proximo) irParaProcesso(proxAnt?.proximo);
+        else navigate(linkNavigate);
       }
     },
   });
