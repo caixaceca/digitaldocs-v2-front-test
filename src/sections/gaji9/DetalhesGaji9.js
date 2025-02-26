@@ -55,8 +55,8 @@ function DetalhesTab({ item, dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
 
   const tabsList = [
-    { value: 'Info', component: <DetalhesContent dados={dados} /> },
-    ...((item === 'clausulas' && [{ value: 'Alíneas', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
+    { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
+    ...((item === 'clausulas' && [{ value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
       (item === 'funcoes' && [
         { value: 'Grupos', component: <UtilizadorInfo dados={dados?.grupos?.map(({ designacao }) => designacao)} /> },
         { value: 'Permissões', component: <UtilizadorInfo dados={dados?.acessos} /> },
@@ -85,7 +85,7 @@ function UtilizadorInfo({ dados = [] }) {
   return (
     <Stack sx={{ px: 0.5, mt: 3 }}>
       {dados?.length === 0 ? (
-        <SearchNotFoundSmall message="Nenhum alínea adicionada..." />
+        <SearchNotFoundSmall message="Nenhum número adicionado..." />
       ) : (
         <Stack useFlexGap flexWrap="wrap" justifyContent="center" direction="row" spacing={1.5} sx={{ pt: 1 }}>
           {sortPermissoes(dados)?.map((row, index) => (
@@ -107,7 +107,7 @@ function AlineasClausula({ dados = [] }) {
   return (
     <Stack sx={{ px: 0.5, mt: 3 }}>
       {dados?.length === 0 ? (
-        <SearchNotFoundSmall message="Nenhum alínea adicionada..." />
+        <SearchNotFoundSmall message="Nenhum número adicionado..." />
       ) : (
         <>
           {dados?.map((row, index) => (
@@ -210,7 +210,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     )}
                     {dados?.numero_ordem > -1 && (
                       <TableRowItem
-                        title="Nº ordem:"
+                        title="Nº de cláusula:"
                         text={`${dados?.numero_ordem}${dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''}`}
                       />
                     )}
@@ -220,7 +220,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="Sufixo:" text={dados?.sufixo} />
                     <TableRowItem title="Rótulo:" text={dados?.rotulo} />
                     <TableRowItem title="Minuta:" text={dados?.minuta} />
-                    <TableRowItem title="Título:" text={dados?.titulo} />
+                    <TableRowItem title={item === 'clausulas' ? 'Epígrafe:' : 'Título:'} text={dados?.titulo} />
                     <TableRowItem title="Subtítulo:" text={dados?.subtitulo} />
                     <TableRowItem title="Representante:" text={dados?.representante} />
                     {dados?.data_entrega && (

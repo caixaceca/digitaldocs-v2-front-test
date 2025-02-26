@@ -49,7 +49,6 @@ function SubTabsParametrizacao({ item, label }) {
       return [
         { value: 'Linhas', component: <TableParametrizacao item="linhas" /> },
         { value: 'Despesas', component: <TableParametrizacao item="despesas" /> },
-        { value: 'Garantias', component: <TableParametrizacao item="garantias" /> },
       ];
     }
     if (item === 'motivos') {

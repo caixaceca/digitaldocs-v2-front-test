@@ -23,6 +23,7 @@ import { pertencoAoEstado } from '../../utils/validarAcesso';
 import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
 // redux
+import { closeModal } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
@@ -34,6 +35,7 @@ import { DefaultAction } from '../../components/Actions';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 // sections
 import { TableProcessos } from '../../sections/tabela';
+import ProcessoForm from '../../sections/processo/form/form-processo';
 
 // ----------------------------------------------------------------------
 
@@ -56,7 +58,8 @@ export default function PageFilaTrabalho() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { totalP } = useSelector((state) => state.indicadores);
   const { cc, dateUpdate } = useSelector((state) => state.intranet);
-  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     if (cc?.id && add(new Date(dateUpdate), { minutes: 2 }) < new Date())
@@ -108,7 +111,9 @@ export default function PageFilaTrabalho() {
         <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
           <Stack direction="row" spacing={1} sx={{ px: 2, py: 1, color: 'common.white', bgcolor: 'primary.main' }}>
             <Typography variant="h4">Fila de trabalho</Typography>
-            <DefaultAction variant="outlined" label="Nº PROCESSOS" color="inherit" handleClick={() => onOpen()} />
+            {meusAmbientes?.length > 0 && (
+              <DefaultAction variant="outlined" label="Nº PROCESSOS" color="inherit" handleClick={() => onOpen()} />
+            )}
             {open && <TotalProcessos onCancel={() => onClose()} />}
           </Stack>
 
@@ -139,6 +144,10 @@ export default function PageFilaTrabalho() {
         </Card>
 
         {tabs.map((tab) => tab.value === currentTab && <Box key={tab.value}>{tab.component}</Box>)}
+
+        {isOpenModal === 'adicionar-processo' && (
+          <ProcessoForm processo={null} onCancel={() => dispatch(closeModal())} ambientId={meuAmbiente?.id} />
+        )}
       </Container>
     </Page>
   );
@@ -179,7 +188,7 @@ export function TotalProcessos({ onCancel }) {
             fullWidth
             value={estado}
             disableClearable
-            options={meusAmbientes}
+            options={meusAmbientes || []}
             getOptionLabel={(option) => option?.nome}
             onChange={(event, newValue) => {
               setFluxo(null);
@@ -195,7 +204,7 @@ export function TotalProcessos({ onCancel }) {
             onChange={(event, newValue) => setFluxo(newValue)}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
-            options={estado?.fluxos?.map(({ fluxo_id: id, assunto }) => ({ id, assunto }))}
+            options={estado?.fluxos?.map(({ fluxo_id: id, assunto }) => ({ id, assunto })) || []}
           />
         </Stack>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mt: 3 }}>

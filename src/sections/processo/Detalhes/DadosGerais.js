@@ -38,10 +38,10 @@ export default function DadosGerais() {
           {processo ? (
             <Grid container spacing={3}>
               <Grid item xs={12} lg={hasAnexos && 5}>
-                <Grid id="detalhes">
+                <Stack id="detalhes">
                   {!isPS && processo?.nota && <NotaProcesso nota={processo?.nota} segmento={processo?.segmento} />}
                   <DetalhesProcesso isPS={isPS} processo={processo} />
-                </Grid>
+                </Stack>
               </Grid>
               {hasAnexos && (
                 <Grid item xs={12} lg={7}>

@@ -21,7 +21,7 @@ import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, getAll, openModal, selectItem, closeModal } from '../../redux/slices/digitaldocs';
+import { setModal, getAll, closeModal } from '../../redux/slices/digitaldocs';
 // Components
 import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
@@ -84,7 +84,7 @@ export default function TableCartoes() {
   const [filter, setFilter] = useState(localStorage.getItem('filterCartao') || '');
   const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
   const [tipoCartao, setTipoCartao] = useState(localStorage.getItem('tipoCartao') || '');
-  const { cartoes, done, isLoading, isOpenModal, isOpenModal1 } = useSelector((state) => state.digitaldocs);
+  const { cartoes, done, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
   const { isAdmin, isAuditoria, confirmarCartoes, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const uosList = useMemo(
     () =>
@@ -305,17 +305,14 @@ export default function TableCartoes() {
                               <DefaultAction
                                 label="EDITAR"
                                 color="warning"
-                                handleClick={() => {
-                                  dispatch(openModal('update'));
-                                  dispatch(selectItem(row));
-                                }}
+                                handleClick={() => dispatch(setModal({ modal: 'balcao-entrega', dados: row }))}
                               />
                             )}
                             <DefaultAction
                               label="DETALHES"
                               handleClick={() => {
-                                dispatch(getSuccess({ item: 'isOpenModal1', dados: true }));
-                                dispatch(getAll('cartao', { mail, id: row?.id }));
+                                dispatch(setModal({ modal: 'detalhes-cartao', dados: null }));
+                                dispatch(getAll('cartao', { id: row?.id }));
                               }}
                             />
                           </Stack>
@@ -346,8 +343,8 @@ export default function TableCartoes() {
         )}
       </Card>
 
-      {isOpenModal1 && <Detalhes closeModal={() => dispatch(closeModal())} />}
-      {isOpenModal && <BalcaoEntregaForm onCancel={() => dispatch(closeModal())} />}
+      {isOpenModal === 'detalhes-cartao' && <Detalhes closeModal={() => dispatch(closeModal())} />}
+      {isOpenModal === 'balcao-entrega' && <BalcaoEntregaForm onCancel={() => dispatch(closeModal())} />}
       {open && (
         <ValidarMultiploForm
           fase={fase}

@@ -52,13 +52,10 @@ export function ArquivarForm({ naoFinal, onClose }) {
   );
 
   const formSchema = Yup.object().shape({
-    entidades: informarConta && Yup.string().required('Nº de entidade(s) não pode ficar vazio'),
+    entidades: informarConta && Yup.string().required().label('Nº de entidade(s)'),
+    data_entrada: Yup.date().typeError('Introduza uma data válida').required().label('Data de entrada'),
     conta:
-      informarConta &&
-      Yup.number().typeError('Introduza o nº de conta do titular').positive('Introduza um nº de conta válido'),
-    data_entrada: Yup.date()
-      .required('Data de entrada não pode ficar vazio')
-      .typeError('Data de entrada não pode ficar vazio'),
+      informarConta && Yup.number().positive().typeError('Introduza o nº de conta do titular').label('Nº de conta'),
   });
 
   const defaultValues = useMemo(
@@ -117,21 +114,21 @@ export function ArquivarForm({ naoFinal, onClose }) {
             {naoFinal?.length > 0 && (
               <Grid item xs={12}>
                 <Alert severity="error">
-                  <Typography variant="body2">
+                  <Typography variant="caption">
                     Geralmente, este processo é encaminhado para outro estado fora da sua Unidade Orgânica.
                     Certifique-se de que pretende realmente arquivá-lo em vez de o encaminhar.
                   </Typography>
-                  <Typography sx={{ typography: 'caption', fontWeight: 700, mt: 1 }}>Posssíveis destinos:</Typography>
+                  <Typography sx={{ typography: 'caption', fontWeight: 700, mt: 0.5 }}>Posssíveis destinos:</Typography>
                   {naoFinal?.map((row) => (
                     <Stack key={row} direction="row" spacing={0.5} alignItems="center">
-                      <CircleIcon sx={{ width: 8, height: 8, ml: 1 }} />
+                      <CircleIcon sx={{ width: 6, height: 6, ml: 1 }} />
                       <Typography variant="caption">{row}</Typography>
                     </Stack>
                   ))}
                 </Alert>
               </Grid>
             )}
-            <Grid item xs={12} sm={processo?.assunto !== 'Encerramento de conta' ? 6 : 12}>
+            <Grid item xs={12} sm={6}>
               <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -140,9 +137,11 @@ export function ArquivarForm({ naoFinal, onClose }) {
             <Grid item xs={12} sm={6}>
               <RHFTextField name="entidades" label="Nº entidade(s)" />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFNumberField name="conta" label="Nº de conta" />
-            </Grid>
+            {processo?.assunto !== 'Encerramento de conta' && (
+              <Grid item xs={12} sm={6}>
+                <RHFNumberField name="conta" label="Nº de conta" />
+              </Grid>
+            )}
             <Grid item xs={12}>
               <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
             </Grid>
@@ -191,13 +190,8 @@ export function DesarquivarForm({ id, colaboradoresList }) {
         estado_id: values?.estado?.id,
         observacao: values?.observacao,
       };
-      dispatch(
-        updateItem('desarquivar', JSON.stringify(dados), {
-          id,
-          msg: 'Processo desarquivado',
-          afterSuccess: () => dispatch(closeModal()),
-        })
-      );
+      const params = { id, msg: 'Processo desarquivado', afterSuccess: () => dispatch(closeModal()) };
+      dispatch(updateItem('desarquivar', JSON.stringify(dados), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -208,23 +202,15 @@ export function DesarquivarForm({ id, colaboradoresList }) {
       <DialogTitle>Desarquivar</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteObj
-                name="estado"
-                label="Estado"
-                options={(processo?.destinosDesarquivamento || [])?.map((row) => ({ id: row?.id, label: row?.nome }))}
-              />
-            </Grid>
-            {values?.estado?.id && (
-              <Grid item xs={12}>
-                <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradoresList} />
-              </Grid>
-            )}
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
-            </Grid>
-          </Grid>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFAutocompleteObj
+              name="estado"
+              label="Estado"
+              options={(processo?.destinosDesarquivamento || [])?.map((row) => ({ id: row?.id, label: row?.nome }))}
+            />
+            {values?.estado?.id && <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradoresList} />}
+            <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
+          </Stack>
           <DialogButons color="error" label="Desarquivar" isSaving={isSaving} onCancel={() => dispatch(closeModal())} />
         </FormProvider>
       </DialogContent>

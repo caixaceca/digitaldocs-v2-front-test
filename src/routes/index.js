@@ -51,8 +51,6 @@ export default function Router() {
             { path: ':id', element: <PageProcesso /> },
             { path: 'lista', element: <PageFilaTrabalho /> },
             { path: 'procurar', element: <PageProcura /> },
-            { path: 'novo', element: <PageNovoEditarProcesso /> },
-            { path: ':id/editar', element: <PageNovoEditarProcesso /> },
           ],
         },
         {
@@ -110,7 +108,6 @@ const PageProcura = Loadable(lazy(() => import('../pages/processo/page-procura')
 const PageIndicadores = Loadable(lazy(() => import('../pages/processo/page-indicadores')));
 const PageFilaTrabalho = Loadable(lazy(() => import('../pages/processo/page-fila-trabalho')));
 const PageProcesso = Loadable(lazy(() => import('../pages/processo/page-detalhes-processo')));
-const PageNovoEditarProcesso = Loadable(lazy(() => import('../pages/processo/page-novo-editar-processo')));
 
 // --------------------------------------------------- PARAMETRIZAÇÃO --------------------------------------------------
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLGAJI9 } from '../../utils/axios';
+import { BASEURLGAJI9 } from '../../utils/apisUrl';
 import { meusAcessosGaji9 } from '../../utils/formatObject';
 //
 import {

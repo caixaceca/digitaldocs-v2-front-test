@@ -18,7 +18,7 @@ import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
-import { getListaProcessos } from '../../redux/slices/digitaldocs';
+import { getListaProcessos, setModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
@@ -127,7 +127,7 @@ export default function TableProcessos({ from }) {
         action={
           <Stack direction="row" spacing={0.75}>
             {!meuAmbiente?.observador && meuAmbiente?.isinicial && (
-              <AddItem button handleClick={() => navigate(PATH_DIGITALDOCS.filaTrabalho.novoProcesso)} />
+              <AddItem button handleClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
             )}
           </Stack>
         }

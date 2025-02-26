@@ -7,7 +7,7 @@ import { useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
@@ -16,18 +16,23 @@ import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
 import { FormProvider } from '../../../components/hook-form';
 import { shapeText, shapeDate, shapeNumber } from '../../../components/hook-form/yup-shape';
 // sections
-import ProcessoCreditoForm from './ProcessoCreditoForm';
+import ProcessoCreditoForm from './form-processo-credito';
 
 // ----------------------------------------------------------------------
 
-ProcessoCredito.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, processo: PropTypes.object };
+ProcessoCredito.propTypes = {
+  isEdit: PropTypes.bool,
+  fluxo: PropTypes.object,
+  estado: PropTypes.object,
+  processo: PropTypes.object,
+};
 
-export default function ProcessoCredito({ isEdit, processo, fluxo }) {
+export default function ProcessoCredito({ isEdit, processo, fluxo, estado }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { cc } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { meuAmbiente, linhas } = useSelector((state) => state.parametrizacao);
+  const { linhas } = useSelector((state) => state.parametrizacao);
   const credito = processo?.credito || null;
 
   const formSchema = Yup.object().shape({
@@ -103,10 +108,10 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
       formData.append('titular', values.titular);
       formData.append('fluxo_id', values.fluxo_id);
       formData.append('segmento', values.segmento);
+      formData.append('uo_origem_id', estado?.uo_id);
+      formData.append('estado_atual_id', estado?.id);
       formData.append('finalidade', values.finalidade);
       formData.append('linha_id', values?.linha_id?.id);
-      formData.append('uo_origem_id', meuAmbiente?.uo_id);
-      formData.append('estado_atual_id', meuAmbiente?.id);
       formData.append('setor_atividade', values.setor_atividade);
       formData.append('montante_solicitado', values.montante_solicitado);
       formData.append('data_entrada', format(values.data_entrada, 'yyyy-MM-dd'));
@@ -144,16 +149,14 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
           formData.append('data_aprovacao', '');
           formData.append('montante_aprovado', '');
         }
-        if (values.situacao_final_mes === 'Indeferido' && values.data_indeferido) {
+        if (values.situacao_final_mes === 'Indeferido' && values.data_indeferido)
           formData.append('data_indeferido', format(values.data_indeferido, 'yyyy-MM-dd'));
-        } else {
-          formData.append('data_indeferido', '');
-        }
-        if (values.situacao_final_mes === 'Desistido' && values.data_desistido) {
+        else formData.append('data_indeferido', '');
+
+        if (values.situacao_final_mes === 'Desistido' && values.data_desistido)
           formData.append('data_desistido', format(values.data_desistido, 'yyyy-MM-dd'));
-        } else {
-          formData.append('data_desistido', '');
-        }
+        else formData.append('data_desistido', '');
+
         if (values.situacao_final_mes === 'Contratado') {
           formData.append('garantia', values.garantia);
           formData.append('taxa_juro', values.taxa_juro);
@@ -181,16 +184,12 @@ export default function ProcessoCredito({ isEdit, processo, fluxo }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <ProcessoCreditoForm isEdit={isEdit} processo={processo} />
-        </Grid>
-        <Grid item xs={12} textAlign="center">
-          <LoadingButton size="large" type="submit" variant="contained" loading={isSaving}>
-            {!isEdit ? 'Adicionar' : 'Guardar'}
-          </LoadingButton>
-        </Grid>
-      </Grid>
+      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
+        <ProcessoCreditoForm isEdit={isEdit} processo={processo} />
+        <LoadingButton type="submit" variant="contained" loading={isSaving}>
+          {!isEdit ? 'Adicionar' : 'Guardar'}
+        </LoadingButton>
+      </Stack>
     </FormProvider>
   );
 }

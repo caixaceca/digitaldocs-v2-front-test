@@ -21,7 +21,7 @@ export function PdfPreview({ url }) {
     document?.getElementById('detalhes')?.clientHeight - document?.getElementById('anexos')?.clientHeight - 52;
 
   return (
-    <Grid item xs={12} sx={{ height: `${heightContent}px`, minHeight: '650px' }}>
+    <Grid item xs={12} sx={{ height: `${heightContent}px`, minHeight: '660px' }}>
       <Viewer
         fileUrl={url}
         localization={pt}

@@ -9,10 +9,10 @@ import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
+import { noDados } from '../../utils/formatText';
 import { setItemValue } from '../../utils/formatObject';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -31,16 +31,15 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 import {
   LinhaForm,
-  FluxoForm,
   EstadoForm,
   OrigemForm,
   DespesaForm,
-  GarantiaForm,
   DocumentoForm,
   MotivoTransicaoForm,
   MotivoPendenciaForm,
 } from './ParametrizacaoForm';
 import { Detalhes } from './Detalhes';
+import { FluxoForm } from './form-fluxo';
 import { applySortFilter } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -59,7 +58,6 @@ export default function TableParametrizacao({ item }) {
     estados,
     origens,
     despesas,
-    garantias,
     isLoading,
     isOpenView,
     documentos,
@@ -110,7 +108,6 @@ export default function TableParametrizacao({ item }) {
       (item === 'fluxos' && fluxos) ||
       (item === 'origens' && origens) ||
       (item === 'despesas' && despesas) ||
-      (item === 'garantias' && garantias) ||
       (item === 'documentos' && documentos) ||
       (item === 'motivosPendencia' && motivosPendencia) ||
       (item === 'motivosTransicao' && motivosTransicao) ||
@@ -125,7 +122,6 @@ export default function TableParametrizacao({ item }) {
     const itemSingle =
       (item === 'origens' && 'origem') ||
       (item === 'despesas' && 'despesa') ||
-      (item === 'garantias' && 'garantia') ||
       (item === 'documentos' && 'documento') ||
       (item === 'motivosTransicao' && 'motivoTransicao');
 
@@ -156,10 +152,10 @@ export default function TableParametrizacao({ item }) {
                   <SkeletonTable
                     row={10}
                     column={
-                      (item === 'fluxos' && 6) ||
                       (item === 'linhas' && 4) ||
                       (item === 'origens' && 7) ||
-                      ((item === 'estados' || item === 'documentos') && 5) ||
+                      (item === 'documentos' && 5) ||
+                      ((item === 'fluxos' || item === 'estados') && 6) ||
                       3
                     }
                   />
@@ -172,7 +168,7 @@ export default function TableParametrizacao({ item }) {
                           <TableCell>{row.descricao}</TableCell>
                         </>
                       )) ||
-                        ((item === 'despesas' || item === 'garantias' || item === 'motivosTransicao') && (
+                        ((item === 'despesas' || item === 'motivosTransicao') && (
                           <TableCell>{row.designacao || row.descritivo}</TableCell>
                         )) ||
                         (item === 'motivosPendencia' && (
@@ -253,7 +249,6 @@ export default function TableParametrizacao({ item }) {
           {item === 'estados' && <EstadoForm onCancel={() => dispatch(closeModal())} />}
           {item === 'origens' && <OrigemForm onCancel={() => dispatch(closeModal())} />}
           {item === 'despesas' && <DespesaForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'garantias' && <GarantiaForm onCancel={() => dispatch(closeModal())} />}
           {item === 'documentos' && <DocumentoForm onCancel={() => dispatch(closeModal())} />}
           {item === 'motivosPendencia' && <MotivoPendenciaForm onCancel={() => dispatch(closeModal())} />}
           {item === 'motivosTransicao' && <MotivoTransicaoForm onCancel={() => dispatch(closeModal())} />}
@@ -271,20 +266,8 @@ export function EstadoDetail({ row = null }) {
   return (
     <>
       <TableCell>{row.nome}</TableCell>
-      <TableCell>
-        <Stack direction="row" alignItems="center">
-          <Typography variant="body2">{row.uo}</Typography>
-          {!!row?.balcao && (
-            <>
-              &nbsp;(
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Balc:
-              </Typography>
-              <Typography variant="body2">&nbsp;{row.balcao})</Typography>
-            </>
-          )}
-        </Stack>
-      </TableCell>
+      <TableCell>{row.uo}</TableCell>
+      <TableCell>{row.balcao || noDados('(Não definido)')}</TableCell>
       <CellChecked check={row.is_inicial} />
       <CellChecked check={row.is_final} />
     </>
@@ -336,39 +319,37 @@ export function dadosComColaborador(dados, colaboradores) {
 function headerTable(item) {
   return [
     ...((item === 'motivosPendencia' && [
-      { id: 'motivo', label: 'Designação', align: 'left' },
-      { id: 'obs', label: 'Observação', align: 'left' },
+      { id: 'motivo', label: 'Designação' },
+      { id: 'obs', label: 'Observação' },
     ]) ||
-      ((item === 'motivosTransicao' || item === 'despesas') && [
-        { id: 'designacao', label: 'Designação', align: 'left' },
-      ]) ||
-      (item === 'garantias' && [{ id: 'descritivo', label: 'Designação', align: 'left' }]) ||
+      ((item === 'motivosTransicao' || item === 'despesas') && [{ id: 'designacao', label: 'Designação' }]) ||
       (item === 'linhas' && [
-        { id: 'linha', label: 'Designação', align: 'left' },
-        { id: 'descricao', label: 'Segmento', align: 'left' },
+        { id: 'linha', label: 'Designação' },
+        { id: 'descricao', label: 'Segmento' },
       ]) ||
       (item === 'fluxos' && [
-        { id: 'assunto', label: 'Assunto', align: 'left' },
-        { id: 'modelo', label: 'Modelo', align: 'left' },
+        { id: 'assunto', label: 'Assunto' },
+        { id: 'modelo', label: 'Modelo' },
         { id: 'is_interno', label: 'Interno', align: 'center' },
         { id: 'is_credito', label: 'Crédito', align: 'center' },
       ]) ||
       (item === 'estados' && [
-        { id: 'nome', label: 'Nome', align: 'left' },
-        { id: 'uo', label: 'Unidade orgânica', align: 'left' },
+        { id: 'nome', label: 'Nome' },
+        { id: 'uo', label: 'Unidade orgânica' },
+        { id: 'balcao', label: 'Nº de balcão' },
         { id: 'is_inicial', label: 'Inicial', align: 'center' },
         { id: 'is_final', label: 'Final', align: 'center' },
       ]) ||
       (item === 'origens' && [
-        { id: 'designacao', label: 'Designação', align: 'left' },
-        { id: 'seguimento', label: 'Segmento', align: 'left' },
-        { id: 'tipo', label: 'Tipo', align: 'left' },
-        { id: 'ilha', label: 'Localização', align: 'left' },
-        { id: 'email', label: 'Email', align: 'left' },
-        { id: 'telefone', label: 'Telefone', align: 'left' },
+        { id: 'designacao', label: 'Designação' },
+        { id: 'seguimento', label: 'Segmento' },
+        { id: 'tipo', label: 'Tipo' },
+        { id: 'ilha', label: 'Localização' },
+        { id: 'email', label: 'Email' },
+        { id: 'telefone', label: 'Telefone' },
       ]) ||
       (item === 'documentos' && [
-        { id: 'designacao', label: 'Designação', align: 'left' },
+        { id: 'designacao', label: 'Designação' },
         { id: 'obriga_prazo_validade', label: 'Validade', align: 'center' },
         { id: 'anexo', label: 'Anexo', align: 'center' },
       ]) ||

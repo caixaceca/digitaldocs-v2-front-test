@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/axios';
+import { BASEURLDD } from '../../utils/apisUrl';
 import { downloadDoc, canPreview } from '../../utils/formatFile';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
@@ -14,12 +14,11 @@ import { selectUtilizador, headerOptions, actionGet, doneSucess, hasError } from
 const initialState = {
   done: '',
   error: '',
+  isOpenModal: '',
   isLoadingFile: '',
   isSaving: false,
   isLoading: false,
   isLoadingP: false,
-  isOpenModal: false,
-  isOpenModal1: false,
   isLoadingPreview: false,
   processo: null,
   filePreview: null,
@@ -73,6 +72,7 @@ const slice = createSlice({
 
     addItemProcesso(state, { payload: { item, dados } }) {
       if (!item) return;
+      if (!state.processo) state.processo = {};
       state.processo[item] = dados;
     },
 
@@ -198,24 +198,13 @@ const slice = createSlice({
       state.selectedAnexoId = null;
     },
 
-    selectItem(state, action) {
-      state.isOpenModal = true;
-      state.selectedItem = action.payload;
-    },
-
-    selectParecer(state, action) {
-      state.isOpenModal1 = true;
-      state.selectedItem = action.payload;
-    },
-
-    openModal(state) {
-      state.isOpenModal = true;
-      state.selectedItem = null;
+    setModal(state, action) {
+      state.isOpenModal = action.payload.modal;
+      state.selectedItem = action.payload.dados;
     },
 
     closeModal(state) {
-      state.isOpenModal = false;
-      state.isOpenModal1 = false;
+      state.isOpenModal = '';
       state.selectedItem = null;
     },
   },
@@ -225,8 +214,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, getSuccess, closeModal, selectItem, selectParecer, resetProcesso, alterarBalcaopSuccess } =
-  slice.actions;
+export const { setModal, getSuccess, closeModal, resetProcesso, alterarBalcaopSuccess } = slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -631,8 +619,12 @@ export function updateItem(item, dados, params) {
           `${BASEURLDD}/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`) ||
         (item === 'parecer estado' &&
           `${BASEURLDD}/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`) ||
+        (item === 'pendencia' &&
+          `${BASEURLDD}/v2/processos/pender/misto/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}`) ||
         (item === 'confidencialidade' &&
           `${BASEURLDD}/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
+        (item === 'aceitar' &&
+          `${BASEURLDD}/v2/processos/aceitar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
         (item === 'libertar' &&
           `${BASEURLDD}/v2/processos/abandonar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
         (item === 'cancelar' &&
@@ -646,45 +638,22 @@ export function updateItem(item, dados, params) {
       if (apiUrl) {
         await axios.patch(apiUrl, dados, options);
         if (item === 'anexo') dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
-      } else {
-        switch (item) {
-          case 'processo': {
-            await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
-            break;
+        if (item === 'aceitar') {
+          dispatch(slice.actions.aceitarSuccess({ ...params, perfilId }));
+          if (params?.modo === 'serie') {
+            dispatch(slice.actions.addItemProcesso({ item: 'atribuidoAMim', dados: true }));
+            dispatch(getInfoProcesso('destinos', { id: params?.id, estadoId: params?.estadoId }));
           }
-          case 'aceitar': {
-            await axios.patch(
-              `${BASEURLDD}/v2/processos/aceitar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-              null,
-              options
-            );
-            dispatch(slice.actions.aceitarSuccess({ ...params, perfilId }));
-            if (params?.modo === 'serie') {
-              dispatch(slice.actions.addItemProcesso({ item: 'atribuidoAMim', dados: true }));
-              dispatch(getInfoProcesso('destinos', { id: params?.id, estadoId: params?.estadoId }));
-            }
-            break;
-          }
-          case 'resgatar': {
-            const response = await axios.get(
-              `${BASEURLDD}/v2/processos/resgatar/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
-              options
-            );
-            dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
-            break;
-          }
-          case 'pendencia': {
-            await axios.patch(
-              `${BASEURLDD}/v2/processos/pender/misto/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}`,
-              dados,
-              options
-            );
-            break;
-          }
-
-          default:
-            break;
         }
+      }
+      if (item === 'processo')
+        await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
+      if (item === 'resgatar') {
+        const response = await axios.get(
+          `${BASEURLDD}/v2/processos/resgatar/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
+          options
+        );
+        dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
       }
       params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);

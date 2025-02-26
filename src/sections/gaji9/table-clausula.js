@@ -86,7 +86,7 @@ export default function TableClausula({ inativos }) {
                 onSort={onSort}
                 orderBy={orderBy}
                 headLabel={[
-                  { id: 'titulo', label: 'Título' },
+                  { id: 'titulo', label: 'Epígrafe' },
                   { id: 'numero_ordem', label: 'Nº', align: 'right' },
                   { id: 'tipo_titular', label: 'Tipo titular' },
                   { id: 'tipo_garantia', label: 'Tipo garantia' },

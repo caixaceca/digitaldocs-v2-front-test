@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/axios';
+import { BASEURLDD } from '../../utils/apisUrl';
 //
 import { getAccessToken } from './intranet';
 import { selectUtilizador, headerOptions, actionGet, hasError } from './sliceActions';

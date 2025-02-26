@@ -76,7 +76,7 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
         title={isEdit ? 'Editar cláusula' : 'Adicionar cláusula'}
         subtitle={
           <>
-            <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Alíneas', 'Resumo']} sx={{ mt: 3 }} />
+            <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Números', 'Resumo']} sx={{ mt: 3 }} />
             {(activeStep === 1 || activeStep === 2) && (
               <Stack sx={{ mb: 2 }}>
                 <Autocomplete
@@ -223,8 +223,8 @@ function Conteudo() {
   const { selectedItem } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
-    numero_ordem: Yup.number().min(0).integer().required().label('Nº ordem'),
-    titulo: dadosStepper?.seccao !== 'Solta' && Yup.string().required().label('Título'),
+    numero_ordem: Yup.number().min(0).integer().required().label('Nº de cláusula'),
+    titulo: dadosStepper?.seccao !== 'Solta' && Yup.string().required().label('Epígrafe'),
     conteudo:
       dadosStepper?.seccao && dadosStepper?.seccao !== 'Condicional' && Yup.string().required().label('Conteúdo'),
   });
@@ -251,9 +251,9 @@ function Conteudo() {
         {dadosStepper?.seccao !== 'Solta' && (
           <Stack direction="row" spacing={3}>
             {(!dadosStepper?.seccao || dadosStepper?.seccao === 'Condicional') && (
-              <RHFNumberField name="numero_ordem" label="Nº ordem" sx={{ width: { xs: 100, md: 150 } }} />
+              <RHFNumberField name="numero_ordem" label="Nº de cláusula" sx={{ width: { xs: 100, md: 150 } }} />
             )}
-            <RHFTextField name="titulo" label="Título" />
+            <RHFTextField name="titulo" label="Epígrafe" />
           </Stack>
         )}
         <RHFTextField name="conteudo" label="Conteúdo" multiline minRows={8} maxRows={12} />
@@ -274,11 +274,11 @@ function Alineas() {
     alineas: Yup.array(
       Yup.object({
         // conteudo: Yup.string().required().label('Conteúdo'),
-        numero_ordem: Yup.number().positive().integer().label('Alínea'),
+        numero_ordem: Yup.number().positive().integer().label('Número'),
         sub_alineas: Yup.array(
           Yup.object({
             conteudo: Yup.string().required().label('Conteúdo'),
-            numero_ordem: Yup.number().positive().integer().label('Subalínea'),
+            numero_ordem: Yup.number().positive().integer().label('Alínea'),
           })
         ),
       })
@@ -305,14 +305,14 @@ function Alineas() {
             variant="body2"
             sx={{ textAlign: 'center', fontStyle: 'italic', p: 3, bgcolor: 'background.neutral', borderRadius: 1 }}
           >
-            Ainda não foi adicionada nenhuma alínea...
+            Ainda não foi adicionado nenhum número...
           </Typography>
         )}
         {fields.map((item, index) => (
           <Paper key={`alinea_${index}`} variant="elevation" elevation={10} sx={{ flexGrow: 1, p: 1 }}>
             <Stack spacing={1} direction="row" alignItems="center">
               <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
-                <RHFNumberField name={`alineas[${index}].numero_ordem`} label="Alínea" sx={{ width: 70 }} />
+                <RHFNumberField name={`alineas[${index}].numero_ordem`} label="Número" sx={{ width: 70 }} />
                 <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name={`alineas[${index}].conteudo`} />
               </Stack>
               <DefaultAction small variant="filled" color="error" label="ELIMINAR" handleClick={() => remove(index)} />
@@ -323,7 +323,7 @@ function Alineas() {
         <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
           <DefaultAction
             button
-            label="Alínea"
+            label="Número"
             icon="adicionar"
             variant="contained"
             handleClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '', sub_alineas: [] })}
@@ -344,11 +344,11 @@ export function Subalineas({ alineaIndex }) {
   return (
     <Stack spacing={2} sx={{ pl: { md: 9 }, mt: 3 }}>
       {fields.map((item, index) => (
-        <Stack spacing={1} direction="row" alignItems="center" key={`alinea_${alineaIndex}_sub_alinea${index}`}>
+        <Stack spacing={1} direction="row" alignItems="center" key={`alinea_${alineaIndex}_sub_alinea_${index}`}>
           <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
             <RHFNumberField
               size="small"
-              label="Subalínea"
+              label="Alínea"
               sx={{ width: 90 }}
               name={`alineas[${alineaIndex}].sub_alineas[${index}].numero_ordem`}
             />
@@ -367,7 +367,7 @@ export function Subalineas({ alineaIndex }) {
       <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
         <AddItem
           small
-          label="Subalínea"
+          label="Alínea"
           handleClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '' })}
         />
       </Stack>
@@ -450,22 +450,22 @@ function Resumo({ minutaId, onClose }) {
       <TitleResumo title="Conteúdo" action={() => dispatch(gotoStep(1))} />
       <Table size="small">
         <TableBody>
-          <TableRowItem title="Nº ordem:" text={dadosStepper?.numero_ordem?.toString()} />
-          <TableRowItem title="Título:" text={dadosStepper?.titulo} />
+          <TableRowItem title="Nº de cláusula:" text={dadosStepper?.numero_ordem?.toString()} />
+          <TableRowItem title="Epígrafe:" text={dadosStepper?.titulo} />
           <TableRowItem title="Contúdo:" text={dadosStepper?.conteudo} />
         </TableBody>
       </Table>
-      <TitleResumo title="Alíneas" action={() => dispatch(gotoStep(2))} />
+      <TitleResumo title="Números" action={() => dispatch(gotoStep(2))} />
       {dadosStepper?.alineas?.length > 0 ? (
         dadosStepper?.alineas?.map((row, index) => (
-          <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
+          <Stack direction="row" key={`res_alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
             <Typography variant="subtitle2">{row?.numero_ordem}.</Typography>
             <Stack>
               <Typography variant="body2" sx={{ textAlign: 'justify' }}>
                 {row?.conteudo ? newLineText(row?.conteudo) : ''}
               </Typography>
               {row?.sub_alineas?.map((item, index1) => (
-                <Stack direction="row" key={`alinea_${index}_sub_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
+                <Stack direction="row" key={`res_alinea_${index}_sub_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
                   <Typography variant="subtitle2">{item?.numero_ordem}.</Typography>
                   <Typography variant="body2" sx={{ textAlign: 'justify' }}>
                     {item?.conteudo ? newLineText(item?.conteudo) : ''}
@@ -477,7 +477,7 @@ function Resumo({ minutaId, onClose }) {
         ))
       ) : (
         <Typography variant="body2" sx={{ p: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-          Não foi adicionada nenhuma alínea...
+          Não foi adicionado nenhum número...
         </Typography>
       )}
       <ButtonsStepper onCancel={() => dispatch(backStep())} handleSubmit={handleSubmit} isSaving={isSaving} />
@@ -554,7 +554,7 @@ export function OpcoesClausula({ onCancel, minutaId }) {
     <>
       <Dialog open onClose={onCancel} fullWidth maxWidth="md">
         <DialogTitleAlt
-          title="Opções da cláusula"
+          title="Cláusulas opcionais"
           onClose={() => onCancel()}
           action={<DefaultAction button small label="Adicionar" handleClick={() => setOpenForm('create')} />}
         />

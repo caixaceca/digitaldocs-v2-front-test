@@ -165,7 +165,7 @@ export function AnexoItem({
     >
       <ListItemText
         primary={anexo?.nome}
-        primaryTypographyProps={{ variant: 'subtitle2' }}
+        primaryTypographyProps={{ variant: 'subtitle2', p: 0 }}
         sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 }}
         secondary={
           <Stack useFlexGap flexWrap="wrap" direction="row" spacing={{ xs: 0.5, sm: 1.5 }}>

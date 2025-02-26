@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/axios';
+import { BASEURLDD } from '../../utils/apisUrl';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 //
@@ -48,16 +48,18 @@ const initialState = {
   origens: [],
   despesas: [],
   checklist: [],
-  garantias: [],
   documentos: [],
   meusFluxos: [],
   meusacessos: [],
+  componentes: [],
   notificacoes: [],
   regrasEstado: [],
   perfisEstado: [],
+  tiposTitular: [],
   meusAmbientes: [],
   destinatarios: [],
   estadosPerfil: [],
+  tiposGarantia: [],
   regrasTransicao: [],
   motivosPendencia: [],
   motivosTransicao: [],
@@ -169,7 +171,6 @@ export function getFromParametrizacao(item, params) {
         (item === 'documento' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'motivoTransicao' && `/v1/motivos_transicoes/detalhe/${perfilId}?id=${params?.id}`) ||
         (item === 'despesa' && `/v1/despesas/tipos/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'grantia' && `/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
         (item === 'checklistitem' &&
           `/v1/tipos_documentos/checklist/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         // LISTA
@@ -180,16 +181,17 @@ export function getFromParametrizacao(item, params) {
         (item === 'acessos' && `/v1/acessos?perfilID=${perfilId}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/all/${perfilId}`) ||
         (item === 'meusacessos' && `/v1/acessos?perfilID=${perfilId}`) ||
+        (item === 'componentes' && `/v2/processos/componentes/${perfilId}`) ||
         (item === 'meusambientes' && `/v1/fluxos/meusambientes/v2/${perfilId}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/transicao/${params?.id}`) ||
+        (item === 'tiposTitular' && `/v2/processos/tipos_titulares/${perfilId}`) ||
+        (item === 'tiposGarantia' && `/v2/processos/tipos_garantias/${perfilId}`) ||
         (item === 'colaboradoresEstado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'regrasTransicao' && `/v1/suportes/regra_parecer/transicao/${params?.id}`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||
         (item === 'despesas' && `/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'documentos' && `/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
-        (item === 'garantias' &&
-          `/v1/tipos_garantias/tipo_garantia/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'motivosTransicao' &&
           !!params?.fluxoId &&
           `/v1/motivos_transicoes/lista/${perfilId}?fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
@@ -255,7 +257,6 @@ export function createItem(item, dados, params) {
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
         (item === 'destinatario' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
-        (item === 'garantias' && `/v1/tipos_garantias/tipo_garantia?perfil_cc_id=${perfilId}`) ||
         (item === 'regra estado destribuido' && `/v1/suportes/regra_parecer/estado/coru/${params?.estadoId}`) ||
         (item === 'regrasTransicao' &&
           `/v1/suportes/regra_parecer/transicao/${params?.estadoId}/${params?.transicaoId}`) ||
@@ -272,8 +273,8 @@ export function createItem(item, dados, params) {
               ),
               options
             );
-          const response = await axios.get(`${BASEURLDD}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
-          dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: response.data }));
+          const fluxo = await axios.get(`${BASEURLDD}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
+          dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: fluxo.data }));
         } else if (item === 'destinatario') {
           const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
           dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
@@ -325,7 +326,6 @@ export function updateItem(item, dados, params) {
         (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
         (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'garantias' && `/v1/tipos_garantias/tipo_garantia/${params?.id}?perfil_cc_id=${perfilId}`) ||
         (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         '';
 

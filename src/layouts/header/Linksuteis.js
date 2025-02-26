@@ -13,7 +13,7 @@ import ListItemText from '@mui/material/ListItemText';
 // redux
 import { useSelector } from '../../redux/store';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { BASEURL } from '../../utils/apisUrl';
 // components
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';

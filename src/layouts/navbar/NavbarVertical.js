@@ -8,7 +8,7 @@ import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import { styled, useTheme } from '@mui/material/styles';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { BASEURL } from '../../utils/apisUrl';
 import cssStyles from '../../utils/cssStyles';
 // config
 import { NAVBAR, ambiente } from '../../config';

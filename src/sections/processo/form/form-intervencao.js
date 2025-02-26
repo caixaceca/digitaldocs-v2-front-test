@@ -163,7 +163,7 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
       values?.estado &&
       !processo?.entidade &&
       title === 'ENCAMINHAR' &&
-      processo?.assunto === 'Abertura de conta' &&
+      processo?.assunto === 'Abertura de Conta' &&
       !values?.estado?.label?.includes('Atendimento'),
     [gerencia, processo?.assunto, processo?.entidade, title, values?.estado]
   );

@@ -202,8 +202,8 @@ function headerTable(item) {
   return [
     ...((item === 'tiposGarantias' && [{ id: 'designacao', label: 'Designação' }]) ||
       (item === 'clausulas' && [
-        { id: 'numero_ordem', label: 'Nº ordem' },
-        { id: 'titulo', label: 'Título' },
+        { id: 'numero_ordem', label: 'Nº de cláusula' },
+        { id: 'titulo', label: 'Epígrafe' },
       ]) ||
       []),
     { id: 'ativo', label: 'Ativo', width: 10, align: 'center' },

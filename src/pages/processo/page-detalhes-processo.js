@@ -10,8 +10,8 @@ import { getProximoAnterior } from '../../utils/formatObject';
 import { findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
 // redux
 import { useAcesso } from '../../hooks/useAcesso';
-import { updateItem } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { updateItem, closeModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -28,11 +28,14 @@ import {
   Views,
   Estados,
   Versoes,
+  InfoCon,
   Pareceres,
   Transicoes,
   DadosGerais,
+  InfoCredito,
   TableDetalhes,
 } from '../../sections/processo/Detalhes';
+import ProcessoForm from '../../sections/processo/form/form-processo';
 import Intervencao, { Libertar, Atribuir, Resgatar, Cancelar, Desarquivar } from '../../sections/processo/Intervencao';
 
 // ----------------------------------------------------------------------
@@ -45,7 +48,7 @@ export default function PageProcesso() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { processos, done, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
+  const { processos, done, isOpenModal, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
   const linkNavigate = useMemo(
@@ -79,6 +82,14 @@ export default function PageProcesso() {
   const tabsList = useMemo(() => {
     const tabs = [];
     tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
+
+    if (processo?.credito) tabs.push({ value: 'Info. crédito', component: <InfoCredito dados={processo?.credito} /> });
+
+    if (processo?.con)
+      tabs.push({
+        value: 'Info. CON',
+        component: <InfoCon dados={processo?.con} valor={processo?.valor} numero={processo?.numero_operacao} />,
+      });
 
     if (processo?.estados && processo.estados?.length > 0)
       tabs.push({ value: 'Pareceres', component: <Estados handleAceitar={handleAceitar} /> });
@@ -203,8 +214,8 @@ export default function PageProcesso() {
                             !ultimaTransicao?.resgate &&
                             perfilId === ultimaTransicao?.perfil_id &&
                             pertencoEstadoId(meusAmbientes, ultimaTransicao?.estado_inicial_id) &&
-                            (!ultimaTransicao?.pareceres || ultimaTransicao?.pareceres?.length === 0) &&
-                            (!estado?.pareceres || !estado?.pareceres?.find((row) => row?.parecer_em)) && (
+                            !ultimaTransicao?.pareceres?.length &&
+                            !estado?.pareceres?.some((row) => row?.parecer_em) && (
                               <Resgatar dados={{ id, fluxoId, estadoId: ultimaTransicao?.estado_inicial_id }} />
                             )}
                         </>
@@ -239,6 +250,10 @@ export default function PageProcesso() {
           <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
           <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         </Card>
+
+        {isOpenModal === 'editar-processo' && (
+          <ProcessoForm processo={processo} onCancel={() => dispatch(closeModal())} />
+        )}
       </Container>
     </Page>
   );

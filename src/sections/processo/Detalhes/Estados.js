@@ -15,7 +15,7 @@ import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, selectItem, closeModal } from '../../../redux/slices/digitaldocs';
+import { getAnexo, setModal, closeModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
@@ -28,7 +28,7 @@ import Pareceres from './Pareceres';
 import { AnexoItem } from './Anexos';
 import MinutaParecer from './MinutaParecer';
 import { Atribuir, Libertar } from '../Intervencao';
-import { ParecerForm } from '../form/IntervencaoForm';
+import { ParecerForm } from '../form/form-intervencao';
 
 // ----------------------------------------------------------------------
 
@@ -40,14 +40,6 @@ export default function Estados({ handleAceitar }) {
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
-
-  const handleEditar = (item) => {
-    dispatch(selectItem(item));
-  };
-
-  const handleClose = () => {
-    dispatch(closeModal());
-  };
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
@@ -84,9 +76,9 @@ export default function Estados({ handleAceitar }) {
                       {row?._lock && row?.perfil_id === perfilId && (
                         <>
                           <DefaultAction
-                            handleClick={() => handleEditar(row)}
                             color={temParecer ? 'warning' : 'success'}
                             label={temParecer ? 'EDITAR' : 'ADICIONAR'}
+                            handleClick={() => dispatch(setModal({ modal: 'parecer-estado', dados: row }))}
                           />
 
                           <Libertar
@@ -162,7 +154,9 @@ export default function Estados({ handleAceitar }) {
           </Stack>
         );
       })}
-      {isOpenModal && <ParecerForm onCancel={handleClose} processoId={processo?.id} estado />}
+      {isOpenModal === 'parecer-estado' && (
+        <ParecerForm onCancel={() => dispatch(closeModal())} processoId={processo?.id} estado />
+      )}
     </Box>
   );
 }

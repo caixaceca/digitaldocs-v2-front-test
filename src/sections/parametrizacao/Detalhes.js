@@ -27,7 +27,7 @@ import { Criado, CellChecked } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
 import { UpdateItem, DefaultAction, DTFechar } from '../../components/Actions';
 //
-import { DestinatarioForm } from './ParametrizacaoForm';
+import { DestinatarioForm } from './form-fluxo';
 
 // ----------------------------------------------------------------------
 

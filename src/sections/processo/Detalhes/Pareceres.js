@@ -11,14 +11,14 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import { pertencoEstadoId } from '../../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, selectParecer, closeModal } from '../../../redux/slices/digitaldocs';
+import { getAnexo, setModal, closeModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { ColaboradorInfo } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
 //
 import { Info } from './Estados';
-import { ParecerForm } from '../form/IntervencaoForm';
+import { ParecerForm } from '../form/form-intervencao';
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ Pareceres.propTypes = {
 export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { isOpenModal1 } = useSelector((state) => state.digitaldocs);
+  const { isOpenModal } = useSelector((state) => state.digitaldocs);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
@@ -53,11 +53,11 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
           viewAnexo={viewAnexo}
           key={`parecer_${row?.id}`}
           handleAccord={handleAccord}
-          handleEditar={(item) => dispatch(selectParecer(item))}
           parecer={{ ...row, estado, observacao: row?.descritivo }}
+          handleEditar={(item) => dispatch(setModal({ modal: 'parecer-individual', dados: item }))}
         />
       ))}
-      {isOpenModal1 && <ParecerForm onCancel={() => dispatch(closeModal())} processoId={id} />}
+      {isOpenModal === 'parecer-individual' && <ParecerForm onCancel={() => dispatch(closeModal())} processoId={id} />}
     </Box>
   );
 }

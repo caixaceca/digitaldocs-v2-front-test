@@ -8,7 +8,6 @@ export const PATH_DIGITALDOCS = {
     root: '/fila-trabalho',
     lista: '/fila-trabalho/lista',
     processo: '/fila-trabalho/:id',
-    novoProcesso: '/fila-trabalho/novo',
     procurar: '/fila-trabalho/procurar',
   },
   controle: {

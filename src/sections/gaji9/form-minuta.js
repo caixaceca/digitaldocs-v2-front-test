@@ -215,7 +215,7 @@ export function ComposicaoForm({ onCancel, action }) {
     clausulas: Yup.array(
       Yup.object({
         clausula: Yup.mixed().required().label('Claúsula'),
-        numero: Yup.number().min(0).integer().required().label('Nº ordem'),
+        numero: Yup.number().min(0).integer().required().label('Nº de cláusula'),
       })
     ),
   });
@@ -287,7 +287,7 @@ export function ComposicaoForm({ onCancel, action }) {
                       }}
                     />
                   </Stack>
-                  <RHFNumberField label="Nº ordem" name={`clausulas[${index}].numero`} sx={{ width: 100 }} />
+                  <RHFNumberField label="Nº de cláusula" name={`clausulas[${index}].numero`} sx={{ width: 105 }} />
                   {action !== 'compor' && (
                     <RHFSwitch name={`clausulas[${index}].ativo`} label="Ativo" sx={{ width: 100 }} />
                   )}

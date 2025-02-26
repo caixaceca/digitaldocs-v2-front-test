@@ -5,7 +5,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { callMsGraph } from '../../graph';
 import { loginRequest, msalInstance } from '../../config';
 // utils
-import { BASEURL, BASEURLSLIM } from '../../utils/axios';
+import { BASEURL, BASEURLSLIM } from '../../utils/apisUrl';
 // hooks
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 

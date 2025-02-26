@@ -3,6 +3,7 @@ export { default as Anexos } from './Anexos';
 export { default as Estados } from './Estados';
 export { default as Versoes } from './Versoes';
 export { default as Pareceres } from './Pareceres';
+export { InfoCon, InfoCredito } from './info-extra';
 export { default as Transicoes } from './Transicoes';
 export { default as DadosGerais } from './DadosGerais';
 export { default as NotaProcesso } from './NotaProcesso';

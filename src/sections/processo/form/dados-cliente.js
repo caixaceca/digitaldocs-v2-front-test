@@ -31,7 +31,7 @@ export default function DadosCliente({ isInterno, noperacao = '', fluxo = null }
               <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </GridItem>
           )}
-          {fluxo?.assunto === 'Abertura de conta' ? (
+          {fluxo?.assunto === 'Abertura de Conta' ? (
             <>
               <Entidades fields={fields} append={append} remove={remove} />
               {fields?.length === 0 && (

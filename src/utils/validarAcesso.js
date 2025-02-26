@@ -171,6 +171,21 @@ export function bancaDigital(assunto) {
   return assunto === 'Banca Digital - Adesão' || assunto === 'Banca Digital - Novos Códigos';
 }
 
+export function fluxoFixo(assunto) {
+  return (
+    assunto === 'Diário' ||
+    assunto === 'OPE DARH' ||
+    assunto === 'Preçário' ||
+    assunto === 'Formulário' ||
+    assunto === 'Abertura de Conta' ||
+    assunto === 'Produtos e Serviços' ||
+    assunto === 'Banca Digital - Adesão' ||
+    assunto === 'Receção de Cartões - DOP' ||
+    assunto === 'Transferência Internacional' ||
+    assunto === 'Banca Digital - Novos Códigos'
+  );
+}
+
 // ----------------------------------------------------------------------
 
 export function noEstado(estado, labels) {

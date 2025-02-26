@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
@@ -18,9 +17,8 @@ import TableContainer from '@mui/material/TableContainer';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
-import { colorLabel } from '../../../utils/getColorPresets';
+import { fNumber, fCurrency } from '../../../utils/formatNumber';
 import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
-import { fNumber, fCurrency, fPercent } from '../../../utils/formatNumber';
 import { newLineText, entidadesParse, baralharString, valorPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';
@@ -33,7 +31,7 @@ import { Checked, CellChecked, Criado } from '../../../components/Panel';
 //
 import { colorProcesso } from '../../tabela/TableProcessos';
 // _mock
-import { dis, estadosCivis } from '../../../_mock';
+import { dis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
@@ -47,8 +45,6 @@ export default function DetalhesProcesso({ isPS, processo }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const { origens, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
 
-  const con = useMemo(() => processo?.con || null, [processo?.con]);
-  const credito = useMemo(() => processo?.credito || null, [processo?.credito]);
   const entidadesList = useMemo(() => entidadesParse(processo?.entidade), [processo?.entidade]);
   const devolvido = useMemo(() => processo?.htransicoes?.[0]?.modo === 'Devolução', [processo?.htransicoes]);
   const origem = useMemo(() => origens?.find((row) => row?.id === processo?.origem_id), [origens, processo?.origem_id]);
@@ -186,13 +182,12 @@ export default function DetalhesProcesso({ isPS, processo }) {
         </List>
       )}
 
-      {(!!processo?.numero_operacao || !!con || !!processo?.operacao || !!origem) && (
+      {(!!processo?.numero_operacao || !!processo?.operacao || !!origem) && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Operação</Typography>
           </ListItem>
           <TextItem title="Nº da operação:" text={processo?.numero_operacao} />
-          {con && processo?.valor && <TextItem title="Valor:" text={fCurrency(processo?.valor)} />}
           <TextItem title="Descrição:" text={processo?.operacao} />
           {origem && origem?.id === processo?.origem_id && (
             <TextItem
@@ -253,89 +248,6 @@ export default function DetalhesProcesso({ isPS, processo }) {
           )}
         </List>
       )}
-
-      {!!credito && (
-        <List>
-          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-            <Typography variant="subtitle1">Info. crédito</Typography>
-          </ListItem>
-          {credito?.situacao_final_mes && (
-            <TextItem
-              title="Situação:"
-              label={<Label color={colorLabel(credito?.situacao_final_mes)}>{credito?.situacao_final_mes}</Label>}
-            />
-          )}
-          <TextItem title="Nº de proposta:" text={credito?.nproposta} />
-          <TextItem title="Segmento:" text={credito?.segmento} />
-          <TextItem title="Linha de crédito:" text={credito?.linha} />
-          {credito?.montante_solicitado && (
-            <TextItem title="Montante solicitado:" text={fCurrency(credito?.montante_solicitado)} />
-          )}
-          <TextItem title="Entidade patronal:" text={credito?.setor_atividade} />
-          <TextItem title="Finalidade:" text={credito?.finalidade} />
-          {credito?.montante_aprovado && (
-            <TextItem title="Montante aprovado:" text={fCurrency(credito?.montante_aprovado)} />
-          )}
-          {credito?.data_aprovacao && <TextItem title="Data de aprovação:" text={ptDate(credito?.data_aprovacao)} />}
-          {credito?.montante_contratado && (
-            <TextItem title="Montante contratado:" text={fCurrency(credito?.montante_contratado)} />
-          )}
-          {credito?.data_contratacao && (
-            <TextItem title="Data de contratação:" text={ptDate(credito?.data_contratacao)} />
-          )}
-          <TextItem title="Prazo de amortização:" text={credito?.prazo_amortizacao} />
-          {credito?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(credito?.taxa_juro)} />}
-          <TextItem title="Garantia:" text={credito?.garantia} />
-          <TextItem title="Escalão de decisão:" text={credito?.escalao_decisao} />
-          {credito?.data_desistido && <TextItem title="Data de desistência:" text={ptDate(credito?.data_desistido)} />}
-          {credito?.data_indeferido && (
-            <TextItem title="Data de indeferimento:" text={ptDate(credito?.data_indeferido)} />
-          )}
-          {credito?.valor_divida && (
-            <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
-              <Label color="info" startIcon={<InfoOutlinedIcon />}>
-                Entidade com crédito em dívida
-              </Label>
-              <TextItem title="Valor:" text={fCurrency(credito?.valor_divida * 1000)} />
-              {credito?.periodo && <TextItem title="Data:" text={ptDate(credito?.periodo)} />}
-            </Paper>
-          )}
-        </List>
-      )}
-
-      {!!con && (
-        <List>
-          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-            <Typography variant="subtitle1">Dados do ordenante</Typography>
-          </ListItem>
-          <TextItem title="Depositante é o próprio titular:" text={con?.titular_ordenador ? 'SIM' : 'NÃO'} />
-          <TextItem title="Titular da conta beneficiária é residente:" text={con?.residente ? 'SIM' : 'NÃO'} />
-          <TextItem title="Nome:" text={con?.ordenador} />
-          <TextItem
-            title="Tipo doc. identificação:"
-            text={dis?.find((row) => row.id === con?.tipo_docid)?.label || con?.tipo_docid}
-          />
-          <TextItem title="Nº doc. identificação:" text={con?.docid} />
-          <TextItem title="NIF:" text={con?.nif} />
-          <TextItem title="Nome do Pai:" text={con?.pai} />
-          <TextItem title="Nome da Mãe:" text={con?.mae} />
-          <TextItem
-            title="Estado civil:"
-            text={estadosCivis?.find((row) => row.id === con?.estado_civil)?.label || con?.estado_civil}
-          />
-          {con?.data_nascimento && <TextItem title="Data nascimento:" text={ptDate(con?.data_nascimento)} />}
-          <TextItem title="Nacionalidade:" text={con?.nacionalidade} />
-          <TextItem title="Local/País de nascimento:" text={con?.local_pais_nascimento} />
-          <TextItem title="Morada:" text={con?.morada} />
-          <TextItem title="Profissão:" text={con?.profissao} />
-          <TextItem title="Local de trabalho:" text={con?.local_trabalho} />
-          <TextItem title="Telefone:" text={con?.telefone} />
-          <TextItem title="Telemóvel:" text={con?.telemovel} />
-          <TextItem title="Email(s):" text={con?.emails} />
-          {con?.origem_fundo && <TextItem title="Origem do fundo:" text={newLineText(con?.origem_fundo)} />}
-          {con?.finalidade && <TextItem title="Finalidade do fundo:" text={newLineText(con?.finalidade)} />}
-        </List>
-      )}
     </>
   );
 }
@@ -349,7 +261,7 @@ TextItem.propTypes = {
   baralhar: PropTypes.bool,
 };
 
-function TextItem({ title = '', text = '', label = null, baralhar = false, ...sx }) {
+export function TextItem({ title = '', text = '', label = null, baralhar = false, ...sx }) {
   return (title && text) || label ? (
     <Stack spacing={1} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
       {title && <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>}
@@ -365,7 +277,7 @@ function TextItem({ title = '', text = '', label = null, baralhar = false, ...sx
 
 SubItem.propTypes = { value: PropTypes.string, label: PropTypes.string };
 
-function SubItem({ value, label }) {
+export function SubItem({ value, label }) {
   return (
     <Typography variant="body2">
       <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>

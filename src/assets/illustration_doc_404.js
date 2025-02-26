@@ -7,7 +7,7 @@ const DocIllustration = memo((props) => {
 
   const svgContent = useMemo(
     () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="90%" height="90%" viewBox="0 0 500 500">
+      <svg xmlns="http://www.w3.org/2000/svg" width="90%" height="90%" viewBox="0 0 500 490">
         <g id="freepik--background-complete--inject-2">
           <rect y="382.4" width="500" height="0.25" fill="#5aaa28" />
           <path

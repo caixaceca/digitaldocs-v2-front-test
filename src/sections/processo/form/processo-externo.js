@@ -6,7 +6,7 @@ import { useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { format, add } from 'date-fns';
@@ -16,19 +16,24 @@ import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
-import ProcessoExternoForm from './ProcessoExternoForm';
+import ProcessoExternoForm from './form-processo-externo';
 
 // ----------------------------------------------------------------------
 
-ProcessoExterno.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, processo: PropTypes.object };
+ProcessoExterno.propTypes = {
+  isEdit: PropTypes.bool,
+  fluxo: PropTypes.object,
+  estado: PropTypes.object,
+  processo: PropTypes.object,
+};
 
-export default function ProcessoExterno({ isEdit, processo, fluxo }) {
+export default function ProcessoExterno({ isEdit, processo, fluxo, estado }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { cc, uos } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { meuAmbiente, origens } = useSelector((state) => state.parametrizacao);
-  const balcaoAmbiente = uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao);
+  const { origens } = useSelector((state) => state.parametrizacao);
+  const balcaoAmbiente = uos?.find((row) => row?.id === estado?.uo_id)?.balcao || Number(cc?.uo?.balcao);
   const origensList = useMemo(
     () => origens.map((row) => ({ id: row?.id, label: `${row?.designacao} - ${row?.seguimento}` })) || [],
     [origens]
@@ -44,7 +49,7 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
     canal: Yup.string().required().label('Canal de entrada'),
     anexos: !isEdit && Yup.array().min(1, 'Introduza pelo menos um anexo'),
     data_entrada: Yup.date().typeError().required().label('Data de entrada'),
-    operacao: meuAmbiente?.nome?.includes('DOP') && Yup.string().required().label('Operação'),
+    operacao: estado?.nome?.includes('DOP') && Yup.string().required().label('Operação'),
     entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
     valor: Yup.string().when('operacao', { is: 'Cativo/Penhora', then: (schema) => schema.required().label('Valor') }),
   });
@@ -114,8 +119,8 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
       if (processo) {
         dispatch(updateItem('processo', formData, { mfd: true, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
-        formData.append('uo_origem_id', meuAmbiente?.uo_id);
-        formData.append('estado_atual_id', meuAmbiente?.id);
+        formData.append('uo_origem_id', estado?.uo_id);
+        formData.append('estado_atual_id', estado?.id);
         dispatch(createProcesso('externo', formData, { msg: 'Processo adicionado' }));
       }
     } catch (error) {
@@ -125,17 +130,12 @@ export default function ProcessoExterno({ isEdit, processo, fluxo }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <ProcessoExternoForm processo={processo} origensList={origensList} />
-        </Grid>
-
-        <Grid item xs={12} textAlign="center">
-          <LoadingButton size="large" type="submit" variant="contained" loading={isSaving}>
-            {!isEdit ? 'Adicionar' : 'Guardar'}
-          </LoadingButton>
-        </Grid>
-      </Grid>
+      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
+        <ProcessoExternoForm processo={processo} origensList={origensList} />
+        <LoadingButton type="submit" variant="contained" loading={isSaving}>
+          {!isEdit ? 'Adicionar' : 'Guardar'}
+        </LoadingButton>
+      </Stack>
     </FormProvider>
   );
 }

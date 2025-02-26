@@ -17,7 +17,7 @@ import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getInfoProcesso, selectParecer } from '../../../redux/slices/digitaldocs';
+import { getInfoProcesso, setModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
@@ -27,7 +27,7 @@ import { Criado, ColaboradorInfo } from '../../../components/Panel';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
-import { ConfidencialidadesForm } from '../form/IntervencaoForm';
+import { ConfidencialidadesForm } from '../form/form-intervencao';
 
 // ----------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ export default function TableDetalhes({ id, item }) {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { processo, isLoading, isOpenModal1 } = useSelector((state) => state.digitaldocs);
+  const { processo, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (id && item) dispatch(getInfoProcesso(item, { id }));
@@ -202,7 +202,7 @@ export default function TableDetalhes({ id, item }) {
                               <DefaultAction
                                 label="EDITAR"
                                 color="warning"
-                                handleClick={() => dispatch(selectParecer(row))}
+                                handleClick={() => dispatch(setModal({ modal: 'confidencialidade', dados: row }))}
                               />
                             )}
                           </TableCell>
@@ -232,7 +232,7 @@ export default function TableDetalhes({ id, item }) {
         />
       )}
 
-      {isOpenModal1 && <ConfidencialidadesForm processoId={processo.id} />}
+      {isOpenModal === 'confidencialidade' && <ConfidencialidadesForm processoId={processo.id} />}
     </Box>
   );
 }

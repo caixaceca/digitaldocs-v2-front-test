@@ -1,3 +1,3 @@
-export { default as ProcessoInterno } from './ProcessoInterno';
-export { default as ProcessoExterno } from './ProcessoExterno';
-export { default as ProcessoCredito } from './ProcessoCredito';
+export { default as ProcessoInterno } from './processo-interno';
+export { default as ProcessoExterno } from './processo-externo';
+export { default as ProcessoCredito } from './processo-credito';

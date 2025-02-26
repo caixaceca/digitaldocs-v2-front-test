@@ -17,7 +17,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { BASEURL } from '../../utils/apisUrl';
 import { getFileThumb } from '../../utils/formatFile';
 // hooks
 import useToggle from '../../hooks/useToggle';

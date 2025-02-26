@@ -1,5 +1,5 @@
 // utils
-import { BASEURL } from './axios';
+import { BASEURL } from './apisUrl';
 
 // ----------------------------------------------------------------------
 

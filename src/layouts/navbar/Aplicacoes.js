@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 // @mui
 import Avatar from '@mui/material/Avatar';
 // utils
-import { BASEURL } from '../../utils/axios';
+import { BASEURL } from '../../utils/apisUrl';
 
 // ----------------------------------------------------------------------
 

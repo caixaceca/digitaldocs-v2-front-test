@@ -1,17 +1,14 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
 // utils
 import { noEstado, podeArquivar, processoEstadoInicial } from '../../utils/validarAcesso';
 // redux
 import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
-import { getInfoProcesso, getSuccess, selectItem } from '../../redux/slices/digitaldocs';
+import { getInfoProcesso, setModal } from '../../redux/slices/digitaldocs';
 // hooks
 import useToggle from '../../hooks/useToggle';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import { DefaultAction } from '../../components/Actions';
 //
@@ -25,15 +22,15 @@ import {
   FinalizarOPForm,
   EncaminharStepper,
   ColocarPendenteForm,
-} from './form/IntervencaoForm';
-import { ArquivarForm, DesarquivarForm } from './form/Arquivo';
+} from './form/form-intervencao';
+import { ArquivarForm, DesarquivarForm } from './form/arquivo';
 
 // ----------------------------------------------------------------------
 
 Intervencao.propTypes = { colaboradoresList: PropTypes.array };
 
 export default function Intervencao({ colaboradoresList }) {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);
   const { processo, isSaving } = useSelector((state) => state.digitaldocs);
   const { arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
@@ -49,7 +46,7 @@ export default function Intervencao({ colaboradoresList }) {
     () =>
       gerencia &&
       processo.segmento === 'E' &&
-      processo?.assunto === 'Abertura de conta' &&
+      processo?.assunto === 'Abertura de Conta' &&
       !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento'),
     [gerencia, processo?.assunto, processo?.htransicoes, processo.segmento]
   );
@@ -103,7 +100,7 @@ export default function Intervencao({ colaboradoresList }) {
       <DefaultAction
         label="EDITAR"
         color="warning"
-        handleClick={() => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${processo.id}/editar`)}
+        handleClick={() => dispatch(setModal({ modal: 'editar-processo', dados: null }))}
       />
 
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
@@ -133,9 +130,7 @@ export function Encaminhar({ title, destinos, gerencia = false, colaboradoresLis
         handleClick={() => {
           onOpen();
           dispatch(resetDados());
-          if (title === 'DEVOLVER') {
-            dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
-          }
+          if (title === 'DEVOLVER') dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
         }}
         label={title}
       />
@@ -172,18 +167,18 @@ Desarquivar.propTypes = { id: PropTypes.number, colaboradoresList: PropTypes.arr
 
 export function Desarquivar({ id, colaboradoresList }) {
   const dispatch = useDispatch();
-  const { isOpenModal1 } = useSelector((state) => state.digitaldocs);
+  const { isOpenModal } = useSelector((state) => state.digitaldocs);
   return (
     <>
       <DefaultAction
         color="error"
         label="DESARQUIVAR"
         handleClick={() => {
-          dispatch(getSuccess({ item: 'isOpenModal1', dados: true }));
+          dispatch(setModal({ modal: 'desarquivar', dados: null }));
           dispatch(getInfoProcesso('destinosDesarquivamento', { id }));
         }}
       />
-      {isOpenModal1 && <DesarquivarForm id={id} colaboradoresList={colaboradoresList} />}
+      {isOpenModal === 'desarquivar' && <DesarquivarForm id={id} colaboradoresList={colaboradoresList} />}
     </>
   );
 }
@@ -288,8 +283,12 @@ export function ColocarPendente() {
   const { processo, isOpenModal } = useSelector((state) => state.digitaldocs);
   return (
     <>
-      <DefaultAction color="inherit" label="PENDENTE" handleClick={() => dispatch(selectItem(processo))} />
-      {isOpenModal && <ColocarPendenteForm />}
+      <DefaultAction
+        color="inherit"
+        label="PENDENTE"
+        handleClick={() => dispatch(setModal({ modal: 'pendencia', dados: processo }))}
+      />
+      {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
     </>
   );
 }

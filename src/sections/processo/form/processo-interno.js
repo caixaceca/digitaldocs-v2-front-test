@@ -7,7 +7,7 @@ import { useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import { LoadingButton } from '@mui/lab';
 // utils
 import { fluxosGmkt, bancaDigital } from '../../../utils/validarAcesso';
@@ -18,28 +18,32 @@ import { createProcesso, updateItem } from '../../../redux/slices/digitaldocs';
 // components
 import { FormProvider } from '../../../components/hook-form';
 // sections
-import ProcessoInternoForm from './ProcessoInternoForm';
+import ProcessoInternoForm from './form-processo-interno';
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
-ProcessoInterno.propTypes = { isEdit: PropTypes.bool, fluxo: PropTypes.object, processo: PropTypes.object };
+ProcessoInterno.propTypes = {
+  isEdit: PropTypes.bool,
+  fluxo: PropTypes.object,
+  estado: PropTypes.object,
+  processo: PropTypes.object,
+};
 
-export default function ProcessoInterno({ isEdit, processo, fluxo }) {
+export default function ProcessoInterno({ isEdit, processo, fluxo, estado }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { cc, uos } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { meuAmbiente } = useSelector((state) => state.parametrizacao);
   const balcaoAmbiente = useMemo(
-    () => uos?.find((row) => row?.id === meuAmbiente?.uo_id)?.balcao || Number(cc?.uo?.balcao),
-    [cc?.uo?.balcao, meuAmbiente?.uo_id, uos]
+    () => uos?.find((row) => row?.id === estado?.uo_id)?.balcao || Number(cc?.uo?.balcao),
+    [cc?.uo?.balcao, estado?.uo_id, uos]
   );
   const entidades = useMemo(
     () =>
       (processo?.entidade && processo?.entidade?.split(';')?.map((row) => ({ numero: row }))) ||
-      (!processo && fluxo?.assunto === 'Abertura de conta' && [{ numero: '' }]) ||
+      (!processo && fluxo?.assunto === 'Abertura de Conta' && [{ numero: '' }]) ||
       [],
     [fluxo?.assunto, processo]
   );
@@ -54,7 +58,7 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
       (fluxo?.assunto === 'Formulário' && Yup.string().required().label('Codificação/Nome')) ||
       (bancaDigital(fluxo?.assunto) && Yup.string().email().required().label('Email')),
     conta:
-      !fluxo?.limpo && fluxo?.assunto !== 'Abertura de conta' && Yup.number().positive().integer().label('Nº de conta'),
+      !fluxo?.limpo && fluxo?.assunto !== 'Abertura de Conta' && Yup.number().positive().integer().label('Nº de conta'),
     // agendamento
     diadomes: shapeNumber('Dia do mês', true, '', 'agendado'),
     data_inicio: shapeDate('Data de início', true, '', 'agendado'),
@@ -164,7 +168,7 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
           `${fluxo?.assunto} (${format(values.data_entrada ? values.data_entrada : new Date(), 'dd/MM/yyyy')})`
         );
       } else if (values.titular) formData.append('titular', values.titular);
-      if (fluxo?.assunto === 'Abertura de conta') {
+      if (fluxo?.assunto === 'Abertura de Conta') {
         formData.append('conta', '');
         formData.append('cliente', '');
       } else {
@@ -212,8 +216,8 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
       if (processo) {
         dispatch(updateItem('processo', formData, { mfd: true, id: processo?.id, msg: 'Processo atualizado' }));
       } else {
-        formData.append('uo_origem_id', meuAmbiente?.uo_id);
-        formData.append('estado_atual_id', meuAmbiente?.id);
+        formData.append('uo_origem_id', estado?.uo_id);
+        formData.append('estado_atual_id', estado?.id);
         dispatch(createProcesso('interno', formData, { msg: 'Processo adicionado' }));
       }
     } catch (error) {
@@ -223,17 +227,12 @@ export default function ProcessoInterno({ isEdit, processo, fluxo }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <ProcessoInternoForm fluxo={fluxo} processo={processo} />
-        </Grid>
-
-        <Grid item xs={12} textAlign="center">
-          <LoadingButton size="large" type="submit" variant="contained" loading={isSaving}>
-            {!isEdit ? 'Adicionar' : 'Guardar'}
-          </LoadingButton>
-        </Grid>
-      </Grid>
+      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
+        <ProcessoInternoForm fluxo={fluxo} processo={processo} />
+        <LoadingButton type="submit" variant="contained" loading={isSaving}>
+          {!isEdit ? 'Adicionar' : 'Guardar'}
+        </LoadingButton>
+      </Stack>
     </FormProvider>
   );
 }

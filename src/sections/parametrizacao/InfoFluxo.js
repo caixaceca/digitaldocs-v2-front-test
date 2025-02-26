@@ -33,7 +33,7 @@ import {
   ClonarFluxoForm,
   NotificacaoForm,
   RegraTransicaoForm,
-} from './ParametrizacaoForm';
+} from './form-fluxo';
 import { applySortFilter } from './applySortFilter';
 import { Detalhes, DetalhesContent } from './Detalhes';
 import { dadosComColaborador, EstadoDetail } from './TableParametrizacao';
@@ -119,7 +119,10 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={(item === 'transicoes' && 5) || (item === 'checklist' && 3) || 4} row={10} />
+                  <SkeletonTable
+                    column={((item === 'transicoes' || item === 'estados') && 5) || (item === 'checklist' && 3) || 4}
+                    row={10}
+                  />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
@@ -236,28 +239,29 @@ function estadosList(transicoes = [], estados = [], uos = []) {
 function headerTable(item) {
   return [
     ...((item === 'transicoes' && [
-      { id: 'estado_inicial', label: 'Origem', align: 'left' },
-      { id: 'estado_final', label: 'Destino', align: 'left' },
+      { id: 'estado_inicial', label: 'Origem' },
+      { id: 'estado_final', label: 'Destino' },
       { id: 'modo', label: 'Modo', align: 'center' },
       { id: 'prazoemdias', label: 'Prazo', align: 'center' },
     ]) ||
       (item === 'estados' && [
-        { id: 'nome', label: 'Nome', align: 'left' },
-        { id: 'uo', label: 'U.O', align: 'left' },
+        { id: 'nome', label: 'Nome' },
+        { id: 'uo', label: 'U.O' },
+        { id: 'balcao', label: 'Nº de balcão' },
         { id: 'is_inicial', label: 'Inicial', align: 'center' },
         { id: 'is_final', label: 'Final', align: 'center' },
       ]) ||
       (item === 'checklist' && [
-        { id: 'designacao	', label: 'Designação', align: 'left' },
+        { id: 'designacao	', label: 'Designação' },
         { id: 'ativo', label: 'Ativo', align: 'center' },
       ]) ||
       (item === 'notificacoes' && [
-        { id: 'assunto', label: 'Assunto', align: 'left' },
-        { id: 'corpo', label: 'Corpo', align: 'left' },
-        { id: 'via', label: 'Via', align: 'left' },
+        { id: 'assunto', label: 'Assunto' },
+        { id: 'corpo', label: 'Corpo' },
+        { id: 'via', label: 'Via' },
       ]) ||
       (item === 'regrasTransicao' && [
-        { id: 'nome', label: 'Colaborador', align: 'left' },
+        { id: 'nome', label: 'Colaborador' },
         { id: 'percentagem', label: 'Percentagem', align: 'center' },
         { id: 'ativo', label: 'Ativo', align: 'center' },
       ]) ||
