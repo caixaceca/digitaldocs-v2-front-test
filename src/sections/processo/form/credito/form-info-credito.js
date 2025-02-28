@@ -52,13 +52,13 @@ export default function FormInfoCredito({ dados, onCancel }) {
     tipo_titular: Yup.mixed().required().label('Tipo de titular'),
     componente: Yup.mixed().required().label('Produto/Componente'),
     titular: shapeText('Nome do proponente', '', false, 'cliente'),
+    prazo_amortizacao: Yup.number().positive().required().label('Prazo'),
     taxa_juro: Yup.number().positive().required().label('Taxa de juros'),
     situacao_final_mes: isEdit && Yup.mixed().required().label('Situação'),
     data_entrada: Yup.date().typeError().required().label('Data de entrada'),
+    montante_solicitado: Yup.number().positive().required().label('Montante'),
     cliente: shapeNumber('Nº de cliente', 'Contratado', '', 'situacao_final_mes'),
     setor_atividade: Yup.string().required().label('Ent. patronal/Set. atividade'),
-    prazo_amortizacao: Yup.number().positive().required().label('Prazo amortização'),
-    montante_solicitado: Yup.number().positive().required().label('Montante solicitado'),
     escalao_decisao: shapeText('Decisor', 'Aprovado', 'Contratado', 'situacao_final_mes'),
     data_desistido: shapeDate('Data de desistência', 'Desistido', '', 'situacao_final_mes'),
     data_contratacao: shapeDate('Data de contratação', 'Contratado', '', 'situacao_final_mes'),
@@ -113,6 +113,8 @@ export default function FormInfoCredito({ dados, onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fluxo?.id, linhas, componentesList, tiposTitularList]);
 
+  const contratado = values?.situacao_final_mes === 'Contratado';
+
   return (
     <FormProvider
       methods={methods}
@@ -122,13 +124,29 @@ export default function FormInfoCredito({ dados, onCancel }) {
         <Box sx={{ width: 1 }}>
           <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6} md={3}>
+              <GridItem xs={12} sm={6} md={contratado ? 3 : 4} lg={contratado ? 3 : 2}>
                 <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante solicitado" />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
+              </GridItem>
+              <GridItem xs={12} sm={6} md={contratado ? 3 : 4} lg={contratado ? 3 : 2}>
+                <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante" />
+              </GridItem>
+              {!contratado && (
+                <>
+                  <GridItem xs={12} sm={6} md={4} lg={2}>
+                    <RHFNumberField name="prazo_amortizacao" tipo="prestacao" label="Prazo" />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={4} lg={2}>
+                    <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
+                  </GridItem>
+                </>
+              )}
+              <GridItem xs={12} sm={6} md={contratado ? 3 : 4} lg={contratado ? 3 : 2}>
+                <RHFTextField name="numero_proposta" label="Nº de proposta" />
+              </GridItem>
+              <GridItem xs={12} sm={6} md={contratado ? 3 : 4} lg={contratado ? 3 : 2}>
+                <RHFNumberField name="cliente" label="Nº de cliente" />
+              </GridItem>
+              <GridItem xs={12} sm={6} md={3}>
                 <RHFAutocompleteObj
                   name="tipo_titular"
                   label="Tipo de titular"
@@ -138,8 +156,8 @@ export default function FormInfoCredito({ dados, onCancel }) {
                     setValue('tipo_titular', newValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
+              </GridItem>
+              <GridItem xs={12} sm={6} md={3}>
                 <RHFAutocompleteObj
                   disabled={!values?.tipo_titular}
                   name="linha"
@@ -154,54 +172,40 @@ export default function FormInfoCredito({ dados, onCancel }) {
                     setValue('linha', newValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
                   }
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <RHFAutocompleteObj name="componente" label="Produto/Componente" options={componentesList} />
-              </Grid>
-              <GridItem xs={12} sm={6} md={3}>
-                <RHFTextField name="numero_proposta" label="Nº de proposta" />
               </GridItem>
-              <GridItem xs={12} sm={6} md={3} children={<RHFNumberField name="cliente" label="Nº de cliente" />} />
-              <GridItem xs={12} md={4} children={<RHFTextField name="titular" label="Nome do proponente" />} />
+              <GridItem xs={12} md={6}>
+                <RHFAutocompleteObj name="componente" label="Produto/Componente" options={componentesList} />
+              </GridItem>
+              <GridItem xs={12} sm={4} children={<RHFTextField name="titular" label="Nome do proponente" />} />
               <GridItem xs={12} sm={4}>
                 <RHFTextField name="setor_atividade" label="Ent. patronal/Set. atividade" />
               </GridItem>
               <GridItem xs={12} sm={4} children={<RHFTextField name="finalidade" label="Finalidade" />} />
-              {values?.situacao_final_mes !== 'Contratado' && (
-                <>
-                  <GridItem xs={12} sm={6} md={3}>
-                    <RHFNumberField name="prazo_amortizacao" tipo="prestacao" label="Prazo amorização" />
-                  </GridItem>
-                  <GridItem xs={12} sm={6} md={3}>
-                    <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
-                  </GridItem>
-                </>
-              )}
             </Grid>
           </Card>
-          {isEdit && (
+          {!isEdit && (
             <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
               <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} sm={3}>
+                <GridItem xs={12} sm={6} md={3}>
                   <RHFAutocompleteSmp label="Situação" disableClearable options={situacoes} name="situacao_final_mes" />
-                </Grid>
+                </GridItem>
                 {(values?.situacao_final_mes === 'Aprovado' ||
                   values?.situacao_final_mes === 'Contratado' ||
                   values?.situacao_final_mes === 'Desistido') && (
                   <>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <GridItem xs={12} sm={6} md={3}>
                       <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    </GridItem>
+                    <GridItem xs={12} sm={6} md={3}>
                       <RHFNumberField tipo="moeda" name="montante_aprovado" label="Montante aprovado" />
-                    </Grid>
+                    </GridItem>
                     <GridItem xs={12} sm={6} md={3}>
                       <RHFAutocompleteSmp name="escalao_decisao" label="Decisor" options={escaloes} />
                     </GridItem>
                   </>
                 )}
-                {values?.situacao_final_mes === 'Contratado' && (
-                  <Grid item xs={12}>
+                {contratado && (
+                  <GridItem xs={12}>
                     <Grid container spacing={3}>
                       <GridItem xs={12} sm={6} md={3}>
                         <RHFDatePicker name="data_contratacao" label="Data de contratação" disableFuture />
@@ -216,17 +220,17 @@ export default function FormInfoCredito({ dados, onCancel }) {
                         <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
                       </GridItem>
                     </Grid>
-                  </Grid>
+                  </GridItem>
                 )}
                 {values?.situacao_final_mes === 'Indeferido' && (
-                  <Grid item xs={12} sm={3}>
+                  <GridItem xs={12} sm={3}>
                     <RHFDatePicker name="data_indeferido" label="Data de indeferimento" disableFuture />
-                  </Grid>
+                  </GridItem>
                 )}
                 {values?.situacao_final_mes === 'Desistido' && (
-                  <Grid item xs={12} sm={3}>
+                  <GridItem xs={12} sm={3}>
                     <RHFDatePicker name="data_desistido" label="Data de desistência" disableFuture />
-                  </Grid>
+                  </GridItem>
                 )}
               </Grid>
             </Card>

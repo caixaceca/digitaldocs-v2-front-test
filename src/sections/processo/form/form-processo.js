@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import CircleIcon from '@mui/icons-material/Circle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // redux
@@ -85,6 +86,7 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
           title={isEdit ? 'Atualizar processo' : 'Adicionar processo'}
           subtitle={
             <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold' }}>
+              <CircleIcon sx={{ height: 10, width: 18, color: estado?.nome ? 'success.main' : 'error.main' }} />
               {estado?.nome || 'Nenhum estado selecionado...'}
             </Typography>
           }
@@ -98,18 +100,20 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
             ) : null
           }
           action={
-            <Autocomplete
-              fullWidth
-              size="small"
-              value={fluxo}
-              disableClearable
-              options={fluxosList}
-              sx={{ minWidth: { xs: 150, sm: 300, md: 500 } }}
-              getOptionLabel={(option) => option?.assunto}
-              onChange={(event, newValue) => setFluxo(newValue)}
-              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-              renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
-            />
+            estado && (
+              <Autocomplete
+                fullWidth
+                size="small"
+                value={fluxo}
+                disableClearable
+                options={fluxosList}
+                sx={{ minWidth: { xs: 150, sm: 300, md: 500 } }}
+                getOptionLabel={(option) => option?.assunto}
+                onChange={(event, newValue) => setFluxo(newValue)}
+                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
+              />
+            )
           }
         />
         <DialogContent>
