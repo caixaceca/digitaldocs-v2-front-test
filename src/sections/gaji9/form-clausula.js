@@ -74,7 +74,7 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt
         title={isEdit ? 'Editar cláusula' : 'Adicionar cláusula'}
-        subtitle={
+        stepper={
           <>
             <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Números', 'Resumo']} sx={{ mt: 3 }} />
             {(activeStep === 1 || activeStep === 2) && (

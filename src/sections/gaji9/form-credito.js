@@ -55,7 +55,7 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt
         title={isEdit ? 'Atualizar crédito' : 'Adicionar crédito'}
-        subtitle={
+        stepper={
           <Steps activeStep={activeStep} steps={['Cliente', 'Crédito', 'Taxas & Custos', 'Garantias']} sx={{ mt: 3 }} />
         }
       />

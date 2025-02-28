@@ -311,16 +311,8 @@ export function ChecklistForm({ fluxo, onCancel }) {
   );
 
   const formSchema = Yup.object().shape({
-    transicao: isEdit && Yup.mixed().required().label('Transição'),
     tipo_documento: isEdit && Yup.mixed().required().label('Documento'),
-    documentos:
-      !isEdit &&
-      Yup.array(
-        Yup.object({
-          transicao: Yup.mixed().required().label('Transição'),
-          tipo_documento: Yup.mixed().required().label('Documento'),
-        })
-      ),
+    documentos: !isEdit && Yup.array(Yup.object({ tipo_documento: Yup.mixed().required().label('Documento') })),
   });
 
   const defaultValues = useMemo(

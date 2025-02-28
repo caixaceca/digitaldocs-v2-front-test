@@ -38,7 +38,7 @@ export function applySortFilter({ dados, filter, comparator }) {
 export function listaTitrulares(tiposTitulares) {
   return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({
     id,
-    label: consumidor ? `${descritivo} (Consumidor)` : descritivo,
+    label: descritivo === 'Particular' && !consumidor ? `${descritivo} (Não consumidor)` : descritivo,
   }));
 }
 
@@ -47,7 +47,7 @@ export function listaProdutos(componentes) {
 }
 
 export function listaGarantias(tiposGarantias) {
-  return tiposGarantias?.map(({ id, designacao }) => ({ id, label: designacao }));
+  return tiposGarantias?.map(({ id, designacao, descritivo }) => ({ id, label: designacao || descritivo }));
 }
 
 export function listaClausulas(clausulas, idsClausulas) {
@@ -57,13 +57,6 @@ export function listaClausulas(clausulas, idsClausulas) {
       id: row?.id,
       numero_ordem: row?.numero_ordem,
       label: `${row?.solta ? 'Cláusula solta' : row?.titulo} (ID: ${row?.id})`,
-      // ...(extra
-      //   ? {
-      //       componente: row?.componente,
-      //       garantia: row?.tipo_garantia,
-      //       titular: row?.tipo_titular ? `${row?.tipo_titular}${row?.consumidor ? ' (Consumidor)' : ''}` : '',
-      //     }
-      //   : null),
     }));
 }
 

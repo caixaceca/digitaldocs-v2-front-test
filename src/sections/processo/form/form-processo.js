@@ -1,15 +1,14 @@
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 // @mui
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
-import DialogTitle from '@mui/material/DialogTitle';
+import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // redux
+import { resetDados } from '../../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
 import { getSuccess as gSDD, updateItem } from '../../../redux/slices/digitaldocs';
@@ -18,10 +17,11 @@ import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // hooks
 import { useNotificacao } from '../../../hooks/useNotificacao';
 // components
+import Steps from '../../../components/Steps';
 import { SearchNotFound } from '../../../components/table';
-import { DialogConfirmar } from '../../../components/CustomDialog';
+import { DialogConfirmar, DialogTitleAlt } from '../../../components/CustomDialog';
 // sections
-import ProcessoCredito from './processo-credito';
+import ProcessoCredito from './credito';
 import ProcessoExterno from './processo-externo';
 import ProcessoInterno from './processo-interno';
 
@@ -30,38 +30,28 @@ import ProcessoInterno from './processo-interno';
 ProcessoForm.propTypes = { processo: PropTypes.object, ambientId: PropTypes.number, onCancel: PropTypes.func };
 
 export default function ProcessoForm({ processo, ambientId, onCancel }) {
-  const { id } = useParams();
+  const isEdit = !!processo;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [fluxo, setFluxo] = useState(null);
-  const [estado, setEstaddo] = useState(null);
 
+  const { activeStep } = useSelector((state) => state.stepper);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { selectedAnexoId, isSaving, done } = useSelector((state) => state.digitaldocs);
 
-  const isEdit = !!processo;
-  const estadoProcesso = useMemo(
-    () => meusAmbientes?.find(({ id }) => id === processo?.estado_processo?.estado_id) || null,
-    [meusAmbientes, processo?.estado_processo?.estado_id]
-  );
-  const estadosList = useMemo(
+  const estado = useMemo(
     () =>
-      (!isEdit && meusAmbientes?.filter(({ isinicial, observador }) => isinicial && !observador)) ||
-      (estadoProcesso && [estadoProcesso]) ||
-      [],
-    [isEdit, meusAmbientes, estadoProcesso]
-  );
-  const fluxosList = useMemo(
-    () =>
-      estado?.fluxos
-        ?.filter(({ ativo, credito_funcionario: cf }) => ativo && !cf)
-        ?.map((row) => ({ ...row, id: row?.fluxo_id })) || [],
-    [estado?.fluxos]
+      meusAmbientes?.find(({ id }) => id === processo?.estado_processo?.estado_id) ||
+      meusAmbientes?.find(({ id }) => id === ambientId) ||
+      meusAmbientes.find(({ isinicial }) => isinicial) ||
+      null,
+    [ambientId, meusAmbientes, processo?.estado_processo?.estado_id]
   );
 
-  useEffect(() => {
-    if (fluxo?.iscredito) dispatch(getFromParametrizacao('linhas'));
-  }, [dispatch, fluxo]);
+  const fluxosList = useMemo(
+    () => estado?.fluxos?.filter(({ ativo }) => ativo)?.map((row) => ({ ...row, id: row?.fluxo_id })) || [],
+    [estado?.fluxos]
+  );
 
   useEffect(() => {
     const fluxoProcesso = fluxosList?.find(({ id }) => id === processo?.fluxo_id) || null;
@@ -69,77 +59,77 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
   }, [dispatch, fluxosList, processo?.fluxo_id]);
 
   useEffect(() => {
-    const estadoDefault = estadoProcesso || estadosList?.find(({ id }) => id === ambientId);
-    if (estadoDefault) setEstaddo(estadoDefault);
-  }, [ambientId, estadoProcesso, estadosList]);
+    if (fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id }));
+  }, [dispatch, fluxo?.id]);
 
   const navigateToProcess = () => {
     if (done === 'Processo adicionado') navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${processo?.id}`);
   };
 
   const eliminarAnexo = () => {
-    const params = { processo: true, processoId: id, anexo: selectedAnexoId, msg: 'Anexo eliminado' };
+    const params = { processo: true, processoId: processo?.id, anexo: selectedAnexoId, msg: 'Anexo eliminado' };
     dispatch(updateItem('anexo', null, params));
   };
 
   useNotificacao({ done, afterSuccess: () => navigateToProcess() });
 
+  const onClose = () => {
+    onCancel();
+    dispatch(resetDados());
+  };
+
   return (
     <>
-      <Dialog open onClose={onCancel} fullWidth maxWidth="lg">
-        <DialogTitle>{isEdit ? 'Atualizar processo' : 'Adicionar processo'}</DialogTitle>
+      <Dialog open onClose={onClose} fullWidth maxWidth="lg">
+        <DialogTitleAlt
+          title={isEdit ? 'Atualizar processo' : 'Adicionar processo'}
+          subtitle={
+            <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold' }}>
+              {estado?.nome || 'Nenhum estado selecionado...'}
+            </Typography>
+          }
+          stepper={
+            fluxo ? (
+              <Steps
+                sx={{ my: 3 }}
+                activeStep={activeStep}
+                steps={fluxo?.iscredito ? ['Info. crédito', 'Garantias', 'Anexos'] : ['Dados gerais', 'Anexos']}
+              />
+            ) : null
+          }
+          action={
+            <Autocomplete
+              fullWidth
+              size="small"
+              value={fluxo}
+              disableClearable
+              options={fluxosList}
+              sx={{ minWidth: { xs: 150, sm: 300, md: 500 } }}
+              getOptionLabel={(option) => option?.assunto}
+              onChange={(event, newValue) => setFluxo(newValue)}
+              isOptionEqualToValue={(option, value) => option?.id === value?.id}
+              renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
+            />
+          }
+        />
         <DialogContent>
-          <Card sx={{ p: 1, mt: 3, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <Autocomplete
-                fullWidth
-                value={estado}
-                disableClearable
-                getOptionLabel={(option) => option?.nome}
-                options={(!isEdit && estadosList) || (estado && [estado]) || []}
-                isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                renderInput={(params) => <TextField {...params} label="Estado" />}
-                onChange={(event, newValue) => {
-                  setFluxo(null);
-                  setEstaddo(newValue);
-                }}
-              />
-              <Autocomplete
-                fullWidth
-                value={fluxo}
-                disableClearable
-                options={fluxosList}
-                getOptionLabel={(option) => option?.assunto}
-                onChange={(event, newValue) => setFluxo(newValue)}
-                isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                renderInput={(params) => <TextField {...params} fullWidth label="Assunto" />}
-              />
-            </Stack>
-          </Card>
           {estado ? (
             <>
-              {!fluxo ? (
-                <SearchNotFound message="Seleciona o assunto do processo que pretendes adicionar..." />
-              ) : (
+              {fluxo ? (
                 <>
-                  {fluxo?.iscredito ? (
-                    <ProcessoCredito isEdit={isEdit} processo={processo} fluxo={fluxo} estado={estado} />
-                  ) : (
-                    <>
-                      {fluxo?.isinterno ? (
-                        <ProcessoInterno isEdit={isEdit} processo={processo} fluxo={fluxo} estado={estado} />
-                      ) : (
-                        <ProcessoExterno isEdit={isEdit} processo={processo} fluxo={fluxo} estado={estado} />
-                      )}
-                    </>
-                  )}
+                  {(fluxo?.iscredito && (
+                    <ProcessoCredito dados={{ isEdit, processo, fluxo, estado }} onCancel={() => onClose()} />
+                  )) ||
+                    (fluxo?.isinterno && (
+                      <ProcessoInterno dados={{ isEdit, processo, fluxo, estado }} onCancel={() => onClose()} />
+                    )) || <ProcessoExterno dados={{ isEdit, processo, fluxo, estado }} onCancel={() => onClose()} />}
                 </>
+              ) : (
+                <SearchNotFound message="Seleciona o assunto do processo que pretendes adicionar..." />
               )}
             </>
           ) : (
-            <SearchNotFound
-              message={`Seleciona o estado ${isEdit ? 'atual do' : 'onde pretendes adicionar o'} processo...`}
-            />
+            <SearchNotFound message={`Estado atual não permite ${isEdit ? 'editar o' : 'adicionar'} processo...`} />
           )}
         </DialogContent>
       </Dialog>

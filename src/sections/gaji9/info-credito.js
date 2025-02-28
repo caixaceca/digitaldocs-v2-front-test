@@ -53,7 +53,7 @@ export default function InfoCredito() {
         { label: 'Conta DO', value: credito?.conta_do },
         {
           label: 'Tipo de titular',
-          value: `${credito?.tipo_titular}${credito?.consumidor ? ` - ${credito?.consumidor}` : ''}`,
+          value: `${credito?.tipo_titular}${credito?.consumidor ? ' (Consumidor)' : ''}`,
         },
         { label: 'Email', value: credito?.morada_eletronico_cliente },
         { label: 'Morada', value: credito?.morada_cliente },

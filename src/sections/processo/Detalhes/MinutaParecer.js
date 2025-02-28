@@ -55,10 +55,10 @@ function PDFLink({ dados }) {
               value1={
                 <Text style={[styles.textBold]}>
                   {dados?.parecer_em ? ptDateTime(dados?.parecer_em) : ''}{' '}
-                  {dados?.parecer_data_limite &&
-                    add(new Date(dados?.parecer_data_limite), { days: 1 }) < new Date(dados?.parecer_em) && (
+                  {dados?.data_limite &&
+                    add(new Date(dados?.data_limite), { days: 1 }) < new Date(dados?.parecer_em) && (
                       <Text style={[styles.text4, styles.textError]}>
-                        (Atrasado: data limite {ptDateTime(dados?.parecer_data_limite)})
+                        (Atrasado: data limite {ptDateTime(dados?.data_limite)})
                       </Text>
                     )}
                 </Text>

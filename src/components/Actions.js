@@ -365,7 +365,7 @@ export function ButtonsStepper({
   labelCancel = 'Voltar',
 }) {
   return (
-    <Stack direction="row" justifyContent="right" spacing={1} sx={{ mt: 3, pt: 1 }}>
+    <Stack direction="row" justifyContent="right" spacing={1} sx={{ mt: 3, pt: 1, width: 1 }}>
       <Button variant="outlined" color="inherit" onClick={() => onCancel()}>
         {labelCancel}
       </Button>

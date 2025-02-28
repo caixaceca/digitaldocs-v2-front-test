@@ -59,8 +59,8 @@ export function colorLabel(value, padrao = 'primary') {
       'success') ||
     ((value === 'Pendentes' || value === 'Pendente' || value === 'Favorável parcial' || value?.includes('UPDATE')) &&
       'warning') ||
-    ((value === 'Atribuídos' || value === 'Afeto' || value?.includes('READ')) && 'info') ||
-    ((value === 'Em análise' || value === 'Entrada' || value === 'Sem parecer') && 'default') ||
+    ((value === 'Em análise' || value === 'Atribuídos' || value === 'Afeto' || value?.includes('READ')) && 'info') ||
+    ((value === 'Entrada' || value === 'Sem parecer') && 'default') ||
     ((value === 'Retidos' ||
       value === 'Desistido' ||
       value === 'Indeferido' ||

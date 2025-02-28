@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // form
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -16,44 +15,38 @@ import {
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
-//
-import Outros from './outros';
-import DadosCliente from './dados-cliente';
+import { Entidades } from './dados-cliente';
+import GridItem from '../../../components/GridItem';
 
 // ----------------------------------------------------------------------
 
-ProcessoExternoForm.propTypes = { origensList: PropTypes.array, processo: PropTypes.object };
+ProcessoExternoForm.propTypes = { origensList: PropTypes.array };
 
-export default function ProcessoExternoForm({ processo, origensList }) {
-  const { watch } = useFormContext();
+export default function ProcessoExternoForm({ origensList }) {
+  const { watch, control } = useFormContext();
   const values = watch();
-  const anexosAtivos = useMemo(() => processo?.anexos?.filter((row) => row?.ativo), [processo?.anexos]);
+  const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
 
   return (
     <Box sx={{ width: 1 }}>
       <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-            <RHFTextField name="referencia" label="Referência" />
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          <GridItem xs={12} sm={6} children={<RHFTextField name="referencia" label="Referência" />} />
+          <GridItem xs={12} sm={6}>
             <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          </GridItem>
+          <GridItem xs={12} sm={6}>
             <RHFAutocompleteSmp name="canal" label="Canal de entrada" options={['Email', 'Correspondência']} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          </GridItem>
+          <GridItem xs={12} sm={6}>
             <RHFAutocompleteObj
               label="Origem"
               name="origem_id"
               options={applySort(origensList, getComparator('asc', 'label'))}
             />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <RHFTextField name="titular" label="Titular" />
-          </Grid>
-          <Grid
-            item
+          </GridItem>
+          <GridItem xs={12} md={6} children={<RHFTextField name="titular" label="Titular" />} />
+          <GridItem
             xs={12}
             sm={values.operacao === 'Cativo/Penhora' ? 6 : 12}
             md={values.operacao === 'Cativo/Penhora' ? 3 : 6}
@@ -69,20 +62,26 @@ export default function ProcessoExternoForm({ processo, origensList }) {
                 'Outras',
               ]}
             />
-          </Grid>
+          </GridItem>
           {values.operacao === 'Cativo/Penhora' && (
-            <Grid item xs={12} sm={6} md={3}>
-              <RHFNumberField name="valor" tipo="moeda" label="Valor" />
-            </Grid>
+            <GridItem xs={12} sm={6} md={3} children={<RHFNumberField name="valor" tipo="moeda" label="Valor" />} />
           )}
         </Grid>
       </Card>
 
       <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-        <DadosCliente />
+        <Grid container spacing={3}>
+          <GridItem xs={12} sm={6} lg={3} children={<RHFTextField name="docidp" label="Nº de identificação 1" />} />
+          <GridItem xs={12} sm={6} lg={3} children={<RHFTextField name="docids" label="Nº de identificação 2" />} />
+          <GridItem xs={12} sm={6} lg={3} children={<RHFNumberField name="cliente" label="Nº de cliente" />} />
+          <GridItem xs={12} sm={6} lg={3} children={<RHFNumberField name="conta" label="Nº de conta" />} />
+          <Entidades fields={fields} append={append} remove={remove} />
+        </Grid>
       </Card>
 
-      <Outros anexos={anexosAtivos} />
+      <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
+      </Card>
     </Box>
   );
 }

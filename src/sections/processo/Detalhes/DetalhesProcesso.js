@@ -35,7 +35,7 @@ import { dis } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
-const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral' };
+const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral', minHeight: 36 };
 
 // ----------------------------------------------------------------------
 
@@ -111,11 +111,11 @@ export default function DetalhesProcesso({ isPS, processo }) {
                         )}
                         {colaboradorAfeto && (
                           <Typography sx={{ typography: 'caption', color: 'info.main' }}>
-                            {row?._lock ? '' : 'Atribuído a '}
+                            {row?.is_lock ? '' : 'Atribuído a '}
                             <Typography variant="spam" sx={{ fontWeight: 900 }}>
                               {baralharString(colaboradorAfeto?.perfil?.displayName)}
                             </Typography>
-                            {row?._lock ? ' está trabalhando neste processo' : ''}.
+                            {row?.is_lock ? ' está trabalhando neste processo' : ''}.
                           </Typography>
                         )}
                       </Stack>
@@ -263,9 +263,19 @@ TextItem.propTypes = {
 
 export function TextItem({ title = '', text = '', label = null, baralhar = false, ...sx }) {
   return (title && text) || label ? (
-    <Stack spacing={1} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
-      {title && <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>}
-      {text && <Typography>{baralhar ? baralharString(text) : text}</Typography>}
+    <Stack spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
+      {title && (
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          {title}
+        </Typography>
+      )}
+      {text && (
+        <Typography
+          sx={text === '(Não definido)' && { fontStyle: 'italic', color: 'text.disabled', typography: 'body2' }}
+        >
+          {baralhar ? baralharString(text) : text}
+        </Typography>
+      )}
       {label}
     </Stack>
   ) : (

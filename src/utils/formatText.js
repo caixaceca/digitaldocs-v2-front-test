@@ -140,7 +140,7 @@ export function nomeacaoBySexo(nomeacao, sexo) {
 
 export function noDados(text) {
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+    <Typography variant="caption" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
       {text || '(Não identificado)'}
     </Typography>
   );

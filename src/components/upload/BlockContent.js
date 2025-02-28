@@ -27,14 +27,14 @@ export default function BlockContent({ multiple = false, small = false }) {
 
       {isLoading ? (
         <Box sx={{ p: small ? 1 : 2 }}>
-          <Typography gutterBottom variant={'subtitle1'}>
+          <Typography variant={'subtitle1'}>
             Carregando e compactando o{multiple ? 's' : ''} documento{multiple ? 's' : ''}...
           </Typography>
           <LinearProgress />
         </Box>
       ) : (
         <Box sx={{ p: small ? 1 : 2 }}>
-          <Typography gutterBottom variant={small ? 'subtitle1' : 'h6'}>
+          <Typography variant={small ? 'subtitle1' : 'h6'}>
             Solte ou seleciona o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''}...
           </Typography>
 

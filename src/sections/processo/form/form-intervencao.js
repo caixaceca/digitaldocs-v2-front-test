@@ -1212,7 +1212,10 @@ export function ConfidencialidadesForm({ processoId }) {
           processoId,
           id: selectedItem?.id,
           msg: 'Confidencialidade atualizado',
-          afterSuccess: () => dispatch(getInfoProcesso('confidencialidades', { id: processoId })),
+          afterSuccess: () => {
+            dispatch(closeModal());
+            dispatch(getInfoProcesso('confidencialidades', { id: processoId }));
+          },
         })
       );
     } catch (error) {

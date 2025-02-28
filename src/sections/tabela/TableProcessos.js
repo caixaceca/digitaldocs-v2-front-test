@@ -126,9 +126,9 @@ export default function TableProcessos({ from }) {
         sx={{ px: 1 }}
         action={
           <Stack direction="row" spacing={0.75}>
-            {!meuAmbiente?.observador && meuAmbiente?.isinicial && (
-              <AddItem button handleClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
-            )}
+            {/* {!meuAmbiente?.observador && meuAmbiente?.isinicial && ( */}
+            <AddItem button handleClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
+            {/* )} */}
           </Stack>
         }
       />

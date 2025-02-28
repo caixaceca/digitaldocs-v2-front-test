@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // form
 import { useFormContext } from 'react-hook-form';
@@ -18,20 +17,25 @@ import {
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
+import GridItem from '../../../components/GridItem';
 //
 import Outros from './outros';
 // _mock
-import { segmentos, escaloes, situacoes } from '../../../_mock';
+import { escaloes, situacoes } from '../../../_mock';
 
 // ----------------------------------------------------------------------
 
-ProcessoCreditoForm.propTypes = { isEdit: PropTypes.bool, processo: PropTypes.object };
+ProcessoCreditoForm.propTypes = {
+  isEdit: PropTypes.bool,
+  anexos: PropTypes.array,
+  componentes: PropTypes.array,
+  tiposTitular: PropTypes.array,
+};
 
-export default function ProcessoCreditoForm({ isEdit, processo }) {
+export default function ProcessoCreditoForm({ isEdit, componentes, tiposTitular, anexos }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
   const { linhas } = useSelector((state) => state.parametrizacao);
-  const anexosAtivos = useMemo(() => processo?.anexos?.filter((row) => row?.ativo), [processo?.anexos]);
 
   return (
     <Box sx={{ width: 1 }}>
@@ -44,44 +48,39 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
             <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante solicitado" />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <RHFAutocompleteSmp
-              name="segmento"
-              label="Segmento"
-              options={segmentos}
+            <RHFAutocompleteObj
+              name="tipo_titular"
+              label="Tipo de titular"
+              options={tiposTitular}
               onChange={(event, newValue) => {
                 setValue('linha_id', null, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
-                setValue('segmento', newValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+                setValue('tipo_titular', newValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
               }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <RHFAutocompleteObj
-              disabled={!values?.segmento}
+              disabled={!values?.tipo_titular}
               name="linha_id"
               label="Linha de crédito"
               options={applySort(
                 linhas
-                  ?.filter((item) => item?.descricao === values.segmento)
+                  ?.filter((item) => item?.descricao === values?.tipo_titular?.label)
                   ?.map((row) => ({ id: row?.id, label: row?.linha })),
                 getComparator('asc', 'label')
               )}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
-            <RHFTextField name="titular" label="Proponente" />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <RHFNumberField name="cliente" label="Nº de cliente" />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <RHFTextField name="numero_proposta" label="Nº de proposta" />
-          </Grid>
           <Grid item xs={12} sm={6}>
-            <RHFTextField name="setor_atividade" label="Entidade patronal" />
+            <RHFAutocompleteObj name="componente" label="Produto/Componente" options={componentes} />
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <RHFTextField name="finalidade" label="Finalidade" />
-          </Grid>
+          <GridItem xs={12} sm={6} md={3} children={<RHFTextField name="numero_proposta" label="Nº de proposta" />} />
+          <GridItem xs={12} sm={6} md={3} children={<RHFNumberField name="cliente" label="Nº de cliente" />} />
+          <GridItem xs={12} md={4} children={<RHFTextField name="titular" label="Nome do proponente" />} />
+          <GridItem xs={12} sm={4}>
+            <RHFTextField name="setor_atividade" label="Ent. patronal/Set. atividade" />
+          </GridItem>
+          <GridItem xs={12} sm={4} children={<RHFTextField name="finalidade" label="Finalidade" />} />
         </Grid>
       </Card>
       {isEdit && (
@@ -105,24 +104,22 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
             {values?.situacao_final_mes === 'Contratado' && (
               <Grid item xs={12}>
                 <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6} md={3}>
+                  <GridItem xs={12} sm={6} md={3}>
                     <RHFDatePicker name="data_contratacao" label="Data de contratação" disableFuture />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
                     <RHFNumberField tipo="moeda" name="montante_contratado" label="Montante contratado" />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <RHFTextField name="prazo_amortizacao" label="Prazo de amortização" />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <RHFTextField name="prazo_amortizacao" label="Prazo" />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
                     <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <RHFAutocompleteSmp name="escalao_decisao" label="Escalão de decisão" options={escaloes} />
-                  </Grid>
-                  <Grid item xs={12} sm={9}>
-                    <RHFTextField name="garantia" label="Garantia" />
-                  </Grid>
+                  </GridItem>
+                  <GridItem xs={12} sm={3}>
+                    <RHFAutocompleteSmp name="escalao_decisao" label="Decisor" options={escaloes} />
+                  </GridItem>
+                  <GridItem xs={12} sm={9} children={<RHFTextField name="garantia" label="Garantia" />} />
                 </Grid>
               </Grid>
             )}
@@ -140,7 +137,7 @@ export default function ProcessoCreditoForm({ isEdit, processo }) {
         </Card>
       )}
 
-      <Outros anexos={anexosAtivos} />
+      <Outros anexos={anexos} />
     </Box>
   );
 }

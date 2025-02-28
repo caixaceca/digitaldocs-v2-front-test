@@ -21,6 +21,7 @@ const initialState = {
   isLoadingP: false,
   isLoadingPreview: false,
   processo: null,
+  pdfPreview: null,
   filePreview: null,
   selectedItem: null,
   processosInfo: null,
@@ -83,7 +84,7 @@ const slice = createSlice({
       state.processo.estado_atual_id = action.payload.estado_atual_id;
       state.processo.data_ultima_transicao = action.payload.data_ultima_transicao;
       state.processo.estado_processo = {
-        _lock: true,
+        is_lock: true,
         perfil_id: action.payload.perfil_id,
         estado: action.payload.estado_atual,
         estado_id: action.payload.estado_atual_id,
@@ -155,12 +156,12 @@ const slice = createSlice({
 
     aceitarSuccess(state, action) {
       if (action.payload.modo === 'serie') {
-        state.processo.estado_processo._lock = true;
+        state.processo.estado_processo.is_lock = true;
         state.processo.estado_processo.perfil_id = action.payload.perfilId;
       } else {
         const index = state.processo.estados.findIndex((row) => row.estado_id === action.payload.estadoId);
         if (index !== -1) {
-          state.processo.estados[index]._lock = true;
+          state.processo.estados[index].is_lock = true;
           state.processo.estados[index].perfil_id = action.payload.perfilId;
         }
       }
@@ -408,7 +409,7 @@ export function getProcesso(item, params) {
 
       if (processo?.estados?.length === 0) {
         processo.estado_processo = {
-          _lock: processo?.preso,
+          is_lock: processo?.preso,
           perfil_id: processo?.perfil_id,
           estado: processo?.estado_atual,
           estado_id: processo?.estado_atual_id,
@@ -437,7 +438,7 @@ export function getProcesso(item, params) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
 
-      if (estado?._lock && estado?.estado_id && processo?.atribuidoAMim) {
+      if (estado?.is_lock && estado?.estado_id && processo?.atribuidoAMim) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         dispatch(getInfoProcesso('destinos', { id: processo?.id, estadoId: estado?.estado_id }));
       }
@@ -521,6 +522,9 @@ export function getAnexo(item, params) {
   return async (dispatch, getState) => {
     if (item === 'filePreview') dispatch(slice.actions.getSuccess({ item: 'isLoadingPreview', dados: true }));
     dispatch(slice.actions.getSuccess({ item: 'isLoadingFile', dados: params?.anexo?.anexo }));
+    const isPdf = canPreview(params?.anexo) === 'pdf';
+    if (isPdf && item !== 'filePreview')
+      dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: { ...params?.anexo, url: '' } }));
 
     try {
       const accessToken = await getAccessToken();
@@ -545,7 +549,8 @@ export function getAnexo(item, params) {
         );
       }
       if (item === 'filePreview')
-        await dispatch(slice.actions.getSuccess({ item: 'filePreview', dados: { ...params?.anexo, url } }));
+        dispatch(slice.actions.getSuccess({ item: 'filePreview', dados: { ...params?.anexo, url } }));
+      else if (isPdf) dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: { ...params?.anexo, url } }));
       else downloadDoc(url, params?.anexo?.nome);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);

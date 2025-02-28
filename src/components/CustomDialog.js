@@ -59,20 +59,24 @@ DialogTitleAlt.propTypes = {
   action: PropTypes.node,
   title: PropTypes.string,
   onClose: PropTypes.func,
+  stepper: PropTypes.node,
   subtitle: PropTypes.node,
 };
 
-export function DialogTitleAlt({ title, onClose = null, sx = null, action, subtitle = null }) {
+export function DialogTitleAlt({ title, onClose = null, sx = null, action, subtitle = null, stepper = null }) {
   return (
     <DialogTitle sx={{ ...sx }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-        {title}
+        <Box>
+          {title}
+          {subtitle}
+        </Box>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {action}
           {onClose && <Fechar handleClick={onClose} />}
         </Stack>
       </Stack>
-      {subtitle}
+      {stepper}
     </DialogTitle>
   );
 }

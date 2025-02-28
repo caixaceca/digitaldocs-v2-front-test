@@ -11,7 +11,7 @@ import { findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/v
 // redux
 import { useAcesso } from '../../hooks/useAcesso';
 import { useDispatch, useSelector } from '../../redux/store';
-import { updateItem, closeModal } from '../../redux/slices/digitaldocs';
+import { getSuccess, updateItem, closeModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -22,6 +22,7 @@ import { useProcesso, useIdentificacao } from '../../hooks/useProcesso';
 import Page from '../../components/Page';
 import { TabCard } from '../../components/TabsWrapper';
 import { DefaultAction } from '../../components/Actions';
+import DialogPreviewDoc from '../../components/CustomDialog';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import {
@@ -48,8 +49,10 @@ export default function PageProcesso() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { processos, done, isOpenModal, isSaving, isLoading } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
+  const { processos, done, pdfPreview, isOpenModal, isSaving, isLoading, isLoadingFile } = useSelector(
+    (state) => state.digitaldocs
+  );
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
   const linkNavigate = useMemo(
     () =>
@@ -191,16 +194,16 @@ export default function PageProcesso() {
                           {/* Aceitar/Atribuir/Intervir */}
                           {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
                             <>
-                              {estado?._lock && processo?.atribuidoAMim && (
+                              {estado?.is_lock && processo?.atribuidoAMim && (
                                 <Intervencao colaboradoresList={colaboradoresList} />
                               )}
-                              {!processo?.atribuidoAMim && estado?._lock && gestorEstado(meusAmbientes, estadoId) && (
+                              {!processo?.atribuidoAMim && estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
                                 <Libertar dados={{ id, fluxoId, estadoId }} isSaving={isSaving} />
                               )}
-                              {!estado?._lock && (!processo?.perfilAtribuido || processo?.atribuidoAMim) && (
+                              {!estado?.is_lock && (!processo?.perfilAtribuido || processo?.atribuidoAMim) && (
                                 <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
                               )}
-                              {!estado?._lock && gestorEstado(meusAmbientes, estadoId) && (
+                              {!estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
                                 <Atribuir
                                   dados={{ fluxoId, estadoId, perfilIdA: processo?.perfilAtribuido, processoId: id }}
                                 />
@@ -209,7 +212,7 @@ export default function PageProcesso() {
                           )}
                           {/* Resgatar */}
                           {!!ultimaTransicao &&
-                            !estado?._lock &&
+                            !estado?.is_lock &&
                             !processo?.pendente &&
                             !ultimaTransicao?.resgate &&
                             perfilId === ultimaTransicao?.perfil_id &&
@@ -224,7 +227,7 @@ export default function PageProcesso() {
                       {/* Transição em paralelo */}
                       {processo?.estados?.length > 0 && pertencoEstadoId(meusAmbientes, estadoId) && (
                         <>
-                          {estado?._lock && processo?.atribuidoAMim && (
+                          {estado?.is_lock && processo?.atribuidoAMim && (
                             <>
                               <Libertar dados={{ id, fluxoId, estadoId }} isSaving={isSaving} />
                               {processo?.estados?.find((row) => row?.parecer_em) ? (
@@ -234,7 +237,7 @@ export default function PageProcesso() {
                               )}
                             </>
                           )}
-                          {!estado?._lock && (
+                          {!estado?.is_lock && (
                             <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
                           )}
                         </>
@@ -253,6 +256,15 @@ export default function PageProcesso() {
 
         {isOpenModal === 'editar-processo' && (
           <ProcessoForm processo={processo} onCancel={() => dispatch(closeModal())} />
+        )}
+
+        {pdfPreview && (
+          <DialogPreviewDoc
+            url={pdfPreview?.url}
+            isLoading={isLoadingFile}
+            titulo={pdfPreview?.nome}
+            onClose={() => dispatch(getSuccess({ item: 'pdfPreview', dados: null }))}
+          />
         )}
       </Container>
     </Page>

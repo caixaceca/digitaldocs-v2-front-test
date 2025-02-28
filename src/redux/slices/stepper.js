@@ -25,12 +25,8 @@ const slice = createSlice({
       state.dadosStepper = null;
     },
     updateDados(state, action) {
-      if (action.payload.forward) {
-        state.activeStep += 1;
-      }
-      if (action.payload.backward) {
-        state.activeStep -= 1;
-      }
+      if (action.payload.forward) state.activeStep += 1;
+      if (action.payload.backward) state.activeStep -= 1;
       state.dadosStepper = { ...state.dadosStepper, ...action.payload.dados };
     },
   },

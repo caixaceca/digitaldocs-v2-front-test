@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // form
 import { useFormContext } from 'react-hook-form';
@@ -17,7 +16,6 @@ import {
 } from '../../../components/hook-form';
 import GridItem from '../../../components/GridItem';
 //
-import Outros from './outros';
 import DadosCliente from './dados-cliente';
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
@@ -29,12 +27,11 @@ ProcessoInternoForm.propTypes = { fluxo: PropTypes.object, processo: PropTypes.o
 export default function ProcessoInternoForm({ processo, fluxo }) {
   const { watch, setValue } = useFormContext();
   const values = watch();
-  const anexosAtivos = useMemo(() => processo?.anexos?.filter((row) => row?.ativo), [processo?.anexos]);
 
   return (
     <Box sx={{ width: 1 }}>
       <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-        <DadosCliente isInterno noperacao={processo?.noperacao} fluxo={fluxo} />
+        <DadosCliente noperacao={processo?.noperacao} fluxo={fluxo} />
       </Card>
       {(fluxo?.assunto === 'OPE DARH' || fluxo?.assunto === 'Transferência Internacional') && (
         <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
@@ -134,7 +131,9 @@ export default function ProcessoInternoForm({ processo, fluxo }) {
         </Card>
       )}
 
-      <Outros anexos={anexosAtivos} />
+      <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
+      </Card>
     </Box>
   );
 }

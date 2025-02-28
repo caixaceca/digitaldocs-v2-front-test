@@ -44,7 +44,7 @@ export default function UploadMultiFile({ error, showPreview = false, files, onR
       >
         <input {...getInputProps()} />
 
-        <BlockContent multiple />
+        <BlockContent multiple small={other?.small} />
       </DropZoneStyle>
 
       {fileRejections.length > 0 && <RejectionFiles fileRejections={fileRejections} />}

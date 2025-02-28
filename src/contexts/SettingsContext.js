@@ -13,11 +13,6 @@ const initialState = {
   onToggleMode: () => {},
   onChangeMode: () => {},
 
-  // Direction
-  onToggleDirection: () => {},
-  onChangeDirection: () => {},
-  onChangeDirectionByLang: () => {},
-
   // Layout
   onToggleLayout: () => {},
   onChangeLayout: () => {},

@@ -63,7 +63,7 @@ export default function Estados({ handleAceitar }) {
                 <Stack direction="row" justifyContent="right" alignItems="center" spacing={1} sx={{ zIndex: 2 }}>
                   {pertencoEstadoId(meusAmbientes, row?.estado_id) && (
                     <>
-                      {!temParecer && !row?._lock && gestorEstado(meusAmbientes, row?.estado_id) && (
+                      {!temParecer && !row?.is_lock && gestorEstado(meusAmbientes, row?.estado_id) && (
                         <Atribuir
                           dados={{
                             estadoId: row?.estado_id,
@@ -73,7 +73,7 @@ export default function Estados({ handleAceitar }) {
                           }}
                         />
                       )}
-                      {row?._lock && row?.perfil_id === perfilId && (
+                      {row?.is_lock && row?.perfil_id === perfilId && (
                         <>
                           <DefaultAction
                             color={temParecer ? 'warning' : 'success'}
@@ -87,7 +87,7 @@ export default function Estados({ handleAceitar }) {
                           />
                         </>
                       )}
-                      {!row?._lock && (!row?.perfil_id || row?.perfil_id === perfilId) && (
+                      {!row?.is_lock && (!row?.perfil_id || row?.perfil_id === perfilId) && (
                         <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(row?.estado_id, 'paralelo')} />
                       )}
                     </>
@@ -109,14 +109,14 @@ export default function Estados({ handleAceitar }) {
                         </Label>
                       )}
                     </Stack>
-                    {!!row?.parecer_data_limite && !temParecer && <DataParecer data1={row?.parecer_data_limite} />}
+                    {!!row?.data_limite && !temParecer && <DataParecer data1={row?.data_limite} />}
                     {afeto && !temPareceres && (
                       <Typography sx={{ typography: 'caption', color: 'info.main' }}>
-                        {row?._lock ? '' : 'Este processo foi tribuído a '}
+                        {row?.is_lock ? '' : 'Este processo foi tribuído a '}
                         <Typography variant="spam" sx={{ fontWeight: 900 }}>
                           {baralharString(afeto?.perfil?.displayName)}
                         </Typography>
-                        {row?._lock ? ' está trabalhando no processo' : ''} neste estado.
+                        {row?.is_lock ? ' está trabalhando no processo' : ''} neste estado.
                       </Typography>
                     )}
                   </Stack>
@@ -323,9 +323,7 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
               {!dados?.temPareceres && <MinutaParecer dados={{ ...dados }} />}
             </Stack>
             {!!dados?.parecer_em && <DataParecer data1={dados?.parecer_em} envio />}
-            {!!dados?.parecer_data_limite && (
-              <DataParecer data1={dados?.parecer_data_limite} data2={dados?.parecer_em} />
-            )}
+            {!!dados?.data_limite && <DataParecer data1={dados?.data_limite} data2={dados?.parecer_em} />}
           </Box>
         )}
       </Stack>
