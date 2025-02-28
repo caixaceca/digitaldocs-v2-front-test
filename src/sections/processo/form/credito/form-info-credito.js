@@ -97,16 +97,8 @@ export default function FormInfoCredito({ dados, onCancel }) {
     [processo, credito, dadosStepper, componentesList, tiposTitularList]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const {
-    watch,
-    reset,
-    setValue,
-    handleSubmit,
-    formState: { errors },
-  } = methods;
+  const { watch, reset, setValue, handleSubmit } = methods;
   const values = watch();
-
-  console.log(errors);
 
   useEffect(() => {
     reset(defaultValues);

@@ -29,8 +29,6 @@ export const loginRequest = {
   scopes: ['User.Read', 'Presence.Read.All', 'openid', 'profile'],
 };
 
-console.log(process.env.REACT_APP_CLIENTE_ID_AAD);
-
 // ----------------------------------------------------------------------
 
 export const HEADER = {

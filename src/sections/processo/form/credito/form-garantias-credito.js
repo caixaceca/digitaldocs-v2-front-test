@@ -36,8 +36,6 @@ export default function FormGarantiasCredito() {
     garantias: Yup.array(Yup.object({ tipo_garantia_id: Yup.mixed().required().label('Garantia') })),
   });
 
-  console.log(dadosStepper?.garantias);
-
   const defaultValues = useMemo(() => ({ garantias: dadosStepper?.garantias || [] }), [dadosStepper]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
