@@ -27,7 +27,7 @@ import { Criado, ColaboradorInfo } from '../../../components/Panel';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
-import { ConfidencialidadesForm } from '../form/form-intervencao';
+import { ConfidencialidadesForm } from '../form/intervencao';
 
 // ----------------------------------------------------------------------
 

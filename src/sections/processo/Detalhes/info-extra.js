@@ -1,20 +1,38 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
+import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
+import Dialog from '@mui/material/Dialog';
 import ListItem from '@mui/material/ListItem';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
+import DialogContent from '@mui/material/DialogContent';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
 import { ptDate } from '../../../utils/formatTime';
-import { newLineText } from '../../../utils/formatText';
 import { colorLabel } from '../../../utils/getColorPresets';
-import { fCurrency, fPercent } from '../../../utils/formatNumber';
+import { newLineText, noDados } from '../../../utils/formatText';
+import { fNumber, fCurrency, fPercent } from '../../../utils/formatNumber';
+// hooks
+import { deleteItem } from '../../../redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import { TextItem } from './DetalhesProcesso';
+import { CellChecked } from '../../../components/Panel';
 import { SearchNotFoundSmall } from '../../../components/table';
+import { DialogConfirmar } from '../../../components/CustomDialog';
+import { TabsWrapperSimple } from '../../../components/TabsWrapper';
+import { DefaultAction, DTFechar } from '../../../components/Actions';
+import { GarantiasSeparados } from '../form/credito/form-garantias-credito';
+import { Resgisto, TableRowItem, LabelSN } from '../../parametrizacao/Detalhes';
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
 
@@ -23,14 +41,47 @@ import { dis, estadosCivis } from '../../../_mock';
 InfoCredito.propTypes = { dados: PropTypes.object };
 
 export function InfoCredito({ dados }) {
+  const [currentTab, setCurrentTab] = useState('Dados');
+
+  const tabsList = [
+    { value: 'Dados', component: <DadosCredito dados={dados} /> },
+    { value: 'Garantias', component: <Garantias dados={dados} /> },
+  ];
+
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 4 }} sx={{ p: { xs: 1, sm: 3 } }}>
+    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
+      <TabsWrapperSimple
+        sx={{ mb: 3 }}
+        tabsList={tabsList}
+        currentTab={currentTab}
+        changeTab={(_, newValue) => setCurrentTab(newValue)}
+      />
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DadosCredito.propTypes = { dados: PropTypes.object };
+
+function DadosCredito({ dados }) {
+  const situacao = dados?.situacao_final_mes || 'Em análise';
+
+  return (
+    <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 4 }}>
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>
           <Typography variant="subtitle1">Pedido</Typography>
         </ListItem>
         <TextItem title="Nº de proposta:" text={dados?.nproposta || '(Não definido)'} />
         <TextItem title="Montante solicitado:" text={fCurrency(dados?.montante_solicitado)} />
+        {situacao === 'Em análise' && (
+          <>
+            <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
+            {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
+          </>
+        )}
         <TextItem title="Finalidade:" text={dados?.finalidade} />
         <TextItem title="Componente:" text={dados?.componente || '(Não definido)'} />
         <TextItem title="Linha de crédito:" text={dados?.linha} />
@@ -50,17 +101,13 @@ export function InfoCredito({ dados }) {
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>
           <Typography variant="subtitle1">
-            Situação <Label color={colorLabel(dados?.situacao_final_mes)}>{dados?.situacao_final_mes}</Label>
+            Situação <Label color={colorLabel(situacao || 'Em análise')}>{situacao || 'Em análise'}</Label>
           </Typography>
         </ListItem>
-        {dados?.situacao_final_mes === 'Em análise' ? (
-          <TextItem
-            label={
-              <Stack justifyContent="center" sx={{ width: 1 }}>
-                <SearchNotFoundSmall message="Sem dados adicionais..." />
-              </Stack>
-            }
-          />
+        {situacao === 'Em análise' ? (
+          <Stack justifyContent="center" sx={{ width: 1, py: 3 }}>
+            <SearchNotFoundSmall message="Sem dados adicionais..." />
+          </Stack>
         ) : (
           <>
             {dados?.montante_aprovado && (
@@ -73,7 +120,7 @@ export function InfoCredito({ dados }) {
             {dados?.data_contratacao && (
               <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />
             )}
-            <TextItem title="Prazo de amortização:" text={dados?.prazo_amortizacao} />
+            <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
             {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
             <TextItem title="Garantia:" text={dados?.garantia} />
             <TextItem title="Decisor:" text={dados?.escalao_decisao} />
@@ -85,6 +132,137 @@ export function InfoCredito({ dados }) {
         )}
       </List>
     </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Garantias.propTypes = { id: PropTypes.string, dados: PropTypes.array };
+
+function Garantias({ dados }) {
+  const dispatch = useDispatch();
+  const [item, setItem] = useState(null);
+  const { id, processoId, garantias = [], modificar } = dados;
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+
+  const eliminarGarantia = () => {
+    const ids = { processoId, id: item?.id, creditoId: id };
+    dispatch(deleteItem('garantias', { ...ids, msg: 'Garantia eliminada', afterSuccess: () => setItem(null) }));
+  };
+
+  return (
+    <>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Garantia</TableCell>
+            <TableCell align="right">Valor</TableCell>
+            <TableCell align="right">Entidade</TableCell>
+            <TableCell>Titular</TableCell>
+            <TableCell>Conta DP</TableCell>
+            <TableCell align="center">Ativo</TableCell>
+            <TableCell width={10}>
+              {modificar && (
+                <DefaultAction small button label="ADICIONAR" handleClick={() => setItem({ isEdit: false })} />
+              )}
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {garantias?.map((row, index) => (
+            <TableRow hover key={`${row?.id}_${id}_${index}`}>
+              <TableCell>{row?.tipo_garantia || noDados('(Não definido)')}</TableCell>
+              <TableCell align="right">
+                {row?.valor_garantia ? `${fNumber(row?.valor_garantia)}${row?.moeda ?? ''}` : noDados('(Não definido)')}
+              </TableCell>
+              <TableCell align="right">{row?.numero_entidade || noDados('(Não definido)')}</TableCell>
+              <TableCell>{row?.titular || noDados('(Não definido)')}</TableCell>
+              <TableCell>{row?.conta_dp || noDados('(Não definido)')}</TableCell>
+              <CellChecked check={row?.ativo} />
+
+              <TableCell>
+                <Stack direction="row" spacing={0.5} justifyContent="right">
+                  {modificar && (
+                    <>
+                      <DefaultAction
+                        small
+                        label="ELIMINAR"
+                        handleClick={() => setItem({ modal: 'eliminar', ...row })}
+                      />
+                      <DefaultAction
+                        small
+                        label="EDITAR"
+                        handleClick={() => setItem({ isEdit: true, garantia: row })}
+                      />
+                    </>
+                  )}
+                  <DefaultAction small label="DETALHES" handleClick={() => setItem({ modal: 'detail', ...row })} />
+                </Stack>
+              </TableCell>
+            </TableRow>
+          ))}
+          {(!garantias || garantias?.length === 0) && (
+            <TableRow>
+              <TableCell colSpan={7}>
+                <SearchNotFoundSmall message="Nenhuma garantia adicionada..." />
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      {(item?.modal === 'detail' && <DetalhesGarantia dados={item} closeModal={() => setItem(null)} />) ||
+        (item?.modal === 'eliminar' && (
+          <DialogConfirmar
+            isSaving={isSaving}
+            onClose={() => setItem(null)}
+            desc="eliminar esta garantia"
+            handleOk={() => eliminarGarantia()}
+          />
+        )) ||
+        (!!item && (
+          <GarantiasSeparados dados={{ ...item, creditoId: id, processoId, onCancel: () => setItem(null) }} />
+        ))}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DetalhesGarantia.propTypes = { dados: PropTypes.object, closeModal: PropTypes.func };
+
+export function DetalhesGarantia({ dados, closeModal }) {
+  return (
+    <Dialog open onClose={closeModal} fullWidth maxWidth="sm">
+      <DTFechar title="Detalhes" handleClick={() => closeModal()} />
+      <DialogContent>
+        <List sx={{ width: 1 }}>
+          <Table size="small">
+            <TableBody>
+              <TableRowItem title="Garantia:" text={dados?.tipo_garantia} />
+              <TableRowItem
+                title="Valor:"
+                text={dados?.valor_garantia ? `${fNumber(dados?.valor_garantia)}${dados?.moeda ?? ''}` : ''}
+              />
+              <TableRowItem title="Nº entidade:" text={dados?.numero_entidade} />
+              <TableRowItem title="Titular:" text={dados?.titular} />
+              <TableRowItem title="Conta DP:" text={dados?.conta_dp} />
+              <TableRowItem title="Hipoteca câmera:" text={dados?.codigo_hipoteca_camara} />
+              <TableRowItem title="Hipoteca cartório:" text={dados?.codigo_hipoteca_cartorio} />
+              <TableRowItem title="Pessoal:" item={<LabelSN item={dados?.pessoal} />} />
+              <TableRowItem title="Avalista:" item={<LabelSN item={dados?.avalista} />} />
+              <TableRowItem title="Fiador:" item={<LabelSN item={dados?.fiador} />} />
+            </TableBody>
+          </Table>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+            <Typography variant="subtitle1">Registo</Typography>
+          </ListItem>
+          <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
+            <Resgisto label="Criado" em={dados?.criado_em} por={dados?.criador} />
+            <Resgisto label="Modificado" em={dados?.modificado_em} por={dados?.modificador} />
+          </Stack>
+        </List>
+      </DialogContent>
+    </Dialog>
   );
 }
 

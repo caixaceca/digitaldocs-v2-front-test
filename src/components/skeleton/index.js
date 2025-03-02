@@ -6,5 +6,4 @@ export {
   SkeletonEntidade,
   SkeletonProcesso,
   SkeletonContainer,
-  SkeletonPedidoCredito,
 } from './Carregando';

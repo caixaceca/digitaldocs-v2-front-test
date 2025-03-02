@@ -114,6 +114,7 @@ export function actionCloseModal(state) {
 export async function doneSucess(msg, dispatch, action) {
   if (msg) dispatch(action({ item: 'done', dados: msg }));
   await new Promise((resolve) => setTimeout(resolve, 500));
+  console.log(msg);
   dispatch(action({ item: 'done', dados: '' }));
 }
 

@@ -70,12 +70,13 @@ Criado.propTypes = {
   caption: PropTypes.bool,
   value1: PropTypes.string,
   baralhar: PropTypes.bool,
+  iconText: PropTypes.string,
 };
 
-export function Criado({ tipo = '', value, value1 = '', caption = false, baralhar = false, sx }) {
-  const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.secondary' };
+export function Criado({ iconText = '', tipo = '', value, value1 = '', caption = false, baralhar = false, sx }) {
+  const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.disabled' };
   return value ? (
-    <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" {...sx}>
+    <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" sx={{ ...sx, pr: 1.5 }}>
       {(tipo === 'uo' && <BusinessIcon sx={{ ...styles }} />) ||
         (tipo === 'data' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'warning' && <WarningAmberIcon sx={{ ...styles }} />) ||
@@ -83,7 +84,13 @@ export function Criado({ tipo = '', value, value1 = '', caption = false, baralha
         (tipo === 'time' && <AccessTimeOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'company' && <BusinessOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'user' && <AccountCircleOutlinedIcon sx={{ ...styles }} />) ||
-        (tipo === 'done' && <TaskAltIcon sx={{ width: 15, height: 15, color: 'text.success' }} />)}
+        (tipo === 'done' && <TaskAltIcon sx={{ width: 15, height: 15, color: 'text.success' }} />) ||
+        (iconText && (
+          <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ color: 'text.disabled', pr: 0.1 }}>
+            {iconText}
+          </Typography>
+        ))}
+
       <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
         {baralhar ? baralharString(value) : value}
       </Typography>

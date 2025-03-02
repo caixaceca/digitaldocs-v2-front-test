@@ -268,7 +268,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
                 sm={6}
                 children={<RHFAutocompleteSmp name="modo" label="Modo" options={['Seguimento', 'Devolução']} />}
               />
-              <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazoemdias" tipo="dia" />} />
+              <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazoemdias" tipo="dias" />} />
               <GridItem sm={4} children={<RHFSwitch name="is_paralelo" label="Paralelo" />} />
               <GridItem sm={4} children={<RHFSwitch name="requer_parecer" label="Requer parecer" />} />
               <GridItem sm={4} children={<RHFSwitch name="is_after_devolucao" label="Depois de devolução" />} />

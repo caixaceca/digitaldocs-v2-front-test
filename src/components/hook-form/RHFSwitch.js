@@ -12,23 +12,16 @@ RHFSwitch.propTypes = { name: PropTypes.string, otherSx: PropTypes.object, onCha
 export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) {
   const { control } = useFormContext();
 
-  return onChange ? (
+  return (
     <FormControlLabel
       control={
         <Controller
           name={name}
           control={control}
-          render={({ field }) => <Switch {...field} onChange={onChange} checked={field.value} />}
+          render={({ field }) => (
+            <Switch {...field} onChange={onChange ?? field.onChange} checked={field.value ?? false} />
+          )}
         />
-      }
-      labelPlacement="start"
-      sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center', ...otherSx }}
-      {...other}
-    />
-  ) : (
-    <FormControlLabel
-      control={
-        <Controller name={name} control={control} render={({ field }) => <Switch {...field} checked={field.value} />} />
       }
       labelPlacement="start"
       sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center', ...otherSx }}

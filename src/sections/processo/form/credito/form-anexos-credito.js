@@ -1,4 +1,3 @@
-import * as Yup from 'yup';
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
@@ -17,6 +16,7 @@ import { FormProvider } from '../../../../components/hook-form';
 import { ButtonsStepper } from '../../../../components/Actions';
 // sections
 import Anexos from '../anexos';
+import { shapeAnexos, defaultAnexos, garantiasAssociadas, appendAnexos } from '../anexos/utils-anexos';
 
 // ----------------------------------------------------------------------
 
@@ -25,19 +25,16 @@ FormAnexosCredito.propTypes = { dados: PropTypes.object };
 export default function FormAnexosCredito({ dados }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { cc } = useSelector((state) => state.intranet);
+  const { isEdit, fluxo, estado, processo, onClose } = dados;
+  const { cc, uos } = useSelector((state) => state.intranet);
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { checklist } = useSelector((state) => state.parametrizacao);
-  const { isEdit, fluxo, estado, processo } = dados;
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
   const checkList = useMemo(() => checklist?.filter(({ designacao }) => designacao !== 'OUTROS'), [checklist]);
 
-  const formSchema = Yup.object().shape({
-    anexos: !isEdit && checkList?.length === 0 && Yup.array().min(1, 'Introduza pelo menos um anexo').label(''),
-  });
-
-  const defaultValues = useMemo(() => ({ anexos: dadosStepper?.anexos || [] }), [dadosStepper]);
+  const formSchema = shapeAnexos(isEdit, outros, checkList);
+  const defaultValues = useMemo(() => defaultAnexos(dadosStepper, checkList), [dadosStepper, checkList]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
@@ -48,11 +45,12 @@ export default function FormAnexosCredito({ dados }) {
       const contratado = situacao === 'Contratado';
       const desistido = situacao === 'Desistido' && !!dadosStepper.data_desistido;
       const indeferido = situacao === 'Indeferido' && !!dadosStepper.data_indeferido;
+      const balcao = processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao;
 
       const formData = new FormData();
+      formData.append('balcao', balcao);
       formData.append('fluxo_id', fluxo?.id);
-      formData.append('uo_origem_id', estado?.uo_id);
-      formData.append('estado_atual_id', estado?.id);
+      formData.append('situacao_final_mes', situacao);
       formData.append('titular', dadosStepper.titular);
       formData.append('linha_id', dadosStepper?.linha?.id);
       formData.append('taxa_juro', dadosStepper.taxa_juro);
@@ -61,33 +59,12 @@ export default function FormAnexosCredito({ dados }) {
       formData.append('setor_atividade', dadosStepper.setor_atividade);
       formData.append('tipo_titular_id', dadosStepper?.tipo_titular?.id);
       formData.append('prazo_amortizacao', dadosStepper.prazo_amortizacao);
-      formData.append('balcao', processo?.balcao || Number(cc?.uo?.balcao));
       formData.append('montante_solicitado', dadosStepper.montante_solicitado);
       formData.append('data_entrada', format(dadosStepper.data_entrada, 'yyyy-MM-dd'));
+
       if (dadosStepper.obs) formData.append('obs', dadosStepper.obs);
       if (dadosStepper.cliente) formData.append('cliente', dadosStepper.cliente);
       if (dadosStepper?.numero_proposta) formData.append('numero_proposta', dadosStepper.numero_proposta);
-
-      dadosStepper?.garantias?.forEach((row, index) => {
-        formData.append(`garantias[${index}].fiador`, row?.fiador);
-        formData.append(`garantias[${index}].pessoal`, row?.pessoal);
-        formData.append(`garantias[${index}].avalista`, row?.avalista);
-        formData.append(`garantias[${index}].moeda`, row?.moeda || null);
-        formData.append(`garantias[${index}].conta_dp`, row?.conta_dp || null);
-        formData.append(`garantias[${index}].valor_garantia`, row?.valor_garantia || null);
-        formData.append(`garantias[${index}].numero_entidade`, row?.numero_entidade || null);
-        formData.append(`garantias[${index}].tipo_garantia_id`, row?.tipo_garantia_id?.id || null);
-        formData.append(`garantias[${index}].codigo_hipoteca_camara`, row?.codigo_hipoteca_camara || null);
-        formData.append(`garantias[${index}].codigo_hipoteca_cartorio`, row?.codigo_hipoteca_cartorio || null);
-      });
-
-      values?.anexos?.forEach((row, index) => {
-        formData.append(`anexos[${index}].anexo`, row);
-        // formData.append(`anexos[${index}].data_emissao`, null);
-        // formData.append(`anexos[${index}].data_validade`, null);
-        // formData.append(`anexos[${index}].numero_entidade`, null);
-        formData.append(`anexos[${index}].tipo_documento_id`, outros?.id);
-      });
 
       if (isEdit) {
         formData.append('diadomes', '');
@@ -96,7 +73,6 @@ export default function FormAnexosCredito({ dados }) {
         formData.append('data_inicio', null);
         formData.append('data_arquivamento', null);
         formData.append('uo_perfil_id', cc?.uo?.id);
-        formData.append('situacao_final_mes', situacao);
         if (
           situacao === 'Aprovado' ||
           situacao === 'Contratado' ||
@@ -109,17 +85,25 @@ export default function FormAnexosCredito({ dados }) {
           formData.append('montante_aprovado', null);
         }
 
-        formData.append('garantia', contratado ? dadosStepper.garantia : null);
         formData.append('escalao_decisao', contratado ? dadosStepper.escalao_decisao : null);
         formData.append('montante_contratado', contratado ? dadosStepper.montante_contratado : null);
         formData.append('data_desistido', desistido ? format(dadosStepper.data_desistido, 'yyyy-MM-dd') : null);
         formData.append('data_indeferido', indeferido ? format(dadosStepper.data_indeferido, 'yyyy-MM-dd') : null);
         formData.append('data_contratacao', contratado ? format(dadosStepper.data_contratacao, 'yyyy-MM-dd') : null);
-
-        dispatch(updateItem('processo', formData, { mfd: true, id: processo?.id, msg: 'Processo atualizado' }));
-      } else {
-        dispatch(createProcesso('interno', formData, { msg: 'Processo adicionado' }));
       }
+
+      if (!isEdit) {
+        formData.append('uo_origem_id', estado?.uo_id);
+        formData.append('estado_atual_id', estado?.id);
+      }
+
+      appendAnexos(formData, values.anexos, outros, values.checklist);
+
+      const garantias = dadosStepper?.garantias?.length > 0 ? garantiasAssociadas(dadosStepper.garantias) : null;
+      const params = { afterSuccess: () => onClose(), msg: `Processo ${isEdit ? 'atualizado' : 'adicionado'}` };
+      dispatch(
+        (isEdit ? updateItem : createProcesso)('processo', formData, { ...params, id: processo?.id, garantias })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -128,7 +112,7 @@ export default function FormAnexosCredito({ dados }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
-        <Anexos anexos={[]} outros={!!outros} checklist={checkList} />
+        <Anexos anexos={[]} outros={!!outros} />
         <ButtonsStepper
           isSaving={isSaving}
           label={isEdit ? 'Guardar' : 'Adicionar'}

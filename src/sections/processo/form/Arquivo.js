@@ -146,7 +146,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
               <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
             </Grid>
             <Grid item xs={12}>
-              <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+              <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
             </Grid>
           </Grid>
           <DialogButons color="error" label="Arquivar" isSaving={isSaving} onCancel={onClose} />

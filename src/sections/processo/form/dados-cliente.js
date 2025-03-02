@@ -64,7 +64,7 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
       )}
       {(noperacao || fluxo?.iscon) && (
         <>
-          <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField tipo="moeda" name="valor" label="Valor" />} />
+          <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
           <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField name="noperacao" label="Nº de operação" />} />
         </>
       )}

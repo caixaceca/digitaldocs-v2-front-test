@@ -18,7 +18,7 @@ import { ColaboradorInfo } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
 //
 import { Info } from './Estados';
-import { ParecerForm } from '../form/form-intervencao';
+import { ParecerForm } from '../form/intervencao';
 
 // ----------------------------------------------------------------------
 

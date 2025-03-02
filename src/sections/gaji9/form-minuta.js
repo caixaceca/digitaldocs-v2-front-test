@@ -96,8 +96,8 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{action} minuta</DialogTitle>
+    <Dialog open fullWidth maxWidth="sm">
+      <DialogTitleAlt title={`${action} minuta`} onClose={() => onCancel()} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
@@ -164,9 +164,10 @@ export function GarantiasForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open fullWidth maxWidth="sm">
       <DialogTitleAlt
         sx={{ mb: 2 }}
+        onClose={() => onCancel()}
         title="Adicionar tipos de garantias"
         action={<AddItem small handleClick={() => append({ garantia: null })} />}
       />
@@ -265,8 +266,12 @@ export function ComposicaoForm({ onCancel, action }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitleAlt sx={{ mb: 2 }} title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'} />
+    <Dialog open fullWidth maxWidth="md">
+      <DialogTitleAlt
+        sx={{ mb: 2 }}
+        onClose={() => onCancel()}
+        title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'}
+      />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 1 }}>

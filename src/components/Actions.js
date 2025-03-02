@@ -2,26 +2,19 @@ import PropTypes from 'prop-types';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
-import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
 import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
 import NotesIcon from '@mui/icons-material/Notes';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import SearchIcon from '@mui/icons-material/Search';
 import RemoveIcon from '@mui/icons-material/Remove';
 import RestoreIcon from '@mui/icons-material/Restore';
 import HistoryIcon from '@mui/icons-material/History';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -44,7 +37,6 @@ import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import SwapVertOutlinedIcon from '@mui/icons-material/SwapVertOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import SpellcheckOutlinedIcon from '@mui/icons-material/SpellcheckOutlined';
 import DifferenceOutlinedIcon from '@mui/icons-material/DifferenceOutlined';
 import AddHomeWorkOutlinedIcon from '@mui/icons-material/AddHomeWorkOutlined';
@@ -55,18 +47,14 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 // utils
 import { getFileThumb } from '../utils/formatFile';
-import { findColaborador } from '../utils/formatObject';
-import { ptDate, ptDateTime } from '../utils/formatTime';
 // hooks
 import useToggle from '../hooks/useToggle';
 // redux
-import { useSelector, useDispatch } from '../redux/store';
-import { getSuccess as gSDD } from '../redux/slices/digitaldocs';
+import { useDispatch } from '../redux/store';
 import { getFromParametrizacao, openModal, getSuccess } from '../redux/slices/parametrizacao';
 // assets
 import { Editar, Arquivo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
 //
-import { Criado } from './Panel';
 import SvgIconStyle from './SvgIconStyle';
 import { DialogConfirmar } from './CustomDialog';
 
@@ -93,6 +81,7 @@ export function DefaultAction({
   button = false,
   variant = 'soft',
   color = 'success',
+  ...others
 }) {
   return button ? (
     <Stack>
@@ -114,6 +103,7 @@ export function DefaultAction({
             <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
           ))
         }
+        {...others}
       >
         {label}
       </Button>
@@ -133,6 +123,7 @@ export function DefaultAction({
             ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || label === 'OPÇÕES') && 'warning') ||
             color
           }
+          {...others}
         >
           {(label === 'FECHAR' && <CloseIcon />) ||
             (icon === 'parecer' && <NotesIcon />) ||
@@ -332,14 +323,15 @@ export function DialogButons({
       {hideSubmit ? (
         ''
       ) : (
-        <LoadingButton
+        <Button
           type="submit"
           color={color}
           loading={isSaving}
+          loadingIndicator="Aguarde…"
           variant={color === 'error' || color === 'warning' ? 'soft' : 'contained'}
         >
           {(label && label) || (edit && 'Guardar') || 'Adicionar'}
-        </LoadingButton>
+        </Button>
       )}
     </DialogActions>
   );
@@ -374,77 +366,17 @@ export function ButtonsStepper({
       ) : (
         <>
           {handleSubmit ? (
-            <LoadingButton loading={isSaving} variant="contained" onClick={() => handleSubmit()}>
+            <Button loading={isSaving} variant="contained" loadingIndicator="Aguarde…" onClick={() => handleSubmit()}>
               {(label && label) || 'Seguinte'}
-            </LoadingButton>
+            </Button>
           ) : (
-            <LoadingButton type="submit" loading={isSaving} variant="contained">
+            <Button type="submit" loading={isSaving} loadingIndicator="Aguarde…" variant="contained">
               {(label && label) || 'Seguinte'}
-            </LoadingButton>
+            </Button>
           )}
         </>
       )}
     </Stack>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-AnexosExistente.propTypes = {
-  mt: PropTypes.number,
-  anexo: PropTypes.bool,
-  onOpen: PropTypes.func,
-  anexos: PropTypes.array,
-};
-
-export function AnexosExistente({ mt = 3, anexos, onOpen = null, anexo = false }) {
-  const dispatch = useDispatch();
-  const { colaboradores } = useSelector((state) => state.intranet);
-  return (
-    <>
-      <Divider sx={{ mt }}>Anexos existentes</Divider>
-      <List>
-        {anexos.map((row) => (
-          <ListItem key={row?.id} sx={{ py: 0.5, px: 1, mt: 1, borderRadius: 1, bgcolor: 'background.neutral' }}>
-            <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
-            <ListItemText
-              primary={
-                <>
-                  {row.name}
-                  {row?.data_validade && (
-                    <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary' }}>
-                      &nbsp;(Validade: {ptDate(row?.data_validade)})
-                    </Typography>
-                  )}
-                </>
-              }
-              primaryTypographyProps={{ variant: 'subtitle2', pb: 0.25 }}
-              secondary={
-                (row?.criado_em || row?.criador) && (
-                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ mt: 0.15 }} spacing={{ xs: 0.5, sm: 1.5 }}>
-                    {row?.criador && (
-                      <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} baralhar />
-                    )}
-                    {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
-                  </Stack>
-                )
-              }
-            />
-            <ListItemSecondaryAction>
-              <DefaultAction
-                color="error"
-                label="ELIMINAR"
-                small
-                handleClick={() => {
-                  if (onOpen) onOpen(row.id);
-                  else dispatch(gSDD({ item: 'selectedAnexoId', dados: anexo ? row.anexo : row.id }));
-                }}
-              />
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-    </>
   );
 }
 

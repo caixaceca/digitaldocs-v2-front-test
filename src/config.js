@@ -14,8 +14,8 @@ export const msalConfig = {
   auth: {
     clientId: process.env.REACT_APP_CLIENTE_ID_AAD,
     authority: process.env.REACT_APP_AUTHORITY_AAD,
-    // redirectUri: 'http://localhost:3000',
-    redirectUri: 'https://ddocsteste.caixa.cv/processos/lista',
+    redirectUri: 'http://localhost:3000',
+    // redirectUri: 'https://ddocsteste.caixa.cv/processos/lista',
     // redirectUri: 'https://digitaldocs.caixa.cv/processos/lista',
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },

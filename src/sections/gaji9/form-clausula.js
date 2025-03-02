@@ -71,8 +71,9 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
   }, [dispatch]);
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
+        onClose={() => onClose()}
         title={isEdit ? 'Editar cláusula' : 'Adicionar cláusula'}
         stepper={
           <>
@@ -647,9 +648,9 @@ export function RegraForm({ dados, minutaId, onCancel }) {
     dispatch(
       createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), {
         minutaId,
+        msg: 'Regra adicionada',
         afterSuccess: () => onCancel(),
         clausulaId: dados?.clausula_id,
-        msg: 'Regra adicionada com sucesso',
       })
     );
   };

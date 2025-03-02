@@ -4,25 +4,36 @@ import { useDropzone } from 'react-dropzone';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled, alpha } from '@mui/material/styles';
-//
-import Iconify from '../Iconify';
-//
-import FileDescription from './FileDescription';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+// utils
+import { fData } from '../../utils/formatNumber';
+import { getFileThumb } from '../../utils/formatFile';
 
 // ----------------------------------------------------------------------
 
 const StyledDropZone = styled('div')(({ theme }) => ({
-  height: 40,
   display: 'flex',
   cursor: 'pointer',
+  position: 'relative',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: theme.spacing(2),
   color: theme.palette.text.secondary,
   borderRadius: theme.shape.borderRadius,
   border: `dashed 1px ${theme.palette.divider}`,
   backgroundColor: alpha(theme.palette.grey[500], 0.08),
   '&:hover': { opacity: 0.72 },
+}));
+
+const PlaceholderStyle = styled('div')(({ theme }) => ({
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  position: 'absolute',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: theme.shape.borderRadius,
 }));
 
 // ----------------------------------------------------------------------
@@ -31,31 +42,58 @@ UploadSingleFileSimple.propTypes = {
   sx: PropTypes.object,
   error: PropTypes.bool,
   disabled: PropTypes.bool,
+  helperText: PropTypes.node,
   file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 
-export default function UploadSingleFileSimple({ error = false, disabled = false, file, sx, ...other }) {
+export default function UploadSingleFileSimple({ error = false, disabled = false, helperText, file, sx, ...other }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ multiple: false, ...other });
 
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+    <Stack spacing={0.5}>
       <StyledDropZone
         {...getRootProps()}
         sx={{
+          p: 1,
+          width: 1,
+          minHeight: 56,
           ...(isDragActive && { opacity: 0.72 }),
+          ...(file && { color: 'success.main' }),
           ...(error && { color: 'error.main', bgcolor: 'error.lighter', borderColor: 'error.light' }),
           ...(disabled && { opacity: 0.48, pointerEvents: 'none' }),
           ...sx,
         }}
       >
         <input {...getInputProps()} />
-        <Iconify icon="eva:cloud-upload-fill" width={24} height={24} />
-        <Typography noWrap variant="body2" sx={{ ml: 1 }}>
-          Selecione o ficheiro...
-        </Typography>
-      </StyledDropZone>
+        {!file && <CloudUploadIcon sx={{ width: 20 }} />}
+        {file ? (
+          <Stack spacing={1} direction="row" alignItems="center" sx={{ px: 0.5, width: 1 }}>
+            <Stack>{getFileThumb(false, null, file?.name || file)}</Stack>
+            <Typography variant="body2" sx={{ lineHeight: 1.25 }}>
+              {file?.name || file}
+              {file?.size && (
+                <Typography variant="caption" sx={{ color: 'text.secondary', pl: 0.5 }}>
+                  ({fData(file.size)})
+                </Typography>
+              )}
+            </Typography>
+          </Stack>
+        ) : (
+          <Typography variant="body2" sx={{ pl: 1 }}>
+            Selecionar ficheiro...
+          </Typography>
+        )}
 
-      {file && <FileDescription file={file} />}
+        {file && (
+          <PlaceholderStyle
+            sx={{ opacity: 0, color: 'common.white', bgcolor: 'grey.900', '&:hover': { opacity: 0.72 } }}
+          >
+            <CloudUploadIcon sx={{ width: 20, mr: 1 }} />
+            <Typography variant="body2">Alterar ficheiro...</Typography>
+          </PlaceholderStyle>
+        )}
+      </StyledDropZone>
+      {helperText && helperText}
     </Stack>
   );
 }

@@ -4,36 +4,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import FormHelperText from '@mui/material/FormHelperText';
 // type
-import { UploadAvatar, UploadMultiFile, UploadSingleFile, UploadSingleFileSimple } from '../upload';
-
-// ----------------------------------------------------------------------
-
-RHFUploadAvatar.propTypes = { name: PropTypes.string };
-
-export function RHFUploadAvatar({ name, ...other }) {
-  const { control } = useFormContext();
-
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState: { error } }) => {
-        const checkError = !!error && !field.value;
-
-        return (
-          <div>
-            <UploadAvatar error={checkError} {...other} file={field.value} />
-            {checkError && (
-              <FormHelperText error sx={{ px: 2, textAlign: 'center' }}>
-                {error.message}
-              </FormHelperText>
-            )}
-          </div>
-        );
-      }}
-    />
-  );
-}
+import { UploadMultiFile, UploadSingleFile, UploadSingleFileSimple } from '../upload';
 
 // ----------------------------------------------------------------------
 
@@ -121,7 +92,7 @@ export function RHFUploadFileSimple({ name, ...other }) {
             error={checkError}
             helperText={
               checkError && (
-                <FormHelperText error sx={{ px: 2 }}>
+                <FormHelperText error sx={{ px: 0.5 }}>
                   {error.message}
                 </FormHelperText>
               )

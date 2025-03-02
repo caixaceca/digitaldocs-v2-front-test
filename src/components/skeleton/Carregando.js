@@ -84,28 +84,6 @@ export function FormLoading({ rows = 0 }) {
 
 // ----------------------------------------------------------------------
 
-export function SkeletonPedidoCredito() {
-  return (
-    <Grid container spacing={3}>
-      {[...Array(8)].map((row, index) => (
-        <GridItem
-          md={3}
-          key={`index_${index}`}
-          children={<Skeleton variant="text" height={90} sx={{ transform: 'none' }} />}
-        />
-      ))}
-      {[...Array(5)].map((row, index) => (
-        <GridItem
-          key={`index1_${index}`}
-          children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />}
-        />
-      ))}
-    </Grid>
-  );
-}
-
-// ----------------------------------------------------------------------
-
 export function SkeletonEntidade() {
   return (
     <>

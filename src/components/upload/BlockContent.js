@@ -3,50 +3,37 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import LinearProgress from '@mui/material/LinearProgress';
 // assets
 import { UploadIllustration } from '../../assets';
-// redux
-import { useSelector } from '../../redux/store';
 
 // ----------------------------------------------------------------------
 
 BlockContent.propTypes = { multiple: PropTypes.bool, small: PropTypes.bool };
 
 export default function BlockContent({ multiple = false, small = false }) {
-  const { isLoading } = useSelector((state) => state.indicadores);
   return (
     <Stack
-      spacing={2}
       alignItems="center"
       justifyContent="center"
-      direction={{ xs: 'column', md: 'row' }}
-      sx={{ width: 1, textAlign: { xs: 'center', md: 'left' } }}
+      spacing={{ xs: 0, sm: 2 }}
+      direction={{ xs: 'column', sm: 'row' }}
+      sx={{ width: 1, textAlign: { xs: 'center', sm: 'left' } }}
     >
       <UploadIllustration sx={{ width: small ? 80 : 120 }} />
 
-      {isLoading ? (
-        <Box sx={{ p: small ? 1 : 2 }}>
-          <Typography variant={'subtitle1'}>
-            Carregando e compactando o{multiple ? 's' : ''} documento{multiple ? 's' : ''}...
-          </Typography>
-          <LinearProgress />
-        </Box>
-      ) : (
-        <Box sx={{ p: small ? 1 : 2 }}>
-          <Typography variant={small ? 'subtitle1' : 'h6'}>
-            Solte ou seleciona o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''}...
-          </Typography>
+      <Box sx={{ p: small ? 1 : 2 }}>
+        <Typography variant={small ? 'subtitle2' : 'subtitle1'}>
+          Solte ou selecione o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''}...
+        </Typography>
 
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Solte o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''} nesta zona ou &nbsp;
-            <Typography variant="body2" component="span" sx={{ color: 'primary.main', textDecoration: 'underline' }}>
-              clica aqui
-            </Typography>
-            &nbsp; e procura na sua máquina...
-          </Typography>
-        </Box>
-      )}
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          Solte o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''} nesta zona ou{' '}
+          <Box component="span" sx={{ color: 'primary.main', textDecoration: 'underline', fontWeight: 600 }}>
+            clica aqui
+          </Box>{' '}
+          e procura na sua máquina...
+        </Typography>
+      </Box>
     </Stack>
   );
 }

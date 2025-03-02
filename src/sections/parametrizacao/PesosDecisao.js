@@ -44,8 +44,8 @@ export default function PesosDecisao({ perfisList }) {
               label={`Colaborador ${index + 1}`}
             />
             <RHFNumberField
+              tipo="%"
               size="small"
-              tipo="percentagem"
               label="Percentagem"
               sx={{ width: '44%' }}
               name={`pesos[${index}].percentagem`}

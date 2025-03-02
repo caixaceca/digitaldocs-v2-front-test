@@ -86,7 +86,15 @@ export default function PageProcesso() {
     const tabs = [];
     tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
 
-    if (processo?.credito) tabs.push({ value: 'Info. crédito', component: <InfoCredito dados={processo?.credito} /> });
+    if (processo?.credito)
+      tabs.push({
+        value: 'Info. crédito',
+        component: (
+          <InfoCredito
+            dados={{ ...processo.credito, processoId: id, modificar: estado?.is_lock && processo?.atribuidoAMim }}
+          />
+        ),
+      });
 
     if (processo?.con)
       tabs.push({
@@ -152,9 +160,12 @@ export default function PageProcesso() {
     done,
     afterSuccess: () => {
       if (
+        !done.includes('Garantia') &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
         done !== 'Processo resgatado' &&
+        done !== 'Processo adicionado' &&
+        done !== 'Processo atualizado' &&
         done !== 'Confidencialidade atualizado'
       ) {
         if (proxAnt?.proximo) irParaProcesso(proxAnt?.proximo);
@@ -255,7 +266,7 @@ export default function PageProcesso() {
         </Card>
 
         {isOpenModal === 'editar-processo' && (
-          <ProcessoForm processo={processo} onCancel={() => dispatch(closeModal())} />
+          <ProcessoForm processo={processo} ambientId={estadoId} onCancel={() => dispatch(closeModal())} />
         )}
 
         {pdfPreview && (

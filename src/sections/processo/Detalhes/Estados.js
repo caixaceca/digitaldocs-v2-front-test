@@ -27,8 +27,8 @@ import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 import Pareceres from './Pareceres';
 import { AnexoItem } from './Anexos';
 import MinutaParecer from './MinutaParecer';
+import { ParecerForm } from '../form/intervencao';
 import { Atribuir, Libertar } from '../Intervencao';
-import { ParecerForm } from '../form/form-intervencao';
 
 // ----------------------------------------------------------------------
 

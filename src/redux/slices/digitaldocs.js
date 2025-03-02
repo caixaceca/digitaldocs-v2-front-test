@@ -571,8 +571,45 @@ export function createProcesso(item, dados, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
-      const response = await axios.post(`${BASEURLDD}/v2/processos/${item}/${perfilId}`, dados, options);
+      const response = await axios.post(
+        `${BASEURLDD}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`,
+        dados,
+        options
+      );
+
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
       dispatch(slice.actions.getSuccess({ item: 'processo', dados: response?.data?.objeto }));
+      if (params?.garantias)
+        dispatch(createItem('garantias', params?.garantias, { processoId: response?.data?.objeto?.id }));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      params?.afterSuccess?.();
+    } catch (error) {
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export function createItem(item, dados, params) {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
+    try {
+      const accessToken = await getAccessToken();
+      const { perfilId } = selectUtilizador(getState()?.intranet || {});
+      const apiUrl =
+        (item === 'garantias' && `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
+        '';
+      if (apiUrl) {
+        const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
+        const response = await axios.post(apiUrl, dados, options);
+        if (item === 'garantias')
+          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
+      }
+      params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -591,7 +628,7 @@ export function updateItem(item, dados, params) {
     try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
-      const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: params?.mfd });
+      const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: item === 'processo' || params?.mfd });
 
       if (params?.anexos?.get('anexos')) {
         await axios.patch(
@@ -651,14 +688,47 @@ export function updateItem(item, dados, params) {
           }
         }
       }
-      if (item === 'processo')
+      if (item === 'processo') {
         await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
+        if (params?.garantias) dispatch(createItem('garantias', params?.garantias, { processoId: params?.id }));
+      }
       if (item === 'resgatar') {
         const response = await axios.get(
           `${BASEURLDD}/v2/processos/resgatar/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`,
           options
         );
         dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
+      }
+      params?.afterSuccess?.();
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+    } catch (error) {
+      hasError(error, dispatch, slice.actions.getSuccess);
+    } finally {
+      dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export function deleteItem(item, params) {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+
+    try {
+      const accessToken = await getAccessToken();
+      const { perfilId } = selectUtilizador(getState()?.intranet || {});
+
+      const apiUrl =
+        (item === 'garantias' &&
+          `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
+        '';
+
+      if (apiUrl) {
+        const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
+        const response = await axios.delete(apiUrl, options);
+        if (item === 'garantias')
+          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }
       params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);

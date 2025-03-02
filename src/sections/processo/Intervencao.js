@@ -22,7 +22,7 @@ import {
   FinalizarOPForm,
   EncaminharStepper,
   ColocarPendenteForm,
-} from './form/form-intervencao';
+} from './form/intervencao';
 import { ArquivarForm, DesarquivarForm } from './form/arquivo';
 
 // ----------------------------------------------------------------------

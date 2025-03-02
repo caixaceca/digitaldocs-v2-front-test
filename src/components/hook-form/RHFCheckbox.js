@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import Checkbox from '@mui/material/Checkbox';
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ----------------------------------------------------------------------
@@ -23,43 +22,6 @@ export function RHFCheckbox({ name, ...other }) {
         />
       }
       {...other}
-    />
-  );
-}
-
-// ----------------------------------------------------------------------
-
-RHFMultiCheckbox.propTypes = { name: PropTypes.string, options: PropTypes.arrayOf(PropTypes.string) };
-
-export function RHFMultiCheckbox({ name, options, ...other }) {
-  const { control } = useFormContext();
-
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => {
-        const onSelected = (option) =>
-          field.value.includes(option) ? field.value.filter((value) => value !== option) : [...field.value, option];
-
-        return (
-          <FormGroup>
-            {options.map((option) => (
-              <FormControlLabel
-                key={option}
-                control={
-                  <Checkbox
-                    checked={field.value.includes(option)}
-                    onChange={() => field.onChange(onSelected(option))}
-                  />
-                }
-                label={option}
-                {...other}
-              />
-            ))}
-          </FormGroup>
-        );
-      }}
     />
   );
 }

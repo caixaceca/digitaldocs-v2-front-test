@@ -10,7 +10,6 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
@@ -44,9 +43,15 @@ export function DialogConfirmar({ isSaving, title = '', desc, descSec, color, on
         <Button color="inherit" variant="outlined" onClick={onClose}>
           Cancelar
         </Button>
-        <LoadingButton color={color || 'error'} variant="soft" onClick={handleOk} autoFocus loading={isSaving}>
+        <Button
+          variant="soft"
+          onClick={handleOk}
+          loading={isSaving}
+          color={color || 'error'}
+          loadingIndicator="Aguarde…"
+        >
           OK
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );

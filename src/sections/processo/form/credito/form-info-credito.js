@@ -35,13 +35,13 @@ import { escaloes, situacoes } from '../../../../_mock';
 
 // ----------------------------------------------------------------------
 
-FormInfoCredito.propTypes = { dados: PropTypes.object, onCancel: PropTypes.func };
+FormInfoCredito.propTypes = { dados: PropTypes.object };
 
-export default function FormInfoCredito({ dados, onCancel }) {
+export default function FormInfoCredito({ dados }) {
   const dispatch = useDispatch();
+  const { isEdit, fluxo, processo, onClose } = dados;
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { linhas, tiposTitular, componentes } = useSelector((state) => state.parametrizacao);
-  const { isEdit, fluxo, processo } = dados;
   const credito = processo?.credito || null;
   const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
   const tiposTitularList = useMemo(() => listaTitrulares(tiposTitular), [tiposTitular]);
@@ -54,8 +54,8 @@ export default function FormInfoCredito({ dados, onCancel }) {
     titular: shapeText('Nome do proponente', '', false, 'cliente'),
     prazo_amortizacao: Yup.number().positive().required().label('Prazo'),
     taxa_juro: Yup.number().positive().required().label('Taxa de juros'),
+    data_entrada: Yup.date().typeError().required().label('Data entrada'),
     situacao_final_mes: isEdit && Yup.mixed().required().label('Situação'),
-    data_entrada: Yup.date().typeError().required().label('Data de entrada'),
     montante_solicitado: Yup.number().positive().required().label('Montante'),
     cliente: shapeNumber('Nº de cliente', 'Contratado', '', 'situacao_final_mes'),
     setor_atividade: Yup.string().required().label('Ent. patronal/Set. atividade'),
@@ -112,23 +112,23 @@ export default function FormInfoCredito({ dados, onCancel }) {
       methods={methods}
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
-      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
+      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center" sx={{ mt: 3 }}>
         <Box sx={{ width: 1 }}>
           <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
             <Grid container spacing={3}>
               <GridItem xs={12} sm={6} md={contratado ? 3 : 4} lg={contratado ? 3 : 2}>
-                <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
+                <RHFDatePicker name="data_entrada" label="Data entrada" disableFuture />
               </GridItem>
               <GridItem xs={12} sm={6} md={contratado ? 3 : 4} lg={contratado ? 3 : 2}>
-                <RHFNumberField tipo="moeda" name="montante_solicitado" label="Montante" />
+                <RHFNumberField tipo="CVE" name="montante_solicitado" label="Montante" />
               </GridItem>
               {!contratado && (
                 <>
                   <GridItem xs={12} sm={6} md={4} lg={2}>
-                    <RHFNumberField name="prazo_amortizacao" tipo="prestacao" label="Prazo" />
+                    <RHFNumberField name="prazo_amortizacao" tipo="meses" label="Prazo" />
                   </GridItem>
                   <GridItem xs={12} sm={6} md={4} lg={2}>
-                    <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
+                    <RHFNumberField name="taxa_juro" tipo="%" label="Taxa de juro" />
                   </GridItem>
                 </>
               )}
@@ -175,7 +175,7 @@ export default function FormInfoCredito({ dados, onCancel }) {
               <GridItem xs={12} sm={4} children={<RHFTextField name="finalidade" label="Finalidade" />} />
             </Grid>
           </Card>
-          {!isEdit && (
+          {isEdit && (
             <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
               <Grid container spacing={3} justifyContent="center">
                 <GridItem xs={12} sm={6} md={3}>
@@ -189,7 +189,7 @@ export default function FormInfoCredito({ dados, onCancel }) {
                       <RHFDatePicker name="data_aprovacao" label="Data de aprovação" disableFuture />
                     </GridItem>
                     <GridItem xs={12} sm={6} md={3}>
-                      <RHFNumberField tipo="moeda" name="montante_aprovado" label="Montante aprovado" />
+                      <RHFNumberField tipo="CVE" name="montante_aprovado" label="Montante aprovado" />
                     </GridItem>
                     <GridItem xs={12} sm={6} md={3}>
                       <RHFAutocompleteSmp name="escalao_decisao" label="Decisor" options={escaloes} />
@@ -203,13 +203,13 @@ export default function FormInfoCredito({ dados, onCancel }) {
                         <RHFDatePicker name="data_contratacao" label="Data de contratação" disableFuture />
                       </GridItem>
                       <GridItem xs={12} sm={6} md={3}>
-                        <RHFNumberField tipo="moeda" name="montante_contratado" label="Montante contratado" />
+                        <RHFNumberField tipo="CVE" name="montante_contratado" label="Montante contratado" />
                       </GridItem>
                       <GridItem xs={12} sm={6} md={3}>
                         <RHFTextField name="prazo_amortizacao" label="Prazo" />
                       </GridItem>
                       <GridItem xs={12} sm={6} md={3}>
-                        <RHFNumberField name="taxa_juro" tipo="percentagem" label="Taxa de juro" />
+                        <RHFNumberField name="taxa_juro" tipo="%" label="Taxa de juro" />
                       </GridItem>
                     </Grid>
                   </GridItem>
@@ -232,7 +232,7 @@ export default function FormInfoCredito({ dados, onCancel }) {
           </Card>
         </Box>
       </Stack>
-      <ButtonsStepper onCancel={onCancel} labelCancel="Cancelar" />
+      <ButtonsStepper onCancel={() => onClose()} labelCancel="Cancelar" />
     </FormProvider>
   );
 }
