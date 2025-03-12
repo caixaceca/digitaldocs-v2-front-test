@@ -36,7 +36,7 @@ export default function PageMinutaDetalhes() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const [action, setAction] = useState('');
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabMinuta') || 'Dados');
+  const [currentTab, setCurrentTab] = useState('Dados');
   const { minuta, isLoading, isLoadingDoc, isOpenModal, minutaId, previewFile, adminGaji9, utilizador, done } =
     useSelector((state) => state.gaji9);
 
@@ -81,7 +81,6 @@ export default function PageMinutaDetalhes() {
     <Page title="Estado | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
-          tab="tabMinuta"
           tabsList={tabsList}
           currentTab={currentTab}
           changeTab={setCurrentTab}

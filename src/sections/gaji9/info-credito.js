@@ -244,30 +244,7 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom
-                order={order}
-                onSort={onSort}
-                orderBy={orderBy}
-                headLabel={
-                  contracts
-                    ? [
-                        { id: 'codigo', label: 'Código' },
-                        { id: 'minuta', label: 'Minuta' },
-                        { id: 'representante', label: 'Representante' },
-                        { id: 'versao', label: 'Versão', align: 'center', width: 10 },
-                        { id: 'ativo', label: 'Ativo', align: 'center' },
-                        { id: '', width: 10 },
-                      ]
-                    : [
-                        { id: 'numero_entidade', label: 'Nº entidade' },
-                        { id: 'nome', label: 'Nome' },
-                        { id: 'designacao', label: 'Designação' },
-                        { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
-                        { id: '', label: 'Responsabilidade' },
-                        { id: '', width: 10 },
-                      ]
-                }
-              />
+              <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(contracts)} />
               <TableBody>
                 {isLoading && isNotFound ? (
                   <SkeletonTable row={10} column={6} />
@@ -366,4 +343,23 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
       )}
     </>
   );
+}
+
+function headerTable(contracts) {
+  return [
+    ...((contracts === 'tiposGarantias' && [
+      { id: 'codigo', label: 'Código' },
+      { id: 'minuta', label: 'Minuta' },
+      { id: 'representante', label: 'Representante' },
+      { id: 'versao', label: 'Versão', align: 'center', width: 10 },
+      { id: 'ativo', label: 'Ativo', align: 'center' },
+    ]) || [
+      { id: 'numero_entidade', label: 'Nº entidade' },
+      { id: 'nome', label: 'Nome' },
+      { id: 'designacao', label: 'Designação' },
+      { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
+      { id: '', label: 'Responsabilidade' },
+    ]),
+    { id: '', width: 10 },
+  ];
 }

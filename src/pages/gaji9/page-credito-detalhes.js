@@ -33,7 +33,7 @@ export default function PageCreditoDetalhes() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabInfoCredito') || 'Dados');
+  const [currentTab, setCurrentTab] = useState('Dados');
   const { credito, isLoading, modalGaji9, isLoadingDoc, previewFile, utilizador, selectedItem, done } = useSelector(
     (state) => state.gaji9
   );
@@ -46,7 +46,7 @@ export default function PageCreditoDetalhes() {
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
     { value: 'Participantes', component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} /> },
-    { value: 'Contratos', component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} contracts /> },
+    { value: 'Contratos', component: <TableInfoCredito id={credito?.id} contracts /> },
   ];
 
   const openForm = (item) => {
@@ -64,7 +64,6 @@ export default function PageCreditoDetalhes() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tabsList={tabsList}
-          tab="tabInfoCredito"
           currentTab={currentTab}
           changeTab={setCurrentTab}
           title={credito ? `${credito?.rotulo || credito?.componente} - ${credito?.cliente}` : 'Detalhes do crédito'}

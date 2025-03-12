@@ -304,7 +304,7 @@ function Garantias({ isEdit, id = 0, onCancel }) {
   const onSubmit = async () => {
     const params = {
       id,
-      getItem: 'credito',
+      getItem: isEdit ? 'credito' : '',
       msg: `Crédito ${isEdit ? 'atualizado' : 'adicionado'}`,
       afterSuccess: () => {
         onCancel();
