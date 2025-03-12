@@ -41,12 +41,8 @@ export default function PageDetalhesFluxo() {
   const { fluxo, estados, done } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
   const transicoes = useMemo(
-    () =>
-      listaTransicoes(
-        (currentTab === 'Notificações' && fluxo?.transicoes?.filter((row) => row?.to_alert)) || fluxo?.transicoes || [],
-        estados
-      ),
-    [currentTab, estados, fluxo?.transicoes]
+    () => listaTransicoes(fluxo?.transicoes?.filter((row) => row?.to_alert) || [], estados),
+    [estados, fluxo?.transicoes]
   );
   const [transicao, setTransicao] = useState(
     transicoes?.find((row) => Number(row?.id) === Number(localStorage.getItem('transicaoParam'))) || null
@@ -64,21 +60,14 @@ export default function PageDetalhesFluxo() {
   }, [dispatch, currentTab, fluxo?.id]);
 
   useEffect(() => {
-    if ((currentTab === 'Notificações' || currentTab === 'Regras transições') && transicao?.id) {
-      dispatch(
-        getFromParametrizacao(currentTab === 'Notificações' ? 'notificacoes' : 'regrasTransicao', { id: transicao?.id })
-      );
-    }
+    if (currentTab === 'Notificações' && transicao?.id)
+      dispatch(getFromParametrizacao('notificacoes', { id: transicao?.id }));
   }, [dispatch, currentTab, transicao?.id]);
 
   const tabsList = [
     { value: 'Dados', component: <InfoFluxo onClose={() => dispatch(closeModal())} /> },
     { value: 'Transições', component: <TableInfoFluxo item="transicoes" onClose={() => dispatch(closeModal())} /> },
     { value: 'Estados', component: <TableInfoFluxo item="estados" onClose={() => dispatch(closeModal())} /> },
-    {
-      value: 'Regras transições',
-      component: <TableInfoFluxo item="regrasTransicao" onClose={() => dispatch(closeModal())} />,
-    },
     { value: 'Checklist', component: <TableInfoFluxo item="checklist" onClose={() => dispatch(closeModal())} /> },
     {
       value: 'Notificações',
@@ -86,7 +75,12 @@ export default function PageDetalhesFluxo() {
     },
   ];
 
-  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+  useNotificacao({
+    done,
+    afterSuccess: () => {
+      if (!done.includes('Regra transição')) dispatch(closeModal());
+    },
+  });
 
   return (
     <Page title="Fluxo | DigitalDocs">
@@ -110,7 +104,7 @@ export default function PageDetalhesFluxo() {
             fluxo && (
               <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
                 <Stack direction="row" spacing={0.75} alignItems="center">
-                  {(currentTab === 'Notificações' || currentTab === 'Regras transições') && (
+                  {currentTab === 'Notificações' && (
                     <Autocomplete
                       fullWidth
                       size="small"

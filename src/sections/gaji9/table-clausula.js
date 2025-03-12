@@ -17,16 +17,16 @@ import { noDados } from '../../utils/formatText';
 import { ptDateTime } from '../../utils/formatTime';
 import { acessoGaji9 } from '../../utils/validarAcesso';
 // hooks
-import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, openModal, closeModal } from '../../redux/slices/gaji9';
+import { getFromGaji9, setModal, closeModal, deleteItem } from '../../redux/slices/gaji9';
 // Components
 import { Criado } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
+import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
@@ -40,7 +40,6 @@ TableClausula.propTypes = { inativos: PropTypes.bool };
 
 export default function TableClausula({ inativos }) {
   const dispatch = useDispatch();
-  const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem('filterclausulas') || '');
 
   const {
@@ -55,9 +54,11 @@ export default function TableClausula({ inativos }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
+  } = useTable({ defaultOrderBy: 'numero_ordem', defaultOrder: 'asc' });
 
-  const { clausulas, isLoading, isOpenView, isOpenModal, utilizador } = useSelector((state) => state.gaji9);
+  const { clausulas, isLoading, isSaving, selectedItem, modalGaji9, utilizador, adminGaji9 } = useSelector(
+    (state) => state.gaji9
+  );
 
   const dataFiltered = applySortFilter({ filter, comparator: getComparator(order, orderBy), dados: clausulas || [] });
   const isNotFound = !dataFiltered.length;
@@ -67,9 +68,20 @@ export default function TableClausula({ inativos }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, clausulas]);
 
-  const viewItem = (modal, dados) => {
-    dispatch(openModal(modal));
-    dispatch(getFromGaji9('clausula', { id: dados?.id, item: 'selectedItem' }));
+  const openModal = (modal, dados) => {
+    const eliminar = modal === 'eliminar-clausula';
+    dispatch(setModal({ item: modal, dados: eliminar ? dados : null }));
+    if (!eliminar) dispatch(getFromGaji9('clausula', { id: dados?.id, item: 'selectedItem' }));
+  };
+
+  const confirmDelete = () => {
+    dispatch(
+      deleteItem('clausulas', {
+        id: selectedItem?.id,
+        msg: 'Cláusula eliminada',
+        afterSuccess: () => dispatch(setModal({ item: '', dados: null })),
+      })
+    );
   };
 
   return (
@@ -86,46 +98,52 @@ export default function TableClausula({ inativos }) {
                 onSort={onSort}
                 orderBy={orderBy}
                 headLabel={[
+                  { id: 'numero_ordem', label: 'Nº de cláusula' },
                   { id: 'titulo', label: 'Epígrafe' },
-                  { id: 'numero_ordem', label: 'Nº', align: 'right' },
                   { id: 'tipo_titular', label: 'Tipo titular' },
                   { id: 'tipo_garantia', label: 'Tipo garantia' },
-                  { id: 'componente', label: 'Produto' },
-                  { id: '', label: 'Secção' },
-                  { id: 'criado_em', label: 'Criado' },
+                  { id: 'componente', label: 'Componente' },
+                  { id: 'ultima_modificacao', label: 'Modificado', width: 10 },
                   { id: '', width: 10 },
                 ]}
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={8} />
+                  <SkeletonTable row={10} column={7} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`clausula_${index}`}>
+                      <TableCell>
+                        {(row?.solta && 'SOLTA') ||
+                          (row?.seccao_identificacao && 'IDENTIFICAÇÃO') ||
+                          (row?.seccao_identificacao_caixa && 'IDENTIFICAÇÃO CAIXA') ||
+                          row?.descritivo ||
+                          row?.numero_ordem}
+                      </TableCell>
                       <TableCell>{row?.titulo || noDados()}</TableCell>
-                      <TableCell align="right">{row?.numero_ordem}</TableCell>
                       <TableCell>
                         {row?.tipo_titular || noDados()}
                         {row?.consumidor ? ' (Consumidor)' : ''}
                       </TableCell>
                       <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                       <TableCell>{row?.componente || noDados()}</TableCell>
-                      <TableCell>
-                        {(row?.solta && 'Solta') ||
-                          (row?.seccao_identificacao && 'Secção de identificação') ||
-                          (row?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
-                          noDados()}
-                      </TableCell>
                       <TableCell width={10}>
-                        {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row.criado_em)} />}
-                        {row?.criado_por && <Criado tipo="user" value={row.criado_por} baralhar caption />}
+                        {row?.ultima_modificacao && (
+                          <Criado caption tipo="data" value={ptDateTime(row.ultima_modificacao)} />
+                        )}
+                        {row?.feito_por && <Criado tipo="user" value={row.feito_por} baralhar caption />}
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['UPDATE_CLAUSULA'])) && (
-                            <DefaultAction label="EDITAR" handleClick={() => viewItem('update', row)} />
+                          <DefaultAction
+                            small
+                            label="ELIMINAR"
+                            handleClick={() => openModal('eliminar-clausula', row)}
+                          />
+                          {row?.ativo && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_CLAUSULA'])) && (
+                            <DefaultAction small label="EDITAR" handleClick={() => openModal('form-clausula', row)} />
                           )}
-                          <DefaultAction label="DETALHES" handleClick={() => viewItem('view', row)} />
+                          <DefaultAction small label="DETALHES" handleClick={() => openModal('view-clausula', row)} />
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -153,8 +171,16 @@ export default function TableClausula({ inativos }) {
         )}
       </Card>
 
-      {isOpenView && <DetalhesGaji9 closeModal={handleCloseModal} item="clausulas" />}
-      {isOpenModal && <ClausulaForm onCancel={handleCloseModal} />}
+      {modalGaji9 === 'form-clausula' && <ClausulaForm onCancel={() => dispatch(closeModal())} />}
+      {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={() => dispatch(closeModal())} item="clausulas" />}
+      {modalGaji9 === 'eliminar-clausula' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          desc="eliminar esta cláusula"
+          handleOk={() => confirmDelete()}
+          onClose={() => dispatch(setModal({ item: '', dados: null }))}
+        />
+      )}
     </>
   );
 }

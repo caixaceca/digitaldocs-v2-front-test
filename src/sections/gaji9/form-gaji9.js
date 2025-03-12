@@ -523,7 +523,7 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
   const params = useMemo(
     () => ({
       afterSuccess: onCancel,
-      getSuccess: 'selectedItem',
+      getItem: 'selectedItem',
       id: selectedItem?.action === 'add' ? grupoId : selectedItem?.id,
       msg: selectedItem?.action === 'add' ? 'Recurso atualizado' : 'Recursos adicionados',
     }),

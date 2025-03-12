@@ -35,7 +35,7 @@ export default function FormDocumentosChecklist({ docIndex, dados }) {
           small
           button
           label="Adicionar"
-          handleClick={() => append({ file: null, data_emissao: null, data_validade: null, numero_entidade: '' })}
+          handleClick={() => append({ file: null, data_emissao: null, data_validade: null, numero_entidade: null })}
         />
       </Stack>
       {fields?.length === 0 ? (
@@ -59,15 +59,14 @@ export default function FormDocumentosChecklist({ docIndex, dados }) {
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                      <RHFNumberField
-                        label="Nº entidade"
-                        name={`checklist.${docIndex}.anexos.${index}.numero_entidade`}
-                      />
-                      <RHFDatePicker
-                        disablePast
-                        label="Emissão"
-                        name={`checklist.${docIndex}.anexos.${index}.data_emissao`}
-                      />
+                      {dados?.identificador && (
+                        <RHFNumberField
+                          disableFuture
+                          label="Nº entidade"
+                          name={`checklist.${docIndex}.anexos.${index}.numero_entidade`}
+                        />
+                      )}
+                      <RHFDatePicker label="Emissão" name={`checklist.${docIndex}.anexos.${index}.data_emissao`} />
                       <RHFDatePicker
                         disablePast
                         label="Validade"

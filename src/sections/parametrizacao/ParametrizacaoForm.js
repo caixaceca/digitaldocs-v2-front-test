@@ -4,14 +4,13 @@ import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -19,8 +18,6 @@ import DialogContent from '@mui/material/DialogContent';
 import { fillData } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
 import { subtractArrays } from '../../utils/formatObject';
-// hooks
-import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
@@ -36,90 +33,11 @@ import {
 import GridItem from '../../components/GridItem';
 import ListSelect from '../../components/ListSelect';
 import { FormLoading } from '../../components/skeleton';
+import { DialogButons } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
-import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
+import { shapeDate } from '../../components/hook-form/yup-shape';
 // _mock
 import { codacessos, objetos, _concelhos } from '../../_mock';
-//
-import PesosDecisao from './PesosDecisao';
-import { listaPerfis } from './applySortFilter';
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-EstadoForm.propTypes = { onCancel: PropTypes.func };
-
-export function EstadoForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { perfilId, uos } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
-  const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, balcao: row?.balcao, label: row?.label })), [uos]);
-
-  const formSchema = Yup.object().shape({
-    nome: Yup.string().required().label('Nome'),
-    uo_id: Yup.mixed().required().label('Unidade orgânica'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      perfilID: perfilId,
-      nome: selectedItem?.nome || '',
-      email: selectedItem?.email || '',
-      balcao: selectedItem?.balcao || '',
-      is_final: selectedItem?.is_final || false,
-      observacao: selectedItem?.observacao || '',
-      is_decisao: selectedItem?.is_decisao || false,
-      is_inicial: selectedItem?.is_inicial || false,
-      uo_id: uosList?.find((row) => row.id === selectedItem?.uo_id) || null,
-    }),
-    [selectedItem, perfilId, uosList]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
-    try {
-      const formData = { ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id };
-      const params = { id: selectedItem.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
-      dispatch((isEdit ? updateItem : createItem)('estado', JSON.stringify(formData), params));
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <GridItem children={<RHFTextField name="nome" label="Nome" />} />
-            <GridItem children={<RHFTextField name="email" label="Email" />} />
-            <GridItem children={<RHFAutocompleteObj name="uo_id" label="Unidade orgânica" options={uosList} />} />
-            <GridItem xs={4} children={<RHFSwitch name="is_inicial" label="Inicial" />} />
-            <GridItem xs={4} children={<RHFSwitch name="is_final" label="Final" />} />
-            <GridItem xs={4} children={<RHFSwitch name="is_decisao" label="Decisão" />} />
-            <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
-          </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            desc={isEdit ? 'eliminar este estado' : ''}
-            handleDelete={() => dispatch(deleteItem('estado', { id: selectedItem?.id, msg: 'Estado eliminado' }))}
-          />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -159,7 +77,7 @@ export function AcessoForm({ perfilIdA, onCancel }) {
   const onSubmit = async () => {
     try {
       const formData = { ...values, objeto: values.objeto.id, acesso: values.acesso.id };
-      const params = { id: selectedItem.id, msg: `Acesso ${isEdit ? 'atualizado' : 'atribuido'}` };
+      const params = { id: selectedItem?.id, msg: `Acesso ${isEdit ? 'atualizado' : 'atribuido'}` };
       dispatch((isEdit ? updateItem : createItem)('acessos', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -181,7 +99,7 @@ export function AcessoForm({ perfilIdA, onCancel }) {
             isSaving={isSaving}
             onCancel={onCancel}
             desc={isEdit ? 'eliminar este acesso' : ''}
-            handleDelete={() => dispatch(deleteItem('acessos', { id: selectedItem.id, msg: 'Acesso eliminado' }))}
+            handleDelete={() => dispatch(deleteItem('acessos', { id: selectedItem?.id, msg: 'Acesso eliminado' }))}
           />
         </FormProvider>
       </DialogContent>
@@ -382,7 +300,7 @@ export function OrigemForm({ onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('origens', { id: selectedItem.id, msg: 'Origem eliminada', perfilId }));
+    dispatch(deleteItem('origens', { id: selectedItem?.id, msg: 'Origem eliminada', perfilId }));
   };
 
   return (
@@ -572,15 +490,12 @@ export function DocumentoForm({ onCancel }) {
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
+    tipo: Yup.mixed().required().label('Tipo'),
     codigo: Yup.string().required().label('Código'),
     designacao: Yup.string().required().label('Designação'),
+    data_formulario: shapeDate('Data', 'Formulário', '', 'tipo'),
     titulo: Yup.mixed().when('formulario', { is: true, then: () => Yup.string().required().label('Título') }),
     sub_titulo: Yup.mixed().when('formulario', { is: true, then: () => Yup.string().required().label('Subtítulo') }),
-    data_formulario: Yup.mixed().when('formulario', {
-      is: true,
-      then: () => Yup.date().typeError().required().label('Data'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
   });
 
   const defaultValues = useMemo(
@@ -588,14 +503,13 @@ export function DocumentoForm({ onCancel }) {
       codigo: selectedItem?.codigo || '',
       pagina: selectedItem?.pagina || '',
       titulo: selectedItem?.titulo || '',
-      anexo: selectedItem?.anexo || false,
       designacao: selectedItem?.designacao || '',
       sub_titulo: selectedItem?.sub_titulo || '',
       ativo: isEdit ? selectedItem?.ativo : true,
-      formulario: selectedItem?.formulario || false,
       identificador: selectedItem?.identificador || false,
       data_formulario: fillData(selectedItem?.data_formulario, null),
       obriga_prazo_validade: selectedItem?.obriga_prazo_validade || false,
+      tipo: (selectedItem?.anexo && 'Anexo') || (selectedItem?.formulario && 'Formulário') || null,
     }),
     [selectedItem, isEdit]
   );
@@ -613,6 +527,8 @@ export function DocumentoForm({ onCancel }) {
     try {
       const formData = {
         ...values,
+        anexo: values.tipo === 'Anexo',
+        formulario: values.tipo === 'Formulário',
         titulo: values?.formulario ? values?.titulo : null,
         sub_titulo: values?.formulario ? values?.sub_titulo : null,
         data_formulario:
@@ -634,18 +550,23 @@ export function DocumentoForm({ onCancel }) {
             <Grid container spacing={3} sx={{ mt: 0 }} justifyContent="center">
               <GridItem children={<RHFTextField name="codigo" label="Código" />} />
               <GridItem children={<RHFTextField name="designacao" label="Designação" />} />
-              <GridItem xs={6} children={<RHFSwitch name="formulario" label="Formulário" />} />
-              {values?.formulario && (
+              <GridItem sm={(values?.tipo === 'Anexo' && 4) || (values?.tipo === 'Formulário' && 6) || 12}>
+                <RHFAutocompleteSmp name="tipo" label="Tipo" options={['Anexo', 'Formulário']} />
+              </GridItem>
+              {values?.tipo === 'Anexo' && (
+                <>
+                  <GridItem xs={4} children={<RHFSwitch name="identificador" label="Identificador" />} />
+                  <GridItem xs={4} children={<RHFSwitch name="obriga_prazo_validade" label="Validade" />} />
+                </>
+              )}
+              {values?.tipo === 'Formulário' && (
                 <>
                   <GridItem xs={6} children={<RHFDatePicker name="data_formulario" label="Data" />} />
                   <GridItem children={<RHFTextField name="titulo" label="Título" />} />
                   <GridItem children={<RHFTextField name="sub_titulo" label="Subtítulo" />} />
                 </>
               )}
-              <GridItem xs={6} children={<RHFSwitch name="identificador" label="Identificador" />} />
-              <GridItem xs={6} children={<RHFSwitch name="obriga_prazo_validade" label="Validade" />} />
-              <GridItem xs={6} children={<RHFSwitch name="anexo" label="Anexo" />} />
-              {isEdit && <GridItem xs={6} children={<RHFSwitch name="ativo" label="Ativo" />} />}
+              {isEdit && <GridItem xs={4} children={<RHFSwitch name="ativo" label="Ativo" />} />}
             </Grid>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
@@ -732,185 +653,9 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
               edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
               desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') ? 'eliminar esta transição' : ''}
               handleDelete={() =>
-                dispatch(deleteItem('estadosPerfil', { id: selectedItem.id, msg: 'Estado eliminado' }))
+                dispatch(deleteItem('estadosPerfil', { id: selectedItem?.id, msg: 'Estado eliminado' }))
               }
             />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.object };
-
-export function PerfisEstadoForm({ estado, onCancel }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { isSaving, done } = useSelector((state) => state.parametrizacao);
-  const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-
-  useNotificacao({ done, afterSuccess: () => onCancel() });
-
-  const defaultValues = useMemo(
-    () => ({
-      perfis: [
-        { perfil: null, gestor: false, padrao: false, observador: false, data_limite: null, data_inicial: null },
-      ],
-    }),
-    []
-  );
-  const formSchema = Yup.object().shape({
-    perfis: Yup.array(Yup.object({ perfil: Yup.mixed().required().label('Colaborador') })),
-  });
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
-  const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
-  const perfisFilter = applyFilter(
-    colaboradores.filter((colab) => !estado?.perfis?.map((row) => row?.perfil_id)?.includes(colab?.perfil_id)) || [],
-    values?.perfis?.map((row) => row?.perfil?.id)
-  );
-
-  const onSubmit = async () => {
-    try {
-      const formData = { estado_id: estado?.id, perfil_id_cc: perfilId, perfis: [] };
-      values?.perfis?.forEach((row) => {
-        formData?.perfis?.push({
-          perfil_id: row?.perfil?.id,
-          gestor: row?.gestor || false,
-          padrao: row?.padrao || false,
-          data_limite: row?.data_limite,
-          data_inicial: row?.data_inicial,
-          observador: row?.observador || false,
-        });
-      });
-      dispatch(createItem('perfisEstado', JSON.stringify(formData), { item1: 'estado', msg: 'Perfis adicionados' }));
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-          {`Adicionar colaborador ao estado » ${estado?.nome}`}
-          <AddItem
-            small
-            label="Colaborador"
-            handleClick={() => append({ perfil: null, data_limite: null, data_inicial: null, observador: false })}
-          />
-        </Stack>
-      </DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack direction="column" divider={<Divider sx={{ borderStyle: 'dashed' }} />} spacing={2} sx={{ mt: 3 }}>
-            {fields.map((item, index) => (
-              <Stack direction="row" key={item.id} spacing={2} alignItems="center">
-                <Stack sx={{ width: 1 }} spacing={1}>
-                  <Stack direction={{ xs: 'column', md: 'row' }} key={item.id} spacing={1} alignItems="center">
-                    <Stack direction="row" sx={{ width: { xs: 1, md: '50%' } }}>
-                      <RHFAutocompleteObj label="Colaborador" options={perfisFilter} name={`perfis[${index}].perfil`} />
-                    </Stack>
-                    <Stack direction="row" spacing={1}>
-                      <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Início" />
-                      <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Término" />
-                    </Stack>
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <RHFSwitch name={`perfis[${index}].observador`} label="Observador" />
-                    <RHFSwitch name={`perfis[${index}].gestor`} label="Gestor" />
-                    <RHFSwitch name={`perfis[${index}].padrao`} label="Padrão" />
-                  </Stack>
-                </Stack>
-                {values.perfis.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
-                )}
-              </Stack>
-            ))}
-          </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-RegraEstadoForm.propTypes = { onCancel: PropTypes.func };
-
-export function RegraEstadoForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, selectedItem, estado } = useSelector((state) => state.parametrizacao);
-  const perfisList = useMemo(() => listaPerfis(estado?.perfis, colaboradores), [colaboradores, estado?.perfis]);
-
-  const formSchema = Yup.object().shape({
-    pesos: Yup.array(
-      Yup.object({
-        perfil: Yup.mixed().required().label('Colaborador'),
-        percentagem: Yup.number().positive().typeError().label('Percentagem'),
-      })
-    ),
-  });
-
-  const defaultValues = useMemo(() => ({ destribuir: false, pesos: [] }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, setValue, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
-    try {
-      const formData = values?.destribuir
-        ? values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))
-        : { estado_id: estado?.id };
-      const params = { estadoId: estado?.id, msg: 'Regra adicionada' };
-      dispatch(
-        createItem(values?.destribuir ? 'regra estado destribuido' : 'regrasEstado', JSON.stringify(formData), params)
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regra'}</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={1}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <GridItem
-                children={
-                  <>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography sx={{ color: 'text.secondary' }}>Estado:</Typography>
-                      <Typography variant="subtitle1">{estado?.nome}</Typography>
-                    </Stack>
-                    <RHFSwitch
-                      name="destribuir"
-                      label="Destribuir peso da decisão"
-                      onChange={(event, value) => {
-                        setValue('pesos', []);
-                        setValue('destribuir', value);
-                      }}
-                    />
-                  </>
-                }
-              />
-              {values?.destribuir && <GridItem children={<PesosDecisao perfisList={perfisList} />} />}
-            </Grid>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -936,15 +681,5 @@ export function ItemComponent({ item, rows, children }) {
         children
       )}
     </>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-function applyFilter(colaboradores, perfisSelect) {
-  return (
-    colaboradores
-      ?.filter((colab) => !perfisSelect?.includes(colab?.perfil_id))
-      ?.map((row) => ({ id: row?.perfil_id, label: row?.nome })) || []
   );
 }

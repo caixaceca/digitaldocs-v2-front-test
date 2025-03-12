@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // hooks
 import { useNotificacao } from '../../hooks/useNotificacao';
@@ -72,23 +70,20 @@ export default function PageDetalhesEstado() {
           action={
             estado?.is_ativo && (
               <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-                <Stack direction="row" spacing={0.75} alignItems="center">
-                  {currentTab === 'Dados' && <UpdateItem dados={{ button: true, dados: estado }} />}
-                  {currentTab !== 'Dados' && <AddItem />}
-                </Stack>
+                {currentTab === 'Dados' && <UpdateItem dados={{ button: true, dados: estado }} />}
+                {(currentTab === 'Colaboradores' ||
+                  (currentTab === 'Regras parecer' && estado?.perfis?.length > 0)) && <AddItem />}
               </RoleBasedGuard>
             )
           }
         />
 
-        {!estado ? (
-          <Grid item xs={12}>
-            <SearchNotFound404 message="Estado não encontrado..." />
-          </Grid>
-        ) : (
+        {estado ? (
           <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
             <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
           </RoleBasedGuard>
+        ) : (
+          <SearchNotFound404 message="Estado não encontrado..." />
         )}
       </Container>
     </Page>

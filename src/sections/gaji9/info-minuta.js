@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -7,35 +7,46 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
+import Typography from '@mui/material/Typography';
+// utils
+import { ptDateTime } from '../../utils/formatTime';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, getFromGaji9, openModal, updateItem } from '../../redux/slices/gaji9';
+import { getSuccess, getFromGaji9, setModal, updateItem, deleteItem } from '../../redux/slices/gaji9';
 // Components
-import Scrollbar from '../../components/Scrollbar';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked } from '../../components/Panel';
+import { Criado, CellChecked } from '../../components/Panel';
 import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { GarantiasForm } from './form-minuta';
+import ClausulaForm from './form-clausula';
 import { applySortFilter } from './applySortFilter';
-import ClausulaForm, { OpcoesClausula } from './form-clausula';
+import { GarantiasForm, ComponentesForm } from './form-minuta';
 import DetalhesGaji9, { DetalhesContent } from './DetalhesGaji9';
 
 // ----------------------------------------------------------------------
 
-export default function InfoMinuta() {
+InfoMinuta.propTypes = { onCancel: PropTypes.func };
+
+export default function InfoMinuta({ onCancel }) {
   const { minuta } = useSelector((state) => state.gaji9);
 
   return (
-    <Card sx={{ p: 3, pt: 1 }}>
-      <DetalhesContent dados={minuta} item="Minuta" />
-    </Card>
+    <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+      <Stack sx={{ width: 1 }}>
+        <Card sx={{ p: 3, pt: 1, height: 1 }}>
+          <DetalhesContent dados={minuta} item="Minuta" />
+        </Card>
+      </Stack>
+      <Stack sx={{ width: 1 }} spacing={3}>
+        <GarantiaComponente onCancel={onCancel} garantia hideAdd={!minuta?.em_analise} />
+        {minuta?.em_vigor && <GarantiaComponente onCancel={onCancel} />}
+      </Stack>
+    </Stack>
   );
 }
 
@@ -59,9 +70,7 @@ export function TableInfoMinuta({ item, onClose }) {
   } = useTable({});
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
-  const { minuta, infoCaixa, isOpenModal, isOpenView, isSaving, idDelete, isLoading, isEdit } = useSelector(
-    (state) => state.gaji9
-  );
+  const { minuta, modalGaji9, isSaving, selectedItem, isLoading } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     setPage(0);
@@ -69,144 +78,168 @@ export function TableInfoMinuta({ item, onClose }) {
   }, [filter]);
 
   const dataFiltered = applySortFilter({
-    filter,
     comparator: getComparator(order, orderBy),
+    filter: item === 'clausulaMinuta' ? filter : '',
     dados:
-      (item === 'clausulas' && minuta?.clausulas) ||
+      (item === 'clausulaMinuta' && minuta?.clausulas) ||
+      (item === 'componentesMinuta' && minuta?.componentes) ||
       (item === 'tiposGarantias' && minuta?.tipos_garantias?.filter((row) => row?.ativo)) ||
       [],
   });
   const isNotFound = !dataFiltered.length;
 
-  const params = useMemo(
-    () => ({
+  const eliminarItem = () => {
+    const params = {
       patch: true,
-      item: 'minuta',
       id: minuta?.id,
-      msg: 'Tipo de garantia eliminado',
-      afterSuccess: () => dispatch(getSuccess({ item: 'idDelete', dados: false })),
-    }),
-    [minuta?.id, dispatch]
-  );
+      getItem: 'minuta',
+      afterSuccess: () => dispatch(getSuccess({ item: 'selectedItem', dados: null })),
+    };
+    const msg = `${
+      (item === 'tiposGarantias' && 'Tipo de garantia') || (item === 'componentesMinuta' && 'Componente') || 'Cláusula'
+    } eliminado`;
 
-  const eliminarTipoGarantia = () => {
-    dispatch(updateItem('removerGaranMinuta', JSON.stringify({ tipos_garantias: [idDelete] }), params));
+    if (item === 'tiposGarantias')
+      dispatch(updateItem('removeGarant', JSON.stringify({ tipos_garantias: [selectedItem?.id] }), { ...params, msg }));
+    else if (item === 'componentesMinuta')
+      dispatch(deleteItem('componentesMinuta', { ...params, msg, componenteId: selectedItem?.componente_id }));
+    else dispatch(deleteItem('clausulaMinuta', { ...params, msg, clausulaId: selectedItem?.clausula_id }));
   };
 
-  const viewActions = (modal, id) => {
-    dispatch(openModal(modal));
-    dispatch(getFromGaji9('clausula', { id, item: 'selectedItem' }));
+  const openModal = (item, dados) => {
+    dispatch(setModal({ item, dados: item === 'clausulaMinuta' ? null : dados }));
+    if (item === 'clausulaMinuta') dispatch(getFromGaji9('clausula', { id: dados?.clausula_id, item: 'selectedItem' }));
   };
 
   return (
     <>
-      <Card sx={{ p: 1 }}>
+      {item === 'clausulaMinuta' && (
         <SearchToolbarSimple item={`filter_${item}`} filter={filter} setFilter={setFilter} />
-        <Scrollbar>
-          <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
-            <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
-              <TableBody>
-                {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={(item === 'tiposGarantias' && 3) || 4} />
-                ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                    <TableRow hover key={`${item}_${index}`}>
-                      {(item === 'tiposGarantias' && <TableCell>{row?.designacao}</TableCell>) ||
-                        (item === 'clausulas' && (
-                          <>
-                            <TableCell>
-                              {row?.numero_ordem}
-                              {row?.descritivo_numero_ordem ? ` (${row?.descritivo_numero_ordem})` : ''}
-                            </TableCell>
-                            <TableCell>{row?.titulo || 'Cláusula solta'}</TableCell>
-                          </>
-                        ))}
-                      <CellChecked check={row.ativo} />
-                      <TableCell align="center" width={50}>
-                        <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {item === 'clausulas' && minuta?.ativo && row?.ativo && (
-                            <DefaultAction
-                              label="OPÇÕES"
-                              handleClick={() => dispatch(getSuccess({ item: 'infoCaixa', dados: row }))}
-                            />
-                          )}
-                          {minuta?.ativo && minuta?.em_analise && (
-                            <>
-                              {item === 'tiposGarantias' && row.ativo && minuta?.ativo && (
-                                <DefaultAction
-                                  color="error"
-                                  label="ELIMINAR"
-                                  handleClick={() => dispatch(getSuccess({ item: 'idDelete', dados: row?.id }))}
-                                />
-                              )}
-                              {item === 'clausulas' && row?.ativo && (
-                                <UpdateItem handleClick={() => viewActions('update', row?.clausula_id)} />
-                              )}
-                            </>
-                          )}
-                          {item === 'clausulas' && (
-                            <DefaultAction label="DETALHES" handleClick={() => viewActions('view', row?.clausula_id)} />
-                          )}
-                        </Stack>
+      )}
+      <Table size={dense || item !== 'clausulaMinuta' ? 'small' : 'medium'}>
+        <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
+        <TableBody>
+          {isLoading && isNotFound ? (
+            <SkeletonTable row={10} column={(item === 'tiposGarantias' && 3) || 4} />
+          ) : (
+            dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+              <TableRow hover key={`${item}_${index}`}>
+                {(item === 'tiposGarantias' && <TableCell>{row?.designacao}</TableCell>) ||
+                  (item === 'clausulaMinuta' && (
+                    <>
+                      <TableCell>
+                        {(row?.numero_ordem === 0 && !row?.titulo && 'SOLTA') ||
+                          (row?.numero_ordem === 0 && 'IDENTIFICAÇÃO') ||
+                          `${row?.descritivo_numero_ordem ?? ''}`}
                       </TableCell>
-                    </TableRow>
-                  ))
+                      <TableCell>{row?.titulo || 'Cláusula solta'}</TableCell>
+                    </>
+                  )) ||
+                  (item === 'componentesMinuta' && <TableCell>{row?.componente}</TableCell>)}
+                <CellChecked check={row.ativo} />
+                {item === 'componentesMinuta' && (
+                  <TableCell>
+                    {row?.ultima_modificacao && (
+                      <Criado caption tipo="data" value={ptDateTime(row.ultima_modificacao)} />
+                    )}
+                    {row?.feito_por && <Criado caption tipo="user" value={row.feito_por} />}
+                  </TableCell>
                 )}
-              </TableBody>
-              {!isLoading && isNotFound && <TableSearchNotFound message="Nenhum registo disponível..." />}
-            </Table>
-          </TableContainer>
-        </Scrollbar>
-
-        {!isNotFound && dataFiltered.length > 10 && (
-          <TablePaginationAlt
-            page={page}
-            dense={dense}
-            rowsPerPage={rowsPerPage}
-            onChangePage={onChangePage}
-            count={dataFiltered.length}
-            onChangeDense={onChangeDense}
-            onChangeRowsPerPage={onChangeRowsPerPage}
-          />
+                <TableCell align="center" width={50}>
+                  <Stack direction="row" spacing={0.5} justifyContent="right">
+                    {minuta?.ativo && (minuta?.em_analise || item === 'componentesMinuta') && (
+                      <>
+                        <DefaultAction small label="ELIMINAR" handleClick={() => openModal('eliminar-item', row)} />
+                        {item === 'clausulaMinuta' && (
+                          <DefaultAction small label="EDITAR" handleClick={() => openModal('form-clausula', row)} />
+                        )}
+                      </>
+                    )}
+                    {item === 'clausulaMinuta' && (
+                      <DefaultAction small label="DETALHES" handleClick={() => openModal('view-clausula', row)} />
+                    )}
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+        {!isLoading && isNotFound && (
+          <TableSearchNotFound height={item !== 'clausulaMinuta' ? 99 : 220} message="Nenhum registo disponível..." />
         )}
-      </Card>
+      </Table>
 
-      {isOpenView && <DetalhesGaji9 closeModal={onClose} item={item} />}
-      {!!infoCaixa && (
-        <OpcoesClausula
-          minutaId={minuta?.id}
-          onCancel={() => dispatch(getSuccess({ item: 'infoCaixa', dados: null }))}
+      {!isNotFound && dataFiltered.length > 10 && (
+        <TablePaginationAlt
+          page={page}
+          dense={dense}
+          rowsPerPage={rowsPerPage}
+          onChangePage={onChangePage}
+          count={dataFiltered.length}
+          onChangeDense={onChangeDense}
+          onChangeRowsPerPage={onChangeRowsPerPage}
         />
       )}
-      {isOpenModal && (
-        <>
-          {item === 'tiposGarantias' && <GarantiasForm onCancel={onClose} />}
-          {item === 'clausulas' && isEdit && <ClausulaForm onCancel={onClose} minutaId={minuta?.id} />}
-        </>
-      )}
 
-      {!!idDelete && (
+      {modalGaji9 === 'form-garantia' && <GarantiasForm onCancel={onClose} />}
+      {modalGaji9 === 'form-componente' && <ComponentesForm onCancel={onClose} />}
+      {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={onClose} item={item} />}
+      {modalGaji9 === 'form-clausula' && <ClausulaForm onCancel={onClose} minutaId={minuta?.id} />}
+
+      {modalGaji9 === 'eliminar-item' && (
         <DialogConfirmar
           isSaving={isSaving}
-          handleOk={() => eliminarTipoGarantia()}
-          desc="eliminar este tipo de garantia associada a minuta"
-          onClose={() => dispatch(getSuccess({ item: 'idDelete', dados: false }))}
+          handleOk={() => eliminarItem()}
+          desc={
+            (item === 'tiposGarantias' && 'eliminar este tipo de garantia associada a minuta') ||
+            (item === 'componentesMinuta' && 'eliminar este componete da minuta') ||
+            'eliminar esta cláusula da minuta'
+          }
+          onClose={() => dispatch(setModal({ item: '', dados: null }))}
         />
       )}
     </>
   );
 }
 
+// ----------------------------------------------------------------------
+
+GarantiaComponente.propTypes = { onCancel: PropTypes.func, garantia: PropTypes.bool, hideAdd: PropTypes.bool };
+
+function GarantiaComponente({ onCancel, garantia = false, hideAdd = false }) {
+  const dispatch = useDispatch();
+
+  return (
+    <Card sx={{ p: 2, height: 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+        <Typography variant="subtitle1">{garantia ? 'Tipos de garantias' : 'Componentes'}</Typography>
+        {!hideAdd && (
+          <DefaultAction
+            small
+            button
+            label="Adicionar"
+            handleClick={() =>
+              dispatch(setModal({ item: garantia ? 'form-garantia' : 'form-componente', dados: null }))
+            }
+          />
+        )}
+      </Stack>
+      <TableInfoMinuta item={garantia ? 'tiposGarantias' : 'componentesMinuta'} onClose={onCancel} />
+    </Card>
+  );
+}
+
 function headerTable(item) {
   return [
     ...((item === 'tiposGarantias' && [{ id: 'designacao', label: 'Designação' }]) ||
-      (item === 'clausulas' && [
+      (item === 'clausulaMinuta' && [
         { id: 'numero_ordem', label: 'Nº de cláusula' },
         { id: 'titulo', label: 'Epígrafe' },
       ]) ||
+      (item === 'componentesMinuta' && [{ id: 'componente', label: 'Componente' }]) ||
       []),
     { id: 'ativo', label: 'Ativo', width: 10, align: 'center' },
+    ...(item === 'componentesMinuta' ? [{ id: 'ultima_modificacao', label: 'Registo', width: 10 }] : []),
     { id: '', width: 10, align: 'center' },
   ];
 }

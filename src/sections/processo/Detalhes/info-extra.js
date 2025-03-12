@@ -33,6 +33,7 @@ import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { DefaultAction, DTFechar } from '../../../components/Actions';
 import { GarantiasSeparados } from '../form/credito/form-garantias-credito';
 import { Resgisto, TableRowItem, LabelSN } from '../../parametrizacao/Detalhes';
+import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-form';
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
 
@@ -66,15 +67,16 @@ export function InfoCredito({ dados }) {
 DadosCredito.propTypes = { dados: PropTypes.object };
 
 function DadosCredito({ dados }) {
+  const [openSituacao, setOpenSituacao] = useState('');
   const situacao = dados?.situacao_final_mes || 'Em análise';
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 4 }}>
       <List sx={{ width: 1, pt: 0 }}>
-        <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>
+        <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0.75, mb: 0.5 }}>
           <Typography variant="subtitle1">Pedido</Typography>
         </ListItem>
-        <TextItem title="Nº de proposta:" text={dados?.nproposta || '(Não definido)'} />
+        <TextItem title="Nº de proposta:" text={dados?.nproposta || 'Não definido'} />
         <TextItem title="Montante solicitado:" text={fCurrency(dados?.montante_solicitado)} />
         {situacao === 'Em análise' && (
           <>
@@ -83,9 +85,9 @@ function DadosCredito({ dados }) {
           </>
         )}
         <TextItem title="Finalidade:" text={dados?.finalidade} />
-        <TextItem title="Componente:" text={dados?.componente || '(Não definido)'} />
+        <TextItem title="Componente:" text={dados?.componente || 'Não definido'} />
         <TextItem title="Linha de crédito:" text={dados?.linha} />
-        <TextItem title="Tipo de titular:" text={dados?.tipo_titular || '(Não definido)'} />
+        <TextItem title="Tipo de titular:" text={dados?.tipo_titular || 'Não definido'} />
         <TextItem title="Segmento:" text={dados?.segmento} />
         <TextItem title="Ent. patronal/Set. atividade:" text={dados?.setor_atividade} />
         {dados?.valor_divida && (
@@ -100,9 +102,18 @@ function DadosCredito({ dados }) {
       </List>
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>
-          <Typography variant="subtitle1">
-            Situação <Label color={colorLabel(situacao || 'Em análise')}>{situacao || 'Em análise'}</Label>
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography variant="subtitle1">Situação</Typography>
+            <Label color={colorLabel(situacao || 'Em análise')} sx={{ typography: 'subtitle1' }}>
+              {situacao || 'Em análise'}
+            </Label>
+            {(situacao === 'Em análise' || situacao === 'Aprovado') && (
+              <DefaultAction small label="EDITAR" handleClick={() => setOpenSituacao('atualizar')} />
+            )}
+            {situacao !== 'Em análise' && (
+              <DefaultAction small label="ELIMINAR" handleClick={() => setOpenSituacao('eliminar')} />
+            )}
+          </Stack>
         </ListItem>
         {situacao === 'Em análise' ? (
           <Stack justifyContent="center" sx={{ width: 1, py: 3 }}>
@@ -131,6 +142,8 @@ function DadosCredito({ dados }) {
           </>
         )}
       </List>
+      {openSituacao === 'atualizar' && <FormSituacao onCancel={() => setOpenSituacao('')} />}
+      {openSituacao === 'eliminar' && <EliminarDadosSituacao onCancel={() => setOpenSituacao('')} />}
     </Stack>
   );
 }
@@ -163,7 +176,7 @@ function Garantias({ dados }) {
             <TableCell align="center">Ativo</TableCell>
             <TableCell width={10}>
               {modificar && (
-                <DefaultAction small button label="ADICIONAR" handleClick={() => setItem({ isEdit: false })} />
+                <DefaultAction small button label="Adicionar" handleClick={() => setItem({ isEdit: false })} />
               )}
             </TableCell>
           </TableRow>
@@ -171,13 +184,13 @@ function Garantias({ dados }) {
         <TableBody>
           {garantias?.map((row, index) => (
             <TableRow hover key={`${row?.id}_${id}_${index}`}>
-              <TableCell>{row?.tipo_garantia || noDados('(Não definido)')}</TableCell>
+              <TableCell>{row?.tipo_garantia || noDados('Não definido')}</TableCell>
               <TableCell align="right">
-                {row?.valor_garantia ? `${fNumber(row?.valor_garantia)}${row?.moeda ?? ''}` : noDados('(Não definido)')}
+                {row?.valor_garantia ? `${fNumber(row?.valor_garantia)} ${row?.moeda ?? ''}` : noDados('Não definido')}
               </TableCell>
-              <TableCell align="right">{row?.numero_entidade || noDados('(Não definido)')}</TableCell>
-              <TableCell>{row?.titular || noDados('(Não definido)')}</TableCell>
-              <TableCell>{row?.conta_dp || noDados('(Não definido)')}</TableCell>
+              <TableCell align="right">{row?.numero_entidade || noDados('Não definido')}</TableCell>
+              <TableCell>{row?.titular || noDados('Não definido')}</TableCell>
+              <TableCell>{row?.conta_dp || noDados('Não definido')}</TableCell>
               <CellChecked check={row?.ativo} />
 
               <TableCell>

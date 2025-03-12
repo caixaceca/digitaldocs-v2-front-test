@@ -32,34 +32,30 @@ export default function AnexosExistente({ anexos, onOpen = null }) {
           <ListItem key={row?.id} sx={{ py: 0.5, pl: 1, borderRadius: 1, bgcolor: 'background.neutral' }}>
             <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
             <ListItemText
+              primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
               primary={
                 row?.tipo === 'OUTROS' ? (
                   row?.name || row?.path
                 ) : (
                   <>
                     {`${row.tipo}${row?.entidade ? ` - ${row.entidade}` : ''}`}
-                    {row?.data_validade && (
-                      <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary' }}>
-                        &nbsp;({row?.name || row?.path})
-                      </Typography>
-                    )}
+                    <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}>
+                      &nbsp;({row?.name || row?.path})
+                    </Typography>
                   </>
                 )
               }
-              primaryTypographyProps={{ variant: 'subtitle2', pb: 0.25 }}
               secondary={
-                <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ mt: 0.15 }}>
-                  {(row?.criado_em || row?.criador) && (
-                    <>
-                      {row?.criador && (
-                        <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} baralhar />
-                      )}
-                      {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
-                    </>
-                  )}
-                  {row?.data_emissao && <Criado caption iconText="Emissão:" value={ptDate(row?.data_emissao)} />}
-                  {row?.data_validade && <Criado caption iconText="Validade:" value={ptDate(row?.data_validade)} />}
-                </Stack>
+                (row?.criado_em || row?.criador || row?.data_emissao || row?.data_validade) && (
+                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
+                    {row?.criador && (
+                      <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} baralhar />
+                    )}
+                    {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
+                    {row?.data_emissao && <Criado caption iconText="Emissão:" value={ptDate(row?.data_emissao)} />}
+                    {row?.data_validade && <Criado caption iconText="Validade:" value={ptDate(row?.data_validade)} />}
+                  </Stack>
+                )
               }
             />
             <ListItemSecondaryAction>

@@ -15,22 +15,20 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { noDados } from '../../utils/formatText';
 import { fNumber } from '../../utils/formatNumber';
 import { ptDateTime, ptDate } from '../../utils/formatTime';
 import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // hooks
-import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { getSuccess, getDocumento, getFromGaji9, deleteItem, openModal, closeModal } from '../../redux/slices/gaji9';
+import { getDocumento, getFromGaji9, deleteItem, setModal } from '../../redux/slices/gaji9';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
+import { CellChecked } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked, Criado } from '../../components/Panel';
 import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -182,7 +180,7 @@ export default function InfoCredito() {
                       {item.label}:&nbsp;
                     </Typography>
                     <Typography variant="body2" sx={{ fontStyle: !item.value && 'italic' }}>
-                      {item.value || '(Não definido)'}
+                      {item.value || 'Não definido'}
                     </Typography>
                   </Stack>
                 )
@@ -197,9 +195,9 @@ export default function InfoCredito() {
 
 // ----------------------------------------------------------------------
 
-TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, contracts: PropTypes.string };
+TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, contracts: PropTypes.bool };
 
-export function TableInfoCredito({ id, dados = [], contracts = '' }) {
+export function TableInfoCredito({ id, dados = [], contracts = false }) {
   const {
     page,
     order,
@@ -215,11 +213,8 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
   } = useTable({});
 
   const dispatch = useDispatch();
-  const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem('filterParticipante') || '');
-  const { isSaving, isLoading, isOpenModal, isOpenView, idDelete, utilizador, contratos } = useSelector(
-    (state) => state.gaji9
-  );
+  const { isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     if (id && contracts && (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CONTRATO'])))
@@ -238,9 +233,8 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
   });
   const isNotFound = !dataFiltered.length;
 
-  const openView = (view, dados) => {
-    dispatch(openModal(view));
-    dispatch(getSuccess({ item: 'selectedItem', dados }));
+  const openModal = (item, dados) => {
+    dispatch(setModal({ item, dados }));
   };
 
   return (
@@ -269,17 +263,14 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
                         { id: 'nome', label: 'Nome' },
                         { id: 'designacao', label: 'Designação' },
                         { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
-                        { id: 'mutuario', label: 'Mutuário', align: 'center' },
-                        { id: 'fiador', label: 'Fiador', align: 'center' },
-                        { id: 'ativo', label: 'Ativo', align: 'center' },
-                        { id: 'modificado_em', label: 'Modificado' },
+                        { id: '', label: 'Responsabilidade' },
                         { id: '', width: 10 },
                       ]
                 }
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={contracts ? 6 : 9} />
+                  <SkeletonTable row={10} column={6} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
                     contracts ? (
@@ -296,7 +287,7 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
                           <Stack direction="row" spacing={0.75}>
                             {(gestaoContrato(utilizador?._role) ||
                               acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
-                              <DefaultAction label="EDITAR" handleClick={() => openView('form', row)} />
+                              <DefaultAction label="EDITAR" handleClick={() => openModal('form-participante', row)} />
                             )}
                             <DefaultAction
                               label="DOWNLOAD"
@@ -306,7 +297,7 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
                                 )
                               }
                             />
-                            <DefaultAction label="DETALHES" handleClick={() => openView('view', row)} />
+                            <DefaultAction label="DETALHES" handleClick={() => openModal('view-participante', row)} />
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -316,23 +307,15 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
                         <TableCell>{row?.nome}</TableCell>
                         <TableCell>{row?.designacao}</TableCell>
                         <TableCell align="right">{row?.numero_ordem}</TableCell>
-                        <CellChecked check={row.mutuario} />
-                        <CellChecked check={row.fiador} />
-                        <CellChecked check={row.ativo} />
-                        <TableCell>
-                          {!row?.modficiado_por && !row?.modificado_em && noDados('Sem modificações')}
-                          {row?.modficiado_por && <Criado caption tipo="user" value={row?.modficiado_por} />}
-                          {row?.modificado_em && <Criado caption tipo="data" value={ptDateTime(row?.modificado_em)} />}
-                        </TableCell>
+                        <TableCell>{(row?.fiador && 'FIADOR') || (row?.avalista && 'AVALISTA') || ''}</TableCell>
                         <TableCell align="center" width={10}>
-                          {row.fiador &&
+                          {!row.mutuario &&
                             (gestaoContrato(utilizador?._role) ||
                               acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
                               <DefaultAction
+                                small
                                 label="ELIMINAR"
-                                handleClick={() =>
-                                  dispatch(getSuccess({ item: 'idDelete', dados: row?.numero_entidade }))
-                                }
+                                handleClick={() => openModal('eliminar-participante', row)}
                               />
                             )}
                         </TableCell>
@@ -359,25 +342,23 @@ export function TableInfoCredito({ id, dados = [], contracts = '' }) {
         )}
       </Card>
 
-      {isOpenView && <DetalhesGaji9 closeModal={handleCloseModal} item="contrato" />}
-      {isOpenModal && !contracts && <FiadoresForm id={id} onCancel={() => dispatch(closeModal())} />}
-      {isOpenModal && contracts && contracts !== 'contrato' && (
-        <DataContrato creditoId={id} onCancel={() => dispatch(closeModal())} />
-      )}
+      {modalGaji9 === 'form-participante' && <FiadoresForm id={id} onCancel={() => openModal('', null)} />}
+      {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onCancel={() => openModal('', null)} />}
+      {modalGaji9 === 'view-contrato' && <DetalhesGaji9 closeModal={() => openModal('', null)} item="contrato" />}
 
-      {!!idDelete && (
+      {modalGaji9 === 'eliminar-participante' && (
         <DialogConfirmar
           isSaving={isSaving}
           desc="eliminar este participante"
-          onClose={() => dispatch(getSuccess({ item: 'idDelete', dados: false }))}
+          onClose={() => openModal('', null)}
           handleOk={() =>
             dispatch(
-              deleteItem('participantes', {
+              deleteItem('intervenientes', {
                 id,
-                numero: idDelete,
-                getSuccess: 'credito',
+                getItem: 'credito',
+                numero: selectedItem?.participante_id,
+                afterSuccess: () => openModal('', null),
                 msg: 'Participante do crédito eliminado',
-                afterSuccess: () => dispatch(getSuccess({ item: 'idDelete', dados: false })),
               })
             )
           }

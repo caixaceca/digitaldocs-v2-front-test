@@ -26,7 +26,7 @@ export function SkeletonBar({ column, height = 50 }) {
   return (
     <Stack spacing={2}>
       {[...Array(column)].map((row, index) => (
-        <Skeleton key={`index1_${index}`} variant="text" height={height} sx={{ transform: 'none' }} />
+        <Skeleton key={`bar_${index}`} variant="text" height={height} sx={{ transform: 'none' }} />
       ))}
     </Stack>
   );
@@ -62,8 +62,12 @@ export function FormLoading({ rows = 0 }) {
     <Stack justifyContent="right" spacing={3} sx={{ mt: 3 }}>
       {rows > 0 ? (
         <>
-          {[...Array(rows)].map((z, y) => (
-            <Skeleton key={y} variant="text" sx={{ height: 50, transform: 'none', width: 1, borderRadius: 1 }} />
+          {[...Array(rows)].map((_, index) => (
+            <Skeleton
+              variant="text"
+              key={`sk_${index}`}
+              sx={{ height: 50, transform: 'none', width: 1, borderRadius: 1 }}
+            />
           ))}
           <Skeleton variant="text" sx={{ height: 100, transform: 'none', width: 1, borderRadius: 1 }} />
         </>
@@ -92,7 +96,7 @@ export function SkeletonEntidade() {
       {[...Array(2)].map((row, index) => (
         <GridItem
           sm={6}
-          key={`SkeletonEntidade_${index}`}
+          key={`entidade_${index}`}
           children={<Skeleton variant="text" height={500} sx={{ transform: 'none' }} />}
         />
       ))}
@@ -132,10 +136,10 @@ export function SkeletonProcesso() {
 SkeletonTable.propTypes = { column: PropTypes.number, row: PropTypes.number };
 
 export function SkeletonTable({ column, row }) {
-  return [...Array(row)].map((x, i) => (
-    <TableRow key={i}>
-      {[...Array(column)].map((z, y) => (
-        <TableCell key={y} sx={{ minWidth: 80 }}>
+  return [...Array(row)].map((_, index) => (
+    <TableRow key={`row_${index}`}>
+      {[...Array(column)].map((_, index1) => (
+        <TableCell key={`column_${index}_${index1}`} sx={{ minWidth: 80 }}>
           <Skeleton variant="rectangular" sx={{ height: 25, borderRadius: 1, transform: 'scale(1)' }} />
         </TableCell>
       ))}

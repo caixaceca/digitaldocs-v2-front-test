@@ -16,7 +16,7 @@ PdfPreview.propTypes = { url: PropTypes.string };
 
 export function PdfPreview({ url }) {
   const theme = useTheme();
-  const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
+  const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {}, sidebarTabs: () => [] });
   const heightContent =
     document?.getElementById('detalhes')?.clientHeight - document?.getElementById('anexos')?.clientHeight - 52;
 

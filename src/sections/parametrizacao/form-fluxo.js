@@ -244,7 +244,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   const onSubmit = async () => {
     try {
       const formData = { ...values, estado_final_id: values?.destino?.id, estado_inicial_id: values?.origem?.id };
-      const params = { item1: 'fluxo', msg: `Transição ${isEdit ? 'atualizada' : 'adicionada'}`, id: selectedItem.id };
+      const params = { item1: 'fluxo', msg: `Transição ${isEdit ? 'atualizada' : 'adicionada'}`, id: selectedItem?.id };
       dispatch((isEdit ? updateItem : createItem)('transicoes', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -252,7 +252,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('transicoes', { item1: 'fluxo', id: selectedItem.id, msg: 'Transição eliminada' }));
+    dispatch(deleteItem('transicoes', { item1: 'fluxo', id: selectedItem?.id, msg: 'Transição eliminada' }));
   };
 
   return (
@@ -271,7 +271,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
               <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazoemdias" tipo="dias" />} />
               <GridItem sm={4} children={<RHFSwitch name="is_paralelo" label="Paralelo" />} />
               <GridItem sm={4} children={<RHFSwitch name="requer_parecer" label="Requer parecer" />} />
-              <GridItem sm={4} children={<RHFSwitch name="is_after_devolucao" label="Depois de devolução" />} />
+              <GridItem sm={4} children={<RHFSwitch name="is_after_devolucao" label="Depois devolução" />} />
               <GridItem sm={4} children={<RHFSwitch name="to_alert" label="Notificar" />} />
               <GridItem sm={4} children={<RHFSwitch name="hasopnumero" label="Indicar nº de operação" />} />
               <GridItem sm={4} children={<RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />} />
@@ -359,7 +359,10 @@ export function ChecklistForm({ fluxo, onCancel }) {
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {isEdit ? 'Editar documento' : 'Adicionar documentos'}
           {!isEdit && (
-            <AddItem small handleClick={() => append({ tipo_documento: null, transicao: null, obrigatorio: false })} />
+            <AddItem
+              dados={{ small: true }}
+              handleClick={() => append({ tipo_documento: null, transicao: null, obrigatorio: false })}
+            />
           )}
         </Stack>
       </DialogTitle>
@@ -612,7 +615,7 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
           {isEdit ? 'Editar destinatário' : 'Adicionar destinatários'}
           {!isEdit && (
             <AddItem
-              small
+              dados={{ small: true }}
               handleClick={() => append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' })}
             />
           )}

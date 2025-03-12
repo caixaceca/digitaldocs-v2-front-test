@@ -229,7 +229,7 @@ export default function PageProcura() {
                         <TableCell>
                           {row.estado}
                           {row?.transitado_em && (
-                            <Stack direction="row" spacing={0.5}>
+                            <Stack direction="row">
                               <Criado caption tipo="time" value={ptDateTime(row.transitado_em)} />
                               <Criado
                                 caption

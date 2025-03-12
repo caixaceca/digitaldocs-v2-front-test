@@ -31,10 +31,10 @@ DialogConfirmar.propTypes = {
   descSec: PropTypes.string,
 };
 
-export function DialogConfirmar({ isSaving, title = '', desc, descSec, color, onClose, handleOk }) {
+export function DialogConfirmar({ isSaving, title = 'Eliminar', desc, descSec, color, onClose, handleOk }) {
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{title || 'Eliminar'}</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
         {descSec && <DialogContentText sx={{ mb: 3 }}>{descSec}</DialogContentText>}
         <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>
@@ -43,13 +43,7 @@ export function DialogConfirmar({ isSaving, title = '', desc, descSec, color, on
         <Button color="inherit" variant="outlined" onClick={onClose}>
           Cancelar
         </Button>
-        <Button
-          variant="soft"
-          onClick={handleOk}
-          loading={isSaving}
-          color={color || 'error'}
-          loadingIndicator="Aguarde…"
-        >
+        <Button variant="soft" onClick={handleOk} loading={isSaving} color={color || 'error'}>
           OK
         </Button>
       </DialogActions>

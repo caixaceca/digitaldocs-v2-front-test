@@ -180,9 +180,10 @@ export function DefaultAction({
 
 // ----------------------------------------------------------------------
 
-AddItem.propTypes = { small: PropTypes.bool, label: PropTypes.string, handleClick: PropTypes.func };
+AddItem.propTypes = { dados: PropTypes.object, handleClick: PropTypes.func };
 
-export function AddItem({ small = false, label = 'Adicionar', handleClick = null }) {
+export function AddItem({ dados = {}, handleClick = null }) {
+  const { small = false, label = 'Adicionar' } = dados;
   const dispatch = useDispatch();
 
   return (
@@ -327,7 +328,6 @@ export function DialogButons({
           type="submit"
           color={color}
           loading={isSaving}
-          loadingIndicator="Aguarde…"
           variant={color === 'error' || color === 'warning' ? 'soft' : 'contained'}
         >
           {(label && label) || (edit && 'Guardar') || 'Adicionar'}
@@ -366,11 +366,11 @@ export function ButtonsStepper({
       ) : (
         <>
           {handleSubmit ? (
-            <Button loading={isSaving} variant="contained" loadingIndicator="Aguarde…" onClick={() => handleSubmit()}>
+            <Button loading={isSaving} variant="contained" onClick={() => handleSubmit()}>
               {(label && label) || 'Seguinte'}
             </Button>
           ) : (
-            <Button type="submit" loading={isSaving} loadingIndicator="Aguarde…" variant="contained">
+            <Button type="submit" loading={isSaving} variant="contained">
               {(label && label) || 'Seguinte'}
             </Button>
           )}

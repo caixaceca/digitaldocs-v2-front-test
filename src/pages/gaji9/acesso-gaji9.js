@@ -18,13 +18,13 @@ AcessoGaji9.propTypes = { item: PropTypes.string, children: PropTypes.node };
 export default function AcessoGaji9({ children, item }) {
   const dispatch = useDispatch();
   const { cc } = useSelector((state) => state.intranet);
-  const { isLoading, utilizador } = useSelector((state) => state.gaji9);
+  const { isLoading, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
   const temAcesso = useMemo(
     () =>
       (item === 'gestao' && utilizador) ||
-      (item === 'minuta' && (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA']))) ||
+      (item === 'minuta' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA']))) ||
       (item === 'credito' && (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO']))),
-    [item, utilizador]
+    [item, adminGaji9, utilizador]
   );
 
   useEffect(() => {

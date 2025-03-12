@@ -111,13 +111,13 @@ export default function TableCredito() {
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`credito_${index}`}>
-                      <TableCell>{row?.cliente || noDados('(Não definido)')}</TableCell>
+                      <TableCell>{row?.cliente || noDados('Não definido')}</TableCell>
                       <TableCell>{row?.titular}</TableCell>
                       <TableCell>{row?.tipo_titular}</TableCell>
                       <TableCell>{row?.rotulo || row?.componente}</TableCell>
-                      <TableCell>{row?.finalidade || noDados('(Não definido)')}</TableCell>
+                      <TableCell>{row?.finalidade || noDados('Não definido')}</TableCell>
                       <TableCell align="right">
-                        {row?.montante ? fCurrency(row?.montante) : noDados('(Não definido)')}
+                        {row?.montante ? fCurrency(row?.montante) : noDados('Não definido')}
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">

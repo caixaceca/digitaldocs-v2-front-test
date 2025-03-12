@@ -45,8 +45,8 @@ export default function Estados({ handleAceitar }) {
     setAccord(isExpanded ? panel : false);
   };
 
-  const viewAnexo = (anexo, transicaoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { anexo, transicaoId, parecerId }));
+  const viewAnexo = (anexo, estadoId, parecerId) => {
+    dispatch(getAnexo('fileDownload', { anexo, estadoId, parecerId }));
   };
 
   return (
@@ -65,12 +65,7 @@ export default function Estados({ handleAceitar }) {
                     <>
                       {!temParecer && !row?.is_lock && gestorEstado(meusAmbientes, row?.estado_id) && (
                         <Atribuir
-                          dados={{
-                            estadoId: row?.estado_id,
-                            processoId: processo?.id,
-                            perfilIdA: row?.perfil_id,
-                            fluxoId: processo?.fluxo_id,
-                          }}
+                          dados={{ estadoId: row?.estado_id, processoId: processo?.id, perfilIdA: row?.perfil_id }}
                         />
                       )}
                       {row?.is_lock && row?.perfil_id === perfilId && (
@@ -221,7 +216,7 @@ export function Info({ dados, viewAnexo, colaboradores }) {
               key={item?.anexo}
               viewAnexo={viewAnexo}
               parecerId={dados?.processo_estado_id ? dados?.id : ''}
-              transicaoId={dados?.processo_estado_id ? dados?.processo_estado_id : dados?.id}
+              estadoId={dados?.processo_estado_id ? dados?.processo_estado_id : dados?.id}
             />
           ))}
         </Stack>
@@ -239,7 +234,7 @@ export function Info({ dados, viewAnexo, colaboradores }) {
                 key={item?.anexo}
                 viewAnexo={viewAnexo}
                 parecerId={dados?.processo_estado_id ? dados?.id : ''}
-                transicaoId={dados?.processo_estado_id ? dados?.processo_estado_id : dados?.id}
+                estadoId={dados?.processo_estado_id ? dados?.processo_estado_id : dados?.id}
               />
             ))}
           </Stack>

@@ -1,9 +1,7 @@
 import PropTypes from 'prop-types';
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
-// utils
-import { setItemValue } from '../../utils/formatObject';
 // Components
 import { AddItem } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -32,17 +30,9 @@ export default function TabParametrizacao({ item, label, subTabs }) {
 SubTabsParametrizacao.propTypes = { item: PropTypes.string, label: PropTypes.string };
 
 function SubTabsParametrizacao({ item, label }) {
-  const initialTab = useMemo(() => {
-    if (item === 'motivos') return 'Transição';
-    if (item === 'credito') return 'Linhas';
-    return '';
-  }, [item]);
-
-  const [currentTab, setCurrentTab] = useState(initialTab);
-
-  const handleChangeTab = (event, newValue) => {
-    setItemValue(newValue, setCurrentTab, '', false);
-  };
+  const [currentTab, setCurrentTab] = useState(
+    (item === 'motivos' && 'Transição') || (item === 'credito' && 'Linhas') || ''
+  );
 
   const tabsList = useMemo(() => {
     if (item === 'credito') {
@@ -60,12 +50,17 @@ function SubTabsParametrizacao({ item, label }) {
     return [];
   }, [item]);
 
+  useEffect(() => {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
+      setCurrentTab(tabsList?.[0]?.value, setCurrentTab);
+  }, [tabsList, currentTab]);
+
   const currentTabContent = useMemo(() => tabsList.find((tab) => tab.value === currentTab), [tabsList, currentTab]);
 
   return (
     <>
       <HeaderBreadcrumbs sx={{ px: 1 }} heading={`${label} - ${currentTab}`} action={<AddItem />} />
-      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
+      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={(_, newVal) => setCurrentTab(newVal)} />
       {currentTabContent && <Box key={currentTabContent.value}>{currentTabContent.component}</Box>}
     </>
   );

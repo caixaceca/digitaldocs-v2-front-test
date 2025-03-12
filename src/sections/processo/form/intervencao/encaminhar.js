@@ -22,7 +22,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { paraLevantamento } from '../../../../utils/validarAcesso';
+import { findColaboradores } from '../../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
@@ -50,10 +50,9 @@ EncaminharStepper.propTypes = {
   title: PropTypes.string,
   gerencia: PropTypes.bool,
   destinos: PropTypes.array,
-  colaboradoresList: PropTypes.array,
 };
 
-export default function EncaminharStepper({ title, destinos, gerencia = false, colaboradoresList = [], onClose }) {
+export default function EncaminharStepper({ title, destinos, gerencia = false, onClose }) {
   const dispatch = useDispatch();
   const { activeStep } = useSelector((state) => state.stepper);
   const destinosParalelo = useMemo(() => destinos?.filter((row) => row?.paralelo), [destinos]);
@@ -91,7 +90,7 @@ export default function EncaminharStepper({ title, destinos, gerencia = false, c
             )}
           </>
         )}
-        {activeStep === 1 && <OutrosEmSerie title={title} colaboradoresList={colaboradoresList} gerencia={gerencia} />}
+        {activeStep === 1 && <OutrosEmSerie title={title} />}
       </DialogContent>
     </Dialog>
   );
@@ -218,41 +217,35 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
 
 // --- CONFIDENCILAIDADE E OUTROS --------------------------------------------------------------------------------------
 
-OutrosEmSerie.propTypes = { title: PropTypes.string, gerencia: PropTypes.bool, colaboradoresList: PropTypes.array };
+OutrosEmSerie.propTypes = { title: PropTypes.string };
 
-export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] }) {
+export function OutrosEmSerie({ title }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const { motivosPendencia } = useSelector((state) => state.parametrizacao);
-  const cliente = useMemo(() => motivosPendencia?.find((row) => row?.label === 'Cliente'), [motivosPendencia]);
+  const { colaboradoresEstado } = useSelector((state) => state.parametrizacao);
   const criador = useMemo(
     () => colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
     [colaboradores, processo?.criador]
   );
+  const colaboradoresList = useMemo(
+    () => findColaboradores(colaboradores, colaboradoresEstado),
+    [colaboradores, colaboradoresEstado]
+  );
 
   const formSchema = Yup.object().shape({
     atribuir: Yup.boolean(),
-    pendente: Yup.boolean(),
-    pendenteLevantamento: Yup.boolean(),
     colaborador: Yup.mixed().when(['atribuir'], {
       is: (atribuir) => atribuir,
       then: () => Yup.mixed().required().label('Colaborador'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-    motivo_pendencia: Yup.mixed().when(['pendente', 'pendenteLevantamento'], {
-      is: (pendente, pendenteLevantamento) => pendente && !pendenteLevantamento,
-      then: () => Yup.mixed().required().label('Motivo de pendência'),
       otherwise: () => Yup.mixed().notRequired(),
     }),
   });
 
   const defaultValues = useMemo(
     () => ({
-      mobs: dadosStepper?.mobs || '',
-      pendente: dadosStepper?.pendente || false,
       atribuir: dadosStepper?.atribuir || false,
       colaborador: dadosStepper?.colaborador || null,
       confidencial: dadosStepper?.confidencial || false,
@@ -260,8 +253,6 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
       perfis_excluidos: dadosStepper?.perfis_excluidos || [],
       estados_incluidos: dadosStepper?.estados_incluidos || [],
       estados_excluidos: dadosStepper?.estados_excluidos || [],
-      motivo_pendencia: dadosStepper?.motivo_pendencia || null,
-      pendenteLevantamento: dadosStepper?.pendenteLevantamento || false,
     }),
     [dadosStepper]
   );
@@ -283,39 +274,16 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
 
       if (values.atribuir && values?.colaborador) {
         formData.append('perfil_afeto_id', values?.colaborador?.id);
-      } else if (
-        !!criador &&
-        !paraLevantamento(processo?.assunto) &&
-        dadosStepper?.estado?.label?.includes('Atendimento')
-      ) {
+      } else if (!!criador && title === 'DEVOLVER' && dadosStepper?.estado?.label?.includes('Atendimento')) {
         formData.append('perfil_afeto_id', criador?.perfil_id);
       }
-      if (values?.pendente && values?.pendenteLevantamento && cliente?.id) {
-        formData.append('pender', true);
-        formData.append('mpendencia', cliente?.id);
-        formData.append('mobs', 'Para levantamento do pedido');
-      } else if (values?.pendente && values?.motivo_pendencia?.id) {
-        formData.append('pender', true);
-        formData.append('mpendencia', values?.motivo_pendencia?.id);
-        formData.append('mobs', values?.mobs);
-      }
       if (values?.confidencial) {
-        values?.perfis_incluidos?.forEach((item) => {
-          formData.append('confidencia.perfis_incluidos', item?.id);
-        });
-        values?.perfis_excluidos?.forEach((item) => {
-          formData.append('confidencia.perfis_excluidos', item?.id);
-        });
-        values?.estados_incluidos?.forEach((item) => {
-          formData.append('confidencia.estados_incluidos', item?.id);
-        });
-        values?.estados_excluidos?.forEach((item) => {
-          formData.append('confidencia.estados_excluidos', item?.id);
-        });
+        values?.perfis_incluidos?.forEach((item) => formData.append('confidencia.perfis_incluidos', item?.id));
+        values?.perfis_excluidos?.forEach((item) => formData.append('confidencia.perfis_excluidos', item?.id));
+        values?.estados_incluidos?.forEach((item) => formData.append('confidencia.estados_incluidos', item?.id));
+        values?.estados_excluidos?.forEach((item) => formData.append('confidencia.estados_excluidos', item?.id));
       }
-      await dadosStepper?.anexos?.forEach((row) => {
-        formData.append('anexos', row);
-      });
+      await dadosStepper?.anexos?.forEach((row) => formData.append('anexos', row));
 
       dispatch(
         updateItem('encaminhar serie', formData, {
@@ -329,25 +297,12 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
     }
   };
 
-  const podeAtribuir = useMemo(
-    () =>
-      colaboradoresList?.length > 0 &&
-      ((gerencia && dadosStepper?.estado?.label?.includes('Atendimento')) ||
-        processo?.estado_atual === 'Devolução AN' ||
-        processo?.estado_atual === 'Diário'),
-    [colaboradoresList?.length, gerencia, dadosStepper?.estado?.label, processo?.estado_atual]
-  );
-  const podeColocarPendente = useMemo(
-    () => gerencia && dadosStepper?.estado?.label?.includes('Atendimento'),
-    [dadosStepper?.estado?.label, gerencia]
-  );
-
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
         {/* CONFIDENCILAIDADE */}
         <Accordion expanded={values?.confidencial} onChange={() => setValue('confidencial', !values?.confidencial)}>
-          <AccordionSummary sx={{ py: 0.75 }}>Confidencialidade</AccordionSummary>
+          <AccordionSummary sx={{ py: 0.5, typography: 'body2' }}>Confidencialidade</AccordionSummary>
           <AccordionDetails sx={{ pt: 2 }}>
             <Confidencialidade
               perfisIncluidos="perfis_incluidos"
@@ -359,37 +314,12 @@ export function OutrosEmSerie({ title, gerencia = false, colaboradoresList = [] 
         </Accordion>
 
         {/* ATRIBUIÇÃO */}
-        {podeAtribuir && (
-          <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
-            <AccordionSummary sx={{ py: 0.75 }}>Atribuir processo</AccordionSummary>
-            <AccordionDetails sx={{ pt: 2 }}>
-              <RHFAutocompleteObj name="colaborador" label="Colaborador" options={colaboradoresList} />
-            </AccordionDetails>
-          </Accordion>
-        )}
-
-        {/* PENDÊNCIA */}
-        {podeColocarPendente && (
-          <Accordion expanded={values?.pendente} onChange={() => setValue('pendente', !values?.pendente)}>
-            <AccordionSummary sx={{ py: 0.75 }}>Enviar como pendente</AccordionSummary>
-            <AccordionDetails sx={{ pt: paraLevantamento(processo?.assunto) ? 2 : 0 }}>
-              {paraLevantamento(processo?.assunto) && (
-                <RHFSwitch otherSx={{ mt: 0 }} name="pendenteLevantamento" label="Pendente de levantamento" />
-              )}
-              {!values?.pendenteLevantamento && (
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 2 }}>
-                  <RHFAutocompleteObj
-                    label="Motivo"
-                    name="motivo_pendencia"
-                    options={motivosPendencia}
-                    sx={{ width: { sm: '50%' } }}
-                  />
-                  <RHFTextField name="mobs" label="Observação pendência" />
-                </Stack>
-              )}
-            </AccordionDetails>
-          </Accordion>
-        )}
+        <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
+          <AccordionSummary sx={{ py: 0.5, typography: 'body2' }}>Atribuir processo</AccordionSummary>
+          <AccordionDetails sx={{ pt: 2 }}>
+            <RHFAutocompleteObj name="colaborador" label="Colaborador" options={colaboradoresList} />
+          </AccordionDetails>
+        </Accordion>
       </Stack>
       <ButtonsStepper
         label="Enviar"

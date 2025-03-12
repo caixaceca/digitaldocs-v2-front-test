@@ -78,7 +78,23 @@ export default function DetalhesProcesso({ isPS, processo }) {
         <TextItem title="Referência:" text={processo?.referencia} />
         {(processo?.estados?.length > 0 || processo?.estado_processo) && (
           <TextItem
-            title="Situação:"
+            alignItems="left"
+            direction="column"
+            title="Situação do processo:"
+            labelTitle={
+              <>
+                {devolvido && (
+                  <Label color="error" startIcon={<ErrorOutlineIcon />}>
+                    Devolvido
+                  </Label>
+                )}
+                {processo?.pendente && processo?.motivo && (
+                  <Label color="warning" startIcon={<InfoOutlinedIcon />}>
+                    Pendente: {processo?.motivo}
+                  </Label>
+                )}
+              </>
+            }
             label={
               <Stack spacing={0.75} sx={{ flexGrow: 1 }} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
                 {(processo?.estados?.length > 0 ? processo?.estados : [processo?.estado_processo])?.map(
@@ -86,29 +102,25 @@ export default function DetalhesProcesso({ isPS, processo }) {
                     const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
                     return (
                       <Stack key={`estado_${row?.id}_${index}`} spacing={0.5}>
-                        <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
+                        <Stack direction="row" alignItems="flex-end" useFlexGap flexWrap="wrap">
                           <Typography variant="subtitle1" sx={{ pr: 1 }}>
                             {row?.estado}
                           </Typography>
-                          {devolvido && (
-                            <Label color="error" startIcon={<ErrorOutlineIcon />}>
-                              Devolvido
-                            </Label>
+                          {row?.data_entrada && (
+                            <Stack direction="row" sx={{ color: 'text.secondary', pt: 0.25 }}>
+                              <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
+                              {row?.estado !== 'Arquivo' && (
+                                <Criado
+                                  caption
+                                  tipo="time"
+                                  value={fToNow(row?.data_entrada)}
+                                  sx={{ color: colorProcesso(processo?.cor) }}
+                                />
+                              )}
+                            </Stack>
                           )}
                         </Stack>
-                        {row?.data_entrada && (
-                          <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
-                            <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
-                            {row?.estado !== 'Arquivo' && (
-                              <Criado
-                                caption
-                                tipo="time"
-                                value={fToNow(row?.data_entrada)}
-                                sx={{ color: colorProcesso(processo?.cor) }}
-                              />
-                            )}
-                          </Stack>
-                        )}
+
                         {colaboradorAfeto && (
                           <Typography sx={{ typography: 'caption', color: 'info.main' }}>
                             {row?.is_lock ? '' : 'Atribuído a '}
@@ -122,21 +134,13 @@ export default function DetalhesProcesso({ isPS, processo }) {
                     );
                   }
                 )}
-                {processo?.pendente && processo?.motivo && (
-                  <Stack direction="column" alignItems="start" sx={{ pt: 0.25 }}>
-                    <Label color="warning" startIcon={<InfoOutlinedIcon />}>
-                      Pendente: {processo?.motivo}
-                    </Label>
-                    {!!processo?.observacao_motivo_pendencia && (
-                      <Typography variant="body2">{processo?.observacao_motivo_pendencia}</Typography>
-                    )}
-                  </Stack>
-                )}
               </Stack>
             }
           />
         )}
-        {processo?.observacao && <TextItem title="Obs:" text={newLineText(processo?.observacao)} />}
+        {processo?.observacao && (
+          <TextItem alignItems="left" direction="column" title="Observação:" text={newLineText(processo?.observacao)} />
+        )}
       </List>
 
       {(entidadesList ||
@@ -182,7 +186,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
         </List>
       )}
 
-      {(!!processo?.numero_operacao || !!processo?.operacao || !!origem) && (
+      {((!!processo?.numero_operacao && !processo?.con) || !!processo?.operacao || !!origem) && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Operação</Typography>
@@ -259,19 +263,23 @@ TextItem.propTypes = {
   text: PropTypes.string,
   title: PropTypes.string,
   baralhar: PropTypes.bool,
+  labelTitle: PropTypes.node,
 };
 
-export function TextItem({ title = '', text = '', label = null, baralhar = false, ...sx }) {
+export function TextItem({ title = '', text = '', label = null, baralhar = false, labelTitle = null, ...sx }) {
   return (title && text) || label ? (
     <Stack spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
       {title && (
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {title}
-        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            {title}
+          </Typography>
+          {labelTitle}
+        </Stack>
       )}
       {text && (
         <Typography
-          sx={text === '(Não definido)' && { fontStyle: 'italic', color: 'text.disabled', typography: 'body2' }}
+          sx={text === 'Não definido' && { fontStyle: 'italic', color: 'text.disabled', typography: 'body2' }}
         >
           {baralhar ? baralharString(text) : text}
         </Typography>

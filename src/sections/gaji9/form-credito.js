@@ -52,8 +52,9 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
   };
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
+        onClose={() => onClose()}
         title={isEdit ? 'Atualizar crédito' : 'Adicionar crédito'}
         stepper={
           <Steps activeStep={activeStep} steps={['Cliente', 'Crédito', 'Taxas & Custos', 'Garantias']} sx={{ mt: 3 }} />
@@ -142,7 +143,7 @@ function Cliente({ dados, onCancel, dispatch, titularesList = [] }) {
   const formSchema = Yup.object().shape({
     tipo_titular_id: Yup.mixed().required().label('Titular'),
     morada_cliente: Yup.string().required().label('Endereço'),
-    conta_do: Yup.number().min(0).required().label('Conta Do'),
+    conta_do: Yup.number().min(0).required().label('Conta DO'),
     cliente: Yup.number().min(0).required().label('Nº de cliente'),
     morada_eletronico_cliente: Yup.string().email().required().label('Email'),
   });
@@ -223,13 +224,9 @@ function Credito({ dados, dispatch, componentesList = [] }) {
         <GridItem xs={6} md={3} children={<RHFNumberField label="Meses de vencimento" name="meses_vencimento" />} />
         <GridItem xs={6} md={3} children={<RHFNumberField label="Nº de proposta" name="numero_proposta" />} />
         <GridItem xs={6} md={3} children={<RHFNumberField label="Processo de origem" name="processo_origem" />} />
-        <GridItem
-          xs={6}
-          md={3}
-          children={
-            <RHFAutocompleteSmp label="Aplicação de origem" name="aplicacao_origem" options={['DDOCS', 'CREDIBOX']} />
-          }
-        />
+        <GridItem xs={6} md={3}>
+          <RHFAutocompleteSmp label="Aplicação de origem" name="aplicacao_origem" options={['DDOCS', 'CREDIBOX']} />
+        </GridItem>
       </Grid>
       <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
     </FormProvider>
@@ -304,19 +301,16 @@ function Garantias({ isEdit, id = 0, onCancel }) {
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'garantias' });
 
-  const params = useMemo(
-    () => ({
+  const onSubmit = async () => {
+    const params = {
       id,
+      getItem: 'credito',
       msg: `Crédito ${isEdit ? 'atualizado' : 'adicionado'}`,
       afterSuccess: () => {
         onCancel();
         dispatch(resetDados());
       },
-    }),
-    [dispatch, isEdit, onCancel, id]
-  );
-
-  const onSubmit = async () => {
+    };
     const formData = {
       ...dadosStepper,
       componente_id: dadosStepper?.componente_id?.id,
@@ -326,11 +320,7 @@ function Garantias({ isEdit, id = 0, onCancel }) {
         ? { garantias: values?.garantias?.map((row) => ({ ...row, tipo_garantia_id: row?.tipo_garantia_id?.id })) }
         : {}),
     };
-    if (isEdit) {
-      dispatch(updateItem('credito', JSON.stringify(formData), params));
-    } else {
-      dispatch(createItem('credito', JSON.stringify(formData), params));
-    }
+    dispatch((isEdit ? updateItem : createItem)('credito', JSON.stringify(formData), params));
   };
 
   return (
@@ -426,62 +416,64 @@ export function FiadoresForm({ id, onCancel }) {
   const { isSaving } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
-    fiadores: Yup.array(
+    intervenientes: Yup.array(
       Yup.object({
-        descricao: Yup.string().required().label('Descrição'),
-        numero_ordem: Yup.number().min(0).required().label('Nº ordem'),
-        numero_entidade: Yup.number().min(0).required().label('Nº de entidade'),
+        entidade: Yup.number().min(0).required().label('Nº de entidade'),
+        responsabilidade: Yup.mixed().required().label('Responsabilidade'),
       })
     ),
   });
 
-  const defaultValues = useMemo(() => ({ fiadores: [{ numero_entidade: '', numero_ordem: 1, designacao: '' }] }), []);
+  const defaultValues = useMemo(() => ({ intervenientes: [{ responsabilidade: null, entidade: null }] }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
   const values = watch();
-  const { fields, append, remove } = useFieldArray({ control, name: 'fiadores' });
-
-  const params = useMemo(
-    () => ({ id, getSuccess: 'credito', msg: 'Fiadores adicionados', afterSuccess: () => onCancel() }),
-    [onCancel, id]
-  );
+  const { fields, append, remove } = useFieldArray({ control, name: 'intervenientes' });
 
   const onSubmit = async () => {
-    dispatch(createItem('fiadores', JSON.stringify(values?.fiadores?.map((row) => row)), params));
+    const params = { id, getItem: 'credito', msg: 'Intervenientes adicionados', afterSuccess: () => onCancel() };
+    dispatch(
+      createItem(
+        'intervenientes',
+        JSON.stringify(
+          values?.intervenientes?.map(({ entidade, responsabilidade }) => ({
+            designacao: '',
+            numero_ordem: null,
+            numero_entidade: Number(entidade),
+            fiador: responsabilidade === 'Fiador',
+            avalista: responsabilidade === 'Avalista',
+            representante: responsabilidade === 'Representante',
+          }))
+        ),
+        params
+      )
+    );
   };
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitleAlt
         sx={{ mb: 2 }}
-        title="Adicionar fiadores"
+        title="Adicionar intervenientes"
         action={
           <AddItem
-            small
-            label="Fiador"
-            handleClick={() => append({ numero_entidade: '', numero_ordem: fields?.length + 1, designacao: '' })}
+            dados={{ small: true, label: 'Fiador' }}
+            handleClick={() => append({ responsabilidade: null, entidade: null })}
           />
         }
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 1 }}>
+          <Stack spacing={2} sx={{ pt: 1 }} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
             {fields.map((item, index) => (
-              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexGrow: 1 }}>
-                  <Stack direction="row" spacing={2}>
-                    <RHFNumberField
-                      label="Nº ordem"
-                      sx={{ width: { xs: 200, sm: 90 } }}
-                      name={`fiadores[${index}].numero_ordem`}
-                    />
-                    <RHFNumberField
-                      label="Nº de entidade"
-                      sx={{ width: { sm: 150 } }}
-                      name={`fiadores[${index}].numero_entidade`}
-                    />
-                  </Stack>
-                  <RHFTextField label="Descrição" name={`fiadores[${index}].descricao`} />
+              <Stack direction="row" alignItems="center" spacing={1.5} key={item.id}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ flexGrow: 1 }}>
+                  <RHFNumberField label="Nº de entidade" name={`intervenientes[${index}].entidade`} />
+                  <RHFAutocompleteSmp
+                    label="Responsabilidade"
+                    options={['Avalista', 'Fiador', 'Representante']}
+                    name={`intervenientes[${index}].responsabilidade`}
+                  />
                 </Stack>
                 {fields?.length > 1 && (
                   <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />

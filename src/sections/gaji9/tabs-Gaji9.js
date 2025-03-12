@@ -14,7 +14,7 @@ import { acessoGaji9 } from '../../utils/validarAcesso';
 import useToggle from '../../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { openModal, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9';
+import { openModal, setModal, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9';
 // Components
 import { DefaultAction } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -97,18 +97,18 @@ function Parametrizacao({ inativos, setInativos }) {
 Identificadores.propTypes = { inativos: PropTypes.bool, setInativos: PropTypes.func };
 
 function Identificadores({ inativos, setInativos }) {
-  const { utilizador } = useSelector((state) => state.gaji9);
+  const { adminGaji9, utilizador } = useSelector((state) => state.gaji9);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('gaji9Identificadores') || 'Produtos');
 
   const tabsList = useMemo(
     () => [
-      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_PRODUTO/COMPONENTE'])
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_PRODUTO/COMPONENTE'])
         ? [{ value: 'Produtos', component: <TableIdentificadores item="componentes" inativos={inativos} /> }]
         : []),
-      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_TIPO TITULAR'])
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO TITULAR'])
         ? [{ value: 'Tipos de titular', component: <TableIdentificadores item="tiposTitulares" inativos={inativos} /> }]
         : []),
-      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
         ? [
             {
               value: 'Tipos de garantia',
@@ -116,14 +116,14 @@ function Identificadores({ inativos, setInativos }) {
             },
           ]
         : []),
-      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_REPRESENTANTE'])
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_REPRESENTANTE'])
         ? [{ value: 'Representantes', component: <TableIdentificadores item="representantes" inativos={inativos} /> }]
         : []),
-      ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_DIVISAO ADMINISTRATIVA'])
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_DIVISAO ADMINISTRATIVA'])
         ? [{ value: 'Freguesias', component: <TableIdentificadores item="freguesias" inativos={inativos} /> }]
         : []),
     ],
-    [inativos, utilizador?._role, utilizador?.acessos]
+    [inativos, adminGaji9, utilizador?.acessos]
   );
 
   useEffect(() => {
@@ -155,7 +155,11 @@ Actions.propTypes = { label: PropTypes.string, inativos: PropTypes.bool, setInat
 
 function Actions({ inativos, setInativos, label = '' }) {
   const dispatch = useDispatch();
-  const { utilizador } = useSelector((state) => state.gaji9);
+  const { adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+
+  const openModalAlt = (item) => {
+    dispatch(setModal({ item, dados: null }));
+  };
 
   return (
     <Stack direction="row" alignItems="center" spacing={1}>
@@ -168,10 +172,10 @@ function Actions({ inativos, setInativos, label = '' }) {
         />
       )}
       {label !== 'Minutas públicas' &&
-        (utilizador?._role === 'ADMIN' ||
+        label !== 'Cláusulas' &&
+        (adminGaji9 ||
           (label === 'Minutas' && acessoGaji9(utilizador?.acessos, ['CREATE_MINUTA'])) ||
           (label === 'Créditos' && acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) ||
-          (label === 'Cláusulas' && acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) ||
           (label === 'Produtos' && acessoGaji9(utilizador?.acessos, ['CREATE_PRODUTO/COMPONENTE'])) ||
           (label === 'Representantes' && acessoGaji9(utilizador?.acessos, ['CREATE_REPRESENTANTE'])) ||
           (label === 'Tipos de titular' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO TITULAR'])) ||
@@ -179,10 +183,12 @@ function Actions({ inativos, setInativos, label = '' }) {
           (label === 'Freguesias' && acessoGaji9(utilizador?.acessos, ['CREATE_DIVISAO ADMINISTRATIVA']))) && (
           <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal('add'))} />
         )}
-      {label === 'Representantes' &&
-        (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_INSTITUICAO'])) && (
-          <ButtonInfoCaixa />
-        )}
+      {label === 'Cláusulas' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) && (
+        <DefaultAction button label="Adicionar" handleClick={() => openModalAlt('form-clausula')} />
+      )}
+      {label === 'Representantes' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_INSTITUICAO'])) && (
+        <ButtonInfoCaixa />
+      )}
       {label === 'Créditos' && (
         <DefaultAction button label="Carregar proposta" handleClick={() => dispatch(openModal('view'))} />
       )}

@@ -25,8 +25,6 @@ import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { fNumber } from '../../utils/formatNumber';
 import { newLineText, noDados } from '../../utils/formatText';
-// hooks
-import useToggle from '../../hooks/useToggle';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { updateDados, resetDados, backStep, gotoStep } from '../../redux/slices/stepper';
@@ -124,18 +122,15 @@ Identificacao.propTypes = { onCancel: PropTypes.func };
 
 function Identificacao({ onCancel }) {
   const dispatch = useDispatch();
-  const { toggle: open, onOpen, onClose } = useToggle();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { tiposTitulares, tiposGarantias, componentes, selectedItem, isEdit, isSaving } = useSelector(
-    (state) => state.gaji9
-  );
+  const { tiposTitulares, tiposGarantias, componentes, selectedItem } = useSelector((state) => state.gaji9);
+
   const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
 
   const defaultValues = useMemo(
     () => ({
-      ativo: dadosStepper?.ativo || !!selectedItem?.ativo,
       condicional: dadosStepper?.condicional || !!selectedItem?.condicional,
       titular:
         dadosStepper?.titular ||
@@ -171,10 +166,6 @@ function Identificacao({ onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const confirmDelete = () => {
-    dispatch(deleteItem('clausulas', { id: selectedItem?.id, afterSuccess: onCancel, msg: 'Cláusula eliminada' }));
-  };
-
   return (
     <>
       <FormProvider
@@ -189,10 +180,7 @@ function Identificacao({ onCancel }) {
                 label="Secção"
                 options={['Solta', 'Secção de identificação', 'Secção de identificação Caixa']}
               />
-              <Stack direction="row" spacing={1}>
-                <RHFSwitch name="condicional" label="Condicional" />
-                {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
-              </Stack>
+              <RHFSwitch name="condicional" label="Condicional" />
             </Stack>
           </Stack>
           <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
@@ -200,20 +188,8 @@ function Identificacao({ onCancel }) {
           <RHFAutocompleteObj name="garantia" label="Tipo de garantia" options={garantiasList} />
         </Stack>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mt: 3 }}>
-          <DefaultAction small label="ELIMINAR" handleClick={() => onOpen()} />
-          <ButtonsStepper onCancel={onCancel} labelCancel="Cancelar" />
-        </Stack>
+        <ButtonsStepper onCancel={onCancel} labelCancel="Cancelar" />
       </FormProvider>
-
-      {open && (
-        <DialogConfirmar
-          isSaving={isSaving}
-          onClose={() => onClose()}
-          desc="eliminar esta cláusula"
-          handleOk={() => confirmDelete()}
-        />
-      )}
     </>
   );
 }
@@ -367,8 +343,7 @@ export function Subalineas({ alineaIndex }) {
       ))}
       <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
         <AddItem
-          small
-          label="Alínea"
+          dados={{ small: true, label: 'Alínea' }}
           handleClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '' })}
         />
       </Stack>
@@ -385,19 +360,16 @@ function Resumo({ minutaId, onClose }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isEdit, selectedItem, isSaving } = useSelector((state) => state.gaji9);
 
-  const params = useMemo(
-    () => ({
+  const handleSubmit = async () => {
+    const params = {
       minutaId,
       id: selectedItem?.id,
-      afterSuccess: onClose,
+      afterSuccess: () => onClose(),
+      getItem: minutaId > 0 ? 'minuta' : '',
       msg: `Cláusula ${isEdit ? 'atualizada' : 'adicionada'}`,
-    }),
-    [isEdit, minutaId, onClose, selectedItem?.id]
-  );
-
-  const handleSubmit = async () => {
+    };
     const formData = {
-      ativo: dadosStepper?.ativo,
+      ativo: true,
       titulo: dadosStepper?.titulo,
       conteudo: dadosStepper?.conteudo,
       condicional: dadosStepper?.condicional,
@@ -428,11 +400,8 @@ function Resumo({ minutaId, onClose }) {
         : null),
     };
 
-    if (isEdit) {
-      dispatch(updateItem(minutaId > 0 ? 'clausulaMinuta' : 'clausulas', JSON.stringify(formData), params));
-    } else {
-      dispatch(createItem('clausulas', JSON.stringify(formData), params));
-    }
+    if (isEdit) dispatch(updateItem(minutaId > 0 ? 'clausulaMinuta' : 'clausulas', JSON.stringify(formData), params));
+    else dispatch(createItem('clausulas', JSON.stringify(formData), params));
   };
 
   return (
@@ -440,7 +409,6 @@ function Resumo({ minutaId, onClose }) {
       <TitleResumo title="Identificação" action={() => dispatch(gotoStep(0))} />
       <Table size="small">
         <TableBody>
-          <TableRowItem title="Ativo:" item={<LabelSN item={dadosStepper?.ativo} />} />
           <TableRowItem title="Secção :" text={dadosStepper?.seccao || 'Sem secção'} />
           <TableRowItem title="Condicional:" item={<LabelSN item={dadosStepper?.condicional} />} />
           <TableRowItem title="Titular:" text={dadosStepper?.titular?.label} />
@@ -527,84 +495,73 @@ function TableRowItem({ title, text = '', item = null }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-OpcoesClausula.propTypes = { onCancel: PropTypes.func, minutaId: PropTypes.number };
-
-export function OpcoesClausula({ onCancel, minutaId }) {
+export function OpcoesClausula() {
   const dispatch = useDispatch();
   const [openForm, setOpenForm] = useState('');
-  const { isSaving, infoCaixa, clausulas } = useSelector((state) => state.gaji9);
-  const opcoes = infoCaixa?.opcoes || [];
+  const { isSaving, selectedItem, minuta } = useSelector((state) => state.gaji9);
+  const clausula = minuta?.clausulas?.find(({ clausula_id: cid }) => cid === selectedItem?.id);
+  const opcoes = clausula?.opcoes || [];
 
   useEffect(() => {
     dispatch(getFromGaji9('clausulas', { condicional: true }));
   }, [dispatch]);
 
   const eliminarRegra = () => {
-    dispatch(
-      deleteItem('eliminarRegra', {
-        minutaId,
-        msg: 'Regra eliminada',
-        condicionalId: openForm,
-        clausulaId: infoCaixa?.clausula_id,
-        afterSuccess: () => setOpenForm(''),
-      })
-    );
+    const params = { minutaId: minuta?.id, condicionalId: openForm, clausulaId: clausula?.clausula_id };
+    dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', afterSuccess: () => setOpenForm('') }));
   };
 
   return (
     <>
-      <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-        <DialogTitleAlt
-          title="Cláusulas opcionais"
-          onClose={() => onCancel()}
-          action={<DefaultAction button small label="Adicionar" handleClick={() => setOpenForm('create')} />}
-        />
-        <DialogContent sx={{ mt: 3 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Cláusula</TableCell>
-                <TableCell align="right">Montante</TableCell>
-                <TableCell align="right">Prazo</TableCell>
-                <TableCell>Taxa negociada</TableCell>
-                <TableCell>2ª habitação</TableCell>
-                <TableCell>Isenção comissão</TableCell>
-                <TableCell width={10}> </TableCell>
+      <Table sx={{ mt: 2 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small">Cláusula</TableCell>
+            <TableCell size="small" align="right">
+              Montante
+            </TableCell>
+            <TableCell size="small" align="right">
+              Prazo
+            </TableCell>
+            <TableCell size="small">Taxa negociada</TableCell>
+            <TableCell size="small">2ª habitação</TableCell>
+            <TableCell size="small">Isenção comissão</TableCell>
+            <TableCell size="small" width={10}>
+              <DefaultAction small label="Adicionar" handleClick={() => setOpenForm('create')} />
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        {opcoes?.length === 0 ? (
+          <TableSearchNotFound height={150} message="Nenhuma regra adicionada..." />
+        ) : (
+          <TableBody>
+            {opcoes?.map((row, index) => (
+              <TableRow haver key={`regra_${index}`}>
+                <TableCell>{clausula?.titulo || noDados()}</TableCell>
+                <TableCell align="right">
+                  {row?.montante_maior_que && <Typography>{`> ${fNumber(row?.montante_maior_que)}`}</Typography>}
+                  {row?.montante_menor_que && <Typography>{`< ${fNumber(row?.montante_menor_que)}`}</Typography>}
+                  {!row?.montante_maior_que && !row?.montante_menor_que && noDados('Não definido')}
+                </TableCell>
+                <TableCell align="right">
+                  {row?.prazo_maior_que && <Typography>{`> ${fNumber(row?.prazo_maior_que)}`}</Typography>}
+                  {row?.prazo_menor_que && <Typography>{`< ${fNumber(row?.prazo_menor_que)}`}</Typography>}
+                  {!row?.prazo_maior_que && !row?.prazo_menor_que && noDados('Não definido')}
+                </TableCell>
+                <CellChecked check={row?.taxa_juros_negociado} />
+                <CellChecked check={row?.segunda_habitacao} />
+                <CellChecked check={row?.isencao_comissao} />
+                <TableCell>
+                  <DefaultAction small label="ELIMINAR" handleClick={() => setOpenForm(row?.clausula_id)} />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            {opcoes?.length === 0 ? (
-              <TableSearchNotFound height={150} message="Nenhuma regra adicionada..." />
-            ) : (
-              <TableBody>
-                {opcoes?.map((row, index) => (
-                  <TableRow haver key={`regra_${index}`}>
-                    <TableCell>
-                      {clausulas?.find(({ id }) => id === row?.clausula_id)?.titulo || row?.clausula_id}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row?.montante_maior_que && <Typography>{`> ${fNumber(row?.montante_maior_que)}`}</Typography>}
-                      {row?.montante_menor_que && <Typography>{`< ${fNumber(row?.montante_menor_que)}`}</Typography>}
-                      {!row?.montante_maior_que && !row?.montante_menor_que && noDados('Não definido')}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row?.prazo_maior_que && <Typography>{`> ${fNumber(row?.prazo_maior_que)}`}</Typography>}
-                      {row?.prazo_menor_que && <Typography>{`< ${fNumber(row?.prazo_menor_que)}`}</Typography>}
-                      {!row?.prazo_maior_que && !row?.prazo_menor_que && noDados('Não definido')}
-                    </TableCell>
-                    <CellChecked check={row?.taxa_juros_negociado} />
-                    <CellChecked check={row?.segunda_habitacao} />
-                    <CellChecked check={row?.isencao_comissao} />
-                    <TableCell>
-                      <DefaultAction small label="ELIMINAR" handleClick={() => setOpenForm(row?.clausula_id)} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            )}
-          </Table>
-        </DialogContent>
-      </Dialog>
-      {openForm === 'create' && <RegraForm onCancel={() => setOpenForm('')} dados={infoCaixa} minutaId={minutaId} />}
+            ))}
+          </TableBody>
+        )}
+      </Table>
+      {openForm === 'create' && (
+        <RegraForm onCancel={() => setOpenForm('')} dados={selectedItem} minutaId={minuta?.id} />
+      )}
       {!!openForm && openForm !== 'create' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -633,6 +590,7 @@ export function RegraForm({ dados, minutaId, onCancel }) {
       prazo_menor_que: null,
       montante_maior_que: null,
       montante_menor_que: null,
+      representante: false,
       isencao_comissao: false,
       segunda_habitacao: false,
       taxa_juros_negociado: false,
@@ -645,13 +603,9 @@ export function RegraForm({ dados, minutaId, onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
+    const params = { minutaId, msg: 'Regra adicionada', afterSuccess: () => onCancel(), clausulaId: dados?.id };
     dispatch(
-      createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), {
-        minutaId,
-        msg: 'Regra adicionada',
-        afterSuccess: () => onCancel(),
-        clausulaId: dados?.clausula_id,
-      })
+      createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), params)
     );
   };
 
@@ -676,11 +630,10 @@ export function RegraForm({ dados, minutaId, onCancel }) {
             <GridItem xs={6} children={<RHFNumberField label="Montante menor que" name="montante_menor_que" />} />
             <GridItem xs={6} children={<RHFNumberField label="Prazo maior que" name="prazo_maior_que" />} />
             <GridItem xs={6} children={<RHFNumberField label="Prazo menor que" name="prazo_menor_que" />} />
-            <GridItem sm={6} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" />} />
-            <GridItem sm={6} children={<RHFSwitch name="segunda_habitacao" label="Segunda habitação" />} />
-            <GridItem
-              children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" otherSx={{ mt: 0 }} />}
-            />
+            <GridItem xs={6} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" />} />
+            <GridItem xs={6} children={<RHFSwitch name="segunda_habitacao" label="Segunda habitação" />} />
+            <GridItem xs={6} children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" />} />
+            <GridItem xs={6} children={<RHFSwitch name="representante" label="Representante" />} />
           </Grid>
           <DialogButons isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>

@@ -89,6 +89,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
       dispatch(
         updateItem(action === 'Atualizar' ? 'minutas' : action, JSON.stringify(formData), {
           id: minuta?.id,
+          getItem: action === 'Atualizar' ? 'minuta' : '',
           msg: (action === 'Versionar' && 'Minuta versionada') || 'Minuta atualizada',
         })
       );
@@ -109,7 +110,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
               <Stack spacing={1.5}>
                 <Stack direction="row" alignItems="end" justifyContent="space-between" spacing={2}>
                   <Typography variant="subtitle2">Tipos de garantia</Typography>
-                  <AddItem small handleClick={() => append({ garantia: null })} />
+                  <AddItem dados={{ small: true }} handleClick={() => append({ garantia: null })} />
                 </Stack>
                 <Divider sx={{ mt: 0.5 }} />
                 {fields.map((item, index) => (
@@ -118,6 +119,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
                       label="Tipo de garantia"
                       options={garantiasList}
                       name={`garantias[${index}].garantia`}
+                      getOptionDisabled={(option) => fields.some(({ garantia }) => garantia?.id === option.id)}
                     />
                     {values.garantias.length > 1 && (
                       <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
@@ -143,6 +145,10 @@ GarantiasForm.propTypes = { onCancel: PropTypes.func };
 export function GarantiasForm({ onCancel }) {
   const dispatch = useDispatch();
   const { isSaving, minuta, tiposGarantias } = useSelector((state) => state.gaji9);
+  const garantiasExistentes = useMemo(
+    () => (minuta?.tipos_garantias || [])?.filter(({ ativo }) => ativo),
+    [minuta?.tipos_garantias]
+  );
 
   const formSchema = Yup.object().shape({
     garantias: Yup.array(Yup.object({ garantia: Yup.mixed().required().label('Tipo de garantia') })),
@@ -158,18 +164,17 @@ export function GarantiasForm({ onCancel }) {
       updateItem(
         'garantiasMinuta',
         JSON.stringify({ tipos_garantias: values?.garantias?.map((row) => row?.garantia?.id) }),
-        { patch: true, item: 'minuta', id: minuta?.id, msg: 'Tipos de garantia adicionadas' }
+        { patch: true, getItem: 'minuta', id: minuta?.id, msg: 'Tipos de garantia adicionadas' }
       )
     );
   };
 
   return (
-    <Dialog open fullWidth maxWidth="sm">
+    <Dialog open fullWidth maxWidth="sm" onClose={() => onCancel()}>
       <DialogTitleAlt
         sx={{ mb: 2 }}
-        onClose={() => onCancel()}
         title="Adicionar tipos de garantias"
-        action={<AddItem small handleClick={() => append({ garantia: null })} />}
+        action={<AddItem dados={{ small: true }} handleClick={() => append({ garantia: null })} />}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -180,8 +185,66 @@ export function GarantiasForm({ onCancel }) {
                   label="Tipo de garantia"
                   name={`garantias[${index}].garantia`}
                   options={listaGarantias(tiposGarantias)}
+                  getOptionDisabled={(option) =>
+                    garantiasExistentes.some(({ id }) => id === option.id) ||
+                    fields.some(({ garantia }) => garantia?.id === option.id)
+                  }
                 />
                 {values.garantias.length > 1 && (
+                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                )}
+              </Stack>
+            ))}
+          </Stack>
+          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+ComponentesForm.propTypes = { onCancel: PropTypes.func };
+
+export function ComponentesForm({ onCancel }) {
+  const dispatch = useDispatch();
+  const { isSaving, minuta, componentes } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({
+    componentes: Yup.array(Yup.object({ componente: Yup.mixed().required().label('Componente') })),
+  });
+  const defaultValues = useMemo(() => ({ componentes: [{ componente: null }] }), []);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'componentes' });
+
+  const onSubmit = async () => {
+    const ids = values?.componentes?.map((row) => ({ componente_id: row?.componente?.id }));
+    const params = { patch: true, getItem: 'minuta', id: minuta?.id, msg: 'Componentes adicionados' };
+    dispatch(createItem('componentesMinuta', JSON.stringify(ids), params));
+  };
+
+  return (
+    <Dialog open fullWidth maxWidth="sm" onClose={() => onCancel()}>
+      <DialogTitleAlt
+        sx={{ mb: 2 }}
+        title="Adicionar componentes"
+        action={<AddItem dados={{ small: true }} handleClick={() => append({ garantia: null })} />}
+      />
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            {fields.map((item, index) => (
+              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+                <RHFAutocompleteObj
+                  label="Componente"
+                  options={listaProdutos(componentes)}
+                  name={`componentes[${index}].componente`}
+                  getOptionDisabled={(option) => fields.some(({ componente }) => componente?.id === option.id)}
+                />
+                {values.componentes.length > 1 && (
                   <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
                 )}
               </Stack>
@@ -201,16 +264,7 @@ ComposicaoForm.propTypes = { onCancel: PropTypes.func, action: PropTypes.string 
 export function ComposicaoForm({ onCancel, action }) {
   const dispatch = useDispatch();
   const { isSaving, clausulas, minuta } = useSelector((state) => state.gaji9);
-  const clausulasList = useMemo(
-    () =>
-      action === 'compor'
-        ? listaClausulas(
-            clausulas,
-            minuta?.clausulas?.map((row) => row?.clausula_id)
-          )
-        : [],
-    [action, clausulas, minuta?.clausulas]
-  );
+  const clausulasList = useMemo(() => listaClausulas(clausulas), [clausulas]);
 
   const formSchema = Yup.object().shape({
     clausulas: Yup.array(
@@ -223,15 +277,15 @@ export function ComposicaoForm({ onCancel, action }) {
 
   const defaultValues = useMemo(
     () => ({
-      clausulasGarant: false,
       clausulas:
         action === 'compor'
           ? [{ clausula: null, numero: '' }]
-          : minuta?.clausulas?.map((row) => ({
-              ativo: row?.ativo,
-              numero: row?.numero_ordem,
-              clausula: { id: row?.clausula_id, label: row?.titulo || 'Cláusula solta' },
-            })),
+          : minuta?.clausulas
+              ?.filter((item) => item?.ativo && item?.numero_ordem > 0)
+              ?.map((row) => ({
+                numero: row?.numero_ordem,
+                clausula: { id: row?.clausula_id, label: row?.titulo || 'Cláusula solta' },
+              })),
     }),
     [action, minuta]
   );
@@ -241,41 +295,34 @@ export function ComposicaoForm({ onCancel, action }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'clausulas' });
 
   const onSubmit = async () => {
-    if (action === 'compor') {
-      const formData = {
-        clausulas: values?.clausulas?.map((row) => ({ numero_ordem: row?.numero, clausula_id: row?.clausula?.id })),
-      };
-      dispatch(
-        createItem('comporMinuta', JSON.stringify(formData), {
-          id: minuta?.id,
-          getSuccess: 'minuta',
-          msg: 'Cláusulas adicionadas',
-          clausulasGarant: values?.clausulasGarant,
-        })
-      );
-    } else {
-      const formData = values?.clausulas?.map((row) => ({
-        ativo: row?.ativo,
-        clausula_id: row?.clausula?.id,
-        numero_ordem: Number(row?.numero),
-      }));
-      dispatch(
-        updateItem('coposicaoMinuta', JSON.stringify(formData), { id: minuta?.id, msg: 'Composição atualizada' })
-      );
-    }
+    const formData =
+      action === 'compor'
+        ? {
+            clausulas: values?.clausulas?.map((row) => ({ numero_ordem: row?.numero, clausula_id: row?.clausula?.id })),
+          }
+        : values?.clausulas?.map((row) => ({
+            ativo: true,
+            numero_ordem: row?.numero,
+            clausula_id: row?.clausula?.id,
+          }));
+    const params = {
+      id: minuta?.id,
+      getItem: 'minuta',
+      msg: action === 'compor' ? 'Cláusulas adicionadas' : 'Composição atualizada',
+    };
+    dispatch((action === 'compor' ? createItem : updateItem)('coposicaoMinuta', JSON.stringify(formData), params));
   };
 
   return (
     <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
-        sx={{ mb: 2 }}
         onClose={() => onCancel()}
         title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 1 }}>
-            <PesquisarClausulas />
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            {action === 'compor' && <PesquisarClausulas />}
             {fields.map((item, index) => (
               <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
                 <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
@@ -286,16 +333,18 @@ export function ComposicaoForm({ onCancel, action }) {
                       options={clausulasList}
                       readOnly={action !== 'compor'}
                       name={`clausulas[${index}].clausula`}
+                      // groupBy={(option) => option.itemOrder}
+                      getOptionDisabled={(option) =>
+                        minuta?.clausulas.some(({ clausula_id: cid }) => cid === option.id) ||
+                        fields.some(({ clausula }) => clausula?.id === option.id)
+                      }
                       onChange={(event, newValue) => {
                         setValue(`clausulas[${index}].clausula`, newValue, vsv);
                         setValue(`clausulas[${index}].numero`, newValue?.numero_ordem, vsv);
                       }}
                     />
                   </Stack>
-                  <RHFNumberField label="Nº de cláusula" name={`clausulas[${index}].numero`} sx={{ width: 105 }} />
-                  {action !== 'compor' && (
-                    <RHFSwitch name={`clausulas[${index}].ativo`} label="Ativo" sx={{ width: 100 }} />
-                  )}
+                  <RHFNumberField label="Nº de cláusula" name={`clausulas[${index}].numero`} sx={{ width: 130 }} />
                 </Stack>
                 {action === 'compor' && values.clausulas.length > 1 && (
                   <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
@@ -304,7 +353,10 @@ export function ComposicaoForm({ onCancel, action }) {
             ))}
             {action === 'compor' && clausulasList?.length > 0 && (
               <Stack alignItems="center">
-                <AddItem small label="Cláusula" handleClick={() => append({ clausula: null, numero: '' })} />
+                <AddItem
+                  dados={{ small: true, label: 'Cláusula' }}
+                  handleClick={() => append({ clausula: null, numero: '' })}
+                />
               </Stack>
             )}
           </Stack>
@@ -380,14 +432,8 @@ export function PublicarRevogarForm({ onCancel, action }) {
   const values = watch();
 
   const onSubmit = async () => {
-    dispatch(
-      updateItem(action, JSON.stringify(values), {
-        patch: true,
-        item: 'minuta',
-        id: minuta?.id,
-        msg: `Minuta ${action === 'Publicar' ? 'publicada' : 'revogada'}`,
-      })
-    );
+    const msg = `Minuta ${action === 'Publicar' ? 'publicada' : 'revogada'}`;
+    dispatch(updateItem(action, JSON.stringify(values), { patch: true, id: minuta?.id, getItem: 'minuta', msg }));
   };
 
   return (
@@ -417,7 +463,7 @@ PreviewForm.propTypes = { id: PropTypes.number, onCancel: PropTypes.func };
 export function PreviewForm({ id, onCancel }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
-  const defaultValues = useMemo(() => ({ taxa: '', prazo: '', montante: '', isento: false }), []);
+  const defaultValues = useMemo(() => ({ taxa: '', prazo: '', montante: '', isento: false, representante: false }), []);
   const methods = useForm({ defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
@@ -435,7 +481,10 @@ export function PreviewForm({ id, onCancel }) {
             <RHFNumberField name="montante" label="Montante" />
             <RHFNumberField name="prazo" label="Prazo" />
             <RHFNumberField name="taxa" label="Taxa de juros negociado" />
-            <RHFSwitch name="isento" label="Isento comissão" />
+            <Stack direction="row" spacing={1}>
+              <RHFSwitch name="isento" label="Isento comissão" />
+              <RHFSwitch name="representante" label="Com representante" />
+            </Stack>
           </Stack>
           <DialogButons label="Pré-visualizar" isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>

@@ -4,57 +4,52 @@ import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 // components
 import { AddItem, DefaultAction } from '../../components/Actions';
-import { RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
+import { RHFSwitch, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-PesosDecisao.propTypes = { perfisList: PropTypes.array };
+PesosDecisao.propTypes = { perfisList: PropTypes.array, isEdit: PropTypes.bool };
 
-export default function PesosDecisao({ perfisList }) {
+export default function PesosDecisao({ perfisList, isEdit }) {
   const { control, watch } = useFormContext();
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'pesos' });
   const perfisFiltered = applyFilter(perfisList, values?.pesos?.map((row) => row?.perfil?.id) || []);
 
-  const handleAdd = () => {
-    append({ perfil: null, percentagem: '' });
-  };
-
-  const handleRemove = (index) => {
-    remove(index);
-  };
-
   return (
-    <>
-      <Divider />
-      <Stack spacing={3} alignItems="center" justifyContent="space-between" direction="row" sx={{ py: 3 }}>
-        <Typography variant="subtitle1">Colaboradores</Typography>
-        {fields?.length < perfisList?.length && <AddItem small button label="Colaborador" handleClick={handleAdd} />}
-      </Stack>
-      <Stack spacing={2}>
-        {fields.map((item, index) => (
-          <Stack spacing={2} key={item.id} alignItems="center" justifyContent="center" direction="row">
+    <Stack direction="column" divider={<Divider sx={{ borderStyle: 'dashed' }} />} spacing={2} sx={{ pt: 3 }}>
+      {fields.map((item, index) => (
+        <Stack direction="row" spacing={2} key={item.id} alignItems="center">
+          <Stack spacing={2} sx={{ width: 1 }}>
             <RHFAutocompleteObj
-              size="small"
               options={perfisFiltered}
-              name={`pesos[${index}].perfil`}
+              name={`pesos[${index}].perfil_id`}
               label={`Colaborador ${index + 1}`}
             />
-            <RHFNumberField
-              tipo="%"
-              size="small"
-              label="Percentagem"
-              sx={{ width: '44%' }}
-              name={`pesos[${index}].percentagem`}
-            />
-            <DefaultAction color="error" label="ELIMINAR" small handleClick={() => handleRemove(index)} />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} key={item.id} alignItems="center">
+              <RHFNumberField tipo="%" label="Percentagem" name={`pesos[${index}].percentagem`} />
+              <Stack direction="row" spacing={2}>
+                <RHFSwitch name={`pesos[${index}].para_aprovacao`} label="Aprovação" />
+                <RHFSwitch name={`pesos[${index}].facultativo`} label="Facultativo" />
+              </Stack>
+            </Stack>
           </Stack>
-        ))}
-      </Stack>
-    </>
+          {fields?.length > 1 && (
+            <DefaultAction color="error" label="ELIMINAR" small handleClick={() => remove(index)} />
+          )}
+        </Stack>
+      ))}
+      {!isEdit && fields?.length < perfisList?.length && (
+        <Stack direction="column" alignItems="center">
+          <AddItem
+            dados={{ small: true, label: 'Colaborador' }}
+            handleClick={() => append({ perfil: null, percentagem: null, facultativo: false, para_aprovacao: false })}
+          />
+        </Stack>
+      )}
+    </Stack>
   );
 }
 

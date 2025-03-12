@@ -94,15 +94,15 @@ export function getInfoIntranet(id) {
   return async (dispatch) => {
     dispatch(getFromIntranet('disposicao', { id, data: format(new Date(), 'yyyy-MM-dd') }));
     dispatch(getFromIntranet('frase'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('colaboradores'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('links', { label: 'nome' }));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('uos', { label: 'label' }));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('certificacoes'));
   };
 }

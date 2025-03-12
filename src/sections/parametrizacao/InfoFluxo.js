@@ -9,7 +9,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fPercent } from '../../utils/formatNumber';
 import { transicoesList } from '../../utils/formatObject';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -35,8 +34,8 @@ import {
   RegraTransicaoForm,
 } from './form-fluxo';
 import { applySortFilter } from './applySortFilter';
+import { EstadoDetail } from './TableParametrizacao';
 import { Detalhes, DetalhesContent } from './Detalhes';
-import { dadosComColaborador, EstadoDetail } from './TableParametrizacao';
 
 // ----------------------------------------------------------------------
 
@@ -78,9 +77,9 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
     defaultOrderBy: item === 'transicoes' ? 'id' : 'nome',
   });
   const dispatch = useDispatch();
-  const { colaboradores, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
-  const { fluxo, estados, checklist, notificacoes, regrasTransicao, isOpenModal, isOpenView, isLoading } = useSelector(
+  const { fluxo, estados, checklist, notificacoes, isOpenModal, isOpenView, isLoading } = useSelector(
     (state) => state.parametrizacao
   );
 
@@ -97,15 +96,17 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
       (item === 'notificacoes' && notificacoes) ||
       (item === 'estados' && estadosList(fluxo?.transicoes, estados, uos)) ||
       (item === 'transicoes' && transicoesList(fluxo?.transicoes, estados)) ||
-      (item === 'regrasTransicao' && dadosComColaborador(regrasTransicao, colaboradores)) ||
       [],
   });
   const isNotFound = !dataFiltered.length;
 
   const handleView = (dados) => {
     dispatch(openModal('view'));
-    if (item === 'notificacoes' && dados?.id) dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
-    if (item === 'checklist') dispatch(getFromParametrizacao('checklistitem', { id: dados?.id, item: 'selectedItem' }));
+    if (item === 'transicoes' && dados?.id)
+      dispatch(getFromParametrizacao('transicao', { id: dados?.id, item: 'selectedItem' }));
+    else if (item === 'notificacoes' && dados?.id) dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
+    else if (item === 'checklist')
+      dispatch(getFromParametrizacao('checklistitem', { id: dados?.id, item: 'selectedItem' }));
     else dispatch(getSuccess({ item: 'selectedItem', dados }));
   };
 
@@ -119,10 +120,7 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable
-                    column={((item === 'transicoes' || item === 'estados') && 5) || (item === 'checklist' && 3) || 4}
-                    row={10}
-                  />
+                  <SkeletonTable column={((item === 'transicoes' || item === 'estados') && 5) || 4} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
@@ -139,7 +137,12 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
                         </>
                       )) ||
                         (item === 'estados' && <EstadoDetail row={row} />) ||
-                        (item === 'checklist' && <TableCell>{row?.designacao || row?.tipo_documento}</TableCell>) ||
+                        (item === 'checklist' && (
+                          <>
+                            <TableCell>{row?.designacao || row?.tipo_documento}</TableCell>
+                            <CellChecked check={row.obrigatorio} />
+                          </>
+                        )) ||
                         (item === 'notificacoes' && (
                           <>
                             <TableCell>{row.assunto}</TableCell>
@@ -148,14 +151,8 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
                             </TableCell>
                             <TableCell>{row.via}</TableCell>
                           </>
-                        )) ||
-                        (item === 'regrasTransicao' && (
-                          <>
-                            <TableCell>{row.nome}</TableCell>
-                            <TableCell align="center">{fPercent(row.percentagem)}</TableCell>
-                          </>
                         ))}
-                      {(item === 'checklist' || item === 'regrasTransicao') && <CellChecked check={row.ativo} />}
+                      {item === 'checklist' && <CellChecked check={row.ativo} />}
                       {item !== 'estados' && (
                         <TableCell align="center" width={50}>
                           <Stack direction="row" spacing={0.5} justifyContent="right">
@@ -253,17 +250,13 @@ function headerTable(item) {
       ]) ||
       (item === 'checklist' && [
         { id: 'designacao	', label: 'Designação' },
+        { id: 'obrigatorio', label: 'Obrigatório', align: 'center' },
         { id: 'ativo', label: 'Ativo', align: 'center' },
       ]) ||
       (item === 'notificacoes' && [
         { id: 'assunto', label: 'Assunto' },
         { id: 'corpo', label: 'Corpo' },
         { id: 'via', label: 'Via' },
-      ]) ||
-      (item === 'regrasTransicao' && [
-        { id: 'nome', label: 'Colaborador' },
-        { id: 'percentagem', label: 'Percentagem', align: 'center' },
-        { id: 'ativo', label: 'Ativo', align: 'center' },
       ]) ||
       []),
     ...(item !== 'estados' ? [{ id: '', width: 10 }] : []),

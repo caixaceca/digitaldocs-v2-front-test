@@ -20,6 +20,7 @@ import { ptDateTime, getDataLS, dataValido, setDataUtil } from '../../utils/form
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
+import { getIndicadores } from '../../redux/slices/indicadores';
 import { getAll, getSuccess } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
@@ -63,10 +64,11 @@ TableArquivo.propTypes = { tab: PropTypes.string };
 export default function TableArquivo({ tab }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { colaboradores, uos } = useSelector((state) => state.intranet);
+  const { indicadoresArquivo } = useSelector((state) => state.indicadores);
+  const { arquivos, pedidos, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterArq') || '');
   const [data, setData] = useState(getDataLS('dataArq', new Date(new Date().getFullYear(), 0, 1)));
-  const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const { arquivos, pedidos, processosInfo, indicadoresArquivo, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
     page,
@@ -80,13 +82,7 @@ export default function TableArquivo({ tab }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({
-    defaultOrder: 'desc',
-    defaultOrderBy:
-      (tab === 'pedidosAcesso' && 'data_last_transicao') ||
-      (tab === 'arquivos' && 'data_last_transicao') ||
-      'criado_em',
-  });
+  } = useTable({});
 
   useEffect(() => {
     dispatch(getSuccess({ item: 'arquivos', dados: [] }));
@@ -94,7 +90,7 @@ export default function TableArquivo({ tab }) {
   }, [data, dispatch, tab]);
 
   useEffect(() => {
-    if (tab === 'arquivos') dispatch(getAll('indicadores arquivos', null));
+    if (tab === 'arquivos') dispatch(getIndicadores('indicadoresArquivo', { item: 'indicadoresArquivo' }));
   }, [dispatch, tab]);
 
   useEffect(() => {

@@ -27,8 +27,8 @@ export default function Transicoes({ transicoes, assunto }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const transicoesFiltered = useMemo(() => removeDuplicates(transicoes), [transicoes]);
 
-  const viewAnexo = (anexo, transicaoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { anexo, transicaoId, parecerId }));
+  const viewAnexo = (anexo, estadoId, parecerId) => {
+    dispatch(getAnexo('fileDownload', { anexo, estadoId, parecerId }));
   };
 
   return (
@@ -128,7 +128,7 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
                   </Stack>
                 )}
               </Stack>
-              <Stack spacing={1} direction="row" alignItems="center">
+              <Stack direction="row" alignItems="center">
                 {transicao?.data_saida && <Criado caption tipo="data" value={ptDateTime(transicao?.data_saida)} />}
                 {transicao?.data_saida && transicao?.data_entrada && (
                   <Criado caption tipo="time" value={fDistance(transicao?.data_entrada, transicao?.data_saida)} />
@@ -188,9 +188,7 @@ function removeDuplicates(arr) {
   return arr.filter((item) => {
     if (item.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.' && item.data_saida) {
       const key = item.data_saida;
-      if (seen.has(key)) {
-        return false;
-      }
+      if (seen.has(key)) return false;
       seen.set(key, true);
       return true;
     }

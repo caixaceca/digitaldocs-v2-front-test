@@ -34,6 +34,7 @@ import {
   Transicoes,
   DadosGerais,
   InfoCredito,
+  TodosAnexos,
   TableDetalhes,
 } from '../../sections/processo/Detalhes';
 import ProcessoForm from '../../sections/processo/form/form-processo';
@@ -50,7 +51,7 @@ export default function PageProcesso() {
   const [currentTab, setCurrentTab] = useState('Dados gerais');
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
-  const { processos, done, pdfPreview, isOpenModal, isSaving, isLoading, isLoadingFile } = useSelector(
+  const { processos, done, pdfPreview, isOpenModal, isLoading, isLoadingFile } = useSelector(
     (state) => state.digitaldocs
   );
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
@@ -84,7 +85,10 @@ export default function PageProcesso() {
 
   const tabsList = useMemo(() => {
     const tabs = [];
+    const { total, fora } = numAnexos(processo);
     tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
+
+    if (total > 2 || fora) tabs.push({ value: 'Anexos', component: <TodosAnexos /> });
 
     if (processo?.credito)
       tabs.push({
@@ -160,6 +164,7 @@ export default function PageProcesso() {
     done,
     afterSuccess: () => {
       if (
+        !done.includes('Stiuação') &&
         !done.includes('Garantia') &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
@@ -205,19 +210,15 @@ export default function PageProcesso() {
                           {/* Aceitar/Atribuir/Intervir */}
                           {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
                             <>
-                              {estado?.is_lock && processo?.atribuidoAMim && (
-                                <Intervencao colaboradoresList={colaboradoresList} />
-                              )}
+                              {estado?.is_lock && processo?.atribuidoAMim && <Intervencao />}
                               {!processo?.atribuidoAMim && estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
-                                <Libertar dados={{ id, fluxoId, estadoId }} isSaving={isSaving} />
+                                <Libertar dados={{ id, estadoId }} />
                               )}
                               {!estado?.is_lock && (!processo?.perfilAtribuido || processo?.atribuidoAMim) && (
                                 <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
                               )}
                               {!estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
-                                <Atribuir
-                                  dados={{ fluxoId, estadoId, perfilIdA: processo?.perfilAtribuido, processoId: id }}
-                                />
+                                <Atribuir dados={{ estadoId, perfilIdA: processo?.perfilAtribuido, processoId: id }} />
                               )}
                             </>
                           )}
@@ -240,7 +241,7 @@ export default function PageProcesso() {
                         <>
                           {estado?.is_lock && processo?.atribuidoAMim && (
                             <>
-                              <Libertar dados={{ id, fluxoId, estadoId }} isSaving={isSaving} />
+                              <Libertar dados={{ id, estadoId }} />
                               {processo?.estados?.find((row) => row?.parecer_em) ? (
                                 <Cancelar id={id} estadoId={estadoId} fechar />
                               ) : (
@@ -272,12 +273,37 @@ export default function PageProcesso() {
         {pdfPreview && (
           <DialogPreviewDoc
             url={pdfPreview?.url}
-            isLoading={isLoadingFile}
             titulo={pdfPreview?.nome}
+            isLoading={!!isLoadingFile}
             onClose={() => dispatch(getSuccess({ item: 'pdfPreview', dados: null }))}
           />
         )}
       </Container>
     </Page>
   );
+}
+
+// ----------------------------------------------------------------------
+
+function numAnexos(processo) {
+  let total = 0;
+  let fora = false;
+  if (processo?.anexos) total += processo.anexos?.length;
+  if (processo?.estados) {
+    processo?.estados.forEach((estado) => {
+      if (estado?.anexos) {
+        fora = true;
+        total += estado.anexos?.length;
+      }
+      if (estado?.pareceres) {
+        estado.pareceres.forEach((parecer) => {
+          if (parecer?.anexos) {
+            fora = true;
+            total += parecer.anexos?.length;
+          }
+        });
+      }
+    });
+  }
+  return { total, fora };
 }

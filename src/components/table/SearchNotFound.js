@@ -70,9 +70,15 @@ export function TableSearchNotFound({ message, height = 220 }) {
         <TableCell
           align="center"
           colSpan={11}
-          sx={{ py: 7, typography: 'body2', fontStyle: 'italic', color: 'text.secondary', border: 'none !important' }}
+          sx={{
+            typography: 'body2',
+            fontStyle: 'italic',
+            color: 'text.secondary',
+            border: 'none !important',
+            py: height === 99 ? 2 : 7,
+          }}
         >
-          <DocIllustration sx={{ height, mb: { xs: 4, sm: 7 } }} />
+          <DocIllustration sx={{ height, mb: { xs: height === 99 ? 1 : 4, sm: height === 99 ? 2 : 7 } }} />
           {message}
         </TableCell>
       </TableRow>

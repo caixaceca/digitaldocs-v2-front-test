@@ -16,7 +16,7 @@ import { FormProvider } from '../../../../components/hook-form';
 import { ButtonsStepper } from '../../../../components/Actions';
 // sections
 import Anexos from '../anexos';
-import { shapeAnexos, defaultAnexos, appendAnexos } from '../anexos/utils-anexos';
+import { shapeAnexos, defaultAnexos, appendAnexos, filterCheckList } from '../anexos/utils-anexos';
 
 // ----------------------------------------------------------------------
 
@@ -30,8 +30,8 @@ export default function FormAnexosCON({ dados }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { checklist } = useSelector((state) => state.parametrizacao);
+  const checkList = filterCheckList(checklist, isEdit);
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
-  const checkList = useMemo(() => checklist?.filter(({ designacao }) => designacao !== 'OUTROS'), [checklist]);
 
   const formSchema = shapeAnexos(isEdit, outros, checkList);
   const defaultValues = useMemo(() => defaultAnexos(dadosStepper, checkList), [dadosStepper, checkList]);

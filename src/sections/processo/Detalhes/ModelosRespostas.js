@@ -6,7 +6,6 @@ import { Packer, Header, Footer, TextRun, Document, ImageRun, Paragraph, PageNum
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 // utils
 import { fDate } from '../../../utils/formatTime';
 import { fCurrency } from '../../../utils/formatNumber';
@@ -295,8 +294,8 @@ export default function ModelosRespostas() {
 
   return (
     <Grid item xs={12}>
-      <Divider sx={{ mt: 1.5 }}>
-        <Typography variant="subtitle2">Modelos de resposta</Typography>
+      <Divider textAlign="left" sx={{ mt: 1.5, mb: 0.25, typography: 'overline' }}>
+        Modelos de resposta
       </Divider>
       {(processo?.operacao === 'Pedido de Informação' && (
         <>

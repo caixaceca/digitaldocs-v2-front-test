@@ -31,7 +31,6 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 import {
   LinhaForm,
-  EstadoForm,
   OrigemForm,
   DespesaForm,
   DocumentoForm,
@@ -40,6 +39,7 @@ import {
 } from './ParametrizacaoForm';
 import { Detalhes } from './Detalhes';
 import { FluxoForm } from './form-fluxo';
+import { EstadoForm } from './form-estado';
 import { applySortFilter } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -201,8 +201,10 @@ export default function TableParametrizacao({ item }) {
                         (item === 'documentos' && (
                           <>
                             <TableCell>{row.designacao}</TableCell>
+                            <TableCell align="center">
+                              {(row?.anexo && 'Anexo') || (row.formulario && 'Formulário') || null}
+                            </TableCell>
                             <CellChecked check={row.obriga_prazo_validade} />
-                            <CellChecked check={row.anexo} />
                           </>
                         ))}
                       {item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens' && (
@@ -267,7 +269,7 @@ export function EstadoDetail({ row = null }) {
     <>
       <TableCell>{row.nome}</TableCell>
       <TableCell>{row.uo}</TableCell>
-      <TableCell>{row.balcao || noDados('(Não definido)')}</TableCell>
+      <TableCell>{row.balcao || noDados('Não definido')}</TableCell>
       <CellChecked check={row.is_inicial} />
       <CellChecked check={row.is_final} />
     </>
@@ -350,8 +352,8 @@ function headerTable(item) {
       ]) ||
       (item === 'documentos' && [
         { id: 'designacao', label: 'Designação' },
+        { id: '', label: 'Anexo', align: 'center' },
         { id: 'obriga_prazo_validade', label: 'Validade', align: 'center' },
-        { id: 'anexo', label: 'Anexo', align: 'center' },
       ]) ||
       []),
     ...(item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens'

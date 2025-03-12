@@ -42,7 +42,7 @@ export default function Anexos({ outros, anexos }) {
 
           {outros && (
             <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-              <Typography sx={{ pb: 0.5, pl: 0.5, typography: 'overline' }}>Outros anexos</Typography>
+              <Typography sx={{ pb: 0.5, pl: 0.5, typography: 'overline' }}>Anexos</Typography>
               <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
             </Card>
           )}

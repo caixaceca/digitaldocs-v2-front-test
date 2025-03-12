@@ -30,7 +30,7 @@ InfoCaixa.propTypes = { onCancel: PropTypes.func, item: PropTypes.string };
 
 export default function InfoCaixa({ onCancel, item }) {
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { isLoading, infoCaixa, utilizador } = useSelector((state) => state.gaji9);
+  const { isLoading, infoCaixa, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
 
   return (
     <Dialog open onClose={() => onCancel()} fullWidth maxWidth="sm">
@@ -40,14 +40,12 @@ export default function InfoCaixa({ onCancel, item }) {
           <Stack direction="row" spacing={1} alignItems="center">
             {!open && !isLoading && (
               <>
-                {!infoCaixa &&
-                  (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['CREATE_INSTITUICAO'])) && (
-                    <DefaultAction label="ADICIONAR" handleClick={onOpen} />
-                  )}
-                {infoCaixa &&
-                  (utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['UPDATE_INSTITUICAO'])) && (
-                    <DefaultAction color="warning" label="EDITAR" handleClick={onOpen} />
-                  )}
+                {!infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_INSTITUICAO'])) && (
+                  <DefaultAction label="ADICIONAR" handleClick={onOpen} />
+                )}
+                {infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_INSTITUICAO'])) && (
+                  <DefaultAction color="warning" label="EDITAR" handleClick={onOpen} />
+                )}
               </>
             )}
             <Fechar handleClick={() => onCancel()} />
@@ -98,17 +96,12 @@ export function InfoForm({ onCancel }) {
 
   const onSubmit = async () => {
     const params = {
-      onCancel,
       id: infoCaixa?.id,
-      afterSuccess: onCancel,
-      getSuccess: 'infoCaixa',
+      getItem: 'infoCaixa',
+      afterSuccess: () => onCancel(),
       msg: `Informações ${infoCaixa ? 'atualizadas' : 'adicionadas'}`,
     };
-    if (infoCaixa) {
-      dispatch(updateItem('infoCaixa', JSON.stringify(values), params));
-    } else {
-      dispatch(createItem('infoCaixa', JSON.stringify(values), params));
-    }
+    dispatch((infoCaixa ? updateItem : createItem)('infoCaixa', JSON.stringify(values), params));
   };
 
   return (

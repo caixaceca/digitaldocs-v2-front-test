@@ -115,10 +115,6 @@ export default function TableProcessos({ from }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, segmento, colaborador?.id, meuAmbiente?.id, meuFluxo?.id]);
 
-  const verMais = () => {
-    carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, processosInfo);
-  };
-
   return (
     <>
       <HeaderBreadcrumbs
@@ -126,9 +122,9 @@ export default function TableProcessos({ from }) {
         sx={{ px: 1 }}
         action={
           <Stack direction="row" spacing={0.75}>
-            {/* {!meuAmbiente?.observador && meuAmbiente?.isinicial && ( */}
-            <AddItem button handleClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
-            {/* )} */}
+            {meusAmbientes?.find(({ isinicial }) => isinicial) && (
+              <AddItem handleClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
+            )}
           </Stack>
         }
       />
@@ -232,7 +228,9 @@ export default function TableProcessos({ from }) {
         )}
       </Card>
       {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
-        <MaisProcessos verMais={verMais} />
+        <MaisProcessos
+          verMais={() => carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, processosInfo)}
+        />
       )}
     </>
   );

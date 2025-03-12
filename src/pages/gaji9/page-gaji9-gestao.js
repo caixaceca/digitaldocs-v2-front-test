@@ -25,17 +25,15 @@ import TabGaji9 from '../../sections/gaji9/tabs-Gaji9';
 export default function PageGaji9Gestao() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
-  const { done, minutaId, utilizador } = useSelector((state) => state.gaji9);
+  const { done, minutaId, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabGaji9') || 'Parametrização');
 
   const tabsList = useMemo(
     () =>
       utilizador
         ? [
-            ...(utilizador?._role === 'ADMIN'
-              ? [{ value: 'Parametrização', component: <TabGaji9 item="parametrizacao" /> }]
-              : []),
-            ...(utilizador?._role === 'ADMIN' ||
+            ...(adminGaji9 ? [{ value: 'Parametrização', component: <TabGaji9 item="parametrizacao" /> }] : []),
+            ...(adminGaji9 ||
             acessoGaji9(utilizador?.acessos, [
               'READ_TIPO TITULAR',
               'READ_TIPO GARANTIA',
@@ -49,13 +47,13 @@ export default function PageGaji9Gestao() {
                   },
                 ]
               : []),
-            ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_CLAUSULA'])
+            ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_CLAUSULA'])
               ? [{ value: 'Cláusulas', component: <TabGaji9 item="clausulas" label="Cláusulas" /> }]
               : []),
-            ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
+            ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
               ? [{ value: 'Minutas', component: <TabGaji9 item="minutas" label="Minutas" /> }]
               : []),
-            // ...(utilizador?._role === 'ADMIN' || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
+            // ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
             //   ? [
             //       {
             //         value: 'Minutas públicas',
@@ -63,14 +61,12 @@ export default function PageGaji9Gestao() {
             //       },
             //     ]
             //   : []),
-            ...(utilizador?._role === 'ADMIN' ||
-            utilizador?._role === 'GERENTE' ||
-            acessoGaji9(utilizador?.acessos, ['READ_CREDITO'])
+            ...(adminGaji9 || utilizador?._role === 'GERENTE' || acessoGaji9(utilizador?.acessos, ['READ_CREDITO'])
               ? [{ value: 'Créditos', component: <TabGaji9 item="creditos" label="Créditos" /> }]
               : []),
           ]
         : [],
-    [utilizador]
+    [adminGaji9, utilizador]
   );
 
   useEffect(() => {
@@ -78,12 +74,12 @@ export default function PageGaji9Gestao() {
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Identificadores', false);
   }, [tabsList, currentTab]);
 
-  const afterSuccess = () => {
+  const navigateTo = () => {
     if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
     if (done === 'Crédito adicionado' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
   };
 
-  useNotificacao({ done, afterSuccess });
+  useNotificacao({ done, afterSuccess: () => navigateTo() });
 
   return (
     <Page title="GAJ-i9 | DigitalDocs">

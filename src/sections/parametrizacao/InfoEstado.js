@@ -29,7 +29,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import { applySortFilter } from './applySortFilter';
 import { Detalhes, DetalhesContent } from './Detalhes';
 import { dadosComColaborador } from './TableParametrizacao';
-import { EstadoForm, PerfisEstadoForm, RegraEstadoForm } from './ParametrizacaoForm';
+import { EstadoForm, PerfisEstadoForm, RegraEstadoForm } from './form-estado';
 
 // ----------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ export function TableInfoEstado({ item, onClose }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
-  const { estado, regrasEstado, isOpenModal, isOpenView, isLoading } = useSelector((state) => state.parametrizacao);
+  const { estado, selectedItem, isOpenModal, isOpenView, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     setPage(0);
@@ -85,7 +85,7 @@ export function TableInfoEstado({ item, onClose }) {
     filter,
     comparator: getComparator(order, orderBy),
     dados:
-      (item === 'regrasEstado' && dadosComColaborador(regrasEstado, colaboradores)) ||
+      (item === 'regrasEstado' && dadosComColaborador(estado?.regras, colaboradores)) ||
       (item === 'colaboradores' && colaboradoresList(estado?.perfis, colaboradores)) ||
       [],
   });
@@ -108,7 +108,7 @@ export function TableInfoEstado({ item, onClose }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={(item === 'colaboradores' && 6) || 3} row={10} />
+                  <SkeletonTable column={6} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
@@ -137,6 +137,9 @@ export function TableInfoEstado({ item, onClose }) {
                           <>
                             <TableCell>{row.nome}</TableCell>
                             <TableCell align="center">{fPercent(row.percentagem)}</TableCell>
+                            <CellChecked check={row.para_aprovacao} />
+                            <CellChecked check={row.facultativo} />
+                            <CellChecked check={row.ativo} />
                           </>
                         ))}
                       {item !== 'colaboradores' && (
@@ -172,7 +175,9 @@ export function TableInfoEstado({ item, onClose }) {
       {isOpenView && <Detalhes item={item} closeModal={() => onClose()} />}
       {isOpenModal && (
         <>
-          {item === 'regrasEstado' && <RegraEstadoForm onCancel={onClose} />}
+          {item === 'regrasEstado' && (
+            <RegraEstadoForm onCancel={onClose} item={estado} estado selectedItem={selectedItem || null} />
+          )}
           {item === 'colaboradores' && <PerfisEstadoForm onCancel={onClose} estado={estado} />}
         </>
       )}
@@ -212,6 +217,9 @@ function headerTable(item) {
       (item === 'regrasEstado' && [
         { id: 'nome', label: 'Colaborador', align: 'left' },
         { id: 'percentagem', label: 'Percentagem', align: 'center' },
+        { id: 'para_aprovacao', label: 'Aprovação', align: 'center' },
+        { id: 'facultativo', label: 'Facultativo', align: 'center' },
+        { id: 'ativo', label: 'Ativo', align: 'center' },
       ]) ||
       []),
     ...(item !== 'colaboradores' ? [{ id: '', width: 10 }] : []),

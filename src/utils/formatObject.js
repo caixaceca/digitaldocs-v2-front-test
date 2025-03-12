@@ -5,6 +5,10 @@ export function findColaborador(mail, colaboradores) {
     : mail;
 }
 
+export function colaboradorByPerfilId(id, colaboradores) {
+  return colaboradores?.find(({ perfil }) => Number(perfil?.id) === Number(id))?.perfil?.displayName || `Perfil: ${id}`;
+}
+
 // ----------------------------------------------------------------------
 
 export function balcoesList(uos) {
@@ -15,12 +19,8 @@ export function balcoesList(uos) {
 // ----------------------------------------------------------------------
 
 export function setItemValue(newValue, setItem, localS, id) {
-  if (setItem) {
-    setItem(newValue);
-  }
-  if (localS) {
-    localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
-  }
+  if (setItem) setItem(newValue);
+  if (localS) localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
 }
 
 // ----------------------------------------------------------------------

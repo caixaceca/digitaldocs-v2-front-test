@@ -39,8 +39,8 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
     setAccord(isExpanded ? panel : false);
   };
 
-  const viewAnexo = (anexo, transicaoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { anexo, transicaoId, parecerId }));
+  const viewAnexo = (anexo, estadoId, parecerId) => {
+    dispatch(getAnexo('fileDownload', { anexo, estadoId, parecerId }));
   };
 
   return (

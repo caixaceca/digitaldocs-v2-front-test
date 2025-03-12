@@ -25,7 +25,7 @@ import { fNumber, fCurrency } from '../../../../utils/formatNumber';
 import { paraLevantamento, findColaboradores } from '../../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
-import { getSuccess, getInfoProcesso, updateItem, closeModal } from '../../../../redux/slices/digitaldocs';
+import { getSuccess, getInfoProcesso, updateItem, deleteItem, closeModal } from '../../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../../hooks/useAnexos';
 import { getComparator, applySort } from '../../../../hooks/useTable';
@@ -184,7 +184,7 @@ export function ParecerForm({ onCancel, processoId, estado = false }) {
       updateItem(estado ? 'parecer estado' : 'parecer individual', formData, {
         mdf: true,
         processoId,
-        id: selectedItem.id,
+        id: selectedItem?.id,
         msg: 'Parecer enviado',
         afterSuccess: () => onCancel(),
       })
@@ -288,7 +288,7 @@ export function ResgatarForm({ dados, onClose }) {
       title="Resgatar"
       desc="resgatar este processo"
       handleOk={() =>
-        dispatch(updateItem('resgatar', null, { ...dados, msg: 'Processo resgatado', afterSuccess: () => onClose() }))
+        dispatch(getInfoProcesso('resgatar', { ...dados, msg: 'Processo resgatado', afterSuccess: () => onClose() }))
       }
     />
   );
@@ -408,19 +408,20 @@ export function AtribuirForm({ dados, onClose }) {
 
 // --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
 
-LibertarForm.propTypes = { dados: PropTypes.func, isSaving: PropTypes.bool, onClose: PropTypes.func };
+LibertarForm.propTypes = { dados: PropTypes.func, onClose: PropTypes.func };
 
-export function LibertarForm({ dados, isSaving, onClose }) {
+export function LibertarForm({ dados, onClose }) {
   const dispatch = useDispatch();
+  const { isSaving } = useSelector((state) => state.digitaldocs);
 
   return (
     <DialogConfirmar
-      onClose={onClose}
-      isSaving={isSaving}
       color="warning"
       title="Libertar"
+      onClose={onClose}
+      isSaving={isSaving}
       desc="libertar este processo"
-      handleOk={() => dispatch(updateItem('libertar', null, { msg: 'Processo libertado', ...dados }))}
+      handleOk={() => dispatch(deleteItem('libertar', { msg: 'Processo libertado', ...dados }))}
     />
   );
 }

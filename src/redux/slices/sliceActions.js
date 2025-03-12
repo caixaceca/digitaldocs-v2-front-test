@@ -104,8 +104,9 @@ export function actionOpenModal(state, payload) {
 }
 
 export function actionCloseModal(state) {
-  state.isOpenView = false;
-  state.isOpenModal = false;
+  if (state?.modalGaji9) state.modalGaji9 = false;
+  if (state?.isOpenView) state.isOpenView = false;
+  if (state?.isOpenModal) state.isOpenModal = false;
   state.selectedItem = null;
 }
 
@@ -114,7 +115,6 @@ export function actionCloseModal(state) {
 export async function doneSucess(msg, dispatch, action) {
   if (msg) dispatch(action({ item: 'done', dados: msg }));
   await new Promise((resolve) => setTimeout(resolve, 500));
-  console.log(msg);
   dispatch(action({ item: 'done', dados: '' }));
 }
 

@@ -54,6 +54,7 @@ export default function TableIdentificadores({ item, inativos }) {
 
   const {
     isLoading,
+    adminGaji9,
     isOpenView,
     utilizador,
     freguesias,
@@ -158,7 +159,7 @@ export default function TableIdentificadores({ item, inativos }) {
                       {(item === 'componentes' && (
                         <>
                           <TableCell>{row?.descritivo}</TableCell>
-                          <TableCell>{row?.rotulo || noDados('(Não definido)')}</TableCell>
+                          <TableCell>{row?.rotulo || noDados('Não definido')}</TableCell>
                         </>
                       )) ||
                         (item === 'freguesias' && (
@@ -177,7 +178,7 @@ export default function TableIdentificadores({ item, inativos }) {
                       <CellChecked check={row.ativo} />
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(utilizador?._role === 'ADMIN' ||
+                          {(adminGaji9 ||
                             (item === 'tipoTitulares' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR'])) ||
                             (item === 'tiposGarantias' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
                             (item === 'representantes' && acessoGaji9(utilizador?.acessos, ['UPDATE_REPRESENTANTE'])) ||

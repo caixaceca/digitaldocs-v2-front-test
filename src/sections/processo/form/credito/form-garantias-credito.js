@@ -38,7 +38,7 @@ const garantiaSquema = {
   avalista: false,
   pessoal: false,
   valor_garantia: '',
-  numero_entidade: '',
+  numero_entidade: null,
   tipo_garantia_id: null,
   codigo_hipoteca_camara: '',
   codigo_hipoteca_cartorio: '',
@@ -109,18 +109,21 @@ export function GarantiasSeparados({ dados }) {
     const params = {
       creditoId,
       processoId,
+      fillCredito: true,
       id: garantia?.id || '',
       afterSuccess: () => onCancel(),
       msg: isEdit ? 'Garantia atualizada' : 'Garantias adicionadas',
     };
     const formData = garantiasAssociadas(values.garantias);
-    dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify(formData), params));
+    dispatch(
+      (isEdit ? updateItem : createItem)('garantias', JSON.stringify(isEdit ? formData[0] : formData), { ...params })
+    );
   };
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="lg">
       <DialogTitleAlt title={isEdit ? 'Atualizar garantia' : 'Adicionar garantias'} />
-      <DialogContent sx={{ mt: 3 }}>
+      <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <FormGarantias dados={{ fields, append, remove, garantiasList, isEdit }} />
           <DialogButons isSaving={isSaving} onCancel={onCancel} hideSubmit={fields?.length === 0} />

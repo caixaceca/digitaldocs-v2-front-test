@@ -49,9 +49,7 @@ export function FilterSwitch({ label, value, setValue, localS = '' }) {
           checked={value}
           onChange={(event, value) => {
             setValue(value);
-            if (localS) {
-              localStorage.setItem(localS, value === true ? 'true' : 'false');
-            }
+            if (localS) localStorage.setItem(localS, value === true ? 'true' : 'false');
           }}
         />
       }

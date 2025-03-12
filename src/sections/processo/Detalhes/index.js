@@ -6,6 +6,7 @@ export { default as Pareceres } from './Pareceres';
 export { InfoCon, InfoCredito } from './info-extra';
 export { default as Transicoes } from './Transicoes';
 export { default as DadosGerais } from './DadosGerais';
+export { default as TodosAnexos } from './todos-anexos';
 export { default as NotaProcesso } from './NotaProcesso';
 export { default as TableDetalhes } from './TableDetalhes';
 export { default as DetalhesProcesso } from './DetalhesProcesso';

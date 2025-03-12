@@ -56,7 +56,7 @@ export default function Anexos({ anexos }) {
 
   const viewAnexo = (anexo) => {
     dispatch(
-      getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', { anexo: { ...anexo, tipo: canPreview(anexo) } })
+      getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', { anexo: { ...anexo, tipoDoc: canPreview(anexo) } })
     );
   };
 
@@ -79,8 +79,8 @@ export default function Anexos({ anexos }) {
         </Stack>
       ) : (
         <>
-          {filePreview?.url && filePreview?.tipo === 'pdf' && <PdfPreview url={filePreview?.url} />}
-          {filePreview?.url && filePreview?.tipo === 'image' && <ImagemPreview imagem={filePreview?.url} />}
+          {filePreview?.url && filePreview?.tipoDoc === 'pdf' && <PdfPreview url={filePreview?.url} />}
+          {filePreview?.url && filePreview?.tipoDoc === 'image' && <ImagemPreview imagem={filePreview?.url} />}
           {filePreview && !filePreview?.url && (
             <Stack alignItems="center" justifyContent="center" sx={sx1}>
               <SearchNotFound message="Ficheiro não encontrado..." height={200} />
@@ -91,7 +91,9 @@ export default function Anexos({ anexos }) {
       <Stack id="anexos" sx={{ mt: 1 }}>
         {anexosPorData(anexosAtivos)?.map((row) => (
           <Stack key={row?.data} sx={{ pb: 1 }}>
-            <Divider sx={{ py: 0.5, px: 3 }}>{row?.data}</Divider>
+            <Divider textAlign="left" sx={{ py: 0.5, my: 1, typography: 'overline' }}>
+              {row?.data}
+            </Divider>
             <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>
               {row?.anexos?.map((row) => (
                 <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
@@ -101,8 +103,8 @@ export default function Anexos({ anexos }) {
         ))}
         {anexosInativos?.length > 0 && (
           <RoleBasedGuard roles={['Todo-111']}>
-            <Divider sx={{ mt: 1, pb: 0.5 }}>
-              <Typography variant="subtitle2">Anexos eliminados</Typography>
+            <Divider textAlign="left" sx={{ mb: 0.5, mt: 1, typography: 'overline' }}>
+              Anexos eliminados
             </Divider>
             <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>
               {anexosInativos?.map((row) => (
@@ -128,28 +130,29 @@ AnexoItem.propTypes = {
   parecer: PropTypes.bool,
   viewAnexo: PropTypes.func,
   eliminado: PropTypes.bool,
+  estadoId: PropTypes.number,
   parecerId: PropTypes.number,
-  transicaoId: PropTypes.number,
 };
 
 export function AnexoItem({
   anexo,
   preview,
+  estadoId = '',
   parecerId = '',
   parecer = false,
-  transicaoId = '',
   viewAnexo = null,
   eliminado = false,
 }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoadingFile } = useSelector((state) => state.digitaldocs);
+
   return (
     <Button
       variant="soft"
       color={anexo?.url ? 'success' : 'inherit'}
       startIcon={getFileThumb(false, null, anexo?.nome)}
       disabled={preview || isLoadingFile === anexo?.anexo}
-      onClick={() => viewAnexo(anexo, transicaoId, parecerId)}
+      onClick={() => viewAnexo(anexo, estadoId, parecerId)}
       sx={{
         flexGrow: 1,
         boxShadow: 'none',
@@ -164,22 +167,37 @@ export function AnexoItem({
       }}
     >
       <ListItemText
-        primary={anexo?.nome}
-        primaryTypographyProps={{ variant: 'subtitle2', p: 0 }}
         sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 }}
+        primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
+        primary={
+          !anexo?.tipo || anexo?.tipo === 'OUTROS' ? (
+            anexo?.nome
+          ) : (
+            <>
+              {`${anexo?.tipo}${anexo?.entidade ? ` - ${anexo.entidade}` : ''}`}
+              <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}>
+                &nbsp;({anexo?.nome})
+              </Typography>
+            </>
+          )
+        }
         secondary={
-          <Stack useFlexGap flexWrap="wrap" direction="row" spacing={{ xs: 0.5, sm: 1.5 }}>
-            {anexo?.criador && (
-              <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} baralhar />
-            )}
-            {anexo?.criado_em && (
-              <Criado
-                caption
-                tipo={eliminado || parecer ? 'data' : 'time'}
-                value={eliminado || parecer ? ptDateTime(anexo?.criado_em) : ptTime(anexo?.criado_em)}
-              />
-            )}
-          </Stack>
+          (anexo?.criador || anexo?.criado_em || anexo?.data_emissao || anexo?.data_validade) && (
+            <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
+              {anexo?.criador && (
+                <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} baralhar />
+              )}
+              {anexo?.criado_em && (
+                <Criado
+                  caption
+                  tipo={eliminado || parecer ? 'data' : 'time'}
+                  value={eliminado || parecer ? ptDateTime(anexo?.criado_em) : ptTime(anexo?.criado_em)}
+                />
+              )}
+              {anexo?.data_emissao && <Criado caption iconText="Emissão:" value={ptDate(anexo?.data_emissao)} />}
+              {anexo?.data_validade && <Criado caption iconText="Validade:" value={ptDate(anexo?.data_validade)} />}
+            </Stack>
+          )
         }
       />
       {isLoadingFile === anexo?.anexo && (

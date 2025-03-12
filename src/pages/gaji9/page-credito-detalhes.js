@@ -10,7 +10,7 @@ import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, getSuccess, createItem, openModal, closeModal } from '../../redux/slices/gaji9';
+import { getFromGaji9, setModal, getSuccess, createItem } from '../../redux/slices/gaji9';
 // routes
 import useSettings from '../../hooks/useSettings';
 // routes
@@ -33,9 +33,8 @@ export default function PageCreditoDetalhes() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [form, setSetForm] = useState('');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabInfoCredito') || 'Dados');
-  const { credito, isLoading, isOpenModal, isLoadingDoc, previewFile, utilizador, selectedItem, done } = useSelector(
+  const { credito, isLoading, modalGaji9, isLoadingDoc, previewFile, utilizador, selectedItem, done } = useSelector(
     (state) => state.gaji9
   );
 
@@ -47,23 +46,18 @@ export default function PageCreditoDetalhes() {
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
     { value: 'Participantes', component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} /> },
-    {
-      value: 'Contratos',
-      component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} contracts={form || 'noform'} />,
-    },
+    { value: 'Contratos', component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} contracts /> },
   ];
 
-  const openForm = (action) => {
-    setSetForm(action);
-    dispatch(openModal());
+  const openForm = (item) => {
+    dispatch(setModal({ item, dados: null }));
   };
 
   const closeForm = () => {
-    setSetForm('');
-    dispatch(closeModal());
+    dispatch(setModal({ item: '', dados: null }));
   };
 
-  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+  useNotificacao({ done, afterSuccess: () => closeForm() });
 
   return (
     <Page title="Estado | DigitalDocs">
@@ -90,11 +84,11 @@ export default function PageCreditoDetalhes() {
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' &&
                   (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['UPDATE_CREDITO'])) && (
-                    <DefaultAction label="EDITAR" color="warning" handleClick={() => openForm('credito')} />
+                    <DefaultAction label="EDITAR" handleClick={() => openForm('form-credito')} />
                   )}
                 {currentTab === 'Participantes' &&
                   (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
-                    <DefaultAction button icon="adicionar" label="Fiadores" handleClick={() => dispatch(openModal())} />
+                    <DefaultAction button label="Adicionar" handleClick={() => openForm('form-participante')} />
                   )}
                 {currentTab === 'Contratos' &&
                   (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
@@ -102,7 +96,7 @@ export default function PageCreditoDetalhes() {
                       button
                       icon="pdf"
                       label="Previsualizar contrato"
-                      handleClick={() => openForm('contrato')}
+                      handleClick={() => openForm('preview-contrato')}
                     />
                   )}
               </Stack>
@@ -140,8 +134,8 @@ export default function PageCreditoDetalhes() {
                 />
               )}
 
-              {isOpenModal && form === 'contrato' && <PreviewForm onCancel={closeForm} />}
-              {isOpenModal && form === 'credito' && <CreditForm isEdit dados={credito} onCancel={closeForm} />}
+              {modalGaji9 === 'preview-contrato' && <PreviewForm onCancel={closeForm} />}
+              {modalGaji9 === 'form-credito' && <CreditForm isEdit dados={credito} onCancel={closeForm} />}
             </>
           )}
         </AcessoGaji9>

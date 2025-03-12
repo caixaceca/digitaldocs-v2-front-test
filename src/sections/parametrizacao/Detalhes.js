@@ -28,6 +28,7 @@ import { SearchNotFoundSmall } from '../../components/table';
 import { UpdateItem, DefaultAction, DTFechar } from '../../components/Actions';
 //
 import { DestinatarioForm } from './form-fluxo';
+import DetalhesTransicao from './detalhes-transicao';
 
 // ----------------------------------------------------------------------
 
@@ -41,10 +42,12 @@ export function Detalhes({ item, closeModal }) {
     : null;
 
   return (
-    <Dialog open onClose={closeModal} fullWidth maxWidth="sm">
+    <Dialog open onClose={closeModal} fullWidth maxWidth={item === 'transicoes' ? 'md' : 'sm'}>
       <DTFechar title="Detalhes" handleClick={() => closeModal()} />
       <DialogContent>
-        <DetalhesContent dados={selectedItem} item={item} perfil={perfil} />
+        {(item === 'transicoes' && <DetalhesTransicao dados={selectedItem} />) || (
+          <DetalhesContent dados={selectedItem} item={item} perfil={perfil} />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -60,7 +63,6 @@ DetalhesContent.propTypes = {
 };
 
 export function DetalhesContent({ dados = null, item = '', perfil = null, uo = null }) {
-  const [destinatario, setDestinatario] = useState(null);
   const { isLoading, destinatarios } = useSelector((state) => state.parametrizacao);
 
   return (
@@ -181,10 +183,10 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                       <TableRowItem title="Obrigatório:" item={<LabelSN item={dados?.obrigatorio} />} />
                     )}
                     {'hasopnumero' in dados && (
-                      <TableRowItem title="Indicar nº de operação:" item={<LabelSN item={dados?.hasopnumero} />} />
+                      <TableRowItem title="Nº operação:" item={<LabelSN item={dados?.hasopnumero} />} />
                     )}
                     {'is_after_devolucao' in dados && (
-                      <TableRowItem title="Depois de devolução:" item={<LabelSN item={dados?.is_after_devolucao} />} />
+                      <TableRowItem title="Depois devolução:" item={<LabelSN item={dados?.is_after_devolucao} />} />
                     )}
                     {'is_interno' in dados && (
                       <TableRowItem title="Processo interno:" item={<LabelSN item={dados?.is_interno} />} />
@@ -206,6 +208,12 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                     )}
                     {'funcionario' in dados && (
                       <TableRowItem title="Crédito colaborador:" item={<LabelSN item={dados?.funcionario} />} />
+                    )}
+                    {'para_aprovacao' in dados && (
+                      <TableRowItem title="Aprovação:" item={<LabelSN item={dados?.para_aprovacao} />} />
+                    )}
+                    {'facultativo' in dados && (
+                      <TableRowItem title="Facultativo:" item={<LabelSN item={dados?.facultativo} />} />
                     )}
                     {'is_con' in dados && (
                       <TableRowItem
@@ -234,60 +242,18 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                 </List>
               )}
               {item === 'notificacoes' && destinatarios?.length > 0 && (
-                <List>
-                  <ListItem disableGutters divider sx={{ pb: 0.5, mb: 0.25 }}>
-                    <Typography variant="subtitle1">Destinatários</Typography>
-                  </ListItem>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Contacto</TableCell>
-                        <TableCell>Data</TableCell>
-                        <TableCell>Ativo</TableCell>
-                        <TableCell width={10}>
-                          <DefaultAction small label="ADICIONAR" handleClick={() => setDestinatario({ add: true })} />
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {destinatarios?.map((row) => (
-                        <TableRow key={`dest_${row?.id}`}>
-                          <TableCell>
-                            <Typography variant="body2">{row?.email}</Typography>
-                            <Typography variant="body2">{row?.telefone}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="caption" noWrap>
-                              Início: {row.data_inicio ? ptDate(row.data_inicio) : 'Sem data'}
-                            </Typography>
-                            <br />
-                            <Typography variant="caption" noWrap>
-                              Fim: {row.data_fim ? ptDate(row.data_fim) : 'Sem data'}
-                            </Typography>
-                          </TableCell>
-                          <CellChecked check={row.ativo} />
-                          <TableCell>
-                            <UpdateItem dados={{ small: true }} handleClick={() => setDestinatario(row)} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {!!destinatario && (
-                    <DestinatarioForm
-                      id={dados?.id}
-                      selectedItem={destinatario}
-                      onCancel={() => setDestinatario(null)}
-                    />
-                  )}
-                </List>
+                <Notificacoes id={dados?.id} destinatarios={destinatarios} />
               )}
               <List>
                 <ListItem disableGutters divider sx={{ pb: 0.5 }}>
                   <Typography variant="subtitle1">Registo</Typography>
                 </ListItem>
                 <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
-                  <Resgisto label="Criado" por={dados?.criador} em={dados?.criado_em} />
+                  <Resgisto
+                    label="Criado"
+                    por={dados?.criador || dados?.feito_por}
+                    em={dados?.criado_em || dados?.ultima_alteracao}
+                  />
                   <Resgisto
                     label="Modificado"
                     em={dados?.modificado_em}
@@ -302,6 +268,59 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
         </>
       )}
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Notificacoes.propTypes = { destinatarios: PropTypes.array, id: PropTypes.number };
+
+function Notificacoes({ destinatarios, id }) {
+  const [destinatario, setDestinatario] = useState(null);
+  return (
+    <List>
+      <ListItem disableGutters divider sx={{ pb: 0.5, mb: 0.25 }}>
+        <Typography variant="subtitle1">Destinatários</Typography>
+      </ListItem>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Contacto</TableCell>
+            <TableCell>Data</TableCell>
+            <TableCell>Ativo</TableCell>
+            <TableCell width={10}>
+              <DefaultAction small label="ADICIONAR" handleClick={() => setDestinatario({ add: true })} />
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {destinatarios?.map((row) => (
+            <TableRow key={`dest_${row?.id}`}>
+              <TableCell>
+                <Typography variant="body2">{row?.email}</Typography>
+                <Typography variant="body2">{row?.telefone}</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant="caption" noWrap>
+                  Início: {row.data_inicio ? ptDate(row.data_inicio) : 'Sem data'}
+                </Typography>
+                <br />
+                <Typography variant="caption" noWrap>
+                  Fim: {row.data_fim ? ptDate(row.data_fim) : 'Sem data'}
+                </Typography>
+              </TableCell>
+              <CellChecked check={row.ativo} />
+              <TableCell>
+                <UpdateItem dados={{ small: true }} handleClick={() => setDestinatario(row)} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {!!destinatario && (
+        <DestinatarioForm id={id} selectedItem={destinatario} onCancel={() => setDestinatario(null)} />
+      )}
+    </List>
   );
 }
 

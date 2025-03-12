@@ -53,14 +53,12 @@ const initialState = {
   meusacessos: [],
   componentes: [],
   notificacoes: [],
-  regrasEstado: [],
   perfisEstado: [],
   tiposTitular: [],
   meusAmbientes: [],
   destinatarios: [],
   estadosPerfil: [],
   tiposGarantia: [],
-  regrasTransicao: [],
   motivosPendencia: [],
   motivosTransicao: [],
   colaboradoresEstado: [],
@@ -122,9 +120,9 @@ const slice = createSlice({
     },
 
     changeMeuAmbiente(state, action) {
+      state.meuFluxo = null;
       state.meuAmbiente = action.payload;
       state.meusFluxos = meusFluxos(action.payload?.fluxos ?? []);
-      state.meuFluxo = null;
     },
   },
 });
@@ -140,15 +138,15 @@ export const { openModal, getSuccess, closeModal, changeMeuAmbiente } = slice.ac
 export function geParamsUtil() {
   return async (dispatch) => {
     dispatch(getFromParametrizacao('meusambientes'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromParametrizacao('meusacessos'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromParametrizacao('fluxos'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromParametrizacao('estados'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromParametrizacao('origens'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromParametrizacao('motivosPendencia'));
   };
 }
@@ -182,13 +180,13 @@ export function getFromParametrizacao(item, params) {
         (item === 'motivosPendencia' && `/v1/motivos/all/${perfilId}`) ||
         (item === 'meusacessos' && `/v1/acessos?perfilID=${perfilId}`) ||
         (item === 'componentes' && `/v2/processos/componentes/${perfilId}`) ||
+        (item === 'transicao' && `/v1/transicoes/${params?.id}/${perfilId}`) ||
         (item === 'meusambientes' && `/v1/fluxos/meusambientes/v2/${perfilId}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/transicao/${params?.id}`) ||
         (item === 'tiposTitular' && `/v2/processos/tipos_titulares/${perfilId}`) ||
         (item === 'tiposGarantia' && `/v2/processos/tipos_garantias/${perfilId}`) ||
         (item === 'colaboradoresEstado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
-        (item === 'regrasTransicao' && `/v1/suportes/regra_parecer/transicao/${params?.id}`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||
         (item === 'despesas' && `/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'documentos' && `/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
@@ -209,7 +207,7 @@ export function getFromParametrizacao(item, params) {
         if (item === 'meusacessos') dispatch(slice.actions.getMeusAcessosSuccess(response.data));
         else if (item === 'meusambientes') dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
         else if (item === 'colaboradoresEstado')
-          dispatch(slice.actions.getSuccess({ item, dados: response?.data?.perfis || [] }));
+          dispatch(slice.actions.getSuccess({ item, dados: response?.data?.objeto?.perfis || [] }));
         else
           dispatch(
             slice.actions.getSuccess({
@@ -219,6 +217,7 @@ export function getFromParametrizacao(item, params) {
             })
           );
       }
+      params?.afterSuccess?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -253,36 +252,33 @@ export function createItem(item, dados, params) {
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}`) ||
         (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}`) ||
         (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
-        (item === 'regrasEstado' && `/v1/suportes/regra_parecer/estado/default`) ||
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
         (item === 'destinatario' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
-        (item === 'regra estado destribuido' && `/v1/suportes/regra_parecer/estado/coru/${params?.estadoId}`) ||
-        (item === 'regrasTransicao' &&
-          `/v1/suportes/regra_parecer/transicao/${params?.estadoId}/${params?.transicaoId}`) ||
+        (item === 'regrasEstado' && `/v1/estados/${params?.estadoId}/regras_pareceres/${perfilId}`) ||
+        (item === 'regrasTransicao' && `/v1/transicoes/${params?.estadoId}/regras_parecers/${perfilId}`) ||
         '';
 
       if (apiUrl) {
         const response = await axios.post(`${BASEURLDD}${apiUrl}`, dados, options);
         if (item === 'clonar fluxo') {
-          if (params?.transicoes?.length > 0)
-            await axios.post(
-              `${BASEURLDD}/v1/transicoes/multi`,
-              JSON.stringify(
-                params?.transicoes?.map((row) => ({ ...row, fluxo_id: response?.data?.id, perfilIDCC: perfilId }))
-              ),
-              options
-            );
+          if (params?.transicoes?.length > 0) {
+            const id = response?.data?.id;
+            const transicoes = params?.transicoes?.map((row) => ({ ...row, perfilIDCC: perfilId, fluxo_id: id }));
+            await axios.post(`${BASEURLDD}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
+          }
           const fluxo = await axios.get(`${BASEURLDD}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
           dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: fluxo.data }));
         } else if (item === 'destinatario') {
           const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
           dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+        } else if (params?.getItem) {
+          dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
         } else if (item === 'fluxo' || item === 'estado') {
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
         } else if (item === 'acessos') {
           dispatch(slice.actions.createSuccess({ item, dados: response.data }));
-        } else if (item !== 'regra estado destribuido') {
+        } else {
           dispatch(
             slice.actions.createSuccess({
               item1: params?.item1 || '',
@@ -293,6 +289,7 @@ export function createItem(item, dados, params) {
         }
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      params?.afterSuccess?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -327,15 +324,21 @@ export function updateItem(item, dados, params) {
         (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
+        (item === 'regrasEstado' &&
+          `/v1/estados/${params?.estadoId}/regras_pareceres/${perfilId}?regra_id=${params?.id}`) ||
+        (item === 'regrasTransicao' &&
+          `/v1/transicoes/${params?.estadoId}/regras_parecers/${perfilId}?regra_id=${params?.id}`) ||
         '';
 
       if (apiUrl) {
         const response = await axios.put(`${BASEURLDD}${apiUrl}`, dados, options);
         const dadosR = (item === 'acessos' && response.data) || response.data?.objeto || response.data || null;
-        if (item === 'fluxo' || item === 'estado') dispatch(slice.actions.getSuccess({ item, dados: dadosR }));
+        if (item === 'fluxo' || item === 'estado' || params?.getItem)
+          dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: dadosR }));
         else dispatch(slice.actions.updateSuccess({ item, item1: params?.item1 || '', dados: dadosR }));
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      params?.afterSuccess?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -364,10 +367,15 @@ export function deleteItem(item, params) {
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/perfil/${perfilId}?peID=${params?.id}`) ||
+        (item === 'regrasEstado' &&
+          `/v1/estados/${params?.estadoId}/regras_pareceres/${perfilId}?regra_id=${params?.id}`) ||
+        (item === 'regrasTransicao' &&
+          `/v1/transicoes/${params?.estadoId}/regras_parecers/${perfilId}?regra_id=${params?.id}`) ||
         '';
 
       if (apiUrl) {
-        await axios.delete(`${BASEURLDD}${apiUrl}`, options);
+        const response = await axios.delete(`${BASEURLDD}${apiUrl}`, options);
+        if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
         dispatch(
           slice.actions.deleteSuccess({
             item,
@@ -377,8 +385,8 @@ export function deleteItem(item, params) {
           })
         );
       }
-
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      params?.afterSuccess?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

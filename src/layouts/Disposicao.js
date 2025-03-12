@@ -66,6 +66,7 @@ export default function Disposicao() {
             {disposicoes.map((option) => (
               <Tooltip key={option.value} title={option.value.toUpperCase()} arrow>
                 <FormControlLabel
+                  label=""
                   value={option.value}
                   control={
                     <Radio

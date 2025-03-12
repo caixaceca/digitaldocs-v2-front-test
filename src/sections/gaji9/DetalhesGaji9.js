@@ -5,19 +5,22 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
+import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { newLineText } from '../../utils/formatText';
 import { colorLabel } from '../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { sortPermissoes } from '../../utils/formatObject';
 // redux
-import { useSelector } from '../../redux/store';
+import { updateItem } from '../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import { DTFechar } from '../../components/Actions';
@@ -25,6 +28,7 @@ import { SearchNotFoundSmall } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
 import GrupoDetail from './detalhes-grupo';
+import { OpcoesClausula } from './form-clausula';
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 
 // ----------------------------------------------------------------------
@@ -35,13 +39,18 @@ export default function DetalhesGaji9({ closeModal, item }) {
   const { selectedItem } = useSelector((state) => state.gaji9);
 
   return (
-    <Dialog open onClose={closeModal} fullWidth maxWidth={item === 'grupos' || item === 'clausulas' ? 'md' : 'sm'}>
+    <Dialog
+      open
+      fullWidth
+      onClose={closeModal}
+      maxWidth={item === 'grupos' || item === 'clausulas' || item === 'clausulaMinuta' ? 'md' : 'sm'}
+    >
       <DTFechar title="Detalhes" handleClick={() => closeModal()} />
       <DialogContent>
         {(item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
-          ((item === 'clausulas' || item === 'funcoes') && <DetalhesTab item={item} dados={selectedItem} />) || (
-            <DetalhesContent dados={selectedItem} item={item} />
-          )}
+          ((item === 'clausulas' || item === 'clausulaMinuta' || item === 'funcoes') && (
+            <DetalhesTab item={item} dados={selectedItem} />
+          )) || <DetalhesContent dados={selectedItem} item={item} />}
       </DialogContent>
     </Dialog>
   );
@@ -57,6 +66,10 @@ function DetalhesTab({ item, dados }) {
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
     ...((item === 'clausulas' && [{ value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
+      (item === 'clausulaMinuta' && [
+        { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
+        { value: 'Cláusulas opcionais', component: <OpcoesClausula /> },
+      ]) ||
       (item === 'funcoes' && [
         { value: 'Grupos', component: <UtilizadorInfo dados={dados?.grupos?.map(({ designacao }) => designacao)} /> },
         { value: 'Permissões', component: <UtilizadorInfo dados={dados?.acessos} /> },
@@ -79,7 +92,7 @@ function DetalhesTab({ item, dados }) {
 
 // ----------------------------------------------------------------------
 
-UtilizadorInfo.propTypes = { dados: PropTypes.object };
+UtilizadorInfo.propTypes = { dados: PropTypes.array };
 
 function UtilizadorInfo({ dados = [] }) {
   return (
@@ -101,7 +114,7 @@ function UtilizadorInfo({ dados = [] }) {
 
 // ----------------------------------------------------------------------
 
-AlineasClausula.propTypes = { dados: PropTypes.object };
+AlineasClausula.propTypes = { dados: PropTypes.array };
 
 function AlineasClausula({ dados = [] }) {
   return (
@@ -135,7 +148,15 @@ function AlineasClausula({ dados = [] }) {
 DetalhesContent.propTypes = { dados: PropTypes.object, item: PropTypes.string };
 
 export function DetalhesContent({ dados = null, item = '' }) {
+  const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.gaji9);
+  const cor = (dados?.revogado && 'error') || (dados?.em_vigor && 'success') || (dados?.em_analise && 'warning');
+  const est = (dados?.em_vigor && 'Em vigor') || (dados?.revogado && 'Revogado') || (dados?.em_analise && 'Em análise');
+
+  const ativarDesativado = () => {
+    const params = { msg: `Cláusula ${dados?.ativo ? 'desativado' : 'ativado'}`, getItem: 'clausula' };
+    dispatch(updateItem('ativar clausula', null, params));
+  };
 
   return (
     <>
@@ -161,21 +182,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     {item === 'Minuta' && (
                       <TableRowItem
                         title="Estado:"
-                        item={
-                          <Label
-                            color={
-                              (dados?.revogado && 'error') ||
-                              (dados?.em_vigor && 'success') ||
-                              (dados?.em_analise && 'warning') ||
-                              'default'
-                            }
-                          >
-                            {(dados?.em_vigor && 'Em vigor') ||
-                              (dados?.revogado && 'Revogado') ||
-                              (dados?.em_analise && 'Em análise') ||
-                              'Desconhecido'}
-                          </Label>
-                        }
+                        item={<Label color={cor || 'default'}>{est || 'Desconhecido'}</Label>}
                       />
                     )}
                     <TableRowItem
@@ -263,7 +270,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                       <TableRowItem title="Condicional:" item={<LabelSN item={dados?.condicional} />} />
                     )}
                     <TableRowItem
-                      title="Data entrada em vigor:"
+                      title="Entrada em vigor:"
                       text={dados?.data_vigor ? ptDateTime(dados?.data_vigor) : ''}
                     />
                     <TableRowItem title="Publicado por:" text={dados?.cc_vigor} />
@@ -273,7 +280,23 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     />
                     <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
                     {dados?.nota && <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />}
-                    {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
+                    {'ativo' in dados && (
+                      <TableRowItem
+                        title="Ativo:"
+                        item={
+                          item === 'clausulas' ? (
+                            <FormControlLabel
+                              label={dados?.ativo ? 'Sim' : 'Não'}
+                              control={
+                                <Switch checked={dados?.ativo} onClick={() => ativarDesativado()} size="small" />
+                              }
+                            />
+                          ) : (
+                            <LabelSN item={dados?.ativo} />
+                          )
+                        }
+                      />
+                    )}
                     <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                   </TableBody>
                 </Table>

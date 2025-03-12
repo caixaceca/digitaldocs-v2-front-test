@@ -27,9 +27,7 @@ import { ArquivarForm, DesarquivarForm } from './form/arquivo';
 
 // ----------------------------------------------------------------------
 
-Intervencao.propTypes = { colaboradoresList: PropTypes.array };
-
-export default function Intervencao({ colaboradoresList }) {
+export default function Intervencao() {
   const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);
   const { processo, isSaving } = useSelector((state) => state.digitaldocs);
@@ -55,20 +53,13 @@ export default function Intervencao({ colaboradoresList }) {
   return (
     <>
       {destinos?.devolucoes?.length > 0 && (
-        <Encaminhar
-          title="DEVOLVER"
-          gerencia={gerencia}
-          fluxoId={processo?.fluxo_id}
-          destinos={destinos?.devolucoes}
-          colaboradoresList={colaboradoresList}
-        />
+        <Encaminhar title="DEVOLVER" gerencia={gerencia} fluxoId={processo?.fluxo_id} destinos={destinos?.devolucoes} />
       )}
 
       {destinos?.seguimentos?.length > 0 && (
         <Encaminhar
           gerencia={gerencia}
           destinos={destinos?.seguimentos}
-          colaboradoresList={colaboradoresList}
           title={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
         />
       )}
@@ -92,10 +83,7 @@ export default function Intervencao({ colaboradoresList }) {
           <Finalizar id={processo?.id} cativos={processo?.cativos} />
         )}
 
-      <Libertar
-        isSaving={isSaving}
-        dados={{ id: processo?.id, fluxoId: processo?.fluxo_id, estadoId: processo?.estado_processo?.estado_id }}
-      />
+      <Libertar dados={{ id: processo?.id, estadoId: processo?.estado_processo?.estado_id }} />
 
       <DefaultAction
         label="EDITAR"
@@ -117,10 +105,9 @@ Encaminhar.propTypes = {
   gerencia: PropTypes.bool,
   destinos: PropTypes.array,
   fluxoId: PropTypes.number,
-  colaboradoresList: PropTypes.array,
 };
 
-export function Encaminhar({ title, destinos, gerencia = false, colaboradoresList = [], fluxoId = null }) {
+export function Encaminhar({ title, destinos, gerencia = false, fluxoId = null }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
@@ -134,15 +121,7 @@ export function Encaminhar({ title, destinos, gerencia = false, colaboradoresLis
         }}
         label={title}
       />
-      {open && (
-        <EncaminharStepper
-          title={title}
-          destinos={destinos}
-          gerencia={gerencia}
-          onClose={() => onClose()}
-          colaboradoresList={colaboradoresList}
-        />
-      )}
+      {open && <EncaminharStepper title={title} destinos={destinos} gerencia={gerencia} onClose={() => onClose()} />}
     </>
   );
 }
@@ -241,14 +220,14 @@ export function Cancelar({ id, estadoId, fechar = false }) {
 
 // --- LIBERTAR PROCESSO -------------------------------------------------------------------------------------
 
-Libertar.propTypes = { dados: PropTypes.object, isSaving: PropTypes.bool };
+Libertar.propTypes = { dados: PropTypes.object };
 
-export function Libertar({ dados, isSaving }) {
+export function Libertar({ dados }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
       <DefaultAction color="warning" label="LIBERTAR" handleClick={onOpen} />
-      {open && <LibertarForm dados={dados} onClose={() => onClose()} isSaving={isSaving} />}
+      {open && <LibertarForm dados={dados} onClose={() => onClose()} />}
     </>
   );
 }
@@ -261,16 +240,14 @@ export function Atribuir({ dados }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
 
-  const atribuirClick = () => {
+  const handleClick = () => {
     onOpen();
-    if (dados?.estadoId) {
-      dispatch(getFromParametrizacao('colaboradoresEstado', { id: dados?.estadoId }));
-    }
+    if (dados?.estadoId) dispatch(getFromParametrizacao('colaboradoresEstado', { id: dados?.estadoId }));
   };
 
   return (
     <>
-      <DefaultAction color="info" label="ATRIBUIR" handleClick={() => atribuirClick()} />
+      <DefaultAction color="info" label="ATRIBUIR" handleClick={() => handleClick()} />
       {open && <AtribuirForm dados={dados} onClose={() => onClose()} />}
     </>
   );
@@ -314,9 +291,7 @@ function destinosProcesso(processo, aberturaESemValGFC) {
   const seguimentos = [];
   const destinosFora = [];
   processo?.destinos?.forEach((row) => {
-    if (processo?.uo_origem_id !== row?.uo_id) {
-      destinosFora.push(row?.nome);
-    }
+    if (processo?.uo_origem_id !== row?.uo_id) destinosFora.push(row?.nome);
     const destino = {
       modo: row.modo,
       label: row?.nome,
@@ -327,14 +302,9 @@ function destinosProcesso(processo, aberturaESemValGFC) {
       requer_parecer: row?.requer_parecer,
     };
     if (row.modo === 'Seguimento') {
-      if (aberturaESemValGFC && row?.nome?.includes('Compliance')) {
-        seguimentos?.push(destino);
-      } else if (!aberturaESemValGFC) {
-        seguimentos?.push(destino);
-      }
-    } else {
-      devolucoes.push(destino);
-    }
+      if (aberturaESemValGFC && row?.nome?.includes('Compliance')) seguimentos?.push(destino);
+      else if (!aberturaESemValGFC) seguimentos?.push(destino);
+    } else devolucoes.push(destino);
   });
 
   return { seguimentos, devolucoes, destinosFora };

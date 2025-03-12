@@ -22,10 +22,11 @@ import { getAccessToken } from './intranet';
 const initialState = {
   done: '',
   error: '',
+  modalGaji9: '',
   isEdit: false,
-  idDelete: false,
   isSaving: false,
   isLoading: false,
+  adminGaji9: false,
   isOpenModal: false,
   isLoadingDoc: false,
   credito: null,
@@ -72,6 +73,11 @@ const slice = createSlice({
       actionDelete(state, action.payload);
     },
 
+    setModal(state, action) {
+      state.modalGaji9 = action.payload.item;
+      state.selectedItem = action.payload.dados;
+    },
+
     openModal(state, action) {
       actionOpenModal(state, action.payload);
     },
@@ -86,7 +92,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, getSuccess, closeModal } = slice.actions;
+export const { openModal, setModal, getSuccess, closeModal } = slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -113,7 +119,6 @@ export function getFromGaji9(item, params) {
         (item === 'credito' && `${BASEURLGAJI9}/v1/suportes/creditos/detail?credito_id=${params?.id}`) ||
         (item === 'entidade' && `${BASEURLGAJI9}/v1/suportes/entidades/detail?entidade_id=${params?.id}`) ||
         (item === 'gerarDocumento' && `${BASEURLGAJI9}/v1/minutas/gerar/documento?minuta_id=${params?.id}`) ||
-        (item === 'ordenarClausulas' && `${BASEURLGAJI9}/v1/minutas/ordenar/clausulas?minuta_id=${params?.id}`) ||
         ((item === 'utilizador' || item === 'funcao') &&
           `${BASEURLGAJI9}/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
@@ -154,6 +159,8 @@ export function getFromGaji9(item, params) {
             })
           );
         } else if (item === 'funcao' || item === 'utilizador') {
+          if (item === 'utilizador' && response.data?.objeto?.utilizador?._role === 'ADMIN')
+            dispatch(slice.actions.getSuccess({ item: 'adminGaji9', dados: true }));
           dispatch(
             slice.actions.getSuccess({
               item: params?.item || item,
@@ -198,7 +205,7 @@ export function getDocumento(item, params) {
         (item === 'prevContrato' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}`) ||
         (item === 'minuta' &&
-          `${BASEURLGAJI9}/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}${params?.isento ? `&isento_comissao=true` : ''}`) ||
+          `${BASEURLGAJI9}/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
         '';
       if (apiUrl) {
         const response = await axios.get(apiUrl, {
@@ -254,12 +261,13 @@ export function createItem(item, dados, params) {
         (item === 'colaboradorGrupo' && `${BASEURLGAJI9}/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/definir`) ||
         (item === 'clonarMinuta' && `${BASEURLGAJI9}/v1/minutas/com/base?minuta_base_id=${params?.id}`) ||
-        (item === 'fiadores' && `${BASEURLGAJI9}/v1/suportes/creditos/fiadores?credito_id=${params?.id}`) ||
+        (item === 'componentesMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis`) ||
         (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
+        (item === 'intervenientes' && `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
+        (item === 'coposicaoMinuta' &&
+          `${BASEURLGAJI9}/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=false`) ||
         (item === 'regrasClausula' &&
           `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}`) ||
-        (item === 'comporMinuta' &&
-          `${BASEURLGAJI9}/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=${params?.clausulasGarant}`) ||
         (item === 'contratos' &&
           `${BASEURLGAJI9}/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}`) ||
         '';
@@ -270,8 +278,8 @@ export function createItem(item, dados, params) {
           const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
           dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
-        } else if (params?.getSuccess) {
-          dispatch(getSuccess({ item: params?.getSuccess, dados: response.data?.objeto }));
+        } else if (params?.getItem) {
+          dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
         } else if (params?.getList) {
           dispatch(getFromGaji9(item, { id: params?.creditoId || params?.id }));
         } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas' || item === 'credito') {
@@ -332,8 +340,8 @@ export function updateItem(item, dados, params) {
         (item === 'utilizadoresGrupo' && `${BASEURLGAJI9}/v1/acs/utilizadores/grupo?id=${params?.id}`) ||
         (item === 'datas contrato' && `${BASEURLGAJI9}/v1/contratos/entrega?codigo=${params?.codigo}`) ||
         (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/atualizar?id=${params?.id}`) ||
+        (item === 'removeGarant' && `${BASEURLGAJI9}/v1/minutas/remover/tipos_garantias?id=${params?.id}`) ||
         (item === 'garantiasMinuta' && `${BASEURLGAJI9}/v1/minutas/adicionar/tipos_garantias?id=${params?.id}`) ||
-        (item === 'removerGaranMinuta' && `${BASEURLGAJI9}/v1/minutas/remover/tipos_garantias?id=${params?.id}`) ||
         (item === 'coposicaoMinuta' && `${BASEURLGAJI9}/v1/minutas/atualizar/composicao?minuta_id=${params?.id}`) ||
         (item === 'clausulaMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/atualizar/clausula?minuta_id=${params?.minutaId}&clausula_id=${params?.id}`) ||
@@ -352,39 +360,29 @@ export function updateItem(item, dados, params) {
             await dispatch(getFromGaji9('contratos', { id: params?.creditoId }));
           } else {
             const response = await axios.patch(apiUrl, dados, options);
-            dispatch(slice.actions.getSuccess({ item: 'idDelete', dados: false }));
-            dispatch(slice.actions.getSuccess({ item: params?.item || item, dados: response.data?.objeto || null }));
+            dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: null }));
+            dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: response.data?.objeto || null }));
           }
         } else {
           const response = await axios.put(apiUrl, dados, options);
-          if (item === 'prg') {
-            await dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
-          } else if (item === 'infoCaixa' || item === 'credito') {
-            await dispatch(getSuccess({ item, dados: response.data?.objeto }));
-          } else if (item === 'minutas' || item === 'coposicaoMinuta' || item === 'clausulaMinuta') {
-            await dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto }));
-          } else if (item === 'Versionar') {
-            await dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
-          } else if (item === 'variaveis') {
-            await dispatch(getFromGaji9(item));
-          } else {
+          if (item === 'prg') dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
+          else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
+          else if (item === 'Versionar') dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
+          else {
+            const dadosItem =
+              (item === 'colaboradorGrupo' && JSON.parse(dados)) ||
+              (item === 'componentes' && params?.values) ||
+              response.data?.clausula ||
+              response.data?.objeto ||
+              null;
             dispatch(
-              slice.actions.updateSuccess({
-                item: params?.item || item,
-                item1: params?.item1 || '',
-                dados:
-                  (item === 'colaboradorGrupo' && JSON.parse(dados)) ||
-                  (item === 'componentes' && params?.values) ||
-                  response.data?.clausula ||
-                  response.data?.objeto ||
-                  null,
-              })
+              slice.actions.updateSuccess({ item: params?.item || item, item1: params?.item1 || '', dados: dadosItem })
             );
           }
         }
-        params?.afterSuccess?.();
-        doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
       }
+      params?.afterSuccess?.();
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -405,8 +403,11 @@ export function deleteItem(item, params) {
         (item === 'clausulas' && `${BASEURLGAJI9}/v1/clausulas?id=${params?.id}`) ||
         (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos?grupo_id=${params?.id}`) ||
         (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos?recurso_id=${params?.id}`) ||
-        (item === 'participantes' &&
-          `${BASEURLGAJI9}/v1/suportes/creditos/fiadores?credito_id=${params?.id}&numero_entidade=${params?.numero}`) ||
+        (item === 'clausulaMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
+        (item === 'componentesMinuta' &&
+          `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
+        (item === 'intervenientes' &&
+          `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}&participante_id=${params?.numero}`) ||
         (item === 'eliminarRegra' &&
           `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}&clausula_condicional_id=${params?.condicionalId}`) ||
         '';
@@ -418,7 +419,7 @@ export function deleteItem(item, params) {
           const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
           dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
-        } else if (params?.getSuccess) dispatch(getSuccess({ item: params?.getSuccess, dados: response.data?.objeto }));
+        } else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
         else dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
       }
       params?.afterSuccess?.();

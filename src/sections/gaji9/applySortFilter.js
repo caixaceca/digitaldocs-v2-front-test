@@ -1,7 +1,7 @@
 // utils
 import { normalizeText } from '../../utils/formatText';
 // hooks
-import { applySort } from '../../hooks/useTable';
+import { applySort, getComparator } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
@@ -50,14 +50,20 @@ export function listaGarantias(tiposGarantias) {
   return tiposGarantias?.map(({ id, designacao, descritivo }) => ({ id, label: designacao || descritivo }));
 }
 
-export function listaClausulas(clausulas, idsClausulas) {
-  return clausulas
-    ?.filter((item) => !idsClausulas?.includes(item?.id))
-    ?.map((row) => ({
+export function listaClausulas(clausulas) {
+  return applySort(
+    clausulas?.map((row) => ({
       id: row?.id,
       numero_ordem: row?.numero_ordem,
-      label: `${row?.solta ? 'Cláusula solta' : row?.titulo} (ID: ${row?.id})`,
-    }));
+      label: `${
+        (row?.solta && 'SOLTA') ||
+        (row?.seccao_identificacao && 'IDENTIFICAÇÃO') ||
+        (row?.seccao_identificacao_caixa && 'IDENTIFICAÇÃO CAIXA') ||
+        row?.descritivo
+      } - ${row?.solta ? 'Cláusula solta' : row?.titulo} (ID: ${row?.id})`,
+    })),
+    getComparator('asc', 'numero_ordem')
+  );
 }
 
 export function dadosComColaborador(dados, colaboradores) {

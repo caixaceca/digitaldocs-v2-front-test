@@ -64,7 +64,6 @@ ValidarMultiploForm.propTypes = {
 export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const defaultValues = useMemo(
@@ -97,7 +96,7 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
               data_rececao_sisp: fase === 'Emissão' ? row.dataSisp : '',
             }))
           ),
-          { mail, balcao, msg: 'Receção dos cartões confirmada' }
+          { balcao, msg: 'Receção dos cartões confirmada' }
         )
       );
     } catch (error) {
@@ -178,7 +177,6 @@ ConfirmarPorDataForm.propTypes = {
 export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
@@ -204,7 +202,7 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
             data_emissao: format(values.data, 'yyyy-MM-dd'),
             data_rececao_sisp: fase === 'Emissão' ? values.dataSisp : null,
           }),
-          { mail, fase, balcao: balcao?.id, msg: 'Receção dos cartões confirmada' }
+          { fase, balcao: balcao?.id, msg: 'Receção dos cartões confirmada' }
         )
       );
     } catch (error) {
@@ -250,7 +248,7 @@ BalcaoEntregaForm.propTypes = { onCancel: PropTypes.func };
 export function BalcaoEntregaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
   const uosList = uos
     ?.filter((row) => row?.tipo === 'Agências')
@@ -279,10 +277,9 @@ export function BalcaoEntregaForm({ onCancel }) {
       } else {
         dispatch(
           updateItem('alterar balcao', JSON.stringify({ balcaoEntrega: values?.balcao?.id }), {
-            mail,
-            id: selectedItem.id,
+            id: selectedItem?.id,
             msg: 'Balcão de entrega alterado',
-            afterSuccess: () => dispatch(alterarBalcaopSuccess({ id: selectedItem.id, balcao: values?.balcao?.id })),
+            afterSuccess: () => dispatch(alterarBalcaopSuccess({ id: selectedItem?.id, balcao: values?.balcao?.id })),
           })
         );
       }
@@ -330,10 +327,10 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
     //
     onSort,
   } = useTable({ defaultOrder: 'asc', defaultOrderBy: 'numero' });
+
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [uoData, setUoData] = useState(false);
-  const { mail } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
@@ -350,7 +347,7 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
         updateItem(
           'anular por balcao e data',
           JSON.stringify({ balcao: values?.uo?.id, data_emissao: format(values.data, 'yyyy-MM-dd') }),
-          { mail, emissao: fase === 'Emissão' ? 'true' : 'false', msg: 'Confirmação anulada' }
+          { emissao: fase === 'Emissão' ? 'true' : 'false', msg: 'Confirmação anulada' }
         )
       );
     } catch (error) {
@@ -360,13 +357,8 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
 
   const handleAnular = async () => {
     try {
-      dispatch(
-        updateItem('anular multiplo', JSON.stringify(selected?.map((row) => ({ id: row }))), {
-          mail,
-          msg: 'Confirmação anulada',
-          emissao: fase === 'Emissão' ? 'true' : 'false',
-        })
-      );
+      const params = { msg: 'Confirmação anulada', emissao: fase === 'Emissão' ? 'true' : 'false' };
+      dispatch(updateItem('anular multiplo', JSON.stringify(selected?.map((row) => ({ id: row }))), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -527,7 +519,7 @@ export function Detalhes({ closeModal }) {
                     }
                     text1={
                       selectedItem?.emissao_validado ? (
-                        <Stack spacing={0.5} sx={{ mt: 1 }}>
+                        <Stack sx={{ mt: 1 }}>
                           {selectedItem?.emissao_validado_por && (
                             <Criado tipo="user" value={selectedItem?.emissao_validado_por} baralhar />
                           )}
