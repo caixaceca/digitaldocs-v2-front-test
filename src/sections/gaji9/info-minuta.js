@@ -120,7 +120,7 @@ export function TableInfoMinuta({ item, onClose }) {
         <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
         <TableBody>
           {isLoading && isNotFound ? (
-            <SkeletonTable row={10} column={(item === 'tiposGarantias' && 3) || 4} />
+            <SkeletonTable row={item === 'clausulaMinuta' ? 10 : 4} column={(item === 'tiposGarantias' && 3) || 4} />
           ) : (
             dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
               <TableRow hover key={`${item}_${index}`}>
