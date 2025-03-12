@@ -122,15 +122,14 @@ export default function PageMinutaDetalhes() {
                     )}
                     {minuta?.em_analise && currentTab === 'Cláusulas' && (
                       <>
-                        <DefaultAction label="ADICIONAR" handleClick={() => handleAction('compor')} />
+                        <DefaultAction button label="Adicionar" handleClick={() => handleAction('compor')} />
                         {minuta?.clausulas?.length > 0 && (
-                          <DefaultAction label="COMPOSIÇÃO" handleClick={() => handleAction('composicao')} />
+                          <DefaultAction button label="Composição" handleClick={() => handleAction('composicao')} />
                         )}
                       </>
                     )}
                   </>
                 )}
-
                 {minuta?.clausulas?.length > 0 && currentTab !== 'Tipos de garantia' && (
                   <DefaultAction button icon="pdf" label="Previsualizar" handleClick={() => handleAction('preview')} />
                 )}

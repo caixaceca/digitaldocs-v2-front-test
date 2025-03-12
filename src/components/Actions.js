@@ -86,13 +86,14 @@ export function DefaultAction({
   return button ? (
     <Stack>
       <Button
-        color={color}
         variant={variant}
         onClick={handleClick}
         size={small ? 'small' : 'medium'}
+        color={label === 'Composição' ? 'warning' : color}
         sx={{ color: variant === 'contained' && color === 'success' && 'common.white' }}
         startIcon={
           (label === 'Clonar' && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
+          (label === 'Composição' && <Editar sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Procurar' && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
           (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
           (icon === 'pdf' && getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
@@ -120,7 +121,7 @@ export function DefaultAction({
             (label === 'VERSIONAR' && 'info') ||
             ((label === 'REVOGAR' || label === 'ELIMINAR') && 'error') ||
             ((label === 'PRÓXIMO' || label === 'ANTERIOR') && 'inherit') ||
-            ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || label === 'OPÇÕES') && 'warning') ||
+            ((label === 'EDITAR' || label === 'OPÇÕES') && 'warning') ||
             color
           }
           {...others}
@@ -163,14 +164,12 @@ export function DefaultAction({
             ((label === 'Gerir acessos' || label === 'Transições') && <SwapHorizOutlinedIcon />) ||
             (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
+            ((label === 'EDITAR' || icon === 'editar') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
             ((label === 'Adicionar' || icon === 'adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'INFO. DAS CONTAS' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
-            ((label === 'EDITAR' || label === 'COMPOSIÇÃO' || icon === 'editar') && (
-              <Editar sx={{ width: small ? 18 : 22 }} />
-            )) ||
             ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />)}
         </Fab>
       </Tooltip>
