@@ -96,6 +96,18 @@ export const { openModal, setModal, getSuccess, closeModal } = slice.actions;
 
 // ----------------------------------------------------------------------
 
+export function getInfoGaji() {
+  return async (dispatch) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    dispatch(getFromGaji9('funcoes'));
+    dispatch(getFromGaji9('componentes'));
+    dispatch(getFromGaji9('tiposTitulares'));
+    dispatch(getFromGaji9('tiposGarantias'));
+  };
+}
+
+// ----------------------------------------------------------------------
+
 export function getFromGaji9(item, params) {
   return async (dispatch) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));

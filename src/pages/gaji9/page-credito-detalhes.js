@@ -39,6 +39,7 @@ export default function PageCreditoDetalhes() {
   );
 
   useEffect(() => {
+    dispatch(getSuccess({ item: 'credito', dados: null }));
     if (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO']))
       dispatch(getFromGaji9('credito', { id }));
   }, [dispatch, utilizador, id]);

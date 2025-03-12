@@ -5,8 +5,8 @@ import Card from '@mui/material/Card';
 // utils
 import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // redux
-import { getFromGaji9 } from '../../redux/slices/gaji9';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getFromGaji9, getInfoGaji } from '../../redux/slices/gaji9';
 // guards
 import { LoadingPanel } from '../../components/LoadingScreen';
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -32,12 +32,7 @@ export default function AcessoGaji9({ children, item }) {
   }, [dispatch, utilizador, cc?.perfil?.id_aad]);
 
   useEffect(() => {
-    if (temAcesso) {
-      dispatch(getFromGaji9('funcoes'));
-      dispatch(getFromGaji9('componentes'));
-      dispatch(getFromGaji9('tiposTitulares'));
-      dispatch(getFromGaji9('tiposGarantias'));
-    }
+    if (temAcesso) dispatch(getInfoGaji());
   }, [dispatch, temAcesso]);
 
   return isLoading && !utilizador ? (
