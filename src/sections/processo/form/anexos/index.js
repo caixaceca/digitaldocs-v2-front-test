@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // hooks
 import useAnexos from '../../../../hooks/useAnexos';
@@ -22,14 +22,14 @@ export default function Anexos({ outros, anexos }) {
   const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
 
   return (
-    <Box sx={{ width: 1 }}>
+    <Stack spacing={3} sx={{ width: 1 }}>
       {anexos?.length > 0 && (
-        <Card sx={{ p: 1, mt: 3, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <AnexosExistente anexos={anexos?.map((row) => ({ ...row, name: row?.nome }))} />
         </Card>
       )}
       {fields?.length === 0 && !outros ? (
-        <Card sx={{ p: 5, mt: 3, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <Card sx={{ p: 5, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Typography variant="body2" sx={{ textAlign: 'center', fontStyle: 'italic' }}>
             Este fluxo não possui Checklist...
           </Typography>
@@ -41,13 +41,13 @@ export default function Anexos({ outros, anexos }) {
           ))}
 
           {outros && (
-            <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+            <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
               <Typography sx={{ pb: 0.5, pl: 0.5, typography: 'overline' }}>Anexos</Typography>
               <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
             </Card>
           )}
         </>
       )}
-    </Box>
+    </Stack>
   );
 }

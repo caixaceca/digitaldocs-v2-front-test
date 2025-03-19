@@ -74,10 +74,10 @@ export default function FormOperacao({ dados }) {
             <GridItem>
               <RHFTextField name="finalidade_fundo" label="Finalidade do fundo" multiline minRows={2} maxRows={4} />
             </GridItem>
-            <GridItem>
-              <RHFTextField name="obs" multiline minRows={2} maxRows={4} label="Observação" />
-            </GridItem>
           </Grid>
+        </Card>
+        <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+          <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
         </Card>
       </Box>
       <ButtonsStepper onCancel={() => onClose()} labelCancel="Cancelar" />

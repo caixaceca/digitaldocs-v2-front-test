@@ -107,7 +107,7 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
         }
       />
       <DialogContent>
-        <ItemComponent item={selectedItem} rows={4}>
+        <ItemComponent item={selectedItem} rows={3}>
           {activeStep === 0 && <Identificacao onCancel={onClose} />}
           {activeStep === 1 && <Conteudo />}
           {activeStep === 2 && <Alineas />}

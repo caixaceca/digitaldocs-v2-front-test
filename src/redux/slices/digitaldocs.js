@@ -427,19 +427,13 @@ export function getProcesso(item, params) {
       dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
 
       const anexoPreview = (processo?.anexos || []).filter((item) => item?.ativo).find((row) => !!canPreview(row));
-      if (anexoPreview) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipoDoc: canPreview(anexoPreview) } }));
-      }
       dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
-
-      if (estado?.is_lock && estado?.estado_id && processo?.atribuidoAMim) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (anexoPreview)
+        dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipoDoc: canPreview(anexoPreview) } }));
+      if (estado?.is_lock && estado?.estado_id && processo?.atribuidoAMim)
         dispatch(getInfoProcesso('destinos', { id: processo?.id, estadoId: estado?.estado_id }));
-      }
+      dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

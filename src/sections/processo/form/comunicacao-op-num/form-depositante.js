@@ -87,7 +87,7 @@ export default function FormDepositante({ dados }) {
       methods={methods}
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
-      <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+      <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
         <Grid container spacing={3} justifyContent="center">
           <GridItem sm={values?.titular_ordenador ? 6 : 4}>
             <RHFSwitch

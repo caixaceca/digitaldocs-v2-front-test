@@ -1,4 +1,6 @@
 import PropTypes from 'prop-types';
+// @mui
+import Box from '@mui/material/Box';
 // redux
 import { useSelector } from '../../../../redux/store';
 // components
@@ -14,10 +16,10 @@ export default function ProcessoCON({ dados }) {
   const { activeStep } = useSelector((state) => state.stepper);
 
   return (
-    <>
+    <Box sx={{ pt: 3 }}>
       {activeStep === 0 && <FormOperacao dados={dados} />}
       {activeStep === 1 && <FormDepositante dados={dados} />}
       {activeStep === 2 && <FormAnexosCON dados={dados} />}
-    </>
+    </Box>
   );
 }

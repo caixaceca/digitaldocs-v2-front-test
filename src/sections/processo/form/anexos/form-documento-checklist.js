@@ -28,7 +28,7 @@ export default function FormDocumentosChecklist({ docIndex, dados }) {
   );
 
   return (
-    <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+    <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ pb: 1 }}>
         <Typography sx={{ pl: 0.5, typography: 'overline' }}>{dados?.designacao}</Typography>
         <DefaultAction

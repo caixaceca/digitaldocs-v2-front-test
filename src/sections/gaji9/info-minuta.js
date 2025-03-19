@@ -38,7 +38,7 @@ export default function InfoMinuta({ onCancel }) {
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
       <Stack sx={{ width: 1 }}>
-        <Card sx={{ p: 3, pt: 1, height: 1 }}>
+        <Card sx={{ p: 3, pt: 1 }}>
           <DetalhesContent dados={minuta} item="Minuta" />
         </Card>
       </Stack>
@@ -106,9 +106,10 @@ export function TableInfoMinuta({ item, onClose }) {
     else dispatch(deleteItem('clausulaMinuta', { ...params, msg, clausulaId: selectedItem?.clausula_id }));
   };
 
-  const openModal = (item, dados) => {
-    dispatch(setModal({ item, dados: item === 'clausulaMinuta' ? null : dados }));
-    if (item === 'clausulaMinuta') dispatch(getFromGaji9('clausula', { id: dados?.clausula_id, item: 'selectedItem' }));
+  const openModal = (modal, dados) => {
+    const getClausula = item === 'clausulaMinuta' && modal !== 'eliminar-item';
+    dispatch(setModal({ item: modal, isEdit: modal === 'form-clausula', dados: getClausula ? null : dados }));
+    if (getClausula) dispatch(getFromGaji9('clausula', { id: dados?.clausula_id, item: 'selectedItem' }));
   };
 
   return (
@@ -210,7 +211,7 @@ function GarantiaComponente({ onCancel, garantia = false, hideAdd = false }) {
   const dispatch = useDispatch();
 
   return (
-    <Card sx={{ p: 2, height: 1 }}>
+    <Card sx={{ p: 2 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="subtitle1">{garantia ? 'Tipos de garantias' : 'Componentes'}</Typography>
         {!hideAdd && (

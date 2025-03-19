@@ -70,7 +70,7 @@ export default function TableClausula({ inativos }) {
 
   const openModal = (modal, dados) => {
     const eliminar = modal === 'eliminar-clausula';
-    dispatch(setModal({ item: modal, dados: eliminar ? dados : null }));
+    dispatch(setModal({ item: modal, dados: eliminar ? dados : null, isEdit: modal === 'form-clausula' }));
     if (!eliminar) dispatch(getFromGaji9('clausula', { id: dados?.id, item: 'selectedItem' }));
   };
 
@@ -128,10 +128,16 @@ export default function TableClausula({ inativos }) {
                       <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                       <TableCell>{row?.componente || noDados()}</TableCell>
                       <TableCell width={10}>
-                        {row?.ultima_modificacao && (
-                          <Criado caption tipo="data" value={ptDateTime(row.ultima_modificacao)} />
+                        {(row?.ultima_modificacao || row?.modificado_em) && (
+                          <Criado
+                            caption
+                            tipo="data"
+                            value={ptDateTime(row?.ultima_modificacao || row?.modificado_em)}
+                          />
                         )}
-                        {row?.feito_por && <Criado tipo="user" value={row.feito_por} baralhar caption />}
+                        {(row?.feito_por || row?.modificador) && (
+                          <Criado tipo="user" value={row?.feito_por || row?.modificador} baralhar caption />
+                        )}
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">

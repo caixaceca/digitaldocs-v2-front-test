@@ -75,6 +75,7 @@ const slice = createSlice({
 
     setModal(state, action) {
       state.modalGaji9 = action.payload.item;
+      state.isEdit = !!action.payload.isEdit;
       state.selectedItem = action.payload.dados;
     },
 

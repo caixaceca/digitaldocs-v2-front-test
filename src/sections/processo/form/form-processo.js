@@ -2,11 +2,13 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 // @mui
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import CircleIcon from '@mui/icons-material/Circle';
+import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // redux
@@ -20,9 +22,10 @@ import { PATH_DIGITALDOCS } from '../../../routes/paths';
 import { useNotificacao } from '../../../hooks/useNotificacao';
 // components
 import Steps from '../../../components/Steps';
+import { Fechar } from '../../../components/Actions';
 import { FormLoading } from '../../../components/skeleton';
 import { SearchNotFound } from '../../../components/table';
-import { DialogConfirmar, DialogTitleAlt } from '../../../components/CustomDialog';
+import { DialogConfirmar } from '../../../components/CustomDialog';
 // sections
 import ProcessoInterno from './interno';
 import ProcessoCredito from './credito';
@@ -86,30 +89,33 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
 
   return (
     <>
-      <Dialog open fullWidth maxWidth="lg">
-        <DialogTitleAlt
-          onClose={() => onClose()}
-          title={isEdit ? 'Atualizar processo' : 'Adicionar processo'}
-          subtitle={
-            <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold' }}>
-              <CircleIcon sx={{ height: 10, width: 18, color: estado?.nome ? 'success.main' : 'error.main' }} />
-              {estado?.nome || 'Nenhum estado selecionado...'}
-            </Typography>
-          }
-          stepper={
-            fluxo ? (
-              <Steps
-                sx={{ mt: 4, mb: 1 }}
-                activeStep={activeStep}
-                steps={
-                  (fluxo?.iscredito && ['Info. crédito', 'Garantias', 'Anexos']) ||
-                  (fluxo?.iscon && ['Operação', 'Depositante', 'Anexos']) || ['Dados gerais', 'Anexos']
-                }
-              />
-            ) : null
-          }
-          action={fluxo && <Assunto dados={{ fluxo, changeFluxo, fluxosList, small: true }} />}
-        />
+      <Dialog open fullWidth maxWidth={fluxo ? 'lg' : 'md'}>
+        <DialogTitle sx={{ p: 0 }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={3} sx={{ p: 2 }}>
+            <Stack>
+              {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
+              <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold' }}>
+                <CircleIcon sx={{ height: 10, width: 18, color: estado?.nome ? 'success.main' : 'error.main' }} />
+                {estado?.nome || 'Nenhum estado selecionado...'}
+              </Typography>
+            </Stack>
+            {fluxo && <Assunto dados={{ fluxo, changeFluxo, fluxosList, small: true }} />}
+          </Stack>
+          {fluxo && (
+            <Steps
+              sx={{ mt: 1, mb: 0 }}
+              activeStep={activeStep}
+              // sx={{ p: 1, mt: 1, mb: 0, bgcolor: 'background.neutral' }}
+              steps={
+                (fluxo?.iscredito && ['Info. crédito', 'Garantias', 'Anexos']) ||
+                (fluxo?.iscon && ['Operação', 'Depositante', 'Anexos']) || ['Dados gerais', 'Anexos']
+              }
+            />
+          )}
+          <Box sx={{ top: 15, right: 15, position: 'absolute' }}>
+            <Fechar handleClick={() => onClose()} />
+          </Box>
+        </DialogTitle>
         <DialogContent>
           {isEdit && !fluxo ? (
             <FormLoading />
@@ -126,7 +132,7 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
               ) : (
                 <>
                   {!fluxo ? (
-                    <Stack justifyContent="center" alignItems="center" sx={{ py: 7 }}>
+                    <Stack justifyContent="center" alignItems="center" sx={{ py: 5, px: { xs: 0, md: 10 } }}>
                       <Assunto dados={{ fluxo, changeFluxo, fluxosList }} />
                     </Stack>
                   ) : (
@@ -166,8 +172,10 @@ export function Assunto({ dados }) {
       getOptionLabel={(option) => option?.assunto}
       onChange={(event, newValue) => changeFluxo(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      sx={{ minWidth: { xs: small ? 150 : 1, sm: small ? 250 : 1, md: small ? 400 : 600 } }}
-      renderInput={(params) => <TextField {...params} fullWidth label="Assunto" variant="filled" />}
+      sx={{ minWidth: { xs: 1, md: small ? 450 : 1 }, pr: { xs: 0, md: 5 } }}
+      renderInput={(params) => (
+        <TextField {...params} fullWidth label="Assunto" variant="standard" focused={small} color="success" />
+      )}
     />
   );
 }

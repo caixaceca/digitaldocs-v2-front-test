@@ -289,14 +289,14 @@ function numAnexos(processo) {
   let total = 0;
   let fora = false;
   if (processo?.anexos) total += processo.anexos?.length;
-  if (processo?.estados) {
-    processo?.estados.forEach((estado) => {
-      if (estado?.anexos) {
+  if (processo?.htransicoes) {
+    processo?.htransicoes.forEach((transicao) => {
+      if (transicao?.anexos) {
         fora = true;
-        total += estado.anexos?.length;
+        total += transicao.anexos?.length;
       }
-      if (estado?.pareceres) {
-        estado.pareceres.forEach((parecer) => {
+      if (transicao?.pareceres) {
+        transicao.pareceres.forEach((parecer) => {
           if (parecer?.anexos) {
             fora = true;
             total += parecer.anexos?.length;

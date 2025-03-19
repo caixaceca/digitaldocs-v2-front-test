@@ -90,7 +90,7 @@ export default function FormInfoInterno({ dados }) {
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
       <Box sx={{ width: 1 }}>
-        <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <DadosCliente noperacao={processo?.noperacao} fluxo={fluxo} />
         </Card>
         {(fluxo?.assunto === 'OPE DARH' || fluxo?.assunto === 'Transferência Internacional') && (
