@@ -17,7 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { updateItem, closeModal } from '../../../redux/slices/digitaldocs';
+import { updateItem, setModal } from '../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
 // hooks
 import useAnexos from '../../../hooks/useAnexos';
@@ -53,9 +53,8 @@ export function ArquivarForm({ naoFinal, onClose }) {
 
   const formSchema = Yup.object().shape({
     entidades: informarConta && Yup.string().required().label('Nº de entidade(s)'),
+    conta: informarConta && Yup.number().positive().required().label('Nº de conta'),
     data_entrada: Yup.date().typeError('Introduza uma data válida').required().label('Data de entrada'),
-    conta:
-      informarConta && Yup.number().positive().typeError('Introduza o nº de conta do titular').label('Nº de conta'),
   });
 
   const defaultValues = useMemo(
@@ -85,19 +84,9 @@ export function ArquivarForm({ naoFinal, onClose }) {
         data_entrada: format(values.data_entrada, 'yyyy-MM-dd'),
       };
       const anexos = new FormData();
-      await values?.anexos?.forEach((row) => {
-        anexos.append('anexos', row);
-      });
-
-      dispatch(
-        updateItem('arquivar', JSON.stringify(formData), {
-          anexos,
-          mfd: true,
-          id: processo?.id,
-          msg: 'Processo arquivado',
-          estadoId: processo?.estado_atual_id,
-        })
-      );
+      await values?.anexos?.forEach((row) => anexos.append('anexos', row));
+      const params = { id: processo?.id, msg: 'Processo arquivado', estadoId: processo?.estado_atual_id };
+      dispatch(updateItem('arquivar', JSON.stringify(formData), { anexos, ...params }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -132,14 +121,14 @@ export function ArquivarForm({ naoFinal, onClose }) {
               <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <RHFNumberField name="noperacao" label="Nº de operação" />
+              <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFTextField name="entidades" label="Nº entidade(s)" />
             </Grid>
             {processo?.assunto !== 'Encerramento de conta' && (
               <Grid item xs={12} sm={6}>
-                <RHFNumberField name="conta" label="Nº de conta" />
+                <RHFNumberField noFormat name="conta" label="Nº de conta" />
               </Grid>
             )}
             <Grid item xs={12}>
@@ -190,7 +179,11 @@ export function DesarquivarForm({ id, colaboradoresList }) {
         estado_id: values?.estado?.id,
         observacao: values?.observacao,
       };
-      const params = { id, msg: 'Processo desarquivado', afterSuccess: () => dispatch(closeModal()) };
+      const params = {
+        id,
+        msg: 'Processo desarquivado',
+        afterSuccess: () => dispatch(setModal({ modal: '', dados: null })),
+      };
       dispatch(updateItem('desarquivar', JSON.stringify(dados), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -198,7 +191,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
   };
 
   return (
-    <Dialog open onClose={() => dispatch(closeModal())} fullWidth maxWidth="sm">
+    <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="sm">
       <DialogTitle>Desarquivar</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -211,7 +204,12 @@ export function DesarquivarForm({ id, colaboradoresList }) {
             {values?.estado?.id && <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradoresList} />}
             <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
           </Stack>
-          <DialogButons color="error" label="Desarquivar" isSaving={isSaving} onCancel={() => dispatch(closeModal())} />
+          <DialogButons
+            color="error"
+            label="Desarquivar"
+            isSaving={isSaving}
+            onCancel={() => dispatch(setModal({ modal: '', dados: null }))}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>

@@ -168,7 +168,7 @@ export default function PageProcura() {
           sx={{ color: 'text.secondary' }}
           heading={
             <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
-              <Typography variant="h4">Procura:</Typography>
+              <Typography variant="h5">Procura:</Typography>
               {localStorage.getItem('fromArquivo') === 'true' && <Label sx={{ mt: 0.5 }}>Arquivo</Label>}
               {localStorage.getItem('tipoPesquisa') === 'avancada' ? (
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
@@ -248,9 +248,7 @@ export default function PageProcura() {
                         <TableCell align="center">
                           <DefaultAction
                             label="DETALHES"
-                            handleClick={() =>
-                              navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${row?.id}?from=Pesquisa`)
-                            }
+                            onClick={() => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${row?.id}?from=Pesquisa`)}
                           />
                         </TableCell>
                       </TableRow>

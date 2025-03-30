@@ -23,7 +23,7 @@ import { transicoesList } from '../../utils/formatObject';
 import { applySort, getComparator } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
+import { getFromParametrizacao, createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
 // components
 import {
   RHFEditor,
@@ -38,8 +38,6 @@ import {
 import GridItem from '../../components/GridItem';
 import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 //
-import PesosDecisao from './PesosDecisao';
-import { listaPerfis } from './applySortFilter';
 import { ItemComponent } from './ParametrizacaoForm';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,7 +84,9 @@ export function FluxoForm({ onCancel }) {
   const onSubmit = async () => {
     try {
       const params = { id: selectedItem?.id, msg: `Fluxo ${isEdit ? 'atualizado' : 'adicionado'}` };
-      dispatch((isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), params));
+      dispatch(
+        (isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), { ...params, getItem: 'selectedItem' })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -102,7 +102,7 @@ export function FluxoForm({ onCancel }) {
               <GridItem>
                 <RHFTextField name="assunto" label="Assunto" InputProps={{ readOnly }} />
                 {readOnly && (
-                  <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                  <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
                     *O nome do fluxo não pode ser alterado, está em uso para validações na aplicação.
                   </Typography>
                 )}
@@ -251,13 +251,9 @@ export function TransicaoForm({ onCancel, fluxoId }) {
     }
   };
 
-  const handleDelete = () => {
-    dispatch(deleteItem('transicoes', { item1: 'fluxo', id: selectedItem?.id, msg: 'Transição eliminada' }));
-  };
-
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>{selectedItem ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
@@ -276,13 +272,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
               <GridItem sm={4} children={<RHFSwitch name="hasopnumero" label="Indicar nº de operação" />} />
               <GridItem sm={4} children={<RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />} />
             </Grid>
-            <DialogButons
-              edit={isEdit}
-              isSaving={isSaving}
-              onCancel={onCancel}
-              handleDelete={handleDelete}
-              desc={isEdit ? 'eliminar esta transição' : ''}
-            />
+            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -298,6 +288,11 @@ export function ChecklistForm({ fluxo, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isEdit, isSaving, selectedItem, estados, documentos } = useSelector((state) => state.parametrizacao);
+
+  useEffect(() => {
+    dispatch(getFromParametrizacao('documentos'));
+  }, [dispatch]);
+
   const listaTransicoes = useMemo(
     () =>
       applySort(
@@ -338,16 +333,17 @@ export function ChecklistForm({ fluxo, onCancel }) {
   const onSubmit = async () => {
     try {
       const docs = (dados) => ({
-        ativo: dados?.ativo,
         obrigatorio: dados?.obrigatorio,
         transicao_id: dados?.transicao?.id,
+        ativo: isEdit ? dados?.ativo : true,
         tipo_documento_id: dados?.tipo_documento?.id,
       });
+      const getItem = isEdit ? '' : 'checklist';
       const formData = isEdit
         ? docs(values)
         : { fluxo_id: fluxo?.id, documentos: values?.documentos?.map((row) => docs(row)) };
       const params = { id: selectedItem?.id, msg: isEdit ? 'Documento atualizado' : 'Documento adicionados' };
-      dispatch((isEdit ? updateItem : createItem)('checklist', JSON.stringify(formData), params));
+      dispatch((isEdit ? updateItem : createItem)('checklist', JSON.stringify(formData), { ...params, getItem }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -400,75 +396,13 @@ export function ChecklistForm({ fluxo, onCancel }) {
                       />
                     </Stack>
                     {values.documentos.length > 1 && (
-                      <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                      <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
                     )}
                   </Stack>
                 ))}
               </Stack>
             )}
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-RegraTransicaoForm.propTypes = { transicao: PropTypes.number, onCancel: PropTypes.func };
-
-export function RegraTransicaoForm({ transicao, onCancel }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, selectedItem, estado } = useSelector((state) => state.parametrizacao);
-  const perfisList = useMemo(() => listaPerfis(estado?.perfis, colaboradores), [colaboradores, estado?.perfis]);
-
-  const formSchema = Yup.object().shape({
-    pesos: Yup.array(
-      Yup.object({
-        perfil: Yup.mixed().required().label('Colaborador'),
-        percentagem: Yup.number().positive().typeError().label('Percentagem'),
-      })
-    ),
-  });
-
-  const defaultValues = useMemo(() => ({ destribuir: false, pesos: [] }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
-    try {
-      dispatch(
-        createItem(
-          'regrasTransicao',
-          JSON.stringify(values?.pesos?.map((row) => ({ perfil_id: row?.perfil?.id, percentagem: row?.percentagem }))),
-          { transicaoId: transicao?.id, msg: 'Regra adicionada', estadoId: estado?.id }
-        )
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar regras' : 'Adicionar regras'}</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={1}>
-            <Grid container spacing={3} sx={{ mt: 0 }}>
-              <Transicao item={estado?.nome} transicao={transicao?.label} />
-              <GridItem children={<PesosDecisao perfisList={perfisList} />} />
-            </Grid>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -529,15 +463,7 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
             <GridItem sm={8} children={<RHFTextField name="assunto" label="Assunto" />} />
             <GridItem children={<RHFEditor simple name="corpo" />} />
           </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            desc={isEdit ? 'eliminar esta notificação' : ''}
-            handleDelete={() =>
-              dispatch(deleteItem('notificacao', { id: selectedItem?.id, msg: 'Notificação eliminada' }))
-            }
-          />
+          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -569,10 +495,10 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
       telefone: selectedItem?.telefone || '',
       data_inicio: fillData(selectedItem?.data_inicio, null),
       data_termino: fillData(selectedItem?.data_termino, null),
+      destinatarios: isEdit ? [] : [{ perfil: null, data_inicio: null, data_termino: null, telefone: '' }],
       perfil: isEdit
         ? perfisList?.find((row) => row?.email?.toLowerCase() === selectedItem?.email?.toLowerCase())
         : null,
-      destinatarios: isEdit ? [] : [{ perfil: null, data_inicio: null, data_termino: null, telefone: '' }],
     }),
     [selectedItem, isEdit, perfisList]
   );
@@ -650,7 +576,7 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
                         <RHFDatePicker label="Data de início" name={`destinatarios[${index}].data_inicio`} />
                         <RHFDatePicker label="Data de fim" name={`destinatarios[${index}].data_termino`} />
                         {values.destinatarios.length > 1 && (
-                          <DefaultAction color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                          <DefaultAction label="ELIMINAR" onClick={() => remove(index)} />
                         )}
                       </Stack>
                     </Grid>

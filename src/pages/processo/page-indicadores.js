@@ -61,7 +61,6 @@ export default function PageIndicadores() {
   return (
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        {/* <Button onClick={handleNotificationClick}>Enviar Notificação</Button> */}
         <TabsWrapper
           title="Indicadores"
           tab="tabIndicadores"

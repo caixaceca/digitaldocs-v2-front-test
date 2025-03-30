@@ -15,7 +15,7 @@ import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, setModal, closeModal } from '../../../redux/slices/digitaldocs';
+import { getAnexo, setModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
@@ -71,9 +71,8 @@ export default function Estados({ handleAceitar }) {
                       {row?.is_lock && row?.perfil_id === perfilId && (
                         <>
                           <DefaultAction
-                            color={temParecer ? 'warning' : 'success'}
                             label={temParecer ? 'EDITAR' : 'ADICIONAR'}
-                            handleClick={() => dispatch(setModal({ modal: 'parecer-estado', dados: row }))}
+                            onClick={() => dispatch(setModal({ modal: 'parecer-estado', dados: row }))}
                           />
 
                           <Libertar
@@ -83,7 +82,7 @@ export default function Estados({ handleAceitar }) {
                         </>
                       )}
                       {!row?.is_lock && (!row?.perfil_id || row?.perfil_id === perfilId) && (
-                        <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(row?.estado_id, 'paralelo')} />
+                        <DefaultAction label="ACEITAR" onClick={() => handleAceitar(row?.estado_id, 'paralelo')} />
                       )}
                     </>
                   )}
@@ -150,7 +149,7 @@ export default function Estados({ handleAceitar }) {
         );
       })}
       {isOpenModal === 'parecer-estado' && (
-        <ParecerForm onCancel={() => dispatch(closeModal())} processoId={processo?.id} estado />
+        <ParecerForm onCancel={() => dispatch(setModal({ modal: '', dados: null }))} processoId={processo?.id} estado />
       )}
     </Box>
   );

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -9,57 +9,31 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { transicoesList } from '../../utils/formatObject';
+import { noDados } from '../../utils/formatText';
+import { transicoesList, transicaoDesc } from '../../utils/formatObject';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, openModal, getSuccess } from '../../redux/slices/parametrizacao';
+import { getFromParametrizacao, getSuccess, setModal } from '../../redux/slices/parametrizacao';
 // Components
 import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
 import { CellChecked } from '../../components/Panel';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import {
-  FluxoForm,
-  ChecklistForm,
-  TransicaoForm,
-  ClonarFluxoForm,
-  NotificacaoForm,
-  RegraTransicaoForm,
-} from './form-fluxo';
 import { applySortFilter } from './applySortFilter';
 import { EstadoDetail } from './TableParametrizacao';
-import { Detalhes, DetalhesContent } from './Detalhes';
 
 // ----------------------------------------------------------------------
 
-InfoFluxo.propTypes = { onClose: PropTypes.func };
+TableInfoFluxo.propTypes = { item: PropTypes.string };
 
-export default function InfoFluxo({ onClose }) {
-  const { fluxo, isOpenView, isOpenModal } = useSelector((state) => state.parametrizacao);
-
-  return (
-    <>
-      <Card sx={{ p: 3, pt: 1 }}>
-        <DetalhesContent dados={fluxo} item="Fluxo" />
-      </Card>
-      {isOpenModal && <FluxoForm onCancel={() => onClose()} />}
-      {isOpenView && <ClonarFluxoForm onCancel={() => onClose()} />}
-    </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-TableInfoFluxo.propTypes = { item: PropTypes.string, transicao: PropTypes.object, onClose: PropTypes.func };
-
-export function TableInfoFluxo({ item, transicao = null, onClose }) {
+export default function TableInfoFluxo({ item }) {
   const {
     page,
     order,
@@ -79,35 +53,38 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
   const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
-  const { fluxo, estados, checklist, notificacoes, isOpenModal, isOpenView, isLoading } = useSelector(
-    (state) => state.parametrizacao
-  );
+  const { fluxo, estados, checklist, notificacoes, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
+  const transicoes = useMemo(() => transicoesList(fluxo?.transicoes, estados), [estados, fluxo?.transicoes]);
 
   const dataFiltered = applySortFilter({
     filter,
     comparator: getComparator(order, orderBy),
     dados:
       (item === 'checklist' && checklist) ||
+      (item === 'transicoes' && transicoes) ||
       (item === 'notificacoes' && notificacoes) ||
       (item === 'estados' && estadosList(fluxo?.transicoes, estados, uos)) ||
-      (item === 'transicoes' && transicoesList(fluxo?.transicoes, estados)) ||
       [],
   });
   const isNotFound = !dataFiltered.length;
 
-  const handleView = (dados) => {
-    dispatch(openModal('view'));
-    if (item === 'transicoes' && dados?.id)
-      dispatch(getFromParametrizacao('transicao', { id: dados?.id, item: 'selectedItem' }));
-    else if (item === 'notificacoes' && dados?.id) dispatch(getFromParametrizacao('destinatarios', { id: dados?.id }));
-    else if (item === 'checklist')
-      dispatch(getFromParametrizacao('checklistitem', { id: dados?.id, item: 'selectedItem' }));
-    else dispatch(getSuccess({ item: 'selectedItem', dados }));
+  const openModal = (modal, dados) => {
+    const id = dados?.id;
+    const dadosModal = item === 'notificacoes' || modal === 'eliminar-item' ? dados : null;
+    dispatch(setModal({ item: modal, isEdit: true, dados: dadosModal }));
+    if (modal !== 'eliminar-item') {
+      if (item === 'transicoes') dispatch(getFromParametrizacao('transicao', { id, item: 'selectedItem' }));
+      if (item === 'checklist') dispatch(getFromParametrizacao('checklistitem', { id, item: 'selectedItem' }));
+      if (item === 'notificacoes') {
+        dispatch(getSuccess({ item: 'destinatarios', dados: [] }));
+        dispatch(getFromParametrizacao('destinatarios', { id }));
+      }
+    }
   };
 
   return (
@@ -120,7 +97,7 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={((item === 'transicoes' || item === 'estados') && 5) || 4} row={10} />
+                  <SkeletonTable column={(item === 'notificacoes' && 4) || 5} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
@@ -139,32 +116,39 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
                         (item === 'estados' && <EstadoDetail row={row} />) ||
                         (item === 'checklist' && (
                           <>
-                            <TableCell>{row?.designacao || row?.tipo_documento}</TableCell>
+                            <TableCell>{row?.designacao}</TableCell>
+                            <TableCell>
+                              {transicaoDesc(transicoes?.find(({ id }) => id === row?.transicao_id)) ||
+                                noDados('(Não definido)')}
+                            </TableCell>
                             <CellChecked check={row.obrigatorio} />
                           </>
                         )) ||
                         (item === 'notificacoes' && (
                           <>
-                            <TableCell>{row.assunto}</TableCell>
                             <TableCell>
                               <Markdown own children={row.corpo} />
                             </TableCell>
                             <TableCell>{row.via}</TableCell>
                           </>
                         ))}
-                      {item === 'checklist' && <CellChecked check={row.ativo} />}
+                      {(item === 'checklist' || item === 'notificacoes') && <CellChecked check={row.ativo} />}
                       {item !== 'estados' && (
                         <TableCell align="center" width={50}>
                           <Stack direction="row" spacing={0.5} justifyContent="right">
                             {fluxo?.is_ativo && (
                               <>
-                                {(item === 'transicoes' || item === 'notificacoes') && (
-                                  <UpdateItem dados={{ dados: row }} />
+                                {item !== 'checklist' && (
+                                  <DefaultAction
+                                    small
+                                    label="ELIMINAR"
+                                    onClick={() => openModal('eliminar-item', row)}
+                                  />
                                 )}
-                                {item === 'checklist' && <UpdateItem dados={{ item: 'checklistitem', id: row?.id }} />}
+                                <DefaultAction small label="EDITAR" onClick={() => openModal(`form-${item}`, row)} />
                               </>
                             )}
-                            <DefaultAction handleClick={() => handleView(row)} label="DETALHES" />
+                            <DefaultAction small label="DETALHES" onClick={() => openModal('detalhes-fluxo', row)} />
                           </Stack>
                         </TableCell>
                       )}
@@ -189,18 +173,6 @@ export function TableInfoFluxo({ item, transicao = null, onClose }) {
           />
         )}
       </Card>
-
-      {isOpenView && <Detalhes item={item} closeModal={() => onClose()} />}
-      {isOpenModal && (
-        <>
-          {item === 'checklist' && <ChecklistForm onCancel={() => onClose()} fluxo={fluxo} />}
-          {item === 'transicoes' && <TransicaoForm onCancel={() => onClose()} fluxoId={fluxo?.id} />}
-          {item === 'regrasTransicao' && <RegraTransicaoForm onCancel={() => onClose()} transicao={transicao} />}
-          {item === 'notificacoes' && (
-            <NotificacaoForm onCancel={() => onClose()} transicao={transicao} fluxo={fluxo} />
-          )}
-        </>
-      )}
     </>
   );
 }
@@ -212,7 +184,7 @@ function estadosList(transicoes = [], estados = [], uos = []) {
   const estadosLista = [];
 
   const estadosMap = new Map(estados.map((estado) => [estado.id, estado]));
-  const uosMap = new Map(uos.map((uo) => [uo.id, uo.label]));
+  const uosMap = new Map(uos.map((uo) => [uo.id, { label: uo.label, balcao: uo.balcao }]));
 
   const processarEstado = (id) => {
     if (!id || estadosProcessados.has(id)) return;
@@ -220,8 +192,8 @@ function estadosList(transicoes = [], estados = [], uos = []) {
     const estado = estadosMap.get(id);
     if (!estado) return;
 
-    const uoLabel = uosMap.get(estado.uo_id) ?? estado.uo_id;
-    estadosLista.push({ ...estado, uo: uoLabel });
+    const uoData = uosMap.get(estado.uo_id) ?? { label: estado.uo_id, balcao: null };
+    estadosLista.push({ ...estado, uo: uoData.label, balcao: uoData.balcao });
     estadosProcessados.add(id);
   };
 
@@ -234,31 +206,39 @@ function estadosList(transicoes = [], estados = [], uos = []) {
 }
 
 function headerTable(item) {
-  return [
-    ...((item === 'transicoes' && [
-      { id: 'estado_inicial', label: 'Origem' },
-      { id: 'estado_final', label: 'Destino' },
-      { id: 'modo', label: 'Modo', align: 'center' },
-      { id: 'prazoemdias', label: 'Prazo', align: 'center' },
-    ]) ||
-      (item === 'estados' && [
-        { id: 'nome', label: 'Nome' },
-        { id: 'uo', label: 'U.O' },
-        { id: 'balcao', label: 'Nº de balcão' },
-        { id: 'is_inicial', label: 'Inicial', align: 'center' },
-        { id: 'is_final', label: 'Final', align: 'center' },
-      ]) ||
-      (item === 'checklist' && [
-        { id: 'designacao	', label: 'Designação' },
-        { id: 'obrigatorio', label: 'Obrigatório', align: 'center' },
-        { id: 'ativo', label: 'Ativo', align: 'center' },
-      ]) ||
-      (item === 'notificacoes' && [
-        { id: 'assunto', label: 'Assunto' },
-        { id: 'corpo', label: 'Corpo' },
-        { id: 'via', label: 'Via' },
-      ]) ||
+  const transicoes = [
+    { id: 'estado_inicial', label: 'Origem' },
+    { id: 'estado_final', label: 'Destino' },
+    { id: 'modo', label: 'Modo', align: 'center' },
+    { id: 'prazoemdias', label: 'Prazo', align: 'center' },
+  ];
+  const estados = [
+    { id: 'nome', label: 'Nome' },
+    { id: 'uo', label: 'U.O' },
+    { id: 'balcao', label: 'Nº de balcão' },
+    { id: 'is_inicial', label: 'Inicial', align: 'center' },
+    { id: 'is_final', label: 'Final', align: 'center' },
+  ];
+  const checklist = [
+    { id: 'designacao	', label: 'Designação' },
+    { id: '', label: 'Transição' },
+    { id: 'obrigatorio', label: 'Obrigatório', align: 'center' },
+    { id: 'ativo', label: 'Ativo', align: 'center' },
+  ];
+  const notificacoes = [
+    { id: 'corpo', label: 'Corpo' },
+    { id: 'via', label: 'Via' },
+    { id: 'ativo', label: 'Ativo', align: 'center' },
+  ];
+
+  const header = [
+    ...((item === 'estados' && estados) ||
+      (item === 'checklist' && checklist) ||
+      (item === 'transicoes' && transicoes) ||
+      (item === 'notificacoes' && notificacoes) ||
       []),
     ...(item !== 'estados' ? [{ id: '', width: 10 }] : []),
   ];
+
+  return header;
 }

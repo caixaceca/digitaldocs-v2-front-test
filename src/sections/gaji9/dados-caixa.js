@@ -41,10 +41,10 @@ export default function InfoCaixa({ onCancel, item }) {
             {!open && !isLoading && (
               <>
                 {!infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_INSTITUICAO'])) && (
-                  <DefaultAction label="ADICIONAR" handleClick={onOpen} />
+                  <DefaultAction label="ADICIONAR" onClick={onOpen} />
                 )}
                 {infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_INSTITUICAO'])) && (
-                  <DefaultAction color="warning" label="EDITAR" handleClick={onOpen} />
+                  <DefaultAction color="warning" label="EDITAR" onClick={onOpen} />
                 )}
               </>
             )}
@@ -109,9 +109,9 @@ export function InfoForm({ onCancel }) {
       <Grid container spacing={3} sx={{ pt: 3 }}>
         <GridItem sm={8} children={<RHFTextField name="nome" label="Nome" />} />
         <GridItem sm={4} children={<RHFTextField name="designacao" label="Designação" />} />
-        <GridItem sm={6} children={<RHFNumberField name="nif" label="NIF" />} />
+        <GridItem sm={6} children={<RHFNumberField noFormat name="nif" label="NIF" />} />
         <GridItem sm={6} children={<RHFNumberField name="capital_social" label="Capital social" />} />
-        <GridItem sm={6} children={<RHFNumberField name="num_matricula" label="Nº matricula" />} />
+        <GridItem sm={6} children={<RHFNumberField noFormat name="num_matricula" label="Nº matricula" />} />
         <GridItem sm={6} children={<RHFTextField name="local_matricula" label="Local matricula" />} />
         <GridItem sm={6} children={<RHFTextField name="morada_eletronico" label="Email" />} />
         <GridItem sm={6} children={<RHFTextField name="morada_sede" label="Endereço" />} />

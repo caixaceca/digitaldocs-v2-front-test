@@ -46,8 +46,15 @@ export default function PageCreditoDetalhes() {
 
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
-    { value: 'Participantes', component: <TableInfoCredito id={credito?.id} dados={credito?.participantes} /> },
-    { value: 'Contratos', component: <TableInfoCredito id={credito?.id} contracts /> },
+    {
+      value: 'Garantias',
+      component: <TableInfoCredito id={credito?.id} tab="garantias" dados={credito?.garantias || []} />,
+    },
+    {
+      value: 'Participantes',
+      component: <TableInfoCredito id={credito?.id} tab="participantes" dados={credito?.participantes || []} />,
+    },
+    { value: 'Contratos', component: <TableInfoCredito id={credito?.id} tab="contratos" /> },
   ];
 
   const openForm = (item) => {
@@ -84,11 +91,11 @@ export default function PageCreditoDetalhes() {
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' &&
                   (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['UPDATE_CREDITO'])) && (
-                    <DefaultAction label="EDITAR" handleClick={() => openForm('form-credito')} />
+                    <DefaultAction button label="Editar" onClick={() => openForm('form-credito')} />
                   )}
                 {currentTab === 'Participantes' &&
                   (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
-                    <DefaultAction button label="Adicionar" handleClick={() => openForm('form-participante')} />
+                    <DefaultAction button label="Adicionar" onClick={() => openForm('form-participante')} />
                   )}
                 {currentTab === 'Contratos' &&
                   (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
@@ -96,7 +103,7 @@ export default function PageCreditoDetalhes() {
                       button
                       icon="pdf"
                       label="Previsualizar contrato"
-                      handleClick={() => openForm('preview-contrato')}
+                      onClick={() => openForm('preview-contrato')}
                     />
                   )}
               </Stack>
@@ -123,7 +130,7 @@ export default function PageCreditoDetalhes() {
                         button
                         variant="contained"
                         label="GERAR CONTRATO"
-                        handleClick={() =>
+                        onClick={() =>
                           dispatch(
                             createItem('contratos', null, { getList: true, ...selectedItem, msg: 'Contrato gerado' })
                           )

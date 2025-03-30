@@ -28,7 +28,7 @@ export default function PageNotFound() {
     <Page title="Página não encontrada">
       <Container>
         <ContentStyle sx={{ textAlign: 'center', alignItems: 'center' }}>
-          <Typography variant="h3" paragraph>
+          <Typography variant="h4" paragraph>
             Desculpa, página não encontrada!
           </Typography>
 

@@ -14,8 +14,6 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-// utils
-import { emailCheck } from '../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
@@ -33,9 +31,10 @@ import { DialogTitleAlt } from '../../components/CustomDialog';
 import { shapeNumber } from '../../components/hook-form/yup-shape';
 import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 //
-import PesosDecisao from './PesosDecisao';
 import { listaPerfis } from './applySortFilter';
 import { ItemComponent } from './ParametrizacaoForm';
+
+const ps = { perfil_id: null, gestor: false, padrao: false, observador: false, data_limite: null, data_inicial: null };
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,9 +43,9 @@ EstadoForm.propTypes = { onCancel: PropTypes.func };
 export function EstadoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { perfilId, uos } = useSelector((state) => state.intranet);
+  const { uos } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
-  const uosList = useMemo(() => uos?.map((row) => ({ id: row?.id, balcao: row?.balcao, label: row?.label })), [uos]);
+  const uosList = useMemo(() => uos?.map(({ id, balcao, label }) => ({ id, balcao, label })), [uos]);
 
   const formSchema = Yup.object().shape({
     nome: Yup.string().required().label('Nome'),
@@ -56,10 +55,9 @@ export function EstadoForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      perfilID: perfilId,
+      ativo: true,
       nome: selectedItem?.nome || '',
       email: selectedItem?.email || '',
-      balcao: selectedItem?.balcao || '',
       is_final: selectedItem?.is_final || false,
       observacao: selectedItem?.observacao || '',
       is_decisao: selectedItem?.is_decisao || false,
@@ -67,7 +65,7 @@ export function EstadoForm({ onCancel }) {
       nivel_decisao: selectedItem?.nivel_decisao || null,
       uo_id: uosList?.find((row) => row.id === selectedItem?.uo_id) || null,
     }),
-    [selectedItem, perfilId, uosList]
+    [selectedItem, uosList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -81,9 +79,9 @@ export function EstadoForm({ onCancel }) {
 
   const onSubmit = async () => {
     try {
-      const formData = { ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id };
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
-      dispatch((isEdit ? updateItem : createItem)('estado', JSON.stringify(formData), params));
+      const formData = JSON.stringify({ ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id });
+      dispatch((isEdit ? updateItem : createItem)('estado', formData, { ...params, getItem: 'selectedItem' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -109,13 +107,7 @@ export function EstadoForm({ onCancel }) {
             )}
             <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
           </Grid>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            desc={isEdit ? 'eliminar este estado' : ''}
-            handleDelete={() => dispatch(deleteItem('estado', { id: selectedItem?.id, msg: 'Estado eliminado' }))}
-          />
+          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -124,28 +116,29 @@ export function EstadoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.string };
+EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.number, estadoId: PropTypes.number };
 
-export function EstadosPerfilForm({ perfilIdE, onCancel }) {
+export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { perfilId } = useSelector((state) => state.intranet);
   const { estados, isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
   const estadosList = useMemo(() => estados?.map((row) => ({ id: row?.id, label: row?.nome })), [estados]);
+  const estadoAtualId = useMemo(() => Number(selectedItem?.estado_id || estadoId), [estadoId, selectedItem?.estado_id]);
 
   const formSchema = Yup.object().shape({ estado: Yup.mixed().required().label('Estado') });
   const defaultValues = useMemo(
     () => ({
       perfil_id_cc: perfilId,
-      perfil_id: Number(perfilIdE),
       gestor: selectedItem?.gestor || false,
       padrao: selectedItem?.padrao || false,
       observador: selectedItem?.observador || false,
-      estado: estadosList.find((row) => row.id === selectedItem?.estado_id) || null,
+      perfil_id: perfilIdE || selectedItem?.perfil_id,
+      estado: estadosList.find(({ id }) => id === estadoAtualId) || null,
       data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
-      data_inicial: selectedItem?.data_inicial ? new Date(selectedItem?.data_inicial) : null,
+      data_inicial: selectedItem ? new Date(selectedItem?.data_inicial || selectedItem?.data_inicio) : null,
     }),
-    [selectedItem, perfilId, estadosList, perfilIdE]
+    [selectedItem, perfilId, estadosList, perfilIdE, estadoAtualId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -161,7 +154,10 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
     try {
       const formData = { ...values, estado_id: values?.estado?.id };
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
-      dispatch((isEdit ? updateItem : createItem)('estadosPerfil', JSON.stringify(formData), params));
+      const params1 = { item: estadoId ? 'perfis' : '', item1: estadoId ? 'estado' : '' };
+      dispatch(
+        (isEdit ? updateItem : createItem)('estadosPerfil', JSON.stringify(formData), { ...params, ...params1 })
+      );
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -178,7 +174,9 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
                 children={<RHFAutocompleteObj name="estado" label="Estado" disabled={isEdit} options={estadosList} />}
               />
               <GridItem xs={6} children={<RHFDatePicker dateTime name="data_inicial" label="Data de início" />} />
-              <GridItem xs={6} children={<RHFDatePicker dateTime name="data_limite" label="Data de término" />} />
+              <GridItem xs={6}>
+                <RHFDatePicker dateTime disablePast name="data_limite" label="Data de término" />
+              </GridItem>
               <GridItem xs={4} children={<RHFSwitch name="observador" label="Observador" />} />
               <GridItem xs={4} children={<RHFSwitch name="gestor" label="Gestor" />} />
               <GridItem xs={4} children={<RHFSwitch name="padrao" label="Padrão" />} />
@@ -193,15 +191,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
                 />
               )}
             </Grid>
-            <DialogButons
-              isSaving={isSaving}
-              onCancel={onCancel}
-              edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
-              desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') ? 'eliminar esta transição' : ''}
-              handleDelete={() =>
-                dispatch(deleteItem('estadosPerfil', { id: selectedItem?.id, msg: 'Estado eliminado' }))
-              }
-            />
+            <DialogButons isSaving={isSaving} onCancel={onCancel} edit={isEdit} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -211,54 +201,29 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-PerfisEstadoForm.propTypes = { onCancel: PropTypes.func, estado: PropTypes.object };
+PerfisEstadoForm.propTypes = { onCancel: PropTypes.func };
 
-export function PerfisEstadoForm({ estado, onCancel }) {
+export function PerfisEstadoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { isSaving } = useSelector((state) => state.parametrizacao);
+  const { isSaving, estado } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
 
-  const defaultValues = useMemo(
-    () => ({
-      perfis: [
-        { perfil: null, gestor: false, padrao: false, observador: false, data_limite: null, data_inicial: null },
-      ],
-    }),
-    []
-  );
+  const defaultValues = useMemo(() => ({ perfis: [ps] }), []);
   const formSchema = Yup.object().shape({
-    perfis: Yup.array(Yup.object({ perfil: Yup.mixed().required().label('Colaborador') })),
+    perfis: Yup.array(Yup.object({ perfil_id: Yup.mixed().required().label('Colaborador') })),
   });
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
-  const perfisFilter = applyFilter(
-    colaboradores.filter((colab) => !estado?.perfis?.map((row) => row?.perfil_id)?.includes(colab?.perfil_id)) || [],
-    values?.perfis?.map((row) => row?.perfil?.id)
-  );
 
   const onSubmit = async () => {
     try {
       const formData = { estado_id: estado?.id, perfil_id_cc: perfilId, perfis: [] };
-      values?.perfis?.forEach((row) => {
-        formData?.perfis?.push({
-          perfil_id: row?.perfil?.id,
-          gestor: row?.gestor || false,
-          padrao: row?.padrao || false,
-          data_limite: row?.data_limite,
-          data_inicial: row?.data_inicial,
-          observador: row?.observador || false,
-        });
-      });
-      dispatch(
-        createItem('perfisEstado', JSON.stringify(formData), {
-          item1: 'estado',
-          msg: 'Perfis adicionados',
-          afterSuccess: () => onCancel(),
-        })
-      );
+      values?.perfis?.forEach((row) => formData?.perfis?.push({ ...row, perfil_id: row?.perfil_id?.id }));
+      const params = { item1: 'estado', msg: 'Perfis adicionados', afterSuccess: () => onCancel() };
+      dispatch(createItem('perfis', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -268,12 +233,7 @@ export function PerfisEstadoForm({ estado, onCancel }) {
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitleAlt
         title="Adicionar colaborador"
-        action={
-          <AddItem
-            dados={{ small: true, label: 'Colaborador' }}
-            handleClick={() => append({ perfil: null, data_limite: null, data_inicial: null, observador: false })}
-          />
-        }
+        action={<AddItem dados={{ small: true, label: 'Colaborador' }} handleClick={() => append(ps)} />}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -283,7 +243,12 @@ export function PerfisEstadoForm({ estado, onCancel }) {
                 <Stack sx={{ width: 1 }} spacing={1}>
                   <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
                     <Stack direction="row" sx={{ width: { xs: 1, md: '50%' } }}>
-                      <RHFAutocompleteObj label="Colaborador" options={perfisFilter} name={`perfis[${index}].perfil`} />
+                      <RHFAutocompleteObj
+                        label="Colaborador"
+                        name={`perfis[${index}].perfil_id`}
+                        options={colaboradores?.map(({ perfil_id: pidp, nome }) => ({ id: pidp, label: nome }))}
+                        getOptionDisabled={(option) => values.perfis.some(({ perfil }) => perfil?.id === option.id)}
+                      />
                     </Stack>
                     <Stack direction="row" spacing={1}>
                       <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Início" />
@@ -296,9 +261,7 @@ export function PerfisEstadoForm({ estado, onCancel }) {
                     <RHFSwitch name={`perfis[${index}].padrao`} label="Padrão" />
                   </Stack>
                 </Stack>
-                {values.perfis.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
-                )}
+                {values.perfis.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
               </Stack>
             ))}
           </Stack>
@@ -311,14 +274,14 @@ export function PerfisEstadoForm({ estado, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-RegraEstadoForm.propTypes = {
+RegrasForm.propTypes = {
   item: PropTypes.object,
   estado: PropTypes.bool,
   onCancel: PropTypes.func,
   selectedItem: PropTypes.object,
 };
 
-export function RegraEstadoForm({ item, onCancel, estado = false, selectedItem }) {
+export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -344,8 +307,9 @@ export function RegraEstadoForm({ item, onCancel, estado = false, selectedItem }
     [isEdit, perfisList, selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'pesos' });
 
   useEffect(() => {
     reset(defaultValues);
@@ -376,10 +340,36 @@ export function RegraEstadoForm({ item, onCancel, estado = false, selectedItem }
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar regra' : 'Adicionar regras'}</DialogTitle>
+      <DialogTitle>
+        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+          {isEdit ? 'Editar regra' : 'Adicionar regras'}
+          {!isEdit && perfisList?.length > 0 && (
+            <AddItem
+              dados={{ small: true, label: 'Colaborador' }}
+              handleClick={() => append({ perfil: null, percentagem: null, facultativo: false, para_aprovacao: false })}
+            />
+          )}
+        </Stack>
+      </DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <PesosDecisao perfisList={perfisList} isEdit={isEdit} />
+          <Stack direction="column" divider={<Divider sx={{ borderStyle: 'dashed' }} />} spacing={2} sx={{ pt: 3 }}>
+            {fields.map((_, index) => (
+              <Stack direction="row" spacing={2} key={_.id} alignItems="center">
+                <Stack spacing={2} sx={{ width: 1 }}>
+                  <RHFAutocompleteObj label="Colaborador" options={perfisList} name={`pesos[${index}].perfil_id`} />
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+                    <RHFNumberField tipo="%" label="Percentagem" name={`pesos[${index}].percentagem`} />
+                    <Stack direction="row" spacing={2}>
+                      <RHFSwitch name={`pesos[${index}].para_aprovacao`} label="Aprovação" />
+                      <RHFSwitch name={`pesos[${index}].facultativo`} label="Facultativo" />
+                    </Stack>
+                  </Stack>
+                </Stack>
+                {fields?.length > 1 && <DefaultAction label="ELIMINAR" small onClick={() => remove(index)} />}
+              </Stack>
+            ))}
+          </Stack>
           <DialogButons
             edit={isEdit}
             isSaving={isSaving}
@@ -390,15 +380,5 @@ export function RegraEstadoForm({ item, onCancel, estado = false, selectedItem }
         </FormProvider>
       </DialogContent>
     </Dialog>
-  );
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-function applyFilter(colaboradores, perfisSelect) {
-  return (
-    colaboradores
-      ?.filter((colab) => !perfisSelect?.includes(colab?.perfil_id))
-      ?.map((row) => ({ id: row?.perfil_id, label: row?.nome })) || []
   );
 }

@@ -139,8 +139,8 @@ export default function TableParamsGaji9({ item, inativos }) {
                       <CellChecked check={row.ativo} />
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          <DefaultAction label="EDITAR" color="warning" handleClick={() => viewItem('update', row)} />
-                          <DefaultAction label="DETALHES" handleClick={() => viewItem('view', row)} />
+                          <DefaultAction label="EDITAR" onClick={() => viewItem('update', row)} />
+                          <DefaultAction label="DETALHES" onClick={() => viewItem('view', row)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

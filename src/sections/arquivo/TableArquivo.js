@@ -193,7 +193,7 @@ export default function TableArquivo({ tab }) {
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
-                            <DefaultAction label="DETALHES" handleClick={() => handleView(row?.processo_id)} />
+                            <DefaultAction label="DETALHES" onClick={() => handleView(row?.processo_id)} />
                           </TableCell>
                         </TableRow>
                       )) || (
@@ -212,7 +212,7 @@ export default function TableArquivo({ tab }) {
                             {row?.data_arquivamento ? <Criado value={ptDateTime(row?.data_arquivamento)} /> : noDados()}
                           </TableCell>
                           <TableCell align="center">
-                            <DefaultAction label="DETALHES" handleClick={() => handleView(row?.id)} />
+                            <DefaultAction label="DETALHES" onClick={() => handleView(row?.id)} />
                           </TableCell>
                         </TableRow>
                       )}

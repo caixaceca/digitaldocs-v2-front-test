@@ -12,35 +12,19 @@ export const shapeAnexos = (isEdit, outros, checkList) =>
         : Yup.array(),
     checklist: Yup.array().of(
       Yup.object().shape({
-        // Campos do documento vindos da API
-        identificador: Yup.boolean().required(),
-        obriga_prazo_validade: Yup.boolean().required(),
-        obrigatorio: Yup.boolean().required(),
-        // Validação dos anexos para o documento:
         anexos: Yup.array().when(
           ['identificador', 'obriga_prazo_validade', 'obrigatorio'],
-          ([identificador, obrigaPrazo, obrigatorio], schema) => {
-            if (obrigatorio) {
-              return schema.min(1, 'Pelo menos um documento é necessário').of(
-                Yup.object().shape({
-                  file: Yup.mixed().required('Introduza um ficheiro.'),
-                  data_emissao: obrigaPrazo ? Yup.date().required().label('Emissão') : Yup.date().nullable(),
-                  data_validade: obrigaPrazo ? Yup.date().required().label('Validade') : Yup.date().nullable(),
-                  numero_entidade: identificador
-                    ? Yup.number().required().label('Nº entidade')
-                    : Yup.number().nullable(),
-                })
-              );
-            }
-            return schema.of(
+          ([identificador, obrigaPrazo], schema) =>
+            schema.of(
               Yup.object().shape({
-                file: Yup.mixed().notRequired(),
-                data_emissao: Yup.date().nullable(),
-                data_validade: Yup.date().nullable(),
-                numero_entidade: Yup.number().nullable(),
+                file: Yup.mixed().required('Introduza um ficheiro.'),
+                data_emissao: obrigaPrazo ? Yup.date().required().label('Emissão') : Yup.date().nullable(),
+                data_validade: obrigaPrazo ? Yup.date().required().label('Validade') : Yup.date().nullable(),
+                numero_entidade: identificador
+                  ? Yup.number().positive().required().label('Nº entidade')
+                  : Yup.number().nullable(),
               })
-            );
-          }
+            )
         ),
       })
     ),
@@ -48,13 +32,16 @@ export const shapeAnexos = (isEdit, outros, checkList) =>
 
 // ----------------------------------------------------------------------
 
-export const defaultAnexos = (dadosStepper, checkList) => ({
+export const defaultAnexos = (dadosStepper, checkList, anexos) => ({
   anexos: dadosStepper?.anexos || [],
   checklist:
     dadosStepper?.checklist ||
     checkList.map((doc) => ({
       ...doc,
-      anexos: doc.obrigatorio ? [{ file: null, data_emissao: null, data_validade: null, numero_entidade: null }] : [],
+      anexos:
+        doc?.obrigatorio && anexos.filter(({ ativo, tipo_id: tid }) => ativo && tid === doc?.tipo_id)?.length === 0
+          ? [{ file: null, data_emissao: null, data_validade: null, numero_entidade: null }]
+          : [],
     })),
 });
 

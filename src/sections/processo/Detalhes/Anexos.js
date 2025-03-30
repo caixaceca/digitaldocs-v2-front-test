@@ -113,7 +113,7 @@ export default function Anexos({ anexos }) {
             </Stack>
           </RoleBasedGuard>
         )}
-        {((emailCheck(mail, 'vc.axiac@arove.ordnavi') && processo?.origem_id) ||
+        {((emailCheck(mail, '') && processo?.origem_id) ||
           (processo?.estado_atual?.includes('Notas Externas') && processo?.estado_atual !== 'Arquivo')) && (
           <ModelosRespostas />
         )}
@@ -163,11 +163,11 @@ export function AnexoItem({
         borderBottomRightRadius: preview && 0,
         opacity: (preview && 1) || (eliminado && 0.75) || 1,
         color: (theme) => preview && `${theme.palette.text.primary} !important`,
-        '& .MuiButton-startIcon': { opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 },
+        '& .MuiButton-startIcon': { opacity: isLoadingFile === anexo?.anexo ? 0.35 : 1 },
       }}
     >
       <ListItemText
-        sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.5 : 1 }}
+        sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.35 : 1 }}
         primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
         primary={
           !anexo?.tipo || anexo?.tipo === 'OUTROS' ? (

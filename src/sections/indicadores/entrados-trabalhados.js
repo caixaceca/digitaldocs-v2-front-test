@@ -88,21 +88,21 @@ export function EntradasTrabalhados({ indicadores }) {
           <Grid item xs={12} md={6} lg={4}>
             <Card sx={{ height: 1, p: 2, pt: 1 }}>
               <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
-                <Typography variant="h4" sx={{ color: 'text.secondary' }}>
+                <Typography variant="h5" sx={{ color: 'text.secondary' }}>
                   Total:
                 </Typography>
-                <Typography variant="h4">{fNumber(total)}</Typography>
+                <Typography variant="h5">{fNumber(total)}</Typography>
               </Stack>
               <Stack spacing={1} direction="row" alignItems="center" justifyContent="center">
                 <DefaultAction
                   small
                   button
                   label={detail ? 'Esconder detalhes' : 'Mostrar detalhes'}
-                  handleClick={() => setItemValue(!detail, setDetail, 'detail', false)}
+                  onClick={() => setItemValue(!detail, setDetail, 'detail', false)}
                 />
                 {dadosByColaborador.length > 1 && (
                   <>
-                    <DefaultAction small button handleClick={onOpen1} label="Comparar colaboradores" />
+                    <DefaultAction small button onClick={onOpen1} label="Comparar colaboradores" />
                     {open1 && (
                       <Dialog open onClose={handleClose} fullWidth maxWidth="sm">
                         <DTFechar title="Comparação colaboradores" handleClick={() => handleClose()} />

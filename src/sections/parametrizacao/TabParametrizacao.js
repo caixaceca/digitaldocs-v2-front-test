@@ -55,13 +55,11 @@ function SubTabsParametrizacao({ item, label }) {
       setCurrentTab(tabsList?.[0]?.value, setCurrentTab);
   }, [tabsList, currentTab]);
 
-  const currentTabContent = useMemo(() => tabsList.find((tab) => tab.value === currentTab), [tabsList, currentTab]);
-
   return (
     <>
       <HeaderBreadcrumbs sx={{ px: 1 }} heading={`${label} - ${currentTab}`} action={<AddItem />} />
       <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={(_, newVal) => setCurrentTab(newVal)} />
-      {currentTabContent && <Box key={currentTabContent.value}>{currentTabContent.component}</Box>}
+      <Box>{tabsList.find((tab) => tab.value === currentTab)?.component}</Box>
     </>
   );
 }

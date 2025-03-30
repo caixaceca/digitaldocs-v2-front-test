@@ -92,7 +92,7 @@ function RecursosUtilizadores({ id, dados, recursos = false }) {
             <TableCell size="small">Data</TableCell>
             <TableCell size="small">{recursos ? 'Permissões' : 'Função'}</TableCell>
             <TableCell size="small" width={10}>
-              {!!id && <DefaultAction label="ADICIONAR" small handleClick={() => setItem({ action: 'add' })} />}
+              {!!id && <DefaultAction label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -160,7 +160,7 @@ function RecursosUtilizadores({ id, dados, recursos = false }) {
                 )}
               </TableCell>
               <TableCell>
-                <DefaultAction small label="EDITAR" handleClick={() => setItem({ action: 'edit', ...row })} />
+                <DefaultAction small label="EDITAR" onClick={() => setItem({ action: 'edit', ...row })} />
               </TableCell>
             </TableRow>
           ))}
@@ -197,7 +197,7 @@ function DataLabel({ data = '', termino = false }) {
       <Typography
         sx={{ typography: 'caption', fontStyle: !data && 'italic', pr: !data && 0.15, color: !data && 'text.disabled' }}
       >
-        {data ? ptDateTime(data) : 'Não definido'}
+        {data ? ptDateTime(data) : '(Não definido)'}
       </Typography>
     </Stack>
   );

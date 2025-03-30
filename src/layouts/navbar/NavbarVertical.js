@@ -65,8 +65,8 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
                 component={RouterLink}
                 sx={{ textAlign: 'center', textDecoration: 'none', color: theme.palette.success.main }}
               >
-                {(ambiente === 'local' && <Typography variant="h5">IntraNet - Local</Typography>) ||
-                  (ambiente === 'teste' && <Typography variant="h5">IntraNet - Teste</Typography>) || (
+                {(ambiente === 'local' && <Typography variant="h6">IntraNet - Local</Typography>) ||
+                  (ambiente === 'teste' && <Typography variant="h6">IntraNet - Teste</Typography>) || (
                     <Typography variant="h3">IntraNet</Typography>
                   )}
                 <Typography variant="subtitle2" sx={{ mt: ambiente === 'teste' || ambiente === 'local' ? 0 : -1 }}>

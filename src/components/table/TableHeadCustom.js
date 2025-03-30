@@ -57,11 +57,11 @@ export default function TableHeadCustom({
           </TableCell>
         )}
 
-        {headLabel.map((headCell) => (
+        {headLabel.map((headCell, index) => (
           <TableCell
             colSpan={headCell.colspan || 1}
-            key={headCell.id}
             align={headCell.align || 'left'}
+            key={headCell?.id || `not_set_${index}`}
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{ width: headCell.width, minWidth: headCell.minWidth }}
           >

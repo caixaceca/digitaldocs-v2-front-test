@@ -21,7 +21,7 @@ import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { setModal, getAll, closeModal } from '../../redux/slices/digitaldocs';
+import { setModal, getAll } from '../../redux/slices/digitaldocs';
 // Components
 import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
@@ -193,7 +193,7 @@ export default function TableCartoes() {
     [dataFiltered, fase]
   );
 
-  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+  useNotificacao({ done, afterSuccess: () => dispatch(setModal({ modal: '', dados: null })) });
 
   return (
     <>
@@ -231,15 +231,13 @@ export default function TableCartoes() {
               {dadosNaoValidados?.length > 0 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
                 <>
                   {(uo && !filter && !tipoCartao && selected.length === 0 && (
-                    <DefaultAction label="CONFIRMAR" handleClick={onOpen1} variant="contained" />
+                    <DefaultAction label="CONFIRMAR" onClick={onOpen1} variant="contained" />
                   )) ||
-                    (selected.length > 0 && (
-                      <DefaultAction label="CONFIRMAR" handleClick={onOpen} variant="contained" />
-                    ))}
+                    (selected.length > 0 && <DefaultAction label="CONFIRMAR" onClick={onOpen} variant="contained" />)}
                 </>
               )}
               {dadosValidados?.length > 0 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
-                <DefaultAction label="ANULAR CONFIRMAÇÂO" handleClick={onOpen2} icon="cancelar" color="error" />
+                <DefaultAction label="ANULAR CONFIRMAÇÂO" onClick={onOpen2} icon="cancelar" color="error" />
               )}
             </Stack>
           </Stack>
@@ -304,13 +302,12 @@ export default function TableCartoes() {
                             {!row.rececao_validado && (isAdmin || (confirmarCartoes && acessoDop)) && (
                               <DefaultAction
                                 label="EDITAR"
-                                color="warning"
-                                handleClick={() => dispatch(setModal({ modal: 'balcao-entrega', dados: row }))}
+                                onClick={() => dispatch(setModal({ modal: 'balcao-entrega', dados: row }))}
                               />
                             )}
                             <DefaultAction
                               label="DETALHES"
-                              handleClick={() => {
+                              onClick={() => {
                                 dispatch(setModal({ modal: 'detalhes-cartao', dados: null }));
                                 dispatch(getAll('cartao', { id: row?.id }));
                               }}
@@ -343,8 +340,12 @@ export default function TableCartoes() {
         )}
       </Card>
 
-      {isOpenModal === 'detalhes-cartao' && <Detalhes closeModal={() => dispatch(closeModal())} />}
-      {isOpenModal === 'balcao-entrega' && <BalcaoEntregaForm onCancel={() => dispatch(closeModal())} />}
+      {isOpenModal === 'detalhes-cartao' && (
+        <Detalhes closeModal={() => dispatch(setModal({ modal: '', dados: null }))} />
+      )}
+      {isOpenModal === 'balcao-entrega' && (
+        <BalcaoEntregaForm onCancel={() => dispatch(setModal({ modal: '', dados: null }))} />
+      )}
       {open && (
         <ValidarMultiploForm
           fase={fase}

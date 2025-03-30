@@ -65,9 +65,11 @@ export default function FormOperacao({ dados }) {
             <GridItem xs={12} sm={6} lg={3}>
               <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
             </GridItem>
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField name="conta" label="Nº de conta" />} />
+            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
             <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField name="noperacao" label="Nº de operação" />} />
+            <GridItem xs={12} sm={6} xl={3}>
+              <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
+            </GridItem>
             <GridItem>
               <RHFTextField name="origem_fundo" label="Origem do fundo" multiline minRows={2} maxRows={4} />
             </GridItem>

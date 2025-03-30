@@ -35,18 +35,19 @@ export default function ItemAnalytic({ title, total, color = 'focus.main', perce
         <CircularProgress variant="determinate" value={percent} size={70} thickness={4.5} sx={{ color }} />
 
         <CircularProgress
-          variant="determinate"
-          value={100}
           size={70}
+          value={100}
           thickness={4.55}
+          variant="determinate"
           sx={{ color: 'grey.50016', position: 'absolute', top: 0, left: 0 }}
         />
       </Stack>
 
       <Stack spacing={0.5} sx={{ ml: 2 }}>
-        <Typography variant="h6">{title}</Typography>
-
-        <Typography variant="subtitle2">{fNumber(total)}</Typography>
+        <Typography variant="subtitle1">{title}</Typography>
+        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+          {fNumber(total)}
+        </Typography>
       </Stack>
     </Stack>
   );

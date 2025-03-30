@@ -14,7 +14,7 @@ export default function Card(theme) {
     },
     MuiCardHeader: {
       defaultProps: {
-        titleTypographyProps: { variant: 'h6' },
+        titleTypographyProps: { variant: 'subtitle1' },
         subheaderTypographyProps: { variant: 'body2', marginTop: theme.spacing(0.5) },
       },
       styleOverrides: {

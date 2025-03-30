@@ -97,7 +97,7 @@ export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClo
   return (
     <Dialog fullScreen open sx={{ '& .MuiDialog-paper': { margin: 0 } }}>
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1.75 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 0.5, pl: 1.5 }}>
           <Typography variant="subtitle1">{titulo}</Typography>
           <Stack direction="row" alignItems="center" spacing={3}>
             {extra}

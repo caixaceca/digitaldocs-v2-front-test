@@ -75,13 +75,8 @@ export default function TableClausula({ inativos }) {
   };
 
   const confirmDelete = () => {
-    dispatch(
-      deleteItem('clausulas', {
-        id: selectedItem?.id,
-        msg: 'Cláusula eliminada',
-        afterSuccess: () => dispatch(setModal({ item: '', dados: null })),
-      })
-    );
+    const params = { id: selectedItem?.id, msg: 'Cláusula eliminada' };
+    dispatch(deleteItem('clausulas', { ...params, afterSuccess: () => dispatch(setModal({ item: '', dados: null })) }));
   };
 
   return (
@@ -141,15 +136,11 @@ export default function TableClausula({ inativos }) {
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          <DefaultAction
-                            small
-                            label="ELIMINAR"
-                            handleClick={() => openModal('eliminar-clausula', row)}
-                          />
+                          <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-clausula', row)} />
                           {row?.ativo && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_CLAUSULA'])) && (
-                            <DefaultAction small label="EDITAR" handleClick={() => openModal('form-clausula', row)} />
+                            <DefaultAction small label="EDITAR" onClick={() => openModal('form-clausula', row)} />
                           )}
-                          <DefaultAction small label="DETALHES" handleClick={() => openModal('view-clausula', row)} />
+                          <DefaultAction small label="DETALHES" onClick={() => openModal('view-clausula', row)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

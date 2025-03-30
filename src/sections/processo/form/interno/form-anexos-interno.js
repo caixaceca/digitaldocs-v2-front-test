@@ -34,7 +34,10 @@ export default function FormAnexosInterno({ dados }) {
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
 
   const formSchema = shapeAnexos(isEdit, outros, checkList);
-  const defaultValues = useMemo(() => defaultAnexos(dadosStepper, checkList), [dadosStepper, checkList]);
+  const defaultValues = useMemo(
+    () => defaultAnexos(dadosStepper, checkList, processo?.anexos || []),
+    [dadosStepper, checkList, processo?.anexos]
+  );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
@@ -43,7 +46,7 @@ export default function FormAnexosInterno({ dados }) {
     try {
       const formData = new FormData();
       const balcao = processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao;
-      const entidades = values?.entidades?.length > 0 ? dadosStepper?.entidades?.map((row) => row?.numero) : null;
+      const entidades = dadosStepper?.entidades?.length > 0 ? dadosStepper?.entidades?.map((row) => row?.numero) : null;
       // required
       formData.append('balcao', balcao);
       formData.append('fluxo_id', fluxo?.id);
@@ -97,7 +100,7 @@ export default function FormAnexosInterno({ dados }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
-        <Anexos anexos={[]} outros={!!outros} checklist={checkList} />
+        <Anexos anexos={processo?.anexos || []} outros={!!outros} checklist={checkList} isEdit={isEdit} />
         <ButtonsStepper
           isSaving={isSaving}
           label={isEdit ? 'Guardar' : 'Adicionar'}

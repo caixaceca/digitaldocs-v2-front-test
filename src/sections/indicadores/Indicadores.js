@@ -214,7 +214,7 @@ export function CardInfo({ title, label, total, conclusao = false, dev = false, 
               {label}
             </Typography>
           )}
-          <Typography variant="h4">
+          <Typography variant="h5">
             {conclusao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
           </Typography>
         </Stack>
@@ -367,13 +367,9 @@ TabView.propTypes = { vista: PropTypes.string, setVista: PropTypes.func, exporta
 export function TabView({ vista, setVista, exportar = null }) {
   return (
     <Stack direction="row" justifyContent="right" alignItems="center" spacing={1}>
-      <Tabs
-        value={vista}
-        sx={{ minHeight: '35px' }}
-        onChange={(event, newValue) => setItemValue(newValue, setVista, 'tabView')}
-      >
+      <Tabs value={vista} onChange={(event, newValue) => setItemValue(newValue, setVista, 'tabView')}>
         {['Gráfico', 'Tabela'].map((tab) => (
-          <Tab key={tab} label={tab} value={tab} sx={{ px: 0.5, minHeight: '35px' }} />
+          <Tab key={tab} label={tab} value={tab} sx={{ px: 0.5 }} />
         ))}
       </Tabs>
       {exportar}

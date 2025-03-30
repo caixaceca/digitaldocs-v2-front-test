@@ -18,8 +18,8 @@ import { DefaultAction } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
+import { RegrasForm } from './form-estado';
 import { DetalhesContent } from './Detalhes';
-import { RegraEstadoForm } from './form-estado';
 
 // ----------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ function RegrasTransicoes({ dados }) {
               Ativo
             </TableCell>
             <TableCell size="small" width={10}>
-              <DefaultAction label="ADICIONAR" small handleClick={() => setItem({ action: 'add' })} />
+              <DefaultAction label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />
             </TableCell>
           </TableRow>
         </TableHead>
@@ -94,7 +94,7 @@ function RegrasTransicoes({ dados }) {
               <CellChecked check={row?.facultativo} />
               <CellChecked check={row?.ativo} />
               <TableCell>
-                <DefaultAction small label="EDITAR" handleClick={() => setItem(row)} />
+                <DefaultAction small label="EDITAR" onClick={() => setItem(row)} />
               </TableCell>
             </TableRow>
           ))}
@@ -108,7 +108,7 @@ function RegrasTransicoes({ dados }) {
         </TableBody>
       </Table>
       {!!item && (
-        <RegraEstadoForm
+        <RegrasForm
           onCancel={() => setItem(null)}
           item={{ ...dados, perfis: colaboradoresEstado }}
           selectedItem={item?.action === 'add' ? null : item}

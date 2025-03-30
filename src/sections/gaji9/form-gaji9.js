@@ -384,7 +384,7 @@ export function VariavelForm({ onCancel }) {
               button
               icon="adicionar"
               label="Variável"
-              handleClick={() => append({ nome: '', descritivo: '', ativo: true })}
+              onClick={() => append({ nome: '', descritivo: '', ativo: true })}
             />
           )
         }
@@ -400,9 +400,7 @@ export function VariavelForm({ onCancel }) {
                     <RHFTextField label="Descritivo" name={`variaveis[${index}].descritivo`} />
                     {isEdit && <RHFSwitch name={`variaveis[${index}].ativo`} label="Ativo" />}
                   </Stack>
-                  {fields?.length > 1 && (
-                    <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
-                  )}
+                  {fields?.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
                 </Stack>
               ))}
             </Stack>
@@ -569,7 +567,7 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
               button
               label="Recurso"
               icon="adicionar"
-              handleClick={() => append({ recurso: null, permissao: [], data_inicio: null, data_termino: null })}
+              onClick={() => append({ recurso: null, permissao: [], data_inicio: null, data_termino: null })}
             />
           )
         }
@@ -593,9 +591,7 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
                   </Stack>
                   {selectedItem?.action === 'edit' && <RHFSwitch name={`recursos[${index}].ativo`} label="Ativo" />}
                 </Stack>
-                {fields?.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
-                )}
+                {fields?.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
               </Stack>
             ))}
           </Stack>

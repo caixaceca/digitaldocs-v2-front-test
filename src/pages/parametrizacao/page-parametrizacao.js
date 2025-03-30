@@ -51,9 +51,8 @@ export default function PageParametrizacao() {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabParams');
-    }
   }, [tabsList, currentTab]);
 
   useNotificacao({ done, afterSuccess: () => handleCloseModal() });

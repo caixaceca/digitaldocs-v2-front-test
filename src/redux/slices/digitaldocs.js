@@ -76,10 +76,6 @@ const slice = createSlice({
       state.processo[item] = dados;
     },
 
-    fillProcesso(state, action) {
-      state.processo = { ...state.processo, ...action.payload };
-    },
-
     resgatarSuccess(state, action) {
       state.processo.preso = true;
       state.processo.perfil_id = action.payload.perfil_id;
@@ -218,7 +214,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { setModal, getSuccess, closeModal, resetProcesso, alterarBalcaopSuccess } = slice.actions;
+export const { setModal, getSuccess, resetProcesso, alterarBalcaopSuccess } = slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -396,43 +392,24 @@ export function getProcesso(item, params) {
     try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
-      const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
+      const options = headerOptions({ accessToken, mail, cc: true });
 
-      const response = await axios.get(
+      const { data } = await axios.get(
         `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
         options
       );
-      if (!response.data?.objeto) return;
-      const processo = response.data?.objeto;
 
-      if (processo?.estados?.length === 0) {
-        processo.estado_processo = {
-          is_lock: processo?.preso,
-          perfil_id: processo?.perfil_id,
-          estado: processo?.estado_atual,
-          estado_id: processo?.estado_atual_id,
-          data_entrada: processo?.data_ultima_transicao,
-        };
-      } else if (processo?.estados?.length === 1 && processo?.pareceres_estado?.length === 0) {
-        processo.estado_processo = processo.estados[0];
-        if (processo.estados[0]?.pareceres?.length > 0) processo.pareceres_estado = processo.estados[0].pareceres;
-        processo.estados = [];
-      } else if (processo?.estados?.length > 1) {
-        processo.estado_processo = processo.estados.find((row) => row?.estado_id === processo.estado_atual_id);
-        processo.estados = processo.estados.filter((row) => row?.estado_id !== processo.estado_atual_id);
-      }
-      const estado = processo?.estado_processo || null;
-      processo.perfilAtribuido = estado?.perfil_id || '';
-      processo.atribuidoAMim = estado?.perfil_id === perfilId;
+      if (!data?.objeto) return;
+      const processo = processarEstadoProcesso(data.objeto, perfilId);
       dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
-
-      const anexoPreview = (processo?.anexos || []).filter((item) => item?.ativo).find((row) => !!canPreview(row));
       dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
 
+      const anexoPreview = (processo.anexos || []).find((item) => item?.ativo && canPreview(item));
       if (anexoPreview)
         dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipoDoc: canPreview(anexoPreview) } }));
-      if (estado?.is_lock && estado?.estado_id && processo?.atribuidoAMim)
-        dispatch(getInfoProcesso('destinos', { id: processo?.id, estadoId: estado?.estado_id }));
+      if (processo.estado_processo?.is_lock && processo.estado_processo?.estado_id && processo.atribuidoAMim)
+        dispatch(getInfoProcesso('destinos', { id: processo.id, estadoId: processo.estado_processo.estado_id }));
+
       dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -497,8 +474,10 @@ export function getInfoProcesso(item, params) {
 
         if (apiUrl) {
           const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
-          if (item === 'resgatar') dispatch(slice.actions.resgatarSuccess(response.data?.objeto));
-          else dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
+          if (item === 'resgatar') {
+            const processo = processarEstadoProcesso(response.data.objeto, perfilId);
+            dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+          } else dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
         }
       }
     } catch (error) {
@@ -624,11 +603,9 @@ export function updateItem(item, dados, params) {
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: item === 'processo' || params?.mfd });
 
       if (params?.anexos?.get('anexos')) {
-        await axios.patch(
-          `${BASEURLDD}/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`,
-          params?.anexos,
-          options
-        );
+        const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
+        const url = `${BASEURLDD}/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`;
+        await axios.patch(url, params?.anexos, options);
       }
 
       const apiUrl =
@@ -639,9 +616,11 @@ export function updateItem(item, dados, params) {
         (item === 'confirmar emissao por data' && `${BASEURLDD}/v1/cartoes/validar/todas/emissoes`) ||
         (item === 'desarquivar' && `${BASEURLDD}/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
         (item === 'alterar balcao' && `${BASEURLDD}/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
-        (item === 'encaminhar serie' && `${BASEURLDD}/v2/processos/encaminhar/serie/${perfilId}/${params?.id}`) ||
         (item === 'domiciliar' && `${BASEURLDD}/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
-        (item === 'encaminhar paralelo' && `${BASEURLDD}/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}`) ||
+        (item === 'encaminhar serie' &&
+          `${BASEURLDD}/v2/processos/encaminhar/serie/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}`) ||
+        (item === 'encaminhar paralelo' &&
+          `${BASEURLDD}/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}`) ||
         (item === 'confirmar rececao multiplo' &&
           `${BASEURLDD}/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||
         (item === 'confirmar emissao por data' &&
@@ -690,7 +669,8 @@ export function updateItem(item, dados, params) {
       if (item === 'processo') {
         const response = await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
         if (params?.garantias) dispatch(createItem('garantias', params?.garantias, { processoId: params?.id }));
-        dispatch(slice.actions.fillProcesso(response.data?.objeto));
+        const processo = processarEstadoProcesso(response.data.objeto, perfilId);
+        dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
       }
       params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
@@ -733,4 +713,41 @@ export function deleteItem(item, params) {
       dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
     }
   };
+}
+
+// ----------------------------------------------------------------------
+
+function processarEstadoProcesso(processo, perfilId) {
+  const {
+    preso,
+    estados = [],
+    perfil_id: perfilIdP,
+    estado_atual: estadoAtual,
+    estado_atual_id: estadoAtualId,
+    data_ultima_transicao: dataTransicao,
+    pareceres_estado: pareceresEstado = [],
+  } = processo;
+
+  if (!estados.length) {
+    processo.estado_processo = {
+      is_lock: preso,
+      estado: estadoAtual,
+      perfil_id: perfilIdP,
+      estado_id: estadoAtualId,
+      data_entrada: dataTransicao,
+    };
+  } else if (estados.length === 1 && !pareceresEstado.length) {
+    processo.estado_processo = estados[0];
+    processo.pareceres_estado = estados[0]?.pareceres?.length ? estados[0].pareceres : [];
+    processo.estados = [];
+  } else {
+    processo.estado_processo = estados.find(({ estado_id: eid }) => eid === estadoAtualId) || null;
+    processo.estados = estados.filter(({ estado_id: eid }) => eid !== estadoAtualId);
+  }
+
+  const estado = processo.estado_processo;
+  processo.perfilAtribuido = estado?.perfil_id || '';
+  processo.atribuidoAMim = estado?.perfil_id === perfilId;
+
+  return processo;
 }

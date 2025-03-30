@@ -123,7 +123,7 @@ export default function TableCredito() {
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           <DefaultAction
                             label="DETALHES"
-                            handleClick={() => navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${row?.id}`)}
+                            onClick={() => navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${row?.id}`)}
                           />
                         </Stack>
                       </TableCell>

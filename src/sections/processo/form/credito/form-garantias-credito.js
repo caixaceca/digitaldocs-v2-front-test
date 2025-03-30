@@ -168,10 +168,10 @@ function FormGarantias({ dados }) {
                     <RHFTextField label="Moeda" name={`garantias[${index}].moeda`} />
                   </GridItem>
                   <GridItem sm={6} md={3}>
-                    <RHFNumberField label="Nº de entidade" name={`garantias[${index}].numero_entidade`} />
+                    <RHFNumberField noFormat label="Nº de entidade" name={`garantias[${index}].numero_entidade`} />
                   </GridItem>
                   <GridItem sm={6} md={3}>
-                    <RHFNumberField label="Conta DP" name={`garantias[${index}].conta_dp`} />
+                    <RHFNumberField noFormat label="Conta DP" name={`garantias[${index}].conta_dp`} />
                   </GridItem>
                   <GridItem sm={6} md={3}>
                     <RHFTextField label="Hipoteca câmara" name={`garantias[${index}].codigo_hipoteca_camara`} />
@@ -190,7 +190,7 @@ function FormGarantias({ dados }) {
                   </GridItem>
                 </Grid>
               </Stack>
-              {!isEdit && <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />}
+              {!isEdit && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
             </Stack>
           ))}
         </Stack>
@@ -198,7 +198,7 @@ function FormGarantias({ dados }) {
 
       {!isEdit && (
         <Stack direction="row" justifyContent="center">
-          <DefaultAction small button label="Garantia" icon="adicionar" handleClick={() => append(garantiaSquema)} />
+          <DefaultAction small button label="Garantia" icon="adicionar" onClick={() => append(garantiaSquema)} />
         </Stack>
       )}
     </Stack>

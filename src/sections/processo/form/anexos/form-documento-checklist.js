@@ -8,14 +8,15 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // components
+import AnexosExistente from './anexos-existente';
 import { DefaultAction } from '../../../../components/Actions';
 import { RHFDatePicker, RHFNumberField, RHFUploadFileSimple } from '../../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-FormDocumentosChecklist.propTypes = { docIndex: PropTypes.number, dados: PropTypes.object };
+FormDocumentosChecklist.propTypes = { docIndex: PropTypes.number, dados: PropTypes.object, anexos: PropTypes.array };
 
-export default function FormDocumentosChecklist({ docIndex, dados }) {
+export default function FormDocumentosChecklist({ docIndex, dados, anexos }) {
   const { control, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: `checklist.${docIndex}.anexos` });
 
@@ -34,56 +35,66 @@ export default function FormDocumentosChecklist({ docIndex, dados }) {
         <DefaultAction
           small
           button
+          variant="text"
           label="Adicionar"
-          handleClick={() => append({ file: null, data_emissao: null, data_validade: null, numero_entidade: null })}
+          onClick={() => append({ file: null, data_emissao: null, data_validade: null, numero_entidade: null })}
         />
       </Stack>
-      {fields?.length === 0 ? (
-        <Typography
-          variant="body2"
-          sx={{ textAlign: 'center', fontStyle: 'italic', p: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}
-        >
-          Sem nenhum documento...
-        </Typography>
+      {fields?.length === 0 && anexos?.length === 0 ? (
+        <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.neutral' }}>
+          <Typography variant="body2" sx={{ textAlign: 'center', fontStyle: 'italic', color: 'text.secondary' }}>
+            Nenhum documento adicionado...
+          </Typography>
+        </Box>
       ) : (
         <Stack spacing={2}>
           {fields.map((item, index) => (
             <Stack key={item.id} spacing={1} direction="row" alignItems="center" justifyContent="center">
               <Box sx={{ width: 1 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={(dados?.obriga_prazo_validade && 6) || (dados?.identificador && 3) || 12}>
                     <RHFUploadFileSimple
                       name={`checklist.${docIndex}.anexos.${index}.file`}
                       onDrop={(file) => handleDrop(`checklist.${docIndex}.anexos.${index}.file`, file)}
                     />
                   </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                      {dados?.identificador && (
-                        <RHFNumberField
-                          disableFuture
-                          label="Nº entidade"
-                          name={`checklist.${docIndex}.anexos.${index}.numero_entidade`}
-                        />
-                      )}
-                      <RHFDatePicker label="Emissão" name={`checklist.${docIndex}.anexos.${index}.data_emissao`} />
-                      <RHFDatePicker
-                        disablePast
-                        label="Validade"
-                        name={`checklist.${docIndex}.anexos.${index}.data_validade`}
-                      />
-                    </Stack>
-                  </Grid>
+                  {(dados?.identificador || dados?.obriga_prazo_validade) && (
+                    <Grid item xs={12} md={dados?.obriga_prazo_validade ? 6 : 3}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        {dados?.identificador && (
+                          <RHFNumberField
+                            noFormat
+                            label="Nº entidade"
+                            name={`checklist.${docIndex}.anexos.${index}.numero_entidade`}
+                          />
+                        )}
+                        {dados?.obriga_prazo_validade && (
+                          <>
+                            <RHFDatePicker
+                              disableFuture
+                              label="Emissão"
+                              name={`checklist.${docIndex}.anexos.${index}.data_emissao`}
+                            />
+                            <RHFDatePicker
+                              disablePast
+                              label="Validade"
+                              name={`checklist.${docIndex}.anexos.${index}.data_validade`}
+                            />
+                          </>
+                        )}
+                      </Stack>
+                    </Grid>
+                  )}
                 </Grid>
               </Box>
-              <DefaultAction
-                label="ELIMINAR"
-                small
-                handleClick={() => remove(index)}
-                disabled={dados?.obrigatorio && fields?.length < 2}
-              />
+              {(!dados?.obrigatorio || anexos?.length > 0 || (dados?.obrigatorio && fields?.length > 1)) && (
+                <DefaultAction label="ELIMINAR" small onClick={() => remove(index)} />
+              )}
             </Stack>
           ))}
+          {anexos?.length > 0 && (
+            <AnexosExistente noTitle anexos={anexos?.map((row) => ({ ...row, name: row?.nome }))} />
+          )}
         </Stack>
       )}
     </Card>

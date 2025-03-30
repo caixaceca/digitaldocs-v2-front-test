@@ -89,7 +89,7 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
 
   return (
     <>
-      <Dialog open fullWidth maxWidth={fluxo ? 'lg' : 'md'}>
+      <Dialog open fullWidth maxWidth={fluxo || (isEdit && !fluxo) ? 'lg' : 'md'}>
         <DialogTitle sx={{ p: 0 }}>
           <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={3} sx={{ p: 2 }}>
             <Stack>

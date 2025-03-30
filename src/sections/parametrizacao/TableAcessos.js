@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
+import { noDados } from '../../utils/formatText';
 import { ptDateTime } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
 // hooks
@@ -16,14 +18,15 @@ import { useNotificacao } from '../../hooks/useNotificacao';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
+import { setModal, deleteItem } from '../../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
-import { CellChecked } from '../../components/Panel';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { AddItem, UpdateItem } from '../../components/Actions';
+import { CellChecked, Criado } from '../../components/Panel';
+import { DialogConfirmar } from '../../components/CustomDialog';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -34,25 +37,6 @@ import { applySortFilter } from './applySortFilter';
 import { AcessoForm, EstadosPerfilForm } from './ParametrizacaoForm';
 // _mock
 import { codacessos, objetos } from '../../_mock';
-
-// ----------------------------------------------------------------------
-
-const TABLE_HEAD_ACESSOS = [
-  { id: 'nome', label: 'Objeto', align: 'left' },
-  { id: 'acessoLabel', label: 'Acesso', align: 'left' },
-  { id: 'datalimite', label: 'Data de término', align: 'center' },
-  { id: '' },
-];
-
-const TABLE_HEAD_ESTADOS = [
-  { id: 'nome', label: 'Nome', align: 'left' },
-  { id: 'data_inicial', label: 'Data de iníco', align: 'center' },
-  { id: 'data_limite', label: 'Data de término', align: 'center' },
-  { id: 'padrao', label: 'Padrão', align: 'center' },
-  { id: 'gestor', label: 'Gestor', align: 'center' },
-  { id: 'observador', label: 'Observador', align: 'center' },
-  { id: '' },
-];
 
 // ----------------------------------------------------------------------
 
@@ -77,11 +61,11 @@ export default function TableAcessos({ tab }) {
   const dispatch = useDispatch();
   const { mail } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
-  const { done, acessos, isLoading, isOpenModal, estados, estadosPerfil } = useSelector(
+  const { isLoading, isSaving, done, acessos, modalParams, estados, estadosPerfil, selectedItem } = useSelector(
     (state) => state.parametrizacao
   );
 
-  useNotificacao({ done, afterSuccess: () => dispatch(closeModal()) });
+  useNotificacao({ done, afterSuccess: () => dispatch(setModal()) });
 
   const dataFiltered = applySortFilter({
     filter,
@@ -105,10 +89,10 @@ export default function TableAcessos({ tab }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  useEffect(() => {
-    if (id && tab === 'acessos') dispatch(getFromParametrizacao('acessos', { perfilId: id }));
-    if (id && tab === 'estados') dispatch(getFromParametrizacao('estadosPerfil', { estadoId: id }));
-  }, [dispatch, id, tab]);
+  const handleDelete = () => {
+    const msg = `${tab === 'acessos' ? 'Acesso' : 'Estado'} eliminado`;
+    dispatch(deleteItem(tab === 'acessos' ? tab : 'estadosPerfil', { id: selectedItem?.id, msg }));
+  };
 
   return (
     <>
@@ -122,7 +106,7 @@ export default function TableAcessos({ tab }) {
         ]}
         action={
           <RoleBasedGuard roles={['acesso-110', 'acesso-111', 'Todo-110', 'Todo-111']}>
-            <AddItem />
+            <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: `form-${tab}` }))} />
           </RoleBasedGuard>
         }
       />
@@ -136,11 +120,26 @@ export default function TableAcessos({ tab }) {
                   order={order}
                   onSort={onSort}
                   orderBy={orderBy}
-                  headLabel={tab === 'acessos' ? TABLE_HEAD_ACESSOS : TABLE_HEAD_ESTADOS}
+                  headLabel={[
+                    ...(tab === 'acessos'
+                      ? [
+                          { id: 'nome', label: 'Objeto' },
+                          { id: 'acessoLabel', label: 'Acesso' },
+                          { id: 'datalimite', label: 'Data de término', align: 'center' },
+                        ]
+                      : [
+                          { id: 'nome', label: 'Nome' },
+                          { id: '', label: 'Data' },
+                          { id: 'padrao', label: 'Padrão', align: 'center' },
+                          { id: 'gestor', label: 'Gestor', align: 'center' },
+                          { id: 'observador', label: 'Observador', align: 'center' },
+                        ]),
+                    { id: '' },
+                  ]}
                 />
                 <TableBody>
                   {isLoading && isNotFound ? (
-                    <SkeletonTable column={tab === 'estados' ? 7 : 4} row={10} />
+                    <SkeletonTable column={tab === 'estados' ? 6 : 4} row={10} />
                   ) : (
                     dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                       <TableRow hover key={`${tab}_${index}`}>
@@ -149,17 +148,19 @@ export default function TableAcessos({ tab }) {
                             <TableCell>{row?.nome}</TableCell>
                             <TableCell>{row?.acessoLabel}</TableCell>
                             <TableCell align="center">
-                              {row?.datalimite ? ptDateTime(row.datalimite) : 'Acesso permanente'}
+                              {ptDateTime(row.datalimite) || noDados('(Não definido)')}
                             </TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell>{row.nome}</TableCell>
-                            <TableCell align="center">
-                              {row?.data_inicial ? ptDateTime(row.data_inicial) : 'Acesso permanente'}
-                            </TableCell>
-                            <TableCell align="center">
-                              {row?.data_limite ? ptDateTime(row.data_limite) : 'Acesso permanente'}
+                            <TableCell>
+                              <Criado
+                                value={<>Início: {ptDateTime(row.data_inicial) || noDados('(Não definido)')}</>}
+                              />
+                              <Criado
+                                value={<>Término: {ptDateTime(row.data_limite) || noDados('(Não definido)')}</>}
+                              />
                             </TableCell>
                             <CellChecked check={row.padrao} />
                             <CellChecked check={row.gestor} />
@@ -167,17 +168,22 @@ export default function TableAcessos({ tab }) {
                           </>
                         )}
                         <TableCell align="center" width={10}>
-                          {tab === 'acessos' &&
-                            row.objeto !== 'Processo' &&
-                            (!row?.datalimite || (row?.datalimite && new Date(row?.datalimite) > new Date())) && (
-                              <UpdateItem dados={{ dados: row }} />
-                            )}
-                          {tab === 'estados' &&
-                            (emailCheck(mail, 'vc.axiac@arove.ordnavi') ||
-                              !row?.data_limite ||
-                              (row?.data_limite && new Date(row?.data_limite) > new Date())) && (
-                              <UpdateItem dados={{ dados: row }} />
-                            )}
+                          {(emailCheck(mail, '') || dataVal(row?.datalimite || row?.data_limite)) && (
+                            <Stack direction="row" spacing={0.5} justifyContent="right">
+                              {emailCheck(mail, '') && (
+                                <DefaultAction
+                                  small
+                                  label="ELIMINAR"
+                                  onClick={() => dispatch(setModal({ item: 'eliminar-item', dados: row }))}
+                                />
+                              )}
+                              <DefaultAction
+                                small
+                                label="EDITAR"
+                                onClick={() => dispatch(setModal({ item: `form-${tab}`, dados: row, isEdit: true }))}
+                              />
+                            </Stack>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
@@ -202,13 +208,21 @@ export default function TableAcessos({ tab }) {
           )}
         </Card>
 
-        {isOpenModal && (
-          <>
-            {tab === 'acessos' && <AcessoForm onCancel={() => dispatch(closeModal())} perfilIdA={id} />}
-            {tab === 'estados' && <EstadosPerfilForm onCancel={() => dispatch(closeModal())} perfilIdE={id} />}
-          </>
+        {modalParams === 'form-acessos' && <AcessoForm onCancel={() => dispatch(setModal())} perfilIdA={id} />}
+        {modalParams === 'form-estados' && <EstadosPerfilForm onCancel={() => dispatch(setModal())} perfilIdE={id} />}
+        {modalParams === 'eliminar-item' && (
+          <DialogConfirmar
+            isSaving={isSaving}
+            handleOk={handleDelete}
+            onClose={() => dispatch(setModal())}
+            desc={(tab === 'acessos' && 'eliminar este acesso') || 'eliminar este estado'}
+          />
         )}
       </RoleBasedGuard>
     </>
   );
+}
+
+function dataVal(data) {
+  return !data || (data && new Date(data) > new Date());
 }

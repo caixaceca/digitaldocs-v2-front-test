@@ -34,7 +34,10 @@ export default function FormAnexosCredito({ dados }) {
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
 
   const formSchema = shapeAnexos(isEdit, outros, checkList);
-  const defaultValues = useMemo(() => defaultAnexos(dadosStepper, checkList), [dadosStepper, checkList]);
+  const defaultValues = useMemo(
+    () => defaultAnexos(dadosStepper, checkList, processo?.anexos || []),
+    [dadosStepper, checkList, processo?.anexos]
+  );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
@@ -89,7 +92,7 @@ export default function FormAnexosCredito({ dados }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
-        <Anexos anexos={[]} outros={!!outros} />
+        <Anexos anexos={processo?.anexos || []} outros={!!outros} checklist={checkList} isEdit={isEdit} />
         <ButtonsStepper
           isSaving={isSaving}
           label={isEdit ? 'Guardar' : 'Adicionar'}

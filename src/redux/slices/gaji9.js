@@ -74,9 +74,9 @@ const slice = createSlice({
     },
 
     setModal(state, action) {
-      state.modalGaji9 = action.payload.item;
-      state.isEdit = !!action.payload.isEdit;
-      state.selectedItem = action.payload.dados;
+      state.isEdit = !!action?.payload?.isEdit;
+      state.modalGaji9 = action?.payload?.item || '';
+      state.selectedItem = action?.payload?.dados || null;
     },
 
     openModal(state, action) {
@@ -99,7 +99,7 @@ export const { openModal, setModal, getSuccess, closeModal } = slice.actions;
 
 export function getInfoGaji() {
   return async (dispatch) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     dispatch(getFromGaji9('funcoes'));
     dispatch(getFromGaji9('componentes'));
     dispatch(getFromGaji9('tiposTitulares'));
@@ -114,7 +114,7 @@ export function getFromGaji9(item, params) {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     try {
       const accessToken = await getAccessToken();
-      // console.log(accessToken);
+      console.log(accessToken);
       const apiUrl =
         // DETALHES
         (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao`) ||
@@ -276,7 +276,7 @@ export function createItem(item, dados, params) {
         (item === 'clonarMinuta' && `${BASEURLGAJI9}/v1/minutas/com/base?minuta_base_id=${params?.id}`) ||
         (item === 'componentesMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis`) ||
         (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
-        (item === 'intervenientes' && `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
+        (item === 'participantes' && `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
         (item === 'coposicaoMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=false`) ||
         (item === 'regrasClausula' &&
@@ -419,7 +419,7 @@ export function deleteItem(item, params) {
         (item === 'clausulaMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
         (item === 'componentesMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
-        (item === 'intervenientes' &&
+        (item === 'participantes' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}&participante_id=${params?.numero}`) ||
         (item === 'eliminarRegra' &&
           `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}&clausula_condicional_id=${params?.condicionalId}`) ||

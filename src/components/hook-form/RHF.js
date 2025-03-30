@@ -13,18 +13,41 @@ import { setDataUtil } from '../../utils/formatTime';
 
 // ----------------------------------------------------------------------
 
-const datePickerConf = (clearable) => ({
-  field: { clearable },
-  textField: {
-    size: 'small',
-    fullWidth: true,
-    sx: {
-      width: clearable ? 170 : 150,
-      '&.MuiTextField-root .MuiIconButton-root': { padding: 0.5 },
-      '&.MuiTextField-root .clearButton': { padding: 0.25, opacity: 0.5 },
-    },
-  },
-});
+RHFNumberField.propTypes = { name: PropTypes.string, tipo: PropTypes.string, noFormat: PropTypes.bool };
+
+export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
+  const { control } = useFormContext();
+
+  const formatNumber = (value) => {
+    if (!value) return '';
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  };
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field: { onChange, value, ...field }, fieldState: { error } }) => (
+        <TextField
+          {...field}
+          value={noFormat ? value : formatNumber(value)}
+          onChange={(e) => {
+            const rawValue = e.target.value.replace(/\s/g, '');
+            onChange(rawValue);
+          }}
+          fullWidth
+          error={!!error}
+          helperText={error?.message}
+          InputProps={{
+            inputProps: { style: { textAlign: 'right' } },
+            endAdornment: tipo && <InputAdornment position="end">{tipo}</InputAdornment>,
+          }}
+          {...other}
+        />
+      )}
+    />
+  );
+}
 
 // ----------------------------------------------------------------------
 
@@ -199,29 +222,15 @@ export function RHFDateIF({ datai, dataf, setDatai, setDataf, labeli = '', label
 
 // ----------------------------------------------------------------------
 
-RHFNumberField.propTypes = { name: PropTypes.string, tipo: PropTypes.string };
-
-export function RHFNumberField({ name, tipo, ...other }) {
-  const { control } = useFormContext();
-
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState: { error } }) => (
-        <TextField
-          {...field}
-          fullWidth
-          error={!!error}
-          helperText={error?.message}
-          InputProps={{
-            type: 'number',
-            inputProps: { style: { textAlign: 'right' } },
-            endAdornment: tipo && <InputAdornment position="end">{tipo}</InputAdornment>,
-          }}
-          {...other}
-        />
-      )}
-    />
-  );
-}
+const datePickerConf = (clearable) => ({
+  field: { clearable },
+  textField: {
+    size: 'small',
+    fullWidth: true,
+    sx: {
+      width: clearable ? 170 : 150,
+      '&.MuiTextField-root .MuiIconButton-root': { padding: 0.5 },
+      '&.MuiTextField-root .clearButton': { padding: 0.25, opacity: 0.5 },
+    },
+  },
+});

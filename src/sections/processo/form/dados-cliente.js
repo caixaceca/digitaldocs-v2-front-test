@@ -40,7 +40,7 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
       ) : (
         <>
           {!fluxosGmkt(fluxo?.assunto) && fluxo?.assunto !== 'Diário' && (
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField name="conta" label="Nº de conta" />} />
+            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField noFormatname="conta" label="Nº de conta" />} />
           )}
         </>
       )}
@@ -65,7 +65,9 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
       {(noperacao || fluxo?.iscon) && (
         <>
           <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
-          <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField name="noperacao" label="Nº de operação" />} />
+          <GridItem xs={12} sm={6} xl={3}>
+            <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
+          </GridItem>
         </>
       )}
     </Grid>
@@ -88,7 +90,7 @@ export function Entidades({ fields = [], append, remove }) {
               type: 'number',
               endAdornment: (
                 <InputAdornment position="end">
-                  <DefaultAction small label="Remover" color="error" handleClick={() => remove(index)} />
+                  <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
                 </InputAdornment>
               ),
             }}

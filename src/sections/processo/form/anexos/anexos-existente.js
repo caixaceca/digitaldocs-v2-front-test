@@ -19,15 +19,15 @@ import { DefaultAction } from '../../../../components/Actions';
 
 // ----------------------------------------------------------------------
 
-AnexosExistente.propTypes = { onOpen: PropTypes.func, anexos: PropTypes.array };
+AnexosExistente.propTypes = { onOpen: PropTypes.func, anexos: PropTypes.array, noTitle: PropTypes.bool };
 
-export default function AnexosExistente({ anexos, onOpen = null }) {
+export default function AnexosExistente({ anexos, onOpen = null, noTitle = false }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   return (
     <>
-      <Typography sx={{ pb: 1, pl: 0.5, typography: 'overline' }}>Anexos existente</Typography>
-      <Stack spacing={1}>
+      {noTitle ? '' : <Typography sx={{ pb: 1, pl: 0.5, typography: 'overline' }}>Anexos existente</Typography>}
+      <Stack spacing={1} sx={{ pt: noTitle ? 1 : 0 }}>
         {anexos.map((row) => (
           <ListItem key={row?.id} sx={{ py: 0.5, pl: 1, borderRadius: 1, bgcolor: 'background.neutral' }}>
             <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
@@ -62,7 +62,7 @@ export default function AnexosExistente({ anexos, onOpen = null }) {
               <DefaultAction
                 small
                 label="ELIMINAR"
-                handleClick={() => {
+                onClick={() => {
                   if (onOpen) onOpen(row.id);
                   else dispatch(getSuccess({ item: 'selectedAnexoId', dados: row.anexo }));
                 }}

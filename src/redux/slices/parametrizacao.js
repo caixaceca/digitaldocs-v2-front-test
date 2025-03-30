@@ -24,6 +24,7 @@ import { getAccessToken } from './intranet';
 const initialState = {
   done: '',
   error: '',
+  modalParams: '',
   isEdit: false,
   isAdmin: false,
   isSaving: false,
@@ -119,6 +120,12 @@ const slice = createSlice({
       actionCloseModal(state);
     },
 
+    setModal(state, action) {
+      state.isEdit = !!action?.payload?.isEdit;
+      state.modalParams = action?.payload?.item || '';
+      state.selectedItem = action?.payload?.dados || null;
+    },
+
     changeMeuAmbiente(state, action) {
       state.meuFluxo = null;
       state.meuAmbiente = action.payload;
@@ -131,7 +138,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, getSuccess, closeModal, changeMeuAmbiente } = slice.actions;
+export const { openModal, getSuccess, closeModal, setModal, changeMeuAmbiente } = slice.actions;
 
 // ----------------------------------------------------------------------
 
@@ -154,6 +161,7 @@ export function geParamsUtil() {
 export function getFromParametrizacao(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    if(params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params.reset.val }));
 
     try {
       const accessToken = await getAccessToken();
@@ -194,7 +202,7 @@ export function getFromParametrizacao(item, params) {
           !!params?.fluxoId &&
           `/v1/motivos_transicoes/lista/${perfilId}?fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
         (item === 'checklist' &&
-          `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
+          `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}${params?.transicaoId ? `&transicao_id=${params?.transicaoId}` : ''}`) ||
         '';
       if (apiUrl) {
         const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
@@ -240,14 +248,14 @@ export function createItem(item, dados, params) {
       const apiUrl =
         (item === 'fluxo' && `/v1/fluxos`) ||
         (item === 'linhas' && `/v1/linhas`) ||
-        (item === 'estado' && `/v1/estados`) ||
         (item === 'acessos' && `/v1/acessos`) ||
         (item === 'origens' && `/v1/origens`) ||
         (item === 'acessos' && `/v1/acessos`) ||
         (item === 'clonar fluxo' && `/v1/fluxos`) ||
         (item === 'transicoes' && `/v1/transicoes`) ||
         (item === 'notificacoes' && `/v1/notificacoes`) ||
-        (item === 'perfisEstado' && `/v1/estados/asscc/perfis`) ||
+        (item === 'estado' && `/v1/estados/${perfilId}`) ||
+        (item === 'perfis' && `/v1/estados/asscc/perfis`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}`) ||
         (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}`) ||
@@ -273,19 +281,12 @@ export function createItem(item, dados, params) {
           const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
           dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
         } else if (params?.getItem) {
-          dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
-        } else if (item === 'fluxo' || item === 'estado') {
-          dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
+          dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data?.objeto ?? null }));
         } else if (item === 'acessos') {
           dispatch(slice.actions.createSuccess({ item, dados: response.data }));
         } else {
-          dispatch(
-            slice.actions.createSuccess({
-              item1: params?.item1 || '',
-              item: item === 'perfisEstado' ? 'perfis' : item,
-              dados: (item === 'perfisEstado' && JSON.parse(dados)?.perfis) || response.data?.objeto || response.data,
-            })
-          );
+          const dadosE = (item === 'perfis' && JSON.parse(dados)?.perfis) || response.data?.objeto || response.data;
+          dispatch(slice.actions.createSuccess({ item, item1: params?.item1 || '', dados: dadosE }));
         }
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
@@ -312,12 +313,12 @@ export function updateItem(item, dados, params) {
       const apiUrl =
         (item === 'fluxo' && `/v1/fluxos/${params?.id}`) ||
         (item === 'linhas' && `/v1/linhas/${params?.id}`) ||
-        (item === 'estado' && `/v1/estados/${params?.id}`) ||
         (item === 'acessos' && `/v1/acessos/${params?.id}`) ||
         (item === 'origens' && `/v1/origens/${params?.id}`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
         (item === 'transicoes' && `/v1/transicoes/${params?.id}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/${params?.id}`) ||
+        (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
         (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
@@ -335,7 +336,7 @@ export function updateItem(item, dados, params) {
         const dadosR = (item === 'acessos' && response.data) || response.data?.objeto || response.data || null;
         if (item === 'fluxo' || item === 'estado' || params?.getItem)
           dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: dadosR }));
-        else dispatch(slice.actions.updateSuccess({ item, item1: params?.item1 || '', dados: dadosR }));
+        else dispatch(slice.actions.updateSuccess({ item: params?.item || item, item1: params?.item1, dados: dadosR }));
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
       params?.afterSuccess?.();
@@ -359,6 +360,7 @@ export function deleteItem(item, params) {
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
       const apiUrl =
+        (item === 'notificacoes' && `/v1/notificacoes/${params?.id}`) ||
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'acessos' && `/v1/acessos/${perfilId}/${params?.id}`) ||
         (item === 'origens' && `/v1/origens/${params?.id}/${perfilId}`) ||
@@ -378,8 +380,8 @@ export function deleteItem(item, params) {
         if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
         dispatch(
           slice.actions.deleteSuccess({
-            item,
             id: params?.id,
+            item: params?.item || item,
             item1: params?.item1 || '',
             destaivar: item === 'destinatario',
           })

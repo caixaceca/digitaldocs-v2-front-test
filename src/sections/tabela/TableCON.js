@@ -95,7 +95,7 @@ export default function TableCON({ item = 'con' }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [filter, dadosControle]);
 
   const dataFiltered = applySortFilter({
     filter,
@@ -182,13 +182,11 @@ export default function TableCON({ item = 'con' }) {
                         <TableCell align="right">{baralharString(row?.conta_processo)}</TableCell>
                         <TableCell align="right">{row?.valor ? fCurrency(row?.valor) : noDados()}</TableCell>
                         <TableCell align="right">{row?.cdg_operacao || noDados()}</TableCell>
-                        <TableCell align="center">
-                          {row?.data_entrada ? ptDate(row?.data_entrada) : noDados()}
-                        </TableCell>
+                        <TableCell align="center">{ptDate(row?.data_entrada) || noDados()}</TableCell>
                       </>
                     )}
                     <TableCell align="center">
-                      <DefaultAction label="DETALHES" handleClick={() => handleView(row?.processo_id || row?.id)} />
+                      <DefaultAction label="DETALHES" onClick={() => handleView(row?.processo_id || row?.id)} />
                     </TableCell>
                   </TableRow>
                 ))

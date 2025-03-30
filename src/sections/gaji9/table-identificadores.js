@@ -186,9 +186,9 @@ export default function TableIdentificadores({ item, inativos }) {
                               acessoGaji9(utilizador?.acessos, ['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
                             (item === 'componentes' &&
                               acessoGaji9(utilizador?.acessos, ['UPDATE_PRODUTO/COMPONENTE']))) && (
-                            <DefaultAction label="EDITAR" color="warning" handleClick={() => viewItem('update', row)} />
+                            <DefaultAction label="EDITAR" onClick={() => viewItem('update', row)} />
                           )}
-                          <DefaultAction label="DETALHES" handleClick={() => viewItem('view', row)} />
+                          <DefaultAction label="DETALHES" onClick={() => viewItem('view', row)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

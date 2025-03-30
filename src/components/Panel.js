@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import { styled } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
@@ -14,8 +15,6 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-// config
-// import { ambiente } from '../config';
 // utils
 import { getFile } from '../utils/getFile';
 import { baralharString } from '../utils/formatText';
@@ -180,7 +179,7 @@ export function Registos({ info, total, handleClick }) {
       <Typography variant="subtitle1" sx={{ color: 'text.primary', pr: 0.5 }}>
         {info?.total_registos || 0}
       </Typography>
-      {info?.proxima_pagina > 0 && <DefaultAction small label="Mais processos" handleClick={handleClick} />}
+      {info?.proxima_pagina > 0 && <DefaultAction small label="Mais processos" onClick={handleClick} />}
     </Stack>
   );
 }
@@ -231,3 +230,16 @@ export function BoxMask({ sx = null }) {
     />
   );
 }
+
+// ----------------------------------------------------------------------
+
+export const TabsWrapperStyle = styled('div')(({ theme }) => ({
+  zIndex: 9,
+  bottom: 0,
+  width: '100%',
+  display: 'flex',
+  position: 'absolute',
+  backgroundColor: theme.palette.background.paper,
+  [theme.breakpoints.down('md')]: { justifyContent: 'center' },
+  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(2) },
+}));

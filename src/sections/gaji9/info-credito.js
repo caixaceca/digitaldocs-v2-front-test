@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
+import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -15,8 +15,9 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fNumber } from '../../utils/formatNumber';
-import { ptDateTime, ptDate } from '../../utils/formatTime';
+import { ptDate, ptDateTime } from '../../utils/formatTime';
+import { noDados } from '../../utils/formatText';
+import { fCurrency, fPercent } from '../../utils/formatNumber';
 import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -26,27 +27,27 @@ import { getDocumento, getFromGaji9, deleteItem, setModal } from '../../redux/sl
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
-import { CellChecked } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
+import { CellChecked, Criado } from '../../components/Panel';
 import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter } from './applySortFilter';
+import { Resgisto } from '../parametrizacao/Detalhes';
 import { FiadoresForm, DataContrato } from './form-credito';
 
 // ----------------------------------------------------------------------
 
 export default function InfoCredito() {
-  const { credito, tiposGarantias } = useSelector((state) => state.gaji9);
+  const { credito } = useSelector((state) => state.gaji9);
 
   const sections = [
     {
       title: 'Informações do Cliente',
       content: [
-        { label: 'Balcão domicílio', value: credito?.balcao_domicilio },
         { label: 'Nº de cliente', value: credito?.cliente },
         { label: 'Conta DO', value: credito?.conta_do },
         {
@@ -55,67 +56,41 @@ export default function InfoCredito() {
         },
         { label: 'Email', value: credito?.morada_eletronico_cliente },
         { label: 'Morada', value: credito?.morada_cliente },
+        { label: 'Balcão domicílio', value: credito?.balcao_domicilio },
       ],
     },
     {
       title: 'Detalhes do Crédito',
       content: [
         { label: 'Componente', value: credito?.rotulo || credito?.componente },
-        { label: 'Nº de proposta', value: credito?.numero_proposta },
-        { label: 'Montante', value: `${fNumber(credito?.montante)} ${credito?.moeda}` },
-        { label: 'Finalidade', value: credito?.finalidade },
+        { label: 'Montante', value: fCurrency(credito?.montante) },
+        {
+          label: 'Prémio do seguro',
+          value: credito?.valor_premio_seguro ? fCurrency(credito?.valor_premio_seguro) : '',
+        },
+        { label: 'Nº de prestações', value: credito?.numero_prestacao },
+        { label: 'Valor da prestação', value: fCurrency(credito?.valor_prestacao) },
+        { label: 'Valor 1ª prestação', value: fCurrency(credito?.valor_prestacao1) },
+        { label: 'Vencimento da 1ª prestação', value: ptDate(credito?.data_vencimento_prestacao1) },
         { label: 'Prazo contratual', value: credito?.prazo_contratual },
         { label: 'Meses vencimento', value: credito?.meses_vencimento },
-        { label: 'Prémio do seguro', value: `${fNumber(credito?.valor_premio_seguro)} ${credito?.moeda}` },
-        {
-          label: 'Garantias',
-          value:
-            credito?.garantias?.length > 0 ? (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {credito?.garantias.map((garantia, idx) => (
-                  <Chip
-                    size="small"
-                    key={`garantia_${idx}`}
-                    label={
-                      tiposGarantias?.find((row) => row?.id === garantia?.tipo_garantia_id)?.designacao ||
-                      garantia?.tipo_garantia_id
-                    }
-                  />
-                ))}
-              </Box>
-            ) : (
-              ''
-            ),
-        },
+        { label: 'Finalidade', value: credito?.finalidade },
       ],
     },
     {
       title: 'Taxas e Custos',
-      visual: {
-        type: 'chip',
-        items: [
-          { label: 'Taxa de juro negociada', color: 'success', value: `${credito?.taxa_juro_negociado}%` },
-          { label: 'Taxa de juro precário', color: '', value: `${credito?.taxa_juro_precario}%` },
-          { label: 'Taxa de juro desconto', color: 'info', value: `${credito?.taxa_Juro_desconto}%` },
-        ],
-      },
       content: [
-        { label: 'TAEG', value: `${credito?.taxa_taeg}%` },
+        { label: 'Taxa juro negociada', color: 'success', value: fPercent(credito?.taxa_juro_negociado) },
+        { label: 'Taxa juro precário', color: '', value: fPercent(credito?.taxa_juro_precario) },
+        { label: 'Taxa juro desconto', color: 'info', value: fPercent(credito?.taxa_Juro_desconto) },
+        { label: 'Taxa TAEG', value: fPercent(credito?.taxa_taeg) },
+        { label: 'Taxa imposto de selo', value: fPercent(credito?.taxa_imposto_selo) },
+        { label: 'Taxa comissão de abertura', value: fPercent(credito?.taxa_comissao_abertura) },
         { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
-        { label: 'Comissão', value: `${fNumber(credito?.valor_comissao)} ${credito?.moeda}` },
-        { label: 'Comissão de abertura', value: `${fNumber(credito?.comissao_abertura)} ${credito?.moeda}` },
-        { label: 'Imposto de selo', value: `${fNumber(credito?.valor_imposto_selo)} ${credito?.moeda}` },
-        { label: 'Valor do juro', value: `${fNumber(credito?.valor_juro)} ${credito?.moeda}` },
-        { label: 'Custo total', value: `${fNumber(credito?.custo_total)} ${credito?.moeda}` },
-      ],
-    },
-    {
-      title: 'Prestações',
-      content: [
-        { label: 'Nº de prestações', value: credito?.numero_prestacao },
-        { label: 'Valor da prestação', value: `${fNumber(credito?.valor_prestacao)} ${credito?.moeda}` },
-        { label: 'Valor 1ª prestação', value: `${fNumber(credito?.valor_prestacao1)} ${credito?.moeda}` },
-        { label: 'Vencimento da 1ª prestação', value: ptDate(credito?.data_vencimento_prestacao1) },
+        { label: 'Valor comissão', value: fCurrency(credito?.valor_comissao) },
+        { label: 'Valor imposto de selo', value: fCurrency(credito?.valor_imposto_selo) },
+        { label: 'Valor do juro', value: fCurrency(credito?.valor_juro) },
+        { label: 'Custo total', value: fCurrency(credito?.custo_total) },
       ],
     },
     {
@@ -126,12 +101,9 @@ export default function InfoCredito() {
           value: <Label color={credito?.ativo ? 'success' : 'default'}>{credito?.ativo ? 'Sim' : 'Não'}</Label>,
         },
         { label: 'Versão', value: credito?.versao },
-        { label: 'ID do processo', value: credito?.processo_origem_id || '!-!' },
+        { label: 'Nº de proposta', value: credito?.numero_proposta },
         { label: 'Aplicação de origem', value: credito?.aplicacao_origem },
-        { label: 'Criado em', value: ptDateTime(credito?.criado_em) },
-        { label: 'Criado por', value: credito?.criado_por },
-        { label: 'Modificado em', value: credito?.modificado_em ? ptDateTime(credito?.modificado_em) : '!-!' },
-        { label: 'Modificado por', value: credito?.modificado_por || '!-!' },
+        { label: 'ID do processo origem', value: credito?.processo_origem_id || '' },
       ],
     },
   ];
@@ -143,47 +115,40 @@ export default function InfoCredito() {
           key={index}
           sx={{
             maxWidth: '100%',
-            flex: { xs: '1 1 calc(100% - 16px)', sm: '1 1 calc(50% - 16px)', lg: '1 1 calc(33.333% - 16px)' },
+            flex: { xs: '1 1 calc(100% - 16px)', md: '1 1 calc(50% - 16px)', xl: '1 1 calc(33.333% - 16px)' },
           }}
         >
-          <CardHeader title={section.title} titleTypographyProps={{ variant: 'subtitle1', color: 'primary.main' }} />
-          <CardContent sx={{ pt: 1.5 }}>
+          <CardHeader title={section.title} sx={{ color: 'primary.main' }} />
+          <CardContent sx={{ pt: 1 }}>
             <Divider sx={{ mb: 2 }} />
             <Stack spacing={1}>
-              {section.visual && section.visual.type === 'chip' && (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {section.visual.items.map((chip, idx) => (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      color={chip.color}
-                      sx={{ fontWeight: 'bold' }}
-                      key={`${section.visual.type}_${idx}`}
-                      label={`${chip.label}: ${chip.value}`}
-                    />
-                  ))}
-                </Box>
-              )}
-              {section.content.map((item, idx) =>
-                item.value === '!-!' ? (
-                  ''
-                ) : (
-                  <Stack
-                    key={idx}
-                    useFlexGap
-                    direction="row"
-                    flexWrap="wrap"
-                    alignItems="center"
-                    sx={{ color: !item.value && 'text.disabled' }}
-                  >
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      {item.label}:&nbsp;
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontStyle: !item.value && 'italic' }}>
-                      {item.value || 'Não definido'}
-                    </Typography>
+              {section.content.map((item, idx) => (
+                <Stack
+                  key={idx}
+                  useFlexGap
+                  direction="row"
+                  flexWrap="wrap"
+                  alignItems="center"
+                  sx={{ color: !item.value && 'text.disabled' }}
+                >
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {item.label}:&nbsp;
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontStyle: !item.value && 'italic' }}>
+                    {item.value || '(Não definido)'}
+                  </Typography>
+                </Stack>
+              ))}
+              {section.title === 'Informações do Processo' && (
+                <List>
+                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+                    <Typography variant="subtitle1">Registo</Typography>
+                  </ListItem>
+                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
+                    <Resgisto label="Criado" por={credito?.criado_por} em={credito?.criado_em} />
+                    <Resgisto label="Modificado" em={credito?.modificado_em} por={credito?.modificado_por} />
                   </Stack>
-                )
+                </List>
               )}
             </Stack>
           </CardContent>
@@ -195,9 +160,9 @@ export default function InfoCredito() {
 
 // ----------------------------------------------------------------------
 
-TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, contracts: PropTypes.bool };
+TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, tab: PropTypes.string };
 
-export function TableInfoCredito({ id, dados = [], contracts = false }) {
+export function TableInfoCredito({ id, dados = [], tab }) {
   const {
     page,
     order,
@@ -217,9 +182,12 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
   const { isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
-    if (id && contracts && (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CONTRATO'])))
+    if (
+      tab === 'contratos' &&
+      (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CONTRATO']))
+    )
       dispatch(getFromGaji9('contratos', { id }));
-  }, [dispatch, utilizador, contracts, id]);
+  }, [dispatch, utilizador, tab, id]);
 
   useEffect(() => {
     setPage(0);
@@ -228,8 +196,8 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
 
   const dataFiltered = applySortFilter({
     filter,
-    dados: contracts ? contratos : dados,
     comparator: getComparator(order, orderBy),
+    dados: tab === 'contratos' ? contratos : dados,
   });
   const isNotFound = !dataFiltered.length;
 
@@ -244,60 +212,79 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
-              <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(contracts)} />
+              <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(tab)} />
               <TableBody>
                 {isLoading && isNotFound ? (
                   <SkeletonTable row={10} column={6} />
                 ) : (
-                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
-                    contracts ? (
-                      <TableRow hover key={`participante_${index}`}>
-                        <TableCell>{row?.codigo}</TableCell>
-                        <TableCell>
-                          {row?.minuta}
-                          {row?.subtitulo ? ` - ${row?.subtitulo}` : ''}
-                        </TableCell>
-                        <TableCell>{row?.representante}</TableCell>
-                        <TableCell align="center">{row?.versao}</TableCell>
-                        <CellChecked check={row.ativo} />
-                        <TableCell align="center" width={10}>
-                          <Stack direction="row" spacing={0.75}>
-                            {(gestaoContrato(utilizador?._role) ||
-                              acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
-                              <DefaultAction label="EDITAR" handleClick={() => openModal('form-participante', row)} />
-                            )}
-                            <DefaultAction
-                              label="DOWNLOAD"
-                              handleClick={() =>
-                                dispatch(
-                                  getDocumento('contrato', { codigo: row?.codigo, titulo: `CONTRATO: ${row?.codigo}` })
-                                )
-                              }
-                            />
-                            <DefaultAction label="DETALHES" handleClick={() => openModal('view-participante', row)} />
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      <TableRow hover key={`participante_${index}`}>
-                        <TableCell>{row?.numero_entidade}</TableCell>
-                        <TableCell>{row?.nome}</TableCell>
-                        <TableCell>{row?.designacao}</TableCell>
-                        <TableCell align="right">{row?.numero_ordem}</TableCell>
-                        <TableCell>{(row?.fiador && 'FIADOR') || (row?.avalista && 'AVALISTA') || ''}</TableCell>
-                        <TableCell align="center" width={10}>
-                          {!row.mutuario &&
-                            (gestaoContrato(utilizador?._role) ||
-                              acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
+                  dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(
+                    (row, index) =>
+                      (tab === 'contratos' && (
+                        <TableRow hover key={`participante_${index}`}>
+                          <TableCell>{row?.codigo}</TableCell>
+                          <TableCell>
+                            {row?.minuta}
+                            {row?.subtitulo ? ` - ${row?.subtitulo}` : ''}
+                          </TableCell>
+                          <TableCell>{row?.representante}</TableCell>
+                          <TableCell align="center">{row?.versao}</TableCell>
+                          <CellChecked check={row.ativo} />
+                          <TableCell align="center" width={10}>
+                            <Stack direction="row" spacing={0.75}>
+                              {(gestaoContrato(utilizador?._role) ||
+                                acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
+                                <DefaultAction label="EDITAR" onClick={() => openModal('form-participante', row)} />
+                              )}
                               <DefaultAction
-                                small
-                                label="ELIMINAR"
-                                handleClick={() => openModal('eliminar-participante', row)}
+                                label="DOWNLOAD"
+                                onClick={() =>
+                                  dispatch(
+                                    getDocumento('contrato', {
+                                      codigo: row?.codigo,
+                                      titulo: `CONTRATO: ${row?.codigo}`,
+                                    })
+                                  )
+                                }
                               />
-                            )}
-                        </TableCell>
-                      </TableRow>
-                    )
+                              <DefaultAction label="DETALHES" onClick={() => openModal('view-participante', row)} />
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      )) ||
+                      (tab === 'garantias' && (
+                        <TableRow hover key={`participante_${index}`}>
+                          <TableCell>{row?.tipo}</TableCell>
+                          <TableCell>{row?.valor ? fCurrency(row?.valor) : noDados}</TableCell>
+                          <TableCell>{row?.nota || noDados('--')}</TableCell>
+                          <CellChecked check={row.ativo} />
+                          <TableCell width={10}>
+                            <Criado caption tipo="user" value={row?.feito_por} />
+                            <Criado caption tipo="data" value={ptDateTime(row?.ultima_modificacao)} />
+                          </TableCell>
+                        </TableRow>
+                      )) || (
+                        <TableRow hover key={`participante_${index}`}>
+                          <TableCell align="right">{row?.numero_ordem}</TableCell>
+                          <TableCell>{row?.numero_entidade}</TableCell>
+                          <TableCell>{row?.nome}</TableCell>
+                          <TableCell>
+                            {row?.designacao}
+                            {(row?.fiador && ' (FIADOR)') || (row?.avalista && ' (AVALISTA)') || ''}
+                            {row?.entidade_representada_nome ? ` - ${row?.entidade_representada_nome}` : ''}
+                          </TableCell>
+                          <TableCell align="center" width={10}>
+                            {!row.mutuario &&
+                              (gestaoContrato(utilizador?._role) ||
+                                acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
+                                <DefaultAction
+                                  small
+                                  label="ELIMINAR"
+                                  onClick={() => openModal('eliminar-participante', row)}
+                                />
+                              )}
+                          </TableCell>
+                        </TableRow>
+                      )
                   )
                 )}
               </TableBody>
@@ -319,7 +306,9 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
         )}
       </Card>
 
-      {modalGaji9 === 'form-participante' && <FiadoresForm id={id} onCancel={() => openModal('', null)} />}
+      {modalGaji9 === 'form-participante' && (
+        <FiadoresForm dados={dados?.filter(({ mutuario }) => mutuario)} id={id} onCancel={() => openModal('', null)} />
+      )}
       {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onCancel={() => openModal('', null)} />}
       {modalGaji9 === 'view-contrato' && <DetalhesGaji9 closeModal={() => openModal('', null)} item="contrato" />}
 
@@ -330,7 +319,7 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
           onClose={() => openModal('', null)}
           handleOk={() =>
             dispatch(
-              deleteItem('intervenientes', {
+              deleteItem('participantes', {
                 id,
                 getItem: 'credito',
                 numero: selectedItem?.participante_id,
@@ -345,21 +334,28 @@ export function TableInfoCredito({ id, dados = [], contracts = false }) {
   );
 }
 
-function headerTable(contracts) {
+function headerTable(tab) {
   return [
-    ...((contracts === 'tiposGarantias' && [
+    ...((tab === 'contratos' && [
       { id: 'codigo', label: 'Código' },
       { id: 'minuta', label: 'Minuta' },
       { id: 'representante', label: 'Representante' },
       { id: 'versao', label: 'Versão', align: 'center', width: 10 },
       { id: 'ativo', label: 'Ativo', align: 'center' },
-    ]) || [
-      { id: 'numero_entidade', label: 'Nº entidade' },
-      { id: 'nome', label: 'Nome' },
-      { id: 'designacao', label: 'Designação' },
-      { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
-      { id: '', label: 'Responsabilidade' },
-    ]),
-    { id: '', width: 10 },
+      { id: '', width: 10 },
+    ]) ||
+      (tab === 'garantias' && [
+        { id: 'tipo', label: 'Garantia' },
+        { id: 'valor', label: 'Valor' },
+        { id: 'nota', label: 'Nota' },
+        { id: 'ativo', label: 'Ativo', align: 'center' },
+        { id: '', label: 'Registo' },
+      ]) || [
+        { id: 'numero_ordem', label: 'Ordem', align: 'right', width: 10 },
+        { id: 'numero_entidade', label: 'Nº entidade' },
+        { id: 'nome', label: 'Nome' },
+        { id: 'designacao', label: 'Designação' },
+        { id: '', width: 10 },
+      ]),
   ];
 }

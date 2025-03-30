@@ -113,14 +113,10 @@ export function ExportarDados({ titulo, dados, tabela }) {
               row?.assunto || '',
             ]
           : []),
-        ...((tabela === 'Entradas' && [
-          row?.nome || '',
-          row?.colaborador || '',
-          row?.criado_em ? ptDateTime(row?.criado_em) : '',
-        ]) ||
+        ...((tabela === 'Entradas' && [row?.nome || '', row?.colaborador || '', ptDateTime(row?.criado_em)]) ||
           (tabela === 'Por concluir' && [
             row?.nome || '',
-            row?.trabalhado_em ? ptDateTime(row?.trabalhado_em) : '',
+            ptDateTime(row?.trabalhado_em),
             row?.motivo || '',
             row?.colaborador || '',
             row?.uoLabel || '',
@@ -130,7 +126,7 @@ export function ExportarDados({ titulo, dados, tabela }) {
             row?.estado_inicial || '',
             row?.estado_final || '',
             row?.colaborador || '',
-            row?.data_transicao ? ptDateTime(row?.data_transicao) : '',
+            ptDateTime(row?.data_transicao),
             row?.motivo || '',
             row?.observacao || '',
             (row?.imputavel === true && 'Sim') || (row?.imputavel === false && 'Não') || '',
@@ -144,8 +140,8 @@ export function ExportarDados({ titulo, dados, tabela }) {
             row?.doc_1 || '',
             row?.doc_2 || '',
             row?.estado || '',
-            row?.data_entrada ? ptDate(row?.data_entrada) : '',
-            row?.criado_em ? ptDateTime(row?.criado_em) : '',
+            ptDate(row?.data_entrada),
+            ptDateTime(row?.criado_em),
           ]) ||
           (tabela === 'CON' && [
             row?.nome_cliente || '',
@@ -162,8 +158,8 @@ export function ExportarDados({ titulo, dados, tabela }) {
             row?.cdg_operacao || '',
             row?.origem_fundo || '',
             row?.finalidade_fundo || '',
-            row?.data_entrada ? ptDate(row?.data_entrada) : '',
-            row?.criado_em ? ptDateTime(row?.criado_em) : '',
+            ptDate(row?.data_entrada),
+            ptDateTime(row?.criado_em),
             '',
             row?.titular_ordenador ? 'Sim' : 'Não',
             row?.ordenador || '',
@@ -171,7 +167,7 @@ export function ExportarDados({ titulo, dados, tabela }) {
             row?.docid || '',
             dis?.find((di) => di?.id === row?.tipo_docid)?.label || row?.tipo_docid || '',
             row?.estado_civil || '',
-            row?.data_nascimento ? ptDate(row?.data_nascimento) : '',
+            ptDate(row?.data_nascimento),
             row?.pai || '',
             row?.mae || '',
             row?.nacionalidade || '',

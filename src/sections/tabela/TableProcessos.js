@@ -200,7 +200,7 @@ export default function TableProcessos({ from }) {
                       <TableCell align="center">
                         <DefaultAction
                           label="DETALHES"
-                          handleClick={() => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${row?.id}`)}
+                          onClick={() => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${row?.id}`)}
                         />
                       </TableCell>
                     </TableRow>

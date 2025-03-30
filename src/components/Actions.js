@@ -51,7 +51,7 @@ import { getFileThumb } from '../utils/formatFile';
 import useToggle from '../hooks/useToggle';
 // redux
 import { useDispatch } from '../redux/store';
-import { getFromParametrizacao, openModal, getSuccess } from '../redux/slices/parametrizacao';
+import { getFromParametrizacao, openModal, getSuccess, setModal } from '../redux/slices/parametrizacao';
 // assets
 import { Editar, Arquivo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
 //
@@ -69,36 +69,44 @@ DefaultAction.propTypes = {
   icon: PropTypes.string,
   color: PropTypes.string,
   label: PropTypes.string,
+  onClick: PropTypes.func,
   variant: PropTypes.string,
-  handleClick: PropTypes.func,
 };
 
 export function DefaultAction({
   icon,
   label = '',
-  handleClick,
+  onClick,
   small = false,
   button = false,
   variant = 'soft',
   color = 'success',
   ...others
 }) {
+  const colorAlt =
+    (label === 'VERSIONAR' && 'info') ||
+    ((label === 'PRÓXIMO' || label === 'ANTERIOR') && 'inherit') ||
+    ((label === 'REVOGAR' || label === 'ELIMINAR' || label === 'Eliminar') && 'error') ||
+    ((label === 'EDITAR' || label === 'OPÇÕES' || label === 'Composição' || label === 'Editar') && 'warning') ||
+    color;
+
   return button ? (
     <Stack>
       <Button
+        color={colorAlt}
         variant={variant}
-        onClick={handleClick}
+        onClick={onClick}
         size={small ? 'small' : 'medium'}
-        color={label === 'Composição' ? 'warning' : color}
         sx={{ color: variant === 'contained' && color === 'success' && 'common.white' }}
         startIcon={
           (label === 'Clonar' && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
-          (label === 'Composição' && <Editar sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Procurar' && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
           (icon === 'aceitar' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
           (icon === 'pdf' && getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
           (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
+          ((label === 'Composição' || label === 'Editar') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
+          ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
           (label === 'Comparar colaboradores' && <SwapHorizOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
           ((label === 'Mostrar detalhes' || label === 'Adicionar' || icon === 'adicionar') && (
             <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
@@ -114,16 +122,10 @@ export function DefaultAction({
       <Tooltip title={label} arrow>
         <Fab
           size="small"
+          color={colorAlt}
           variant={variant}
-          onClick={handleClick}
-          sx={{ ...(small ? whsmall : wh), boxShadow: label === 'Remover' && 'none' }}
-          color={
-            (label === 'VERSIONAR' && 'info') ||
-            ((label === 'REVOGAR' || label === 'ELIMINAR') && 'error') ||
-            ((label === 'PRÓXIMO' || label === 'ANTERIOR') && 'inherit') ||
-            ((label === 'EDITAR' || label === 'OPÇÕES') && 'warning') ||
-            color
-          }
+          onClick={onClick}
+          sx={{ ...(small ? whsmall : wh), boxShadow: icon === 'Remover' && 'none' }}
           {...others}
         >
           {(label === 'FECHAR' && <CloseIcon />) ||
@@ -165,7 +167,7 @@ export function DefaultAction({
             (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
             (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
             ((label === 'EDITAR' || icon === 'editar') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
-            ((label === 'ELIMINAR' || label === 'Remover') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
+            ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
             ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
             (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
             ((label === 'Adicionar' || icon === 'adicionar') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -174,6 +176,20 @@ export function DefaultAction({
         </Fab>
       </Tooltip>
     </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+ActionButton.propTypes = { options: PropTypes.object };
+
+export function ActionButton({ options = {} }) {
+  const dispatch = useDispatch();
+  const { item = '', sm = false, fab = false, label = 'ELIMINAR', dados = null } = options;
+  const isEdit = label === 'EDITAR' || label === 'Editar';
+
+  return (
+    <DefaultAction small={sm} button={!fab} label={label} onClick={() => dispatch(setModal({ item, dados, isEdit }))} />
   );
 }
 
@@ -312,7 +328,7 @@ export function DialogButons({
     <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
       {desc && (
         <>
-          <DefaultAction color="error" label="ELIMINAR" handleClick={onOpen} />
+          <DefaultAction label="ELIMINAR" onClick={onOpen} />
           {open && <DialogConfirmar desc={desc} onClose={onClose} isSaving={isSaving} handleOk={handleDelete} />}
         </>
       )}
@@ -418,39 +434,12 @@ export function ButtonDocx({ label, handleClick }) {
 
 // ----------------------------------------------------------------------
 
-DownloadDoc.propTypes = {
-  temUrl: PropTypes.bool,
-  isLoading: PropTypes.func,
-  funcObter: PropTypes.func,
-  funcDownload: PropTypes.func,
-};
-
-export function DownloadDoc({ temUrl = false, isLoading, funcDownload, funcObter }) {
-  return (
-    <>
-      {temUrl ? (
-        <DefaultAction color="inherit" label="DOWNLOAD" handleClick={funcDownload} />
-      ) : (
-        <>
-          {isLoading ? (
-            <DefaultAction label="BAIXANDO..." handleClick={() => null} />
-          ) : (
-            <DefaultAction label="OBTER DOCUMENTO" handleClick={funcObter} />
-          )}
-        </>
-      )}
-    </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
 MaisProcessos.propTypes = { verMais: PropTypes.func };
 
 export function MaisProcessos({ verMais }) {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'right', mt: 3 }}>
-      <DefaultAction button label="Mais processos" handleClick={() => verMais()} variant="contained" />
+      <DefaultAction button label="Mais processos" onClick={() => verMais()} variant="contained" />
     </Box>
   );
 }

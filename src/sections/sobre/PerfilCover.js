@@ -81,7 +81,7 @@ export default function PerfilCover({ perfilColaborador, isDeFeria }) {
             ) : (
               <>
                 {perfilColaborador ? (
-                  <Typography variant="h4" noWrap>
+                  <Typography variant="h5" noWrap>
                     {perfilColaborador?.perfil?.displayName || perfilColaborador?.perfil?.mail}
                   </Typography>
                 ) : (

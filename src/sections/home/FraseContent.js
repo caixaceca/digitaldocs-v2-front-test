@@ -16,12 +16,10 @@ FraseContent.propTypes = { frase: PropTypes.object };
 export default function FraseContent({ frase }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const sugeridoPor = colaboradores?.find((row) => row?.id === frase?.sugerido_por);
-  const isKPI =
-    emailCheck(sugeridoPor?.perfil?.mail, 'vc.axiac@arove.ordnavi') &&
-    frase?.frase?.includes('KPI - Key Performance Indicator');
+  const isKPI = emailCheck(sugeridoPor?.perfil?.mail, '') && frase?.frase?.includes('KPI - Key Performance Indicator');
   return (
     <Stack sx={{ flexGrow: 1, color: 'text.secondary' }}>
-      <Typography gutterBottom variant="h5" sx={{ textAlign: 'center' }}>
+      <Typography gutterBottom variant="h6" sx={{ textAlign: 'center' }}>
         Frase da semana
         {format(new Date(), 'MM') === '03' && (
           <Typography variant="spam" sx={{ fontWeight: 300 }}>

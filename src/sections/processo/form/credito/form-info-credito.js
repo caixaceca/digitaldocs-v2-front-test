@@ -108,7 +108,7 @@ export default function FormInfoCredito({ dados }) {
                 <RHFTextField name="numero_proposta" label="Nº de proposta" />
               </GridItem>
               <GridItem xs={12} sm={6} md={3}>
-                <RHFNumberField name="cliente" label="Nº de cliente" />
+                <RHFNumberField noFormat name="cliente" label="Nº de cliente" />
               </GridItem>
               <GridItem xs={12} sm={6} md={3}>
                 <RHFAutocompleteObj

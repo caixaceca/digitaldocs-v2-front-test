@@ -11,7 +11,7 @@ import { findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/v
 // redux
 import { useAcesso } from '../../hooks/useAcesso';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, updateItem, closeModal } from '../../redux/slices/digitaldocs';
+import { getSuccess, updateItem, setModal } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -166,6 +166,7 @@ export default function PageProcesso() {
       if (
         !done.includes('Stiuação') &&
         !done.includes('Garantia') &&
+        done !== 'Anexo eliminado' &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
         done !== 'Processo resgatado' &&
@@ -195,10 +196,10 @@ export default function PageProcesso() {
               {processo && (
                 <Stack spacing={0.5} direction={{ xs: 'row' }}>
                   {proxAnt?.anterior && (
-                    <DefaultAction label="ANTERIOR" handleClick={() => irParaProcesso(proxAnt?.anterior)} />
+                    <DefaultAction label="ANTERIOR" onClick={() => irParaProcesso(proxAnt?.anterior)} />
                   )}
                   {proxAnt?.proximo && (
-                    <DefaultAction label="PRÓXIMO" handleClick={() => irParaProcesso(proxAnt?.proximo)} />
+                    <DefaultAction label="PRÓXIMO" onClick={() => irParaProcesso(proxAnt?.proximo)} />
                   )}
                   {processo?.status === 'Arquivado' ? (
                     <>{acessoDesarquivar && <Desarquivar id={id} colaboradoresList={colaboradoresList} />}</>
@@ -215,7 +216,7 @@ export default function PageProcesso() {
                                 <Libertar dados={{ id, estadoId }} />
                               )}
                               {!estado?.is_lock && (!processo?.perfilAtribuido || processo?.atribuidoAMim) && (
-                                <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
+                                <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
                               )}
                               {!estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
                                 <Atribuir dados={{ estadoId, perfilIdA: processo?.perfilAtribuido, processoId: id }} />
@@ -250,7 +251,7 @@ export default function PageProcesso() {
                             </>
                           )}
                           {!estado?.is_lock && (
-                            <DefaultAction label="ACEITAR" handleClick={() => handleAceitar(estadoId, 'serie')} />
+                            <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
                           )}
                         </>
                       )}
@@ -267,7 +268,11 @@ export default function PageProcesso() {
         </Card>
 
         {isOpenModal === 'editar-processo' && (
-          <ProcessoForm processo={processo} ambientId={estadoId} onCancel={() => dispatch(closeModal())} />
+          <ProcessoForm
+            processo={processo}
+            ambientId={estadoId}
+            onCancel={() => dispatch(setModal({ modal: '', dados: null }))}
+          />
         )}
 
         {pdfPreview && (

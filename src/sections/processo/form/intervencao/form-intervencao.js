@@ -25,7 +25,7 @@ import { fNumber, fCurrency } from '../../../../utils/formatNumber';
 import { paraLevantamento, findColaboradores } from '../../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
-import { getSuccess, getInfoProcesso, updateItem, deleteItem, closeModal } from '../../../../redux/slices/digitaldocs';
+import { getSuccess, getInfoProcesso, updateItem, deleteItem, setModal } from '../../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../../hooks/useAnexos';
 import { getComparator, applySort } from '../../../../hooks/useTable';
@@ -442,7 +442,11 @@ export function ColocarPendenteForm() {
 
   const onSubmit = (action) => {
     try {
-      const params = { id: processo?.id, fluxoId: processo?.fluxo_id, afterSuccess: () => dispatch(closeModal()) };
+      const params = {
+        id: processo?.id,
+        fluxoId: processo?.fluxo_id,
+        afterSuccess: () => dispatch(setModal({ modal: '', dados: null })),
+      };
       dispatch(
         updateItem(
           'pendencia',
@@ -461,7 +465,7 @@ export function ColocarPendenteForm() {
   };
 
   return (
-    <Dialog open onClose={() => dispatch(closeModal())} fullWidth maxWidth="sm">
+    <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="sm">
       <DialogTitle>Processo pendente</DialogTitle>
       <DialogContent>
         {processo?.pendente && processo?.motivo_pendencia_id && processo?.motivo ? (
@@ -477,7 +481,7 @@ export function ColocarPendenteForm() {
               </Stack>
             )}
             <Stack direction="row" sx={{ pt: 3 }} justifyContent="end">
-              <DefaultAction color="error" button handleClick={() => onSubmit('eliminar')} label="Eliminar" />
+              <DefaultAction button onClick={() => onSubmit('eliminar')} label="Eliminar" />
             </Stack>
           </Stack>
         ) : (
@@ -503,7 +507,7 @@ export function ColocarPendenteForm() {
               />
               <RHFTextField name="mobs" label="Observação" disabled={values?.pendenteLevantamento} />
             </Stack>
-            <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(closeModal())} />
+            <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(setModal({ modal: '', dados: null }))} />
           </FormProvider>
         )}
       </DialogContent>
@@ -640,7 +644,7 @@ export function ConfidencialidadesForm({ processoId }) {
           id: selectedItem?.id,
           msg: 'Confidencialidade atualizado',
           afterSuccess: () => {
-            dispatch(closeModal());
+            dispatch(setModal({ modal: '', dados: null }));
             dispatch(getInfoProcesso('confidencialidades', { id: processoId }));
           },
         })
@@ -651,7 +655,7 @@ export function ConfidencialidadesForm({ processoId }) {
   };
 
   return (
-    <Dialog open onClose={() => dispatch(closeModal())} fullWidth maxWidth="md">
+    <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="md">
       <DialogTitle>Editar confidencialidade</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -661,7 +665,7 @@ export function ConfidencialidadesForm({ processoId }) {
             estadosIncluidos="estados_incluidos"
             estadosExcluidos="estados_excluidos"
           />
-          <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(closeModal())} />
+          <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(setModal({ modal: '', dados: null }))} />
         </FormProvider>
       </DialogContent>
     </Dialog>

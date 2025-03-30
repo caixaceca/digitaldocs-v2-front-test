@@ -201,8 +201,7 @@ export default function TableDetalhes({ id, item }) {
                             {row?.ativo && row?.permite_alteracao && (
                               <DefaultAction
                                 label="EDITAR"
-                                color="warning"
-                                handleClick={() => dispatch(setModal({ modal: 'confidencialidade', dados: row }))}
+                                onClick={() => dispatch(setModal({ modal: 'confidencialidade', dados: row }))}
                               />
                             )}
                           </TableCell>

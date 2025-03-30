@@ -16,7 +16,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fillData } from '../../utils/formatTime';
-import { emailCheck } from '../../utils/validarAcesso';
 import { subtractArrays } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
@@ -92,15 +91,9 @@ export function AcessoForm({ perfilIdA, onCancel }) {
           <Stack spacing={3} sx={{ pt: 3 }}>
             <RHFAutocompleteObj name="objeto" label="Objeto" options={objetos} />
             <RHFAutocompleteObj name="acesso" label="Acesso" options={codacessos} />
-            <RHFDatePicker dateTime name="datalimite" label="Data" />
+            <RHFDatePicker dateTime name="datalimite" label="Data de término" />
           </Stack>
-          <DialogButons
-            edit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancel}
-            desc={isEdit ? 'eliminar este acesso' : ''}
-            handleDelete={() => dispatch(deleteItem('acessos', { id: selectedItem?.id, msg: 'Acesso eliminado' }))}
-          />
+          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -215,7 +208,7 @@ export function MotivoTransicaoForm({ onCancel }) {
 
   const onSubmit = async () => {
     try {
-      const formData = { ...values, fluxos: fluxosAtribuidos?.map((row) => row?.id) || null };
+      const formData = { ...values, fluxos: fluxosAtribuidos.length > 0 ? fluxosAtribuidos.map(({ id }) => id) : null };
       const params = { id: selectedItem?.id, msg: `Motivo ${isEdit ? 'atualizado' : 'adicionado'}` };
       dispatch((isEdit ? updateItem : createItem)('motivosTransicao', JSON.stringify(formData), params));
     } catch (error) {
@@ -583,9 +576,11 @@ EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.s
 export function EstadosPerfilForm({ perfilIdE, onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, perfilId } = useSelector((state) => state.intranet);
+  const { perfilId } = useSelector((state) => state.intranet);
   const { estados, isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
   const estadosList = useMemo(() => estados?.map((row) => ({ id: row?.id, label: row?.nome })), [estados]);
+
+  console.log(selectedItem);
 
   const formSchema = Yup.object().shape({ estado: Yup.mixed().required().label('Estado') });
   const defaultValues = useMemo(
@@ -623,7 +618,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
@@ -647,15 +642,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
                 />
               )}
             </Grid>
-            <DialogButons
-              isSaving={isSaving}
-              onCancel={onCancel}
-              edit={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi')}
-              desc={isEdit && emailCheck(mail, 'vc.axiac@arove.ordnavi') ? 'eliminar esta transição' : ''}
-              handleDelete={() =>
-                dispatch(deleteItem('estadosPerfil', { id: selectedItem?.id, msg: 'Estado eliminado' }))
-              }
-            />
+            <DialogButons isSaving={isSaving} onCancel={onCancel} edit={isEdit} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>

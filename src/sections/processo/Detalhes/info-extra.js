@@ -108,10 +108,10 @@ function DadosCredito({ dados }) {
               {situacao || 'Em análise'}
             </Label>
             {(situacao === 'Em análise' || situacao === 'Aprovado') && (
-              <DefaultAction small label="EDITAR" handleClick={() => setOpenSituacao('atualizar')} />
+              <DefaultAction small label="EDITAR" onClick={() => setOpenSituacao('atualizar')} />
             )}
             {situacao !== 'Em análise' && (
-              <DefaultAction small label="ELIMINAR" handleClick={() => setOpenSituacao('eliminar')} />
+              <DefaultAction small label="ELIMINAR" onClick={() => setOpenSituacao('eliminar')} />
             )}
           </Stack>
         </ListItem>
@@ -175,9 +175,7 @@ function Garantias({ dados }) {
             <TableCell>Conta DP</TableCell>
             <TableCell align="center">Ativo</TableCell>
             <TableCell width={10}>
-              {modificar && (
-                <DefaultAction small button label="Adicionar" handleClick={() => setItem({ isEdit: false })} />
-              )}
+              {modificar && <DefaultAction small button label="Adicionar" onClick={() => setItem({ isEdit: false })} />}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -197,19 +195,11 @@ function Garantias({ dados }) {
                 <Stack direction="row" spacing={0.5} justifyContent="right">
                   {modificar && (
                     <>
-                      <DefaultAction
-                        small
-                        label="ELIMINAR"
-                        handleClick={() => setItem({ modal: 'eliminar', ...row })}
-                      />
-                      <DefaultAction
-                        small
-                        label="EDITAR"
-                        handleClick={() => setItem({ isEdit: true, garantia: row })}
-                      />
+                      <DefaultAction small label="ELIMINAR" onClick={() => setItem({ modal: 'eliminar', ...row })} />
+                      <DefaultAction small label="EDITAR" onClick={() => setItem({ isEdit: true, garantia: row })} />
                     </>
                   )}
-                  <DefaultAction small label="DETALHES" handleClick={() => setItem({ modal: 'detail', ...row })} />
+                  <DefaultAction small label="DETALHES" onClick={() => setItem({ modal: 'detail', ...row })} />
                 </Stack>
               </TableCell>
             </TableRow>

@@ -103,35 +103,35 @@ export default function PageMinutaDetalhes() {
                   <>
                     {currentTab === 'Dados' && (
                       <>
-                        <DefaultAction color="inherit" label="CLONAR" handleClick={() => handleAction('Clonar')} />
+                        <DefaultAction color="inherit" label="CLONAR" onClick={() => handleAction('Clonar')} />
                         {minuta?.em_analise && (
                           <>
-                            <DefaultAction label="EDITAR" handleClick={() => handleAction('Atualizar')} />
+                            <DefaultAction label="EDITAR" onClick={() => handleAction('Atualizar')} />
                             {minuta?.clausulas?.length > 0 && (
-                              <DefaultAction label="PUBLICAR" handleClick={() => handleAction('Publicar')} />
+                              <DefaultAction label="PUBLICAR" onClick={() => handleAction('Publicar')} />
                             )}
                           </>
                         )}
                         {minuta?.em_vigor && (
                           <>
-                            <DefaultAction label="VERSIONAR" handleClick={() => handleAction('Versionar')} />
-                            <DefaultAction label="REVOGAR" handleClick={() => handleAction('Revogar')} />
+                            <DefaultAction label="VERSIONAR" onClick={() => handleAction('Versionar')} />
+                            <DefaultAction label="REVOGAR" onClick={() => handleAction('Revogar')} />
                           </>
                         )}
                       </>
                     )}
                     {minuta?.em_analise && currentTab === 'Cláusulas' && (
                       <>
-                        <DefaultAction button label="Adicionar" handleClick={() => handleAction('compor')} />
+                        <DefaultAction button label="Adicionar" onClick={() => handleAction('compor')} />
                         {minuta?.clausulas?.length > 0 && (
-                          <DefaultAction button label="Composição" handleClick={() => handleAction('composicao')} />
+                          <DefaultAction button label="Composição" onClick={() => handleAction('composicao')} />
                         )}
                       </>
                     )}
                   </>
                 )}
                 {minuta?.clausulas?.length > 0 && currentTab !== 'Tipos de garantia' && (
-                  <DefaultAction button icon="pdf" label="Previsualizar" handleClick={() => handleAction('preview')} />
+                  <DefaultAction button icon="pdf" label="Previsualizar" onClick={() => handleAction('preview')} />
                 )}
               </Stack>
             )

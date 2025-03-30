@@ -150,14 +150,14 @@ export function TableInfoMinuta({ item, onClose }) {
                   <Stack direction="row" spacing={0.5} justifyContent="right">
                     {minuta?.ativo && (minuta?.em_analise || item === 'componentesMinuta') && (
                       <>
-                        <DefaultAction small label="ELIMINAR" handleClick={() => openModal('eliminar-item', row)} />
+                        <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-item', row)} />
                         {item === 'clausulaMinuta' && (
-                          <DefaultAction small label="EDITAR" handleClick={() => openModal('form-clausula', row)} />
+                          <DefaultAction small label="EDITAR" onClick={() => openModal('form-clausula', row)} />
                         )}
                       </>
                     )}
                     {item === 'clausulaMinuta' && (
-                      <DefaultAction small label="DETALHES" handleClick={() => openModal('view-clausula', row)} />
+                      <DefaultAction small label="DETALHES" onClick={() => openModal('view-clausula', row)} />
                     )}
                   </Stack>
                 </TableCell>
@@ -219,9 +219,7 @@ function GarantiaComponente({ onCancel, garantia = false, hideAdd = false }) {
             small
             button
             label="Adicionar"
-            handleClick={() =>
-              dispatch(setModal({ item: garantia ? 'form-garantia' : 'form-componente', dados: null }))
-            }
+            onClick={() => dispatch(setModal({ item: garantia ? 'form-garantia' : 'form-componente', dados: null }))}
           />
         )}
       </Stack>

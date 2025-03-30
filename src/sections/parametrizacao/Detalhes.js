@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -16,6 +17,7 @@ import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fPercent } from '../../utils/formatNumber';
 import { ptDateTime, ptDate } from '../../utils/formatTime';
+import { nomeacaoBySexo, noDados } from '../../utils/formatText';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -25,10 +27,44 @@ import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
 import { Criado, CellChecked } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
+import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import { UpdateItem, DefaultAction, DTFechar } from '../../components/Actions';
 //
 import { DestinatarioForm } from './form-fluxo';
 import DetalhesTransicao from './detalhes-transicao';
+
+// ----------------------------------------------------------------------
+
+const fields = [
+  { key: 'ativo', title: 'Ativo:' },
+  { key: 'is_ativo', title: 'Ativo:' },
+  { key: 'to_alert', title: 'Notificar:' },
+  { key: 'is_paralelo', title: 'Em paralelo:' },
+  { key: 'limpo', title: 'Limpo:' },
+  { key: 'requer_parecer', title: 'Requer parecer:' },
+  { key: 'formulario', title: 'Formulário:' },
+  { key: 'anexo', title: 'Anexo:' },
+  { key: 'identificador', title: 'Identificador:' },
+  { key: 'obriga_prazo_validade', title: 'Prazo de validade:' },
+  { key: 'reutilizavel', title: 'Reutilizável:' },
+  { key: 'imputavel', title: 'Imputável:' },
+  { key: 'obrigatorio', title: 'Obrigatório:' },
+  { key: 'hasopnumero', title: 'Nº operação:' },
+  { key: 'is_after_devolucao', title: 'Depois devolução:' },
+  { key: 'is_interno', title: 'Processo interno:' },
+  { key: 'is_credito', title: 'Processo de crédito:' },
+  { key: 'is_inicial', title: 'Estado inicial:' },
+  { key: 'is_final', title: 'Estado final:' },
+  { key: 'is_decisao', title: 'Estado de decisão:' },
+  { key: 'credito_funcionario', title: 'Crédito colaborador:' },
+  { key: 'funcionario', title: 'Crédito colaborador:' },
+  { key: 'para_aprovacao', title: 'Aprovação:' },
+  { key: 'facultativo', title: 'Facultativo:' },
+  { key: 'padrao', title: 'Padrão:' },
+  { key: 'gestor', title: 'Gestor:' },
+  { key: 'observador', title: 'Observador:' },
+  { key: 'is_con', title: 'Comunicação de operação de numerário:' },
+];
 
 // ----------------------------------------------------------------------
 
@@ -42,12 +78,18 @@ export function Detalhes({ item, closeModal }) {
     : null;
 
   return (
-    <Dialog open onClose={closeModal} fullWidth maxWidth={item === 'transicoes' ? 'md' : 'sm'}>
+    <Dialog
+      open
+      fullWidth
+      onClose={closeModal}
+      maxWidth={item === 'Transições' || item === 'Notificações' ? 'md' : 'sm'}
+    >
       <DTFechar title="Detalhes" handleClick={() => closeModal()} />
       <DialogContent>
-        {(item === 'transicoes' && <DetalhesTransicao dados={selectedItem} />) || (
-          <DetalhesContent dados={selectedItem} item={item} perfil={perfil} />
-        )}
+        {(item === 'Transições' && <DetalhesTransicao dados={selectedItem} />) ||
+          (item === 'Notificações' && <Notificacao dados={selectedItem} />) || (
+            <DetalhesContent dados={selectedItem} item={item} perfil={perfil} />
+          )}
       </DialogContent>
     </Dialog>
   );
@@ -63,7 +105,8 @@ DetalhesContent.propTypes = {
 };
 
 export function DetalhesContent({ dados = null, item = '', perfil = null, uo = null }) {
-  const { isLoading, destinatarios } = useSelector((state) => state.parametrizacao);
+  const { isLoading } = useSelector((state) => state.parametrizacao);
+  const uoAlt = uo || perfil?.uo;
 
   return (
     <>
@@ -78,9 +121,11 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
           {dados ? (
             <>
               <List>
-                <ListItem disableGutters divider sx={{ pb: 0 }}>
-                  <Typography variant="subtitle1">{item === 'Fluxo' ? 'Dados' : ''}</Typography>
-                </ListItem>
+                {(item === 'Fluxo' || item === 'Estado') && (
+                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+                    <Typography variant="subtitle1">Dados</Typography>
+                  </ListItem>
+                )}
                 <Table size="small">
                   <TableBody>
                     <TableRowItem title="ID:" text={dados?.id} />
@@ -94,7 +139,7 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                     <TableRowItem title={item === 'linhas' ? 'Segmento:' : 'Descrição:'} text={dados?.descricao} />
                     {dados?.assunto && (
                       <TableRowItem
-                        title="Assunto"
+                        title="Assunto:"
                         text={`${dados?.assunto}${dados?.fluxo_id ? ` (ID: ${dados?.fluxo_id})` : ''}`}
                       />
                     )}
@@ -142,8 +187,14 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                         text={`${perfil?.perfil?.displayName} (ID_Perfil: ${perfil?.perfil_id})`}
                       />
                     )}
-                    {uo && <TableRowItem title="U.O:" text={`${uo?.label} (ID: ${uo?.id})`} />}
-                    {uo && <TableRowItem title="Balcão:" text={uo?.balcao} />}
+                    {perfil && (
+                      <TableRowItem
+                        title="Função:"
+                        text={nomeacaoBySexo(perfil?.nomeacao || perfil?.funcao, perfil?.sexo)}
+                      />
+                    )}
+                    {uoAlt && <TableRowItem title="U.O:" text={`${uoAlt?.label} (ID: ${uoAlt?.id})`} />}
+                    {uoAlt && <TableRowItem title="Balcão:" text={uoAlt?.balcao} />}
                     {'corpo' in dados && (
                       <TableRowItem title="Corpo:" item={<Markdown own children={dados?.corpo} />} />
                     )}
@@ -151,76 +202,14 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                     <TableRowItem title="Concelho:" text={dados?.cidade} />
                     <TableRowItem title="Ilha:" text={dados?.ilha} />
                     {dados?.percentagem && <TableRowItem title="Percentagem:" text={fPercent(dados?.percentagem)} />}
-                    {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
-                    {'is_ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.is_ativo} />} />}
-                    {'to_alert' in dados && (
-                      <TableRowItem title="Notificar:" item={<LabelSN item={dados?.to_alert} />} />
+                    {dados?.data_inicio && <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />}
+                    {dados?.data_limite && <TableRowItem title="Data fim:" text={ptDateTime(dados?.data_limite)} />}
+                    {fields.map(({ key, title }) =>
+                      key in dados ? (
+                        <TableRowItem key={key} title={title} item={<LabelSN item={dados[key]} />} />
+                      ) : null
                     )}
-                    {'is_paralelo' in dados && (
-                      <TableRowItem title="Em paralelo:" item={<LabelSN item={dados?.is_paralelo} />} />
-                    )}
-                    {'limpo' in dados && <TableRowItem title="Limpo:" item={<LabelSN item={dados?.limpo} />} />}
-                    {'requer_parecer' in dados && (
-                      <TableRowItem title="Requer parecer:" item={<LabelSN item={dados?.requer_parecer} />} />
-                    )}
-                    {'formulario' in dados && (
-                      <TableRowItem title="Formulário:" item={<LabelSN item={dados?.formulario} />} />
-                    )}
-                    {'anexo' in dados && <TableRowItem title="Anexo:" item={<LabelSN item={dados?.anexo} />} />}
-                    {'identificador' in dados && (
-                      <TableRowItem title="Identificador:" item={<LabelSN item={dados?.identificador} />} />
-                    )}
-                    {'obriga_prazo_validade' in dados && (
-                      <TableRowItem title="Prazo de validade:" item={<LabelSN item={dados?.obriga_prazo_validade} />} />
-                    )}
-                    {'reutilizavel' in dados && (
-                      <TableRowItem title="Reutilizável:" item={<LabelSN item={dados?.reutilizavel} />} />
-                    )}
-                    {'imputavel' in dados && (
-                      <TableRowItem title="Imputável:" item={<LabelSN item={dados?.imputavel} />} />
-                    )}
-                    {'obrigatorio' in dados && (
-                      <TableRowItem title="Obrigatório:" item={<LabelSN item={dados?.obrigatorio} />} />
-                    )}
-                    {'hasopnumero' in dados && (
-                      <TableRowItem title="Nº operação:" item={<LabelSN item={dados?.hasopnumero} />} />
-                    )}
-                    {'is_after_devolucao' in dados && (
-                      <TableRowItem title="Depois devolução:" item={<LabelSN item={dados?.is_after_devolucao} />} />
-                    )}
-                    {'is_interno' in dados && (
-                      <TableRowItem title="Processo interno:" item={<LabelSN item={dados?.is_interno} />} />
-                    )}
-                    {'is_credito' in dados && (
-                      <TableRowItem title="Processo de crédito:" item={<LabelSN item={dados?.is_credito} />} />
-                    )}
-                    {'is_inicial' in dados && (
-                      <TableRowItem title="Estado inicial:" item={<LabelSN item={dados?.is_inicial} />} />
-                    )}
-                    {'is_final' in dados && (
-                      <TableRowItem title="Estado final:" item={<LabelSN item={dados?.is_final} />} />
-                    )}
-                    {'is_decisao' in dados && (
-                      <TableRowItem title="Estado de decisão:" item={<LabelSN item={dados?.is_decisao} />} />
-                    )}
-                    {'credito_funcionario' in dados && (
-                      <TableRowItem title="Crédito colaborador:" item={<LabelSN item={dados?.credito_funcionario} />} />
-                    )}
-                    {'funcionario' in dados && (
-                      <TableRowItem title="Crédito colaborador:" item={<LabelSN item={dados?.funcionario} />} />
-                    )}
-                    {'para_aprovacao' in dados && (
-                      <TableRowItem title="Aprovação:" item={<LabelSN item={dados?.para_aprovacao} />} />
-                    )}
-                    {'facultativo' in dados && (
-                      <TableRowItem title="Facultativo:" item={<LabelSN item={dados?.facultativo} />} />
-                    )}
-                    {'is_con' in dados && (
-                      <TableRowItem
-                        title="Comunicação de operação de numerário:"
-                        item={<LabelSN item={dados?.is_con} />}
-                      />
-                    )}
+                    <TableRowItem title="Nível de decisão:" text={dados?.nivel_decisao} />
                     <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                   </TableBody>
                 </Table>
@@ -240,9 +229,6 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                     )}
                   </Stack>
                 </List>
-              )}
-              {item === 'notificacoes' && destinatarios?.length > 0 && (
-                <Notificacoes id={dados?.id} destinatarios={destinatarios} />
               )}
               <List>
                 <ListItem disableGutters divider sx={{ pb: 0.5 }}>
@@ -273,43 +259,68 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
 
 // ----------------------------------------------------------------------
 
+Notificacao.propTypes = { dados: PropTypes.object };
+
+function Notificacao({ dados }) {
+  const [currentTab, setCurrentTab] = useState('Info');
+  const { destinatarios } = useSelector((state) => state.parametrizacao);
+
+  const tabsList = [
+    { value: 'Info', component: <DetalhesContent dados={dados} /> },
+    { value: 'Destinatários', component: <Notificacoes id={dados?.id} destinatarios={destinatarios || []} /> },
+  ];
+
+  return (
+    <>
+      <TabsWrapperSimple
+        tabsList={tabsList}
+        currentTab={currentTab}
+        sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
+        changeTab={(_, newValue) => setCurrentTab(newValue)}
+      />
+      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 Notificacoes.propTypes = { destinatarios: PropTypes.array, id: PropTypes.number };
 
 function Notificacoes({ destinatarios, id }) {
   const [destinatario, setDestinatario] = useState(null);
   return (
-    <List>
-      <ListItem disableGutters divider sx={{ pb: 0.5, mb: 0.25 }}>
-        <Typography variant="subtitle1">Destinatários</Typography>
-      </ListItem>
-      <Table size="small">
+    <>
+      <Table sx={{ mt: 3 }}>
         <TableHead>
           <TableRow>
-            <TableCell>Contacto</TableCell>
-            <TableCell>Data</TableCell>
-            <TableCell>Ativo</TableCell>
-            <TableCell width={10}>
-              <DefaultAction small label="ADICIONAR" handleClick={() => setDestinatario({ add: true })} />
+            <TableCell size="small">Contacto</TableCell>
+            <TableCell size="small">Data</TableCell>
+            <TableCell size="small" align="center">
+              Ativo
+            </TableCell>
+            <TableCell size="small">Registo</TableCell>
+            <TableCell size="small" width={10}>
+              <DefaultAction small label="ADICIONAR" onClick={() => setDestinatario({ add: true })} />
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {destinatarios?.map((row) => (
-            <TableRow key={`dest_${row?.id}`}>
+            <TableRow hover key={`dest_${row?.id}`}>
               <TableCell>
                 <Typography variant="body2">{row?.email}</Typography>
                 <Typography variant="body2">{row?.telefone}</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="caption" noWrap>
-                  Início: {row.data_inicio ? ptDate(row.data_inicio) : 'Sem data'}
-                </Typography>
-                <br />
-                <Typography variant="caption" noWrap>
-                  Fim: {row.data_fim ? ptDate(row.data_fim) : 'Sem data'}
-                </Typography>
+                <Criado value={<>Início: {ptDate(row.data_inicio) || noDados('(Não definido)')}</>} caption />
+                <Criado value={<>Fim: {ptDate(row.data_fim) || noDados('(Não definido)')}</>} caption />
               </TableCell>
               <CellChecked check={row.ativo} />
+              <TableCell>
+                <Criado tipo="user" value={row?.modificador || row?.criador} baralhar caption />
+                <Criado tipo="data" value={ptDateTime(row?.modificado_em || row?.criado_em)} caption />
+              </TableCell>
               <TableCell>
                 <UpdateItem dados={{ small: true }} handleClick={() => setDestinatario(row)} />
               </TableCell>
@@ -317,10 +328,11 @@ function Notificacoes({ destinatarios, id }) {
           ))}
         </TableBody>
       </Table>
+      {!destinatarios?.length && <SearchNotFoundSmall message="Nenhum destinatário adicionado..." />}
       {!!destinatario && (
         <DestinatarioForm id={id} selectedItem={destinatario} onCancel={() => setDestinatario(null)} />
       )}
-    </List>
+    </>
   );
 }
 
@@ -354,7 +366,7 @@ TableRowItem.propTypes = {
 export function TableRowItem({ title, id = 0, text = '', item = null }) {
   return text || item ? (
     <TableRow hover>
-      <TableCell align="right" sx={{ color: 'text.secondary', pr: 0 }}>
+      <TableCell align="right" sx={{ color: 'text.secondary', pr: 0, maxWidth: '25% !important' }}>
         {title}
       </TableCell>
       <TableCell sx={{ minWidth: '75% !important' }}>

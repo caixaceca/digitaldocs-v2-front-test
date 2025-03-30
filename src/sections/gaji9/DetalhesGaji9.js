@@ -269,15 +269,9 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     {'condicional' in dados && (
                       <TableRowItem title="Condicional:" item={<LabelSN item={dados?.condicional} />} />
                     )}
-                    <TableRowItem
-                      title="Entrada em vigor:"
-                      text={dados?.data_vigor ? ptDateTime(dados?.data_vigor) : ''}
-                    />
+                    <TableRowItem title="Entrada em vigor:" text={ptDateTime(dados?.data_vigor)} />
                     <TableRowItem title="Publicado por:" text={dados?.cc_vigor} />
-                    <TableRowItem
-                      title="Data de revogação:"
-                      text={dados?.data_revogado ? ptDateTime(dados?.data_revogado) : ''}
-                    />
+                    <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                     <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
                     {dados?.nota && <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />}
                     {'ativo' in dados && (

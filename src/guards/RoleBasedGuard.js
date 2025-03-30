@@ -31,7 +31,7 @@ export default function RoleBasedGuard({ hasContent, roles, children = null, sho
       <Card>
         <CardContent>
           <Container sx={{ textAlign: 'center' }}>
-            <Typography variant="h3" paragraph>
+            <Typography variant="h4" paragraph>
               Sem permissão
             </Typography>
 

@@ -109,7 +109,7 @@ export default function FormDepositante({ dados }) {
             <GridItem>
               <Grid container spacing={3} justifyContent="center">
                 <GridItem sm={6} xl={3}>
-                  <RHFNumberField name="entidade_con" label="Nº da entidade" />
+                  <RHFNumberField noFormat name="entidade_con" label="Nº da entidade" />
                 </GridItem>
               </Grid>
             </GridItem>

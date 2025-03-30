@@ -67,7 +67,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
         <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
         <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
         <TextItem title="Assunto:" text={processo?.assunto} />
-        <TextItem title="Criado em:" text={processo?.criado_em ? ptDateTime(processo?.criado_em) : ''} />
+        <TextItem title="Criado em:" text={ptDateTime(processo?.criado_em)} />
         <TextItem title="Criado por:" text={criador?.perfil?.displayName} baralhar />
         {!isPS && !!processo?.data_entrada && (
           <TextItem
@@ -107,7 +107,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
                             {row?.estado}
                           </Typography>
                           {row?.data_entrada && (
-                            <Stack direction="row" sx={{ color: 'text.secondary', pt: 0.25 }}>
+                            <Stack direction="row" sx={{ color: 'text.secondary' }}>
                               <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
                               {row?.estado !== 'Arquivo' && (
                                 <Criado
@@ -323,7 +323,7 @@ function ValorItem({ title, valor, cativos }) {
       </Typography>
       {cativos?.length > 0 && (
         <>
-          <DefaultAction handleClick={onOpen} small color="info" label="INFO. DAS CONTAS" />
+          <DefaultAction onClick={() => onOpen()} small color="info" label="INFO. DAS CONTAS" />
           {open && (
             <Dialog open onClose={onClose} fullWidth maxWidth="md">
               <DTFechar title="Contas para cativo" handleClick={() => onClose()} />

@@ -157,10 +157,6 @@ function Actions({ inativos, setInativos, label = '' }) {
   const dispatch = useDispatch();
   const { adminGaji9, utilizador } = useSelector((state) => state.gaji9);
 
-  const openModalAlt = (item) => {
-    dispatch(setModal({ item, dados: null }));
-  };
-
   return (
     <Stack direction="row" alignItems="center" spacing={1}>
       {label === 'Minutas' && <EstadoMinuta />}
@@ -170,6 +166,9 @@ function Actions({ inativos, setInativos, label = '' }) {
           label="Inativos"
           control={<Switch checked={inativos} onChange={(event) => setInativos(event.target.checked)} />}
         />
+      )}
+      {label === 'Créditos' && (
+        <DefaultAction button label="Carregar proposta" onClick={() => dispatch(openModal('view'))} />
       )}
       {label !== 'Minutas públicas' &&
         label !== 'Cláusulas' &&
@@ -181,16 +180,17 @@ function Actions({ inativos, setInativos, label = '' }) {
           (label === 'Tipos de titular' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO TITULAR'])) ||
           (label === 'Tipos de garantia' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO GARANTIA'])) ||
           (label === 'Freguesias' && acessoGaji9(utilizador?.acessos, ['CREATE_DIVISAO ADMINISTRATIVA']))) && (
-          <DefaultAction button label="Adicionar" handleClick={() => dispatch(openModal('add'))} />
+          <DefaultAction button label="Adicionar" onClick={() => dispatch(openModal('add'))} />
         )}
       {label === 'Cláusulas' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) && (
-        <DefaultAction button label="Adicionar" handleClick={() => openModalAlt('form-clausula')} />
+        <DefaultAction
+          button
+          label="Adicionar"
+          onClick={() => dispatch(setModal({ item: 'form-clausula', dados: null }))}
+        />
       )}
       {label === 'Representantes' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_INSTITUICAO'])) && (
         <ButtonInfoCaixa />
-      )}
-      {label === 'Créditos' && (
-        <DefaultAction button label="Carregar proposta" handleClick={() => dispatch(openModal('view'))} />
       )}
     </Stack>
   );
@@ -207,7 +207,7 @@ function ButtonInfoCaixa() {
       <DefaultAction
         button
         label="Caixa"
-        handleClick={() => {
+        onClick={() => {
           onOpen();
           dispatch(getFromGaji9('infoCaixa'));
         }}

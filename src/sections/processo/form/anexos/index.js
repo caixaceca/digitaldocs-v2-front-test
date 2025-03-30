@@ -20,30 +20,34 @@ export default function Anexos({ outros, anexos }) {
   const values = watch();
   const { fields } = useFieldArray({ control, name: 'checklist' });
   const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
+  const outrosExistente = anexos?.filter((row) => !row?.tipo_id || row?.tipo === 'OUTROS');
 
   return (
     <Stack spacing={3} sx={{ width: 1 }}>
-      {anexos?.length > 0 && (
-        <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-          <AnexosExistente anexos={anexos?.map((row) => ({ ...row, name: row?.nome }))} />
-        </Card>
-      )}
       {fields?.length === 0 && !outros ? (
-        <Card sx={{ p: 5, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-          <Typography variant="body2" sx={{ textAlign: 'center', fontStyle: 'italic' }}>
+        <Card sx={{ p: 3, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+          <Typography variant="body2" sx={{ textAlign: 'center', fontStyle: 'italic', color: 'text.secondary' }}>
             Este fluxo não possui Checklist...
           </Typography>
         </Card>
       ) : (
         <>
           {fields?.map((row, docIndex) => (
-            <FormDocumentosChecklist key={row?.id} dados={row} docIndex={docIndex} />
+            <FormDocumentosChecklist
+              dados={row}
+              key={row?.id}
+              docIndex={docIndex}
+              anexos={anexos.filter(({ ativo, tipo_id: tid }) => ativo && tid === row?.tipo_id)}
+            />
           ))}
 
           {outros && (
             <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
               <Typography sx={{ pb: 0.5, pl: 0.5, typography: 'overline' }}>Anexos</Typography>
               <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+              {outrosExistente?.length > 0 && (
+                <AnexosExistente noTitle anexos={outrosExistente?.map((row) => ({ ...row, name: row?.nome }))} />
+              )}
             </Card>
           )}
         </>

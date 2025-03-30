@@ -85,11 +85,7 @@ export default function Intervencao() {
 
       <Libertar dados={{ id: processo?.id, estadoId: processo?.estado_processo?.estado_id }} />
 
-      <DefaultAction
-        label="EDITAR"
-        color="warning"
-        handleClick={() => dispatch(setModal({ modal: 'editar-processo', dados: null }))}
-      />
+      <DefaultAction label="EDITAR" onClick={() => dispatch(setModal({ modal: 'editar-processo', dados: null }))} />
 
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
         <Arquivar naoFinal={destinos?.destinosFora?.length > 0 ? destinos?.destinosFora : []} />
@@ -113,13 +109,13 @@ export function Encaminhar({ title, destinos, gerencia = false, fluxoId = null }
   return (
     <>
       <DefaultAction
+        label={title}
         color={title === 'DEVOLVER' ? 'warning' : 'success'}
-        handleClick={() => {
+        onClick={() => {
           onOpen();
           dispatch(resetDados());
           if (title === 'DEVOLVER') dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
         }}
-        label={title}
       />
       {open && <EncaminharStepper title={title} destinos={destinos} gerencia={gerencia} onClose={() => onClose()} />}
     </>
@@ -134,7 +130,7 @@ export function Arquivar({ naoFinal }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction color="error" handleClick={onOpen} label="ARQUIVAR" />
+      <DefaultAction onClick={() => onOpen()} label="ARQUIVAR" />
       {open && <ArquivarForm naoFinal={naoFinal} onClose={() => onClose()} />}
     </>
   );
@@ -152,7 +148,7 @@ export function Desarquivar({ id, colaboradoresList }) {
       <DefaultAction
         color="error"
         label="DESARQUIVAR"
-        handleClick={() => {
+        onClick={() => {
           dispatch(setModal({ modal: 'desarquivar', dados: null }));
           dispatch(getInfoProcesso('destinosDesarquivamento', { id }));
         }}
@@ -170,7 +166,7 @@ export function Finalizar({ id, cativos = [] }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction handleClick={onOpen} label="FINALIZAR" />
+      <DefaultAction onClick={() => onOpen()} label="FINALIZAR" />
       {open && <FinalizarForm onClose={() => onClose()} id={id} cativos={cativos} />}
     </>
   );
@@ -184,7 +180,7 @@ export function FinalizarOP({ id, isSaving }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction handleClick={onOpen} label="FINALIZAR" />
+      <DefaultAction onClick={() => onOpen()} label="FINALIZAR" />
       {open && <FinalizarOPForm onClose={() => onClose()} id={id} isSaving={isSaving} />}
     </>
   );
@@ -198,7 +194,7 @@ export function Resgatar({ dados }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction label="RESGATAR" handleClick={onOpen} color="warning" />
+      <DefaultAction label="RESGATAR" onClick={() => onOpen()} color="warning" />
       {open && <ResgatarForm dados={dados} onClose={() => onClose()} />}
     </>
   );
@@ -212,7 +208,7 @@ export function Cancelar({ id, estadoId, fechar = false }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction label={fechar ? 'FECHAR' : 'RESGATAR'} color="warning" handleClick={onOpen} />
+      <DefaultAction label={fechar ? 'FECHAR' : 'RESGATAR'} color="warning" onClick={() => onOpen()} />
       {open && <CancelarForm onClose={() => onClose()} id={id} estadoId={estadoId} fechar={fechar} />}
     </>
   );
@@ -226,7 +222,7 @@ export function Libertar({ dados }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction color="warning" label="LIBERTAR" handleClick={onOpen} />
+      <DefaultAction color="warning" label="LIBERTAR" onClick={() => onOpen()} />
       {open && <LibertarForm dados={dados} onClose={() => onClose()} />}
     </>
   );
@@ -247,7 +243,7 @@ export function Atribuir({ dados }) {
 
   return (
     <>
-      <DefaultAction color="info" label="ATRIBUIR" handleClick={() => handleClick()} />
+      <DefaultAction color="info" label="ATRIBUIR" onClick={() => handleClick()} />
       {open && <AtribuirForm dados={dados} onClose={() => onClose()} />}
     </>
   );
@@ -263,7 +259,7 @@ export function ColocarPendente() {
       <DefaultAction
         color="inherit"
         label="PENDENTE"
-        handleClick={() => dispatch(setModal({ modal: 'pendencia', dados: processo }))}
+        onClick={() => dispatch(setModal({ modal: 'pendencia', dados: processo }))}
       />
       {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
     </>
@@ -278,7 +274,7 @@ export function Domiciliar({ id, estadoId }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
     <>
-      <DefaultAction color="warning" label="DOMICILIAR" handleClick={() => onOpen()} />
+      <DefaultAction color="warning" label="DOMICILIAR" onClick={() => onOpen()} />
       {open && <DomiciliarForm id={id} estadoId={estadoId} onClose={() => onClose()} />}
     </>
   );

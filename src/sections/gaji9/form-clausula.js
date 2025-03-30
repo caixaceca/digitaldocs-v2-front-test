@@ -292,7 +292,7 @@ function Alineas() {
                 <RHFNumberField name={`alineas[${index}].numero_ordem`} label="Número" sx={{ width: 70 }} />
                 <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name={`alineas[${index}].conteudo`} />
               </Stack>
-              <DefaultAction small variant="filled" color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+              <DefaultAction small variant="filled" label="ELIMINAR" onClick={() => remove(index)} />
             </Stack>
             <Subalineas alineaIndex={index} />
           </Paper>
@@ -303,7 +303,7 @@ function Alineas() {
             label="Número"
             icon="adicionar"
             variant="contained"
-            handleClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '', sub_alineas: [] })}
+            onClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '', sub_alineas: [] })}
           />
         </Stack>
       </Stack>
@@ -338,7 +338,7 @@ export function Subalineas({ alineaIndex }) {
               name={`alineas[${alineaIndex}].sub_alineas[${index}].conteudo`}
             />
           </Stack>
-          <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+          <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
         </Stack>
       ))}
       <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
@@ -460,11 +460,7 @@ TitleResumo.propTypes = { title: PropTypes.string, action: PropTypes.func };
 
 function TitleResumo({ title, action }) {
   return (
-    <ListItem
-      divider
-      disableGutters
-      secondaryAction={<DefaultAction small color="warning" label="EDITAR" handleClick={() => action()} />}
-    >
+    <ListItem divider disableGutters secondaryAction={<DefaultAction small label="EDITAR" onClick={() => action()} />}>
       <Typography variant="subtitle2">{title}</Typography>
     </ListItem>
   );
@@ -527,7 +523,7 @@ export function OpcoesClausula() {
             <TableCell size="small">2ª habitação</TableCell>
             <TableCell size="small">Isenção comissão</TableCell>
             <TableCell size="small" width={10}>
-              <DefaultAction small label="Adicionar" handleClick={() => setOpenForm('create')} />
+              <DefaultAction small label="Adicionar" onClick={() => setOpenForm('create')} />
             </TableCell>
           </TableRow>
         </TableHead>
@@ -541,18 +537,18 @@ export function OpcoesClausula() {
                 <TableCell align="right">
                   {row?.montante_maior_que && <Typography>{`> ${fNumber(row?.montante_maior_que)}`}</Typography>}
                   {row?.montante_menor_que && <Typography>{`< ${fNumber(row?.montante_menor_que)}`}</Typography>}
-                  {!row?.montante_maior_que && !row?.montante_menor_que && noDados('Não definido')}
+                  {!row?.montante_maior_que && !row?.montante_menor_que && noDados('(Não definido)')}
                 </TableCell>
                 <TableCell align="right">
                   {row?.prazo_maior_que && <Typography>{`> ${fNumber(row?.prazo_maior_que)}`}</Typography>}
                   {row?.prazo_menor_que && <Typography>{`< ${fNumber(row?.prazo_menor_que)}`}</Typography>}
-                  {!row?.prazo_maior_que && !row?.prazo_menor_que && noDados('Não definido')}
+                  {!row?.prazo_maior_que && !row?.prazo_menor_que && noDados('(Não definido)')}
                 </TableCell>
                 <CellChecked check={row?.taxa_juros_negociado} />
                 <CellChecked check={row?.segunda_habitacao} />
                 <CellChecked check={row?.isencao_comissao} />
                 <TableCell>
-                  <DefaultAction small label="ELIMINAR" handleClick={() => setOpenForm(row?.clausula_id)} />
+                  <DefaultAction small label="ELIMINAR" onClick={() => setOpenForm(row?.clausula_id)} />
                 </TableCell>
               </TableRow>
             ))}

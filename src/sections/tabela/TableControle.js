@@ -238,7 +238,7 @@ export default function TableControle({ from }) {
                       </TableCell>
 
                       <TableCell align="center">
-                        <DefaultAction label="DETALHES" handleClick={() => handleView(row?.id)} />
+                        <DefaultAction label="DETALHES" onClick={() => handleView(row?.id)} />
                       </TableCell>
                     </TableRow>
                   ))

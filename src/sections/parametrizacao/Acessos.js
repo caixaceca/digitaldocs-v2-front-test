@@ -9,7 +9,7 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { normalizeText, nomeacaoBySexo } from '../../utils/formatText';
+import { normalizeText, nomeacaoBySexo, noDados } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -19,8 +19,8 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
-import { ColaboradorInfo } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
+import { ColaboradorInfo, Criado } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -28,9 +28,10 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'nome', label: 'Nome', align: 'left' },
-  { id: 'unidade_organica', label: 'Unidade orgânica', align: 'left' },
-  { id: 'nomeacao_funcao', label: 'Nomeação/Função', align: 'left' },
+  { id: 'nome', label: 'Nome' },
+  { id: 'unidade_organica', label: 'Unidade orgânica' },
+  { id: 'vinculo', label: 'Vínculo' },
+  { id: '', label: 'Contacto' },
   { id: '' },
 ];
 
@@ -52,10 +53,10 @@ export default function Acessos() {
   } = useTable({ defaultOrderBy: 'nome', defaultOrder: 'asc' });
 
   const navigate = useNavigate();
-  const { isLoading, colaboradores } = useSelector((state) => state.intranet);
   const [uo, setUo] = useState(localStorage.getItem('uoParams') || '');
   const [filter, setFilter] = useState(localStorage.getItem('filterAcessos') || '');
 
+  const { isLoading, colaboradores } = useSelector((state) => state.intranet);
   const dataFiltered = applySortFilter({ colaboradores, comparator: getComparator(order, orderBy), filter, uo });
   const isNotFound = !dataFiltered.length;
 
@@ -63,10 +64,6 @@ export default function Acessos() {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, uo]);
-
-  const handleUpdate = (id) => {
-    navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${id}`);
-  };
 
   return (
     <>
@@ -79,7 +76,7 @@ export default function Acessos() {
               <TableHeadCustom order={order} orderBy={orderBy} headLabel={TABLE_HEAD} onSort={onSort} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={4} row={10} />
+                  <SkeletonTable column={5} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                     <TableRow key={row?.id} hover>
@@ -88,7 +85,7 @@ export default function Acessos() {
                           id={row?.id}
                           nome={row?.nome}
                           foto={row?.foto_disk}
-                          label={row?.perfil?.mail}
+                          label={nomeacaoBySexo(row.nomeacao || row?.funcao, row?.sexo)}
                         />
                       </TableCell>
                       <TableCell align="left">
@@ -97,9 +94,16 @@ export default function Acessos() {
                           Balcão nº {row?.uo?.balcao}
                         </Typography>
                       </TableCell>
-                      <TableCell>{nomeacaoBySexo(row.nomeacao || row?.funcao, row?.sexo)}</TableCell>
+                      <TableCell>{row?.vinculo || noDados()}</TableCell>
+                      <TableCell>
+                        <Criado value={row?.perfil?.mail} />
+                        <Criado value={row?.perfil?.businessPhones} />
+                      </TableCell>
                       <TableCell align="center" width={50}>
-                        <DefaultAction label="Gerir acessos" handleClick={() => handleUpdate(row?.perfil?.id)} />
+                        <DefaultAction
+                          label="Gerir acessos"
+                          onClick={() => navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${row?.perfil?.id}`)}
+                        />
                       </TableCell>
                     </TableRow>
                   ))

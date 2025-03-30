@@ -124,8 +124,10 @@ export default function FormInfoExterno({ dados }) {
           <Grid container spacing={3}>
             <GridItem xs={12} sm={6} lg={3} children={<RHFTextField name="docidp" label="Nº de identificação 1" />} />
             <GridItem xs={12} sm={6} lg={3} children={<RHFTextField name="docids" label="Nº de identificação 2" />} />
-            <GridItem xs={12} sm={6} lg={3} children={<RHFNumberField name="cliente" label="Nº de cliente" />} />
-            <GridItem xs={12} sm={6} lg={3} children={<RHFNumberField name="conta" label="Nº de conta" />} />
+            <GridItem xs={12} sm={6} lg={3}>
+              <RHFNumberField noFormat name="cliente" label="Nº de cliente" />
+            </GridItem>
+            <GridItem xs={12} sm={6} lg={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
             <Entidades fields={fields} append={append} remove={remove} />
           </Grid>
         </Card>

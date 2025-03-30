@@ -64,9 +64,7 @@ export default function Versoes({ id }) {
                         <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
                           Alterado em:
                         </Typography>
-                        <Typography variant="subtitle1">
-                          {row?.updated_in ? ptDateTime(row?.updated_in) : ''}
-                        </Typography>
+                        <Typography variant="subtitle1">{ptDateTime(row?.updated_in)}</Typography>
                       </Stack>
                       <ColaboradorInfo
                         id={colaborador?.id}

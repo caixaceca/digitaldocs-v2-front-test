@@ -114,7 +114,7 @@ export default function TableMinutas({ item, inativos }) {
                       <TableCell align="center" width={10}>
                         <DefaultAction
                           label="DETALHES"
-                          handleClick={() => navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${row?.id}`)}
+                          onClick={() => navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${row?.id}`)}
                         />
                       </TableCell>
                     </TableRow>

@@ -86,9 +86,8 @@ export default function TableParametrizacao({ item }) {
   });
 
   useEffect(() => {
-    if (done === 'Estado adicionado' || done === 'Fluxo adicionado') {
+    if (done === 'Estado adicionado' || done === 'Fluxo adicionado')
       navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${selectedItem?.id}`);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
@@ -112,7 +111,7 @@ export default function TableParametrizacao({ item }) {
       (item === 'motivosPendencia' && motivosPendencia) ||
       (item === 'motivosTransicao' && motivosTransicao) ||
       (item === 'estados' &&
-        estados?.map((row) => ({ ...row, uo: uos?.find((item) => item?.id === row?.uo_id)?.label || row?.uo_id }))) ||
+        estados?.map((row) => ({ ...row, uo: uos?.find(({ id }) => id === row?.uo_id)?.label || row?.uo_id }))) ||
       [],
     comparator: getComparator(order, orderBy),
   });
@@ -215,7 +214,7 @@ export default function TableParametrizacao({ item }) {
                           {item !== 'fluxos' && item !== 'estados' && (
                             <UpdateItem handleClick={() => handleView(row, 'update')} />
                           )}
-                          <DefaultAction handleClick={() => handleView(row, 'view')} label="DETALHES" />
+                          <DefaultAction onClick={() => handleView(row, 'view')} label="DETALHES" />
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -269,7 +268,7 @@ export function EstadoDetail({ row = null }) {
     <>
       <TableCell>{row.nome}</TableCell>
       <TableCell>{row.uo}</TableCell>
-      <TableCell>{row.balcao || noDados('Não definido')}</TableCell>
+      <TableCell>{row.balcao || noDados('(Não definido)')}</TableCell>
       <CellChecked check={row.is_inicial} />
       <CellChecked check={row.is_final} />
     </>

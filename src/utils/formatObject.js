@@ -34,13 +34,9 @@ export function subtractArrays(a1, a2) {
   a1.forEach((o1) => {
     let found = false;
     a2.forEach((o2) => {
-      if (objectsEqual(o1, o2)) {
-        found = true;
-      }
+      if (objectsEqual(o1, o2)) found = true;
     });
-    if (!found) {
-      arr.push(o1);
-    }
+    if (!found) arr.push(o1);
   });
   return arr;
 }
@@ -53,6 +49,10 @@ export function transicoesList(transicoes, estados) {
     estado_final: estados?.find(({ id }) => id === row.estado_final_id)?.nome || row.estado_final_id,
     estado_inicial: estados?.find(({ id }) => id === row.estado_inicial_id)?.nome || row.estado_inicial_id,
   }));
+}
+
+export function transicaoDesc(transicao) {
+  return transicao ? `${transicao?.modo}: ${transicao?.estado_inicial} » ${transicao?.estado_final}` : '';
 }
 
 // ----------------------------------------------------------------------

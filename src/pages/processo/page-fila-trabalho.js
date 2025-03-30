@@ -8,7 +8,6 @@ import Card from '@mui/material/Card';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
-import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -23,7 +22,7 @@ import { pertencoAoEstado } from '../../utils/validarAcesso';
 import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
 // redux
-import { closeModal } from '../../redux/slices/digitaldocs';
+import { setModal } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
@@ -31,24 +30,12 @@ import { geParamsUtil } from '../../redux/slices/parametrizacao';
 // components
 import Page from '../../components/Page';
 import Label from '../../components/Label';
+import { TabsWrapperStyle } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 // sections
 import { TableProcessos } from '../../sections/tabela';
 import ProcessoForm from '../../sections/processo/form/form-processo';
-
-// ----------------------------------------------------------------------
-
-const TabsWrapperStyle = styled('div')(({ theme }) => ({
-  zIndex: 9,
-  bottom: 0,
-  width: '100%',
-  display: 'flex',
-  position: 'absolute',
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.up('sm')]: { justifyContent: 'center' },
-  [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(3) },
-}));
 
 // ----------------------------------------------------------------------
 
@@ -108,19 +95,22 @@ export default function PageFilaTrabalho() {
   return (
     <Page title="Fila de trabalho | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Card sx={{ mb: 3, height: 100, position: 'relative' }}>
-          <Stack direction="row" spacing={1} sx={{ px: 2, py: 1, color: 'common.white', bgcolor: 'primary.main' }}>
-            <Typography variant="h4">Fila de trabalho</Typography>
+        <Card sx={{ mb: 3, height: 95, position: 'relative' }}>
+          <Stack
+            spacing={0.5}
+            direction="row"
+            alignItems="center"
+            sx={{ px: 2, py: 0.88, color: 'common.white', bgcolor: 'primary.main' }}
+          >
+            <Typography variant="h5">Fila de trabalho</Typography>
             {meusAmbientes?.length > 0 && (
-              <DefaultAction variant="outlined" label="Nº PROCESSOS" color="inherit" handleClick={() => onOpen()} />
+              <DefaultAction small color="inherit" variant="outlined" label="Nº PROCESSOS" onClick={onOpen} />
             )}
-            {open && <TotalProcessos onCancel={() => onClose()} />}
           </Stack>
 
           <TabsWrapperStyle>
             <Tabs
               value={currentTab}
-              variant="scrollable"
               allowScrollButtonsMobile
               onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabProcessos')}
             >
@@ -128,6 +118,7 @@ export default function PageFilaTrabalho() {
                 <Tab
                   disableRipple
                   key={tab.value}
+                  sx={{ px: 0.32, py: 1.2 }}
                   value={tab.value}
                   label={
                     <Stack direction="row" spacing={0.5} alignItems="center">
@@ -143,10 +134,15 @@ export default function PageFilaTrabalho() {
           </TabsWrapperStyle>
         </Card>
 
-        {tabs.map((tab) => tab.value === currentTab && <Box key={tab.value}>{tab.component}</Box>)}
+        <Box>{tabs.find((tab) => tab.value === currentTab)?.component}</Box>
 
+        {open && <TotalProcessos onCancel={() => onClose()} />}
         {isOpenModal === 'adicionar-processo' && (
-          <ProcessoForm processo={null} onCancel={() => dispatch(closeModal())} ambientId={meuAmbiente?.id} />
+          <ProcessoForm
+            processo={null}
+            ambientId={meuAmbiente?.id}
+            onCancel={() => dispatch(setModal({ modal: '', dados: null }))}
+          />
         )}
       </Container>
     </Page>

@@ -119,10 +119,12 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
                       label="Tipo de garantia"
                       options={garantiasList}
                       name={`garantias[${index}].garantia`}
-                      getOptionDisabled={(option) => fields.some(({ garantia }) => garantia?.id === option.id)}
+                      getOptionDisabled={(option) =>
+                        values.garantias.some(({ garantia }) => garantia?.id === option.id)
+                      }
                     />
                     {values.garantias.length > 1 && (
-                      <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                      <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
                     )}
                   </Stack>
                 ))}
@@ -187,12 +189,10 @@ export function GarantiasForm({ onCancel }) {
                   options={listaGarantias(tiposGarantias)}
                   getOptionDisabled={(option) =>
                     garantiasExistentes.some(({ id }) => id === option.id) ||
-                    fields.some(({ garantia }) => garantia?.id === option.id)
+                    values.garantias.some(({ garantia }) => garantia?.id === option.id)
                   }
                 />
-                {values.garantias.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
-                )}
+                {values.garantias.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
               </Stack>
             ))}
           </Stack>
@@ -242,10 +242,12 @@ export function ComponentesForm({ onCancel }) {
                   label="Componente"
                   options={listaProdutos(componentes)}
                   name={`componentes[${index}].componente`}
-                  getOptionDisabled={(option) => fields.some(({ componente }) => componente?.id === option.id)}
+                  getOptionDisabled={(option) =>
+                    values.componentes.some(({ componente }) => componente?.id === option.id)
+                  }
                 />
                 {values.componentes.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                  <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
                 )}
               </Stack>
             ))}
@@ -336,7 +338,7 @@ export function ComposicaoForm({ onCancel, action }) {
                       // groupBy={(option) => option.itemOrder}
                       getOptionDisabled={(option) =>
                         minuta?.clausulas.some(({ clausula_id: cid }) => cid === option.id) ||
-                        fields.some(({ clausula }) => clausula?.id === option.id)
+                        values.clausulas.some(({ clausula }) => clausula?.id === option.id)
                       }
                       onChange={(event, newValue) => {
                         setValue(`clausulas[${index}].clausula`, newValue, vsv);
@@ -347,7 +349,7 @@ export function ComposicaoForm({ onCancel, action }) {
                   <RHFNumberField label="Nº de cláusula" name={`clausulas[${index}].numero`} sx={{ width: 130 }} />
                 </Stack>
                 {action === 'compor' && values.clausulas.length > 1 && (
-                  <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
+                  <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
                 )}
               </Stack>
             ))}
@@ -460,7 +462,7 @@ export function PublicarRevogarForm({ onCancel, action }) {
 
 PreviewForm.propTypes = { id: PropTypes.number, onCancel: PropTypes.func };
 
-export function PreviewForm({ id, onCancel }) {
+export function PreviewForm({ id = 0, onCancel }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
   const defaultValues = useMemo(() => ({ taxa: '', prazo: '', montante: '', isento: false, representante: false }), []);
@@ -478,9 +480,11 @@ export function PreviewForm({ id, onCancel }) {
       <DialogContent sx={{ pt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack sx={{ pt: 1 }} spacing={3}>
-            <RHFNumberField name="montante" label="Montante" />
-            <RHFNumberField name="prazo" label="Prazo" />
-            <RHFNumberField name="taxa" label="Taxa de juros negociado" />
+            <RHFNumberField name="montante" label="Montante" tipo="CVE" />
+            <Stack direction="row" spacing={3}>
+              <RHFNumberField name="prazo" label="Prazo" />
+              <RHFNumberField name="taxa" label="Taxa negociada" tipo="%" />
+            </Stack>
             <Stack direction="row" spacing={1}>
               <RHFSwitch name="isento" label="Isento comissão" />
               <RHFSwitch name="representante" label="Com representante" />

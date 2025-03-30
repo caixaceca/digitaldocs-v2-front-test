@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // hooks
 import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, closeModal } from '../../redux/slices/parametrizacao';
+import { getFromParametrizacao, setModal, deleteItem } from '../../redux/slices/parametrizacao';
 // routes
 import useSettings from '../../hooks/useSettings';
 // routes
@@ -15,11 +17,14 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
+import { ActionButton } from '../../components/Actions';
 import { SearchNotFound404 } from '../../components/table';
-import { AddItem, UpdateItem } from '../../components/Actions';
+import { DialogConfirmar } from '../../components/CustomDialog';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
-import InfoEstado, { TableInfoEstado } from '../../sections/parametrizacao/InfoEstado';
+import TableInfoEstado from '../../sections/parametrizacao/table-info-estado';
+import { Detalhes, DetalhesContent } from '../../sections/parametrizacao/Detalhes';
+import { EstadoForm, PerfisEstadoForm, RegrasForm, EstadosPerfilForm } from '../../sections/parametrizacao/form-estado';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -27,27 +32,47 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
 export default function PageDetalhesEstado() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { perfilId } = useSelector((state) => state.intranet);
-  const { estado, done } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Dados');
 
+  const { perfilId, uos } = useSelector((state) => state.intranet);
+  const { estado, selectedItem, modalParams, done, isLoading, isSaving } = useSelector((state) => state.parametrizacao);
+
   useEffect(() => {
-    if (perfilId && id) dispatch(getFromParametrizacao('estado', { id }));
+    if (perfilId && id) dispatch(getFromParametrizacao('estado', { id, reset: { val: null } }));
   }, [dispatch, perfilId, id]);
 
-  const handleCloseModal = () => {
-    dispatch(closeModal());
-  };
-
   const tabsList = [
-    { value: 'Dados', component: <InfoEstado onClose={handleCloseModal} /> },
-    { value: 'Colaboradores', component: <TableInfoEstado item="colaboradores" onClose={handleCloseModal} /> },
-    { value: 'Regras parecer', component: <TableInfoEstado item="regrasEstado" onClose={handleCloseModal} /> },
+    {
+      value: 'Dados',
+      component: (
+        <Card sx={{ p: 3, pt: 1 }}>
+          <DetalhesContent dados={estado} item="Estado" uo={uos?.find(({ id }) => id === estado?.uo_id)} />
+        </Card>
+      ),
+    },
+    { value: 'Colaboradores', component: <TableInfoEstado item="colaboradores" dados={estado?.perfis || []} /> },
+    { value: 'Regras parecer', component: <TableInfoEstado item="regrasEstado" dados={estado?.regras || []} /> },
   ];
 
-  useNotificacao({ done, afterSuccess: () => handleCloseModal() });
+  const confirmEliminar = () => {
+    const item1 = currentTab === 'Colaboradores' ? { item: 'perfis', item1: 'estado' } : null;
+    const msg = (currentTab === 'Colaboradores' && 'Colaborador') || (currentTab === 'Dados' && 'Estado');
+    const item = (currentTab === 'Colaboradores' && 'estadosPerfil') || (currentTab === 'Dados' && 'estado');
+    const params = { id: selectedItem?.id, estadoId: id, getItem: currentTab === 'Regras parecer' ? 'estado' : '' };
+    dispatch(deleteItem(item || 'regrasEstado', { ...params, ...item1, msg: `${msg || 'Regra'} eliminado` }));
+  };
+
+  const closeModal = () => dispatch(setModal());
+  useNotificacao({
+    done,
+    afterSuccess: () => {
+      if (done === 'Estado eliminado') navigate(PATH_DIGITALDOCS.parametrizacao.root);
+      closeModal();
+    },
+  });
 
   return (
     <Page title="Estado | DigitalDocs">
@@ -70,21 +95,46 @@ export default function PageDetalhesEstado() {
           action={
             estado?.is_ativo && (
               <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
-                {currentTab === 'Dados' && <UpdateItem dados={{ button: true, dados: estado }} />}
-                {(currentTab === 'Colaboradores' ||
-                  (currentTab === 'Regras parecer' && estado?.perfis?.length > 0)) && <AddItem />}
+                <Stack direction="row" spacing={0.75} alignItems="center">
+                  {currentTab === 'Dados' && (
+                    <>
+                      <ActionButton options={{ label: 'Editar', item: 'form-estado', dados: estado }} />
+                      <ActionButton options={{ label: 'Eliminar', item: 'eliminar-item', dados: estado }} />
+                    </>
+                  )}
+                  {(currentTab === 'Colaboradores' ||
+                    (currentTab === 'Regras parecer' && estado?.perfis?.length > 0)) && (
+                    <ActionButton options={{ label: 'Adicionar', item: currentTab }} />
+                  )}
+                </Stack>
               </RoleBasedGuard>
             )
           }
         />
 
-        {estado ? (
-          <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
+        <RoleBasedGuard hasContent roles={['Todo-110', 'Todo-111']}>
+          {!isLoading && !estado ? (
+            <SearchNotFound404 message="Estado não encontrado..." />
+          ) : (
             <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
-          </RoleBasedGuard>
-        ) : (
-          <SearchNotFound404 message="Estado não encontrado..." />
-        )}
+          )}
+
+          {modalParams === 'form-estado' && <EstadoForm onCancel={() => closeModal()} />}
+          {modalParams === 'Colaboradores' && <PerfisEstadoForm onCancel={() => closeModal()} />}
+          {modalParams === 'detalhes-estado' && <Detalhes item="" closeModal={() => closeModal()} />}
+          {modalParams === 'colaboradores' && <EstadosPerfilForm estadoId={id} onCancel={() => closeModal()} />}
+          {(modalParams === 'Regras parecer' || modalParams === 'regrasEstado') && (
+            <RegrasForm item={estado} estado selectedItem={selectedItem} onCancel={() => closeModal()} />
+          )}
+          {modalParams === 'eliminar-item' && (
+            <DialogConfirmar
+              isSaving={isSaving}
+              onClose={() => closeModal()}
+              handleOk={() => confirmEliminar()}
+              desc={`eliminar est${(currentTab === 'Colaboradores' && 'e colaborador') || (currentTab === 'Regras parecer' && 'a regra') || 'e estado'}`}
+            />
+          )}
+        </RoleBasedGuard>
       </Container>
     </Page>
   );

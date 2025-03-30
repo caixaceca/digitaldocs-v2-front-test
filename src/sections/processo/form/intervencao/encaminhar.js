@@ -7,10 +7,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Paper from '@mui/material/Paper';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
@@ -24,10 +23,10 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { findColaboradores } from '../../../../utils/validarAcesso';
 // redux
+import { updateItem } from '../../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../../redux/store';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
 import { backStep, resetStep, updateDados } from '../../../../redux/slices/stepper';
-import { updateItem } from '../../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../../hooks/useAnexos';
 // components
@@ -41,7 +40,17 @@ import {
   RHFAutocompleteObj,
 } from '../../../../components/hook-form';
 import Steps from '../../../../components/Steps';
-import { DefaultAction, ButtonsStepper } from '../../../../components/Actions';
+import { DefaultAction, ButtonsStepper, Fechar } from '../../../../components/Actions';
+
+const destinoItem = {
+  estado: null,
+  observacao: '',
+  confidencial: false,
+  perfis_incluidos: [],
+  perfis_excluidos: [],
+  estados_incluidos: [],
+  estados_excluidos: [],
+};
 
 // --- ENCAMINHAR/DEVOLVER PROCESSO ------------------------------------------------------------------------------------
 
@@ -60,7 +69,7 @@ export default function EncaminharStepper({ title, destinos, gerencia = false, o
   const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open fullWidth maxWidth="md">
       <DialogTitle sx={{ pb: 2 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
           {title?.charAt(0).toUpperCase() + title?.slice(1)?.toLowerCase()} processo
@@ -76,6 +85,7 @@ export default function EncaminharStepper({ title, destinos, gerencia = false, o
                 }}
               />
             )}
+            <Fechar handleClick={() => onClose()} />
           </Stack>
         </Stack>
       </DialogTitle>
@@ -114,7 +124,7 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
   const formSchema = Yup.object().shape({
     estado: Yup.mixed().required('Escolhe o estado'),
     motivo_devolucao: title === 'DEVOLVER' && Yup.mixed().required('Indica o motivo da devolução'),
-    parecer_favoravel: Yup.mixed().when(['estado'], {
+    parecer: Yup.mixed().when(['estado'], {
       is: (estado) => estado?.requer_parecer,
       then: () => Yup.mixed().required().label('Parecer'),
       otherwise: () => Yup.mixed().notRequired(),
@@ -130,10 +140,10 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
     () => ({
       mobs: dadosStepper?.mobs || '',
       anexos: dadosStepper?.anexos || [],
+      parecer: dadosStepper?.parecer || null,
       noperacao: dadosStepper?.noperacao || '',
       observacao: dadosStepper?.observacao || '',
       motivo_devolucao: dadosStepper?.motivo_devolucao || null,
-      parecer_favoravel: dadosStepper?.parecer_favoravel || null,
       estado: dadosStepper?.estado || (destinos?.length === 1 && destinos?.[0]) || null,
     }),
     [dadosStepper, destinos]
@@ -188,12 +198,12 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
           <>
             {parecer && (
               <Grid item xs={12} sm={numOperacao ? 6 : 12} md={numOperacao ? 3 : 4}>
-                <RHFAutocompleteSmp label="Parecer" name="parecer_favoravel" options={['Favorável', 'Não favorável']} />
+                <RHFAutocompleteSmp label="Parecer" name="parecer" options={['Favorável', 'Não favorável']} />
               </Grid>
             )}
             {numOperacao && (
               <Grid item xs={12} sm={parecer ? 6 : 12} md={parecer ? 3 : 4}>
-                <RHFNumberField name="noperacao" label="Nº de operação" />
+                <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
               </Grid>
             )}
             {title === 'DEVOLVER' && (
@@ -202,10 +212,10 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
               </Grid>
             )}
             <Grid item xs={12}>
-              <RHFTextField multiline rows={4} name="observacao" label="Observação" />
+              <RHFTextField multiline rows={8} name="observacao" label="Observação" />
             </Grid>
             <Grid item xs={12}>
-              <RHFUploadMultiFile name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+              <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
             </Grid>
           </>
         )}
@@ -269,14 +279,13 @@ export function OutrosEmSerie({ title }) {
       formData.append('transicao_id ', dadosStepper?.estado?.id);
       if (dadosStepper?.motivo_devolucao?.id) formData.append('motivo_id ', dadosStepper?.motivo_devolucao?.id);
 
-      if (dadosStepper?.parecer_favoravel === 'Favorável') formData.append('parecer_favoravel', true);
-      else if (dadosStepper?.parecer_favoravel === 'Não favorável') formData.append('parecer_favoravel', false);
+      if (dadosStepper?.parecer === 'Favorável') formData.append('parecer_favoravel', true);
+      else if (dadosStepper?.parecer === 'Não favorável') formData.append('parecer_favoravel', false);
 
-      if (values.atribuir && values?.colaborador) {
-        formData.append('perfil_afeto_id', values?.colaborador?.id);
-      } else if (!!criador && title === 'DEVOLVER' && dadosStepper?.estado?.label?.includes('Atendimento')) {
+      if (values.atribuir && values?.colaborador) formData.append('perfil_afeto_id', values?.colaborador?.id);
+      else if (!!criador && title === 'DEVOLVER' && dadosStepper?.estado?.label?.includes('Atendimento'))
         formData.append('perfil_afeto_id', criador?.perfil_id);
-      }
+
       if (values?.confidencial) {
         values?.perfis_incluidos?.forEach((item) => formData.append('confidencia.perfis_incluidos', item?.id));
         values?.perfis_excluidos?.forEach((item) => formData.append('confidencia.perfis_excluidos', item?.id));
@@ -285,10 +294,10 @@ export function OutrosEmSerie({ title }) {
       }
       await dadosStepper?.anexos?.forEach((row) => formData.append('anexos', row));
 
+      const params = { mfd: true, id: processo.id, estadoId: processo?.estado_processo?.estado_id };
       dispatch(
         updateItem('encaminhar serie', formData, {
-          mfd: true,
-          id: processo.id,
+          ...params,
           msg: title === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado',
         })
       );
@@ -347,32 +356,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
     destinos_par: Yup.array(Yup.object({ estado: Yup.mixed().required('Escolhe o estado') })),
   });
 
-  const defaultValues = useMemo(
-    () => ({
-      destinos_par: [
-        {
-          estado: null,
-          observacao: '',
-          confidencial: false,
-          perfis_incluidos: [],
-          perfis_excluidos: [],
-          estados_incluidos: [],
-          estados_excluidos: [],
-        },
-        {
-          estado: null,
-          observacao: '',
-          confidencial: false,
-          perfis_incluidos: [],
-          perfis_excluidos: [],
-          estados_incluidos: [],
-          estados_excluidos: [],
-        },
-      ],
-    }),
-    []
-  );
-
+  const defaultValues = useMemo(() => ({ destinos_par: [destinoItem, destinoItem] }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
   const values = watch();
@@ -393,9 +377,8 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
           },
         });
       });
-      dispatch(
-        updateItem('encaminhar paralelo', JSON.stringify(formData), { id: processo.id, msg: 'Processo encaminhado' })
-      );
+      const params = { id: processo.id, msg: 'Processo encaminhado', estadoId: processo?.estado_processo?.estado_id };
+      dispatch(updateItem('encaminhar paralelo', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -405,19 +388,17 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2}>
         {fields.map((item, index) => (
-          <Paper key={`destino_${index}`} variant="elevation" elevation={5} sx={{ flexGrow: 1, p: 1 }}>
+          <Card key={`destino_${index}`} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
             <Stack direction="row" spacing={2} alignItems="center">
-              <Box variant="elevation" elevation={3} sx={{ flexGrow: 1 }}>
+              <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
                     <RHFAutocompleteObj
                       label="Estado"
                       disableClearable
+                      options={destinos}
                       name={`destinos_par[${index}].estado`}
-                      options={applyFilter(
-                        destinos,
-                        values?.destinos_par?.map((row) => row?.estado?.id)
-                      )}
+                      getOptionDisabled={(option) => values.destinos_par.some(({ estado }) => estado?.id === option.id)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={8}>
@@ -448,30 +429,13 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
                   </Grid>
                 </Grid>
               </Box>
-              {fields?.length > 2 && (
-                <DefaultAction small color="error" label="ELIMINAR" handleClick={() => remove(index)} />
-              )}
+              {fields?.length > 2 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
             </Stack>
-          </Paper>
+          </Card>
         ))}
       </Stack>
-      <Stack direction="row" alignItems="right" justifyContent="right" sx={{ mt: 2 }}>
-        <DefaultAction
-          small
-          button
-          label="Adicionar"
-          handleClick={() =>
-            append({
-              estado: null,
-              observacao: '',
-              confidencial: false,
-              perfis_incluidos: [],
-              perfis_excluidos: [],
-              estados_incluidos: [],
-              estados_excluidos: [],
-            })
-          }
-        />
+      <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mt: 2 }}>
+        <DefaultAction small button label="Adicionar" onClick={() => append(destinoItem)} />
       </Stack>
       <ButtonsStepper onCancel={onClose} isSaving={isSaving} labelCancel="Cancelar" />
     </FormProvider>
@@ -491,11 +455,12 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
 
   return (
     <>
-      <Divider sx={{ mb: 1.5 }}>
-        <Chip label="ATRIBUIR ACESSO" size="small" />
+      <Divider sx={{ mb: 1.5 }} textAlign="left">
+        <Typography variant="overline">ATRIBUIR ACESSO</Typography>
       </Divider>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
         <RHFAutocompleteObj
+          small
           multiple
           limitTags={1}
           label="Estados"
@@ -504,6 +469,7 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
           options={estados?.map((row) => ({ id: row?.id, label: row?.nome }))}
         />
         <RHFAutocompleteObj
+          small
           multiple
           limitTags={1}
           disableCloseOnSelect
@@ -512,11 +478,12 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
           options={colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }))}
         />
       </Stack>
-      <Divider sx={{ mt: 3, mb: 1.5 }}>
-        <Chip label="REMOVER ACESSO" size="small" />
+      <Divider sx={{ mt: 3, mb: 1.5 }} textAlign="left">
+        <Typography variant="overline">REMOVER ACESSO</Typography>
       </Divider>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
         <RHFAutocompleteObj
+          small
           multiple
           limitTags={1}
           label="Estados"
@@ -525,6 +492,7 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
           options={estados?.map((row) => ({ id: row?.id, label: row?.nome }))}
         />
         <RHFAutocompleteObj
+          small
           multiple
           limitTags={1}
           disableCloseOnSelect
@@ -538,10 +506,6 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-function applyFilter(destinos, detinosSelct) {
-  return destinos?.filter((item) => !detinosSelct.includes(Number(item?.id)));
-}
 
 export function confidenciaIds(dados, item) {
   return dados?.confidencial && dados?.[item]?.length > 0 ? dados?.[item]?.map((row) => row?.id) : null;

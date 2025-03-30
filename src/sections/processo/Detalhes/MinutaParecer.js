@@ -54,7 +54,7 @@ function PDFLink({ dados }) {
               label="Data parecer"
               value1={
                 <Text style={[styles.textBold]}>
-                  {dados?.parecer_em ? ptDateTime(dados?.parecer_em) : ''}{' '}
+                  {ptDateTime(dados?.parecer_em)}{' '}
                   {dados?.data_limite &&
                     add(new Date(dados?.data_limite), { days: 1 }) < new Date(dados?.parecer_em) && (
                       <Text style={[styles.text4, styles.textError]}>

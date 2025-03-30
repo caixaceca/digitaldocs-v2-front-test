@@ -11,7 +11,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import { pertencoEstadoId } from '../../../utils/validarAcesso';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, setModal, closeModal } from '../../../redux/slices/digitaldocs';
+import { getAnexo, setModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { ColaboradorInfo } from '../../../components/Panel';
@@ -57,7 +57,9 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
           handleEditar={(item) => dispatch(setModal({ modal: 'parecer-individual', dados: item }))}
         />
       ))}
-      {isOpenModal === 'parecer-individual' && <ParecerForm onCancel={() => dispatch(closeModal())} processoId={id} />}
+      {isOpenModal === 'parecer-individual' && (
+        <ParecerForm onCancel={() => dispatch(setModal({ modal: '', dados: null }))} processoId={id} />
+      )}
     </Box>
   );
 }
@@ -86,7 +88,7 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
         <Stack direction="row" justifyContent="right" alignItems="center" spacing={1} sx={{ zIndex: 2 }}>
           {pertencoEstadoId(meusAmbientes, estadoId) && parecer?.perfil_id === perfilId && !parecer?.validado && (
             <DefaultAction
-              handleClick={() => handleEditar(parecer)}
+              onClick={() => handleEditar(parecer)}
               color={temParecer ? 'warning' : 'success'}
               label={temParecer ? 'EDITAR' : 'ADICIONAR'}
             />
