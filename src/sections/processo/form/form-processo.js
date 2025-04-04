@@ -15,7 +15,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { resetDados } from '../../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
-import { getSuccess as gSDD, updateItem } from '../../../redux/slices/digitaldocs';
+import { getSuccess, setModal, updateItem } from '../../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // hooks
@@ -34,9 +34,9 @@ import ProcessoCON from './comunicacao-op-num';
 
 // ----------------------------------------------------------------------
 
-ProcessoForm.propTypes = { processo: PropTypes.object, ambientId: PropTypes.number, onCancel: PropTypes.func };
+ProcessoForm.propTypes = { processo: PropTypes.object, ambientId: PropTypes.number };
 
-export default function ProcessoForm({ processo, ambientId, onCancel }) {
+export default function ProcessoForm({ processo, ambientId }) {
   const isEdit = !!processo;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -78,7 +78,7 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
   });
 
   const onClose = () => {
-    onCancel();
+    dispatch(setModal({ modal: '', dados: null }));
     dispatch(resetDados());
   };
 
@@ -113,7 +113,7 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
             />
           )}
           <Box sx={{ top: 15, right: 15, position: 'absolute' }}>
-            <Fechar handleClick={() => onClose()} />
+            <Fechar onClick={() => onClose()} />
           </Box>
         </DialogTitle>
         <DialogContent>
@@ -150,7 +150,7 @@ export default function ProcessoForm({ processo, ambientId, onCancel }) {
           isSaving={isSaving}
           handleOk={eliminarAnexo}
           desc="eliminar este anexo"
-          onClose={() => dispatch(gSDD({ item: 'selectedAnexoId', dados: null }))}
+          onClose={() => dispatch(getSuccess({ item: 'selectedAnexoId', dados: null }))}
         />
       )}
     </>

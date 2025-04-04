@@ -233,7 +233,7 @@ export function PerfisEstadoForm({ onCancel }) {
     <Dialog open onClose={onCancel} fullWidth maxWidth="md">
       <DialogTitleAlt
         title="Adicionar colaborador"
-        action={<AddItem dados={{ small: true, label: 'Colaborador' }} handleClick={() => append(ps)} />}
+        action={<AddItem dados={{ small: true, label: 'Colaborador' }} onClick={() => append(ps)} />}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -346,7 +346,7 @@ export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
           {!isEdit && perfisList?.length > 0 && (
             <AddItem
               dados={{ small: true, label: 'Colaborador' }}
-              handleClick={() => append({ perfil: null, percentagem: null, facultativo: false, para_aprovacao: false })}
+              onClick={() => append({ perfil: null, percentagem: null, facultativo: false, para_aprovacao: false })}
             />
           )}
         </Stack>

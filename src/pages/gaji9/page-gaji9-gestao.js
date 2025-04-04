@@ -76,7 +76,8 @@ export default function PageGaji9Gestao() {
 
   const navigateTo = () => {
     if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
-    if (done === 'Crédito adicionado' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
+    if ((done === 'Crédito adicionado' || done === 'Proposta carregada') && minutaId)
+      navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
   };
 
   useNotificacao({ done, afterSuccess: () => navigateTo() });

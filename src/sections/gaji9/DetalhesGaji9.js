@@ -23,12 +23,12 @@ import { updateItem } from '../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
-import { DTFechar } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
 import GrupoDetail from './detalhes-grupo';
-import { OpcoesClausula } from './form-clausula';
+import OpcoesClausula from './opcoes-clausulas';
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 
 // ----------------------------------------------------------------------
@@ -45,7 +45,7 @@ export default function DetalhesGaji9({ closeModal, item }) {
       onClose={closeModal}
       maxWidth={item === 'grupos' || item === 'clausulas' || item === 'clausulaMinuta' ? 'md' : 'sm'}
     >
-      <DTFechar title="Detalhes" handleClick={() => closeModal()} />
+      <DialogTitleAlt title="Detalhes" onClose={closeModal} />
       <DialogContent>
         {(item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
           ((item === 'clausulas' || item === 'clausulaMinuta' || item === 'funcoes') && (

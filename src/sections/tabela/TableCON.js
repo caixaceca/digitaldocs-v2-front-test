@@ -120,14 +120,7 @@ export default function TableCON({ item = 'con' }) {
         action={
           <Stack direction="row" alignItems="center" spacing={1}>
             {item === 'con' && (
-              <RHFDateIF
-                datai={datai}
-                dataf={dataf}
-                labeli="dataICon"
-                labelf="dataFCon"
-                setDatai={setDatai}
-                setDataf={setDataf}
-              />
+              <RHFDateIF options={{ datai, dataf, setDatai, setDataf, labeli: 'dataICon', labelf: 'dataFCon' }} />
             )}
             {!isNotFound && (
               <ExportarDados

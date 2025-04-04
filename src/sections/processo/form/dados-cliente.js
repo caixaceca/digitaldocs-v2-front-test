@@ -40,7 +40,7 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
       ) : (
         <>
           {!fluxosGmkt(fluxo?.assunto) && fluxo?.assunto !== 'Diário' && (
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField noFormatname="conta" label="Nº de conta" />} />
+            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
           )}
         </>
       )}

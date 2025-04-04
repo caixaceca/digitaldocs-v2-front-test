@@ -73,6 +73,10 @@ const slice = createSlice({
       actionDelete(state, action.payload);
     },
 
+    contratoGerado(state) {
+      state.credito.contratado = true;
+    },
+
     setModal(state, action) {
       state.isEdit = !!action?.payload?.isEdit;
       state.modalGaji9 = action?.payload?.item || '';
@@ -97,13 +101,13 @@ export const { openModal, setModal, getSuccess, closeModal } = slice.actions;
 
 // ----------------------------------------------------------------------
 
-export function getInfoGaji() {
+export function getInfoGaji(item) {
   return async (dispatch) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    dispatch(getFromGaji9('funcoes'));
     dispatch(getFromGaji9('componentes'));
     dispatch(getFromGaji9('tiposTitulares'));
-    dispatch(getFromGaji9('tiposGarantias'));
+    if (item === 'gestao') dispatch(getFromGaji9('funcoes'));
+    if (item !== 'credito') dispatch(getFromGaji9('tiposGarantias'));
   };
 }
 
@@ -111,10 +115,10 @@ export function getInfoGaji() {
 
 export function getFromGaji9(item, params) {
   return async (dispatch) => {
-    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    if (!params?.notLoading) dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     try {
       const accessToken = await getAccessToken();
-      console.log(accessToken);
+      // console.log(accessToken);
       const apiUrl =
         // DETALHES
         (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao`) ||
@@ -184,16 +188,14 @@ export function getFromGaji9(item, params) {
               },
             })
           );
-        } else {
-          dispatch(
-            slice.actions.getSuccess({
-              item: params?.item || item,
-              dados: (item === 'creditos' && response.data) || response.data?.clausula || response.data?.objeto,
-            })
-          );
+        } else if (item === 'proposta') dispatch(getSuccess({ item: 'minutaId', dados: response?.data?.objeto?.id }));
+        else {
+          const dados = (item === 'creditos' && response.data) || response.data?.clausula || response.data?.objeto;
+          dispatch(slice.actions.getSuccess({ item: params?.item || item, dados }));
         }
 
         if (params?.msg) doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+        params?.afterSuccess?.();
       }
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -215,19 +217,24 @@ export function getDocumento(item, params) {
       const accessToken = await getAccessToken();
       const apiUrl =
         (item === 'contrato' && `${BASEURLGAJI9}/v1/contratos/download?codigo=${params?.codigo}`) ||
-        (item === 'prevContrato' &&
-          `${BASEURLGAJI9}/v1/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}`) ||
+        (item === 'gerar-contrato' &&
+          `${BASEURLGAJI9}/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
+        (item === 'preview-contrato' &&
+          `${BASEURLGAJI9}/v1/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
         (item === 'minuta' &&
           `${BASEURLGAJI9}/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
         '';
       if (apiUrl) {
-        const response = await axios.get(apiUrl, {
-          responseType: 'arraybuffer',
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+        const headrs = { responseType: 'arraybuffer', headers: { Authorization: `Bearer ${accessToken}` } };
+        const response =
+          item === 'gerar-contrato' ? await axios.post(apiUrl, null, headrs) : await axios.get(apiUrl, headrs);
         const blob = new Blob([response.data], { type: params?.tipo_conteudo });
         const fileUrl = URL.createObjectURL(blob);
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
+        if (item === 'gerar-contrato') {
+          dispatch(getFromGaji9('contratos', { id: params?.creditoId }));
+          dispatch(slice.actions.contratoGerado());
+        }
       }
     } catch (error) {
       let errorMessage = 'Erro ao carregar o ficheiro';
@@ -276,13 +283,11 @@ export function createItem(item, dados, params) {
         (item === 'clonarMinuta' && `${BASEURLGAJI9}/v1/minutas/com/base?minuta_base_id=${params?.id}`) ||
         (item === 'componentesMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis`) ||
         (item === 'recursosGrupo' && `${BASEURLGAJI9}/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
-        (item === 'participantes' && `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
+        (item === 'intervenientes' && `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
         (item === 'coposicaoMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=false`) ||
         (item === 'regrasClausula' &&
           `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}`) ||
-        (item === 'contratos' &&
-          `${BASEURLGAJI9}/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}`) ||
         '';
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
@@ -294,7 +299,7 @@ export function createItem(item, dados, params) {
         } else if (params?.getItem) {
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
         } else if (params?.getList) {
-          dispatch(getFromGaji9(item, { id: params?.creditoId || params?.id }));
+          dispatch(getFromGaji9(item, { id: params?.id }));
         } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas' || item === 'credito') {
           dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
         } else {
@@ -419,7 +424,7 @@ export function deleteItem(item, params) {
         (item === 'clausulaMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
         (item === 'componentesMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
-        (item === 'participantes' &&
+        (item === 'intervenientes' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}&participante_id=${params?.numero}`) ||
         (item === 'eliminarRegra' &&
           `${BASEURLGAJI9}/v1/minutas/regras?minuta_id=${params?.minutaId}&clausula_id=${params?.clausulaId}&clausula_condicional_id=${params?.condicionalId}`) ||

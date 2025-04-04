@@ -123,7 +123,7 @@ export default function TableProcessos({ from }) {
         action={
           <Stack direction="row" spacing={0.75}>
             {meusAmbientes?.find(({ isinicial }) => isinicial) && (
-              <AddItem handleClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
+              <AddItem onClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
             )}
           </Stack>
         }

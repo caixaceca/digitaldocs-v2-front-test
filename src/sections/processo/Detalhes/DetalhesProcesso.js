@@ -26,7 +26,8 @@ import { useSelector } from '../../../redux/store';
 import useToggle from '../../../hooks/useToggle';
 // components
 import Label from '../../../components/Label';
-import { DefaultAction, DTFechar } from '../../../components/Actions';
+import { DefaultAction } from '../../../components/Actions';
+import { DialogTitleAlt } from '../../../components/CustomDialog';
 import { Checked, CellChecked, Criado } from '../../../components/Panel';
 //
 import { colorProcesso } from '../../tabela/TableProcessos';
@@ -326,7 +327,7 @@ function ValorItem({ title, valor, cativos }) {
           <DefaultAction onClick={() => onOpen()} small color="info" label="INFO. DAS CONTAS" />
           {open && (
             <Dialog open onClose={onClose} fullWidth maxWidth="md">
-              <DTFechar title="Contas para cativo" handleClick={() => onClose()} />
+              <DialogTitleAlt title="Contas para cativo" onClose={onClose} />
               <DialogContent>
                 <TableContainer sx={{ minWidth: 500, mt: 3, position: 'relative', overflow: 'hidden' }}>
                   <Table>

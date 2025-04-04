@@ -16,7 +16,7 @@ import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVer
 import { useDispatch, useSelector } from '../redux/store';
 import { createItem, getSuccess } from '../redux/slices/intranet';
 // components
-import { DTFechar } from '../components/Actions';
+import { DialogTitleAlt } from '../components/CustomDialog';
 // sections
 import FraseContent from '../sections/home/FraseContent';
 
@@ -56,9 +56,9 @@ export default function Disposicao() {
 
   return (
     <Dialog fullWidth keepMounted maxWidth="sm" open>
-      <DTFechar
+      <DialogTitleAlt
         title="Como te sentes hoje?"
-        handleClick={() => dispatch(getSuccess({ item: 'disposicao', dados: true }))}
+        onClose={() => dispatch(getSuccess({ item: 'disposicao', dados: true }))}
       />
       <DialogContent sx={{ mt: 3 }}>
         <Stack direction="row" justifyContent="center">

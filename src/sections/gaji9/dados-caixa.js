@@ -48,7 +48,7 @@ export default function InfoCaixa({ onCancel, item }) {
                 )}
               </>
             )}
-            <Fechar handleClick={() => onCancel()} />
+            <Fechar onClick={() => onCancel()} />
           </Stack>
         }
       />

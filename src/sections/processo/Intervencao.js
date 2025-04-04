@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // utils
-import { noEstado, podeArquivar, processoEstadoInicial } from '../../utils/validarAcesso';
+import { noEstado, podeArquivar, processoEstadoInicial, findColaboradores } from '../../utils/validarAcesso';
 // redux
 import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
@@ -30,7 +30,7 @@ import { ArquivarForm, DesarquivarForm } from './form/arquivo';
 export default function Intervencao() {
   const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);
-  const { processo, isSaving } = useSelector((state) => state.digitaldocs);
+  const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
   const { arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const gerencia = useMemo(
     () => noEstado(processo?.estado_processo?.estado, ['Gerência', 'Caixa Principal']),
@@ -40,15 +40,7 @@ export default function Intervencao() {
     () => uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências',
     [processo?.uo_origem_id, uos]
   );
-  const aberturaESemValGFC = useMemo(
-    () =>
-      gerencia &&
-      processo.segmento === 'E' &&
-      processo?.assunto === 'Abertura de Conta' &&
-      !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento'),
-    [gerencia, processo?.assunto, processo?.htransicoes, processo.segmento]
-  );
-  const destinos = useMemo(() => destinosProcesso(processo, aberturaESemValGFC), [aberturaESemValGFC, processo]);
+  const destinos = useMemo(() => destinosProcesso(processo, gerencia), [gerencia, processo]);
 
   return (
     <>
@@ -64,7 +56,7 @@ export default function Intervencao() {
         />
       )}
 
-      <ColocarPendente />
+      <DefaultAction label="PENDENTE" onClick={() => dispatch(setModal({ modal: 'pendencia', dados: processo }))} />
 
       {processoEstadoInicial(meusAmbientes, processo?.estado_atual_id) && (
         <Domiciliar id={processo?.id} estadoId={processo?.estado_atual_id} />
@@ -90,6 +82,9 @@ export default function Intervencao() {
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
         <Arquivar naoFinal={destinos?.destinosFora?.length > 0 ? destinos?.destinosFora : []} />
       )}
+
+      {/* FORMS */}
+      {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
     </>
   );
 }
@@ -138,11 +133,18 @@ export function Arquivar({ naoFinal }) {
 
 // --- DESARQUIVAR PROCESSO --------------------------------------------------------------------------------------------
 
-Desarquivar.propTypes = { id: PropTypes.number, colaboradoresList: PropTypes.array };
+Desarquivar.propTypes = { id: PropTypes.number };
 
-export function Desarquivar({ id, colaboradoresList }) {
+export function Desarquivar({ id }) {
   const dispatch = useDispatch();
   const { isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const { colaboradoresEstado } = useSelector((state) => state.parametrizacao);
+  const colaboradoresList = useMemo(
+    () => findColaboradores(colaboradores, colaboradoresEstado),
+    [colaboradores, colaboradoresEstado]
+  );
+
   return (
     <>
       <DefaultAction
@@ -236,32 +238,15 @@ export function Atribuir({ dados }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
 
-  const handleClick = () => {
+  const onClick = () => {
     onOpen();
     if (dados?.estadoId) dispatch(getFromParametrizacao('colaboradoresEstado', { id: dados?.estadoId }));
   };
 
   return (
     <>
-      <DefaultAction color="info" label="ATRIBUIR" onClick={() => handleClick()} />
+      <DefaultAction color="info" label="ATRIBUIR" onClick={() => onClick()} />
       {open && <AtribuirForm dados={dados} onClose={() => onClose()} />}
-    </>
-  );
-}
-
-// --- COLOCAR PROCESSO PENDENTE ---------------------------------------------------------------------------------------
-
-export function ColocarPendente() {
-  const dispatch = useDispatch();
-  const { processo, isOpenModal } = useSelector((state) => state.digitaldocs);
-  return (
-    <>
-      <DefaultAction
-        color="inherit"
-        label="PENDENTE"
-        onClick={() => dispatch(setModal({ modal: 'pendencia', dados: processo }))}
-      />
-      {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
     </>
   );
 }
@@ -282,10 +267,17 @@ export function Domiciliar({ id, estadoId }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function destinosProcesso(processo, aberturaESemValGFC) {
+function destinosProcesso(processo, gerencia) {
   const devolucoes = [];
   const seguimentos = [];
   const destinosFora = [];
+
+  const aberturaESemValGFC =
+    gerencia &&
+    processo.segmento === 'E' &&
+    processo?.assunto === 'Abertura de Conta' &&
+    !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento');
+
   processo?.destinos?.forEach((row) => {
     if (processo?.uo_origem_id !== row?.uo_id) destinosFora.push(row?.nome);
     const destino = {

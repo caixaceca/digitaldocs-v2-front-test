@@ -580,8 +580,6 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
   const { estados, isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
   const estadosList = useMemo(() => estados?.map((row) => ({ id: row?.id, label: row?.nome })), [estados]);
 
-  console.log(selectedItem);
-
   const formSchema = Yup.object().shape({ estado: Yup.mixed().required().label('Estado') });
   const defaultValues = useMemo(
     () => ({

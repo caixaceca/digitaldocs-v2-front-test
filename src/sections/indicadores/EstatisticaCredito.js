@@ -179,14 +179,7 @@ export default function EstatisticaCredito() {
                   slotProps={{ textField: { fullWidth: true, size: 'small', sx: { maxWidth: 175 } } }}
                 />
               ) : (
-                <RHFDateIF
-                  datai={datai}
-                  dataf={dataf}
-                  labeli="dataIEst"
-                  labelf="dataFEst"
-                  setDatai={setDatai}
-                  setDataf={setDataf}
-                />
+                <RHFDateIF options={{ datai, dataf, setDatai, setDataf, labeli: 'dataIEst', labelf: 'dataFEst' }} />
               )}
               <ExportarEstatisticaCred
                 vista={vista}

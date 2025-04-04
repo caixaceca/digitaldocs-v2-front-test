@@ -237,7 +237,7 @@ export default function TableCartoes() {
                 </>
               )}
               {dadosValidados?.length > 0 && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
-                <DefaultAction label="ANULAR CONFIRMAÇÂO" onClick={onOpen2} icon="cancelar" color="error" />
+                <DefaultAction label="ANULAR CONFIRMAÇÂO" onClick={onOpen2} color="error" />
               )}
             </Stack>
           </Stack>

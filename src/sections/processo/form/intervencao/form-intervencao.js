@@ -426,6 +426,74 @@ export function LibertarForm({ dados, onClose }) {
   );
 }
 
+// --- CONFIDENCILAIDADES ----------------------------------------------------------------------------------------------
+
+ConfidencialidadesForm.propTypes = { processoId: PropTypes.number };
+
+export function ConfidencialidadesForm({ processoId }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
+
+  const defaultValues = useMemo(
+    () => ({
+      confidencial: true,
+      perfis_incluidos: confidencialidadesIds(selectedItem?.criterios, 'perfil_incluido_id', '', colaboradores),
+      perfis_excluidos: confidencialidadesIds(selectedItem?.criterios, 'perfil_excluido_id', '', colaboradores),
+      estados_incluidos: confidencialidadesIds(selectedItem?.criterios, 'estado_incluido_id', 'estado_incluido', []),
+      estados_excluidos: confidencialidadesIds(selectedItem?.criterios, 'estado_excluido_id', 'estado_excluido', []),
+    }),
+    [selectedItem, colaboradores]
+  );
+
+  const methods = useForm({ defaultValues });
+  const { watch, handleSubmit } = methods;
+  const values = watch();
+
+  const onSubmit = async () => {
+    try {
+      const formData = {
+        perfis_incluidos: confidenciaIds(values, 'perfis_incluidos'),
+        perfis_excluidos: confidenciaIds(values, 'perfis_excluidos'),
+        estados_incluidos: confidenciaIds(values, 'estados_incluidos'),
+        estados_excluidos: confidenciaIds(values, 'estados_excluidos'),
+      };
+
+      dispatch(
+        updateItem('confidencialidade', JSON.stringify(formData), {
+          processoId,
+          id: selectedItem?.id,
+          msg: 'Confidencialidade atualizado',
+          afterSuccess: () => {
+            dispatch(setModal({ modal: '', dados: null }));
+            dispatch(getInfoProcesso('confidencialidades', { id: processoId }));
+          },
+        })
+      );
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="md">
+      <DialogTitle>Editar confidencialidade</DialogTitle>
+      <DialogContent sx={{ mt: 2 }}>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Confidencialidade
+            perfisIncluidos="perfis_incluidos"
+            perfisExcluidos="perfis_excluidos"
+            estadosIncluidos="estados_incluidos"
+            estadosExcluidos="estados_excluidos"
+          />
+          <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(setModal({ modal: '', dados: null }))} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // --- COLOCAR PROCESSO PENDENTE ---------------------------------------------------------------------------------------
 
 export function ColocarPendenteForm() {
@@ -604,74 +672,6 @@ export function FinalizarOPForm({ id, isSaving, onClose }) {
   );
 }
 
-// --- CONFIDENCILAIDADES ----------------------------------------------------------------------------------------------
-
-ConfidencialidadesForm.propTypes = { processoId: PropTypes.number };
-
-export function ConfidencialidadesForm({ processoId }) {
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const { colaboradores } = useSelector((state) => state.intranet);
-  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
-
-  const defaultValues = useMemo(
-    () => ({
-      confidencial: true,
-      perfis_incluidos: confidencialidadesIds(selectedItem?.criterios, 'perfil_incluido_id', '', colaboradores),
-      perfis_excluidos: confidencialidadesIds(selectedItem?.criterios, 'perfil_excluido_id', '', colaboradores),
-      estados_incluidos: confidencialidadesIds(selectedItem?.criterios, 'estado_incluido_id', 'estado_incluido', []),
-      estados_excluidos: confidencialidadesIds(selectedItem?.criterios, 'estado_excluido_id', 'estado_excluido', []),
-    }),
-    [selectedItem, colaboradores]
-  );
-
-  const methods = useForm({ defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
-
-  const onSubmit = async () => {
-    try {
-      const formData = {
-        perfis_incluidos: confidenciaIds(values, 'perfis_incluidos'),
-        perfis_excluidos: confidenciaIds(values, 'perfis_excluidos'),
-        estados_incluidos: confidenciaIds(values, 'estados_incluidos'),
-        estados_excluidos: confidenciaIds(values, 'estados_excluidos'),
-      };
-
-      dispatch(
-        updateItem('confidencialidade', JSON.stringify(formData), {
-          processoId,
-          id: selectedItem?.id,
-          msg: 'Confidencialidade atualizado',
-          afterSuccess: () => {
-            dispatch(setModal({ modal: '', dados: null }));
-            dispatch(getInfoProcesso('confidencialidades', { id: processoId }));
-          },
-        })
-      );
-    } catch (error) {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
-  };
-
-  return (
-    <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="md">
-      <DialogTitle>Editar confidencialidade</DialogTitle>
-      <DialogContent sx={{ mt: 2 }}>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Confidencialidade
-            perfisIncluidos="perfis_incluidos"
-            perfisExcluidos="perfis_excluidos"
-            estadosIncluidos="estados_incluidos"
-            estadosExcluidos="estados_excluidos"
-          />
-          <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(setModal({ modal: '', dados: null }))} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // ---------------------------------------------------------------------------------------------------------------------
 
 function confidencialidadesIds(dados, item, label, colaboradores) {
@@ -682,7 +682,7 @@ function confidencialidadesIds(dados, item, label, colaboradores) {
         id: val[item],
         label: label
           ? val[label]
-          : colaboradores?.find((colab) => colab?.perfil_id === val[item])?.perfil?.displayName ||
+          : colaboradores?.find(({ perfil_id: pid }) => pid === val[item])?.perfil?.displayName ||
             `PerfilID: ${val[item]}`,
       })) || []
   );

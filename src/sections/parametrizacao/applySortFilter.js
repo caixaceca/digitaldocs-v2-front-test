@@ -45,20 +45,6 @@ export function applySortFilter({ dados, filter, comparator }) {
 
 // ----------------------------------------------------------------------
 
-export function listaTransicoes(transicoes, estados) {
-  return (
-    transicoes?.map((row) => ({
-      id: row?.id,
-      label: `${row?.modo}${row?.is_after_devolucao ? ' (DD)' : ''}: ${
-        estados?.find((item) => item?.id === row.estado_inicial_id)?.nome || row.estado_inicial_id
-      } » ${estados?.find((item) => item?.id === row.estado_final_id)?.nome || row.estado_final_id}`,
-      estadoInicial: row.estado_inicial_id,
-    })) || []
-  );
-}
-
-// ----------------------------------------------------------------------
-
 export function listaPerfis(perfis, colaboradores) {
   perfis = perfis?.map((row) => ({
     id: row?.perfil_id,

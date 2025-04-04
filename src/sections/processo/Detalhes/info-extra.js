@@ -27,12 +27,12 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import Label from '../../../components/Label';
 import { TextItem } from './DetalhesProcesso';
 import { CellChecked } from '../../../components/Panel';
+import { DefaultAction } from '../../../components/Actions';
 import { SearchNotFoundSmall } from '../../../components/table';
-import { DialogConfirmar } from '../../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
-import { DefaultAction, DTFechar } from '../../../components/Actions';
 import { GarantiasSeparados } from '../form/credito/form-garantias-credito';
 import { Resgisto, TableRowItem, LabelSN } from '../../parametrizacao/Detalhes';
+import { DialogConfirmar, DialogTitleAlt } from '../../../components/CustomDialog';
 import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-form';
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
@@ -236,7 +236,7 @@ DetalhesGarantia.propTypes = { dados: PropTypes.object, closeModal: PropTypes.fu
 export function DetalhesGarantia({ dados, closeModal }) {
   return (
     <Dialog open onClose={closeModal} fullWidth maxWidth="sm">
-      <DTFechar title="Detalhes" handleClick={() => closeModal()} />
+      <DialogTitleAlt title="Detalhes" onClose={closeModal} />
       <DialogContent>
         <List sx={{ width: 1 }}>
           <Table size="small">

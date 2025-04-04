@@ -30,14 +30,14 @@ export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
       render={({ field: { onChange, value, ...field }, fieldState: { error } }) => (
         <TextField
           {...field}
+          fullWidth
+          error={!!error}
+          helperText={error?.message}
           value={noFormat ? value : formatNumber(value)}
           onChange={(e) => {
             const rawValue = e.target.value.replace(/\s/g, '');
             onChange(rawValue);
           }}
-          fullWidth
-          error={!!error}
-          helperText={error?.message}
           InputProps={{
             inputProps: { style: { textAlign: 'right' } },
             endAdornment: tipo && <InputAdornment position="end">{tipo}</InputAdornment>,
@@ -93,6 +93,7 @@ export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...
           fullWidth
           options={options}
           multiple={multiple}
+          disableClearable={!!other?.dc}
           onChange={(event, newValue) => field.onChange(newValue)}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
           {...other}
@@ -123,6 +124,7 @@ export function RHFAutocompleteObj({ name, options, label, small = false, ...oth
           {...field}
           fullWidth
           options={options}
+          disableClearable={!!other?.dc}
           size={small ? 'small' : 'medium'}
           getOptionLabel={(option) => option?.label}
           onChange={(event, newValue) => field.onChange(newValue)}
@@ -187,17 +189,11 @@ export function RHFDatePicker({ name, label = '', small = false, required = fals
 
 // ----------------------------------------------------------------------
 
-RHFDateIF.propTypes = {
-  datai: PropTypes.object,
-  dataf: PropTypes.object,
-  setDatai: PropTypes.func,
-  setDataf: PropTypes.func,
-  labeli: PropTypes.string,
-  labelf: PropTypes.string,
-  clearable: PropTypes.bool,
-};
+RHFDateIF.propTypes = { options: PropTypes.object };
 
-export function RHFDateIF({ datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false }) {
+export function RHFDateIF({ options }) {
+  const { datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false } = options;
+
   return (
     <Stack direction="row" spacing={1}>
       <DatePicker

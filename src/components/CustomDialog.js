@@ -28,15 +28,13 @@ DialogConfirmar.propTypes = {
   onClose: PropTypes.func,
   handleOk: PropTypes.func,
   isSaving: PropTypes.bool,
-  descSec: PropTypes.string,
 };
 
-export function DialogConfirmar({ isSaving, title = 'Eliminar', desc, descSec, color, onClose, handleOk }) {
+export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color, onClose, handleOk }) {
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
-        {descSec && <DialogContentText sx={{ mb: 3 }}>{descSec}</DialogContentText>}
         <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -72,7 +70,7 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
         </Box>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {action}
-          {onClose && <Fechar handleClick={onClose} />}
+          {onClose && <Fechar onClick={onClose} />}
         </Stack>
       </Stack>
       {stepper}
@@ -82,16 +80,11 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
 
 // ----------------------------------------------------------------------
 
-DialogPreviewDoc.propTypes = {
-  url: PropTypes.string,
-  extra: PropTypes.node,
-  onClose: PropTypes.func,
-  titulo: PropTypes.string,
-  isLoading: PropTypes.bool,
-};
+DialogPreviewDoc.propTypes = { params: PropTypes.object, onClose: PropTypes.func };
 
-export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClose, extra = null }) {
+export default function DialogPreviewDoc({ params, onClose }) {
   const theme = useTheme();
+  const { isLoading = false, titulo, url } = params;
   const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
 
   return (
@@ -99,10 +92,7 @@ export default function DialogPreviewDoc({ isLoading = false, titulo, url, onClo
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 0.5, pl: 1.5 }}>
           <Typography variant="subtitle1">{titulo}</Typography>
-          <Stack direction="row" alignItems="center" spacing={3}>
-            {extra}
-            <Fechar large handleClick={() => onClose()} />
-          </Stack>
+          <Fechar large onClick={() => onClose()} />
         </Stack>
         <Divider />
         <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>

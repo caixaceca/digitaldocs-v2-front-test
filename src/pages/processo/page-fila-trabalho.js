@@ -22,7 +22,6 @@ import { pertencoAoEstado } from '../../utils/validarAcesso';
 import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
 // redux
-import { setModal } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
@@ -137,13 +136,7 @@ export default function PageFilaTrabalho() {
         <Box>{tabs.find((tab) => tab.value === currentTab)?.component}</Box>
 
         {open && <TotalProcessos onCancel={() => onClose()} />}
-        {isOpenModal === 'adicionar-processo' && (
-          <ProcessoForm
-            processo={null}
-            ambientId={meuAmbiente?.id}
-            onCancel={() => dispatch(setModal({ modal: '', dados: null }))}
-          />
-        )}
+        {isOpenModal === 'adicionar-processo' && <ProcessoForm processo={null} ambientId={meuAmbiente?.id} />}
       </Container>
     </Page>
   );

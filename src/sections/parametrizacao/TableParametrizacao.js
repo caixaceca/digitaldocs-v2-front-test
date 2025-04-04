@@ -24,9 +24,9 @@ import { openModal, getSuccess, closeModal, getFromParametrizacao } from '../../
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { CellChecked } from '../../components/Panel';
+import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { UpdateItem, DefaultAction } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import {
@@ -212,7 +212,7 @@ export default function TableParametrizacao({ item }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item !== 'fluxos' && item !== 'estados' && (
-                            <UpdateItem handleClick={() => handleView(row, 'update')} />
+                            <DefaultAction label="EDITAR" onClick={() => handleView(row, 'update')} />
                           )}
                           <DefaultAction onClick={() => handleView(row, 'view')} label="DETALHES" />
                         </Stack>

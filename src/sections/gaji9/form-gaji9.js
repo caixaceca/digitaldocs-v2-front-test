@@ -817,16 +817,12 @@ export function RepresentanteForm({ onCancel }) {
     [funcoes, colaboradores]
   );
 
-  // const colaboradoresList = useMemo(
-  //   () => funcoes?.map(({ row }) => ({ id: row?.utilizador_id, label: row?.utilizador_email })),
-  //   [funcoes]
-  // );
-
   const formSchema = Yup.object().shape({
     nif: Yup.string().required().label('NIF'),
     funcao: Yup.string().required().label('Função'),
     concelho: Yup.mixed().required().label('Concelho'),
     freguesia: Yup.mixed().required().label('Fregusia'),
+    nome: Yup.string().required().label('Nome completo'),
     atua_como: Yup.string().required().label('Atua como'),
     utilizador: Yup.mixed().required().label('Colaborador'),
     residencia: Yup.string().required().label('Residência'),
@@ -840,6 +836,7 @@ export function RepresentanteForm({ onCancel }) {
       bi: selectedItem?.bi || '',
       nif: selectedItem?.nif || '',
       cni: selectedItem?.cni || '',
+      nome: selectedItem?.nome || '',
       funcao: selectedItem?.funcao || '',
       atua_como: selectedItem?.atua_como || '',
       concelho: selectedItem?.concelho || null,
@@ -876,7 +873,6 @@ export function RepresentanteForm({ onCancel }) {
                 {
                   ...values,
                   sexo: values?.utilizador?.sexo,
-                  nome: values?.utilizador?.label,
                   email: values?.utilizador?.email,
                   balcao: values?.utilizador?.balcao,
                   utilizador_id: values?.utilizador?.id,
@@ -894,18 +890,22 @@ export function RepresentanteForm({ onCancel }) {
         >
           <ItemComponent item={selectedItem} rows={5}>
             <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFAutocompleteObj
-                name="utilizador"
-                label="Colaborador"
-                options={colaboradoresList}
-                onChange={(event, newValue) => {
-                  setValue('utilizador', newValue, vsv);
-                  setValue('funcao', newValue?.funcao || null, vsv);
-                  setValue('atua_como', newValue?.funcao || null, vsv);
-                  setValue('concelho', newValue?.concelho || null, vsv);
-                  setValue('residencia', newValue?.residencia || null, vsv);
-                }}
-              />
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                <RHFAutocompleteObj
+                  name="utilizador"
+                  label="Colaborador"
+                  options={colaboradoresList}
+                  onChange={(event, newValue) => {
+                    setValue('utilizador', newValue, vsv);
+                    setValue('nome', newValue?.label || '', vsv);
+                    setValue('funcao', newValue?.funcao || '', vsv);
+                    setValue('atua_como', newValue?.funcao || '', vsv);
+                    setValue('concelho', newValue?.concelho || null, vsv);
+                    setValue('residencia', newValue?.residencia || '', vsv);
+                  }}
+                />
+                <RHFTextField name="nome" label="Nome completo" />
+              </Stack>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                 <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
                   <RHFTextField name="nif" label="NIF" />

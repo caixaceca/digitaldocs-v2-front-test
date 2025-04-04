@@ -110,7 +110,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
               <Stack spacing={1.5}>
                 <Stack direction="row" alignItems="end" justifyContent="space-between" spacing={2}>
                   <Typography variant="subtitle2">Tipos de garantia</Typography>
-                  <AddItem dados={{ small: true }} handleClick={() => append({ garantia: null })} />
+                  <AddItem dados={{ small: true }} onClick={() => append({ garantia: null })} />
                 </Stack>
                 <Divider sx={{ mt: 0.5 }} />
                 {fields.map((item, index) => (
@@ -176,7 +176,7 @@ export function GarantiasForm({ onCancel }) {
       <DialogTitleAlt
         sx={{ mb: 2 }}
         title="Adicionar tipos de garantias"
-        action={<AddItem dados={{ small: true }} handleClick={() => append({ garantia: null })} />}
+        action={<AddItem dados={{ small: true }} onClick={() => append({ garantia: null })} />}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -231,7 +231,7 @@ export function ComponentesForm({ onCancel }) {
       <DialogTitleAlt
         sx={{ mb: 2 }}
         title="Adicionar componentes"
-        action={<AddItem dados={{ small: true }} handleClick={() => append({ garantia: null })} />}
+        action={<AddItem dados={{ small: true }} onClick={() => append({ garantia: null })} />}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -330,8 +330,8 @@ export function ComposicaoForm({ onCancel, action }) {
                 <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
                   <Stack sx={{ flexGrow: 1 }}>
                     <RHFAutocompleteObj
+                      dc
                       label="Cláusula"
-                      disableClearable
                       options={clausulasList}
                       readOnly={action !== 'compor'}
                       name={`clausulas[${index}].clausula`}
@@ -357,7 +357,7 @@ export function ComposicaoForm({ onCancel, action }) {
               <Stack alignItems="center">
                 <AddItem
                   dados={{ small: true, label: 'Cláusula' }}
-                  handleClick={() => append({ clausula: null, numero: '' })}
+                  onClick={() => append({ clausula: null, numero: '' })}
                 />
               </Stack>
             )}

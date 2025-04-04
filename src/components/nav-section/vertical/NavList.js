@@ -20,17 +20,12 @@ NavList.propTypes = {
 
 export default function NavList({ data, depth, hasChildren, isCollapse = false }) {
   const navigate = useNavigate();
-
   const { pathname } = useLocation();
-
   const active = getActive(data.path, pathname);
-
   const [open, setOpen] = useState(active);
 
   const handleClickItem = () => {
-    if (!hasChildren) {
-      navigate(data.path);
-    }
+    if (!hasChildren) navigate(data.path);
     setOpen(!open);
   };
 

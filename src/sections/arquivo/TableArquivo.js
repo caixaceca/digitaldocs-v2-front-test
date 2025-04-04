@@ -163,7 +163,7 @@ export default function TableArquivo({ tab }) {
         </SearchToolbarSimple>
         {tab !== 'pedidosAcesso' && (
           <Stack sx={{ pb: 1 }}>
-            <Registos info={processosInfo} handleClick={() => mostrarMais()} total={arquivos?.length} />
+            <Registos info={processosInfo} onClick={() => mostrarMais()} total={arquivos?.length} />
           </Stack>
         )}
         <Scrollbar>

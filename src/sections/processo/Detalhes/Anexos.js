@@ -150,9 +150,11 @@ export function AnexoItem({
     <Button
       variant="soft"
       color={anexo?.url ? 'success' : 'inherit'}
-      startIcon={getFileThumb(false, null, anexo?.nome)}
       disabled={preview || isLoadingFile === anexo?.anexo}
       onClick={() => viewAnexo(anexo, estadoId, parecerId)}
+      startIcon={
+        isLoadingFile === anexo?.anexo ? <CircularProgress size={26} /> : getFileThumb(false, null, anexo?.nome)
+      }
       sx={{
         flexGrow: 1,
         boxShadow: 'none',
@@ -163,11 +165,9 @@ export function AnexoItem({
         borderBottomRightRadius: preview && 0,
         opacity: (preview && 1) || (eliminado && 0.75) || 1,
         color: (theme) => preview && `${theme.palette.text.primary} !important`,
-        '& .MuiButton-startIcon': { opacity: isLoadingFile === anexo?.anexo ? 0.35 : 1 },
       }}
     >
       <ListItemText
-        sx={{ opacity: isLoadingFile === anexo?.anexo ? 0.35 : 1 }}
         primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
         primary={
           !anexo?.tipo || anexo?.tipo === 'OUTROS' ? (
@@ -200,11 +200,6 @@ export function AnexoItem({
           )
         }
       />
-      {isLoadingFile === anexo?.anexo && (
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ position: 'absolute' }}>
-          <CircularProgress size={34} thickness={5} />
-        </Stack>
-      )}
     </Button>
   );
 }

@@ -7,6 +7,7 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { noDados } from '../../utils/formatText';
@@ -19,7 +20,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, closeModal } from '../../redux/slices/gaji9';
+import { getFromGaji9, setModal } from '../../redux/slices/gaji9';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
@@ -52,7 +53,7 @@ export default function TableCredito() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
 
-  const { isLoading, isOpenView, isOpenModal, creditos } = useSelector((state) => state.gaji9);
+  const { isLoading, modalGaji9, creditos } = useSelector((state) => state.gaji9);
   const { cc, uos } = useSelector((state) => state.intranet);
   const balcoes = useMemo(() => balcoesList(uos), [uos]);
 
@@ -113,11 +114,16 @@ export default function TableCredito() {
                     <TableRow hover key={`credito_${index}`}>
                       <TableCell>{row?.cliente || noDados('Não definido')}</TableCell>
                       <TableCell>{row?.titular}</TableCell>
-                      <TableCell>{row?.tipo_titular}</TableCell>
+                      <TableCell>
+                        {row?.tipo_titular}
+                        {row?.consumidor ? ' (Consumidor)' : ''}
+                      </TableCell>
                       <TableCell>{row?.rotulo || row?.componente}</TableCell>
                       <TableCell>{row?.finalidade || noDados('Não definido')}</TableCell>
                       <TableCell align="right">
-                        {row?.montante ? fCurrency(row?.montante) : noDados('Não definido')}
+                        <Typography variant="body2" noWrap>
+                          {row?.montante ? fCurrency(row?.montante) : noDados('Não definido')}
+                        </Typography>
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
@@ -152,8 +158,8 @@ export default function TableCredito() {
         )}
       </Card>
 
-      {isOpenView && <PropostaForm onCancel={() => dispatch(closeModal())} />}
-      {isOpenModal && <CreditForm onCancel={() => dispatch(closeModal())} />}
+      {modalGaji9 === 'form-proposta' && <PropostaForm onCancel={() => dispatch(setModal())} />}
+      {modalGaji9 === 'form-credito' && <CreditForm onCancel={() => dispatch(setModal())} />}
     </>
   );
 }

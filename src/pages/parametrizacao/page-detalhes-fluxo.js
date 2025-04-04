@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -8,7 +9,7 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { setItemValue } from '../../utils/formatObject';
+import { setItemValue, transicoesList } from '../../utils/formatObject';
 // hooks
 import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
@@ -35,8 +36,6 @@ import {
 } from '../../sections/parametrizacao/form-fluxo';
 import TableInfoFluxo from '../../sections/parametrizacao/table-info-fluxo';
 import { Detalhes, DetalhesContent } from '../../sections/parametrizacao/Detalhes';
-//
-import { listaTransicoes } from '../../sections/parametrizacao/applySortFilter';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -47,25 +46,18 @@ export default function PageDetalhesFluxo() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { perfilId } = useSelector((state) => state.intranet);
-  const { fluxo, estados, selectedItem, modalParams, done, isSaving, isLoading } = useSelector(
-    (state) => state.parametrizacao
-  );
+  const { fluxo, selectedItem, modalParams, done, isSaving, isLoading } = useSelector((state) => state.parametrizacao);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
-  const transicoes = useMemo(
-    () => listaTransicoes(fluxo?.transicoes?.filter((row) => row?.to_alert) || [], estados),
-    [estados, fluxo?.transicoes]
-  );
-  const [transicao, setTransicao] = useState(
-    transicoes?.find((row) => Number(row?.id) === Number(localStorage.getItem('transicaoParam'))) || null
-  );
+  const [transicao, setTransicao] = useState(null);
 
   useEffect(() => {
     if (perfilId && id) dispatch(getFromParametrizacao('fluxo', { id, reset: { val: null } }));
   }, [dispatch, perfilId, id]);
 
   useEffect(() => {
-    if (currentTab === 'Checklist' && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id }));
-  }, [dispatch, currentTab, fluxo?.id]);
+    if (currentTab === 'Checklist' && fluxo?.id)
+      dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, transicaoId: transicao?.id }));
+  }, [dispatch, currentTab, fluxo?.id, transicao?.id]);
 
   useEffect(() => {
     if (currentTab === 'Notificações' && transicao?.id)
@@ -131,17 +123,11 @@ export default function PageDetalhesFluxo() {
             fluxo && (
               <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
                 <Stack direction="row" spacing={0.75} alignItems="center">
-                  {currentTab === 'Notificações' && (
-                    <Autocomplete
-                      fullWidth
-                      size="small"
-                      disableClearable
-                      options={transicoes}
-                      sx={{ minWidth: 300 }}
-                      value={transicao || null}
-                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                      renderInput={(params) => <TextField {...params} label="Transição" />}
-                      onChange={(event, newValue) => setItemValue(newValue, setTransicao, 'transicaoParam', true)}
+                  {(currentTab === 'Notificações' || currentTab === 'Checklist') && (
+                    <Transicoes
+                      transicao={transicao}
+                      setTransicao={setTransicao}
+                      transicoes={fluxo?.transicoes || []}
                     />
                   )}
                   {currentTab === 'Dados' && (
@@ -183,5 +169,33 @@ export default function PageDetalhesFluxo() {
         </RoleBasedGuard>
       </Container>
     </Page>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Transicoes.propTypes = { transicao: PropTypes.object, setTransicao: PropTypes.func, transicoes: PropTypes.array };
+
+function Transicoes({ transicao, setTransicao, transicoes }) {
+  const { estados } = useSelector((state) => state.parametrizacao);
+  const listaTransicoes = useMemo(() => transicoesList(transicoes || [], estados, true), [estados, transicoes]);
+
+  useEffect(() => {
+    if (!transicao && listaTransicoes?.length > 0)
+      setTransicao(listaTransicoes?.find(({ id }) => id === Number(localStorage.getItem('trsParam'))) || null);
+  }, [setTransicao, transicao, listaTransicoes]);
+
+  return (
+    <Autocomplete
+      fullWidth
+      size="small"
+      disableClearable
+      sx={{ minWidth: 300 }}
+      options={listaTransicoes}
+      value={transicao || null}
+      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      renderInput={(params) => <TextField {...params} label="Transição" />}
+      onChange={(event, newValue) => setItemValue(newValue, setTransicao, 'trsParam', true)}
+    />
   );
 }

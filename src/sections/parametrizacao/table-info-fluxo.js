@@ -59,7 +59,7 @@ export default function TableInfoFluxo({ item }) {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
-  const transicoes = useMemo(() => transicoesList(fluxo?.transicoes, estados), [estados, fluxo?.transicoes]);
+  const transicoes = useMemo(() => transicoesList(fluxo?.transicoes, estados, false), [estados, fluxo?.transicoes]);
 
   const dataFiltered = applySortFilter({
     filter,
@@ -106,7 +106,10 @@ export default function TableInfoFluxo({ item }) {
                           <TableCell>{row.estado_inicial}</TableCell>
                           <TableCell>{row.estado_final}</TableCell>
                           <TableCell align="center">
-                            <Label color={row?.modo === 'Seguimento' ? 'success' : 'error'}>{row?.modo}</Label>
+                            <Label color={row?.modo === 'Seguimento' ? 'success' : 'error'}>
+                              {row?.modo}
+                              {row?.is_after_devolucao ? ' - DD' : ''}
+                            </Label>
                           </TableCell>
                           <TableCell align="center">
                             {row.prazoemdias > 1 ? `${row.prazoemdias} dias` : `${row.prazoemdias} dia`}
@@ -116,7 +119,7 @@ export default function TableInfoFluxo({ item }) {
                         (item === 'estados' && <EstadoDetail row={row} />) ||
                         (item === 'checklist' && (
                           <>
-                            <TableCell>{row?.designacao}</TableCell>
+                            <TableCell>{row?.designacao || row?.tipo_documento}</TableCell>
                             <TableCell>
                               {transicaoDesc(transicoes?.find(({ id }) => id === row?.transicao_id)) ||
                                 noDados('(Não definido)')}

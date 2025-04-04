@@ -26,7 +26,8 @@ import { getComparator, applySort } from '../../hooks/useTable';
 import { useSelector } from '../../redux/store';
 // components
 import MyAvatar from '../../components/MyAvatar';
-import { DTFechar, DefaultAction } from '../../components/Actions';
+import { DefaultAction } from '../../components/Actions';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 //
 import { IndicadorItem, ColaboradorCard } from './Indicadores';
 
@@ -105,7 +106,7 @@ export function EntradasTrabalhados({ indicadores }) {
                     <DefaultAction small button onClick={onOpen1} label="Comparar colaboradores" />
                     {open1 && (
                       <Dialog open onClose={handleClose} fullWidth maxWidth="sm">
-                        <DTFechar title="Comparação colaboradores" handleClick={() => handleClose()} />
+                        <DialogTitleAlt title="Comparação colaboradores" onClose={handleClose} />
                         <DialogContent>
                           <Grid container spacing={1.5} sx={{ mt: 1 }}>
                             <ColaboradorComp

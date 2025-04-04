@@ -24,8 +24,8 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getSuccess, getIndicadores } from '../../redux/slices/indicadores';
 // components
 import Panel from '../../components/Panel';
-import { DTFechar } from '../../components/Actions';
 import { FilterSwitch } from '../../components/hook-form';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 
@@ -310,7 +310,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
 
       {open && (
         <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-          <DTFechar title="Filtrar" handleClick={() => onClose()} />
+          <DialogTitleAlt title="Filtrar" onClose={onClose} />
           <DialogContent>
             <Stack spacing={3} sx={{ mt: 3 }}>
               {tab === 'devolucoes' && (

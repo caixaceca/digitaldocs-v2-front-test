@@ -140,9 +140,7 @@ export function TableInfoMinuta({ item, onClose }) {
                 <CellChecked check={row.ativo} />
                 {item === 'componentesMinuta' && (
                   <TableCell>
-                    {row?.ultima_modificacao && (
-                      <Criado caption tipo="data" value={ptDateTime(row.ultima_modificacao)} />
-                    )}
+                    <Criado caption tipo="data" value={ptDateTime(row?.ultima_modificacao)} />
                     {row?.feito_por && <Criado caption tipo="user" value={row.feito_por} />}
                   </TableCell>
                 )}

@@ -32,8 +32,8 @@ export default function AcessoGaji9({ children, item }) {
   }, [dispatch, utilizador, cc?.perfil?.id_aad]);
 
   useEffect(() => {
-    if (temAcesso) dispatch(getInfoGaji());
-  }, [dispatch, temAcesso]);
+    if (temAcesso) dispatch(getInfoGaji(item));
+  }, [dispatch, item, temAcesso]);
 
   return isLoading && !utilizador ? (
     <Card sx={{ p: 3, height: { xs: 400, md: 600 }, alignItems: 'center' }}>

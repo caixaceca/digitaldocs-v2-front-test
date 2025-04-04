@@ -1,12 +1,13 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
@@ -29,8 +30,9 @@ import {
 } from '../../components/hook-form';
 import Steps from '../../components/Steps';
 import GridItem from '../../components/GridItem';
-import { DialogTitleAlt } from '../../components/CustomDialog';
+import { SemDados } from '../../components/Panel';
 import { shapeMixed } from '../../components/hook-form/yup-shape';
+import { DialogTitleAlt, DialogConfirmar } from '../../components/CustomDialog';
 import { DefaultAction, DialogButons, ButtonsStepper } from '../../components/Actions';
 //
 import { listaTitrulares, listaGarantias, listaProdutos } from './applySortFilter';
@@ -73,6 +75,7 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
             dados={{
               cliente: dadosStepper?.cliente || dados?.cliente || '',
               conta_do: dadosStepper?.conta_do || dados?.conta_do || '',
+              conta_do_renda: dadosStepper?.conta_do_renda || dados?.conta_do_renda || '',
               numero_proposta: dadosStepper?.numero_proposta || dados?.numero_proposta || '',
               processo_origem: dadosStepper?.processo_origem || dados?.processo_origem || null,
               aplicacao_origem: dadosStepper?.aplicacao_origem || dados?.aplicacao_origem || null,
@@ -112,13 +115,13 @@ export default function CreditForm({ dados = null, onCancel, isEdit = false }) {
               custo_total: dadosStepper?.custo_total || dados?.custo_total || '',
               valor_comissao: dadosStepper?.valor_comissao || dados?.valor_comissao || '',
               valor_prestacao: dadosStepper?.valor_prestacao || dados?.valor_prestacao || '',
-              valor_prestacao1: dadosStepper?.valor_prestacao1 || dados?.valor_prestacao1 || '',
               isento_comissao: dadosStepper?.isento_comissao || dados?.isento_comissao || false,
-              taxa_imposto_selo: dadosStepper?.taxa_imposto_selo || dados?.taxa_imposto_selo || '',
               valor_imposto_selo: dadosStepper?.valor_imposto_selo || dados?.valor_imposto_selo || '',
               taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || '',
               taxa_juro_negociado: dadosStepper?.taxa_juro_negociado || dados?.taxa_juro_negociado || '',
               taxa_comissao_abertura: dadosStepper?.taxa_comissao_abertura || dados?.taxa_comissao_abertura || '',
+              valor_prestacao_sem_desconto:
+                dadosStepper?.valor_prestacao_sem_desconto || dados?.valor_prestacao_sem_desconto || '',
             }}
           />
         )}
@@ -140,9 +143,10 @@ Identificacao.propTypes = {
 function Identificacao({ dados, onCancel, dispatch, titularesList = [] }) {
   const formSchema = Yup.object().shape({
     tipo_titular_id: Yup.mixed().required().label('Titular'),
-    conta_do: Yup.number().min(0).required().label('Conta DO'),
     cliente: Yup.number().min(0).required().label('Nº de cliente'),
+    conta_do: Yup.number().min(0).required().label('Conta DO crédito'),
     aplicacao_origem: Yup.mixed().required().label('Aplicação de origem'),
+    conta_do_renda: Yup.number().min(0).required().label('Conta DO débito'),
     numero_proposta: Yup.number().min(0).required().label('Nº de proposta'),
   });
 
@@ -157,16 +161,17 @@ function Identificacao({ dados, onCancel, dispatch, titularesList = [] }) {
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
       <Grid container spacing={3} sx={{ pt: 1 }}>
-        <GridItem xs={6} sm={4} children={<RHFNumberField noFormat label="Nº de cliente" name="cliente" />} />
-        <GridItem xs={6} sm={4} children={<RHFNumberField noFormat label="Conta DO" name="conta_do" />} />
-        <GridItem xs={6} sm={4}>
-          <RHFAutocompleteObj name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
+        <GridItem xs={12} sm={4} children={<RHFNumberField noFormat label="Nº de cliente" name="cliente" />} />
+        <GridItem xs={12} sm={4} children={<RHFNumberField noFormat label="Conta DO crédito" name="conta_do" />} />
+        <GridItem xs={12} sm={4} children={<RHFNumberField noFormat label="Conta DO débito" name="conta_do_renda" />} />
+        <GridItem xs={6} md={3}>
+          <RHFAutocompleteObj dc name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
         </GridItem>
-        <GridItem xs={6} sm={4} children={<RHFNumberField noFormat label="Nº de proposta" name="numero_proposta" />} />
-        <GridItem xs={6} sm={4}>
-          <RHFAutocompleteSmp label="Aplicação de origem" name="aplicacao_origem" options={['DDOCS', 'CREDIBOX']} />
+        <GridItem xs={6} md={3} children={<RHFNumberField noFormat label="Nº de proposta" name="numero_proposta" />} />
+        <GridItem xs={6} md={3}>
+          <RHFAutocompleteSmp dc label="Aplicação de origem" name="aplicacao_origem" options={['DDOCS', 'CREDIBOX']} />
         </GridItem>
-        <GridItem xs={6} sm={4}>
+        <GridItem xs={6} md={3}>
           <RHFNumberField noFormat label="ID processo origem" name="processo_origem" />
         </GridItem>
       </Grid>
@@ -201,21 +206,23 @@ function Credito({ dados, dispatch, componentesList = [] }) {
     >
       <Grid container spacing={3} sx={{ pt: 1 }}>
         <GridItem children={<RHFAutocompleteObj name="componente_id" label="Componente" options={componentesList} />} />
-        <GridItem xs={6} md={3} children={<RHFNumberField label="Montante" name="montante" tipo="CVE" />} />
-        <GridItem xs={6} md={3}>
+        <GridItem xs={6} md={4} children={<RHFNumberField label="Montante" name="montante" tipo="CVE" />} />
+        <GridItem xs={6} md={4}>
           <RHFNumberField label="Prêmio do seguro" name="valor_premio_seguro" tipo="CVE" />
         </GridItem>
-        <GridItem xs={6} md={3}>
-          <RHFNumberField label="Nº de prestação" name="numero_prestacao" tipo="meses" />
-        </GridItem>
-        <GridItem xs={6} md={3}>
-          <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
-        </GridItem>
-        <GridItem xs={6} md={3}>
+        <GridItem xs={6} md={4}>
           <RHFDatePicker name="data_vencimento_prestacao1" label="Venc. 1ª prestação" />
         </GridItem>
-        <GridItem xs={6} md={3} children={<RHFNumberField label="Meses de vencimento" name="meses_vencimento" />} />
-        <GridItem md={6} children={<RHFTextField name="finalidade" label="Finalidade" />} />
+        <GridItem xs={6} md={4}>
+          <RHFNumberField label="Nº de prestação" name="numero_prestacao" tipo="meses" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
+        </GridItem>
+        <GridItem children={<RHFTextField name="finalidade" label="Finalidade" />} />
       </Grid>
       <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
     </FormProvider>
@@ -228,17 +235,16 @@ Taxas.propTypes = { dados: PropTypes.object, dispatch: PropTypes.func };
 
 function Taxas({ dados, dispatch }) {
   const formSchema = Yup.object().shape({
-    taxa_taeg: Yup.number().min(0).required().label('TAEG'),
-    custo_total: Yup.number().min(0).required().label('Custo total'),
-    valor_juro: Yup.number().min(0).required().label('Valor do juro'),
-    valor_comissao: Yup.number().min(0).required().label('Valor comissão'),
+    taxa_taeg: Yup.number().min(0).required().label('Taxa TAEG'),
+    custo_total: Yup.number().min(0).required().label('Custo total TAEG'),
+    valor_juro: Yup.number().min(0).required().label('Valor total de juros'),
     valor_prestacao: Yup.number().min(0).required().label('Valor da prestação'),
     taxa_juro_precario: Yup.number().min(0).required().label('Taxa juro precário'),
-    taxa_imposto_selo: Yup.number().min(0).required().label('Taxa imposto de selo'),
-    valor_prestacao1: Yup.number().min(0).required().label('Valor da 1ª prestação'),
+    valor_comissao: Yup.number().min(0).required().label('Valor total de comissões'),
     taxa_juro_negociado: Yup.number().min(0).required().label('Taxa juro negociado'),
-    valor_imposto_selo: Yup.number().min(0).required().label('Valor imposto de selo'),
+    valor_imposto_selo: Yup.number().min(0).required().label('Valor total de imposto selo'),
     taxa_comissao_abertura: Yup.number().min(0).required().label('Taxa comissão de abertura'),
+    valor_prestacao_sem_desconto: Yup.number().min(0).required().label('Valor prestação sem desconto'),
   });
 
   const defaultValues = useMemo(() => dados, [dados]);
@@ -261,22 +267,23 @@ function Taxas({ dados, dispatch }) {
         </GridItem>
         <GridItem xs={6} sm={3} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" tipo="%" />} />
         <GridItem xs={6} sm={3}>
-          <RHFNumberField label="Taxa imposto selo" name="taxa_imposto_selo" tipo="%" />
-        </GridItem>
-        <GridItem xs={6} sm={3}>
           <RHFNumberField label="Taxa comissão de abertura" name="taxa_comissao_abertura" tipo="%" />
         </GridItem>
-        <GridItem xs={6} sm={3}>
-          <RHFNumberField label="Valor imposto selo" name="valor_imposto_selo" tipo="CVE" />
+        <GridItem xs={6} sm={4}>
+          <RHFNumberField label="Valor total de imposto selo" name="valor_imposto_selo" tipo="CVE" />
         </GridItem>
-        <GridItem xs={6} sm={3} children={<RHFNumberField label="Valor comissão" name="valor_comissao" tipo="CVE" />} />
-        <GridItem xs={6} sm={3} children={<RHFNumberField label="Valor do juro" name="valor_juro" tipo="CVE" />} />
-        <GridItem xs={6} sm={4} children={<RHFNumberField label="Custo total" name="custo_total" tipo="CVE" />} />
+        <GridItem xs={6} sm={4}>
+          <RHFNumberField label="Valor total de comissões" name="valor_comissao" tipo="CVE" />
+        </GridItem>
+        <GridItem xs={6} sm={4}>
+          <RHFNumberField label="Valor total de juros" name="valor_juro" tipo="CVE" />
+        </GridItem>
+        <GridItem xs={6} sm={4} children={<RHFNumberField label="Custo total TAEG" name="custo_total" tipo="CVE" />} />
         <GridItem xs={6} sm={4}>
           <RHFNumberField label="Valor da prestação" name="valor_prestacao" tipo="CVE" />
         </GridItem>
         <GridItem xs={6} sm={4}>
-          <RHFNumberField label="Valor da 1ª prestação" name="valor_prestacao1" tipo="CVE" />
+          <RHFNumberField label="Valor prestação sem desconto" name="valor_prestacao_sem_desconto" tipo="CVE" />
         </GridItem>
       </Grid>
       <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
@@ -290,6 +297,7 @@ Garantias.propTypes = { isEdit: PropTypes.bool, dados: PropTypes.object, onCance
 
 function Garantias({ isEdit, dados, onCancel }) {
   const dispatch = useDispatch();
+  const [item, setItem] = useState(null);
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving, tiposGarantias } = useSelector((state) => state.gaji9);
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
@@ -326,6 +334,7 @@ function Garantias({ isEdit, dados, onCancel }) {
     };
     const formData = {
       ...dadosStepper,
+      taxa_imposto_selo: 0,
       componente_id: dadosStepper?.componente_id?.id,
       tipo_titular_id: dadosStepper?.tipo_titular_id?.id,
       data_vencimento_prestacao1: formatDate(dadosStepper?.data_vencimento_prestacao1, 'yyyy-MM-dd'),
@@ -348,72 +357,75 @@ function Garantias({ isEdit, dados, onCancel }) {
     dispatch((isEdit ? updateItem : createItem)('credito', JSON.stringify(formData), params));
   };
 
-  return (
-    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={3}>
-        {fields?.length === 0 ? (
-          <Typography
-            variant="body2"
-            sx={{ textAlign: 'center', fontStyle: 'italic', p: 3, bgcolor: 'background.neutral', borderRadius: 1 }}
-          >
-            Ainda não foi adicionada nenhuma garantia...
-          </Typography>
-        ) : (
-          <Stack spacing={3} sx={{ pt: 1 }} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
-            {fields.map((item, index) => (
-              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
-                <Stack sx={{ flexGrow: 1 }}>
-                  <Grid container spacing={2}>
-                    <GridItem sm={4}>
-                      <RHFAutocompleteObj
-                        label="Garantia"
-                        options={garantiasList}
-                        name={`garantias[${index}].garantia`}
-                      />
-                    </GridItem>
-                    <GridItem sm={8} children={<RHFTextField label="Nota" name={`garantias[${index}].nota`} />} />
-                  </Grid>
-                </Stack>
-                {fields?.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
-              </Stack>
-            ))}
-          </Stack>
-        )}
+  const eliminarGarantia = async () => {
+    await remove(item);
+    setItem(null);
+  };
 
-        <Stack direction="row" justifyContent="center">
-          <DefaultAction
-            small
-            button
-            label="Garantia"
-            icon="adicionar"
-            onClick={() => append({ nota: '', garantia: null })}
-          />
+  return (
+    <>
+      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+        <Stack spacing={3}>
+          {fields?.length === 0 ? (
+            <SemDados message="Ainda não foi adicionada nenhuma garantia..." />
+          ) : (
+            <Stack spacing={3} sx={{ pt: 1 }} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+              {fields.map((item, index) => (
+                <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+                  <Stack sx={{ flexGrow: 1 }}>
+                    <Grid container spacing={2}>
+                      <GridItem sm={4}>
+                        <RHFAutocompleteObj
+                          label="Garantia"
+                          options={garantiasList}
+                          name={`garantias[${index}].garantia`}
+                        />
+                      </GridItem>
+                      <GridItem sm={8} children={<RHFTextField label="Nota" name={`garantias[${index}].nota`} />} />
+                    </Grid>
+                  </Stack>
+                  {fields?.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => setItem(index)} />}
+                </Stack>
+              ))}
+            </Stack>
+          )}
+
+          <Stack direction="row" justifyContent="center">
+            <DefaultAction
+              small
+              button
+              label="Garantia"
+              icon="adicionar"
+              onClick={() => append({ nota: '', garantia: null })}
+            />
+          </Stack>
         </Stack>
-      </Stack>
-      <ButtonsStepper
-        isSaving={isSaving}
-        label={isEdit ? 'Guardar' : 'Adicionar'}
-        onCancel={() => dispatch(updateDados({ backward: true, dados: values }))}
-      />
-    </FormProvider>
+        <ButtonsStepper
+          isSaving={isSaving}
+          label={isEdit ? 'Guardar' : 'Adicionar'}
+          onCancel={() => dispatch(updateDados({ backward: true, dados: values }))}
+        />
+      </FormProvider>
+      {item !== null && (
+        <DialogConfirmar handleOk={eliminarGarantia} desc="eliminar esta alínea" onClose={() => setItem(null)} />
+      )}
+    </>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-FiadoresForm.propTypes = { id: PropTypes.number, dados: PropTypes.array, onCancel: PropTypes.func };
+IntervenienteForm.propTypes = { id: PropTypes.number, dados: PropTypes.array, onCancel: PropTypes.func };
 
-export function FiadoresForm({ id, dados, onCancel }) {
+export function IntervenienteForm({ id, dados, onCancel }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
     entidade: Yup.number().min(0).required().label('Nº de entidade'),
     responsabilidade: Yup.mixed().required().label('Responsabilidade'),
-    entidade_representada: shapeMixed('Entidade representada', 'Representante', '', 'responsabilidade'),
+    entidade_representada: shapeMixed('Entidade representada', 'Procurador', '', 'responsabilidade'),
   });
-
-  console.log(dados);
 
   const defaultValues = useMemo(() => ({ responsabilidade: null, entidade: null, entidade_representada: null }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -421,10 +433,10 @@ export function FiadoresForm({ id, dados, onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { id, getItem: 'credito', msg: 'Participante adicionado', afterSuccess: () => onCancel() };
+    const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', afterSuccess: () => onCancel() };
     dispatch(
       createItem(
-        'participantes',
+        'intervenientes',
         JSON.stringify([
           {
             designacao: '',
@@ -432,8 +444,8 @@ export function FiadoresForm({ id, dados, onCancel }) {
             numero_entidade: values?.entidade,
             fiador: values?.responsabilidade === 'Fiador',
             avalista: values?.responsabilidade === 'Avalista',
-            representante: values?.responsabilidade === 'Representante',
-            entidade_representada: values.responsabilidade === 'Representante' ? values.entidade_representada.id : '',
+            representante: values?.responsabilidade === 'Procurador',
+            entidade_representada: values.responsabilidade === 'Procurador' ? values.entidade_representada.id : '',
           },
         ]),
         params
@@ -443,20 +455,20 @@ export function FiadoresForm({ id, dados, onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitleAlt sx={{ mb: 2 }} title="Adicionar participante" />
+      <DialogTitleAlt sx={{ mb: 2 }} title="Adicionar interveniente" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack direction="column" spacing={3} sx={{ pt: 1 }}>
             <RHFNumberField noFormat label="Nº de entidade" name="entidade" />
             <RHFAutocompleteSmp
-              disableClearable
+              dc
               name="responsabilidade"
               label="Responsabilidade"
-              options={['Avalista', 'Fiador', 'Representante']}
+              options={['Avalista', 'Fiador', 'Procurador']}
             />
-            {values.responsabilidade === 'Representante' && (
+            {values.responsabilidade === 'Procurador' && (
               <RHFAutocompleteSmp
-                disableClearable
+                dc
                 name="entidade_representada"
                 label="Entidade representada"
                 options={dados?.map(({ numero_entidade: ne, nome }) => ({ id: ne, label: nome }))}
@@ -555,7 +567,7 @@ export function PropostaForm({ onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    dispatch(getFromGaji9('proposta', { ...values }));
+    dispatch(getFromGaji9('proposta', { ...values, msg: 'Proposta carregada', afterSuccess: () => onCancel() }));
   };
 
   return (
@@ -578,11 +590,17 @@ export function PropostaForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PreviewForm.propTypes = { onCancel: PropTypes.func };
+PreviewForm.propTypes = { item: PropTypes.string, onCancel: PropTypes.func };
 
-export function PreviewForm({ onCancel }) {
+export function PreviewForm({ item, onCancel }) {
   const dispatch = useDispatch();
   const { isLoadingDoc, credito, minutasPublicas, representantes } = useSelector((state) => state.gaji9);
+
+  useEffect(() => {
+    dispatch(getFromGaji9('representantes', { notLoading: true }));
+    dispatch(getFromGaji9('minutasPublicas', { notLoading: true }));
+  }, [dispatch]);
+
   const representantesList = useMemo(
     () =>
       representantes
@@ -608,6 +626,7 @@ export function PreviewForm({ onCancel }) {
   });
   const defaultValues = useMemo(
     () => ({
+      cache: false,
       minuta: minutasList?.length === 1 ? minutasList[0] : null,
       representante: representantesList?.length === 1 ? representantesList[0] : null,
     }),
@@ -615,40 +634,51 @@ export function PreviewForm({ onCancel }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
+  const { watch, reset, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
-    dispatch(getFromGaji9('representantes'));
-    dispatch(getFromGaji9('minutasPublicas'));
-  }, [dispatch]);
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minutasList, representantesList]);
 
   const onSubmit = async () => {
+    const params = { creditoId: credito?.id, minutaId: values?.minuta?.id, representanteId: values?.representante?.id };
     dispatch(
-      getDocumento('prevContrato', {
-        creditoId: credito?.id,
-        minutaId: values?.minuta?.id,
-        representanteId: values?.representante?.id,
-        titulo: `Previsualização de contrato: Cliente ${credito?.cliente}`,
+      getDocumento(item, {
+        ...params,
+        cache: !values?.cache,
+        titulo: `${item === 'preview-contrato' ? 'Pré-visualização de ' : ''}Contrato: Cliente ${credito?.cliente}`,
       })
     );
   };
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitleAlt sx={{ mb: 2 }} title="Previsualizar contrato" />
+      <DialogTitleAlt sx={{ mb: 2 }} title={`${item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'} contrato`} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 1 }}>
-            <RHFAutocompleteObj name="minuta" label="Minuta" disableClearable options={minutasList} />
-            <RHFAutocompleteObj
-              disableClearable
-              name="representante"
-              label="Representante"
-              options={representantesList}
-            />
+            {item === 'gerar-contrato' && (
+              <Alert severity="warning">
+                <Typography variant="body2">
+                  Ao gerar o contrato, este será finalizado e não poderá ser modificado.
+                </Typography>
+                <Typography variant="body2">
+                  Se deseja apenas visualizar o contrato antes de confirmar a geração, utilize o botão de
+                  Pré-visualização.
+                </Typography>
+              </Alert>
+            )}
+            <RHFAutocompleteObj dc name="minuta" label="Minuta" options={minutasList} />
+            <RHFAutocompleteObj dc name="representante" label="Representante" options={representantesList} />
+            <RHFSwitch name="cache" label="Forçar atualização dos dados da banca" />
           </Stack>
-          <DialogButons isSaving={isLoadingDoc} onCancel={onCancel} label="Previsualizar" />
+          <DialogButons
+            onCancel={onCancel}
+            isSaving={isLoadingDoc}
+            label={item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>

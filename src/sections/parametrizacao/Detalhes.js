@@ -25,10 +25,11 @@ import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
+import { DefaultAction } from '../../components/Actions';
 import { Criado, CellChecked } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import { UpdateItem, DefaultAction, DTFechar } from '../../components/Actions';
 //
 import { DestinatarioForm } from './form-fluxo';
 import DetalhesTransicao from './detalhes-transicao';
@@ -84,7 +85,7 @@ export function Detalhes({ item, closeModal }) {
       onClose={closeModal}
       maxWidth={item === 'Transições' || item === 'Notificações' ? 'md' : 'sm'}
     >
-      <DTFechar title="Detalhes" handleClick={() => closeModal()} />
+      <DialogTitleAlt title="Detalhes" onClick={closeModal} />
       <DialogContent>
         {(item === 'Transições' && <DetalhesTransicao dados={selectedItem} />) ||
           (item === 'Notificações' && <Notificacao dados={selectedItem} />) || (
@@ -322,7 +323,7 @@ function Notificacoes({ destinatarios, id }) {
                 <Criado tipo="data" value={ptDateTime(row?.modificado_em || row?.criado_em)} caption />
               </TableCell>
               <TableCell>
-                <UpdateItem dados={{ small: true }} handleClick={() => setDestinatario(row)} />
+                <DefaultAction small label="EDITAR" onClick={() => setDestinatario(row)} />
               </TableCell>
             </TableRow>
           ))}

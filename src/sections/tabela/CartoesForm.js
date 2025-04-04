@@ -39,7 +39,8 @@ import { updateItem, alterarBalcaopSuccess } from '../../redux/slices/digitaldoc
 // components
 import Label from '../../components/Label';
 import { Criado } from '../../components/Panel';
-import { DTFechar, DialogButons } from '../../components/Actions';
+import { DialogButons } from '../../components/Actions';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TableHeadCustom, SearchNotFoundSmall } from '../../components/table';
 import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObj } from '../../components/hook-form';
 
@@ -455,7 +456,7 @@ export function Detalhes({ closeModal }) {
 
   return (
     <Dialog open onClose={closeModal} fullWidth maxWidth="sm">
-      <DTFechar title="Detalhes do cartão" handleClick={() => closeModal()} />
+      <DialogTitleAlt title="Detalhes do cartão" onClose={closeModal} />
       <DialogContent>
         {isLoading ? (
           <Stack justifyContent="space-between" alignItems="center" spacing={3} sx={{ mt: 1 }}>

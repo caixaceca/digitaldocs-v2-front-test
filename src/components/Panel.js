@@ -162,9 +162,9 @@ export function ColaboradorInfo({
 
 // ----------------------------------------------------------------------
 
-Registos.propTypes = { info: PropTypes.object, handleClick: PropTypes.func, total: PropTypes.number };
+Registos.propTypes = { info: PropTypes.object, onClick: PropTypes.func, total: PropTypes.number };
 
-export function Registos({ info, total, handleClick }) {
+export function Registos({ info, total, onClick }) {
   return (
     <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="center" sx={{ color: 'text.secondary' }}>
       <Typography>{info?.proxima_pagina > 0 ? 'Processos' : 'Total de processos'}:</Typography>
@@ -179,7 +179,7 @@ export function Registos({ info, total, handleClick }) {
       <Typography variant="subtitle1" sx={{ color: 'text.primary', pr: 0.5 }}>
         {info?.total_registos || 0}
       </Typography>
-      {info?.proxima_pagina > 0 && <DefaultAction small label="Mais processos" onClick={handleClick} />}
+      {info?.proxima_pagina > 0 && <DefaultAction small label="Mais processos" onClick={onClick} />}
     </Stack>
   );
 }
@@ -203,6 +203,20 @@ export function CellChecked({ check }) {
     <TableCell align="center">
       <Checked check={check} />
     </TableCell>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SemDados.propTypes = { message: PropTypes.string };
+
+export function SemDados({ message }) {
+  return (
+    <Box sx={{ p: 3, borderRadius: 1, bgcolor: 'background.neutral' }}>
+      <Typography variant="body2" sx={{ fontStyle: 'italic', textAlign: 'center', color: 'text.secondary' }}>
+        {message}
+      </Typography>
+    </Box>
   );
 }
 

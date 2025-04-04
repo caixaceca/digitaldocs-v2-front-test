@@ -42,7 +42,7 @@ export default function PageAcessosPerfil() {
   ];
 
   return (
-    <Page title="Perfil do colaborador">
+    <Page title="Perfil do colaborador | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Card sx={{ mb: 3, height: 170, position: 'relative' }}>
           <PerfilCover perfilColaborador={colaborador} />

@@ -168,13 +168,16 @@ function Actions({ inativos, setInativos, label = '' }) {
         />
       )}
       {label === 'Créditos' && (
-        <DefaultAction button label="Carregar proposta" onClick={() => dispatch(openModal('view'))} />
+        <DefaultAction button label="Carregar proposta" onClick={() => dispatch(setModal({ item: 'form-proposta' }))} />
       )}
-      {label !== 'Minutas públicas' &&
+      {label === 'Créditos' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
+        <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: 'form-credito' }))} />
+      )}
+      {label !== 'Créditos' &&
         label !== 'Cláusulas' &&
+        label !== 'Minutas públicas' &&
         (adminGaji9 ||
           (label === 'Minutas' && acessoGaji9(utilizador?.acessos, ['CREATE_MINUTA'])) ||
-          (label === 'Créditos' && acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) ||
           (label === 'Produtos' && acessoGaji9(utilizador?.acessos, ['CREATE_PRODUTO/COMPONENTE'])) ||
           (label === 'Representantes' && acessoGaji9(utilizador?.acessos, ['CREATE_REPRESENTANTE'])) ||
           (label === 'Tipos de titular' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO TITULAR'])) ||
@@ -183,11 +186,7 @@ function Actions({ inativos, setInativos, label = '' }) {
           <DefaultAction button label="Adicionar" onClick={() => dispatch(openModal('add'))} />
         )}
       {label === 'Cláusulas' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) && (
-        <DefaultAction
-          button
-          label="Adicionar"
-          onClick={() => dispatch(setModal({ item: 'form-clausula', dados: null }))}
-        />
+        <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: 'form-clausula' }))} />
       )}
       {label === 'Representantes' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_INSTITUICAO'])) && (
         <ButtonInfoCaixa />

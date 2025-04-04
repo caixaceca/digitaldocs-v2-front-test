@@ -30,8 +30,9 @@ import { useNotificacao } from '../../hooks/useNotificacao';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getSuccess, createItem, getFromIntranet } from '../../redux/slices/intranet';
 // components
+import { DialogButons } from '../../components/Actions';
 import { Loading } from '../../components/LoadingScreen';
-import { DTFechar, DialogButons } from '../../components/Actions';
+import { DialogTitleAlt } from '../../components/CustomDialog';
 import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile } from '../../components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -210,7 +211,7 @@ export function ValidarDocForm({ onCancel }) {
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DTFechar title="Validação de documento" handleClick={() => onCancel()} />
+      <DialogTitleAlt title="Validação de documento" onClose={onCancel} />
       <DialogContent sx={{ mt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 1 }}>

@@ -18,6 +18,10 @@ export function gestaoContrato(funcao) {
   return funcao === 'ADMIN' || funcao === 'GERENTE';
 }
 
+export function actionAcessoGaji9(utilizador, permissoes) {
+  return gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, permissoes);
+}
+
 export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (
@@ -223,13 +227,13 @@ export function pertencoEstadoId(meusAmbientes, estadoId) {
 // ----------------------------------------------------------------------
 
 export function gestorEstado(meusAmbientes, estadoId) {
-  return !!meusAmbientes?.find((row) => row?.id === estadoId && row?.gestor);
+  return !!meusAmbientes?.find(({ id, gestor }) => id === estadoId && gestor);
 }
 
 // ----------------------------------------------------------------------
 
 export function findColaboradores(colaboradores, idsList) {
   return colaboradores
-    ?.filter((row) => idsList?.map((row) => row?.perfil_id)?.includes(row?.perfil_id))
-    ?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }));
+    ?.filter(({ perfil_id: pidc }) => idsList?.map(({ perfil_id: pidl }) => pidl)?.includes(pidc))
+    ?.map(({ perfil }) => ({ id: perfil?.id, label: perfil?.displayName, mail: perfil?.mail }));
 }

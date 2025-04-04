@@ -463,9 +463,10 @@ export function getInfoProcesso(item, params) {
           (item === 'hatribuicoes' && `/v2/processos/ht_atribuicoes/${idPerfilId}`) ||
           (item === 'hversoes' && `/v1/processos/versoes/${perfilId}?processoID=${params?.id}`) ||
           (item === 'hvisualizacoes' && `/v2/processos/visualizacoes/${perfilId}?processo_id=${params?.id}`) ||
+          (item === 'aceitar' && `/v2/processos/aceitar/${perfilId}/${params?.id}?&estado_id=${params?.estadoId}`) ||
+          (item === 'destinos' && `/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
           (item === 'destinosDesarquivamento' &&
             `/v1/arquivos/destinos/desarquivamento/v2/${perfilId}?processo_id=${params?.id}`) ||
-          (item === 'destinos' && `/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
           (item === 'confidencialidades' &&
             `/v2/processos/confidencialidades?perfil_cc_id=${perfilId}&processo_id=${params?.id}`) ||
           (item === 'resgatar' &&
@@ -474,10 +475,12 @@ export function getInfoProcesso(item, params) {
 
         if (apiUrl) {
           const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
-          if (item === 'resgatar') {
+          if (item === 'resgatar' || item === 'aceitar') {
             const processo = processarEstadoProcesso(response.data.objeto, perfilId);
             dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
           } else dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
+          if (params?.modo === 'serie')
+            dispatch(getInfoProcesso('destinos', { id: params?.id, estadoId: params?.estadoId }));
         }
       }
     } catch (error) {
@@ -639,8 +642,6 @@ export function updateItem(item, dados, params) {
           `${BASEURLDD}/v2/processos/pender/misto/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}`) ||
         (item === 'confidencialidade' &&
           `${BASEURLDD}/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
-        (item === 'aceitar' &&
-          `${BASEURLDD}/v2/processos/aceitar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
         (item === 'libertar' &&
           `${BASEURLDD}/v2/processos/abandonar/${perfilId}/${params?.id}?fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
         (item === 'cancelar' &&
@@ -656,13 +657,6 @@ export function updateItem(item, dados, params) {
       if (apiUrl) {
         const response = await axios.patch(apiUrl, dados, options);
         if (item === 'anexo') dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
-        if (item === 'aceitar') {
-          dispatch(slice.actions.aceitarSuccess({ ...params, perfilId }));
-          if (params?.modo === 'serie') {
-            dispatch(slice.actions.addItemProcesso({ item: 'atribuidoAMim', dados: true }));
-            dispatch(getInfoProcesso('destinos', { id: params?.id, estadoId: params?.estadoId }));
-          }
-        }
         if (params?.fillCredito)
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }

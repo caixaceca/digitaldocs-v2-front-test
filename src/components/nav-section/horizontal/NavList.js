@@ -18,34 +18,18 @@ NavList.propTypes = {
 
 export default function NavList({ data, depth, hasChildren }) {
   const menuRef = useRef(null);
-
   const navigate = useNavigate();
-
   const { pathname } = useLocation();
-
   const active = getActive(data.path, pathname);
-
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      handleClose();
-    }
+    if (open) setOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const handleClickItem = () => {
-    if (!hasChildren) {
-      navigate(data.path);
-    }
+    if (!hasChildren) navigate(data.path);
   };
 
   return (
@@ -70,8 +54,8 @@ export default function NavList({ data, depth, hasChildren }) {
           active={active}
           ref={menuRef}
           onClick={handleClickItem}
-          onMouseEnter={handleOpen}
-          onMouseLeave={handleClose}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
         />
       )}
 
@@ -86,8 +70,8 @@ export default function NavList({ data, depth, hasChildren }) {
             depth === 1 ? { vertical: 'top', horizontal: 'left' } : { vertical: 'center', horizontal: 'left' }
           }
           PaperProps={{
-            onMouseEnter: handleOpen,
-            onMouseLeave: handleClose,
+            onMouseEnter: () => setOpen(true),
+            onMouseLeave: () => setOpen(false),
           }}
         >
           <NavSubList data={data.children} depth={depth} />

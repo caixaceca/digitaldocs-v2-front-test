@@ -89,10 +89,10 @@ const slice = createSlice({
         const chave = `${objeto}-${acesso}`;
         if (!state.meusacessos.includes(chave)) state.meusacessos.push(chave);
 
+        if (chave === 'Todo-111') state.isAdmin = true;
         if (chave === 'auditoria-100') state.isAuditoria = true;
         if (chave === 'rececao-cartoes-110') state.confirmarCartoes = true;
         if (chave === 'arquivar-processo-110') state.arquivarProcessos = true;
-        if (chave === 'Todo-111' || chave === 'Todo-110') state.isAdmin = true;
       });
     },
 
@@ -161,7 +161,7 @@ export function geParamsUtil() {
 export function getFromParametrizacao(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
-    if(params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params.reset.val }));
+    if (params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params.reset.val }));
 
     try {
       const accessToken = await getAccessToken();

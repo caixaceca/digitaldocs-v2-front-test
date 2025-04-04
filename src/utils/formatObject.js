@@ -1,3 +1,8 @@
+// hooks
+import { applySort, getComparator } from '../hooks/useTable';
+
+// ----------------------------------------------------------------------
+
 export function findColaborador(mail, colaboradores) {
   const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
   return colaborador
@@ -43,16 +48,25 @@ export function subtractArrays(a1, a2) {
 
 // ----------------------------------------------------------------------
 
-export function transicoesList(transicoes, estados) {
-  return transicoes?.map((row) => ({
-    ...row,
-    estado_final: estados?.find(({ id }) => id === row.estado_final_id)?.nome || row.estado_final_id,
-    estado_inicial: estados?.find(({ id }) => id === row.estado_inicial_id)?.nome || row.estado_inicial_id,
-  }));
+export function transicoesList(transicoes, estados, label) {
+  const lista =
+    transicoes
+      ?.filter(({ modo }) => modo !== 'desarquivamento')
+      ?.map((row) => ({
+        ...row,
+        estado_final: estados?.find(({ id }) => id === row.estado_final_id)?.nome || row.estado_final_id,
+        estado_inicial: estados?.find(({ id }) => id === row.estado_inicial_id)?.nome || row.estado_inicial_id,
+      })) || [];
+  return applySort(
+    label ? lista?.map((row) => ({ id: row?.id, label: transicaoDesc(row) })) : lista,
+    getComparator('desc', 'label')
+  );
 }
 
 export function transicaoDesc(transicao) {
-  return transicao ? `${transicao?.modo}: ${transicao?.estado_inicial} » ${transicao?.estado_final}` : '';
+  return transicao
+    ? `${transicao?.modo}${transicao?.is_after_devolucao ? ' (DD)' : ''}: ${transicao?.estado_inicial} » ${transicao?.estado_final}`
+    : '';
 }
 
 // ----------------------------------------------------------------------

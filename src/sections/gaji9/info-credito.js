@@ -15,10 +15,10 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { noDados } from '../../utils/formatText';
+import { ptDate, ptDateTime } from '../../utils/formatTime';
+import { actionAcessoGaji9 } from '../../utils/validarAcesso';
 import { fCurrency, fPercent } from '../../utils/formatNumber';
-import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -37,7 +37,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter } from './applySortFilter';
 import { Resgisto } from '../parametrizacao/Detalhes';
-import { FiadoresForm, DataContrato } from './form-credito';
+import { IntervenienteForm, DataContrato } from './form-credito';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +49,8 @@ export default function InfoCredito() {
       title: 'Informações do Cliente',
       content: [
         { label: 'Nº de cliente', value: credito?.cliente },
-        { label: 'Conta DO', value: credito?.conta_do },
+        { label: 'Conta DO crédito', value: credito?.conta_do },
+        { label: 'Conta DO débito', value: credito?.conta_do_renda },
         {
           label: 'Tipo de titular',
           value: `${credito?.tipo_titular}${credito?.consumidor ? ' (Consumidor)' : ''}`,
@@ -70,7 +71,7 @@ export default function InfoCredito() {
         },
         { label: 'Nº de prestações', value: credito?.numero_prestacao },
         { label: 'Valor da prestação', value: fCurrency(credito?.valor_prestacao) },
-        { label: 'Valor 1ª prestação', value: fCurrency(credito?.valor_prestacao1) },
+        { label: 'Valor prestação sem desconto', value: fCurrency(credito?.valor_prestacao_sem_desconto) },
         { label: 'Vencimento da 1ª prestação', value: ptDate(credito?.data_vencimento_prestacao1) },
         { label: 'Prazo contratual', value: credito?.prazo_contratual },
         { label: 'Meses vencimento', value: credito?.meses_vencimento },
@@ -84,13 +85,12 @@ export default function InfoCredito() {
         { label: 'Taxa juro precário', color: '', value: fPercent(credito?.taxa_juro_precario) },
         { label: 'Taxa juro desconto', color: 'info', value: fPercent(credito?.taxa_Juro_desconto) },
         { label: 'Taxa TAEG', value: fPercent(credito?.taxa_taeg) },
-        { label: 'Taxa imposto de selo', value: fPercent(credito?.taxa_imposto_selo) },
         { label: 'Taxa comissão de abertura', value: fPercent(credito?.taxa_comissao_abertura) },
         { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
-        { label: 'Valor comissão', value: fCurrency(credito?.valor_comissao) },
-        { label: 'Valor imposto de selo', value: fCurrency(credito?.valor_imposto_selo) },
-        { label: 'Valor do juro', value: fCurrency(credito?.valor_juro) },
-        { label: 'Custo total', value: fCurrency(credito?.custo_total) },
+        { label: 'Valor total de comissões', value: fCurrency(credito?.valor_comissao) },
+        { label: 'Valor total de imposto selo', value: fCurrency(credito?.valor_imposto_selo) },
+        { label: 'Valor total de juros', value: fCurrency(credito?.valor_juro) },
+        { label: 'Custo total TAEG', value: fCurrency(credito?.custo_total) },
       ],
     },
     {
@@ -160,9 +160,10 @@ export default function InfoCredito() {
 
 // ----------------------------------------------------------------------
 
-TableInfoCredito.propTypes = { id: PropTypes.number, dados: PropTypes.array, tab: PropTypes.string };
+TableInfoCredito.propTypes = { params: PropTypes.object, dados: PropTypes.array };
 
-export function TableInfoCredito({ id, dados = [], tab }) {
+export function TableInfoCredito({ params, dados = [] }) {
+  const { contratado = false, id, tab } = params;
   const {
     page,
     order,
@@ -178,14 +179,11 @@ export function TableInfoCredito({ id, dados = [], tab }) {
   } = useTable({});
 
   const dispatch = useDispatch();
-  const [filter, setFilter] = useState(localStorage.getItem('filterParticipante') || '');
+  const [filter, setFilter] = useState(localStorage.getItem(`${tab}_form`) || '');
   const { isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
-    if (
-      tab === 'contratos' &&
-      (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CONTRATO']))
-    )
+    if (tab === 'contratos' && actionAcessoGaji9(utilizador, ['READ_CONTRATO']))
       dispatch(getFromGaji9('contratos', { id }));
   }, [dispatch, utilizador, tab, id]);
 
@@ -205,10 +203,14 @@ export function TableInfoCredito({ id, dados = [], tab }) {
     dispatch(setModal({ item, dados }));
   };
 
+  const downloadContrato = (codigo) => {
+    dispatch(getDocumento('contrato', { codigo, titulo: `CONTRATO: ${codigo}` }));
+  };
+
   return (
     <>
       <Card sx={{ p: 1 }}>
-        <SearchToolbarSimple item="filterParticipante" filter={filter} setFilter={setFilter} />
+        <SearchToolbarSimple item={`${tab}_form`} filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -220,7 +222,7 @@ export function TableInfoCredito({ id, dados = [], tab }) {
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(
                     (row, index) =>
                       (tab === 'contratos' && (
-                        <TableRow hover key={`participante_${index}`}>
+                        <TableRow hover key={`contratos_${index}`}>
                           <TableCell>{row?.codigo}</TableCell>
                           <TableCell>
                             {row?.minuta}
@@ -231,28 +233,17 @@ export function TableInfoCredito({ id, dados = [], tab }) {
                           <CellChecked check={row.ativo} />
                           <TableCell align="center" width={10}>
                             <Stack direction="row" spacing={0.75}>
-                              {(gestaoContrato(utilizador?._role) ||
-                                acessoGaji9(utilizador?.acessos, ['CREATE_CONTRATO'])) && (
-                                <DefaultAction label="EDITAR" onClick={() => openModal('form-participante', row)} />
+                              <DefaultAction small label="DOWNLOAD" onClick={() => downloadContrato(row?.codigo)} />
+                              {actionAcessoGaji9(utilizador, ['CREATE_CONTRATO']) && (
+                                <DefaultAction small label="EDITAR" onClick={() => openModal('data-contrato', row)} />
                               )}
-                              <DefaultAction
-                                label="DOWNLOAD"
-                                onClick={() =>
-                                  dispatch(
-                                    getDocumento('contrato', {
-                                      codigo: row?.codigo,
-                                      titulo: `CONTRATO: ${row?.codigo}`,
-                                    })
-                                  )
-                                }
-                              />
-                              <DefaultAction label="DETALHES" onClick={() => openModal('view-participante', row)} />
+                              <DefaultAction small label="DETALHES" onClick={() => openModal('view-contrato', row)} />
                             </Stack>
                           </TableCell>
                         </TableRow>
                       )) ||
                       (tab === 'garantias' && (
-                        <TableRow hover key={`participante_${index}`}>
+                        <TableRow hover key={`garantia_${index}`}>
                           <TableCell>{row?.tipo}</TableCell>
                           <TableCell>{row?.valor ? fCurrency(row?.valor) : noDados}</TableCell>
                           <TableCell>{row?.nota || noDados('--')}</TableCell>
@@ -263,7 +254,7 @@ export function TableInfoCredito({ id, dados = [], tab }) {
                           </TableCell>
                         </TableRow>
                       )) || (
-                        <TableRow hover key={`participante_${index}`}>
+                        <TableRow hover key={`interveniente_${index}`}>
                           <TableCell align="right">{row?.numero_ordem}</TableCell>
                           <TableCell>{row?.numero_entidade}</TableCell>
                           <TableCell>{row?.nome}</TableCell>
@@ -273,15 +264,13 @@ export function TableInfoCredito({ id, dados = [], tab }) {
                             {row?.entidade_representada_nome ? ` - ${row?.entidade_representada_nome}` : ''}
                           </TableCell>
                           <TableCell align="center" width={10}>
-                            {!row.mutuario &&
-                              (gestaoContrato(utilizador?._role) ||
-                                acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
-                                <DefaultAction
-                                  small
-                                  label="ELIMINAR"
-                                  onClick={() => openModal('eliminar-participante', row)}
-                                />
-                              )}
+                            {!contratado && !row.mutuario && actionAcessoGaji9(utilizador, ['CREATE_CREDITO']) && (
+                              <DefaultAction
+                                small
+                                label="ELIMINAR"
+                                onClick={() => openModal('eliminar-interveniente', row)}
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       )
@@ -306,25 +295,29 @@ export function TableInfoCredito({ id, dados = [], tab }) {
         )}
       </Card>
 
-      {modalGaji9 === 'form-participante' && (
-        <FiadoresForm dados={dados?.filter(({ mutuario }) => mutuario)} id={id} onCancel={() => openModal('', null)} />
+      {modalGaji9 === 'form-interveniente' && (
+        <IntervenienteForm
+          id={id}
+          onCancel={() => openModal('', null)}
+          dados={dados?.filter(({ mutuario, fiador }) => mutuario || fiador)}
+        />
       )}
       {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onCancel={() => openModal('', null)} />}
       {modalGaji9 === 'view-contrato' && <DetalhesGaji9 closeModal={() => openModal('', null)} item="contrato" />}
 
-      {modalGaji9 === 'eliminar-participante' && (
+      {modalGaji9 === 'eliminar-interveniente' && (
         <DialogConfirmar
           isSaving={isSaving}
-          desc="eliminar este participante"
+          desc="eliminar este interveniente"
           onClose={() => openModal('', null)}
           handleOk={() =>
             dispatch(
-              deleteItem('participantes', {
+              deleteItem('intervenientes', {
                 id,
                 getItem: 'credito',
+                msg: 'Interveniente eliminado',
                 numero: selectedItem?.participante_id,
                 afterSuccess: () => openModal('', null),
-                msg: 'Participante do crédito eliminado',
               })
             )
           }

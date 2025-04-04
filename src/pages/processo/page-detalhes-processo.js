@@ -7,11 +7,11 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { getProximoAnterior } from '../../utils/formatObject';
-import { findColaboradores, pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
+import { pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
 // redux
 import { useAcesso } from '../../hooks/useAcesso';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, updateItem, setModal } from '../../redux/slices/digitaldocs';
+import { getSuccess, getInfoProcesso } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -49,8 +49,9 @@ export default function PageProcesso() {
   const [params] = useSearchParams();
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
-  const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado } = useSelector((state) => state.parametrizacao);
+
+  const { perfilId } = useSelector((state) => state.intranet);
+  const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
   const { processos, done, pdfPreview, isOpenModal, isLoading, isLoadingFile } = useSelector(
     (state) => state.digitaldocs
   );
@@ -72,23 +73,14 @@ export default function PageProcesso() {
   const ultimaTransicao = useMemo(() => processo?.htransicoes?.[0] || null, [processo?.htransicoes]);
   const estadoId = useMemo(() => processo?.estado_processo?.estado_id || '', [processo?.estado_processo?.estado_id]);
 
-  const colaboradoresList = useMemo(
-    () => findColaboradores(colaboradores, colaboradoresEstado),
-    [colaboradores, colaboradoresEstado]
-  );
-
   const handleAceitar = useCallback(
-    (estadoId, modo) =>
-      dispatch(updateItem('aceitar', null, { id, fluxoId, estadoId, modo, msg: 'Processo aceitado' })),
-    [dispatch, fluxoId, id]
+    (estadoId, modo) => dispatch(getInfoProcesso('aceitar', { id, estadoId, modo, msg: 'Processo aceitado' })),
+    [dispatch, id]
   );
 
   const tabsList = useMemo(() => {
     const tabs = [];
-    const { total, fora } = numAnexos(processo);
     tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
-
-    if (total > 2 || fora) tabs.push({ value: 'Anexos', component: <TodosAnexos /> });
 
     if (processo?.credito)
       tabs.push({
@@ -135,6 +127,7 @@ export default function PageProcesso() {
 
     if (processo) {
       tabs.push(
+        { value: 'Anexos', component: <TodosAnexos /> },
         { value: 'Retenções', component: <TableDetalhes id={id} item="hretencoes" /> },
         { value: 'Pendências', component: <TableDetalhes id={id} item="hpendencias" /> },
         { value: 'Atribuições', component: <TableDetalhes id={id} item="hatribuicoes" /> },
@@ -202,7 +195,7 @@ export default function PageProcesso() {
                     <DefaultAction label="PRÓXIMO" onClick={() => irParaProcesso(proxAnt?.proximo)} />
                   )}
                   {processo?.status === 'Arquivado' ? (
-                    <>{acessoDesarquivar && <Desarquivar id={id} colaboradoresList={colaboradoresList} />}</>
+                    <>{acessoDesarquivar ? <Desarquivar id={id} /> : ''}</>
                   ) : (
                     <>
                       {/* Transição em série */}
@@ -228,9 +221,9 @@ export default function PageProcesso() {
                             !estado?.is_lock &&
                             !processo?.pendente &&
                             !ultimaTransicao?.resgate &&
+                            !ultimaTransicao?.pareceres?.length &&
                             perfilId === ultimaTransicao?.perfil_id &&
                             pertencoEstadoId(meusAmbientes, ultimaTransicao?.estado_inicial_id) &&
-                            !ultimaTransicao?.pareceres?.length &&
                             !estado?.pareceres?.some((row) => row?.parecer_em) && (
                               <Resgatar dados={{ id, fluxoId, estadoId: ultimaTransicao?.estado_inicial_id }} />
                             )}
@@ -267,48 +260,15 @@ export default function PageProcesso() {
           <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         </Card>
 
-        {isOpenModal === 'editar-processo' && (
-          <ProcessoForm
-            processo={processo}
-            ambientId={estadoId}
-            onCancel={() => dispatch(setModal({ modal: '', dados: null }))}
-          />
-        )}
+        {isOpenModal === 'editar-processo' && <ProcessoForm processo={processo} ambientId={estadoId} />}
 
         {pdfPreview && (
           <DialogPreviewDoc
-            url={pdfPreview?.url}
-            titulo={pdfPreview?.nome}
-            isLoading={!!isLoadingFile}
             onClose={() => dispatch(getSuccess({ item: 'pdfPreview', dados: null }))}
+            params={{ url: pdfPreview?.url, titulo: pdfPreview?.nome, isLoading: !!isLoadingFile }}
           />
         )}
       </Container>
     </Page>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function numAnexos(processo) {
-  let total = 0;
-  let fora = false;
-  if (processo?.anexos) total += processo.anexos?.length;
-  if (processo?.htransicoes) {
-    processo?.htransicoes.forEach((transicao) => {
-      if (transicao?.anexos) {
-        fora = true;
-        total += transicao.anexos?.length;
-      }
-      if (transicao?.pareceres) {
-        transicao.pareceres.forEach((parecer) => {
-          if (parecer?.anexos) {
-            fora = true;
-            total += parecer.anexos?.length;
-          }
-        });
-      }
-    });
-  }
-  return { total, fora };
 }

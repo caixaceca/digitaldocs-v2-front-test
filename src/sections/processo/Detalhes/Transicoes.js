@@ -103,7 +103,7 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
         {addConector && <TimelineConnector sx={{ mb: -2.5 }} />}
       </TimelineSeparator>
       <TimelineContent sx={{ pr: 0, pl: { xs: 1, sm: 2 } }}>
-        <Paper sx={{ boxShadow: (theme) => theme.customShadows.z8 }}>
+        <Paper sx={{ boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Paper
             sx={{
               p: { xs: 1, md: 2 },

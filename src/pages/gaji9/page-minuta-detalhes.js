@@ -78,7 +78,7 @@ export default function PageMinutaDetalhes() {
   });
 
   return (
-    <Page title="Estado | DigitalDocs">
+    <Page title="Minuta | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           tabsList={tabsList}
@@ -131,7 +131,7 @@ export default function PageMinutaDetalhes() {
                   </>
                 )}
                 {minuta?.clausulas?.length > 0 && currentTab !== 'Tipos de garantia' && (
-                  <DefaultAction button icon="pdf" label="Previsualizar" onClick={() => handleAction('preview')} />
+                  <DefaultAction button label="Pré-visualizar" onClick={() => handleAction('preview')} />
                 )}
               </Stack>
             )
@@ -164,9 +164,11 @@ export default function PageMinutaDetalhes() {
 
           {(isLoadingDoc || previewFile) && (
             <DialogPreviewDoc
-              url={previewFile}
-              isLoading={isLoadingDoc}
-              titulo={`MINUTA: ${minuta?.titulo} - ${minuta?.subtitulo}`}
+              params={{
+                url: previewFile,
+                isLoading: isLoadingDoc,
+                titulo: `MINUTA: ${minuta?.titulo} - ${minuta?.subtitulo}`,
+              }}
               onClose={() => dispatch(getSuccess({ item: 'previewFile', dados: '' }))}
             />
           )}

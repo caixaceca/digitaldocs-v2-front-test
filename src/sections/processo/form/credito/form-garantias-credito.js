@@ -9,7 +9,6 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { updateDados } from '../../../../redux/slices/stepper';
@@ -25,6 +24,7 @@ import {
   RHFAutocompleteObj,
 } from '../../../../components/hook-form';
 import GridItem from '../../../../components/GridItem';
+import { SemDados } from '../../../../components/Panel';
 import { DialogTitleAlt } from '../../../../components/CustomDialog';
 import { ButtonsStepper, DefaultAction, DialogButons } from '../../../../components/Actions';
 //
@@ -142,12 +142,7 @@ function FormGarantias({ dados }) {
   return (
     <Stack spacing={3} sx={{ pt: 3 }}>
       {fields?.length === 0 ? (
-        <Typography
-          variant="body2"
-          sx={{ textAlign: 'center', fontStyle: 'italic', p: 3, bgcolor: 'background.neutral', borderRadius: 1 }}
-        >
-          Ainda não foi adicionada nenhuma garantia...
-        </Typography>
+        <SemDados message="Ainda não foi adicionada nenhuma garantia..." />
       ) : (
         <Stack spacing={3} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
           {fields.map((item, index) => (

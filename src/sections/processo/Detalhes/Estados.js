@@ -165,8 +165,9 @@ export function Info({ dados, viewAnexo, colaboradores }) {
 
   return (
     <>
+      {dados?.motivo && <Typography sx={{ textAlign: 'justify', pt: 1.5 }}>Motivo: {dados?.motivo}</Typography>}
       {(dados?.observacao || dados?.descritivo) && !dados?.temPareceres && (
-        <Typography sx={{ textAlign: 'justify', pt: 2 }}>
+        <Typography sx={{ textAlign: 'justify', pt: 1 }}>
           {newLineText(dados?.observacao || dados?.descritivo)}
         </Typography>
       )}

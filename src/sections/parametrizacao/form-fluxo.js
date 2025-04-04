@@ -19,8 +19,6 @@ import DialogContent from '@mui/material/DialogContent';
 import { fillData } from '../../utils/formatTime';
 import { fluxoFixo } from '../../utils/validarAcesso';
 import { transicoesList } from '../../utils/formatObject';
-// hooks
-import { applySort, getComparator } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { getFromParametrizacao, createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
@@ -293,18 +291,7 @@ export function ChecklistForm({ fluxo, onCancel }) {
     dispatch(getFromParametrizacao('documentos'));
   }, [dispatch]);
 
-  const listaTransicoes = useMemo(
-    () =>
-      applySort(
-        transicoesList(fluxo?.transicoes, estados)?.map((row) => ({
-          id: row?.id,
-          label: `${row?.modo}${row?.is_after_devolucao ? ' (DD)' : ''}: ${row?.estado_inicial} » ${row?.estado_final}`,
-        })),
-        getComparator('desc', 'label')
-      ),
-    [fluxo?.transicoes, estados]
-  );
-
+  const listaTransicoes = useMemo(() => transicoesList(fluxo?.transicoes, estados, true), [fluxo?.transicoes, estados]);
   const formSchema = Yup.object().shape({
     tipo_documento: isEdit && Yup.mixed().required().label('Documento'),
     documentos: !isEdit && Yup.array(Yup.object({ tipo_documento: Yup.mixed().required().label('Documento') })),
@@ -357,7 +344,7 @@ export function ChecklistForm({ fluxo, onCancel }) {
           {!isEdit && (
             <AddItem
               dados={{ small: true }}
-              handleClick={() => append({ tipo_documento: null, transicao: null, obrigatorio: false })}
+              onClick={() => append({ tipo_documento: null, transicao: null, obrigatorio: false })}
             />
           )}
         </Stack>
@@ -542,7 +529,7 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
           {!isEdit && (
             <AddItem
               dados={{ small: true }}
-              handleClick={() => append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' })}
+              onClick={() => append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' })}
             />
           )}
         </Stack>

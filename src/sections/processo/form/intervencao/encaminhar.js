@@ -12,7 +12,6 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
-import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -85,22 +84,22 @@ export default function EncaminharStepper({ title, destinos, gerencia = false, o
                 }}
               />
             )}
-            <Fechar handleClick={() => onClose()} />
+            <Fechar onClick={() => onClose()} />
           </Stack>
         </Stack>
+        {!inParalelo && <Steps activeStep={activeStep} steps={['Destino', 'Atribuir/Anexos']} sx={{ mt: 2, mb: 0 }} />}
       </DialogTitle>
       <DialogContent>
-        {!inParalelo && <Steps activeStep={activeStep} steps={['Destino', 'Outros']} />}
-        {activeStep === 0 && (
-          <>
-            {inParalelo ? (
-              <EncaminharEmParalelo destinos={destinosParalelo} onClose={onClose} />
-            ) : (
-              <EncaminharEmSerie title={title} onClose={onClose} gerencia={gerencia} destinos={destinosSingulares} />
-            )}
-          </>
-        )}
-        {activeStep === 1 && <OutrosEmSerie title={title} />}
+        <Box sx={{ pt: 1 }}>
+          {activeStep === 0 && (
+            <>
+              {(inParalelo && <EncaminharEmParalelo destinos={destinosParalelo} onClose={onClose} />) || (
+                <EncaminharEmSerie title={title} onClose={onClose} gerencia={gerencia} destinos={destinosSingulares} />
+              )}
+            </>
+          )}
+          {activeStep === 1 && <OutrosEmSerie title={title} />}
+        </Box>
       </DialogContent>
     </Dialog>
   );
@@ -139,10 +138,14 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
   const defaultValues = useMemo(
     () => ({
       mobs: dadosStepper?.mobs || '',
-      anexos: dadosStepper?.anexos || [],
       parecer: dadosStepper?.parecer || null,
       noperacao: dadosStepper?.noperacao || '',
       observacao: dadosStepper?.observacao || '',
+      confidencial: dadosStepper?.confidencial || false,
+      perfis_incluidos: dadosStepper?.perfis_incluidos || [],
+      perfis_excluidos: dadosStepper?.perfis_excluidos || [],
+      estados_incluidos: dadosStepper?.estados_incluidos || [],
+      estados_excluidos: dadosStepper?.estados_excluidos || [],
       motivo_devolucao: dadosStepper?.motivo_devolucao || null,
       estado: dadosStepper?.estado || (destinos?.length === 1 && destinos?.[0]) || null,
     }),
@@ -170,8 +173,6 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
     dispatch(updateDados({ forward: true, dados: values }));
   };
 
-  const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
-
   useEffect(() => {
     if (values?.estado?.estado_final_id) {
       setValue('perfil', null);
@@ -183,7 +184,7 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={(parecer && numOperacao && 6) || ((parecer || numOperacao) && 8) || 12}>
-          <RHFAutocompleteObj name="estado" label="Estado" disableClearable options={destinos} />
+          <RHFAutocompleteObj dc name="estado" label="Estado" options={destinos} />
         </Grid>
         {aberturaSemEntGer ? (
           <Grid item xs={12}>
@@ -197,12 +198,12 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
         ) : (
           <>
             {parecer && (
-              <Grid item xs={12} sm={numOperacao ? 6 : 12} md={numOperacao ? 3 : 4}>
+              <Grid item xs={numOperacao ? 6 : 12} md={numOperacao ? 3 : 4}>
                 <RHFAutocompleteSmp label="Parecer" name="parecer" options={['Favorável', 'Não favorável']} />
               </Grid>
             )}
             {numOperacao && (
-              <Grid item xs={12} sm={parecer ? 6 : 12} md={parecer ? 3 : 4}>
+              <Grid item xs={parecer ? 6 : 12} md={parecer ? 3 : 4}>
                 <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
               </Grid>
             )}
@@ -212,10 +213,23 @@ export function EncaminharEmSerie({ title, destinos, gerencia = false, onClose }
               </Grid>
             )}
             <Grid item xs={12}>
-              <RHFTextField multiline rows={8} name="observacao" label="Observação" />
+              <RHFTextField multiline rows={6} name="observacao" label="Observação" />
             </Grid>
             <Grid item xs={12}>
-              <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+              <Accordion
+                expanded={values?.confidencial}
+                onChange={() => setValue('confidencial', !values?.confidencial)}
+              >
+                <AccordionSummary sx={{ py: 0.5, typography: 'body2' }}>Confidencialidade</AccordionSummary>
+                <AccordionDetails sx={{ pt: 2 }}>
+                  <Confidencialidade
+                    perfisIncluidos="perfis_incluidos"
+                    perfisExcluidos="perfis_excluidos"
+                    estadosIncluidos="estados_incluidos"
+                    estadosExcluidos="estados_excluidos"
+                  />
+                </AccordionDetails>
+              </Accordion>
             </Grid>
           </>
         )}
@@ -236,71 +250,54 @@ export function OutrosEmSerie({ title }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { colaboradoresEstado } = useSelector((state) => state.parametrizacao);
-  const criador = useMemo(
-    () => colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
-    [colaboradores, processo?.criador]
-  );
   const colaboradoresList = useMemo(
     () => findColaboradores(colaboradores, colaboradoresEstado),
     [colaboradores, colaboradoresEstado]
   );
 
-  const formSchema = Yup.object().shape({
-    atribuir: Yup.boolean(),
-    colaborador: Yup.mixed().when(['atribuir'], {
-      is: (atribuir) => atribuir,
-      then: () => Yup.mixed().required().label('Colaborador'),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
-  });
+  const formSchema = Yup.object().shape({});
 
   const defaultValues = useMemo(
     () => ({
-      atribuir: dadosStepper?.atribuir || false,
-      colaborador: dadosStepper?.colaborador || null,
-      confidencial: dadosStepper?.confidencial || false,
-      perfis_incluidos: dadosStepper?.perfis_incluidos || [],
-      perfis_excluidos: dadosStepper?.perfis_excluidos || [],
-      estados_incluidos: dadosStepper?.estados_incluidos || [],
-      estados_excluidos: dadosStepper?.estados_excluidos || [],
+      anexos: dadosStepper?.anexos || [],
+      colaborador:
+        colaboradoresList?.find(({ id }) => id === dadosStepper?.colaborador?.id) ||
+        colaboradoresList?.find(({ mail }) => mail?.toLowerCase() === processo?.criador?.toLowerCase()) ||
+        null,
     }),
-    [dadosStepper]
+    [dadosStepper, processo?.criador, colaboradoresList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, setValue, handleSubmit } = methods;
   const values = watch();
 
+  const { dropMultiple, removeOne } = useAnexos('', 'anexos', setValue, values?.anexos);
+
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-      formData.append('noperacao', dadosStepper?.noperacao);
-      formData.append('observacao', dadosStepper?.observacao);
       formData.append('transicao_id ', dadosStepper?.estado?.id);
+      if (dadosStepper?.noperacao) formData.append('noperacao', dadosStepper?.noperacao);
+      if (dadosStepper?.observacao) formData.append('observacao', dadosStepper?.observacao);
       if (dadosStepper?.motivo_devolucao?.id) formData.append('motivo_id ', dadosStepper?.motivo_devolucao?.id);
 
       if (dadosStepper?.parecer === 'Favorável') formData.append('parecer_favoravel', true);
       else if (dadosStepper?.parecer === 'Não favorável') formData.append('parecer_favoravel', false);
 
-      if (values.atribuir && values?.colaborador) formData.append('perfil_afeto_id', values?.colaborador?.id);
-      else if (!!criador && title === 'DEVOLVER' && dadosStepper?.estado?.label?.includes('Atendimento'))
-        formData.append('perfil_afeto_id', criador?.perfil_id);
-
-      if (values?.confidencial) {
-        values?.perfis_incluidos?.forEach((item) => formData.append('confidencia.perfis_incluidos', item?.id));
-        values?.perfis_excluidos?.forEach((item) => formData.append('confidencia.perfis_excluidos', item?.id));
-        values?.estados_incluidos?.forEach((item) => formData.append('confidencia.estados_incluidos', item?.id));
-        values?.estados_excluidos?.forEach((item) => formData.append('confidencia.estados_excluidos', item?.id));
+      if (dadosStepper?.confidencial) {
+        dadosStepper?.perfis_incluidos?.forEach((item) => formData.append('confidencia.perfis_incluidos', item?.id));
+        dadosStepper?.perfis_excluidos?.forEach((item) => formData.append('confidencia.perfis_excluidos', item?.id));
+        dadosStepper?.estados_incluidos?.forEach((item) => formData.append('confidencia.estados_incluidos', item?.id));
+        dadosStepper?.estados_excluidos?.forEach((item) => formData.append('confidencia.estados_excluidos', item?.id));
       }
-      await dadosStepper?.anexos?.forEach((row) => formData.append('anexos', row));
+
+      if (values?.colaborador) formData.append('perfil_afeto_id', values?.colaborador?.id);
+      await values?.anexos?.forEach((row) => formData.append('anexos', row));
 
       const params = { mfd: true, id: processo.id, estadoId: processo?.estado_processo?.estado_id };
-      dispatch(
-        updateItem('encaminhar serie', formData, {
-          ...params,
-          msg: title === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado',
-        })
-      );
+      const msg = title === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado';
+      dispatch(updateItem('encaminhar serie', formData, { ...params, msg }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -309,35 +306,17 @@ export function OutrosEmSerie({ title }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        {/* CONFIDENCILAIDADE */}
-        <Accordion expanded={values?.confidencial} onChange={() => setValue('confidencial', !values?.confidencial)}>
-          <AccordionSummary sx={{ py: 0.5, typography: 'body2' }}>Confidencialidade</AccordionSummary>
-          <AccordionDetails sx={{ pt: 2 }}>
-            <Confidencialidade
-              perfisIncluidos="perfis_incluidos"
-              perfisExcluidos="perfis_excluidos"
-              estadosIncluidos="estados_incluidos"
-              estadosExcluidos="estados_excluidos"
-            />
-          </AccordionDetails>
-        </Accordion>
-
-        {/* ATRIBUIÇÃO */}
-        <Accordion expanded={values?.atribuir} onChange={() => setValue('atribuir', !values?.atribuir)}>
-          <AccordionSummary sx={{ py: 0.5, typography: 'body2' }}>Atribuir processo</AccordionSummary>
-          <AccordionDetails sx={{ pt: 2 }}>
-            <RHFAutocompleteObj name="colaborador" label="Colaborador" options={colaboradoresList} />
-          </AccordionDetails>
-        </Accordion>
+        <RHFAutocompleteObj name="colaborador" label="Atribuir processo a" options={colaboradoresList} />
+        <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
       </Stack>
       <ButtonsStepper
         label="Enviar"
+        isSaving={isSaving}
         labelCancel="Voltar"
         onCancel={() => {
           dispatch(backStep());
           dispatch(updateDados({ dados: values }));
         }}
-        isSaving={isSaving}
       />
     </FormProvider>
   );
@@ -394,8 +373,8 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
                     <RHFAutocompleteObj
+                      dc
                       label="Estado"
-                      disableClearable
                       options={destinos}
                       name={`destinos_par[${index}].estado`}
                       getOptionDisabled={(option) => values.destinos_par.some(({ estado }) => estado?.id === option.id)}
@@ -454,54 +433,48 @@ export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIn
   const { estados } = useSelector((state) => state.parametrizacao);
 
   return (
-    <>
-      <Divider sx={{ mb: 1.5 }} textAlign="left">
-        <Typography variant="overline">ATRIBUIR ACESSO</Typography>
-      </Divider>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+    <Stack direction="column" spacing={2}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
         <RHFAutocompleteObj
           small
           multiple
           limitTags={1}
-          label="Estados"
           disableCloseOnSelect
           name={estadosIncluidos}
+          label="Estados com acesso"
           options={estados?.map((row) => ({ id: row?.id, label: row?.nome }))}
         />
         <RHFAutocompleteObj
           small
           multiple
           limitTags={1}
-          disableCloseOnSelect
-          label="Colaboradores"
-          name={perfisIncluidos}
-          options={colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }))}
-        />
-      </Stack>
-      <Divider sx={{ mt: 3, mb: 1.5 }} textAlign="left">
-        <Typography variant="overline">REMOVER ACESSO</Typography>
-      </Divider>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
-        <RHFAutocompleteObj
-          small
-          multiple
-          limitTags={1}
-          label="Estados"
           disableCloseOnSelect
           name={estadosExcluidos}
+          label="Estados sem acesso"
           options={estados?.map((row) => ({ id: row?.id, label: row?.nome }))}
+        />
+      </Stack>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+        <RHFAutocompleteObj
+          small
+          multiple
+          limitTags={1}
+          disableCloseOnSelect
+          name={perfisIncluidos}
+          label="Colaboradores com acesso"
+          options={colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }))}
         />
         <RHFAutocompleteObj
           small
           multiple
           limitTags={1}
           disableCloseOnSelect
-          label="Colaboradores"
           name={perfisExcluidos}
+          label="Colaboradores sem acesso"
           options={colaboradores?.map((row) => ({ id: row?.perfil_id, label: row?.perfil?.displayName }))}
         />
       </Stack>
-    </>
+    </Stack>
   );
 }
 
