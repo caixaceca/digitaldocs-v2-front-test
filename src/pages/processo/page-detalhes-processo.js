@@ -21,8 +21,8 @@ import { useProcesso, useIdentificacao } from '../../hooks/useProcesso';
 // components
 import Page from '../../components/Page';
 import { TabCard } from '../../components/TabsWrapper';
-import { DefaultAction } from '../../components/Actions';
 import DialogPreviewDoc from '../../components/CustomDialog';
+import { DefaultAction, Voltar } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 // sections
 import {
@@ -185,15 +185,10 @@ export default function PageProcesso() {
             { name: identificador },
           ]}
           action={
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 3, md: 4 }} alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Voltar fab />
               {processo && (
                 <Stack spacing={0.5} direction={{ xs: 'row' }}>
-                  {proxAnt?.anterior && (
-                    <DefaultAction label="ANTERIOR" onClick={() => irParaProcesso(proxAnt?.anterior)} />
-                  )}
-                  {proxAnt?.proximo && (
-                    <DefaultAction label="PRÓXIMO" onClick={() => irParaProcesso(proxAnt?.proximo)} />
-                  )}
                   {processo?.status === 'Arquivado' ? (
                     <>{acessoDesarquivar ? <Desarquivar id={id} /> : ''}</>
                   ) : (
@@ -259,6 +254,25 @@ export default function PageProcesso() {
           <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
           <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         </Card>
+
+        {(proxAnt?.anterior || proxAnt?.proximo) && (
+          <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ mt: 3 }}>
+            <DefaultAction
+              small
+              button
+              label="Anterior"
+              disabled={!proxAnt?.anterior}
+              onClick={() => irParaProcesso(proxAnt?.anterior)}
+            />
+            <DefaultAction
+              small
+              button
+              label="Próximo"
+              disabled={!proxAnt?.proximo}
+              onClick={() => irParaProcesso(proxAnt?.proximo)}
+            />
+          </Stack>
+        )}
 
         {isOpenModal === 'editar-processo' && <ProcessoForm processo={processo} ambientId={estadoId} />}
 

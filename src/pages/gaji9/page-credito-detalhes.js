@@ -67,6 +67,7 @@ export default function PageCreditoDetalhes() {
     <Page title="Crédito | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
+          voltar
           tabsList={tabsList}
           currentTab={currentTab}
           changeTab={setCurrentTab}

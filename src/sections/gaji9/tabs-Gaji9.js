@@ -225,7 +225,7 @@ function EstadoMinuta() {
       size="small"
       disableClearable
       value={estadoMinutas || null}
-      sx={{ minWidth: { md: 150 } }}
+      sx={{ minWidth: { xs: 130, md: 150 } }}
       options={['Em análise', 'Em vigor', 'Revogado']}
       renderInput={(params) => <TextField {...params} label="Estado" />}
       onChange={(event, newValue) => {

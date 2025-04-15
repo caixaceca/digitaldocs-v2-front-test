@@ -18,6 +18,7 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.codigo && normalizeText(row?.codigo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.titulo && normalizeText(row?.titulo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.sufixo && normalizeText(row?.sufixo).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
         (row?.prefixo && normalizeText(row?.prefixo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.subtitulo && normalizeText(row?.subtitulo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.componente && normalizeText(row?.componente).indexOf(normalizeText(filter)) !== -1) ||
@@ -25,6 +26,7 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1) ||
         (row?.tipo_titular && normalizeText(row?.tipo_titular).indexOf(normalizeText(filter)) !== -1) ||
         (row?.tipo_conteudo && normalizeText(row?.tipo_conteudo).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.numero_proposta && normalizeText(row?.numero_proposta).indexOf(normalizeText(filter)) !== -1) ||
         (row?.numero_entidade && normalizeText(row?.numero_entidade).indexOf(normalizeText(filter)) !== -1) ||
         (row?.utilizador_email && normalizeText(row?.utilizador_email).indexOf(normalizeText(filter)) !== -1)
     );

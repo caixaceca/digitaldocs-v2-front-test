@@ -291,7 +291,7 @@ PropostaForm.propTypes = { onCancel: PropTypes.func };
 
 export function PropostaForm({ onCancel }) {
   const dispatch = useDispatch();
-  const { isSaving } = useSelector((state) => state.gaji9);
+  const { isLoading } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({ proposta: Yup.number().positive().integer().label('Nº de proposta') });
   const defaultValues = useMemo(() => ({ proposta: '', credibox: false }), []);
@@ -314,7 +314,7 @@ export function PropostaForm({ onCancel }) {
               <RHFSwitch name="credibox" label="Credibox" />
             </Stack>
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} label="Carregar" />
+          <DialogButons isSaving={isLoading} onCancel={onCancel} label="Carregar" />
         </FormProvider>
       </DialogContent>
     </Dialog>

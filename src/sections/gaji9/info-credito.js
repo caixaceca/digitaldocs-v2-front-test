@@ -6,6 +6,7 @@ import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Divider from '@mui/material/Divider';
+import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -42,7 +43,7 @@ import { IntervenienteForm, DataContrato } from './form-credito';
 // ----------------------------------------------------------------------
 
 export default function InfoCredito() {
-  const { credito } = useSelector((state) => state.gaji9);
+  const { credito, isLoading } = useSelector((state) => state.gaji9);
 
   const sections = [
     {
@@ -110,56 +111,60 @@ export default function InfoCredito() {
 
   return (
     <Stack spacing={3} useFlexGap flexWrap="wrap" direction="row" alignItems="stretch">
-      {sections.map((section, index) => (
-        <Card
-          key={index}
-          sx={{
-            maxWidth: '100%',
-            flex: { xs: '1 1 calc(100% - 16px)', md: '1 1 calc(50% - 16px)', xl: '1 1 calc(33.333% - 16px)' },
-          }}
-        >
-          <CardHeader title={section.title} sx={{ color: 'primary.main' }} />
-          <CardContent sx={{ pt: 1 }}>
-            <Divider sx={{ mb: 2 }} />
-            <Stack spacing={1}>
-              {section.content.map(({ value, label }, idx) => (
-                <Stack
-                  key={idx}
-                  useFlexGap
-                  direction="row"
-                  flexWrap="wrap"
-                  alignItems="center"
-                  sx={{ color: !value && 'text.disabled' }}
-                >
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {label}:&nbsp;
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: !value && 'italic',
-                      color: (label === 'Email' || label === 'Morada') && !value && 'error.main',
-                    }}
+      {!credito && isLoading ? (
+        <Skeleton variant="text" sx={{ width: 1, height: 660, transform: 'scale(1)' }} />
+      ) : (
+        sections?.map((section, index) => (
+          <Card
+            key={index}
+            sx={{
+              maxWidth: '100%',
+              flex: { xs: '1 1 calc(100% - 16px)', md: '1 1 calc(50% - 16px)', xl: '1 1 calc(33.333% - 16px)' },
+            }}
+          >
+            <CardHeader title={section.title} sx={{ color: 'primary.main' }} />
+            <CardContent sx={{ pt: 1 }}>
+              <Divider sx={{ mb: 2 }} />
+              <Stack spacing={1}>
+                {section.content.map(({ value, label }, idx) => (
+                  <Stack
+                    key={idx}
+                    useFlexGap
+                    direction="row"
+                    flexWrap="wrap"
+                    alignItems="center"
+                    sx={{ color: !value && 'text.disabled' }}
                   >
-                    {value || '(Não definido)'}
-                  </Typography>
-                </Stack>
-              ))}
-              {section.title === 'Informações do Processo' && (
-                <List>
-                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                    <Typography variant="subtitle1">Registo</Typography>
-                  </ListItem>
-                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
-                    <Resgisto label="Criado" por={credito?.criado_por} em={credito?.criado_em} />
-                    <Resgisto label="Modificado" em={credito?.modificado_em} por={credito?.modificado_por} />
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {label}:&nbsp;
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontStyle: !value && 'italic',
+                        color: (label === 'Email' || label === 'Morada') && !value && 'error.main',
+                      }}
+                    >
+                      {value || '(Não definido)'}
+                    </Typography>
                   </Stack>
-                </List>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
-      ))}
+                ))}
+                {section.title === 'Informações do Processo' && (
+                  <List>
+                    <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+                      <Typography variant="subtitle1">Registo</Typography>
+                    </ListItem>
+                    <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
+                      <Resgisto label="Criado" por={credito?.criado_por} em={credito?.criado_em} />
+                      <Resgisto label="Modificado" em={credito?.modificado_em} por={credito?.modificado_por} />
+                    </Stack>
+                  </List>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </Stack>
   );
 }

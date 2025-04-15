@@ -1,14 +1,15 @@
 import PropTypes from 'prop-types';
 // @mui
-import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 // utils
 import { setItemValue } from '../utils/formatObject';
 //
+import { Voltar } from './Actions';
 import { TabsWrapperStyle } from './Panel';
 
 // ----------------------------------------------------------------------
@@ -28,26 +29,34 @@ const TabsWrapperStyleSimple = styled('div')(({ theme }) => ({
 
 TabsWrapper.propTypes = {
   tab: PropTypes.string,
+  voltar: PropTypes.bool,
   title: PropTypes.string,
   changeTab: PropTypes.func,
   tabsList: PropTypes.array,
   currentTab: PropTypes.string,
 };
 
-export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab }) {
+export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab, voltar = false }) {
   return (
-    <Card sx={{ mb: 3, height: 95, position: 'relative' }}>
-      <Box sx={{ px: 2, py: 0.88, color: 'common.white', backgroundColor: (theme) => theme.palette.primary.main }}>
+    <Card sx={{ mb: 3, position: 'relative' }}>
+      <Stack
+        spacing={1}
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{ px: 2, mb: '42px', py: 1, minHeight: 50, color: 'common.white', bgcolor: 'primary.main' }}
+      >
         <Typography variant="h5">{title}</Typography>
-      </Box>
+        {voltar && <Voltar />}
+      </Stack>
       <TabsWrapperStyle>
         <Tabs
           value={currentTab}
           allowScrollButtonsMobile
           onChange={(event, newValue) => setItemValue(newValue, changeTab, tab)}
         >
-          {tabsList.map((tab) => (
-            <Tab key={tab?.value} sx={{ px: 0.64, py: 1.5 }} value={tab?.value} label={tab?.label || tab?.value} />
+          {tabsList.map(({ value, label }) => (
+            <Tab key={value} sx={{ px: 0.64, pb: 1.5, pt: 1.75, mt: 0.25 }} value={value} label={label || value} />
           ))}
         </Tabs>
       </TabsWrapperStyle>

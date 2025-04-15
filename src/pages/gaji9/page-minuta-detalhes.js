@@ -81,6 +81,7 @@ export default function PageMinutaDetalhes() {
     <Page title="Minuta | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
+          voltar
           tabsList={tabsList}
           currentTab={currentTab}
           changeTab={setCurrentTab}

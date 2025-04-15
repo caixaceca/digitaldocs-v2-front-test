@@ -20,7 +20,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, setModal } from '../../redux/slices/gaji9';
+import { getFromGaji9, getSuccess, setModal } from '../../redux/slices/gaji9';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
@@ -62,6 +62,7 @@ export default function TableCredito() {
   }, [balcao, balcoes, cc?.uo, setBalcao]);
 
   useEffect(() => {
+    dispatch(getSuccess({ item: 'credito', dados: null }));
     if (balcao?.id) dispatch(getFromGaji9('creditos', { balcao: balcao.id, resetLista: true }));
   }, [dispatch, balcao?.id]);
 
@@ -97,8 +98,9 @@ export default function TableCredito() {
                 onSort={onSort}
                 orderBy={orderBy}
                 headLabel={[
+                  { id: 'codigo', label: 'Código' },
+                  { id: 'numero_proposta', label: 'Nº proposta' },
                   { id: 'cliente', label: 'Cliente' },
-                  { id: 'titular	', label: 'Titular' },
                   { id: 'tipo_titular	', label: 'Tipo titular' },
                   { id: 'componente', label: 'Componente' },
                   { id: 'finalidade', label: 'Finalidade' },
@@ -108,12 +110,15 @@ export default function TableCredito() {
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={7} />
+                  <SkeletonTable row={10} column={8} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`credito_${index}`}>
-                      <TableCell>{row?.cliente || noDados('Não definido')}</TableCell>
-                      <TableCell>{row?.titular}</TableCell>
+                      <TableCell>{row?.codigo || noDados('Não definido')}</TableCell>
+                      <TableCell>{row?.numero_proposta || noDados('Não definido')}</TableCell>
+                      <TableCell>
+                        {row?.cliente} - {row?.titular}
+                      </TableCell>
                       <TableCell>
                         {row?.tipo_titular}
                         {row?.consumidor ? ' (Consumidor)' : ''}

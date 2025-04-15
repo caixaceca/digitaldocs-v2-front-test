@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
@@ -31,6 +32,7 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import { getFileThumb } from '../utils/formatFile';
 // hooks
 import useToggle from '../hooks/useToggle';
+import useResponsive from '../hooks/useResponsive';
 // redux
 import { useDispatch } from '../redux/store';
 import { openModal, setModal } from '../redux/slices/parametrizacao';
@@ -83,14 +85,12 @@ export function DefaultAction({
     (label === 'VERSIONAR' && 'info') ||
     ((label === 'EDITAR' || label === 'Composição' || label === 'Editar') && 'warning') ||
     ((label === 'ELIMINAR' || label === 'Eliminar' || label === 'ARQUIVAR' || label === 'REVOGAR') && 'error') ||
-    ((label === 'PRÓXIMO' || label === 'ANTERIOR' || label === 'PENDENTE' || label === 'Gerar contrato') &&
+    ((label === 'Próximo' || label === 'Anterior' || label === 'PENDENTE' || label === 'Gerar contrato') &&
       'inherit') ||
     color;
 
   const iconAlt =
     (label === 'FECHAR' && <CloseIcon />) ||
-    (label === 'ANTERIOR' && <ArrowBackIcon />) ||
-    (label === 'PRÓXIMO' && <ArrowForwardIcon />) ||
     (label === 'ANULAR CONFIRMAÇÂO' && <ClearIcon />) ||
     (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
     (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
@@ -111,6 +111,7 @@ export function DefaultAction({
     ((label === 'EDITAR' || label === 'Composição') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Procurar' || label === 'PROCURAR') && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
+    ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
@@ -133,6 +134,7 @@ export function DefaultAction({
         startIcon={iconAlt}
         size={small ? 'small' : 'medium'}
         sx={{ color: variant === 'contained' && color === 'success' && 'common.white' }}
+        endIcon={label === 'Próximo' && <ArrowForwardIcon sx={{ width: small ? 18 : 22 }} />}
         {...others}
       >
         {label}
@@ -310,5 +312,26 @@ export function MaisProcessos({ verMais }) {
     <Box sx={{ display: 'flex', justifyContent: 'right', mt: 3 }}>
       <DefaultAction button label="Mais processos" onClick={() => verMais()} variant="contained" />
     </Box>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Voltar.propTypes = { fab: PropTypes.bool };
+
+export function Voltar({ fab }) {
+  const navigate = useNavigate();
+  const small = useResponsive('down', 'sm');
+
+  return (
+    <DefaultAction
+      label="VOLTAR"
+      color="inherit"
+      variant="outlined"
+      small={!(small || fab)}
+      button={!(small || fab)}
+      onClick={() => navigate(-1)}
+      sx={{ color: !fab && 'common.white' }}
+    />
   );
 }

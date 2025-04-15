@@ -48,8 +48,8 @@ export default function PageAcessosPerfil() {
           <PerfilCover perfilColaborador={colaborador} />
           <TabsWrapperStyle>
             <Tabs value={currentTab} onChange={(_, val) => setItemValue(val, setCurrentTab, 'tabAcesso', false)}>
-              {TABS.map((tab) => (
-                <Tab key={tab?.value} value={tab?.value} label={tab?.value} sx={{ py: 1.5, mt: 0.5, px: 0.64 }} />
+              {TABS.map(({ value }) => (
+                <Tab key={value} value={value} label={value} sx={{ py: 1.5, mt: 0.5, px: 0.64 }} />
               ))}
             </Tabs>
           </TabsWrapperStyle>

@@ -774,11 +774,10 @@ export function FuncaoForm({ onCancel }) {
       },
       ['utilizador']
     );
-    if (isEdit) {
-      dispatch(updateItem('funcoes', JSON.stringify(formData), { id: selectedItem?.id, msg: 'Função atualizada' }));
-    } else {
-      dispatch(createItem('funcoes', JSON.stringify(formData), { msg: 'Função adicionada' }));
-    }
+    const params = { msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, afterSuccess: () => onCancel() };
+    dispatch(
+      (isEdit ? updateItem : createItem)('funcoes', JSON.stringify(formData), { id: selectedItem?.id, ...params })
+    );
   };
 
   return (

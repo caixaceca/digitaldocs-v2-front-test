@@ -105,6 +105,7 @@ export default function PageDetalhesFluxo() {
     <Page title="Fluxo | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
+          voltar
           tab="tabFluxo"
           tabsList={tabsList}
           currentTab={currentTab}
@@ -112,7 +113,7 @@ export default function PageDetalhesFluxo() {
           title={fluxo?.assunto || 'Detalhes do fluxo'}
         />
         <HeaderBreadcrumbs
-          sx={{ px: 1 }}
+          options={{ voltar: currentTab === 'Dados', sx: { px: 1 } }}
           heading={currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },

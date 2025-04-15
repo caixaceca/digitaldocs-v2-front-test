@@ -78,6 +78,7 @@ export default function PageDetalhesEstado() {
     <Page title="Estado | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
+          voltar
           tab="tabEstado"
           tabsList={tabsList}
           currentTab={currentTab}
