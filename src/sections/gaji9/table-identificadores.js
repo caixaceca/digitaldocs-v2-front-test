@@ -69,7 +69,7 @@ export default function TableIdentificadores({ item, inativos }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [item, filter]);
 
   useEffect(() => {
     dispatch(getFromGaji9(item, { inativos }));
@@ -105,11 +105,8 @@ export default function TableIdentificadores({ item, inativos }) {
       (item === 'tiposGarantias' && 'tipoGarantia') ||
       (item === 'representantes' && 'representante');
     dispatch(openModal(modal));
-    if (item === 'componentes') {
-      dispatch(getSuccess({ item: 'selectedItem', dados }));
-    } else {
-      dispatch(getFromGaji9(itemSingle, { id: dados?.id, item: 'selectedItem' }));
-    }
+    if (item === 'componentes') dispatch(getSuccess({ item: 'selectedItem', dados }));
+    else dispatch(getFromGaji9(itemSingle, { id: dados?.id, item: 'selectedItem' }));
   };
 
   return (

@@ -94,7 +94,7 @@ export default function TableParametrizacao({ item }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [item, filter]);
 
   useEffect(() => {
     if (item) dispatch(getFromParametrizacao(item, { fluxoId: fluxo?.id }));

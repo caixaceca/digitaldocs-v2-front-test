@@ -59,7 +59,7 @@ export default function TableParamsGaji9({ item, inativos }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [item, filter]);
 
   useEffect(() => {
     dispatch(getFromGaji9(item, { inativos }));

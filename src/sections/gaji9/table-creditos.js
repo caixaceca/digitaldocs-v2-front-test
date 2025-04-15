@@ -28,8 +28,8 @@ import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple, SearchAutocomplete } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
+import { PropostaForm } from './form-credito';
 import { applySortFilter } from './applySortFilter';
-import CreditForm, { PropostaForm } from './form-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -159,7 +159,6 @@ export default function TableCredito() {
       </Card>
 
       {modalGaji9 === 'form-proposta' && <PropostaForm onCancel={() => dispatch(setModal())} />}
-      {modalGaji9 === 'form-credito' && <CreditForm onCancel={() => dispatch(setModal())} />}
     </>
   );
 }

@@ -81,12 +81,12 @@ export default function InfoCredito() {
     {
       title: 'Taxas e Custos',
       content: [
-        { label: 'Taxa juro negociada', color: 'success', value: fPercent(credito?.taxa_juro_negociado) },
-        { label: 'Taxa juro precário', color: '', value: fPercent(credito?.taxa_juro_precario) },
-        { label: 'Taxa juro desconto', color: 'info', value: fPercent(credito?.taxa_Juro_desconto) },
+        { label: 'Taxa juro negociada', value: fPercent(credito?.taxa_juro_negociado) },
+        { label: 'Taxa juro precário', value: fPercent(credito?.taxa_juro_precario) },
+        { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
+        { label: 'Taxa imposto de selo', value: fPercent(credito?.taxa_imposto_selo) },
         { label: 'Taxa TAEG', value: fPercent(credito?.taxa_taeg) },
         { label: 'Taxa comissão de abertura', value: fPercent(credito?.taxa_comissao_abertura) },
-        { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
         { label: 'Valor total de comissões', value: fCurrency(credito?.valor_comissao) },
         { label: 'Valor total de imposto selo', value: fCurrency(credito?.valor_imposto_selo) },
         { label: 'Valor total de juros', value: fCurrency(credito?.valor_juro) },
@@ -122,20 +122,26 @@ export default function InfoCredito() {
           <CardContent sx={{ pt: 1 }}>
             <Divider sx={{ mb: 2 }} />
             <Stack spacing={1}>
-              {section.content.map((item, idx) => (
+              {section.content.map(({ value, label }, idx) => (
                 <Stack
                   key={idx}
                   useFlexGap
                   direction="row"
                   flexWrap="wrap"
                   alignItems="center"
-                  sx={{ color: !item.value && 'text.disabled' }}
+                  sx={{ color: !value && 'text.disabled' }}
                 >
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {item.label}:&nbsp;
+                    {label}:&nbsp;
                   </Typography>
-                  <Typography variant="body2" sx={{ fontStyle: !item.value && 'italic' }}>
-                    {item.value || '(Não definido)'}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontStyle: !value && 'italic',
+                      color: (label === 'Email' || label === 'Morada') && !value && 'error.main',
+                    }}
+                  >
+                    {value || '(Não definido)'}
                   </Typography>
                 </Stack>
               ))}
@@ -233,7 +239,7 @@ export function TableInfoCredito({ params, dados = [] }) {
                           <CellChecked check={row.ativo} />
                           <TableCell align="center" width={10}>
                             <Stack direction="row" spacing={0.75}>
-                              <DefaultAction small label="DOWNLOAD" onClick={() => downloadContrato(row?.codigo)} />
+                              <DefaultAction small label="CONTRATO" onClick={() => downloadContrato(row?.codigo)} />
                               {actionAcessoGaji9(utilizador, ['CREATE_CONTRATO']) && (
                                 <DefaultAction small label="EDITAR" onClick={() => openModal('data-contrato', row)} />
                               )}

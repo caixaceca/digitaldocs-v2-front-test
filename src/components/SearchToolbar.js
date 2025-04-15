@@ -477,18 +477,12 @@ export function SearchAutocomplete({ value = null, label, valuel = null, setValu
 
 // ----------------------------------------------------------------------
 
-SearchField.propTypes = {
-  small: PropTypes.bool,
-  item: PropTypes.string,
-  filter: PropTypes.string,
-  setFilter: PropTypes.func,
-};
+SearchField.propTypes = { item: PropTypes.string, filter: PropTypes.string, setFilter: PropTypes.func };
 
-export function SearchField({ item, small = false, filter, setFilter }) {
+export function SearchField({ item, filter, setFilter, ...others }) {
   return (
     <TextField
       fullWidth
-      size={small && 'small'}
       value={filter}
       placeholder="Procurar..."
       onChange={(event) => setItemValue(event.target.value, setFilter, item)}
@@ -499,6 +493,7 @@ export function SearchField({ item, small = false, filter, setFilter }) {
           </InputAdornment>
         ),
       }}
+      {...others}
     />
   );
 }

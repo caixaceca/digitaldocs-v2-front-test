@@ -190,7 +190,10 @@ export function ValidarDocForm({ onCancel }) {
   const { docIdentificacao, isLoading } = useSelector((state) => state.intranet);
 
   const formSchema = Yup.object().shape({ documento: Yup.string().required('Introduza o nº do documento') });
-  const defaultValues = useMemo(() => ({ documento: '', cache: true }), []);
+  const defaultValues = useMemo(
+    () => ({ documento: docIdentificacao?.NUM_DOCUMENTO ?? '', cache: false }),
+    [docIdentificacao?.NUM_DOCUMENTO]
+  );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, reset, handleSubmit } = methods;
   const values = watch();
@@ -198,7 +201,7 @@ export function ValidarDocForm({ onCancel }) {
   const onSubmit = async () => {
     try {
       dispatch(getSuccess({ item: 'docIdentificacao', dados: null }));
-      dispatch(getFromIntranet('docIdentificacao', { doc: values.documento, cache: values.cache }));
+      dispatch(getFromIntranet('docIdentificacao', { doc: values.documento, cache: !values.cache }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -216,15 +219,11 @@ export function ValidarDocForm({ onCancel }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 1 }}>
             <Grid item xs={12}>
-              <Stack direction="row" spacing={1}>
-                <Stack sx={{ px: 1.5 }}>
-                  <RHFSwitch name="cache" label="Cache" />
-                </Stack>
-
+              <Stack spacing={1}>
                 <RHFTextField
                   maxWidth
                   name="documento"
-                  label="Documento"
+                  label="Nº de documento"
                   InputProps={{
                     endAdornment: values?.documento && (
                       <InputAdornment position="end">
@@ -242,6 +241,7 @@ export function ValidarDocForm({ onCancel }) {
                     ),
                   }}
                 />
+                <RHFSwitch name="cache" label="Forçar atualização dos dados" />
               </Stack>
             </Grid>
             {isLoading ? (

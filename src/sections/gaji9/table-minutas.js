@@ -57,7 +57,7 @@ export default function TableMinutas({ item, inativos }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [item, filter]);
 
   useEffect(() => {
     dispatch(

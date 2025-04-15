@@ -364,8 +364,8 @@ export function deleteItem(item, params) {
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'acessos' && `/v1/acessos/${perfilId}/${params?.id}`) ||
         (item === 'origens' && `/v1/origens/${params?.id}/${perfilId}`) ||
+        (item === 'linhas' && `/v1/linhas/${params?.linhaID}/${perfilId}`) ||
         (item === 'transicoes' && `/v1/transicoes/${params?.id}/${perfilId}`) ||
-        (item === 'linhas' && `/v1/linhas/${params?.linhaID}/${params?.perfilID}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/perfil/${perfilId}?peID=${params?.id}`) ||

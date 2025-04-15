@@ -163,13 +163,13 @@ MotivoTransicaoForm.propTypes = { onCancel: PropTypes.func };
 export function MotivoTransicaoForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const [fluxosAtribuidos, setFluxosAtribuidos] = useState([]);
   const { isEdit, isSaving, selectedItem, fluxos } = useSelector((state) => state.parametrizacao);
 
   const fluxosList = useMemo(
     () => fluxos?.filter((item) => item?.is_ativo)?.map((row) => ({ id: row?.id, label: row?.assunto })) || [],
     [fluxos]
   );
-  const [fluxosAtribuidos, setFluxosAtribuidos] = useState([]);
   const fluxosExistentes = useMemo(
     () => selectedItem?.fluxos?.map((row) => ({ id: row?.id, label: row?.fluxo })) || [],
     [selectedItem?.fluxos]
@@ -202,10 +202,6 @@ export function MotivoTransicaoForm({ onCancel }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const changeFluxos = (novosFluxosAtribuidos) => {
-    setFluxosAtribuidos(novosFluxosAtribuidos);
-  };
-
   const onSubmit = async () => {
     try {
       const formData = { ...values, fluxos: fluxosAtribuidos.length > 0 ? fluxosAtribuidos.map(({ id }) => id) : null };
@@ -231,7 +227,11 @@ export function MotivoTransicaoForm({ onCancel }) {
                 <RHFSwitch name="imputavel" label="Imputável" />
                 {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
               </Stack>
-              <ListSelect atribuidos={fluxosExistentes} disponiveis={fluxosDisponiveis} changeFluxos={changeFluxos} />
+              <ListSelect
+                atribuidos={fluxosExistentes}
+                disponiveis={fluxosDisponiveis}
+                changeItems={(items) => setFluxosAtribuidos(items)}
+              />
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
           </ItemComponent>
@@ -292,10 +292,6 @@ export function OrigemForm({ onCancel }) {
     }
   };
 
-  const handleDelete = () => {
-    dispatch(deleteItem('origens', { id: selectedItem?.id, msg: 'Origem eliminada', perfilId }));
-  };
-
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
@@ -310,30 +306,24 @@ export function OrigemForm({ onCancel }) {
                 sm={6}
                 children={<RHFAutocompleteSmp name="tipo" label="Tipo" options={['Fiscal', 'Judicial']} />}
               />
-              <GridItem
-                sm={6}
-                children={
-                  <RHFAutocompleteSmp
-                    name="ilha"
-                    label="Ilha"
-                    onChange={(event, value) => {
-                      setValue('ilha', value);
-                      setValue('cidade', null);
-                    }}
-                    options={[...new Set(_concelhos.map((row) => row.ilha))]}
-                  />
-                }
-              />
-              <GridItem
-                sm={6}
-                children={
-                  <RHFAutocompleteSmp
-                    name="cidade"
-                    label="Concelho"
-                    options={_concelhos?.filter((row) => row?.ilha === values?.ilha)?.map((item) => item?.concelho)}
-                  />
-                }
-              />
+              <GridItem sm={6}>
+                <RHFAutocompleteSmp
+                  name="ilha"
+                  label="Ilha"
+                  onChange={(event, value) => {
+                    setValue('ilha', value);
+                    setValue('cidade', null);
+                  }}
+                  options={[...new Set(_concelhos.map((row) => row.ilha))]}
+                />
+              </GridItem>
+              <GridItem sm={6}>
+                <RHFAutocompleteSmp
+                  name="cidade"
+                  label="Concelho"
+                  options={_concelhos?.filter((row) => row?.ilha === values?.ilha)?.map((item) => item?.concelho)}
+                />
+              </GridItem>
               <GridItem sm={6} children={<RHFTextField name="email" label="Email" />} />
               <GridItem sm={6} children={<RHFTextField name="telefone" label="Telefone" />} />
               <GridItem children={<RHFTextField name="observacao" multiline rows={2} label="Observação" />} />
@@ -342,8 +332,8 @@ export function OrigemForm({ onCancel }) {
               edit={isEdit}
               isSaving={isSaving}
               onCancel={onCancel}
-              handleDelete={handleDelete}
               desc={isEdit ? 'eliminar esta origem' : ''}
+              handleDelete={() => dispatch(deleteItem('origens', { id: selectedItem?.id, msg: 'Origem eliminada' }))}
             />
           </ItemComponent>
         </FormProvider>
@@ -359,7 +349,6 @@ LinhaForm.propTypes = { onCancel: PropTypes.func };
 export function LinhaForm({ onCancel }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { perfilId } = useSelector((state) => state.intranet);
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
@@ -388,7 +377,7 @@ export function LinhaForm({ onCancel }) {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem('linhas', { perfilID: perfilId, linhaID: selectedItem?.id, msg: 'Linha eliminada' }));
+    dispatch(deleteItem('linhas', { linhaID: selectedItem?.id, msg: 'Linha eliminada' }));
   };
 
   return (
@@ -630,14 +619,12 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
               <GridItem xs={4} children={<RHFSwitch name="gestor" label="Gestor" />} />
               <GridItem xs={4} children={<RHFSwitch name="padrao" label="Padrão" />} />
               {isEdit && (
-                <GridItem
-                  children={
-                    <Alert severity="info">
-                      <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
-                      <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
-                    </Alert>
-                  }
-                />
+                <GridItem>
+                  <Alert severity="info">
+                    <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
+                    <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
+                  </Alert>
+                </GridItem>
               )}
             </Grid>
             <DialogButons isSaving={isSaving} onCancel={onCancel} edit={isEdit} />

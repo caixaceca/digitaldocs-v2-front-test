@@ -20,7 +20,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import PublishOutlinedIcon from '@mui/icons-material/PublishOutlined';
 import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -97,7 +96,6 @@ export function DefaultAction({
     (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
     (label === 'PUBLICAR' && <PublishOutlinedIcon sx={{ width: 20 }} />) ||
     (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
-    (label === 'DOWNLOAD' && <DownloadOutlinedIcon sx={{ width: 20 }} />) ||
     (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
     (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
     (label === 'RESGATAR' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
@@ -110,7 +108,6 @@ export function DefaultAction({
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     ((label === 'Clonar' || label === 'CLONAR') && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
-    (label === 'Pré-visualizar' && getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
     ((label === 'EDITAR' || label === 'Composição') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Procurar' || label === 'PROCURAR') && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
@@ -121,6 +118,8 @@ export function DefaultAction({
     ((label === 'ADICIONAR' || label === 'Adicionar' || icon === 'adicionar' || label === 'Mostrar detalhes') && (
       <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
     )) ||
+    ((label === 'CONTRATO' || label === 'Pré-visualizar') &&
+      getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
     ((label === 'Gerir acessos' || label === 'Transições' || label === 'Comparar colaboradores') && (
       <SwapHorizOutlinedIcon />
     ));

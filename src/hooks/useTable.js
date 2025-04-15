@@ -33,15 +33,12 @@ export default function useTable(props) {
 
     let newSelected = [];
 
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
+    if (selectedIndex === -1) newSelected = newSelected.concat(selected, id);
+    else if (selectedIndex === 0) newSelected = newSelected.concat(selected.slice(1));
+    else if (selectedIndex === selected.length - 1) newSelected = newSelected.concat(selected.slice(0, -1));
+    else if (selectedIndex > 0)
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
+
     setSelected(newSelected);
   };
 
@@ -93,12 +90,8 @@ export default function useTable(props) {
 // ----------------------------------------------------------------------
 
 export function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 }
 

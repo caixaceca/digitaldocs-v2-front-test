@@ -170,9 +170,6 @@ function Actions({ inativos, setInativos, label = '' }) {
       {label === 'Créditos' && (
         <DefaultAction button label="Carregar proposta" onClick={() => dispatch(setModal({ item: 'form-proposta' }))} />
       )}
-      {label === 'Créditos' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CREDITO'])) && (
-        <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: 'form-credito' }))} />
-      )}
       {label !== 'Créditos' &&
         label !== 'Cláusulas' &&
         label !== 'Minutas públicas' &&

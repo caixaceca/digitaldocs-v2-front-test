@@ -40,12 +40,7 @@ export default function PageGaji9Gestao() {
               'READ_REPRESENTANTE',
               'READ_PRODUTO/COMPONENTE',
             ])
-              ? [
-                  {
-                    value: 'Identificadores',
-                    component: <TabGaji9 item="identificadores" />,
-                  },
-                ]
+              ? [{ value: 'Identificadores', component: <TabGaji9 item="identificadores" /> }]
               : []),
             ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_CLAUSULA'])
               ? [{ value: 'Cláusulas', component: <TabGaji9 item="clausulas" label="Cláusulas" /> }]
@@ -76,8 +71,7 @@ export default function PageGaji9Gestao() {
 
   const navigateTo = () => {
     if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
-    if ((done === 'Crédito adicionado' || done === 'Proposta carregada') && minutaId)
-      navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
+    if (done === 'Proposta carregada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
   };
 
   useNotificacao({ done, afterSuccess: () => navigateTo() });

@@ -16,7 +16,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 // utils
 import { normalizeText } from '../utils/formatText';
-//
+// components
 import Scrollbar from './Scrollbar';
 import { SearchField } from './SearchToolbar';
 
@@ -36,9 +36,9 @@ function union(a, b) {
 
 // ----------------------------------------------------------------------
 
-ListSelect.propTypes = { disponiveis: PropTypes.array, atribuidos: PropTypes.array, changeFluxos: PropTypes.func };
+ListSelect.propTypes = { disponiveis: PropTypes.array, atribuidos: PropTypes.array, changeItems: PropTypes.func };
 
-export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
+export default function ListSelect({ disponiveis, atribuidos, changeItems }) {
   const [checked, setChecked] = useState([]);
   const [filterL, setFilterL] = useState('');
   const [filterR, setFilterR] = useState('');
@@ -48,8 +48,8 @@ export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
   const rightChecked = intersection(checked, right);
 
   useEffect(() => {
-    changeFluxos(right);
-  }, [right, changeFluxos]);
+    changeItems(right);
+  }, [right, changeItems]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -80,8 +80,23 @@ export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
     setChecked(not(checked, rightChecked));
   };
 
+  const searchField = (value, setValue) => (
+    <SearchField
+      size="small"
+      filter={value}
+      setFilter={setValue}
+      sx={{ '& .MuiOutlinedInput-root': { backgroundColor: 'background.paper' } }}
+    />
+  );
+
+  const buttonChange = (left, onClick, disabled) => (
+    <Button size="small" variant="soft" onClick={onClick} disabled={disabled} sx={{ my: 1, minWidth: 48 }}>
+      {left ? <ArrowForwardIosOutlinedIcon sx={{ width: 18 }} /> : <ArrowBackIosNewOutlinedIcon sx={{ width: 18 }} />}
+    </Button>
+  );
+
   const customList = (title, items) => (
-    <Card sx={{ borderRadius: 1.5 }}>
+    <Card sx={{ bgcolor: 'background.neutral', borderRadius: 1.5, boxShadow: (theme) => theme.customShadows.cardAlt }}>
       <CardHeader
         avatar={
           <Checkbox
@@ -99,18 +114,14 @@ export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
       />
 
       <Divider />
-      <Stack sx={{ p: 0.5, pb: 0 }}>
-        {title === 'Disponíveis' ? (
-          <SearchField small filter={filterL} setFilter={setFilterL} />
-        ) : (
-          <SearchField small filter={filterR} setFilter={setFilterR} />
-        )}
+      <Stack sx={{ p: 1, pb: 0 }}>
+        {title === 'Disponíveis' ? searchField(filterL, setFilterL) : searchField(filterR, setFilterR)}
       </Stack>
       <List
         dense
         role="list"
         component="div"
-        sx={{ maxWidth: { md: 320, xs: 250 }, minWidth: { md: 320, xs: 250 }, height: 300, overflow: 'auto' }}
+        sx={{ maxWidth: { xs: 200, md: 320 }, minWidth: { xs: 200, md: 320 }, height: 300, overflow: 'auto' }}
       >
         <Scrollbar>
           {items.map((value) => (
@@ -128,30 +139,12 @@ export default function ListSelect({ disponiveis, atribuidos, changeFluxos }) {
 
   return (
     <Scrollbar>
-      <Grid container justifyContent="center" alignItems="center" sx={{ py: 3, minWidth: 660 }}>
+      <Grid container justifyContent="center" alignItems="center" sx={{ py: 1, minWidth: 660 }}>
         <Grid item>{customList('Disponíveis', filterDados(left, filterL))}</Grid>
         <Grid item>
           <Grid container direction="column" alignItems="center" sx={{ p: 1.5 }}>
-            <Button
-              size="small"
-              color="inherit"
-              variant="outlined"
-              onClick={handleCheckedRight}
-              sx={{ my: 1, minWidth: 48 }}
-              disabled={leftChecked.length === 0}
-            >
-              <ArrowForwardIosOutlinedIcon sx={{ width: 18 }} />
-            </Button>
-            <Button
-              size="small"
-              color="inherit"
-              variant="outlined"
-              onClick={handleCheckedLeft}
-              sx={{ my: 1, minWidth: 48 }}
-              disabled={rightChecked.length === 0}
-            >
-              <ArrowBackIosNewOutlinedIcon sx={{ width: 18 }} />
-            </Button>
+            {buttonChange(true, handleCheckedRight, leftChecked.length === 0)}
+            {buttonChange(false, handleCheckedLeft, rightChecked.length === 0)}
           </Grid>
         </Grid>
         <Grid item>{customList('Atribuídos', filterDados(right, filterR))}</Grid>

@@ -139,7 +139,7 @@ export function getFromGaji9(item, params) {
         ((item === 'utilizador' || item === 'funcao') &&
           `${BASEURLGAJI9}/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
-          `${BASEURLGAJI9}/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${params?.credibox}`) ||
+          `${BASEURLGAJI9}/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${!!params?.credibox}`) ||
         // LISTA
         (item === 'minutasPublicas' && `${BASEURLGAJI9}/v1/minutas/publicas`) ||
         (item === 'importar componentes' && `${BASEURLGAJI9}/v1/produtos/importar`) ||
@@ -273,7 +273,6 @@ export function createItem(item, dados, params) {
         (item === 'freguesias' && `${BASEURLGAJI9}/v1/divisoes`) ||
         (item === 'marcadores' && `${BASEURLGAJI9}/v1/marcadores`) ||
         (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos`) ||
-        (item === 'credito' && `${BASEURLGAJI9}/v1/suportes/creditos`) ||
         (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao`) ||
         (item === 'tiposTitulares' && `${BASEURLGAJI9}/v1/tipos_titulares`) ||
         (item === 'tiposGarantias' && `${BASEURLGAJI9}/v1/tipos_garantias`) ||
@@ -296,22 +295,17 @@ export function createItem(item, dados, params) {
           const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
           dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
-        } else if (params?.getItem) {
-          dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
-        } else if (params?.getList) {
-          dispatch(getFromGaji9(item, { id: params?.id }));
-        } else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas' || item === 'credito') {
+        } else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
+        else if (params?.getList) dispatch(getFromGaji9(item, { id: params?.id }));
+        else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas')
           dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
-        } else {
+        else {
+          const dados = response.data?.clausula || response.data?.objeto || null;
           dispatch(
             slice.actions.createSuccess({
               item: params?.item || item,
               item1: params?.item1 || '',
-              dados:
-                (item === 'colaboradorGrupo' && JSON.parse(dados)) ||
-                response.data?.clausula ||
-                response.data?.objeto ||
-                null,
+              dados: (item === 'colaboradorGrupo' && JSON.parse(dados)) || dados,
             })
           );
         }
@@ -421,6 +415,7 @@ export function deleteItem(item, params) {
         (item === 'clausulas' && `${BASEURLGAJI9}/v1/clausulas?id=${params?.id}`) ||
         (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos?grupo_id=${params?.id}`) ||
         (item === 'recursos' && `${BASEURLGAJI9}/v1/acs/recursos?recurso_id=${params?.id}`) ||
+        (item === 'credito' && `${BASEURLGAJI9}/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
         (item === 'clausulaMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
         (item === 'componentesMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
