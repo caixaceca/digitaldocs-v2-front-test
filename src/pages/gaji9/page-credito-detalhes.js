@@ -89,8 +89,8 @@ export default function PageCreditoDetalhes() {
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' && actionAcessoGaji9(utilizador, ['UPDATE_CREDITO']) && (
                   <>
-                    <DefaultAction button label="Editar" onClick={() => openForm('form-credito')} />
-                    <DefaultAction button label="Eliminar" onClick={() => openForm('eliminar-credito')} />
+                    <DefaultAction small button label="Editar" onClick={() => openForm('form-credito')} />
+                    <DefaultAction small button label="Eliminar" onClick={() => openForm('eliminar-credito')} />
                   </>
                 )}
                 {currentTab === 'Intervenientes' && actionAcessoGaji9(utilizador, ['CREATE_CREDITO']) && (
