@@ -78,8 +78,8 @@ export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
     <Card sx={{ height: 45, mb: 3, ...sx, bgcolor: sx?.boxShadow === 'none' && 'background.neutral' }}>
       <TabsWrapperStyleSimple sx={{ bgcolor: 'transparent' }}>
         <Tabs value={currentTab} onChange={changeTab} allowScrollButtonsMobile>
-          {tabsList.map((tab) => (
-            <Tab key={tab.value} value={tab.value} sx={{ px: 0.64, mb: 0.32 }} label={tab.label || tab.value} />
+          {tabsList.map(({ value, label }) => (
+            <Tab key={value} value={value} sx={{ px: 0.64, py: 1.55 }} label={label || value} />
           ))}
         </Tabs>
       </TabsWrapperStyleSimple>

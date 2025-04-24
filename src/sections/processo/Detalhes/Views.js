@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -19,13 +18,11 @@ import { ColaboradorInfo } from '../../../components/Panel';
 
 // ----------------------------------------------------------------------
 
-Views.propTypes = { id: PropTypes.number, isLoading: PropTypes.bool };
-
-export default function Views({ id, isLoading }) {
+export default function Views() {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { processo } = useSelector((state) => state.digitaldocs);
   const { colaboradores } = useSelector((state) => state.intranet);
+  const { processo, isLoading } = useSelector((state) => state.digitaldocs);
   const viewsGroupByColaborador = useMemo(
     () => groupByColaborador(processo?.hvisualizacoes || [], 'perfil_id'),
     [processo?.hvisualizacoes]
@@ -36,8 +33,8 @@ export default function Views({ id, isLoading }) {
   };
 
   useEffect(() => {
-    if (id) dispatch(getInfoProcesso('hvisualizacoes', { id }));
-  }, [dispatch, id]);
+    dispatch(getInfoProcesso('hvisualizacoes', { id: processo?.id }));
+  }, [dispatch, processo?.id]);
 
   return (
     <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>

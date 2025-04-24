@@ -7,7 +7,7 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 // utils
-import { fDate } from '../../../utils/formatTime';
+import { formatDate } from '../../../utils/formatTime';
 import { fCurrency } from '../../../utils/formatNumber';
 import { getFileThumb } from '../../../utils/formatFile';
 import { valorPorExtenso } from '../../../utils/formatText';
@@ -263,7 +263,7 @@ export default function ModelosRespostas() {
               spacing: { line: 360 },
               alignment: AlignmentType.RIGHT,
               children: [
-                new TextRun({ text: `Praia, ${fDate(new Date())}`, break: 1 }),
+                new TextRun({ text: `Praia, ${formatDate(new Date(), "dd 'de' MMMM 'de' yyyy")}`, break: 1 }),
                 new TextRun({ text: ' ', break: 1 }),
               ],
             }),

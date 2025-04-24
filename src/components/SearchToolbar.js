@@ -39,33 +39,22 @@ export function SearchToolbarSimple({ filter, item = '', setFilter, children = n
 
 // ----------------------------------------------------------------------
 
-SearchToolbarProcura.propTypes = {
-  uo: PropTypes.string,
-  setUo: PropTypes.func,
-  estado: PropTypes.string,
-  search: PropTypes.string,
-  assunto: PropTypes.string,
-  setSearch: PropTypes.func,
-  setEstado: PropTypes.func,
-  setAssunto: PropTypes.func,
-  estadosList: PropTypes.array,
-  assuntosList: PropTypes.array,
-  uosorigemList: PropTypes.array,
-};
+SearchToolbarProcura.propTypes = { options: PropTypes.object };
 
-export function SearchToolbarProcura({
-  uo,
-  setUo,
-  estado,
-  search,
-  assunto,
-  setSearch,
-  setEstado,
-  setAssunto,
-  estadosList,
-  assuntosList,
-  uosorigemList,
-}) {
+export function SearchToolbarProcura({ options }) {
+  const {
+    uo,
+    setUo,
+    estado,
+    search,
+    assunto,
+    setSearch,
+    setEstado,
+    setAssunto,
+    estadosList,
+    assuntosList,
+    uosorigemList,
+  } = options;
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       {(assuntosList?.length > 0 || estadosList?.length > 0 || uosorigemList?.length > 0) && (
@@ -197,6 +186,7 @@ export function SearchToolbarProcessos({
 // ----------------------------------------------------------------------
 
 SearchToolbarEntradas.propTypes = {
+  from: PropTypes.string,
   filter: PropTypes.string,
   estado: PropTypes.string,
   assunto: PropTypes.string,
@@ -211,6 +201,7 @@ SearchToolbarEntradas.propTypes = {
 };
 
 export function SearchToolbarEntradas({
+  from,
   filter,
   estado,
   assunto,
@@ -227,14 +218,14 @@ export function SearchToolbarEntradas({
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       {(estadosList?.length > 0 || assuntosList?.length > 0 || colaboradoresList?.length > 0) && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {estadosList?.length > 0 && (
+          {from !== 'Por concluir' && colaboradoresList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={estado || null}
-              options={estadosList?.sort()}
+              value={colaborador || null}
+              options={colaboradoresList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              renderInput={(params) => <TextField {...params} label="Estado" />}
-              onChange={(event, newValue) => setItemValue(newValue, setEstado, 'estadoC')}
+              renderInput={(params) => <TextField {...params} label="Colaborador" />}
+              onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorC')}
             />
           )}
           {assuntosList?.length > 0 && (
@@ -247,14 +238,14 @@ export function SearchToolbarEntradas({
               onChange={(event, newValue) => setItemValue(newValue, setAssunto, 'assuntoC')}
             />
           )}
-          {colaboradoresList?.length > 0 && (
+          {estadosList?.length > 0 && (
             <Autocomplete
               fullWidth
-              value={colaborador || null}
-              options={colaboradoresList?.sort()}
+              value={estado || null}
+              options={estadosList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
-              renderInput={(params) => <TextField {...params} label="Colaborador" />}
-              onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorC')}
+              renderInput={(params) => <TextField {...params} label="Estado atual" />}
+              onChange={(event, newValue) => setItemValue(newValue, setEstado, 'estadoC')}
             />
           )}
         </Stack>
@@ -278,15 +269,10 @@ export function SearchToolbarEntradas({
 
 // ----------------------------------------------------------------------
 
-SearchToolbarCartoes.propTypes = {
-  filter: PropTypes.string,
-  setFilter: PropTypes.func,
-  tiposCartao: PropTypes.array,
-  tipoCartao: PropTypes.string,
-  setTipoCartao: PropTypes.func,
-};
+SearchToolbarCartoes.propTypes = { options: PropTypes.object };
 
-export function SearchToolbarCartoes({ filter, setFilter, tipoCartao, tiposCartao, setTipoCartao }) {
+export function SearchToolbarCartoes({ options }) {
+  const { filter, setFilter, tipoCartao, tiposCartao, setTipoCartao } = options;
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       <Autocomplete
@@ -314,14 +300,10 @@ export function SearchToolbarCartoes({ filter, setFilter, tipoCartao, tiposCarta
 
 // ----------------------------------------------------------------------
 
-TableToolbarPerfilEstados.propTypes = {
-  uo: PropTypes.string,
-  setUo: PropTypes.func,
-  filter: PropTypes.string,
-  setFilter: PropTypes.func,
-};
+TableToolbarPerfilEstados.propTypes = { options: PropTypes.object };
 
-export function TableToolbarPerfilEstados({ uo, filter, setUo, setFilter }) {
+export function TableToolbarPerfilEstados({ options }) {
+  const { uo, filter, setUo, setFilter } = options;
   const { uos } = useSelector((state) => state.intranet);
 
   return (
@@ -451,20 +433,15 @@ export function SearchIndicadores({
 
 // ----------------------------------------------------------------------
 
-SearchAutocomplete.propTypes = {
-  dados: PropTypes.array,
-  value: PropTypes.string,
-  label: PropTypes.string,
-  valuel: PropTypes.string,
-  setValue: PropTypes.func,
-};
+SearchAutocomplete.propTypes = { options: PropTypes.object };
 
-export function SearchAutocomplete({ value = null, label, valuel = null, setValue, dados = [], ...others }) {
+export function SearchAutocomplete({ options, ...others }) {
+  const { value = null, label, valuel = null, setValue, dados = [] } = options;
   return (
     <Autocomplete
       fullWidth
       value={value}
-      options={dados?.sort()}
+      options={dados}
       sx={{ maxWidth: { md: 300 } }}
       getOptionLabel={(option) => option?.label}
       renderInput={(params) => <TextField {...params} label={label} />}

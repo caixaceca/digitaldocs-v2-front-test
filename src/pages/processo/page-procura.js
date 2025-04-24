@@ -200,17 +200,10 @@ export default function PageProcura() {
 
         <Card sx={{ p: 1 }}>
           <SearchToolbarProcura
-            uo={uo}
-            setUo={setUo}
-            search={search}
-            estado={estado}
-            assunto={assunto}
-            setSearch={setSearch}
-            setEstado={setEstado}
-            setAssunto={setAssunto}
-            estadosList={dados?.estados}
-            assuntosList={dados?.assuntos}
-            uosorigemList={dados?.uosOrigem}
+            options={{
+              ...{ uo, search, estado, assunto, setUo, setSearch, setEstado, setAssunto },
+              ...{ estadosList: dados?.estados, assuntosList: dados?.assuntos, uosorigemList: dados?.uosOrigem },
+            }}
           />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>

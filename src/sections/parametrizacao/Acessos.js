@@ -69,7 +69,7 @@ export default function Acessos() {
     <>
       <HeaderBreadcrumbs heading="Acessos" sx={{ px: 1 }} />
       <Card sx={{ p: 1 }}>
-        <TableToolbarPerfilEstados filter={filter} setFilter={setFilter} uo={uo} setUo={setUo} />
+        <TableToolbarPerfilEstados options={{ uo, setUo, filter, setFilter }} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>

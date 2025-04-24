@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
 // utils
 import { fNumber, fPercent } from '../../utils/formatNumber';
-import { fMShortYear, fYear, fMonthYear } from '../../utils/formatTime';
+import { formatDate, fYear, fMonthYear } from '../../utils/formatTime';
 // redux
 import { useSelector } from '../../redux/store';
 // components
@@ -51,10 +51,10 @@ Criacao.propTypes = { vista: PropTypes.string, indicadores: PropTypes.array };
 export function Criacao({ vista, indicadores }) {
   const { isLoading } = useSelector((state) => state.indicadores);
   const [view, setView] = useState(localStorage.getItem('tabView') || 'Gráfico');
-  const isNotFound = !indicadores?.filter((row) => row?.criado_em).length;
+  const isNotFound = !indicadores?.filter(({ criado_em: em }) => em).length;
   const total = sumBy(indicadores, 'total');
   const series = useMemo(
-    () => [{ name: 'Nº de processos', data: indicadores?.map((row) => row?.criado_em && row?.total) }],
+    () => [{ name: 'Nº de processos', data: indicadores?.map(({ criado_em: em, total }) => em && total) }],
     [indicadores]
   );
   const chartOptions = useChart({
@@ -62,8 +62,8 @@ export function Criacao({ vista, indicadores }) {
     xaxis: {
       categories:
         vista === 'Anual'
-          ? indicadores?.map((row) => row?.criado_em && fYear(row?.criado_em))
-          : indicadores?.map((row) => row?.criado_em && fMShortYear(row?.criado_em)),
+          ? indicadores?.map(({ criado_em: em }) => em && fYear(em))
+          : indicadores?.map(({ criado_em: em }) => em && formatDate(em, 'MMM yyyy')),
     },
     yaxis: { labels: { formatter: (value) => fNumber(value) }, title: { text: 'Nº de processos' } },
     tooltip: { y: { formatter: (value) => fNumber(value) } },
@@ -124,11 +124,11 @@ export function DevolvidosTipos({ dev, indicadores }) {
   const theme = useTheme();
   const { isLoading } = useSelector((state) => state.indicadores);
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
-  const isNotFound = !indicadores?.filter((row) => row.total)?.length;
+  const isNotFound = !indicadores?.filter(({ total }) => total)?.length;
   const total = useMemo(() => sumBy(indicadores, 'total'), [indicadores]);
-  const labels = useMemo(() => indicadores?.map((row) => row?.assunto), [indicadores]);
-  const quantidades = useMemo(() => indicadores?.map((row) => row?.total), [indicadores]);
-  const percentagem = useMemo(() => indicadores?.map((row) => (row?.total * 100) / total), [indicadores, total]);
+  const labels = useMemo(() => indicadores?.map(({ assunto }) => assunto), [indicadores]);
+  const quantidades = useMemo(() => indicadores?.map(({ total }) => total), [indicadores]);
+  const percentagem = useMemo(() => indicadores?.map(({ total: t }) => (t * 100) / total), [indicadores, total]);
   const resumo = useMemo(() => dadosResumo(indicadores, 'total', 'assunto'), [indicadores]);
   const series = useMemo(
     () => [
@@ -198,11 +198,11 @@ export function Origem({ top, indicadores }) {
     () => origensItem(indicadores, uos, colaboradores, agrupamento, topNumb),
     [agrupamento, colaboradores, indicadores, topNumb, uos]
   );
-  const isNotFound = !origemByItem?.filter((row) => row?.total).length;
+  const isNotFound = !origemByItem?.filter(({ total }) => total).length;
   const total = useMemo(() => sumBy(origemByItem, 'total'), [origemByItem]);
-  const labels = useMemo(() => origemByItem?.map((row) => row?.label), [origemByItem]);
-  const quantidades = useMemo(() => origemByItem?.map((row) => row?.total), [origemByItem]);
-  const percentagem = useMemo(() => origemByItem?.map((row) => (row?.total * 100) / total), [origemByItem, total]);
+  const labels = useMemo(() => origemByItem?.map(({ label }) => label), [origemByItem]);
+  const quantidades = useMemo(() => origemByItem?.map(({ total }) => total), [origemByItem]);
+  const percentagem = useMemo(() => origemByItem?.map(({ total: t }) => (t * 100) / total), [origemByItem, total]);
   const resumo = useMemo(
     () => [
       { label: 'Total', valor: sumBy(origemByItem, 'total'), desc: '' },
@@ -237,9 +237,9 @@ export function Origem({ top, indicadores }) {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={6} md={3}>
-                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} percentagem={row?.percentagem} />
+            {resumo?.map(({ label, valor, desc, percentagem }) => (
+              <Grid key={label} item xs={12} sm={6} md={3}>
+                <CardInfo title={label} total={valor} label={desc} percentagem={percentagem} />
               </Grid>
             ))}
             <Grid item xs={12}>
@@ -262,19 +262,14 @@ function origensItem(indicadores, uos, colaboradores, agrupamento, topNumb) {
   const dados = [];
   indicadores?.forEach((row, index) => {
     if (agrupamento === 'Unidade orgânica') {
-      const uo = uos?.find((uo) => uo.id === row?.objeto_id);
-      if (topNumb !== 'Todos' && index < topNumb) {
-        dados.push({ total: row?.total, label: uo?.label || row?.objeto_id });
-      } else if (topNumb === 'Todos') {
-        dados.push({ total: row?.total, label: uo?.label || row?.objeto_id });
-      }
+      const uo = uos?.find(({ id }) => id === row?.objeto_id);
+      if (topNumb !== 'Todos' && index < topNumb) dados.push({ total: row?.total, label: uo?.label || row?.objeto_id });
+      else if (topNumb === 'Todos') dados.push({ total: row?.total, label: uo?.label || row?.objeto_id });
     } else if (agrupamento === 'Colaborador') {
-      const colaborador = colaboradores?.find((colaborador) => colaborador.perfil_id === row?.objeto_id);
-      if (topNumb !== 'Todos' && index < topNumb) {
-        dados.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
-      } else if (topNumb === 'Todos') {
-        dados.push({ total: row?.total, label: colaborador?.perfil?.displayName || row?.objeto_id });
-      }
+      const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row?.objeto_id);
+      if (topNumb !== 'Todos' && index < topNumb)
+        dados.push({ total: row?.total, label: colaborador?.nome || row?.objeto_id });
+      else if (topNumb === 'Todos') dados.push({ total: row?.total, label: colaborador?.nome || row?.objeto_id });
     }
   });
 

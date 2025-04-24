@@ -51,7 +51,7 @@ export default function FormAnexosInterno({ dados }) {
       formData.append('balcao', balcao);
       formData.append('fluxo_id', fluxo?.id);
       formData.append('agendado', dadosStepper.agendado);
-      formData.append('data_entrada', format(values?.data_entrada || new Date(), 'yyyy-MM-dd'));
+      formData.append('data_entrada', format(dadosStepper?.data_entrada || new Date(), 'yyyy-MM-dd'));
       if (dadosStepper.agendado) {
         formData.append('diadomes', dadosStepper.diadomes);
         formData.append('periodicidade', dadosStepper.periodicidade);

@@ -16,15 +16,16 @@ export default function TodosAnexos() {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   const { processo } = useSelector((state) => state.digitaldocs);
+  const anexosTransicao = useMemo(() => anexosPorTransicao(processo?.htransicoes), [processo?.htransicoes]);
 
   const viewAnexo = (anexo, estadoId, parecerId) => {
     dispatch(getAnexo('fileDownload', { anexo: { ...anexo, tipoDoc: canPreview(anexo) }, estadoId, parecerId }));
   };
 
-  const renderAnexos = (anexos, titulo, estadoId, parecerId, padding = 0) =>
+  const renderAnexos = (anexos, titulo, parecerId, padding = 0) =>
     anexos?.length > 0 && (
       <Stack sx={{ pl: padding }}>
-        <AnexosGroup dados={{ titulo, viewAnexo, estadoId, parecerId, anexos }} />
+        <AnexosGroup dados={{ titulo, viewAnexo, parecerId, anexos }} />
       </Stack>
     );
 
@@ -32,20 +33,17 @@ export default function TodosAnexos() {
     <CardContent>
       <Stack spacing={3}>
         {renderAnexos(processo?.anexos, 'Anexos do processo')}
-        {processo?.htransicoes?.map((row) => (
-          <Stack key={row?.id}>
-            {renderAnexos(row?.anexos, `Estado: ${row?.estado_inicial}`, row?.id)}
-            {row?.pareceres?.map((item) =>
-              renderAnexos(
-                item?.anexos,
-                `Parecer: ${colaboradorByPerfilId(item?.perfil_id, colaboradores)}`,
-                row?.id,
-                item?.id,
-                { xs: 3, md: 6 }
-              )
-            )}
-          </Stack>
-        ))}
+        {anexosTransicao?.map(
+          ({ transicao_id: tid, anexos, pareceres, estadoInicial, estadoFinal }) =>
+            (anexos?.length > 0 || pareceres?.length > 0) && (
+              <Stack key={tid}>
+                {renderAnexos(anexos, `Transição: ${estadoInicial} » ${estadoFinal}`, tid)}
+                {pareceres?.map(({ id, anexos, perfil_id: pid }) =>
+                  renderAnexos(anexos, `Parecer: ${colaboradorByPerfilId(pid, colaboradores)}`, id, { xs: 3, md: 6 })
+                )}
+              </Stack>
+            )
+        )}
       </Stack>
     </CardContent>
   );
@@ -56,7 +54,7 @@ export default function TodosAnexos() {
 AnexosGroup.propTypes = { dados: PropTypes.object };
 
 function AnexosGroup({ dados }) {
-  const { anexos, titulo, viewAnexo, estadoId, parecerId } = dados;
+  const { anexos, titulo, viewAnexo, parecerId } = dados;
   const [anexosAtivos, anexosInativos] = useMemo(
     () => [anexos?.filter((row) => row.ativo) || [], anexos?.filter((row) => !row.ativo) || []],
     [anexos]
@@ -70,12 +68,12 @@ function AnexosGroup({ dados }) {
       <Stack spacing={1}>
         {anexosAtivos.map((row) => (
           <AnexoItem
-            key={row?.anexo}
             parecer
             anexo={row}
-            estadoId={estadoId}
+            key={row?.anexo}
             parecerId={parecerId}
             viewAnexo={viewAnexo}
+            estadoId={row?.transicao_id}
           />
         ))}
       </Stack>
@@ -87,12 +85,12 @@ function AnexosGroup({ dados }) {
           <Stack spacing={1}>
             {anexosInativos.map((row) => (
               <AnexoItem
-                key={row?.anexo}
                 eliminado
                 anexo={row}
-                estadoId={estadoId}
+                key={row?.anexo}
                 parecerId={parecerId}
                 viewAnexo={viewAnexo}
+                estadoId={row?.transicao_id}
               />
             ))}
           </Stack>
@@ -100,4 +98,29 @@ function AnexosGroup({ dados }) {
       )}
     </Stack>
   );
+}
+
+function anexosPorTransicao(htransicoes) {
+  if (!htransicoes) return [];
+
+  const agrupado = {};
+
+  htransicoes.forEach((transicao) => {
+    const { id, transicao_id: tid, estado_final: ef, estado_inicial: ei, anexos, pareceres } = transicao;
+
+    if (!agrupado[tid])
+      agrupado[tid] = { transicao_id: tid, estadoFinal: ef, estadoInicial: ei, anexos: [], pareceres: [] };
+
+    if (Array.isArray(anexos)) {
+      const anexosComId = anexos.map((anexo) => ({ ...anexo, transicao_id: id }));
+      agrupado[tid].anexos.push(...anexosComId);
+    }
+
+    if (Array.isArray(pareceres)) {
+      const pareceresComId = pareceres.map((parecer) => ({ ...parecer, transicao_id: id }));
+      agrupado[tid].pareceres.push(...pareceresComId);
+    }
+  });
+
+  return Object.values(agrupado);
 }

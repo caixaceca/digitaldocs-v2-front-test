@@ -5,24 +5,18 @@ import { applySort } from '../../hooks/useTable';
 
 // ----------------------------------------------------------------------
 
-export default function applySortFilter({ dados, comparator, filter, colaborador, assunto, estado }) {
+export default function applySortFilter({ from, dados, comparator, filter, colaborador, assunto, estado }) {
   dados = applySort(dados, comparator);
 
-  if (colaborador) {
-    dados = dados.filter((row) => row?.colaborador === colaborador);
-  }
-  if (estado === 'Excepto Arquivo') {
-    dados = dados.filter((row) => row?.nome !== 'Arquivo');
-  } else if (estado === 'Pendente') {
-    dados = dados.filter((row) => row?.motivo);
-  } else if (estado === 'Excepto Pendente') {
-    dados = dados.filter((row) => !row?.motivo);
-  } else if (estado) {
-    dados = dados.filter((row) => row?.nome === estado);
-  }
-  if (assunto) {
-    dados = dados.filter((row) => row?.assunto === assunto);
-  }
+  if (assunto) dados = dados.filter(({ assunto: ass }) => ass === assunto);
+  if (from === 'Devoluções' && colaborador) dados = dados.filter(({ dono }) => dono === colaborador);
+  if (from === 'Entradas' && colaborador) dados = dados.filter(({ colaborador: colab }) => colab === colaborador);
+
+  if (estado === 'Excepto Arquivo') dados = dados.filter(({ nome }) => nome !== 'Arquivo');
+  else if (estado === 'Pendente') dados = dados.filter(({ motivo }) => motivo);
+  else if (estado === 'Excepto Pendente') dados = dados.filter(({ motivo }) => !motivo);
+  else if (estado) dados = dados.filter(({ nome }) => nome === estado);
+
   if (filter) {
     dados = dados.filter(
       (row) =>
@@ -46,35 +40,25 @@ export function dadosList(array, colaboradores, uos, from) {
   const estadosList = [];
   const assuntosList = [];
   const colaboradoresList = [];
+
   array?.forEach((row) => {
-    const uo = uos?.find((item) => Number(item?.id) === Number(row?.uo_origem_id));
-    const colaborador = colaboradores?.find(
-      (item) => Number(item?.perfil_id) === Number(row?.dono) || Number(item?.perfil_id) === Number(row?.perfil_id)
-    );
-    const criado = colaboradores?.find((item) => Number(item?.perfil_id) === Number(row?.perfil_dono_id));
-    if (colaborador && !colaboradoresList.includes(colaborador?.perfil?.displayName)) {
-      colaboradoresList.push(colaborador?.perfil?.displayName);
-    }
-    if (row?.nome && !estadosList.includes(row?.nome)) {
-      estadosList.push(row?.nome);
-    }
-    if (row?.nome === 'Arquivo' && !estadosList.includes('Excepto Arquivo')) {
-      estadosList.push('Excepto Arquivo');
-    }
-    if (from === 'Por concluir' && row?.motivo && !estadosList.includes('Pendente')) {
-      estadosList.push('Pendente');
-    }
-    if (from === 'Por concluir' && row?.motivo && !estadosList.includes('Excepto Pendente')) {
+    const uo = uos?.find(({ id }) => id === Number(row?.uo_origem_id));
+    const criado = colaboradores?.find(({ id }) => id === Number(row?.perfil_dono_id));
+    const colaborador = colaboradores?.find(({ id }) => id === row?.dono || id === row?.perfil_id);
+    if (colaborador && !colaboradoresList.includes(colaborador?.label)) colaboradoresList.push(colaborador?.label);
+
+    if (row?.nome && !estadosList.includes(row?.nome)) estadosList.push(row?.nome);
+    if (row?.nome === 'Arquivo' && !estadosList.includes('Excepto Arquivo')) estadosList.push('Excepto Arquivo');
+    if (from === 'Por concluir' && row?.motivo && !estadosList.includes('Pendente')) estadosList.push('Pendente');
+    if (from === 'Por concluir' && row?.motivo && !estadosList.includes('Excepto Pendente'))
       estadosList.push('Excepto Pendente');
-    }
-    if (row?.assunto && !assuntosList.includes(row?.assunto)) {
-      assuntosList.push(row?.assunto);
-    }
+    if (row?.assunto && !assuntosList.includes(row?.assunto)) assuntosList.push(row?.assunto);
+
     dados.push({
       ...row,
       balcao: uo?.balcao || '',
-      dono: criado?.perfil?.displayName || row?.perfil_dono_id || '',
-      colaborador: colaborador?.perfil?.displayName || row?.dono || row?.perfil_id || '',
+      dono: criado?.label || row?.perfil_dono_id || '',
+      colaborador: colaborador?.label || row?.dono || row?.perfil_id || '',
       uoLabel: (uo && uo?.tipo === 'Agências' && `Agência ${uo?.label}`) || uo?.label || '',
     });
   });

@@ -53,7 +53,7 @@ export default function FormAnexosExterno({ dados }) {
       formData.append('fluxo_id', fluxo?.id);
       formData.append('canal', dadosStepper.canal);
       formData.append('referencia', dadosStepper.referencia);
-      formData.append('origem_id', values?.origem_id?.id);
+      formData.append('origem_id', dadosStepper?.origem_id?.id);
       formData.append('data_entrada', format(dadosStepper.data_entrada, 'yyyy-MM-dd'));
 
       // optional

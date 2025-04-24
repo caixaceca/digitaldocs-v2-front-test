@@ -53,9 +53,9 @@ export default function TableControle({ from }) {
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoC') || null);
   const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorC') || null);
 
+  const { cc, colaboradores, uos } = useSelector((state) => state.intranet);
   const { dadosControle, isLoading } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
-  const { cc, colaboradores, uos } = useSelector((state) => state.intranet);
   const uosList = useMemo(
     () => UosAcesso(uos, cc, isAdmin || isAuditoria, meusAmbientes, 'id'),
     [cc, isAdmin, isAuditoria, meusAmbientes, uos]
@@ -79,10 +79,10 @@ export default function TableControle({ from }) {
   });
 
   useEffect(() => {
-    if (uosList?.length > 0 && !uosList?.map((row) => row?.id)?.includes(uo?.id)) {
+    if (uosList?.length > 0 && !uosList?.map(({ id }) => id)?.includes(uo?.id)) {
       const currentUo =
-        uosList?.find((row) => row?.id === Number(localStorage.getItem('uoC'))) ||
-        uosList?.find((row) => row?.id === cc?.uo?.id) ||
+        uosList?.find(({ id }) => id === Number(localStorage.getItem('uoC'))) ||
+        uosList?.find(({ id }) => id === cc?.uo?.id) ||
         uosList[0];
       localStorage.setItem('uoC', currentUo.id || '');
       setUo(currentUo);
@@ -90,33 +90,36 @@ export default function TableControle({ from }) {
   }, [uosList, uo, cc?.uo?.id]);
 
   useEffect(() => {
-    if (uo?.id && dataValido(dataf) && dataValido(datai) && (from === 'Entradas' || from === 'Devoluções')) {
-      const dataFim = format(dataf, 'yyyy-MM-dd');
-      const dataInicio = format(datai, 'yyyy-MM-dd');
-      dispatch(getAll(from, { uoId: uo?.id, dataFim, dataInicio }));
+    if ((from === 'Entradas' || from === 'Devoluções') && uo?.id && dataValido(dataf) && dataValido(datai)) {
+      const periodo = { dataInicio: format(datai, 'yyyy-MM-dd'), dataFim: format(dataf, 'yyyy-MM-dd') };
+      dispatch(getAll(from, { item: 'dadosControle', uoId: uo?.id, ...periodo }));
     }
   }, [dispatch, uo?.id, datai, dataf, from]);
 
   useEffect(() => {
-    if (from === 'Trabalhados' && data && uo?.id && dataValido(data))
-      dispatch(getAll(from, { uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
+    if (from === 'Trabalhados' && uo?.id && dataValido(data))
+      dispatch(getAll(from, { item: 'dadosControle', uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
   }, [dispatch, uo?.id, data, from]);
 
   useEffect(() => {
-    if (from === 'Por concluir') dispatch(getAll(from, null));
+    if (from === 'Por concluir') dispatch(getAll(from, { item: 'dadosControle' }));
   }, [dispatch, from]);
 
+  const colaboradoresAcesso = useMemo(
+    () =>
+      from === 'Trabalhados'
+        ? ColaboradoresAcesso(colaboradores, cc, isAdmin || isAuditoria, meusAmbientes)
+        : ColaboradoresAcesso(colaboradores, cc, true, []),
+    [cc, from, colaboradores, isAdmin, isAuditoria, meusAmbientes]
+  );
   const dados = useMemo(
-    () => dadosList(dadosControle, colaboradores, uos, from),
-    [colaboradores, dadosControle, from, uos]
+    () => dadosList(dadosControle, colaboradoresAcesso, uos, from),
+    [colaboradoresAcesso, dadosControle, from, uos]
   );
   const dataFiltered = applySortFilter({
-    filter,
-    estado,
-    assunto,
-    colaborador,
     dados: dados?.dados,
     comparator: getComparator(order, orderBy),
+    ...{ from, filter, estado, assunto, colaborador },
   });
   const isNotFound = !dataFiltered.length;
 
@@ -124,10 +127,6 @@ export default function TableControle({ from }) {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, assunto, estado, colaborador, uo?.id, datai, dataf]);
-
-  const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.controle.root}/${id}?from=Controle`);
-  };
 
   return (
     <>
@@ -174,6 +173,7 @@ export default function TableControle({ from }) {
 
       <Card sx={{ p: 1 }}>
         <SearchToolbarEntradas
+          from={from}
           filter={filter}
           estado={estado}
           assunto={assunto}
@@ -184,14 +184,7 @@ export default function TableControle({ from }) {
           setColaborador={setColaborador}
           estadosList={dados?.estadosList || []}
           assuntosList={dados?.assuntosList || []}
-          colaboradoresList={
-            (from === 'Trabalhados' &&
-              ColaboradoresAcesso(dados?.colaboradoresList, cc, isAdmin || isAuditoria, meusAmbientes)?.map(
-                (row) => row?.label
-              )) ||
-            dados?.colaboradoresList ||
-            []
-          }
+          colaboradoresList={dados?.colaboradoresList || []}
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
@@ -213,13 +206,12 @@ export default function TableControle({ from }) {
                       <TableCell>{row?.assunto}</TableCell>
                       <TableCell>
                         {row?.nome || row?.estado_inicial}
-                        {row?.estado_final ? ` » ${row?.estado_final}` : ''}
                         {row?.motivo && (
                           <Label variant="ghost" color="warning" sx={{ ml: 1 }}>
                             PENDENTE: {row?.motivo}
                           </Label>
                         )}
-                        {row?.trabalhado_em && (
+                        {row?.trabalhado_em && from === 'Por concluir' && (
                           <Criado
                             caption
                             tipo="data"
@@ -230,15 +222,21 @@ export default function TableControle({ from }) {
                       </TableCell>
                       {from === 'Devoluções' && <TableCell>{row?.motivo || row?.observacao}</TableCell>}
                       <TableCell width={10}>
-                        {(row?.criado_em || row?.data_transicao) && (
-                          <Criado caption tipo="data" value={ptDateTime(row.criado_em || row?.data_transicao)} />
-                        )}
-                        {row?.colaborador && <Criado caption tipo="user" value={row.colaborador} baralhar />}
-                        {row?.uoLabel && <Criado caption tipo="company" value={row.uoLabel} />}
+                        <Criado caption tipo="data" value={ptDateTime(row.criado_em || row?.data_transicao)} />
+                        <Criado
+                          baralhar
+                          value={row.colaborador}
+                          caption={from !== 'Trabalhados'}
+                          tipo={from === 'Trabalhados' ? '' : 'user'}
+                        />
+                        <Criado caption tipo="company" value={row.uoLabel} />
                       </TableCell>
 
                       <TableCell align="center">
-                        <DefaultAction label="DETALHES" onClick={() => handleView(row?.id)} />
+                        <DefaultAction
+                          label="DETALHES"
+                          onClick={() => navigate(`${PATH_DIGITALDOCS.controle.root}/${row?.id}?from=Controle`)}
+                        />
                       </TableCell>
                     </TableRow>
                   ))
@@ -319,21 +317,17 @@ export function ResumoTrabalhados({ dados = [], assunto = '', colaborador = '', 
 
 function tableHeaders(item) {
   return [
-    { id: item === 'Devoluções' ? 'entrada' : 'nentrada', label: 'Nº', align: 'left' },
-    { id: 'titular', label: 'Titular', align: 'left' },
-    { id: 'entidades', label: 'Cliente/Entidade', align: 'left' },
-    { id: 'assunto', label: 'Assunto', align: 'left' },
-    {
-      id: item === 'Devoluções' ? 'estado_inicial' : 'nome',
-      label: item === 'Devoluções' ? 'Origem' : 'Estado',
-      align: 'left',
-    },
-    ...((item === 'Por concluir' && [{ id: 'colaborador', label: 'Criado', align: 'left' }]) ||
-      (item === 'Entradas' && [{ id: 'criado_em', label: 'Criado', align: 'left' }]) ||
-      (item === 'Trabalhados' && [{ id: 'trabalhado_em', label: 'Trabalhado em', align: 'left' }]) ||
+    { id: item === 'Devoluções' ? 'entrada' : 'nentrada', label: 'Nº' },
+    { id: 'titular', label: 'Titular' },
+    { id: 'entidades', label: 'Cliente' },
+    { id: 'assunto', label: 'Assunto' },
+    { id: item === 'Devoluções' ? 'estado_inicial' : 'nome', label: item === 'Devoluções' ? 'Origem' : 'Estado atual' },
+    ...((item === 'Por concluir' && [{ id: 'colaborador', label: 'Criado por' }]) ||
+      (item === 'Entradas' && [{ id: 'criado_em', label: 'Criado em' }]) ||
+      (item === 'Trabalhados' && [{ id: 'colaborador', label: 'Trabalhado por' }]) ||
       (item === 'Devoluções' && [
-        { id: 'observacao', label: 'Motivo', align: 'left' },
-        { id: 'data_transicao', label: 'Devolvido em', align: 'left' },
+        { id: 'observacao', label: 'Motivo' },
+        { id: 'data_transicao', label: 'Devolvido em' },
       ]) ||
       []),
     { id: '', width: 10 },

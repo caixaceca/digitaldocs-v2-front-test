@@ -52,9 +52,7 @@ export default function PageProcesso() {
 
   const { perfilId } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
-  const { processos, done, pdfPreview, isOpenModal, isLoading, isLoadingFile } = useSelector(
-    (state) => state.digitaldocs
-  );
+  const { processos, done, pdfPreview, isOpenModal, isLoadingFile } = useSelector((state) => state.digitaldocs);
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
   const linkNavigate = useMemo(
     () =>
@@ -136,17 +134,14 @@ export default function PageProcesso() {
     }
 
     if (processo && (isAdmin || isAuditoria)) {
-      tabs.push(
-        { value: 'Versões', component: <Versoes id={id} /> },
-        { value: 'Visualizações', component: <Views id={id} isLoading={isLoading} /> }
-      );
+      tabs.push({ value: 'Versões', component: <Versoes id={id} /> }, { value: 'Visualizações', component: <Views /> });
     }
 
     return tabs;
-  }, [id, isAdmin, isAuditoria, processo, estado, isLoading, handleAceitar]);
+  }, [id, isAdmin, isAuditoria, processo, estado, handleAceitar]);
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
+    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
   }, [tabsList, currentTab]);
 
   const irParaProcesso = (idProcesso) => {
@@ -193,14 +188,13 @@ export default function PageProcesso() {
                     <>{acessoDesarquivar ? <Desarquivar id={id} /> : ''}</>
                   ) : (
                     <>
-                      {/* Transição em série */}
+                      {/* EM SÉRIE */}
                       {estado && processo?.estados?.length === 0 && (
                         <>
-                          {/* Aceitar/Atribuir/Intervir */}
                           {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
                             <>
                               {estado?.is_lock && processo?.atribuidoAMim && <Intervencao />}
-                              {!processo?.atribuidoAMim && estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
+                              {estado?.is_lock && !processo?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
                                 <Libertar dados={{ id, estadoId }} />
                               )}
                               {!estado?.is_lock && (!processo?.perfilAtribuido || processo?.atribuidoAMim) && (
@@ -219,19 +213,19 @@ export default function PageProcesso() {
                             !ultimaTransicao?.pareceres?.length &&
                             perfilId === ultimaTransicao?.perfil_id &&
                             pertencoEstadoId(meusAmbientes, ultimaTransicao?.estado_inicial_id) &&
-                            !estado?.pareceres?.some((row) => row?.parecer_em) && (
+                            !estado?.pareceres?.some(({ parecer_em: parecer }) => parecer) && (
                               <Resgatar dados={{ id, fluxoId, estadoId: ultimaTransicao?.estado_inicial_id }} />
                             )}
                         </>
                       )}
 
-                      {/* Transição em paralelo */}
+                      {/* EM PARALELO */}
                       {processo?.estados?.length > 0 && pertencoEstadoId(meusAmbientes, estadoId) && (
                         <>
                           {estado?.is_lock && processo?.atribuidoAMim && (
                             <>
                               <Libertar dados={{ id, estadoId }} />
-                              {processo?.estados?.find((row) => row?.parecer_em) ? (
+                              {processo?.estados?.find(({ parecer_em: parecer }) => parecer) ? (
                                 <Cancelar id={id} estadoId={estadoId} fechar />
                               ) : (
                                 <Cancelar id={id} estadoId={estadoId} />
@@ -250,7 +244,7 @@ export default function PageProcesso() {
             </Stack>
           }
         />
-        <Card sx={{ height: 1 }}>
+        <Card>
           <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
           <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
         </Card>

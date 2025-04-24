@@ -40,16 +40,16 @@ const slice = createSlice({
   initialState,
   reducers: {
     resetProcesso(state) {
-      state.objectURLs = [];
       state.processo = null;
       state.filePreview = null;
       state.objectURLs.forEach(URL.revokeObjectURL);
+      state.objectURLs = [];
     },
 
     getListaProcessosSuccess(state, action) {
-      const { item, ha_mais: mais, proximo_cursor: proximo, objeto: dados } = action.payload;
+      const { item, ha_mais: mais, proximo_cursor: proximo, objeto } = action.payload;
       state.processosInfo = mais && proximo ? proximo : null;
-      state[item] = [...state[item], ...(dados || [])];
+      state[item] = [...state[item], ...(objeto || [])];
     },
 
     getSuccess(state, action) {
@@ -76,46 +76,30 @@ const slice = createSlice({
       state.processo[item] = dados;
     },
 
-    resgatarSuccess(state, action) {
-      state.processo.preso = true;
-      state.processo.perfil_id = action.payload.perfil_id;
-      state.processo.estado_atual = action.payload.estado_atual;
-      state.processo.estado_atual_id = action.payload.estado_atual_id;
-      state.processo.data_ultima_transicao = action.payload.data_ultima_transicao;
-      state.processo.estado_processo = {
-        is_lock: true,
-        perfil_id: action.payload.perfil_id,
-        estado: action.payload.estado_atual,
-        estado_id: action.payload.estado_atual_id,
-        data_entrada: action.payload.data_ultima_transicao,
-      };
-      state.isLoadingP = false;
-    },
-
     getFileSuccess(state, action) {
       const { url, parecerId, estadoId, anexo } = action.payload;
       if (url) state.objectURLs.push(url);
       if (!state.processo) return;
 
       const updateNestedAnexo = (container, estadoId, parecerId, anexoValue, url) => {
-        const transicaoIndex = container.findIndex((item) => item.id === estadoId);
+        const transicaoIndex = container.findIndex(({ id }) => id === estadoId);
         if (transicaoIndex === -1) return;
 
         const { pareceres } = container[transicaoIndex];
         if (!Array.isArray(pareceres)) return;
 
-        const parecerIndex = pareceres.findIndex((item) => item.id === parecerId);
+        const parecerIndex = pareceres.findIndex(({ id }) => id === parecerId);
         if (parecerIndex === -1) return;
 
         const { anexos } = pareceres[parecerIndex];
         if (!Array.isArray(anexos)) return;
 
-        const anexoIndex = anexos.findIndex((item) => item.anexo === anexoValue);
+        const anexoIndex = anexos.findIndex(({ anexo }) => anexo === anexoValue);
         if (anexoIndex !== -1) anexos[anexoIndex].url = url;
       };
 
       const updateDirectAnexo = (container, estadoId, anexoValue, url) => {
-        const transicaoIndex = container.findIndex((item) => item.id === estadoId);
+        const transicaoIndex = container.findIndex(({ id }) => id === estadoId);
         if (transicaoIndex === -1) return;
 
         const { anexos } = container[transicaoIndex];
@@ -133,7 +117,7 @@ const slice = createSlice({
           updateNestedAnexo(state.processo.htransicoes, estadoId, parecerId, anexo, url);
 
         if (state.processo.estado_processo && Array.isArray(state.processo.estado_processo.pareceres)) {
-          const parecerIndex = state.processo.estado_processo.pareceres.findIndex((item) => item.id === parecerId);
+          const parecerIndex = state.processo.estado_processo.pareceres.findIndex(({ id }) => id === parecerId);
           if (parecerIndex !== -1) {
             const { anexos } = state.processo.estado_processo.pareceres[parecerIndex];
             if (Array.isArray(anexos)) {
@@ -158,7 +142,7 @@ const slice = createSlice({
         state.processo.estado_processo.is_lock = true;
         state.processo.estado_processo.perfil_id = action.payload.perfilId;
       } else {
-        const index = state.processo.estados.findIndex((row) => row.estado_id === action.payload.estadoId);
+        const index = state.processo.estados.findIndex(({ estado_id: id }) => id === action.payload.estadoId);
         if (index !== -1) {
           state.processo.estados[index].is_lock = true;
           state.processo.estados[index].perfil_id = action.payload.perfilId;
@@ -167,7 +151,7 @@ const slice = createSlice({
     },
 
     alterarBalcaopSuccess(state, action) {
-      const index = state.cartoes.findIndex((row) => row.id === action.payload.id);
+      const index = state.cartoes.findIndex(({ id }) => id === action.payload.id);
       if (index !== -1) state.cartoes[index].balcao_entrega = action.payload.balcao;
     },
 
@@ -183,14 +167,14 @@ const slice = createSlice({
       if (isProcesso) {
         updateAnexoStatus(state.processo?.anexos);
       } else if (individual === 'true') {
-        const estado = state.processo?.estados?.find((item) => item.id === estadoId);
+        const estado = state.processo?.estados?.find(({ id }) => id === estadoId);
         if (estado && Array.isArray(estado.pareceres)) {
-          const parecer = estado.pareceres.find((item) => item.id === parecerId);
+          const parecer = estado.pareceres.find(({ id }) => id === parecerId);
           if (parecer) updateAnexoStatus(parecer.anexos);
         }
         updateAnexoStatus(state.selectedItem?.anexos);
       } else {
-        const estado = state.processo?.estados?.find((item) => item.id === estadoId);
+        const estado = state.processo?.estados?.find(({ id }) => id === estadoId);
         if (estado) updateAnexoStatus(estado.anexos);
         updateAnexoStatus(state.selectedItem?.anexos);
       }
@@ -228,42 +212,21 @@ export function getAll(item, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
+      const apiUrl =
+        (item === 'Por concluir' && `/v1/processos/porconcluir/${perfilId}`) ||
+        (item === 'Trabalhados' && `/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`) ||
+        (item === 'Entradas' &&
+          `/v1/entradas/agencias/intervalo/${params?.uoId}/${perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`) ||
+        (item === 'Devoluções' &&
+          `/v2/processos/ht_devolvidos?perfil_cc_id=${perfilId}&uo_id=${params?.uoId}&apartir_de=${params?.dataInicio}&ate=${params?.dataFim}`) ||
+        '';
+      if (apiUrl) {
+        dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
+        const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
+        dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
+      }
+
       switch (item) {
-        case 'Entradas': {
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', tipo: [] }));
-          const response = await axios.get(
-            `${BASEURLDD}/v1/entradas/agencias/intervalo/${params?.uoId}/${perfilId}?diai=${params?.dataInicio}&diaf=${params?.dataFim}`,
-            options
-          );
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
-          break;
-        }
-        case 'Devoluções': {
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
-          const response = await axios.get(
-            `${BASEURLDD}/v2/processos/ht_devolvidos?perfil_cc_id=${perfilId}&uo_id=${params?.uoId}&apartir_de=${params?.dataInicio}&ate=${params?.dataFim}`,
-            options
-          );
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
-          break;
-        }
-        case 'Por concluir': {
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
-          const response = await axios.get(`${BASEURLDD}/v1/processos/porconcluir/${perfilId}`, options);
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
-          break;
-        }
-        case 'Trabalhados': {
-          dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
-          if (params?.uoId) {
-            const response = await axios.get(
-              `${BASEURLDD}/v1/entradas/trabalhados/uo/${params?.uoId}?qdia=${params?.data}`,
-              options
-            );
-            dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
-          }
-          break;
-        }
         case 'arquivos': {
           const response = await axios.get(
             `${BASEURLDD}/v2/arquivos/${perfilId}?apartir_de=${params?.data}&pagina=${params?.pagina}`,
@@ -333,18 +296,18 @@ export function getListaProcessos(item, params) {
 
       const queryParams = new URLSearchParams({
         cursor: params?.cursor ?? 0,
-        ...(params?.estadoId ? { estado_id: params?.estadoId } : null),
+        ...(params?.uo ? { uo_id: params?.uo } : null),
         ...(params?.fluxoId ? { fluxo_id: params?.fluxoId } : null),
-        ...(params?.perfilId ? { perfil_id: params?.perfilId } : null),
         ...(params?.situacao ? { situacao: params?.situacao } : null),
-        ...(params?.fromArquivo ? { em_arquivo: params?.fromArquivo } : null),
-        ...(params?.chave ? { search_param: params?.chave } : null),
+        ...(params?.estadoId ? { estado_id: params?.estadoId } : null),
+        ...(params?.perfilId ? { perfil_id: params?.perfilId } : null),
         ...(params?.conta ? { conta: params?.conta } : null),
         ...(params?.cliente ? { cliente: params?.cliente } : null),
+        ...(params?.chave ? { search_param: params?.chave } : null),
         ...(params?.entidade ? { entidade: params?.entidade } : null),
-        ...(params?.noperacao ? { noperacao: params?.noperacao } : null),
         ...(params?.nentrada ? { nentrada: params?.nentrada } : null),
-        ...(params?.uo ? { uo_id: params?.uo } : null),
+        ...(params?.noperacao ? { noperacao: params?.noperacao } : null),
+        ...(params?.fromArquivo ? { em_arquivo: params?.fromArquivo } : null),
         ...(params?.segmento
           ? { segmento: (params?.segmento === 'Particulares' && 'P') || (params?.segmento === 'Empresas' && 'E') }
           : null),
@@ -370,9 +333,8 @@ export function getListaProcessos(item, params) {
       if (!apiUrl) return;
 
       const response = await axios.get(`${BASEURLDD}${apiUrl}?${queryParams}`, options);
-      if (item === 'con')
-        dispatch(slice.actions.getListaProcessosSuccess({ item: 'dadosControle', objeto: response.data }));
-      else dispatch(slice.actions.getListaProcessosSuccess({ item: params?.item || item, ...response.data }));
+      const dados = item === 'con' ? { objeto: response.data } : response.data;
+      dispatch(slice.actions.getListaProcessosSuccess({ item: params?.item || item, ...dados }));
       params?.afterSuccess?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -400,17 +362,12 @@ export function getProcesso(item, params) {
       );
 
       if (!data?.objeto) return;
-      const processo = processarEstadoProcesso(data.objeto, perfilId);
-      dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+      const processo = processarProcesso(data.objeto, perfilId, dispatch);
       dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
 
       const anexoPreview = (processo.anexos || []).find((item) => item?.ativo && canPreview(item));
       if (anexoPreview)
         dispatch(getAnexo('filePreview', { anexo: { ...anexoPreview, tipoDoc: canPreview(anexoPreview) } }));
-      if (processo.estado_processo?.is_lock && processo.estado_processo?.estado_id && processo.atribuidoAMim)
-        dispatch(getInfoProcesso('destinos', { id: processo.id, estadoId: processo.estado_processo.estado_id }));
-
-      dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -476,11 +433,8 @@ export function getInfoProcesso(item, params) {
         if (apiUrl) {
           const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
           if (item === 'resgatar' || item === 'aceitar') {
-            const processo = processarEstadoProcesso(response.data.objeto, perfilId);
-            dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+            processarProcesso(response.data.objeto, perfilId, dispatch);
           } else dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
-          if (params?.modo === 'serie')
-            dispatch(getInfoProcesso('destinos', { id: params?.id, estadoId: params?.estadoId }));
         }
       }
     } catch (error) {
@@ -663,8 +617,7 @@ export function updateItem(item, dados, params) {
       if (item === 'processo') {
         const response = await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
         if (params?.garantias) dispatch(createItem('garantias', params?.garantias, { processoId: params?.id }));
-        const processo = processarEstadoProcesso(response.data.objeto, perfilId);
-        dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+        processarProcesso(response.data.objeto, perfilId, dispatch);
       }
       params?.afterSuccess?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
@@ -711,7 +664,7 @@ export function deleteItem(item, params) {
 
 // ----------------------------------------------------------------------
 
-function processarEstadoProcesso(processo, perfilId) {
+function processarProcesso(processo, perfilId, dispatch) {
   const {
     preso,
     estados = [],
@@ -742,6 +695,11 @@ function processarEstadoProcesso(processo, perfilId) {
   const estado = processo.estado_processo;
   processo.perfilAtribuido = estado?.perfil_id || '';
   processo.atribuidoAMim = estado?.perfil_id === perfilId;
+
+  dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+  if (processo.estado_processo?.is_lock && processo.estado_processo?.estado_id && processo.atribuidoAMim)
+    dispatch(getInfoProcesso('destinos', { id: processo.id, estadoId: processo.estado_processo.estado_id }));
+  dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
 
   return processo;
 }

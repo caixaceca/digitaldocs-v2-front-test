@@ -46,6 +46,7 @@ export default function CreditoForm({ onCancel }) {
     finalidade: Yup.string().required().label('Finalidade'),
     taxa_taeg: Yup.number().min(0).required().label('Taxa TAEG'),
     tipo_titular_id: Yup.mixed().required().label('Tipo de titular'),
+    conta_do_renda: Yup.number().min(0).required().label('Conta DO débito'),
     valor_juro: Yup.number().min(0).required().label('Valor total de juros'),
     taxa_imposto_selo: Yup.number().min(0).required().label('Taxa imposto de selo'),
     prazo_contratual: Yup.number().positive(0).required().label('Prazo contratual'),
@@ -63,6 +64,7 @@ export default function CreditoForm({ onCancel }) {
       valor_juro: credito?.valor_juro ?? '',
       isento_comissao: !!credito?.isento_comissao,
       valor_comissao: credito?.valor_comissao ?? '',
+      conta_do_renda: credito?.conta_do_renda ?? '',
       meses_vencimento: credito?.meses_vencimento ?? 0,
       prazo_contratual: credito?.prazo_contratual ?? '',
       taxa_imposto_selo: credito?.taxa_imposto_selo ?? 0,
@@ -105,10 +107,13 @@ export default function CreditoForm({ onCancel }) {
               <RHFAutocompleteObj dc name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
             </GridItem>
             <GridItem sm={8} children={<RHFTextField label="Finalidade" name="finalidade" />} />
-            <GridItem xs={6} sm={4}>
+            <GridItem xs={6} sm={6} md={4}>
+              <RHFNumberField noFormat label="Conta DO débito" name="conta_do_renda" />
+            </GridItem>
+            <GridItem xs={6} sm={3} md={2}>
               <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
             </GridItem>
-            <GridItem xs={6} md={4}>
+            <GridItem xs={6} sm={3} md={2}>
               <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
             </GridItem>
             <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
@@ -139,7 +144,7 @@ export default function CreditoForm({ onCancel }) {
               <RHFDatePicker name="data_vencimento_prestacao1" label="Venc. 1ª prestação" />
             </GridItem>
           </Grid>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>
       </DialogContent>
     </Dialog>

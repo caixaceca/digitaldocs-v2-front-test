@@ -122,16 +122,16 @@ export function getFromIntranet(item, params) {
         const colaboradores = await axios.get(`${BASEURL}/colaborador`, options);
         const perfis = await axios.get(`${BASEURL}/perfil`, options);
         const colaboradoresPerfis = colaboradores.data
-          ?.filter((_) => _?.is_active)
+          // ?.filter(({ is_active: ativo }) => ativo)
           ?.map((row) => ({
             ...row,
             nome: row?.perfil?.displayName,
-            perfil: perfis?.data?.find((item) => Number(item?.id) === Number(row?.perfil_id)) || row?.perfil,
+            perfil: perfis?.data?.find(({ id }) => Number(id) === Number(row?.perfil_id)) || row?.perfil,
           }));
         dispatch(slice.actions.getSuccess({ item, dados: colaboradoresPerfis, label: 'nome' }));
 
         // USERS PRESENCE
-        const ids = perfis?.data?.filter((row) => row?.id_aad)?.map((item) => item?.id_aad);
+        const ids = perfis?.data?.filter(({ id_aad: idAd }) => idAd)?.map(({ id_aad: id }) => id);
         if (ids?.length > 0) {
           const presences = await axios.post(
             `https://graph.microsoft.com/v1.0/communications/getPresencesByUserId`,
@@ -144,7 +144,7 @@ export function getFromIntranet(item, params) {
               label: 'nome',
               dados: colaboradoresPerfis?.map((row) => ({
                 ...row,
-                presence: presences.data?.value?.find((item) => item?.id === row?.perfil?.id_aad) || null,
+                presence: presences.data?.value?.find(({ id }) => id === row?.perfil?.id_aad) || null,
               })),
             })
           );
@@ -165,11 +165,8 @@ export function getFromIntranet(item, params) {
           '';
         if (apiUrl) {
           const response = await axios.get(apiUrl, options);
-          if (item === 'disposicao') {
-            dispatch(slice.actions.getSuccess({ item, dados: !!response.data }));
-          } else {
-            dispatch(slice.actions.getSuccess({ item, dados: response.data, label: params?.label || '' }));
-          }
+          if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: !!response.data }));
+          else dispatch(slice.actions.getSuccess({ item, dados: response.data, label: params?.label || '' }));
         }
       }
     } catch (error) {

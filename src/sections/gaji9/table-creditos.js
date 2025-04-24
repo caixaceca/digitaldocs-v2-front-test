@@ -79,12 +79,8 @@ export default function TableCredito() {
       <Card sx={{ p: 1 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
           <SearchAutocomplete
-            label="Balcão"
-            value={balcao}
-            dados={balcoes}
             disableClearable
-            valuel="balcaoCred"
-            setValue={setBalcao}
+            options={{ label: 'Balcão', value: balcao, dados: balcoes, valuel: 'balcaoCred', setValue: setBalcao }}
           />
           <Stack sx={{ flexGrow: 1, width: 1 }}>
             <SearchToolbarSimple item="filterCredito" filter={filter} setFilter={setFilter} />

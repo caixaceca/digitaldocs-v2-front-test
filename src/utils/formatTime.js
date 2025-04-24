@@ -1,38 +1,21 @@
-import {
-  add,
-  format,
-  isSameYear,
-  isSameMonth,
-  formatDistance,
-  formatDistanceToNow,
-  formatDistanceStrict,
-} from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { add, format, isSameYear, isSameMonth, formatDistance, formatDistanceToNow } from 'date-fns';
 
 // ----------------------------------------------------------------------
 
 export function formatDate(date, newFormat) {
+  if (!date) return '';
   const fm = newFormat || 'dd MMM yyyy';
   return date ? format(add(new Date(date), { hours: 2 }), fm, { locale: pt }) : '';
 }
 
-export function fDate(date) {
-  return format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: pt });
-}
-
-export function padraoDate(date) {
-  return format(add(new Date(date), { hours: 2 }), 'yyyy-MM-dd', { locale: pt });
-}
-
-export function fMShortYear(date) {
-  return format(add(new Date(date), { hours: 2 }), 'MMM yyyy', { locale: pt });
-}
-
 export function fMonthYear(date) {
+  if (!date) return '';
   return format(add(new Date(date), { hours: 2 }), "MMMM 'de' yyyy", { locale: pt });
 }
 
 export function fYear(date) {
+  if (!date) return '';
   return format(add(new Date(date), { hours: 2 }), 'yyyy', { locale: pt });
 }
 
@@ -47,6 +30,7 @@ export function ptDate(date) {
 }
 
 export function ptTime(date) {
+  if (!date) return '';
   return format(new Date(date), 'HH:mm', { locale: pt });
 }
 
@@ -64,22 +48,6 @@ export function dataMaior(date, date1) {
   const x = new Date(date);
   const y = new Date(date1);
   return x.getTime() - y.getTime() > 0;
-}
-
-export function dataPadrao(data) {
-  return `${data?.toString()?.substr(0, 4)}-${data?.toString()?.substr(0, 6)?.substr(4)}-${data
-    ?.toString()
-    ?.substr(6)}`;
-}
-
-export function dataPadraoPt(data) {
-  return `${data?.toString()?.substr(6)}/${data?.toString()?.substr(0, 6)?.substr(4)}/${data
-    ?.toString()
-    ?.substr(0, 4)}`;
-}
-
-export function formatDistanceStrict_(date, date1) {
-  return formatDistanceStrict(new Date(date), new Date(date1), { unit: 'year', locale: pt });
 }
 
 export function dataLabel(dataInicial, dataFinal) {

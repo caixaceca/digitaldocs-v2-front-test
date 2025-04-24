@@ -61,12 +61,12 @@ export default function TableProcessos({ from }) {
   const { isLoading, processosInfo, processos } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
 
-  const perfisProcessos = useMemo(() => [...new Set(processos.map((p) => p.perfil_id))], [processos]);
+  const perfisProcessos = useMemo(() => [...new Set(processos.map(({ perfil_id: pid }) => pid))], [processos]);
   const colaboradoresList = useMemo(
     () =>
       colaboradores
-        ?.filter((row) => perfisProcessos?.includes(row?.perfil_id))
-        ?.map((item) => ({ id: item?.perfil_id, label: item?.nome })),
+        ?.filter(({ perfil_id: pid }) => perfisProcessos?.includes(pid))
+        ?.map(({ perfil_id: pid, nome }) => ({ id: pid, label: nome })),
     [colaboradores, perfisProcessos]
   );
 
@@ -121,11 +121,11 @@ export default function TableProcessos({ from }) {
         heading={from}
         sx={{ px: 1 }}
         action={
-          <Stack direction="row" spacing={0.75}>
-            {meusAmbientes?.find(({ isinicial }) => isinicial) && (
+          meusAmbientes?.find(({ isinicial }) => isinicial) && (
+            <Stack direction="row" spacing={0.75}>
               <AddItem onClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
-            )}
-          </Stack>
+            </Stack>
+          )
         }
       />
       <Card sx={{ p: 1 }}>

@@ -245,13 +245,7 @@ export default function TableCartoes() {
       />
 
       <Card sx={{ p: 1 }}>
-        <SearchToolbarCartoes
-          filter={filter}
-          setFilter={setFilter}
-          tipoCartao={tipoCartao}
-          tiposCartao={tiposCartao}
-          setTipoCartao={setTipoCartao}
-        />
+        <SearchToolbarCartoes options={{ filter, setFilter, tipoCartao, tiposCartao, setTipoCartao }} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
