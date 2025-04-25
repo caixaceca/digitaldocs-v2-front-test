@@ -73,8 +73,8 @@ const slice = createSlice({
       actionDelete(state, action.payload);
     },
 
-    contratoGerado(state) {
-      state.credito.contratado = true;
+    setContratado(state, action) {
+      state.credito.contratado = action.payload;
     },
 
     setModal(state, action) {
@@ -233,7 +233,7 @@ export function getDocumento(item, params) {
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
         if (item === 'gerar-contrato') {
           dispatch(getFromGaji9('contratos', { id: params?.creditoId }));
-          dispatch(slice.actions.contratoGerado());
+          dispatch(slice.actions.setContratado(true));
         }
       }
     } catch (error) {
@@ -419,6 +419,8 @@ export function deleteItem(item, params) {
         (item === 'clausulaMinuta' && `${BASEURLGAJI9}/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
         (item === 'componentesMinuta' &&
           `${BASEURLGAJI9}/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
+        (item === 'contratos' &&
+          `${BASEURLGAJI9}/v1/contratos/credito?credito_id=${params?.creditoId}&contrato_id=${params?.id}`) ||
         (item === 'intervenientes' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/intervenientes?credito_id=${params?.id}&participante_id=${params?.numero}`) ||
         (item === 'eliminarRegra' &&
@@ -428,6 +430,7 @@ export function deleteItem(item, params) {
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         const response = await axios.delete(apiUrl, options);
+        if (item === 'contratos') dispatch(slice.actions.setContratado(false));
         if (item === 'eliminarRegra') {
           const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));

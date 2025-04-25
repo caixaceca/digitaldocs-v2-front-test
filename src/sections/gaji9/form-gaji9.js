@@ -23,6 +23,7 @@ import {
   FormProvider,
   RHFTextField,
   RHFDatePicker,
+  RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../components/hook-form';
@@ -46,10 +47,10 @@ export function ProdutoForm({ onCancel }) {
   const formSchema = Yup.object().shape({ codigo: !isEdit && Yup.string().required().label('Código') });
   const defaultValues = useMemo(
     () => ({
-      id: selectedItem?.id || '',
-      codigo: selectedItem?.codigo || '',
-      rotulo: selectedItem?.rotulo || '',
-      descritivo: selectedItem?.descritivo || '',
+      id: selectedItem?.id ?? '',
+      codigo: selectedItem?.codigo ?? '',
+      rotulo: selectedItem?.rotulo ?? '',
+      descritivo: selectedItem?.descritivo ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
     }),
     [selectedItem, isEdit]
@@ -67,13 +68,8 @@ export function ProdutoForm({ onCancel }) {
   const onSubmit = async () => {
     const params = { values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, afterSuccess: () => onCancel() };
     if (isEdit) {
-      dispatch(
-        updateItem(
-          'componentes',
-          JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]),
-          params
-        )
-      );
+      const formData = JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]);
+      dispatch(updateItem('componentes', formData, params));
     } else {
       dispatch(createItem('componentes', JSON.stringify({ codigo: values?.codigo }), params));
     }
@@ -116,9 +112,9 @@ export function TipoTitularForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      codigo: selectedItem?.codigo || '',
+      codigo: selectedItem?.codigo ?? '',
       consumidor: !!selectedItem?.consumidor,
-      descritivo: selectedItem?.descritivo || '',
+      descritivo: selectedItem?.descritivo ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
     }),
     [selectedItem, isEdit]
@@ -175,9 +171,9 @@ export function GarantiaForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      codigo: selectedItem?.codigo || '',
-      designacao: selectedItem?.designacao || '',
-      descritivo: selectedItem?.descritivo || '',
+      codigo: selectedItem?.codigo ?? '',
+      designacao: selectedItem?.designacao ?? '',
+      descritivo: selectedItem?.descritivo ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
     }),
     [selectedItem, isEdit]
@@ -237,14 +233,14 @@ export function FreguesiaForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      ilha: selectedItem?.ilha || '',
-      sigla: selectedItem?.sigla || '',
-      regiao: selectedItem?.regiao || '',
-      concelho: selectedItem?.concelho || '',
-      freguesia: selectedItem?.freguesia || '',
+      ilha: selectedItem?.ilha ?? '',
+      sigla: selectedItem?.sigla ?? '',
+      regiao: selectedItem?.regiao ?? '',
+      concelho: selectedItem?.concelho ?? '',
+      freguesia: selectedItem?.freguesia ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
-      freguesia_banca: selectedItem?.freguesia_banca || '',
-      naturalidade_banca: selectedItem?.naturalidade_banca || '',
+      freguesia_banca: selectedItem?.freguesia_banca ?? '',
+      naturalidade_banca: selectedItem?.naturalidade_banca ?? '',
     }),
     [selectedItem, isEdit]
   );
@@ -302,8 +298,8 @@ export function MarcadorForm({ onCancel }) {
 
   const defaultValues = useMemo(
     () => ({
-      sufixo: selectedItem?.sufixo || '',
-      prefixo: selectedItem?.prefixo || '',
+      sufixo: selectedItem?.sufixo ?? '',
+      prefixo: selectedItem?.prefixo ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
     }),
     [selectedItem, isEdit]
@@ -426,9 +422,9 @@ export function GrupoForm({ onCancel }) {
   });
   const defaultValues = useMemo(
     () => ({
-      email: selectedItem?.email || '',
-      descricao: selectedItem?.descricao || '',
-      designacao: selectedItem?.designacao || '',
+      email: selectedItem?.email ?? '',
+      descricao: selectedItem?.descricao ?? '',
+      designacao: selectedItem?.designacao ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
     }),
     [selectedItem, isEdit]
@@ -616,9 +612,9 @@ export function RecursoForm({ onCancel }) {
   });
   const defaultValues = useMemo(
     () => ({
-      nome: selectedItem?.nome || '',
+      nome: selectedItem?.nome ?? '',
       tipo: selectedItem?.tipo || null,
-      descricao: selectedItem?.descricao || '',
+      descricao: selectedItem?.descricao ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
     }),
     [selectedItem, isEdit]
@@ -826,22 +822,24 @@ export function RepresentanteForm({ onCancel }) {
     utilizador: Yup.mixed().required().label('Colaborador'),
     residencia: Yup.string().required().label('Residência'),
     cni: Yup.string().required().label('Doc. identificação'),
+    balcao: Yup.number().positive().required().label('Bacão'),
     local_emissao: Yup.string().required().label('Local emissão'),
     data_emissao: Yup.date().typeError().required().label('Data de nacimento'),
   });
 
   const defaultValues = useMemo(
     () => ({
-      bi: selectedItem?.bi || '',
-      nif: selectedItem?.nif || '',
-      cni: selectedItem?.cni || '',
-      nome: selectedItem?.nome || '',
-      funcao: selectedItem?.funcao || '',
-      atua_como: selectedItem?.atua_como || '',
+      bi: selectedItem?.bi ?? '',
+      nif: selectedItem?.nif ?? '',
+      cni: selectedItem?.cni ?? '',
+      nome: selectedItem?.nome ?? '',
+      funcao: selectedItem?.funcao ?? '',
+      balcao: selectedItem?.balcao ?? '',
+      atua_como: selectedItem?.atua_como ?? '',
       concelho: selectedItem?.concelho || null,
       freguesia: selectedItem?.freguesia || null,
-      residencia: selectedItem?.residencia || '',
-      observacao: selectedItem?.observacao || '',
+      residencia: selectedItem?.residencia ?? '',
+      observacao: selectedItem?.observacao ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
       local_emissao: selectedItem?.local_emissao || null,
       data_emissao: fillData(selectedItem?.data_emissao, null),
@@ -873,7 +871,6 @@ export function RepresentanteForm({ onCancel }) {
                   ...values,
                   sexo: values?.utilizador?.sexo,
                   email: values?.utilizador?.email,
-                  balcao: values?.utilizador?.balcao,
                   utilizador_id: values?.utilizador?.id,
                   estado_civil: values?.utilizador?.estado_civil,
                   data_emissao: values?.data_emissao ? format(values.data_emissao, 'yyyy-MM-dd') : null,
@@ -890,19 +887,23 @@ export function RepresentanteForm({ onCancel }) {
           <ItemComponent item={selectedItem} rows={5}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                <RHFAutocompleteObj
-                  name="utilizador"
-                  label="Colaborador"
-                  options={colaboradoresList}
-                  onChange={(event, newValue) => {
-                    setValue('utilizador', newValue, vsv);
-                    setValue('nome', newValue?.label || '', vsv);
-                    setValue('funcao', newValue?.funcao || '', vsv);
-                    setValue('atua_como', newValue?.funcao || '', vsv);
-                    setValue('concelho', newValue?.concelho || null, vsv);
-                    setValue('residencia', newValue?.residencia || '', vsv);
-                  }}
-                />
+                <Stack spacing={3} direction="row" sx={{ width: '100%' }}>
+                  <RHFAutocompleteObj
+                    name="utilizador"
+                    label="Colaborador"
+                    options={colaboradoresList}
+                    onChange={(event, newValue) => {
+                      setValue('utilizador', newValue, vsv);
+                      setValue('nome', newValue?.label ?? '', vsv);
+                      setValue('balcao', newValue?.balcao ?? '', vsv);
+                      setValue('funcao', newValue?.funcao ?? '', vsv);
+                      setValue('atua_como', newValue?.funcao ?? '', vsv);
+                      setValue('concelho', newValue?.concelho || null, vsv);
+                      setValue('residencia', newValue?.residencia ?? '', vsv);
+                    }}
+                  />
+                  <RHFNumberField label="Balcão" name="balcao" sx={{ maxWidth: 120 }} />
+                </Stack>
                 <RHFTextField name="nome" label="Nome completo" />
               </Stack>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
@@ -970,9 +971,6 @@ export function ItemComponent({ item, rows, children }) {
 
 export function submitDados(id, values, isEdit, dispatch, item, onCancel) {
   const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, afterSuccess: onCancel || null };
-  if (isEdit) {
-    dispatch(updateItem(item, JSON.stringify(values), params));
-  } else {
-    dispatch(createItem(item, JSON.stringify(values), params));
-  }
+  if (isEdit) dispatch(updateItem(item, JSON.stringify(values), params));
+  else dispatch(createItem(item, JSON.stringify(values), params));
 }

@@ -249,22 +249,12 @@ export function DataContrato({ creditoId, onCancel }) {
       : null;
 
   const onSubmit = async () => {
-    dispatch(
-      updateItem(
-        'datas contrato',
-        {
-          data_entrega: preencheData(values?.data_entrega, selectedItem?.data_entrega),
-          data_recebido: preencheData(values?.data_recebido, selectedItem?.data_recebido),
-        },
-        {
-          creditoId,
-          patch: true,
-          msg: 'Datas atualizado',
-          codigo: selectedItem?.codigo,
-          afterSuccess: () => onCancel(),
-        }
-      )
-    );
+    const params = { msg: 'Datas atualizado', codigo: selectedItem?.codigo, afterSuccess: () => onCancel() };
+    const datas = {
+      data_entrega: values?.data_entrega ? preencheData(values?.data_entrega, selectedItem?.data_entrega) : null,
+      data_recebido: values?.data_recebido ? preencheData(values?.data_recebido, selectedItem?.data_recebido) : null,
+    };
+    dispatch(updateItem('datas contrato', datas, { creditoId, patch: true, ...params }));
   };
 
   return (

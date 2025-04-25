@@ -18,7 +18,7 @@ export function gestaoContrato(funcao) {
   return funcao === 'ADMIN' || funcao === 'GERENTE';
 }
 
-export function actionAcessoGaji9(utilizador, permissoes) {
+export function gestaoCredito(utilizador, permissoes) {
   return gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, permissoes);
 }
 

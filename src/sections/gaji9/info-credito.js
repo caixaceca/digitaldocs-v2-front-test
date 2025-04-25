@@ -17,8 +17,8 @@ import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { noDados } from '../../utils/formatText';
+import { gestaoCredito } from '../../utils/validarAcesso';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { actionAcessoGaji9 } from '../../utils/validarAcesso';
 import { fCurrency, fPercent } from '../../utils/formatNumber';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
@@ -194,7 +194,7 @@ export function TableInfoCredito({ params, dados = [] }) {
   const { isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
-    if (tab === 'contratos' && actionAcessoGaji9(utilizador, ['READ_CONTRATO']))
+    if (tab === 'contratos' && gestaoCredito(utilizador, ['READ_CONTRATO']))
       dispatch(getFromGaji9('contratos', { id }));
   }, [dispatch, utilizador, tab, id]);
 
@@ -216,6 +216,16 @@ export function TableInfoCredito({ params, dados = [] }) {
 
   const downloadContrato = (codigo) => {
     dispatch(getDocumento('contrato', { codigo, titulo: `CONTRATO: ${codigo}` }));
+  };
+
+  const eliminarInterveniente = () => {
+    const params = { numero: selectedItem?.participante_id, getItem: 'credito', afterSuccess: () => openModal() };
+    dispatch(deleteItem('intervenientes', { id, msg: 'Interveniente eliminado', ...params }));
+  };
+
+  const eliminarContrato = () => {
+    const params = { creditoId: id, id: selectedItem?.id, afterSuccess: () => openModal() };
+    dispatch(deleteItem('contratos', { ...params, msg: 'Contrato eliminado' }));
   };
 
   return (
@@ -245,7 +255,14 @@ export function TableInfoCredito({ params, dados = [] }) {
                           <TableCell align="center" width={10}>
                             <Stack direction="row" spacing={0.75}>
                               <DefaultAction small label="CONTRATO" onClick={() => downloadContrato(row?.codigo)} />
-                              {actionAcessoGaji9(utilizador, ['CREATE_CONTRATO']) && (
+                              {gestaoCredito(utilizador, ['DELETE_CONTRATO']) && (
+                                <DefaultAction
+                                  small
+                                  label="ELIMINAR"
+                                  onClick={() => openModal('eliminar-contrato', row)}
+                                />
+                              )}
+                              {gestaoCredito(utilizador, ['CREATE_CONTRATO']) && (
                                 <DefaultAction small label="EDITAR" onClick={() => openModal('data-contrato', row)} />
                               )}
                               <DefaultAction small label="DETALHES" onClick={() => openModal('view-contrato', row)} />
@@ -275,12 +292,8 @@ export function TableInfoCredito({ params, dados = [] }) {
                             {row?.entidade_representada_nome ? ` - ${row?.entidade_representada_nome}` : ''}
                           </TableCell>
                           <TableCell align="center" width={10}>
-                            {!contratado && !row.mutuario && actionAcessoGaji9(utilizador, ['CREATE_CREDITO']) && (
-                              <DefaultAction
-                                small
-                                label="ELIMINAR"
-                                onClick={() => openModal('eliminar-interveniente', row)}
-                              />
+                            {!contratado && !row.mutuario && gestaoCredito(utilizador, ['CREATE_CREDITO']) && (
+                              <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-interv', row)} />
                             )}
                           </TableCell>
                         </TableRow>
@@ -306,34 +319,31 @@ export function TableInfoCredito({ params, dados = [] }) {
         )}
       </Card>
 
+      {modalGaji9 === 'eliminar-interv' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          onClose={() => openModal()}
+          handleOk={eliminarInterveniente}
+          desc="eliminar este interveniente"
+        />
+      )}
+      {modalGaji9 === 'eliminar-contrato' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          handleOk={eliminarContrato}
+          onClose={() => openModal()}
+          desc="eliminar este contrato"
+        />
+      )}
       {modalGaji9 === 'form-interveniente' && (
         <IntervenienteForm
           id={id}
-          onCancel={() => openModal('', null)}
+          onCancel={() => openModal()}
           dados={dados?.filter(({ mutuario, fiador }) => mutuario || fiador)}
         />
       )}
-      {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onCancel={() => openModal('', null)} />}
-      {modalGaji9 === 'view-contrato' && <DetalhesGaji9 closeModal={() => openModal('', null)} item="contrato" />}
-
-      {modalGaji9 === 'eliminar-interveniente' && (
-        <DialogConfirmar
-          isSaving={isSaving}
-          desc="eliminar este interveniente"
-          onClose={() => openModal('', null)}
-          handleOk={() =>
-            dispatch(
-              deleteItem('intervenientes', {
-                id,
-                getItem: 'credito',
-                msg: 'Interveniente eliminado',
-                numero: selectedItem?.participante_id,
-                afterSuccess: () => openModal('', null),
-              })
-            )
-          }
-        />
-      )}
+      {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onCancel={() => openModal()} />}
+      {modalGaji9 === 'view-contrato' && <DetalhesGaji9 closeModal={() => openModal()} item="contrato" />}
     </>
   );
 }
