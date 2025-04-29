@@ -292,14 +292,15 @@ export function InfoCon({ dados, valor, numero }) {
           <Typography variant="subtitle1">Dados do ordenante</Typography>
         </ListItem>
         <TextItem title="Nome:" text={dados?.ordenador} />
-        <TextItem
-          title="Tipo doc. identificação:"
-          text={dis?.find((row) => row.id === dados?.tipo_docid)?.label || dados?.tipo_docid}
-        />
-        <TextItem title="Nº doc. identificação:" text={dados?.docid} />
         <TextItem title="NIF:" text={dados?.nif} />
-        <TextItem title="Nome do Pai:" text={dados?.pai} />
-        <TextItem title="Nome da Mãe:" text={dados?.mae} />
+        <TextItem
+          title="Doc. identificação:"
+          text={`${dados?.docid}${dados?.tipo_docid ? ` (${dis?.find(({ id }) => id === dados?.tipo_docid)?.label || dados?.tipo_docid})` : ''}`}
+        />
+        <TextItem
+          title="Filiação:"
+          text={`${dados?.pai ?? ''}${dados?.pai && dados?.mae ? ' e ' : ''}${dados?.mae ?? ''}`}
+        />
         <TextItem
           title="Estado civil:"
           text={estadosCivis?.find((row) => row.id === dados?.estado_civil)?.label || dados?.estado_civil}

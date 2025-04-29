@@ -880,24 +880,28 @@ function EmptyRow({ segmento }) {
 function filterDados(dados, filter) {
   if (filter) {
     dados = dados.filter(
-      (row) =>
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1)
+      ({ titular, cliente }) =>
+        (titular && normalizeText(titular).indexOf(normalizeText(filter)) !== -1) ||
+        (cliente && normalizeText(cliente).indexOf(normalizeText(filter)) !== -1)
     );
   }
 
   return {
-    empresaConstrucao: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Construção'),
-    empresaTesouraria: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Tesouraria'),
-    empresaInvestimento: dados?.filter((row) => row?.segmento === 'Empresa' && row?.linha === 'Investimento'),
-    particularHabitacao: dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'Habitação'),
-    particularCrediCaixa: dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'CrediCaixa'),
-    particularOutros: dados?.filter((row) => row?.segmento === 'Particular' && row?.linha === 'Outros'),
-    piTesouraria: dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Tesouraria'),
-    piInvestimento: dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Investimento'),
-    piMicrocredito: dados?.filter((row) => row?.segmento === 'Produtor Individual' && row?.linha === 'Micro-Crédito'),
-    entidadesPublicas: dados?.filter((row) => row?.segmento === 'Entidade Pública'),
-    garantiaBancaria: dados?.filter((row) => row?.linha === 'Garantia Bancária'),
+    empresaConstrucao: dados?.filter(({ segmento, linha }) => segmento === 'Empresa' && linha === 'Construção'),
+    empresaTesouraria: dados?.filter(({ segmento, linha }) => segmento === 'Empresa' && linha === 'Tesouraria'),
+    empresaInvestimento: dados?.filter(({ segmento, linha }) => segmento === 'Empresa' && linha === 'Investimento'),
+    particularHabitacao: dados?.filter(({ segmento, linha }) => segmento === 'Particular' && linha === 'Habitação'),
+    particularCrediCaixa: dados?.filter(({ segmento, linha }) => segmento === 'Particular' && linha === 'CrediCaixa'),
+    particularOutros: dados?.filter(({ segmento, linha }) => segmento === 'Particular' && linha === 'Outros'),
+    piTesouraria: dados?.filter(({ segmento, linha }) => segmento === 'Produtor Individual' && linha === 'Tesouraria'),
+    piInvestimento: dados?.filter(
+      ({ segmento, linha }) => segmento === 'Produtor Individual' && linha === 'Investimento'
+    ),
+    piMicrocredito: dados?.filter(
+      ({ segmento, linha }) => segmento === 'Produtor Individual' && linha === 'Micro-Crédito'
+    ),
+    entidadesPublicas: dados?.filter(({ segmento }) => segmento === 'Entidade Pública'),
+    garantiaBancaria: dados?.filter(({ linha }) => linha === 'Garantia Bancária'),
   };
 }
 

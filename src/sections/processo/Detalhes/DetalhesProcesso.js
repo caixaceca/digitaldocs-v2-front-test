@@ -48,13 +48,10 @@ export default function DetalhesProcesso({ isPS, processo }) {
 
   const entidadesList = useMemo(() => entidadesParse(processo?.entidade), [processo?.entidade]);
   const devolvido = useMemo(() => processo?.htransicoes?.[0]?.modo === 'Devolução', [processo?.htransicoes]);
-  const origem = useMemo(() => origens?.find((row) => row?.id === processo?.origem_id), [origens, processo?.origem_id]);
-  const uo = useMemo(
-    () => uos?.find((row) => Number(row?.id) === Number(processo?.uo_origem_id)),
-    [processo?.uo_origem_id, uos]
-  );
+  const origem = useMemo(() => origens?.find(({ id }) => id === processo?.origem_id), [origens, processo?.origem_id]);
+  const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
   const criador = useMemo(
-    () => colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
+    () => colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
     [colaboradores, processo?.criador]
   );
 
@@ -198,28 +195,14 @@ export default function DetalhesProcesso({ isPS, processo }) {
             <TextItem
               title="Origem:"
               label={
-                <Stack spacing={0.75}>
+                <Stack>
                   {origem?.designacao && <Typography>{origem.designacao}</Typography>}
                   {origem?.seguimento && <Typography>{origem.seguimento}</Typography>}
-                  {(origem?.tipo || origem?.codigo) && (
-                    <Stack
-                      spacing={1}
-                      direction="row"
-                      alignItems="center"
-                      divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
-                    >
-                      {origem?.tipo && <SubItem value={origem.tipo} label="Tipo:" />}
+                  {(origem?.tipo || origem?.codigo || origem?.telefone || origem?.email) && (
+                    <Stack useFlexGap spacing={1} flexWrap="wrap" direction="row" alignItems="center">
                       {origem?.codigo && <SubItem value={origem.codigo} label="Código:" />}
-                    </Stack>
-                  )}
-                  {(origem?.telefone || origem?.email) && (
-                    <Stack
-                      spacing={1}
-                      direction="row"
-                      alignItems="center"
-                      divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'text.primary' }} />}
-                    >
-                      {origem?.telefone && <SubItem value={origem.telefone} label="Telfone:" />}
+                      {origem?.tipo && <SubItem value={origem.tipo} label="Tipo:" />}
+                      {origem?.telefone && <SubItem value={origem.telefone} label="Telefone:" />}
                       {origem?.email && <SubItem value={origem.email} label="Email:" />}
                     </Stack>
                   )}
@@ -269,7 +252,7 @@ TextItem.propTypes = {
 
 export function TextItem({ title = '', text = '', label = null, baralhar = false, labelTitle = null, ...sx }) {
   return (title && text) || label ? (
-    <Stack spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
+    <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
       {title && (
         <Stack direction="row" spacing={1} alignItems="center">
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -299,7 +282,7 @@ SubItem.propTypes = { value: PropTypes.string, label: PropTypes.string };
 export function SubItem({ value, label }) {
   return (
     <Typography variant="body2">
-      <Typography variant="spam" sx={{ color: 'text.secondary', fontWeight: 900 }}>
+      <Typography variant="spam" sx={{ color: 'text.secondary' }}>
         {label}
       </Typography>
       &nbsp;{value}

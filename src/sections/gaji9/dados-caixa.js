@@ -44,7 +44,7 @@ export default function InfoCaixa({ onCancel, item }) {
                   <DefaultAction label="ADICIONAR" onClick={onOpen} />
                 )}
                 {infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_INSTITUICAO'])) && (
-                  <DefaultAction color="warning" label="EDITAR" onClick={onOpen} />
+                  <DefaultAction button small color="warning" label="EDITAR" onClick={onOpen} />
                 )}
               </>
             )}

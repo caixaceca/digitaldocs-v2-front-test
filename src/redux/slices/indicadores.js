@@ -35,8 +35,8 @@ const slice = createSlice({
     getResumoEstatisticaCreditoSuccess(state, action) {
       const { uoId, dados: allDados = [] } = action.payload || {};
       let dados = allDados;
-      if (uoId === -2) dados = dados.filter((row) => row?.regiao === 'Norte');
-      else if (uoId === -3) dados = dados.filter((row) => row?.regiao === 'Sul');
+      if (uoId === -2) dados = dados.filter(({ regiao }) => regiao === 'Norte');
+      else if (uoId === -3) dados = dados.filter(({ regiao }) => regiao === 'Sul');
 
       const transform = (fase, montanteKey) =>
         dados.filter((row) => row.fase === fase).map((row) => ({ ...row, [montanteKey]: row?.montante }));

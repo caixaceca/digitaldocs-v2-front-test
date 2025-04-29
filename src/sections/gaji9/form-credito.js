@@ -103,46 +103,45 @@ export default function CreditoForm({ onCancel }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 3 }}>
-            <GridItem sm={4}>
+            <GridItem xs={6} md={4}>
               <RHFAutocompleteObj dc name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
             </GridItem>
-            <GridItem sm={8} children={<RHFTextField label="Finalidade" name="finalidade" />} />
-            <GridItem xs={6} sm={6} md={4}>
+            <GridItem xs={6} md={4}>
               <RHFNumberField noFormat label="Conta DO débito" name="conta_do_renda" />
-            </GridItem>
-            <GridItem xs={6} sm={3} md={2}>
-              <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
-            </GridItem>
-            <GridItem xs={6} sm={3} md={2}>
-              <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
-            </GridItem>
-            <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
-            <GridItem xs={6} sm={4} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" tipo="%" />} />
-            <GridItem xs={6} sm={4}>
-              <RHFNumberField label="Taxa comissão de abertura" name="taxa_comissao_abertura" tipo="%" />
-            </GridItem>
-            <GridItem xs={6} sm={4}>
-              <RHFNumberField label="Taxa imposto de selo" name="taxa_imposto_selo" tipo="%" />
-            </GridItem>
-            <GridItem xs={6} sm={4}>
-              {' '}
-              <RHFNumberField label="Valor total de juros" name="valor_juro" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} sm={4}>
-              <RHFNumberField label="Valor total de imposto selo" name="valor_imposto_selo" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} sm={4}>
-              <RHFNumberField label="Valor total de comissões" name="valor_comissao" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} sm={4}>
-              <RHFNumberField label="Valor prêmio do seguro" name="valor_premio_seguro" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} sm={4}>
-              <RHFNumberField label="Valor prestação sem desconto" name="valor_prestacao_sem_desconto" tipo="CVE" />
             </GridItem>
             <GridItem xs={6} md={4}>
               <RHFDatePicker name="data_vencimento_prestacao1" label="Venc. 1ª prestação" />
             </GridItem>
+            <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
+            </GridItem>
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
+            </GridItem>
+            <GridItem xs={6} md={3} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" tipo="%" />} />
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Taxa comissão de abertura" name="taxa_comissao_abertura" tipo="%" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Taxa imposto de selo" name="taxa_imposto_selo" tipo="%" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Prêmio do seguro" name="valor_premio_seguro" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Valor total de juros" name="valor_juro" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Valor total de imposto selo" name="valor_imposto_selo" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Valor total de comissões" name="valor_comissao" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Valor prestação sem desconto" name="valor_prestacao_sem_desconto" tipo="CVE" />
+            </GridItem>
+            <GridItem children={<RHFTextField label="Finalidade" name="finalidade" />} />
           </Grid>
           <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
         </FormProvider>

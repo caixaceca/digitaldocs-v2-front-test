@@ -14,8 +14,8 @@ import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 
 export default function TodosAnexos() {
   const dispatch = useDispatch();
-  const { colaboradores } = useSelector((state) => state.intranet);
   const { processo } = useSelector((state) => state.digitaldocs);
+  const { colaboradores } = useSelector((state) => state.intranet);
   const anexosTransicao = useMemo(() => anexosPorTransicao(processo?.htransicoes), [processo?.htransicoes]);
 
   const viewAnexo = (anexo, estadoId, parecerId) => {
@@ -56,15 +56,13 @@ AnexosGroup.propTypes = { dados: PropTypes.object };
 function AnexosGroup({ dados }) {
   const { anexos, titulo, viewAnexo, parecerId } = dados;
   const [anexosAtivos, anexosInativos] = useMemo(
-    () => [anexos?.filter((row) => row.ativo) || [], anexos?.filter((row) => !row.ativo) || []],
+    () => [anexos?.filter(({ ativo }) => ativo) || [], anexos?.filter(({ ativo }) => !ativo) || []],
     [anexos]
   );
 
   return (
     <Stack>
-      <Divider textAlign="left" sx={{ mb: 1, typography: 'overline' }}>
-        {titulo}
-      </Divider>
+      <Divider sx={{ m: 1, typography: 'overline' }}>{titulo}</Divider>
       <Stack spacing={1}>
         {anexosAtivos.map((row) => (
           <AnexoItem
@@ -79,9 +77,7 @@ function AnexosGroup({ dados }) {
       </Stack>
       {anexosInativos.length > 0 && (
         <RoleBasedGuard roles={['Todo-111']}>
-          <Divider textAlign="left" sx={{ mb: 0.5, mt: 1, opacity: 0.5, typography: 'overline' }}>
-            Eliminados
-          </Divider>
+          <Divider sx={{ mb: 0.5, mt: 1, opacity: 0.5, typography: 'overline' }}>Eliminados</Divider>
           <Stack spacing={1}>
             {anexosInativos.map((row) => (
               <AnexoItem

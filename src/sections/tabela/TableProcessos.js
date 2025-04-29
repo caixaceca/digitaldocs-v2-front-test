@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 // @mui
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -122,9 +121,7 @@ export default function TableProcessos({ from }) {
         sx={{ px: 1 }}
         action={
           meusAmbientes?.find(({ isinicial }) => isinicial) && (
-            <Stack direction="row" spacing={0.75}>
-              <AddItem onClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
-            </Stack>
+            <AddItem onClick={() => dispatch(setModal({ modal: 'adicionar-processo', dados: null }))} />
           )
         }
       />
@@ -246,14 +243,14 @@ function applySortFilter({ dados, comparator, filter, colaborador, from }) {
 
   if (filter)
     dados = dados.filter(
-      (row) =>
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.entrada && normalizeText(row?.entrada).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.assunto && normalizeText(row?.assunto).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(filter)) !== -1)
+      ({ conta, motivo, entrada, assunto, cliente, titular, entidades }) =>
+        (conta && normalizeText(conta).indexOf(normalizeText(filter)) !== -1) ||
+        (motivo && normalizeText(motivo).indexOf(normalizeText(filter)) !== -1) ||
+        (entrada && normalizeText(entrada).indexOf(normalizeText(filter)) !== -1) ||
+        (assunto && normalizeText(assunto).indexOf(normalizeText(filter)) !== -1) ||
+        (cliente && normalizeText(cliente).indexOf(normalizeText(filter)) !== -1) ||
+        (titular && normalizeText(titular).indexOf(normalizeText(filter)) !== -1) ||
+        (entidades && normalizeText(entidades).indexOf(normalizeText(filter)) !== -1)
     );
 
   return dados;

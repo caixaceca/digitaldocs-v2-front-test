@@ -169,12 +169,8 @@ export function getFromGaji9(item, params) {
 
         if (item === 'grupo') {
           const uts = await axios.get(`${BASEURLGAJI9}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, headers);
-          dispatch(
-            slice.actions.getSuccess({
-              item: 'selectedItem',
-              dados: { ...response.data?.objeto, utilizadores: uts.data?.objeto },
-            })
-          );
+          const dados = { ...response.data?.objeto, utilizadores: uts.data?.objeto };
+          dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados }));
         } else if (item === 'funcao' || item === 'utilizador') {
           if (item === 'utilizador' && response.data?.objeto?.utilizador?._role === 'ADMIN')
             dispatch(slice.actions.getSuccess({ item: 'adminGaji9', dados: true }));

@@ -372,9 +372,7 @@ function dadosList(cartoes, uos) {
 function tiposCartoes(dados, filter, uo) {
   const tiposCartao = [];
   applySortFilter({ dados, filter, tipoCartao: '', balcao: uo?.id, comparator: getComparator('asc', 'id') })?.forEach(
-    (row) => {
-      tiposCartao.push(row?.tipo);
-    }
+    (row) => tiposCartao.push(row?.tipo)
   );
   return [...new Set(tiposCartao)];
 }
@@ -382,21 +380,16 @@ function tiposCartoes(dados, filter, uo) {
 function applySortFilter({ dados, comparator, filter, tipoCartao, balcao }) {
   dados = applySort(dados, comparator);
 
-  if (balcao) {
-    dados = dados.filter((row) => row?.balcao_entrega === balcao);
-  }
-
-  if (tipoCartao) {
-    dados = dados.filter((row) => row?.tipo === tipoCartao);
-  }
+  if (balcao) dados = dados.filter(({ balcao_entrega: be }) => be === balcao);
+  if (tipoCartao) dados = dados.filter(({ tipo }) => tipo === tipoCartao);
 
   if (filter) {
     dados = dados.filter(
-      (row) =>
-        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.numero && normalizeText(row?.numero).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.data_emissao && normalizeText(row?.data_emissao).indexOf(normalizeText(filter)) !== -1)
+      ({ nome, numero, cliente, data_emissao: dataEmissao }) =>
+        (nome && normalizeText(nome).indexOf(normalizeText(filter)) !== -1) ||
+        (numero && normalizeText(numero).indexOf(normalizeText(filter)) !== -1) ||
+        (cliente && normalizeText(cliente).indexOf(normalizeText(filter)) !== -1) ||
+        (dataEmissao && normalizeText(dataEmissao).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

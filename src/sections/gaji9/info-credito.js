@@ -17,9 +17,9 @@ import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { noDados } from '../../utils/formatText';
-import { gestaoCredito } from '../../utils/validarAcesso';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { fCurrency, fPercent } from '../../utils/formatNumber';
+import { acessoGaji9, gestaoCredito } from '../../utils/validarAcesso';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -191,7 +191,9 @@ export function TableInfoCredito({ params, dados = [] }) {
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(localStorage.getItem(`${tab}_form`) || '');
-  const { isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector((state) => state.gaji9);
+  const { adminGaji9, isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector(
+    (state) => state.gaji9
+  );
 
   useEffect(() => {
     if (tab === 'contratos' && gestaoCredito(utilizador, ['READ_CONTRATO']))
@@ -255,7 +257,7 @@ export function TableInfoCredito({ params, dados = [] }) {
                           <TableCell align="center" width={10}>
                             <Stack direction="row" spacing={0.75}>
                               <DefaultAction small label="CONTRATO" onClick={() => downloadContrato(row?.codigo)} />
-                              {gestaoCredito(utilizador, ['DELETE_CONTRATO']) && (
+                              {(adminGaji9 || acessoGaji9(utilizador?.acessos, ['DELETE_CONTRATO'])) && (
                                 <DefaultAction
                                   small
                                   label="ELIMINAR"

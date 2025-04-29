@@ -308,11 +308,11 @@ function applySortFilter({ dados, comparator, filter }) {
   dados = applySort(dados, comparator);
   if (filter) {
     dados = dados.filter(
-      (row) =>
-        (row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.estado && normalizeText(row?.estado).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.observacao && normalizeText(row?.observacao).indexOf(normalizeText(filter)) !== -1)
+      ({ nome, estado, motivo, observacao }) =>
+        (nome && normalizeText(nome).indexOf(normalizeText(filter)) !== -1) ||
+        (estado && normalizeText(estado).indexOf(normalizeText(filter)) !== -1) ||
+        (motivo && normalizeText(motivo).indexOf(normalizeText(filter)) !== -1) ||
+        (observacao && normalizeText(observacao).indexOf(normalizeText(filter)) !== -1)
     );
   }
   return dados;
