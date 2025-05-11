@@ -25,7 +25,7 @@ import { fNumber, fCurrency } from '../../../../utils/formatNumber';
 import { paraLevantamento, findColaboradores } from '../../../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
-import { getSuccess, getInfoProcesso, updateItem, deleteItem, setModal } from '../../../../redux/slices/digitaldocs';
+import { getSuccess, getInfoProcesso, updateItem, setModal } from '../../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../../hooks/useAnexos';
 import { getComparator, applySort } from '../../../../hooks/useTable';
@@ -180,15 +180,8 @@ export function ParecerForm({ onCancel, processoId, estado = false }) {
   }, [selectedItem]);
 
   const enviarParecer = async (formData) => {
-    dispatch(
-      updateItem(estado ? 'parecer estado' : 'parecer individual', formData, {
-        mdf: true,
-        processoId,
-        id: selectedItem?.id,
-        msg: 'Parecer enviado',
-        afterSuccess: () => onCancel(),
-      })
-    );
+    const params = { mfd: true, processoId, id: selectedItem?.id, msg: 'Parecer enviado', onClose: () => onCancel() };
+    dispatch(updateItem(estado ? 'parecer estado' : 'parecer individual', formData, { ...params }));
   };
 
   const onSubmit = async () => {
@@ -287,9 +280,7 @@ export function ResgatarForm({ dados, onClose }) {
       color="warning"
       title="Resgatar"
       desc="resgatar este processo"
-      handleOk={() =>
-        dispatch(getInfoProcesso('resgatar', { ...dados, msg: 'Processo resgatado', afterSuccess: () => onClose() }))
-      }
+      handleOk={() => dispatch(getInfoProcesso('resgatar', { ...dados, msg: 'Processo resgatado', onClose }))}
     />
   );
 }
@@ -319,7 +310,7 @@ export function CancelarForm({ id, estadoId, fechar = false, onClose }) {
   const onSubmit = async () => {
     try {
       const parmas = { id, fechar, msg: fechar ? 'Pareceres fechado' : 'Processo resgatado' };
-      dispatch(updateItem('cancelar', JSON.stringify(values), { ...parmas, afterSuccess: () => onClose() }));
+      dispatch(updateItem('cancelar', JSON.stringify(values), { ...parmas, onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -408,7 +399,7 @@ export function AtribuirForm({ dados, onClose }) {
 
 // --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
 
-LibertarForm.propTypes = { dados: PropTypes.func, onClose: PropTypes.func };
+LibertarForm.propTypes = { dados: PropTypes.object, onClose: PropTypes.func };
 
 export function LibertarForm({ dados, onClose }) {
   const dispatch = useDispatch();
@@ -421,7 +412,7 @@ export function LibertarForm({ dados, onClose }) {
       onClose={onClose}
       isSaving={isSaving}
       desc="libertar este processo"
-      handleOk={() => dispatch(deleteItem('libertar', { msg: 'Processo libertado', ...dados }))}
+      handleOk={() => dispatch(updateItem('libertar', null, { msg: 'Processo libertado', ...dados }))}
     />
   );
 }
@@ -465,7 +456,7 @@ export function ConfidencialidadesForm({ processoId }) {
           processoId,
           id: selectedItem?.id,
           msg: 'Confidencialidade atualizado',
-          afterSuccess: () => {
+          onClose: () => {
             dispatch(setModal({ modal: '', dados: null }));
             dispatch(getInfoProcesso('confidencialidades', { id: processoId }));
           },
@@ -499,8 +490,8 @@ export function ConfidencialidadesForm({ processoId }) {
 export function ColocarPendenteForm() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { processo, isSaving } = useSelector((state) => state.digitaldocs);
   const { motivosPendencia } = useSelector((state) => state.parametrizacao);
+  const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({ motivo: Yup.mixed().required('Motivo de pendência não pode ficar vazio') });
   const defaultValues = useMemo(() => ({ pendenteLevantamento: false, mobs: '', motivo: null }), []);
@@ -510,17 +501,13 @@ export function ColocarPendenteForm() {
 
   const onSubmit = (action) => {
     try {
-      const params = {
-        id: processo?.id,
-        fluxoId: processo?.fluxo_id,
-        afterSuccess: () => dispatch(setModal({ modal: '', dados: null })),
-      };
+      const params = { id: selectedItem?.id, onClose: () => dispatch(setModal({ modal: '', dados: null })) };
       dispatch(
         updateItem(
           'pendencia',
           JSON.stringify({
             pender: action !== 'eliminar',
-            fluxo_id: processo?.fluxo_id,
+            estado_id: selectedItem?.estadoId,
             mobs: action === 'eliminar' ? '' : values?.mobs,
             mpendencia: action === 'eliminar' ? '' : values?.motivo?.id,
           }),
@@ -536,16 +523,22 @@ export function ColocarPendenteForm() {
     <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="sm">
       <DialogTitle>Processo pendente</DialogTitle>
       <DialogContent>
-        {processo?.pendente && processo?.motivo_pendencia_id && processo?.motivo ? (
+        {selectedItem?.pendente ? (
           <Stack direction="column" spacing={1} sx={{ pt: 3 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography sx={{ color: 'text.secondary', width: '85px', textAlign: 'right' }}>Motivo:</Typography>
-              <Typography>{processo?.motivo}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'right' }}>
+                Motivo:
+              </Typography>
+              <Typography>
+                {selectedItem?.motivo || motivosPendencia?.find(({ id }) => id === selectedItem?.motivo_id)?.label}
+              </Typography>
             </Stack>
-            {processo?.observacao_motivo_pendencia && (
+            {selectedItem?.obs && (
               <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography sx={{ color: 'text.secondary' }}>Observação:</Typography>
-                <Typography>{processo?.observacao_motivo_pendencia}</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  Observação:
+                </Typography>
+                <Typography>{selectedItem?.obs}</Typography>
               </Stack>
             )}
             <Stack direction="row" sx={{ pt: 3 }} justifyContent="end">
@@ -555,7 +548,7 @@ export function ColocarPendenteForm() {
         ) : (
           <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
             <Stack direction="column" spacing={3} sx={{ pt: 3 }}>
-              {paraLevantamento(processo?.assunto) && processo?.estado_atual?.includes('Atendimento') && (
+              {paraLevantamento(selectedItem?.fluxo) && selectedItem?.estado?.includes('Atendimento') && (
                 <RHFSwitch
                   name="pendenteLevantamento"
                   label="Pendente de levantamento"

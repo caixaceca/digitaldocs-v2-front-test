@@ -21,17 +21,17 @@ import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
-import { getAll, getSuccess } from '../../redux/slices/digitaldocs';
+import { getListaProcessos } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Scrollbar from '../../components/Scrollbar';
 import ItemAnalytic from '../../components/ItemAnalytic';
-import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
+import { Criado, ColaboradorInfo } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { Criado, Registos, ColaboradorInfo } from '../../components/Panel';
+import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from '../parametrizacao/applySortFilter';
@@ -41,18 +41,18 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD_ARQUIVOS = [
-  { id: 'referencia', label: 'Referência', align: 'left' },
-  { id: 'titular', label: 'Titular', align: 'left' },
-  { id: 'entidades', label: 'Entidade(s)', align: 'left' },
-  { id: 'assunto', label: 'Assunto', align: 'left' },
-  { id: 'uo', label: 'U.O', align: 'left' },
+  { id: 'referencia', label: 'Referência' },
+  { id: 'titular', label: 'Titular' },
+  { id: 'entidades', label: 'Entidade(s)' },
+  { id: 'assunto', label: 'Assunto' },
+  { id: 'uo', label: 'U.O' },
   { id: 'data_arquivamento', label: 'Data arquivo', align: 'center' },
   { id: '', width: 10 },
 ];
 
 const TABLE_HEAD_PEDIDOS = [
-  { id: 'nome', label: 'Colaborador', align: 'left' },
-  { id: 'processo_id', label: 'ID Processo', align: 'left' },
+  { id: 'nome', label: 'Colaborador' },
+  { id: 'processo_id', label: 'ID Processo' },
   { id: 'criado_em', label: 'Data do pedido', align: 'center' },
   { id: '', width: 10 },
 ];
@@ -64,9 +64,9 @@ TableArquivo.propTypes = { tab: PropTypes.string };
 export default function TableArquivo({ tab }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { colaboradores, uos } = useSelector((state) => state.intranet);
   const { indicadoresArquivo } = useSelector((state) => state.indicadores);
-  const { arquivos, pedidos, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
+  const { perfilId, colaboradores, uos } = useSelector((state) => state.intranet);
+  const { arquivos, pedidosAcesso, cursor, isLoading } = useSelector((state) => state.digitaldocs);
   const [filter, setFilter] = useState(localStorage.getItem('filterArq') || '');
   const [data, setData] = useState(getDataLS('dataArq', new Date(new Date().getFullYear(), 0, 1)));
 
@@ -85,13 +85,11 @@ export default function TableArquivo({ tab }) {
   } = useTable({});
 
   useEffect(() => {
-    dispatch(getSuccess({ item: 'arquivos', dados: [] }));
-    dispatch(getAll(tab, { pagina: 0, data: dataValido(data) ? format(data, 'yyyy-MM-dd') : '' }));
-  }, [data, dispatch, tab]);
-
-  useEffect(() => {
-    if (tab === 'arquivos') dispatch(getIndicadores('indicadoresArquivo', { item: 'indicadoresArquivo' }));
-  }, [dispatch, tab]);
+    if (perfilId) {
+      dispatch(getListaProcessos(tab, { cursor: 0, apartir: dataValido(data) ? format(data, 'yyyy-MM-dd') : '' }));
+      if (tab === 'arquivos') dispatch(getIndicadores('indicadoresArquivo', { item: 'indicadoresArquivo' }));
+    }
+  }, [data, dispatch, perfilId, tab]);
 
   useEffect(() => {
     setPage(0);
@@ -101,7 +99,7 @@ export default function TableArquivo({ tab }) {
   const dataFiltered = applySortFilter({
     filter,
     comparator: getComparator(order, orderBy),
-    dados: pedidosList(tab === 'pedidosAcesso' ? pedidos : arquivos, colaboradores, uos),
+    dados: pedidosList(tab === 'pedidosAcesso' ? pedidosAcesso : arquivos, colaboradores, uos),
   });
   const isNotFound = !dataFiltered.length;
 
@@ -110,9 +108,7 @@ export default function TableArquivo({ tab }) {
   };
 
   const mostrarMais = () => {
-    dispatch(
-      getAll(tab, { pagina: processosInfo?.proxima_pagina, data: dataValido(data) ? format(data, 'yyyy-MM-dd') : '' })
-    );
+    dispatch(getListaProcessos(tab, { cursor, apartir: dataValido(data) ? format(data, 'yyyy-MM-dd') : '' }));
   };
 
   return (
@@ -161,11 +157,6 @@ export default function TableArquivo({ tab }) {
             />
           )}
         </SearchToolbarSimple>
-        {tab !== 'pedidosAcesso' && (
-          <Stack sx={{ pb: 1 }}>
-            <Registos info={processosInfo} onClick={() => mostrarMais()} total={arquivos?.length} />
-          </Stack>
-        )}
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -184,7 +175,7 @@ export default function TableArquivo({ tab }) {
                       {(tab === 'pedidosAcesso' && (
                         <TableRow hover key={`${tab}_pa_${index}`}>
                           <TableCell>
-                            <ColaboradorInfo caption nome={row?.nome} label={row?.uoColaborador} foto={row?.foto} />
+                            <ColaboradorInfo id={row?.cid} nome={row?.nome} label={row?.uoColab} foto={row?.foto} />
                           </TableCell>
                           <TableCell>{row?.processo_id}</TableCell>
                           <TableCell align="center" width={50}>
@@ -240,6 +231,9 @@ export default function TableArquivo({ tab }) {
           />
         )}
       </Card>
+      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && cursor && (
+        <MaisProcessos verMais={() => mostrarMais()} />
+      )}
     </RoleBasedGuard>
   );
 }
@@ -249,14 +243,15 @@ export default function TableArquivo({ tab }) {
 function pedidosList(dados, colaboradores, uos) {
   const pedidos = [];
   dados?.forEach((row) => {
-    const uo = uos?.find((_uo) => _uo?.id === row.uo_id);
-    const colaborador = colaboradores?.find((colab) => colab?.perfil_id === row.perfil_id);
+    const uo = uos?.find(({ id }) => id === row.uo_id);
+    const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row.perfil_id);
     pedidos.push({
       ...row,
       balcao: uo?.balcao,
+      cid: colaborador?.id,
       uo: uo?.label || row?.uo_id,
       foto: colaborador?.foto_disk,
-      uoColaborador: colaborador?.uo?.label,
+      uoColab: colaborador?.uo?.label,
       nome: colaborador?.perfil?.displayName || row.perfil_id,
     });
   });

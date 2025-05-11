@@ -19,7 +19,7 @@ const iconWH = { width: 14, height: 14 };
 const CustomAvatar = forwardRef(({ name, ...other }, ref) => {
   const renderContent = (
     <Avatar ref={ref} {...other}>
-      {name?.charAt(0)?.toUpperCase()}
+      {typeof name === 'string' ? name?.charAt(0)?.toUpperCase() : ''}
     </Avatar>
   );
 
@@ -36,20 +36,20 @@ AvatarBedge.propTypes = { id: PropTypes.number, children: PropTypes.node, sx: Pr
 
 export function AvatarBedge({ id, children, sx = null }) {
   const { colaboradores } = useSelector((state) => state.intranet);
-  const presence = colaboradores?.find((row) => Number(row?.id) === Number(id))?.presence || null;
+  const presence = colaboradores?.find(({ id: cid }) => Number(cid) === Number(id))?.presence?.availability || '';
   return presence ? (
     <Box>
       <Badge
         overlap="circular"
         badgeContent={
-          (presence?.availability === 'Available' && <CheckCircleIcon color="success" sx={{ ...iconWH }} />) ||
-          (presence?.availability === 'Busy' && <CircleIcon color="error" sx={{ ...iconWH }} />) ||
-          (presence?.availability === 'DoNotDisturb' && <RemoveCircleOutlineIcon color="error" sx={{ ...iconWH }} />) ||
-          (presence?.availability === 'Away' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
-          (presence?.availability === 'BeRightBack' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
-          (presence?.availability === 'Offline' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
-          (presence?.availability === 'OutOfOffice' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
-          (presence?.availability && <RemoveCircleOutlineIcon color="focus" sx={{ ...iconWH }} />)
+          (presence === 'Available' && <CheckCircleIcon color="success" sx={{ ...iconWH }} />) ||
+          (presence === 'Busy' && <CircleIcon color="error" sx={{ ...iconWH }} />) ||
+          (presence === 'DoNotDisturb' && <RemoveCircleOutlineIcon color="error" sx={{ ...iconWH }} />) ||
+          (presence === 'Away' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
+          (presence === 'BeRightBack' && <AccessTimeFilledIcon color="warning" sx={{ ...iconWH }} />) ||
+          (presence === 'Offline' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
+          (presence === 'OutOfOffice' && <HighlightOffIcon color="focus" sx={{ ...iconWH }} />) ||
+          (presence && <RemoveCircleOutlineIcon color="focus" sx={{ ...iconWH }} />)
         }
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         sx={{
@@ -64,7 +64,6 @@ export function AvatarBedge({ id, children, sx = null }) {
             ...sx,
           },
         }}
-        // sx={{ '& .MuiBadge-badge': { p: 0, minWidth: 10, width: 10, height: 10, bgcolor: 'common.white', ...sx } }}
       >
         {children}
       </Badge>

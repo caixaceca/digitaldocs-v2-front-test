@@ -95,7 +95,7 @@ export default function TableCredito() {
                 orderBy={orderBy}
                 headLabel={[
                   { id: 'codigo', label: 'Código' },
-                  { id: 'numero_proposta', label: 'Nº proposta' },
+                  { id: 'numero_proposta', label: 'Proposta' },
                   { id: 'cliente', label: 'Cliente' },
                   { id: 'tipo_titular	', label: 'Tipo titular' },
                   { id: 'componente', label: 'Componente' },
@@ -117,7 +117,7 @@ export default function TableCredito() {
                       </TableCell>
                       <TableCell>
                         {row?.tipo_titular}
-                        {row?.consumidor ? ' (Consumidor)' : ''}
+                        {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
                       </TableCell>
                       <TableCell>{row?.rotulo || row?.componente}</TableCell>
                       <TableCell>{row?.finalidade || noDados('Não definido')}</TableCell>

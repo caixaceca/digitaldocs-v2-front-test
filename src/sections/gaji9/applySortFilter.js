@@ -40,7 +40,7 @@ export function applySortFilter({ dados, filter, comparator }) {
 export function listaTitrulares(tiposTitulares) {
   return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({
     id,
-    label: consumidor ? `${descritivo} (Consumidor)` : descritivo,
+    label: descritivo === 'Particular' && !consumidor ? `${descritivo} (Não consumidor)` : descritivo,
   }));
 }
 

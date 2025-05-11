@@ -11,7 +11,6 @@ import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { updateDados } from '../../../../redux/slices/stepper';
 import { useSelector, useDispatch } from '../../../../redux/store';
 import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
@@ -26,7 +25,7 @@ import {
 import GridItem from '../../../../components/GridItem';
 import { SemDados } from '../../../../components/Panel';
 import { DialogTitleAlt } from '../../../../components/CustomDialog';
-import { ButtonsStepper, DefaultAction, DialogButons } from '../../../../components/Actions';
+import { DefaultAction, DialogButons } from '../../../../components/Actions';
 //
 import { garantiasAssociadas } from '../anexos/utils-anexos';
 import { listaGarantias } from '../../../gaji9/applySortFilter';
@@ -46,42 +45,14 @@ const garantiaSquema = {
 
 // ----------------------------------------------------------------------
 
-export default function GarantiasProcesso() {
-  const dispatch = useDispatch();
-  const { dadosStepper } = useSelector((state) => state.stepper);
-  const { tiposGarantia } = useSelector((state) => state.parametrizacao);
-  const garantiasList = useMemo(() => listaGarantias(tiposGarantia), [tiposGarantia]);
-
-  const formSchema = Yup.object().shape({
-    garantias: Yup.array(Yup.object({ tipo_garantia_id: Yup.mixed().required().label('Garantia') })),
-  });
-
-  const defaultValues = useMemo(() => ({ garantias: dadosStepper?.garantias || [] }), [dadosStepper]);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
-  const { fields, append, remove } = useFieldArray({ control, name: 'garantias' });
-
-  return (
-    <FormProvider
-      methods={methods}
-      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-    >
-      <FormGarantias dados={{ fields, append, remove, garantiasList }} />
-      <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
-    </FormProvider>
-  );
-}
-
-// ----------------------------------------------------------------------
-
 GarantiasSeparados.propTypes = { dados: PropTypes.object };
 
 export function GarantiasSeparados({ dados }) {
-  const { isEdit, garantia, creditoId, processoId, onCancel } = dados;
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { tiposGarantia } = useSelector((state) => state.parametrizacao);
+
+  const { isEdit, garantia, creditoId, processoId, onCancel } = dados;
   const garantiasList = useMemo(() => listaGarantias(tiposGarantia), [tiposGarantia]);
 
   useEffect(() => {
@@ -111,7 +82,7 @@ export function GarantiasSeparados({ dados }) {
       processoId,
       fillCredito: true,
       id: garantia?.id || '',
-      afterSuccess: () => onCancel(),
+      onClose: () => onCancel(),
       msg: isEdit ? 'Garantia atualizada' : 'Garantias adicionadas',
     };
     const formData = garantiasAssociadas(values.garantias);
@@ -121,12 +92,17 @@ export function GarantiasSeparados({ dados }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="lg">
-      <DialogTitleAlt title={isEdit ? 'Atualizar garantia' : 'Adicionar garantias'} />
+    <Dialog open fullWidth maxWidth="lg">
+      <DialogTitleAlt title={isEdit ? 'Atualizar garantia' : 'Adicionar garantias'} onClose={onCancel} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <FormGarantias dados={{ fields, append, remove, garantiasList, isEdit }} />
-          <DialogButons isSaving={isSaving} onCancel={onCancel} hideSubmit={fields?.length === 0} />
+          <DialogButons
+            isSaving={isSaving}
+            onCancel={onCancel}
+            label={isEdit ? 'Guardar' : ''}
+            hideSubmit={fields?.length === 0}
+          />
         </FormProvider>
       </DialogContent>
     </Dialog>

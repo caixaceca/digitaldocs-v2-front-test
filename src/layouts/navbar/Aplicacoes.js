@@ -11,14 +11,14 @@ Aplicacoes.propTypes = { minhasAplicacoes: PropTypes.array };
 export default function Aplicacoes({ minhasAplicacoes = [] }) {
   return minhasAplicacoes?.length === 0
     ? []
-    : minhasAplicacoes?.map((row) => ({
-        path: row.link,
-        title: row.nome,
+    : minhasAplicacoes?.map(({ link, nome, logo_disco: logo }) => ({
+        path: link,
+        title: nome,
         icon: (
           <Avatar
-            alt={row.nome}
+            alt={nome}
             sx={{ p: 0.25, width: '25px', height: '25px' }}
-            src={`${BASEURL}/aplicacao/logo/${row.logo_disco}`}
+            src={`${BASEURL}/aplicacao/logo/${logo}`}
           />
         ),
       }));

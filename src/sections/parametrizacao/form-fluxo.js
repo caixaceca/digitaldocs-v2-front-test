@@ -224,8 +224,8 @@ export function TransicaoForm({ onCancel, fluxoId }) {
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
       to_alert: selectedItem ? selectedItem?.to_alert : true,
       is_after_devolucao: selectedItem?.is_after_devolucao || false,
-      destino: estadosList?.find((row) => row.id === selectedItem?.estado_final_id) || null,
-      origem: estadosList?.find((row) => row.id === selectedItem?.estado_inicial_id) || null,
+      destino: estadosList?.find(({ id }) => id === selectedItem?.estado_final_id) || null,
+      origem: estadosList?.find(({ id }) => id === selectedItem?.estado_inicial_id) || null,
     }),
     [fluxoId, selectedItem, perfilId, estadosList]
   );
@@ -291,7 +291,10 @@ export function ChecklistForm({ fluxo, onCancel }) {
     dispatch(getFromParametrizacao('documentos'));
   }, [dispatch]);
 
-  const listaTransicoes = useMemo(() => transicoesList(fluxo?.transicoes, estados, true), [fluxo?.transicoes, estados]);
+  const listaTransicoes = useMemo(
+    () => transicoesList(fluxo?.transicoes, estados, true, true),
+    [fluxo?.transicoes, estados]
+  );
   const formSchema = Yup.object().shape({
     tipo_documento: isEdit && Yup.mixed().required().label('Documento'),
     documentos: !isEdit && Yup.array(Yup.object({ tipo_documento: Yup.mixed().required().label('Documento') })),

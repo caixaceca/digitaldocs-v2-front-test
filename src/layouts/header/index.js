@@ -1,4 +1,3 @@
-import { m } from 'framer-motion';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
@@ -7,37 +6,30 @@ import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
-import Dialog from '@mui/material/Dialog';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
+import { styled } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
-import Typography from '@mui/material/Typography';
-import { alpha, styled } from '@mui/material/styles';
-import OutlinedFlagIcon from '@mui/icons-material/OutlinedFlag';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 // utils
 import cssStyles from '../../utils/cssStyles';
-import { formatDate } from '../../utils/formatTime';
-// redux
-import { useSelector } from '../../redux/store';
 // hooks
+import useToggle from '../../hooks/useToggle';
 import useOffSetTop from '../../hooks/useOffSetTop';
 import useResponsive from '../../hooks/useResponsive';
-import useToggle, { useToggle1, useToggle2 } from '../../hooks/useToggle';
 // config
 import { HEADER, NAVBAR } from '../../config';
 // components
 import Logo from '../../components/Logo';
-import Image from '../../components/Image';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 // sections
-import Ajuda from '../../sections/home/Ajuda';
-import { ValidarDocForm, DenunciaForm, FormSugestao } from '../../sections/home/HomeForm';
+import { FormSugestao } from '../../sections/home/HomeForm';
 //
-import Linksuteis from './Linksuteis';
+import Parabens from './Parabens';
+import Definicoes from './Definicoes';
 import Notificacoes from './Notificacoes';
 import ProcuraAvancada from './ProcuraAvancada';
+import { ValidarDocumento, Ajuda, Denuncia, LinksUteis } from './Items';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -85,8 +77,6 @@ DashboardHeader.propTypes = {
 export default function DashboardHeader({ onOpenSidebar, isCollapse = false, verticalLayout = false }) {
   const isDesktop = useResponsive('up', 'lg');
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
-  const { toggle2: open2, onOpen2, onClose2 } = useToggle2();
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
 
   return (
@@ -107,28 +97,14 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <ProcuraAvancada />
           <Box sx={{ flexGrow: 1 }} />
 
-          <Stack direction="row" alignItems="center" spacing={{ xs: 0.25, sm: 1 }}>
-            <RoleBasedGuard roles={['Todo-111']}>
-              <IconButtonHead
-                open={open1}
-                onOpen={onOpen1}
-                title="Validação de documento"
-                icon={<BadgeOutlinedIcon sx={{ width: { xs: 20, sm: 26 }, height: { xs: 20, sm: 26 } }} />}
-              />
-              {open1 && <ValidarDocForm onCancel={onClose1} />}
+          <Stack direction="row" alignItems="center" spacing={{ xs: 0.25, sm: 0.75 }}>
+            <RoleBasedGuard roles={['Todo-111', 'Admin', 'pdex']}>
+              <ValidarDocumento />
             </RoleBasedGuard>
-
-            <Linksuteis />
+            <LinksUteis />
             <Notificacoes />
-
-            <IconButtonHead
-              open={open2}
-              onOpen={onOpen2}
-              title="Denúncia"
-              icon={<OutlinedFlagIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />}
-            />
-            {open2 && <DenunciaForm open onCancel={onClose2} />}
-
+            <Denuncia />
+            <Definicoes />
             <Ajuda />
             <Parabens />
           </Stack>
@@ -162,187 +138,5 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
       </Box>
       {open && <FormSugestao open onCancel={onClose} />}
     </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-function Parabens() {
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const { cc } = useSelector((state) => state.intranet);
-  const aniversarianteHoje =
-    cc?.data_cel_aniv && formatDate(cc?.data_cel_aniv, 'dd-MM') === formatDate(new Date(), 'dd-MM');
-  const tempoServicoHoje =
-    cc?.data_admissao && formatDate(cc?.data_admissao, 'dd-MM') === formatDate(new Date(), 'dd-MM');
-  const anos = tempoServicoHoje ? formatDate(new Date(), 'yyyy') - formatDate(cc?.data_admissao, 'yyyy') : 0;
-
-  return !!aniversarianteHoje || !!tempoServicoHoje ? (
-    <>
-      <Tooltip arrow title="Parabéns">
-        <IconButtonAnimate size="small" onClick={onOpen}>
-          <m.div animate={{ rotate: [0, -20, 0, 20, 0] }} transition={{ duration: 1, repeat: Infinity }}>
-            <Image src="/assets/icons/gift.svg" sx={{ width: 36, height: 36 }} />
-          </m.div>
-        </IconButtonAnimate>
-      </Tooltip>
-      <Dialog
-        fullWidth
-        open={open}
-        maxWidth="xs"
-        scroll="paper"
-        onClose={onClose}
-        PaperProps={{ style: { overflow: 'hidden' } }}
-      >
-        <Logo
-          sx={{
-            opacity: 0.1,
-            width: '155%',
-            height: '155%',
-            position: 'absolute',
-            transform: 'rotate(37deg)',
-            left: aniversarianteHoje && tempoServicoHoje ? '55%' : '60%',
-            bottom: aniversarianteHoje && tempoServicoHoje ? '-80%' : '-70%',
-          }}
-        />
-        <Box sx={{ p: { xs: 4, sm: 8 } }}>
-          <Stack
-            spacing={1}
-            sx={{
-              color: 'success.main',
-              fontWeight: 'normal',
-              pt: (aniversarianteHoje && tempoServicoHoje && 1) || (tempoServicoHoje && 3) || 5,
-            }}
-          >
-            <Stack>
-              <Typography variant="subtitle1">Parabéns:</Typography>
-              <Typography variant="subtitle1">{cc?.perfil?.displayName}</Typography>
-              {aniversarianteHoje ? (
-                <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  Feliz Aniversário!
-                </Typography>
-              ) : (
-                <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                  {anos} ano{anos > 1 ? 's' : ''} de serviço!
-                </Typography>
-              )}
-            </Stack>
-            {aniversarianteHoje ? (
-              <>
-                <SvgIconStyle
-                  src="/assets/icons/party.svg"
-                  sx={{
-                    top: 33,
-                    width: 25,
-                    right: 65,
-                    height: 25,
-                    position: 'absolute',
-                    color: 'success.main',
-                    transform: 'rotate(-60deg)',
-                  }}
-                />
-                <SvgIconStyle
-                  src="/assets/icons/party.svg"
-                  sx={{ position: 'absolute', width: 37, height: 37, color: 'success.main', right: 30, top: 30 }}
-                />
-                <SvgIconStyle
-                  src="/assets/icons/party.svg"
-                  sx={{
-                    top: 65,
-                    width: 25,
-                    right: 35,
-                    height: 25,
-                    position: 'absolute',
-                    color: 'success.main',
-                    transform: 'rotate(60deg)',
-                  }}
-                />
-                <SvgIconStyle
-                  src="/assets/icons/calendarcake.svg"
-                  sx={{ position: 'absolute', width: 100, height: 100, color: 'success.main', right: 50, top: 60 }}
-                />
-                <Stack>
-                  <Typography>É com muita alegria que a</Typography>
-                  <Typography>Caixa celebra contigo este</Typography>
-                  <Typography>dia especial.</Typography>
-                </Stack>
-              </>
-            ) : (
-              ''
-            )}
-            {tempoServicoHoje ? (
-              <>
-                <SvgIconStyle
-                  src="/assets/icons/medal.svg"
-                  sx={{
-                    right: 30,
-                    width: 100,
-                    height: 100,
-                    position: 'absolute',
-                    color: 'success.main',
-                    top: aniversarianteHoje ? 230 : 30,
-                  }}
-                />
-                {aniversarianteHoje && (
-                  <Typography variant="subtitle1" sx={{ pt: 3 }}>
-                    {anos} ano{anos > 1 ? 's' : ''} de serviço!
-                  </Typography>
-                )}
-                <Stack>
-                  <Typography>É com grande prazer e estima</Typography>
-                  <Typography>que a Caixa comemora contigo {anos > 1 ? 'mais' : ''}</Typography>
-                  <Typography>um ano de parceria, aprendizado,</Typography>
-                  <Typography>empenho e dedicação.</Typography>
-                </Stack>
-                <Stack>
-                  <Typography>Agradecemos por todo</Typography>
-                  <Typography>o teu esforço e companheirismo</Typography>
-                  <Typography>
-                    ao longo deste{anos > 1 ? 's' : ''} ano{anos > 1 ? 's' : ''}.
-                  </Typography>
-                </Stack>
-              </>
-            ) : (
-              ''
-            )}
-            <Stack>
-              <Typography>Obrigado por fazeres parte</Typography>
-              <Typography>desta Família.</Typography>
-            </Stack>
-          </Stack>
-        </Box>
-      </Dialog>
-    </>
-  ) : (
-    ''
-  );
-}
-
-// ----------------------------------------------------------------------
-
-IconButtonHead.propTypes = {
-  open: PropTypes.bool,
-  icon: PropTypes.node,
-  onOpen: PropTypes.func,
-  title: PropTypes.string,
-};
-
-export function IconButtonHead({ open, title, icon, onOpen, ...sx }) {
-  return (
-    <Tooltip arrow title={title}>
-      <IconButtonAnimate
-        color={open ? 'primary' : 'default'}
-        onClick={onOpen}
-        sx={{
-          p: 0,
-          color: '#fff',
-          width: { xs: 28, sm: 40 },
-          height: { xs: 28, sm: 40 },
-          ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
-        }}
-        {...sx}
-      >
-        {icon}
-      </IconButtonAnimate>
-    </Tooltip>
   );
 }

@@ -45,7 +45,7 @@ export function FormSugestao({ onCancel }) {
   const { mail } = useSelector((state) => state.intranet);
   const { done, isSaving } = useSelector((state) => state.intranet);
 
-  useNotificacao({ done, afterSuccess: () => onCancel() });
+  useNotificacao({ done, onClose: () => onCancel() });
 
   const formSchema = Yup.object().shape({
     titulo: Yup.string().required('Título não pode ficar vazio'),
@@ -113,7 +113,7 @@ export function DenunciaForm({ onCancel }) {
   const { enqueueSnackbar } = useSnackbar();
   const { mail, done, isSaving } = useSelector((state) => state.intranet);
 
-  useNotificacao({ done, afterSuccess: () => onCancel() });
+  useNotificacao({ done, onClose: () => onCancel() });
 
   const formSchema = Yup.object().shape({
     assunto: Yup.string().required('Assunto não pode ficar vazio'),

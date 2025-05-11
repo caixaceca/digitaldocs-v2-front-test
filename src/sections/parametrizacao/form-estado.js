@@ -63,7 +63,7 @@ export function EstadoForm({ onCancel }) {
       is_decisao: selectedItem?.is_decisao || false,
       is_inicial: selectedItem?.is_inicial || false,
       nivel_decisao: selectedItem?.nivel_decisao || null,
-      uo_id: uosList?.find((row) => row.id === selectedItem?.uo_id) || null,
+      uo_id: uosList?.find(({ id }) => id === selectedItem?.uo_id) || null,
     }),
     [selectedItem, uosList]
   );
@@ -222,7 +222,7 @@ export function PerfisEstadoForm({ onCancel }) {
     try {
       const formData = { estado_id: estado?.id, perfil_id_cc: perfilId, perfis: [] };
       values?.perfis?.forEach((row) => formData?.perfis?.push({ ...row, perfil_id: row?.perfil_id?.id }));
-      const params = { item1: 'estado', msg: 'Perfis adicionados', afterSuccess: () => onCancel() };
+      const params = { item1: 'estado', msg: 'Perfis adicionados', onClose: () => onCancel() };
       dispatch(createItem('perfis', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -319,7 +319,7 @@ export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
   const paramsComum = {
     estadoId: item?.id,
     id: selectedItem?.id,
-    afterSuccess: () => onCancel(),
+    onClose: () => onCancel(),
     getItem: estado ? 'estado' : 'selectedItem',
   };
   const action = estado ? 'regrasEstado' : 'regrasTransicao';

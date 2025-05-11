@@ -45,18 +45,21 @@ export default function PageDetalhesFluxo() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
+  const [transicao, setTransicao] = useState(null);
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
+
   const { perfilId } = useSelector((state) => state.intranet);
   const { fluxo, selectedItem, modalParams, done, isSaving, isLoading } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
-  const [transicao, setTransicao] = useState(null);
 
   useEffect(() => {
     if (perfilId && id) dispatch(getFromParametrizacao('fluxo', { id, reset: { val: null } }));
   }, [dispatch, perfilId, id]);
 
   useEffect(() => {
-    if (currentTab === 'Checklist' && fluxo?.id)
-      dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, transicaoId: transicao?.id }));
+    if (currentTab === 'Checklist' && fluxo?.id) {
+      const params = { fluxoId: fluxo?.id, transicaoId: transicao?.id, reset: { val: [] } };
+      dispatch(getFromParametrizacao('checklist', params));
+    }
   }, [dispatch, currentTab, fluxo?.id, transicao?.id]);
 
   useEffect(() => {
@@ -90,7 +93,7 @@ export default function PageDetalhesFluxo() {
   const closeModal = () => dispatch(setModal());
   useNotificacao({
     done,
-    afterSuccess: () => {
+    onClose: () => {
       if (!done.includes('Regra transição')) closeModal();
     },
   });
@@ -126,9 +129,12 @@ export default function PageDetalhesFluxo() {
                 <Stack direction="row" spacing={0.75} alignItems="center">
                   {(currentTab === 'Notificações' || currentTab === 'Checklist') && (
                     <Transicoes
-                      transicao={transicao}
-                      setTransicao={setTransicao}
-                      transicoes={fluxo?.transicoes || []}
+                      options={{
+                        transicao,
+                        setTransicao,
+                        transicoes: fluxo?.transicoes || [],
+                        checklist: currentTab === 'Checklist',
+                      }}
                     />
                   )}
                   {currentTab === 'Dados' && (
@@ -175,11 +181,15 @@ export default function PageDetalhesFluxo() {
 
 // ----------------------------------------------------------------------
 
-Transicoes.propTypes = { transicao: PropTypes.object, setTransicao: PropTypes.func, transicoes: PropTypes.array };
+Transicoes.propTypes = { options: PropTypes.object };
 
-function Transicoes({ transicao, setTransicao, transicoes }) {
+function Transicoes({ options }) {
+  const { transicao, setTransicao, transicoes, checklist } = options;
   const { estados } = useSelector((state) => state.parametrizacao);
-  const listaTransicoes = useMemo(() => transicoesList(transicoes || [], estados, true), [estados, transicoes]);
+  const listaTransicoes = useMemo(
+    () => transicoesList(transicoes || [], estados, true, checklist),
+    [estados, transicoes, checklist]
+  );
 
   useEffect(() => {
     if (!transicao && listaTransicoes?.length > 0)

@@ -27,34 +27,34 @@ import { Criado, ColaboradorInfo } from '../../../components/Panel';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
-import { ConfidencialidadesForm } from '../form/intervencao';
+// import { ConfidencialidadesForm } from '../form/intervencao';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD_RETENCOES = [
-  { id: 'nome', label: 'Colaborador', align: 'left' },
+  { id: 'nome', label: 'Colaborador' },
   { id: 'preso_em', label: 'Retido em', align: 'center' },
   { id: '', label: 'Duração', align: 'center' },
   { id: 'solto_em', label: 'Solto em', align: 'center', minWidth: 100, width: 10 },
 ];
 
 const TABLE_HEAD_ATRIBUICOES = [
-  { id: 'nome', label: 'Colaborador', align: 'left' },
-  { id: 'estado', label: 'Estado', align: 'left' },
+  { id: 'nome', label: 'Colaborador' },
+  { id: 'estado', label: 'Estado' },
   { id: 'atribuido_em', label: 'Atribuido em', align: 'center', minWidth: 130, width: 10 },
 ];
 
 const TABLE_HEAD_PENDENCIAS = [
-  { id: 'motivo', label: 'Motivo', align: 'left' },
-  { id: 'observacao', label: 'Observação', align: 'left' },
-  { id: '', label: 'Duração', align: 'left' },
+  { id: 'motivo', label: 'Motivo' },
+  { id: 'observacao', label: 'Observação' },
+  { id: '', label: 'Duração' },
   { id: 'data_pendente', label: 'Registo', align: 'center', minWidth: 130, width: 10 },
 ];
 
 const TABLE_HEAD_CONF = [
-  { id: '', label: 'Critérios', align: 'left' },
+  { id: '', label: 'Critérios' },
   { id: 'ativo', label: 'Ativo', align: 'center' },
-  { id: 'criador', label: 'Criado', align: 'left' },
+  { id: 'criador', label: 'Criado' },
   { id: '', width: 10 },
 ];
 
@@ -79,7 +79,7 @@ export default function TableDetalhes({ id, item }) {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { processo, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { processo, isLoading } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (id && item) dispatch(getInfoProcesso(item, { id }));
@@ -231,7 +231,7 @@ export default function TableDetalhes({ id, item }) {
         />
       )}
 
-      {isOpenModal === 'confidencialidade' && <ConfidencialidadesForm processoId={processo.id} />}
+      {/* {isOpenModal === 'confidencialidade' && <ConfidencialidadesForm processoId={processo.id} />} */}
     </Box>
   );
 }
@@ -241,20 +241,20 @@ export default function TableDetalhes({ id, item }) {
 Criterios.propTypes = { dados: PropTypes.array, colaboradores: PropTypes.array };
 
 export function Criterios({ dados, colaboradores }) {
-  const estadosIncluidos = dados.filter((row) => row.estado_incluido_id).map((item) => item.estado_incluido);
-  const estadosExcluidos = dados.filter((row) => row.estado_excluido_id).map((item) => item.estado_excluido);
+  const estadosIncluidos = dados.filter(({ estado_incluido_id: estado }) => estado).map((item) => item.estado_incluido);
+  const estadosExcluidos = dados.filter(({ estado_excluido_id: estado }) => estado).map((item) => item.estado_excluido);
   const perfisIncluidos = dados
-    .filter((row) => row.perfil_incluido_id)
+    .filter(({ perfil_incluido_id: pid }) => pid)
     .map(
       (item) =>
-        colaboradores?.find((colab) => colab?.perfil_id === item.perfil_incluido_id)?.perfil?.displayName ||
+        colaboradores?.find(({ perfil_id: pid }) => pid === item.perfil_incluido_id)?.perfil?.displayName ||
         `PerfilID: ${item.perfil_incluido_id}`
     );
   const perfisExcluidos = dados
-    .filter((row) => row.perfil_excluido_id)
+    .filter(({ perfil_excluido_id: pid }) => pid)
     .map(
       (item) =>
-        colaboradores?.find((colab) => colab?.perfil_id === item.perfil_excluido_id)?.perfil?.displayName ||
+        colaboradores?.find(({ perfil_id: pid }) => pid === item.perfil_excluido_id)?.perfil?.displayName ||
         `PerfilID: ${item.perfil_excluido_id}`
     );
 

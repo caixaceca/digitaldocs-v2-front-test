@@ -54,7 +54,7 @@ export default function InfoCredito() {
         { label: 'Conta DO débito', value: credito?.conta_do_renda },
         {
           label: 'Tipo de titular',
-          value: `${credito?.tipo_titular}${credito?.consumidor ? ' (Consumidor)' : ''}`,
+          value: `${credito?.tipo_titular}${credito?.tipo_titular === 'Particular' && !credito?.consumidor ? ' (Não consumidor)' : ''}`,
         },
         { label: 'Email', value: credito?.morada_eletronico_cliente },
         { label: 'Morada', value: credito?.morada_cliente },
@@ -221,12 +221,12 @@ export function TableInfoCredito({ params, dados = [] }) {
   };
 
   const eliminarInterveniente = () => {
-    const params = { numero: selectedItem?.participante_id, getItem: 'credito', afterSuccess: () => openModal() };
+    const params = { numero: selectedItem?.participante_id, getItem: 'credito', onClose: () => openModal() };
     dispatch(deleteItem('intervenientes', { id, msg: 'Interveniente eliminado', ...params }));
   };
 
   const eliminarContrato = () => {
-    const params = { creditoId: id, id: selectedItem?.id, afterSuccess: () => openModal() };
+    const params = { creditoId: id, id: selectedItem?.id, onClose: () => openModal() };
     dispatch(deleteItem('contratos', { ...params, msg: 'Contrato eliminado' }));
   };
 

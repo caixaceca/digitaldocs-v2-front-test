@@ -51,10 +51,14 @@ export default function TableParamsGaji9({ item, inativos }) {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
 
+  const { colaboradores, uos } = useSelector((state) => state.intranet);
   const { funcoes, grupos, recursos, variaveis, marcadores, isLoading, isOpenView, isOpenModal } = useSelector(
     (state) => state.gaji9
   );
-  const { colaboradores, uos } = useSelector((state) => state.intranet);
+
+  useEffect(() => {
+    setFilter(localStorage.getItem(`filter${item}`) || '');
+  }, [item]);
 
   useEffect(() => {
     setPage(0);
@@ -139,8 +143,8 @@ export default function TableParamsGaji9({ item, inativos }) {
                       <CellChecked check={row.ativo} />
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          <DefaultAction label="EDITAR" onClick={() => viewItem('update', row)} />
-                          <DefaultAction label="DETALHES" onClick={() => viewItem('view', row)} />
+                          <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
+                          <DefaultAction small label="DETALHES" onClick={() => viewItem('view', row)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

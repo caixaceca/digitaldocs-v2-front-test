@@ -35,16 +35,8 @@ export default function Table(theme) {
           backgroundImage: `linear-gradient(to bottom, ${theme.palette.background.neutral} 0%, ${theme.palette.background.neutral} 100%)`,
         },
         body: {
-          '&:first-of-type': {
-            paddingLeft: theme.spacing(3),
-            borderTopLeftRadius: theme.shape.borderRadius,
-            borderBottomLeftRadius: theme.shape.borderRadius,
-          },
-          '&:last-of-type': {
-            paddingRight: theme.spacing(3),
-            borderTopRightRadius: theme.shape.borderRadius,
-            borderBottomRightRadius: theme.shape.borderRadius,
-          },
+          '&:first-of-type': { paddingLeft: theme.spacing(3) },
+          '&:last-of-type': { paddingRight: theme.spacing(3) },
         },
       },
     },

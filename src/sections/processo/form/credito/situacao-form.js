@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from '../../../../redux/store';
 import { DialogButons } from '../../../../components/Actions';
 import { DialogConfirmar } from '../../../../components/CustomDialog';
 import { shapeMixed, shapeNumber } from '../../../../components/hook-form/yup-shape';
-import { FormProvider, RHFDatePicker, RHFNumberField, RHFAutocompleteSmp } from '../../../../components/hook-form';
+import { FormProvider, RHFDataEntrada, RHFNumberField, RHFAutocompleteSmp } from '../../../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ export function FormSituacao({ onCancel }) {
   const formSchema = Yup.object().shape({
     situacao: Yup.mixed().required().label('Situação'),
     data_referencia: Yup.date().typeError().required().label('Data'),
-    nivel_decisao: shapeMixed('Decisor', 'Aprovado', '', 'situacao'),
+    escalao_decisao: shapeMixed('Decisor', 'Aprovado', '', 'situacao'),
     montante: shapeNumber('Data', 'Aprovado', 'Contratado', 'situacao'),
   });
 
@@ -67,7 +67,7 @@ export function FormSituacao({ onCancel }) {
         updateItem('situacaoCredito', JSON.stringify(formData), {
           ...params,
           fillCredito: true,
-          afterSuccess: () => onCancel(),
+          onClose: () => onCancel(),
         })
       );
     } catch (error) {
@@ -85,11 +85,11 @@ export function FormSituacao({ onCancel }) {
             {values?.situacao === 'Aprovado' && (
               <RHFAutocompleteSmp
                 label="Decisor"
-                name="nivel_decisao"
+                name="escalao_decisao"
                 options={['1º Comitê', '2º Comitê', '3º Comitê']}
               />
             )}
-            <RHFDatePicker name="data_referencia" label="Data" />
+            <RHFDataEntrada name="data_referencia" label="Data" disableFuture />
             {(values?.situacao === 'Aprovado' || values?.situacao === 'Contratado') && (
               <RHFNumberField name="montante" label="Montante" tipo="CVE" />
             )}
@@ -129,7 +129,7 @@ export function EliminarDadosSituacao({ onCancel }) {
               contratar: situacao === 'Contratado',
               indeferir: situacao === 'Indeferido',
             }),
-            { ...params, fillCredito: true, afterSuccess: () => onCancel() }
+            { ...params, fillCredito: true, onClose: () => onCancel() }
           )
         )
       }

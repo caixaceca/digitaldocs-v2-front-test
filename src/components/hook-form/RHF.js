@@ -187,6 +187,32 @@ export function RHFDatePicker({ name, label = '', small = false, required = fals
   );
 }
 
+RHFDataEntrada.propTypes = { name: PropTypes.string, label: PropTypes.string };
+
+export function RHFDataEntrada({ name, label = '', ...other }) {
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <DatePicker
+          label={label}
+          value={field.value}
+          onChange={(newValue) => field.onChange(newValue)}
+          slotProps={{ textField: { error, fullWidth: true, helperText: error?.message } }}
+          shouldDisableDate={(date) => {
+            const day = date.getDay();
+            return day === 0 || day === 6;
+          }}
+          {...other}
+        />
+      )}
+    />
+  );
+}
+
 // ----------------------------------------------------------------------
 
 RHFDateIF.propTypes = { options: PropTypes.object };

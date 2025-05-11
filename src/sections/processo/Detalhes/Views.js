@@ -46,7 +46,7 @@ export default function Views() {
             <SearchNotFound message="Sem histórico de visualização disponível..." />
           ) : (
             viewsGroupByColaborador?.map((row, index) => {
-              const colaborador = colaboradores?.find((colab) => colab.perfil_id === row.perfilId);
+              const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row.perfilId);
               return (
                 <Accordion expanded={accord === row.perfilId} onChange={handleAccord(row.perfilId)} key={`vw_${index}`}>
                   <AccordionSummary>

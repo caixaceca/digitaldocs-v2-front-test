@@ -46,18 +46,17 @@ export default function Anexos({ anexos }) {
   const { mail } = useSelector((state) => state.intranet);
   const { filePreview, isLoadingPreview, processo } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = useMemo(
-    () => anexos?.filter((row) => row.ativo && row?.anexo !== filePreview?.anexo),
+    () => anexos?.filter(({ ativo, anexo }) => ativo && anexo !== filePreview?.anexo),
     [anexos, filePreview?.anexo]
   );
   const anexosInativos = useMemo(
-    () => anexos?.filter((row) => !row.ativo && row?.anexo !== filePreview?.anexo),
+    () => anexos?.filter(({ ativo, anexo }) => !ativo && anexo !== filePreview?.anexo),
     [anexos, filePreview?.anexo]
   );
 
   const viewAnexo = (anexo) => {
-    dispatch(
-      getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', { anexo: { ...anexo, tipoDoc: canPreview(anexo) } })
-    );
+    const params = { processoId: processo?.id, anexo: { ...anexo, tipoDoc: canPreview(anexo) } };
+    dispatch(getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', params));
   };
 
   return (

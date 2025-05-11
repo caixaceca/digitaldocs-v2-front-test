@@ -4,12 +4,10 @@ import { formatDate } from '../../../../utils/formatTime';
 
 // ----------------------------------------------------------------------
 
-export const shapeAnexos = (isEdit, outros, checkList) =>
+export const shapeAnexos = (outros, checkList) =>
   Yup.object().shape({
     anexos:
-      !isEdit && outros && checkList?.length === 0
-        ? Yup.array().min(1, 'Pelo menos um documento é necessário.')
-        : Yup.array(),
+      outros && checkList?.length === 0 ? Yup.array().min(1, 'Pelo menos um documento é necessário.') : Yup.array(),
     checklist: Yup.array().of(
       Yup.object().shape({
         anexos: Yup.array().when(
@@ -57,34 +55,25 @@ export const garantiasAssociadas = (garantias) =>
 
 // ----------------------------------------------------------------------
 
-export const filterCheckList = (checklist, isEdit) =>
-  checklist?.filter(({ designacao, identificador }) =>
-    isEdit ? designacao !== 'OUTROS' : designacao !== 'OUTROS' && !identificador
-  );
-
-// ----------------------------------------------------------------------
-
 export function appendAnexos(formData, anexos, outros, checklist) {
   let index = 0;
 
-  checklist.forEach((documento) => {
-    documento.anexos.forEach((anexo) => {
-      if (anexo.file) {
-        formData.append(`anexos[${index}].tipo_documento_id`, documento.tipo_id);
-        if (anexo.numero_entidade) formData.append(`anexos[${index}].numero_entidade`, anexo.numero_entidade);
-        if (anexo.data_emissao)
-          formData.append(`anexos[${index}].data_emissao`, formatDate(anexo.data_emissao, 'yyyy-MM-dd'));
-        if (anexo.data_validade)
-          formData.append(`anexos[${index}].data_validade`, formatDate(anexo.data_validade, 'yyyy-MM-dd'));
-        formData.append(`anexos[${index}].anexo`, anexo.file);
+  checklist.forEach(({ tipo_id: tipoId, anexos }) => {
+    anexos.forEach(({ file, numero_entidade: entidade, data_emissao: emissao, data_validade: validade }) => {
+      if (file) {
+        formData.append(`anexos[${index}].tipo_documento_id`, tipoId);
+        if (entidade) formData.append(`anexos[${index}].numero_entidade`, entidade);
+        if (emissao) formData.append(`anexos[${index}].data_emissao`, formatDate(emissao, 'yyyy-MM-dd'));
+        if (validade) formData.append(`anexos[${index}].data_validade`, formatDate(validade, 'yyyy-MM-dd'));
+        formData.append(`anexos[${index}].anexo`, file);
         index += 1;
       }
     });
   });
 
   anexos.forEach((row) => {
-    formData.append(`anexos[${index}].anexo`, row);
     formData.append(`anexos[${index}].tipo_documento_id`, outros?.tipo_id);
+    formData.append(`anexos[${index}].anexo`, row);
     index += 1;
   });
   return formData;

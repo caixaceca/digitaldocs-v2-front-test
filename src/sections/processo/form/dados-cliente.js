@@ -12,7 +12,7 @@ import { fluxosGmkt, bancaDigital } from '../../../utils/validarAcesso';
 // components
 import GridItem from '../../../components/GridItem';
 import { DefaultAction } from '../../../components/Actions';
-import { RHFTextField, RHFNumberField, RHFDatePicker } from '../../../components/hook-form';
+import { RHFTextField, RHFNumberField, RHFDataEntrada } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -26,28 +26,28 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
   return (
     <Grid container spacing={3} justifyContent="center">
       {!fluxosGmkt(fluxo?.assunto) && (
-        <GridItem xs={12} sm={6} lg={3}>
-          <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
+        <GridItem sm={6} lg={3}>
+          <RHFDataEntrada disableFuture name="data_entrada" label="Data de entrada" />
         </GridItem>
       )}
       {fluxo?.assunto === 'Abertura de Conta' ? (
         <>
           {fields?.length === 0 && (
-            <GridItem xs={12} lg={6} children={<RHFTextField name="titular" label="Titular" required />} />
+            <GridItem lg={6} children={<RHFTextField name="titular" label="Titular" required />} />
           )}
           <Entidades fields={fields} append={append} remove={remove} />
         </>
       ) : (
         <>
           {!fluxosGmkt(fluxo?.assunto) && fluxo?.assunto !== 'Diário' && (
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
+            <GridItem sm={6} lg={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
           )}
         </>
       )}
       {fluxo?.limpo && fluxo?.assunto !== 'Diário' && !fluxosGmkt(fluxo?.assunto) && (
-        <Grid item xs={12} xl={6}>
+        <GridItem xl={6}>
           <RHFTextField name="titular" label="Titular" required={!values?.conta} />
-        </Grid>
+        </GridItem>
       )}
       {fluxosGmkt(fluxo?.assunto) && (
         <>
@@ -55,19 +55,15 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
             <RHFTextField name="titular" label="Descrição" />
           </Grid>
           {fluxo?.assunto === 'Formulário' && (
-            <GridItem xs={12} sm={6} children={<RHFTextField name="email" label="Codificação/Nome" />} />
+            <GridItem sm={6} children={<RHFTextField name="email" label="Codificação/Nome" />} />
           )}
         </>
       )}
-      {bancaDigital(fluxo?.assunto) && (
-        <GridItem xs={12} xl={6} children={<RHFTextField name="email" label="Email" />} />
-      )}
+      {bancaDigital(fluxo?.assunto) && <GridItem xl={6} children={<RHFTextField name="email" label="Email" />} />}
       {(noperacao || fluxo?.iscon) && (
         <>
-          <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
-          <GridItem xs={12} sm={6} xl={3}>
-            <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
-          </GridItem>
+          <GridItem sm={6} xl={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
+          <GridItem sm={6} xl={3} children={<RHFNumberField noFormat name="noperacao" label="Nº de operação" />} />
         </>
       )}
     </Grid>

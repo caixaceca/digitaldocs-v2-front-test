@@ -92,6 +92,10 @@ export default function TableParametrizacao({ item }) {
   }, [done]);
 
   useEffect(() => {
+    setFilter(localStorage.getItem(`filter${item}`) || '');
+  }, [item]);
+
+  useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, filter]);
@@ -212,9 +216,9 @@ export default function TableParametrizacao({ item }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item !== 'fluxos' && item !== 'estados' && (
-                            <DefaultAction label="EDITAR" onClick={() => handleView(row, 'update')} />
+                            <DefaultAction small label="EDITAR" onClick={() => handleView(row, 'update')} />
                           )}
-                          <DefaultAction onClick={() => handleView(row, 'view')} label="DETALHES" />
+                          <DefaultAction small onClick={() => handleView(row, 'view')} label="DETALHES" />
                         </Stack>
                       </TableCell>
                     </TableRow>

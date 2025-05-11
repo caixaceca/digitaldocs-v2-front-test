@@ -76,7 +76,7 @@ export default function TableClausula({ inativos }) {
 
   const confirmDelete = () => {
     const params = { id: selectedItem?.id, msg: 'Cláusula eliminada' };
-    dispatch(deleteItem('clausulas', { ...params, afterSuccess: () => dispatch(setModal({ item: '', dados: null })) }));
+    dispatch(deleteItem('clausulas', { ...params, onClose: () => dispatch(setModal({ item: '', dados: null })) }));
   };
 
   return (
@@ -118,7 +118,7 @@ export default function TableClausula({ inativos }) {
                       <TableCell>{row?.titulo || noDados()}</TableCell>
                       <TableCell>
                         {row?.tipo_titular || noDados()}
-                        {row?.consumidor ? ' (Consumidor)' : ''}
+                        {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
                       </TableCell>
                       <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                       <TableCell>{row?.componente || noDados()}</TableCell>

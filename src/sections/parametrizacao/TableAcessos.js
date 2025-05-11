@@ -65,7 +65,7 @@ export default function TableAcessos({ tab }) {
     (state) => state.parametrizacao
   );
 
-  useNotificacao({ done, afterSuccess: () => dispatch(setModal()) });
+  useNotificacao({ done, onClose: () => dispatch(setModal()) });
 
   const dataFiltered = applySortFilter({
     filter,

@@ -48,9 +48,12 @@ export function subtractArrays(a1, a2) {
 
 // ----------------------------------------------------------------------
 
-export function transicoesList(transicoes, estados, label) {
+export function transicoesList(transicoes, estados, label, checklist) {
   const lista =
-    transicoes
+    (checklist
+      ? transicoes?.filter(({ is_paralelo: paralelo, modo }) => !paralelo && modo !== 'Devolução')
+      : transicoes
+    )
       ?.filter(({ modo }) => modo !== 'desarquivamento')
       ?.map((row) => ({
         ...row,

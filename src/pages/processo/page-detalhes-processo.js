@@ -38,6 +38,7 @@ import {
   TableDetalhes,
 } from '../../sections/processo/Detalhes';
 import ProcessoForm from '../../sections/processo/form/form-processo';
+import { ColocarPendenteForm } from '../../sections/processo/form/intervencao';
 import Intervencao, { Libertar, Atribuir, Resgatar, Cancelar, Desarquivar } from '../../sections/processo/Intervencao';
 
 // ----------------------------------------------------------------------
@@ -66,10 +67,10 @@ export default function PageProcesso() {
   const identificador = useIdentificacao({ id });
   const processo = useProcesso({ id, perfilId });
   const proxAnt = getProximoAnterior(processos, processo?.id);
+  const estado = useMemo(() => processo?.estado || null, [processo?.estado]);
   const fluxoId = useMemo(() => processo?.fluxo_id || '', [processo?.fluxo_id]);
-  const estado = useMemo(() => processo?.estado_processo || null, [processo?.estado_processo]);
+  const estadoId = useMemo(() => processo?.estado?.estado_id || '', [processo?.estado?.estado_id]);
   const ultimaTransicao = useMemo(() => processo?.htransicoes?.[0] || null, [processo?.htransicoes]);
-  const estadoId = useMemo(() => processo?.estado_processo?.estado_id || '', [processo?.estado_processo?.estado_id]);
 
   const handleAceitar = useCallback(
     (estadoId, modo) => dispatch(getInfoProcesso('aceitar', { id, estadoId, modo, msg: 'Processo aceitado' })),
@@ -85,7 +86,7 @@ export default function PageProcesso() {
         value: 'Info. crédito',
         component: (
           <InfoCredito
-            dados={{ ...processo.credito, processoId: id, modificar: estado?.is_lock && processo?.atribuidoAMim }}
+            dados={{ ...processo.credito, processoId: id, modificar: estado?.preso && estado?.atribuidoAMim }}
           />
         ),
       });
@@ -93,7 +94,7 @@ export default function PageProcesso() {
     if (processo?.con)
       tabs.push({
         value: 'Info. CON',
-        component: <InfoCon dados={processo?.con} valor={processo?.valor} numero={processo?.numero_operacao} />,
+        component: <InfoCon dados={{ ...processo?.con, valor: processo?.valor, numero: processo?.numero_operacao }} />,
       });
 
     if (processo?.estados && processo.estados?.length > 0)
@@ -108,7 +109,7 @@ export default function PageProcesso() {
             estado={estado?.estado}
             pareceres={estado.pareceres}
             estadoId={estado?.estado_id}
-            assunto={`${processo.assunto} - ${processo.titular}`}
+            assunto={`${processo?.fluxo ?? ''} - ${processo?.titular ?? ''}`}
           />
         ),
       });
@@ -116,9 +117,12 @@ export default function PageProcesso() {
 
     if (processo?.htransicoes && processo.htransicoes?.length > 0) {
       tabs.push({
-        value: 'Transições',
+        value: 'Encaminhamentos',
         component: (
-          <Transicoes transicoes={processo.htransicoes} assunto={`${processo.assunto} - ${processo.titular}`} />
+          <Transicoes
+            transicoes={processo.htransicoes}
+            assunto={`${processo?.fluxo ?? ''} - ${processo?.titular ?? ''}`}
+          />
         ),
       });
     }
@@ -128,10 +132,13 @@ export default function PageProcesso() {
         { value: 'Anexos', component: <TodosAnexos /> },
         { value: 'Retenções', component: <TableDetalhes id={id} item="hretencoes" /> },
         { value: 'Pendências', component: <TableDetalhes id={id} item="hpendencias" /> },
-        { value: 'Atribuições', component: <TableDetalhes id={id} item="hatribuicoes" /> },
-        { value: 'Confidencialidades', component: <TableDetalhes id={id} item="confidencialidades" /> }
+        { value: 'Atribuições', component: <TableDetalhes id={id} item="hatribuicoes" /> }
       );
     }
+
+    // if (processo?.htransicoes?.length > 0) {
+    //   tabs.push({ value: 'Confidencialidades', component: <TableDetalhes id={id} item="confidencialidades" /> });
+    // }
 
     if (processo && (isAdmin || isAuditoria)) {
       tabs.push({ value: 'Versões', component: <Versoes id={id} /> }, { value: 'Visualizações', component: <Views /> });
@@ -150,7 +157,7 @@ export default function PageProcesso() {
 
   useNotificacao({
     done,
-    afterSuccess: () => {
+    onClose: () => {
       if (
         !done.includes('Stiuação') &&
         !done.includes('Garantia') &&
@@ -193,21 +200,21 @@ export default function PageProcesso() {
                         <>
                           {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
                             <>
-                              {estado?.is_lock && processo?.atribuidoAMim && <Intervencao />}
-                              {estado?.is_lock && !processo?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
+                              {estado?.preso && estado?.atribuidoAMim && <Intervencao />}
+                              {estado?.preso && !estado?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
                                 <Libertar dados={{ id, estadoId }} />
                               )}
-                              {!estado?.is_lock && (!processo?.perfilAtribuido || processo?.atribuidoAMim) && (
+                              {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
                                 <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
                               )}
-                              {!estado?.is_lock && gestorEstado(meusAmbientes, estadoId) && (
-                                <Atribuir dados={{ estadoId, perfilIdA: processo?.perfilAtribuido, processoId: id }} />
+                              {!estado?.preso && gestorEstado(meusAmbientes, estadoId) && (
+                                <Atribuir dados={{ estadoId, perfilIdA: estado?.perfil_id, processoId: id }} />
                               )}
                             </>
                           )}
                           {/* Resgatar */}
                           {!!ultimaTransicao &&
-                            !estado?.is_lock &&
+                            !estado?.preso &&
                             !processo?.pendente &&
                             !ultimaTransicao?.resgate &&
                             !ultimaTransicao?.pareceres?.length &&
@@ -222,7 +229,7 @@ export default function PageProcesso() {
                       {/* EM PARALELO */}
                       {processo?.estados?.length > 0 && pertencoEstadoId(meusAmbientes, estadoId) && (
                         <>
-                          {estado?.is_lock && processo?.atribuidoAMim && (
+                          {estado?.preso && estado?.atribuidoAMim && (
                             <>
                               <Libertar dados={{ id, estadoId }} />
                               {processo?.estados?.find(({ parecer_em: parecer }) => parecer) ? (
@@ -232,7 +239,7 @@ export default function PageProcesso() {
                               )}
                             </>
                           )}
-                          {!estado?.is_lock && (
+                          {!estado?.preso && (
                             <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
                           )}
                         </>
@@ -268,6 +275,7 @@ export default function PageProcesso() {
           </Stack>
         )}
 
+        {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
         {isOpenModal === 'editar-processo' && <ProcessoForm processo={processo} ambientId={estadoId} />}
 
         {pdfPreview && (

@@ -15,12 +15,9 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 // utils
 import { BASEURL } from '../../utils/apisUrl';
 import { getFileThumb } from '../../utils/formatFile';
-// hooks
-import useToggle from '../../hooks/useToggle';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
@@ -28,31 +25,14 @@ import { getFromIntranet } from '../../redux/slices/intranet';
 import Image from '../../components/Image';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
-import { IconButtonHead } from '../../layouts/header';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import SearchNotFound from '../../components/table/SearchNotFound';
 
 // ----------------------------------------------------------------------
 
-export default function Ajuda() {
-  const { toggle: open, onOpen, onClose } = useToggle();
-
-  return (
-    <>
-      <IconButtonHead
-        open={open}
-        title="Ajuda"
-        onOpen={onOpen}
-        icon={<HelpOutlineOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />}
-      />
-      {open && <AjudaDialog onClose={onClose} />}
-    </>
-  );
-}
-
 AjudaDialog.propTypes = { onClose: PropTypes.func };
 
-function AjudaDialog({ onClose }) {
+export default function AjudaDialog({ onClose }) {
   const dispatch = useDispatch();
   const [controlled, setControlled] = useState(false);
   const [isOpenVideo, setIsOpenVideo] = useState(false);

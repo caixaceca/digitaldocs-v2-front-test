@@ -170,7 +170,7 @@ export function IntervenienteForm({ id, dados, onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', afterSuccess: () => onCancel() };
+    const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', onClose: () => onCancel() };
     dispatch(
       createItem(
         'intervenientes',
@@ -248,7 +248,7 @@ export function DataContrato({ creditoId, onCancel }) {
       : null;
 
   const onSubmit = async () => {
-    const params = { msg: 'Datas atualizado', codigo: selectedItem?.codigo, afterSuccess: () => onCancel() };
+    const params = { msg: 'Datas atualizado', codigo: selectedItem?.codigo, onClose: () => onCancel() };
     const datas = {
       data_entrega: values?.data_entrega ? preencheData(values?.data_entrega, selectedItem?.data_entrega) : null,
       data_recebido: values?.data_recebido ? preencheData(values?.data_recebido, selectedItem?.data_recebido) : null,
@@ -294,7 +294,7 @@ export function PropostaForm({ onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    dispatch(getFromGaji9('proposta', { ...values, msg: 'Proposta carregada', afterSuccess: () => onCancel() }));
+    dispatch(getFromGaji9('proposta', { ...values, msg: 'Proposta carregada', onClose: () => onCancel() }));
   };
 
   return (

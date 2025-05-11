@@ -25,20 +25,11 @@ export default IconButtonAnimate;
 
 // ----------------------------------------------------------------------
 
-const varSmall = {
-  hover: { scale: 1.1 },
-  tap: { scale: 0.95 },
-};
+const varSmall = { hover: { scale: 1.1 }, tap: { scale: 0.95 } };
 
-const varMedium = {
-  hover: { scale: 1.09 },
-  tap: { scale: 0.97 },
-};
+const varMedium = { hover: { scale: 1.09 }, tap: { scale: 0.97 } };
 
-const varLarge = {
-  hover: { scale: 1.08 },
-  tap: { scale: 0.99 },
-};
+const varLarge = { hover: { scale: 1.08 }, tap: { scale: 0.99 } };
 
 AnimateWrap.propTypes = {
   children: PropTypes.node.isRequired,
@@ -55,9 +46,7 @@ function AnimateWrap({ size, children }) {
       whileTap="tap"
       whileHover="hover"
       variants={(isSmall && varSmall) || (isLarge && varLarge) || varMedium}
-      sx={{
-        display: 'inline-flex',
-      }}
+      sx={{ display: 'inline-flex' }}
     >
       {children}
     </Box>

@@ -243,7 +243,7 @@ ColaboradorCard.propTypes = {
 export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const totalColaborador = sumBy(colaboradorDados?.processos, 'total');
-  const colaborador = colaboradores?.find((row) => row.perfil_id === colaboradorDados.item);
+  const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === colaboradorDados.item);
 
   return (
     <Grid item xs={12} md={6} lg={4}>

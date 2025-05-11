@@ -57,7 +57,7 @@ export default function TableProcessos({ from }) {
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
 
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { isLoading, processosInfo, processos } = useSelector((state) => state.digitaldocs);
+  const { isLoading, cursor, processos } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, meuAmbiente, meuFluxo } = useSelector((state) => state.parametrizacao);
 
   const perfisProcessos = useMemo(() => [...new Set(processos.map(({ perfil_id: pid }) => pid))], [processos]);
@@ -95,7 +95,7 @@ export default function TableProcessos({ from }) {
       dispatch(getIndicadores('totalP', { item: 'totalP' }));
       carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, 0);
     }
-  }, [dispatch, carregarProcessos, from, segmento, meuAmbiente?.id, meuFluxo?.id, meusAmbientes]);
+  }, [dispatch, carregarProcessos, from, segmento, meuAmbiente?.id, meuFluxo?.id, meusAmbientes?.length]);
 
   const dataFiltered = applySortFilter({
     from,
@@ -112,7 +112,7 @@ export default function TableProcessos({ from }) {
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, segmento, colaborador?.id, meuAmbiente?.id, meuFluxo?.id]);
+  }, [filter, from, segmento, colaborador?.id, meuAmbiente?.id, meuFluxo?.id]);
 
   return (
     <>
@@ -139,7 +139,7 @@ export default function TableProcessos({ from }) {
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
-            <Table size={dense ? 'small' : 'medium'}>
+            <Table stickyHeader size={dense ? 'small' : 'medium'}>
               <TableHeadCustom
                 order={order}
                 onSort={onSort}
@@ -224,10 +224,8 @@ export default function TableProcessos({ from }) {
           />
         )}
       </Card>
-      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
-        <MaisProcessos
-          verMais={() => carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, processosInfo)}
-        />
+      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && cursor && (
+        <MaisProcessos verMais={() => carregarProcessos(from, meuAmbiente?.id, meuFluxo?.id, segmento, cursor)} />
       )}
     </>
   );

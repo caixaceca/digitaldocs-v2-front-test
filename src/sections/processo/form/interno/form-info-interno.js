@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useSnackbar } from 'notistack';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -13,7 +14,6 @@ import { fillData } from '../../../../utils/formatTime';
 import { fluxosGmkt, bancaDigital } from '../../../../utils/validarAcesso';
 import { shapeDate, shapeNumber, shapeMixed } from '../../../../components/hook-form/yup-shape';
 // redux
-import { updateDados } from '../../../../redux/slices/stepper';
 import { useSelector, useDispatch } from '../../../../redux/store';
 // components
 import {
@@ -27,6 +27,8 @@ import {
 import DadosCliente from '../dados-cliente';
 import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
+//
+import { entidadesList, submitDados } from '../utils-form-processo';
 
 // ----------------------------------------------------------------------
 
@@ -34,15 +36,12 @@ FormInfoInterno.propTypes = { dados: PropTypes.object };
 
 export default function FormInfoInterno({ dados }) {
   const dispatch = useDispatch();
-  const { isEdit, processo, fluxo, onClose } = dados;
+  const { enqueueSnackbar } = useSnackbar();
+  const { isEdit, processo, fluxo, estado, onClose } = dados;
+
+  const { cc, uos } = useSelector((state) => state.intranet);
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const entidades = useMemo(
-    () =>
-      (processo?.entidade && processo?.entidade?.split(';')?.map((row) => ({ numero: row }))) ||
-      (!isEdit && fluxo?.assunto === 'Abertura de Conta' && [{ numero: '' }]) ||
-      [],
-    [fluxo?.assunto, isEdit, processo?.entidade]
-  );
+  const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
     titular: fluxosGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
@@ -63,7 +62,7 @@ export default function FormInfoInterno({ dados }) {
 
   const defaultValues = useMemo(
     () => ({
-      entidades: dadosStepper?.entidades || entidades,
+      fluxo_id: fluxo?.id,
       conta: dadosStepper?.conta || processo?.conta || '',
       email: dadosStepper?.email || processo?.email || '',
       obs: dadosStepper?.obs || processo?.observacao || '',
@@ -75,20 +74,23 @@ export default function FormInfoInterno({ dados }) {
       periodicidade: dadosStepper?.periodicidade || processo?.periodicidade || null,
       data_inicio: dadosStepper?.data_inicio || fillData(processo?.data_inicio, null),
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
+      entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
+      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
       data_arquivamento: dadosStepper?.data_arquivamento || fillData(processo?.data_arquivamento, null),
     }),
-    [entidades, dadosStepper, processo]
+    [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo, estado?.uo_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
 
+  const onSubmit = async () => {
+    submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+  };
+
   return (
-    <FormProvider
-      methods={methods}
-      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-    >
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Box sx={{ width: 1 }}>
         <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <DadosCliente noperacao={processo?.noperacao} fluxo={fluxo} />
@@ -130,7 +132,7 @@ export default function FormInfoInterno({ dados }) {
           <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
         </Card>
       </Box>
-      <ButtonsStepper onCancel={() => onClose()} labelCancel="Cancelar" />
+      <ButtonsStepper isSaving={isSaving} onCancel={onClose} labelCancel="Cancelar" label={isEdit ? 'Guardar' : ''} />
     </FormProvider>
   );
 }

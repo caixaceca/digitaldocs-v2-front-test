@@ -69,7 +69,7 @@ export default function PageMinutaDetalhes() {
 
   useNotificacao({
     done,
-    afterSuccess: () => {
+    onClose: () => {
       if (!done?.includes('Regra')) handleClose();
       if (done === 'Minuta publicada' || done === 'Minuta revogada') navigate(PATH_DIGITALDOCS.gaji9.root);
       else if (done === 'Minuta clonada' || (done === 'Minuta versionada' && minutaId))

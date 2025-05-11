@@ -78,7 +78,7 @@ export default function TableCON({ item = 'con' }) {
   const [datai, setDatai] = useState(
     getDataLS('dataICon', new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   );
-  const { dadosControle, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
+  const { dadosControle, cursor, isLoading } = useSelector((state) => state.digitaldocs);
 
   useEffect(() => {
     if (item === 'con' && dataValido(datai) && dataValido(dataf)) {
@@ -109,7 +109,7 @@ export default function TableCON({ item = 'con' }) {
   };
 
   const verMais = () => {
-    dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor: processosInfo }));
+    dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor }));
   };
 
   return (
@@ -204,9 +204,7 @@ export default function TableCON({ item = 'con' }) {
           />
         )}
       </Card>
-      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
-        <MaisProcessos verMais={verMais} />
-      )}
+      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && cursor && <MaisProcessos verMais={verMais} />}
     </>
   );
 }

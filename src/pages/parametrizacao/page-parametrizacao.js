@@ -55,7 +55,7 @@ export default function PageParametrizacao() {
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabParams');
   }, [tabsList, currentTab]);
 
-  useNotificacao({ done, afterSuccess: () => handleCloseModal() });
+  useNotificacao({ done, onClose: () => handleCloseModal() });
 
   return (
     <Page title="Parametrização | DigitalDocs">

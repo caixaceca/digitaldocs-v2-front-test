@@ -69,7 +69,7 @@ export function actionUpdate(state, payload) {
 
   if (!Array.isArray(target)) return;
 
-  const index = target.findIndex((row) => row.id === dados.id);
+  const index = target.findIndex(({ id }) => id === dados.id);
 
   if (index > -1) {
     const updatedArray = [...target];
@@ -88,11 +88,11 @@ export function actionDelete(state, payload) {
 
   if (!Array.isArray(target)) return;
 
-  if (item1) state[item1][item] = target.filter((row) => row.id !== id);
+  if (item1) state[item1][item] = target.filter(({ id: idt }) => idt !== id);
   else if (desativar) {
-    const index = target.findIndex((row) => row.id === id);
+    const index = target.findIndex(({ id: idt }) => idt === id);
     state[item][index].ativo = false;
-  } else state[item] = target.filter((row) => row.id !== id);
+  } else state[item] = target.filter(({ id: idt }) => idt !== id);
 }
 
 export function actionOpenModal(state, payload) {

@@ -46,72 +46,99 @@ export default function Estados({ handleAceitar }) {
   };
 
   const viewAnexo = (anexo, estadoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { anexo, estadoId, parecerId }));
+    dispatch(getAnexo('fileDownload', { processoId: processo?.id, anexo, estadoId, parecerId }));
   };
 
   return (
     <Box sx={{ pb: { xs: 1, sm: 2 } }}>
       {processo?.estados?.map((row) => {
         const temPareceres = row?.pareceres && row?.pareceres?.length > 0;
-        const afeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+        const afeto = colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id);
         const temParecer = row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false);
 
         return (
           <Stack key={row?.id} sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
-            {!temPareceres && (
-              <Box sx={{ position: 'absolute', right: 15, p: 2 }}>
-                <Stack direction="row" justifyContent="right" alignItems="center" spacing={1} sx={{ zIndex: 2 }}>
-                  {pertencoEstadoId(meusAmbientes, row?.estado_id) && (
-                    <>
-                      {!temParecer && !row?.is_lock && gestorEstado(meusAmbientes, row?.estado_id) && (
-                        <Atribuir
-                          dados={{ estadoId: row?.estado_id, processoId: processo?.id, perfilIdA: row?.perfil_id }}
-                        />
-                      )}
-                      {row?.is_lock && row?.perfil_id === perfilId && (
-                        <>
-                          <DefaultAction
-                            label={temParecer ? 'EDITAR' : 'ADICIONAR'}
-                            onClick={() => dispatch(setModal({ modal: 'parecer-estado', dados: row }))}
-                          />
-
-                          <Libertar
-                            isSaving={isSaving}
-                            dados={{ id: processo?.id, fluxoId: processo?.fluxo_id, estadoId: row?.estado_id }}
-                          />
-                        </>
-                      )}
-                      {!row?.is_lock && (!row?.perfil_id || row?.perfil_id === perfilId) && (
-                        <DefaultAction label="ACEITAR" onClick={() => handleAceitar(row?.estado_id, 'paralelo')} />
-                      )}
-                    </>
-                  )}
-                </Stack>
-              </Box>
-            )}
             <Stack>
               <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
                 <AccordionSummary sx={{ minHeight: '65px !important' }}>
-                  <Stack>
-                    <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
-                      <Typography variant="subtitle1" sx={{ pr: 1 }}>
-                        {row?.estado}
-                      </Typography>
-                      {temParecer && (
-                        <Label color={row?.parecer_favoravel ? 'success' : 'error'}>
-                          {row?.parecer_favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
-                        </Label>
+                  <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ flexGrow: 1 }}>
+                    <Stack>
+                      <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
+                        <Typography variant="subtitle1" sx={{ pr: 1 }}>
+                          {row?.estado}
+                        </Typography>
+                        {temParecer && (
+                          <Label color={row?.parecer_favoravel ? 'success' : 'error'}>
+                            {row?.parecer_favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
+                          </Label>
+                        )}
+                      </Stack>
+                      {!!row?.data_limite && !temParecer && <DataParecer data1={row?.data_limite} />}
+                      {afeto && !temPareceres && (
+                        <Typography sx={{ typography: 'caption', color: 'info.main' }}>
+                          {row?.preso ? '' : 'Este processo foi tribuído a '}
+                          <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                            {baralharString(afeto?.perfil?.displayName)}
+                          </Typography>
+                          {row?.preso ? ' está trabalhando no processo' : ''} neste estado.
+                        </Typography>
+                      )}
+                      {row?.pendente && !row?.preso && (
+                        <Typography sx={{ typography: 'caption', color: 'warning.main' }}>
+                          Processo pendente: {row?.motivo_pendencia}
+                        </Typography>
                       )}
                     </Stack>
-                    {!!row?.data_limite && !temParecer && <DataParecer data1={row?.data_limite} />}
-                    {afeto && !temPareceres && (
-                      <Typography sx={{ typography: 'caption', color: 'info.main' }}>
-                        {row?.is_lock ? '' : 'Este processo foi tribuído a '}
-                        <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                          {baralharString(afeto?.perfil?.displayName)}
-                        </Typography>
-                        {row?.is_lock ? ' está trabalhando no processo' : ''} neste estado.
-                      </Typography>
+
+                    {!temPareceres && (
+                      <Stack spacing={0.75} direction="row" alignItems="center" onClick={(e) => e.stopPropagation()}>
+                        {pertencoEstadoId(meusAmbientes, row?.estado_id) && (
+                          <>
+                            {!temParecer && !row?.preso && gestorEstado(meusAmbientes, row?.estado_id) && (
+                              <Atribuir
+                                dados={{
+                                  estadoId: row?.estado_id,
+                                  processoId: processo?.id,
+                                  perfilIdA: row?.perfil_id,
+                                }}
+                              />
+                            )}
+                            {row?.preso && row?.perfil_id === perfilId && (
+                              <>
+                                <DefaultAction
+                                  label={temParecer ? 'Editar' : 'Adicionar'}
+                                  onClick={() => dispatch(setModal({ modal: 'parecer-estado', dados: row }))}
+                                />
+                                <DefaultAction
+                                  label="PENDENTE"
+                                  onClick={() =>
+                                    dispatch(
+                                      setModal({
+                                        modal: 'pendencia',
+                                        dados: {
+                                          id: processo?.id,
+                                          pendente: !!row?.pendente,
+                                          obs: row?.observacao ?? '',
+                                          estadoId: row?.estado_id ?? '',
+                                          motivo: row?.motivo_pendencia ?? '',
+                                          motivo_id: row?.motivo_pendencia_id ?? '',
+                                        },
+                                      })
+                                    )
+                                  }
+                                />
+                                <Libertar isSaving={isSaving} dados={{ id: processo?.id, estadoId: row?.estado_id }} />
+                              </>
+                            )}
+                            {!row?.preso && (!row?.perfil_id || row?.perfil_id === perfilId) && (
+                              <DefaultAction
+                                label="ACEITAR"
+                                onClick={() => handleAceitar(row?.estado_id, 'paralelo')}
+                              />
+                            )}
+                          </>
+                        )}
+                      </Stack>
                     )}
                   </Stack>
                 </AccordionSummary>
@@ -123,7 +150,7 @@ export default function Estados({ handleAceitar }) {
                         estado={row?.estado}
                         estadoId={row?.estado_id}
                         pareceres={row?.pareceres}
-                        assunto={`${processo?.assunto} - ${processo?.titular}`}
+                        assunto={`${processo?.fluxo ?? ''} - ${processo?.titular ?? ''}`}
                       />
                     ) : (
                       <>
@@ -160,8 +187,8 @@ export default function Estados({ handleAceitar }) {
 Info.propTypes = { dados: PropTypes.object, viewAnexo: PropTypes.func, colaboradores: PropTypes.array };
 
 export function Info({ dados, viewAnexo, colaboradores }) {
-  const anexosAtivos = useMemo(() => dados?.anexos?.filter((item) => item?.ativo), [dados?.anexos]);
-  const anexosInativos = useMemo(() => dados?.anexos?.filter((item) => !item?.ativo), [dados?.anexos]);
+  const anexosAtivos = useMemo(() => dados?.anexos?.filter(({ ativo }) => ativo), [dados?.anexos]);
+  const anexosInativos = useMemo(() => dados?.anexos?.filter(({ ativo }) => !ativo), [dados?.anexos]);
 
   return (
     <>
@@ -250,11 +277,13 @@ DataParecer.propTypes = { data1: PropTypes.string, data2: PropTypes.string, envi
 
 export function DataParecer({ data1, data2 = '', envio = false }) {
   return (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }} useFlexGap flexWrap="wrap">
-      <Typography variant={envio ? 'body2' : 'caption'} sx={{ color: 'text.secondary' }}>
+    <Stack direction="row" alignItems="center" sx={{ mt: 0.5 }} useFlexGap flexWrap="wrap">
+      <Typography variant={envio ? 'body2' : 'caption'} sx={{ color: 'text.secondary', pr: 0.5 }}>
         Data{envio ? ' envio' : ' limite parecer'}:
       </Typography>
-      <Typography variant={envio ? 'body2' : 'caption'}>{ptDateTime(data1)}</Typography>
+      <Typography variant={envio ? 'body2' : 'caption'} sx={{ pr: 1 }}>
+        {ptDateTime(data1)}
+      </Typography>
       {!envio && (
         <Criado
           caption

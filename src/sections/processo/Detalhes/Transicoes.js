@@ -24,11 +24,12 @@ Transicoes.propTypes = { transicoes: PropTypes.array, assunto: PropTypes.string 
 
 export default function Transicoes({ transicoes, assunto }) {
   const dispatch = useDispatch();
+  const { processo } = useSelector((state) => state.digitaldocs);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
   const transicoesFiltered = useMemo(() => removeDuplicates(transicoes), [transicoes]);
 
   const viewAnexo = (anexo, estadoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { anexo, estadoId, parecerId }));
+    dispatch(getAnexo('fileDownload', { processoId: processo?.id, anexo, estadoId, parecerId }));
   };
 
   return (
@@ -62,10 +63,10 @@ Transicao.propTypes = {
 function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colaboradores = [] }) {
   const acao = useMemo(
     () =>
-      ((transicao?.resgate || transicao?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') &&
-        'Resgate') ||
       ((transicao?.modo === 'Arquivamento' || transicao?.modo === 'arquivamento') && 'Arquivo') ||
       ((transicao?.modo === 'desarquivamento' || transicao?.modo === 'Desarquivamento') && 'Desarquivo') ||
+      ((transicao?.resgate || transicao?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') &&
+        'Resgate') ||
       transicao?.modo,
     [transicao?.modo, transicao?.resgate, transicao?.observacao]
   );
@@ -87,9 +88,9 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
   );
   const color = useMemo(
     () =>
-      ((acao === 'Devolução' || acao === 'Desarquivo') && 'error') ||
-      ((acao === 'Resgate' || acao === 'Restauro') && 'warning') ||
       (acao === 'Arquivo' && 'info') ||
+      ((acao === 'Resgate' || acao === 'Restauro') && 'warning') ||
+      ((acao === 'Devolução' || acao === 'Desarquivo') && 'error') ||
       'success',
     [acao]
   );

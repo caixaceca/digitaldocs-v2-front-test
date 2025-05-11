@@ -68,7 +68,7 @@ export default function PageDetalhesEstado() {
   const closeModal = () => dispatch(setModal());
   useNotificacao({
     done,
-    afterSuccess: () => {
+    onClose: () => {
       if (done === 'Estado eliminado') navigate(PATH_DIGITALDOCS.parametrizacao.root);
       closeModal();
     },

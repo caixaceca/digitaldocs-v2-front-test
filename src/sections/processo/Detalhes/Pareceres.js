@@ -33,14 +33,14 @@ Pareceres.propTypes = {
 export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { isOpenModal, processo } = useSelector((state) => state.digitaldocs);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
   };
 
   const viewAnexo = (anexo, estadoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { anexo, estadoId, parecerId }));
+    dispatch(getAnexo('fileDownload', { processoId: processo?.id, anexo, estadoId, parecerId }));
   };
 
   return (
@@ -78,7 +78,7 @@ Parecer.propTypes = {
 export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord, viewAnexo }) {
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const colaborador = colaboradores?.find((item) => item?.perfil_id === parecer?.perfil_id);
+  const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === parecer?.perfil_id);
   const temParecer =
     parecer?.parecer_em && (parecer?.parecer_favoravel === true || parecer?.parecer_favoravel === false);
 

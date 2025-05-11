@@ -22,11 +22,8 @@ export default function DadosGerais() {
   const { isLoadingP, processo } = useSelector((state) => state.digitaldocs);
   const hasAnexos = useMemo(() => processo?.anexos && processo?.anexos?.length > 0, [processo?.anexos]);
   const isPS = useMemo(
-    () =>
-      fluxosGmkt(processo?.assunto) ||
-      processo?.assunto === 'Diário' ||
-      processo?.assunto === 'Receção de Cartões - DOP',
-    [processo?.assunto]
+    () => fluxosGmkt(processo?.fluxo) || processo?.fluxo === 'Diário' || processo?.fluxo === 'Receção de Cartões - DOP',
+    [processo?.fluxo]
   );
 
   return (

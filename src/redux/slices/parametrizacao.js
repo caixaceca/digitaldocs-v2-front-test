@@ -75,7 +75,7 @@ const slice = createSlice({
         ...item,
         id: item.estado_id,
       }));
-      const meuAmbiente = ambientes.find((row) => row.padrao) ?? ambientes[0];
+      const meuAmbiente = ambientes.find(({ padrao }) => padrao) ?? ambientes[0];
 
       state.meusAmbientes = ambientes;
       state.meuAmbiente = meuAmbiente;
@@ -225,7 +225,7 @@ export function getFromParametrizacao(item, params) {
             })
           );
       }
-      params?.afterSuccess?.();
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -290,7 +290,7 @@ export function createItem(item, dados, params) {
         }
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      params?.afterSuccess?.();
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -339,7 +339,7 @@ export function updateItem(item, dados, params) {
         else dispatch(slice.actions.updateSuccess({ item: params?.item || item, item1: params?.item1, dados: dadosR }));
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      params?.afterSuccess?.();
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -388,7 +388,7 @@ export function deleteItem(item, params) {
         );
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      params?.afterSuccess?.();
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

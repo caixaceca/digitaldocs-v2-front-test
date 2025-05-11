@@ -3,13 +3,13 @@ import { useSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
-export function useNotificacao({ done, error, afterSuccess }) {
+export function useNotificacao({ done, error, onClose }) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
-      afterSuccess?.();
+      onClose?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);

@@ -51,30 +51,27 @@ export function DiscoFicheiros() {
   const imagem = { tipo: 'Img', qnt: 0, tamanho: 0, file: 'format_image' };
   const excel = { tipo: 'Excel', qnt: 0, tamanho: 0, file: 'format_excel' };
 
-  fileSystem?.forEach((row) => {
-    total.qnt += row.quantidade;
-    total.tamanho += row.tamanhoMB * 1000000;
-    if (row.tipo === 'application/pdf') {
-      pdf.qnt += row.quantidade;
-      pdf.tamanho += row.tamanhoMB * 1000000;
-    } else if (row.tipo.includes('image/')) {
-      imagem.qnt += row.quantidade;
-      imagem.tamanho += row.tamanhoMB * 1000000;
+  fileSystem?.forEach(({ tipo, quantidade, tamanhoMB }) => {
+    total.qnt += quantidade;
+    total.tamanho += tamanhoMB * 1000000;
+    if (tipo === 'application/pdf') {
+      pdf.qnt += quantidade;
+      pdf.tamanho += tamanhoMB * 1000000;
+    } else if (tipo.includes('image/')) {
+      imagem.qnt += quantidade;
+      imagem.tamanho += tamanhoMB * 1000000;
+    } else if (tipo === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || tipo.includes('excel')) {
+      excel.qnt += quantidade;
+      excel.tamanho += tamanhoMB * 1000000;
     } else if (
-      row.tipo === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      row.tipo.includes('excel')
+      tipo === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      tipo.includes('msword')
     ) {
-      excel.qnt += row.quantidade;
-      excel.tamanho += row.tamanhoMB * 1000000;
-    } else if (
-      row.tipo === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-      row.tipo.includes('msword')
-    ) {
-      word.qnt += row.quantidade;
-      word.tamanho += row.tamanhoMB * 1000000;
+      word.qnt += quantidade;
+      word.tamanho += tamanhoMB * 1000000;
     } else {
-      outros.qnt += row.quantidade;
-      outros.tamanho += row.tamanhoMB * 1000000;
+      outros.qnt += quantidade;
+      outros.tamanho += tamanhoMB * 1000000;
     }
   });
 

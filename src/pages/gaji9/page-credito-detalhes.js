@@ -61,7 +61,7 @@ export default function PageCreditoDetalhes() {
     dispatch(setModal({ item: item || '', dados: null }));
   };
 
-  useNotificacao({ done, afterSuccess: () => openForm() });
+  useNotificacao({ done, onClose: () => openForm() });
 
   return (
     <Page title="Crédito | DigitalDocs">
@@ -94,13 +94,13 @@ export default function PageCreditoDetalhes() {
                   </>
                 )}
                 {currentTab === 'Intervenientes' && gestaoCredito(utilizador, ['CREATE_CREDITO']) && (
-                  <DefaultAction button label="Adicionar" onClick={() => openForm('form-interveniente')} />
+                  <DefaultAction small button label="Adicionar" onClick={() => openForm('form-interveniente')} />
                 )}
                 {currentTab === 'Contratos' && gestaoCredito(utilizador, ['READ_CONTRATO']) && (
-                  <DefaultAction button label="Pré-visualizar" onClick={() => openForm('preview-contrato')} />
+                  <DefaultAction small button label="Pré-visualizar" onClick={() => openForm('preview-contrato')} />
                 )}
                 {currentTab === 'Contratos' && gestaoCredito(utilizador, ['CREATE_CONTRATO']) && (
-                  <DefaultAction button label="Gerar contrato" onClick={() => openForm('gerar-contrato')} />
+                  <DefaultAction small button label="Gerar contrato" onClick={() => openForm('gerar-contrato')} />
                 )}
               </Stack>
             )
@@ -134,8 +134,8 @@ export default function PageCreditoDetalhes() {
                   desc="eliminar este crédito"
                   onClose={() => openForm('', null)}
                   handleOk={() => {
-                    const afterSuccess = () => navigate(`${PATH_DIGITALDOCS.gaji9.root}`);
-                    dispatch(deleteItem('credito', { id, msg: 'Crédito eliminado', afterSuccess }));
+                    const onClose = () => navigate(`${PATH_DIGITALDOCS.gaji9.root}`);
+                    dispatch(deleteItem('credito', { id, msg: 'Crédito eliminado', onClose }));
                   }}
                 />
               )}

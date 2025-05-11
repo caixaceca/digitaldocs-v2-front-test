@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // @mui
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -15,7 +16,6 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
 import { fNumber, fCurrency } from '../../../utils/formatNumber';
 import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
@@ -43,16 +43,16 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object };
 
 export default function DetalhesProcesso({ isPS, processo }) {
+  const { origens } = useSelector((state) => state.parametrizacao);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const { origens, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
 
   const entidadesList = useMemo(() => entidadesParse(processo?.entidade), [processo?.entidade]);
   const devolvido = useMemo(() => processo?.htransicoes?.[0]?.modo === 'Devolução', [processo?.htransicoes]);
   const origem = useMemo(() => origens?.find(({ id }) => id === processo?.origem_id), [origens, processo?.origem_id]);
   const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
-  const criador = useMemo(
-    () => colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === processo?.criador?.toLowerCase()),
-    [colaboradores, processo?.criador]
+  const bd = useMemo(
+    () => uos?.find(({ balcao }) => balcao === processo?.balcao_domicilio)?.label,
+    [processo?.balcao_domicilio, uos]
   );
 
   return (
@@ -61,12 +61,9 @@ export default function DetalhesProcesso({ isPS, processo }) {
         <ListItem disableGutters divider sx={{ pb: 0.5 }}>
           <Typography variant="subtitle1">Processo</Typography>
         </ListItem>
-        {isAdmin || isAuditoria ? <TextItem title="Versão:" text={processo?.versao} /> : ''}
         <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
         <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
-        <TextItem title="Assunto:" text={processo?.assunto} />
-        <TextItem title="Criado em:" text={ptDateTime(processo?.criado_em)} />
-        <TextItem title="Criado por:" text={criador?.perfil?.displayName} baralhar />
+        <TextItem title="Assunto:" text={processo?.fluxo} />
         {!isPS && !!processo?.data_entrada && (
           <TextItem
             title="Data de entrada:"
@@ -74,71 +71,77 @@ export default function DetalhesProcesso({ isPS, processo }) {
           />
         )}
         <TextItem title="Referência:" text={processo?.referencia} />
-        {(processo?.estados?.length > 0 || processo?.estado_processo) && (
+        {(processo?.estados?.length > 0 || processo?.estado) && (
           <TextItem
-            alignItems="left"
-            direction="column"
-            title="Situação do processo:"
-            labelTitle={
-              <>
-                {devolvido && (
-                  <Label color="error" startIcon={<ErrorOutlineIcon />}>
-                    Devolvido
-                  </Label>
-                )}
-                {processo?.pendente && processo?.motivo && (
-                  <Label color="warning" startIcon={<InfoOutlinedIcon />}>
-                    Pendente: {processo?.motivo}
-                  </Label>
-                )}
-              </>
+            title="Estado:"
+            situacao={
+              devolvido && (
+                <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row">
+                  {devolvido && (
+                    <Label color="error" startIcon={<ErrorOutlineIcon />}>
+                      Devolvido
+                    </Label>
+                  )}
+                </Stack>
+              )
             }
             label={
-              <Stack spacing={0.75} sx={{ flexGrow: 1 }} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
-                {(processo?.estados?.length > 0 ? processo?.estados : [processo?.estado_processo])?.map(
-                  (row, index) => {
-                    const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
-                    return (
-                      <Stack key={`estado_${row?.id}_${index}`} spacing={0.5}>
-                        <Stack direction="row" alignItems="flex-end" useFlexGap flexWrap="wrap">
-                          <Typography variant="subtitle1" sx={{ pr: 1 }}>
-                            {row?.estado}
-                          </Typography>
-                          {row?.data_entrada && (
-                            <Stack direction="row" sx={{ color: 'text.secondary' }}>
-                              <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
-                              {row?.estado !== 'Arquivo' && (
-                                <Criado
-                                  caption
-                                  tipo="time"
-                                  value={fToNow(row?.data_entrada)}
-                                  sx={{ color: colorProcesso(processo?.cor) }}
-                                />
-                              )}
-                            </Stack>
-                          )}
-                        </Stack>
-
-                        {colaboradorAfeto && (
-                          <Typography sx={{ typography: 'caption', color: 'info.main' }}>
-                            {row?.is_lock ? '' : 'Atribuído a '}
-                            <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                              {baralharString(colaboradorAfeto?.perfil?.displayName)}
-                            </Typography>
-                            {row?.is_lock ? ' está trabalhando neste processo' : ''}.
-                          </Typography>
+              <Stack spacing={0.75} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
+                {(processo?.estados?.length > 0 ? processo?.estados : [processo?.estado])?.map((row, index) => {
+                  const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+                  return (
+                    <Stack key={`estado_${row?.id}_${index}`} sx={{ pl: 0.25 }}>
+                      <Stack direction="row" alignItems="flex-end" useFlexGap flexWrap="wrap">
+                        <Typography variant="subtitle1" sx={{ pr: 1 }}>
+                          {row?.estado}
+                        </Typography>
+                        {row?.data_entrada && (
+                          <Stack direction="row" sx={{ color: 'text.secondary' }}>
+                            <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
+                            {row?.estado !== 'Arquivo' && (
+                              <Criado
+                                caption
+                                tipo="time"
+                                value={fToNow(row?.data_entrada)}
+                                sx={{ color: colorProcesso(processo?.cor) }}
+                              />
+                            )}
+                          </Stack>
                         )}
                       </Stack>
-                    );
-                  }
-                )}
+
+                      {colaboradorAfeto && (
+                        <Typography sx={{ typography: 'caption', color: 'info.main' }}>
+                          {row?.preso ? '' : 'Atribuído a '}
+                          <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                            {baralharString(colaboradorAfeto?.perfil?.displayName)}
+                          </Typography>
+                          {row?.preso ? ' está trabalhando neste processo' : ''}.
+                        </Typography>
+                      )}
+
+                      {row?.pendente && !row?.preso && (
+                        <Typography sx={{ typography: 'caption', color: 'warning.main' }}>
+                          Processo pendente: {row?.motivo_pendencia}
+                        </Typography>
+                      )}
+                    </Stack>
+                  );
+                })}
               </Stack>
             }
           />
         )}
-        {processo?.observacao && (
-          <TextItem alignItems="left" direction="column" title="Observação:" text={newLineText(processo?.observacao)} />
-        )}
+        {processo?.observacao && <TextItem title="Observação:" text={newLineText(processo?.observacao)} />}
+        <TextItem
+          title="Criado:"
+          label={
+            <>
+              <Criado tipo="data" value={ptDateTime(processo?.criado_em)} />
+              <Criado tipo="user" value={processo?.criador ?? ''} baralhar />
+            </>
+          }
+        />
       </List>
 
       {(entidadesList ||
@@ -148,8 +151,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
         processo?.doc_idp ||
         processo?.doc_ids ||
         processo?.cliente ||
-        processo?.titular ||
-        processo?.segmento) && (
+        processo?.titular) && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Identificação</Typography>
@@ -158,20 +160,20 @@ export default function DetalhesProcesso({ isPS, processo }) {
           <TextItem
             baralhar
             text={processo?.email}
-            title={processo?.assunto === 'Formulário' ? 'Codificação/Nome:' : 'Email:'}
+            title={processo?.fluxo === 'Formulário' ? 'Codificação/Nome:' : 'Email:'}
           />
           {processo?.doc_idp && (
             <TextItem
               baralhar
               text={processo?.doc_idp?.toString()}
-              title={`${dis?.find((row) => row.id === processo?.tipo_doc_idp)?.label || 'Doc. primário'}:`}
+              title={`${dis?.find(({ id }) => id === processo?.tipo_doc_idp)?.label || 'Doc. primário'}:`}
             />
           )}
           {processo?.doc_ids && (
             <TextItem
               baralhar
               text={processo?.doc_ids?.toString()}
-              title={`${dis?.find((row) => row.id === processo?.tipo_doc_ids)?.label || 'Doc. secundário'}:`}
+              title={`${dis?.find(({ id }) => id === processo?.tipo_doc_ids)?.label || 'Doc. secundário'}:`}
             />
           )}
           {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} baralhar />}
@@ -181,6 +183,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
             title="Segmento:"
             text={(processo?.segmento === 'P' && 'Particular') || (processo?.segmento === 'E' && 'Empresa') || ''}
           />
+          <TextItem title="Balcão de domicílio:" text={`${processo?.balcao_domicilio ?? ''}${bd ? ` - ${bd}` : ''}`} />
         </List>
       )}
 
@@ -247,19 +250,16 @@ TextItem.propTypes = {
   text: PropTypes.string,
   title: PropTypes.string,
   baralhar: PropTypes.bool,
-  labelTitle: PropTypes.node,
+  situacao: PropTypes.node,
 };
 
-export function TextItem({ title = '', text = '', label = null, baralhar = false, labelTitle = null, ...sx }) {
+export function TextItem({ title = '', text = '', label = null, baralhar = false, situacao = null }) {
   return (title && text) || label ? (
-    <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }} {...sx}>
+    <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }}>
       {title && (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {title}
-          </Typography>
-          {labelTitle}
-        </Stack>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          {title}
+        </Typography>
       )}
       {text && (
         <Typography
@@ -268,7 +268,8 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
           {baralhar ? baralharString(text) : text}
         </Typography>
       )}
-      {label}
+      {situacao ? <Box>{situacao}</Box> : ''}
+      {label ? <Box sx={{ flexGrow: 1 }}>{label}</Box> : ''}
     </Stack>
   ) : (
     ''
@@ -337,8 +338,8 @@ function ValorItem({ title, valor, cativos }) {
                           <TableCell align="center">
                             {row?.executado ? (
                               <>
-                                {row?.cativador && <Criado tipo="user" value={row?.cativador} baralhar />}
-                                {row.data_cativo && <Criado tipo="data" value={ptDate(row.data_cativo)} />}
+                                <Criado tipo="user" value={row?.cativador} baralhar />
+                                <Criado tipo="data" value={ptDate(row?.data_cativo)} />
                               </>
                             ) : (
                               <Checked check={row?.executado} />

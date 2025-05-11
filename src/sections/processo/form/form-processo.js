@@ -41,6 +41,7 @@ export default function ProcessoForm({ processo, ambientId }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [fluxo, setFluxo] = useState(null);
+  const id = useMemo(() => processo?.id || '', [processo?.id]);
 
   const { activeStep } = useSelector((state) => state.stepper);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
@@ -62,8 +63,8 @@ export default function ProcessoForm({ processo, ambientId }) {
   }, [dispatch, fluxosList, processo?.fluxo_id]);
 
   useEffect(() => {
-    if (fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id }));
-  }, [dispatch, fluxo?.id]);
+    if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
+  }, [dispatch, isEdit, fluxo?.id]);
 
   const eliminarAnexo = () => {
     const params = { processo: true, processoId: processo?.id, anexo: selectedAnexoId, msg: 'Anexo eliminado' };
@@ -72,7 +73,7 @@ export default function ProcessoForm({ processo, ambientId }) {
 
   useNotificacao({
     done,
-    afterSuccess: () => {
+    onClose: () => {
       if (done === 'Processo adicionado') navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${newProcesso?.id}`);
     },
   });
@@ -101,16 +102,15 @@ export default function ProcessoForm({ processo, ambientId }) {
             </Stack>
             {fluxo && <Assunto dados={{ fluxo, changeFluxo, fluxosList, small: true }} />}
           </Stack>
-          {fluxo && (
+          {fluxo?.iscon && (
             <Steps
               sx={{ mt: 1, mb: 0 }}
               activeStep={activeStep}
-              // sx={{ p: 1, mt: 1, mb: 0, bgcolor: 'background.neutral' }}
-              steps={
-                (fluxo?.iscredito && ['Info. crédito', 'Garantias', 'Anexos']) ||
-                (fluxo?.iscon && ['Operação', 'Depositante', 'Anexos']) || ['Dados gerais', 'Anexos']
-              }
+              steps={isEdit ? ['Operação', 'Depositante'] : ['Operação', 'Depositante', 'Anexos']}
             />
+          )}
+          {!isEdit && fluxo && !fluxo?.iscon && (
+            <Steps sx={{ mt: 1, mb: 0 }} activeStep={activeStep} steps={['Dados gerais', 'Anexos']} />
           )}
           <Box sx={{ top: 15, right: 15, position: 'absolute' }}>
             <Fechar onClick={() => onClose()} />
@@ -123,11 +123,11 @@ export default function ProcessoForm({ processo, ambientId }) {
             <>
               {estado && fluxo ? (
                 <>
-                  {(fluxo?.iscredito && <ProcessoCredito dados={{ isEdit, processo, fluxo, estado, onClose }} />) ||
-                    (fluxo?.iscon && <ProcessoCON dados={{ isEdit, processo, fluxo, estado, onClose }} />) ||
-                    (fluxo?.isinterno && <ProcessoInterno dados={{ isEdit, processo, fluxo, estado, onClose }} />) || (
-                      <ProcessoExterno dados={{ isEdit, processo, fluxo, estado, onClose }} />
-                    )}
+                  {(fluxo?.iscredito && <ProcessoCredito dados={{ isEdit, id, processo, fluxo, estado, onClose }} />) ||
+                    (fluxo?.iscon && <ProcessoCON dados={{ isEdit, id, processo, fluxo, estado, onClose }} />) ||
+                    (fluxo?.isinterno && (
+                      <ProcessoInterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />
+                    )) || <ProcessoExterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />}
                 </>
               ) : (
                 <>

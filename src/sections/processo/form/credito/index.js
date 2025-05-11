@@ -6,7 +6,6 @@ import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
 // components
 import FormInfoCredito from './form-info-credito';
 import FormAnexosCredito from './form-anexos-credito';
-import GarantiasProcesso from './form-garantias-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -20,14 +19,12 @@ export default function ProcessoCredito({ dados }) {
     dispatch(getFromParametrizacao('linhas'));
     dispatch(getFromParametrizacao('componentes'));
     dispatch(getFromParametrizacao('tiposTitular'));
-    dispatch(getFromParametrizacao('tiposGarantia'));
   }, [dispatch]);
 
   return (
     <>
       {activeStep === 0 && <FormInfoCredito dados={dados} />}
-      {activeStep === 1 && <GarantiasProcesso />}
-      {activeStep === 2 && <FormAnexosCredito dados={dados} />}
+      {activeStep === 1 && <FormAnexosCredito dados={dados} />}
     </>
   );
 }

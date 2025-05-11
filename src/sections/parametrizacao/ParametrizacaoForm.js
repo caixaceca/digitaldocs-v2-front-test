@@ -314,14 +314,14 @@ export function OrigemForm({ onCancel }) {
                     setValue('ilha', value);
                     setValue('cidade', null);
                   }}
-                  options={[...new Set(_concelhos.map((row) => row.ilha))]}
+                  options={[...new Set(_concelhos.map(({ ilha }) => ilha))]}
                 />
               </GridItem>
               <GridItem sm={6}>
                 <RHFAutocompleteSmp
                   name="cidade"
                   label="Concelho"
-                  options={_concelhos?.filter((row) => row?.ilha === values?.ilha)?.map((item) => item?.concelho)}
+                  options={_concelhos?.filter(({ ilha }) => ilha === values?.ilha)?.map(({ concelho }) => concelho)}
                 />
               </GridItem>
               <GridItem sm={6} children={<RHFTextField name="email" label="Email" />} />
@@ -528,30 +528,38 @@ export function DocumentoForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar documento' : 'Adicionar documento'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <ItemComponent item={selectedItem} rows={3}>
-            <Grid container spacing={3} sx={{ mt: 0 }} justifyContent="center">
-              <GridItem children={<RHFTextField name="codigo" label="Código" />} />
-              <GridItem children={<RHFTextField name="designacao" label="Designação" />} />
-              <GridItem sm={(values?.tipo === 'Anexo' && 4) || (values?.tipo === 'Formulário' && 6) || 12}>
-                <RHFAutocompleteSmp name="tipo" label="Tipo" options={['Anexo', 'Formulário']} />
-              </GridItem>
-              {values?.tipo === 'Anexo' && (
-                <>
-                  <GridItem xs={4} children={<RHFSwitch name="identificador" label="Identificador" />} />
-                  <GridItem xs={4} children={<RHFSwitch name="obriga_prazo_validade" label="Validade" />} />
-                </>
-              )}
-              {values?.tipo === 'Formulário' && (
-                <>
-                  <GridItem xs={6} children={<RHFDatePicker name="data_formulario" label="Data" />} />
-                  <GridItem children={<RHFTextField name="titulo" label="Título" />} />
-                  <GridItem children={<RHFTextField name="sub_titulo" label="Subtítulo" />} />
-                </>
-              )}
-              {isEdit && <GridItem xs={4} children={<RHFSwitch name="ativo" label="Ativo" />} />}
-            </Grid>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
+          {values?.designacao === 'OUTROS' ? (
+            <Stack sx={{ pt: 3, pb: 1 }}>
+              <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
+                Este documento não pode ser editado, está em uso para validações na aplicação.
+              </Typography>
+            </Stack>
+          ) : (
+            <ItemComponent item={selectedItem} rows={3}>
+              <Grid container spacing={3} sx={{ mt: 0 }} justifyContent="center">
+                <GridItem children={<RHFTextField name="codigo" label="Código" />} />
+                <GridItem children={<RHFTextField name="designacao" label="Designação" />} />
+                <GridItem sm={(values?.tipo === 'Anexo' && 4) || (values?.tipo === 'Formulário' && 6) || 12}>
+                  <RHFAutocompleteSmp name="tipo" label="Tipo" options={['Anexo', 'Formulário']} />
+                </GridItem>
+                {values?.tipo === 'Anexo' && (
+                  <>
+                    <GridItem xs={4} children={<RHFSwitch name="identificador" label="Identificador" />} />
+                    <GridItem xs={4} children={<RHFSwitch name="obriga_prazo_validade" label="Validade" />} />
+                  </>
+                )}
+                {values?.tipo === 'Formulário' && (
+                  <>
+                    <GridItem xs={6} children={<RHFDatePicker name="data_formulario" label="Data" />} />
+                    <GridItem children={<RHFTextField name="titulo" label="Título" />} />
+                    <GridItem children={<RHFTextField name="sub_titulo" label="Subtítulo" />} />
+                  </>
+                )}
+                {isEdit && <GridItem xs={4} children={<RHFSwitch name="ativo" label="Ativo" />} />}
+              </Grid>
+              <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            </ItemComponent>
+          )}
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -577,7 +585,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
       gestor: selectedItem?.gestor || false,
       padrao: selectedItem?.padrao || false,
       observador: selectedItem?.observador || false,
-      estado: estadosList.find((row) => row.id === selectedItem?.estado_id) || null,
+      estado: estadosList.find(({ id }) => id === selectedItem?.estado_id) || null,
       data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
       data_inicial: selectedItem?.data_inicial ? new Date(selectedItem?.data_inicial) : null,
     }),

@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useSnackbar } from 'notistack';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -11,13 +12,12 @@ import Grid from '@mui/material/Grid';
 // utils
 import { fillData } from '../../../../utils/formatTime';
 // redux
-import { updateDados } from '../../../../redux/slices/stepper';
 import { useSelector, useDispatch } from '../../../../redux/store';
 // components
 import {
   FormProvider,
   RHFTextField,
-  RHFDatePicker,
+  RHFDataEntrada,
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
@@ -25,6 +25,8 @@ import {
 import { Entidades } from '../dados-cliente';
 import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
+//
+import { entidadesList, submitDados } from '../utils-form-processo';
 
 // ----------------------------------------------------------------------
 
@@ -32,21 +34,22 @@ FormInfoExterno.propTypes = { dados: PropTypes.object };
 
 export default function FormInfoExterno({ dados }) {
   const dispatch = useDispatch();
-  const { processo, estado, onClose } = dados;
+  const { enqueueSnackbar } = useSnackbar();
+  const { isEdit, processo, fluxo, estado, onClose } = dados;
+
+  const { cc, uos } = useSelector((state) => state.intranet);
   const { dadosStepper } = useSelector((state) => state.stepper);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
   const { origens } = useSelector((state) => state.parametrizacao);
+
   const origensList = useMemo(
     () => origens.map(({ id, designacao, seguimento }) => ({ id, label: `${designacao} - ${seguimento}` })) || [],
     [origens]
   );
-  const entidadesList = useMemo(
-    () => processo?.entidade?.split(';')?.map((row) => ({ numero: row })) || [],
-    [processo?.entidade]
-  );
 
   const formSchema = Yup.object().shape({
     origem_id: Yup.mixed().required().label('Origem'),
-    canal: Yup.string().required().label('Canal entrada'),
+    canal: Yup.mixed().required().label('Canal entrada'),
     referencia: Yup.string().required().label('Referência'),
     data_entrada: Yup.date().typeError().required().label('Data entrada'),
     operacao: estado?.nome?.includes('DOP') && Yup.string().required().label('Operação'),
@@ -56,21 +59,23 @@ export default function FormInfoExterno({ dados }) {
 
   const defaultValues = useMemo(
     () => ({
-      entidades: dadosStepper?.entidades || entidadesList,
+      fluxo_id: fluxo?.id,
       conta: dadosStepper?.conta || processo?.conta || '',
       valor: dadosStepper?.valor || processo?.valor || '',
+      obs: dadosStepper?.obs || processo?.observacao || '',
       canal: dadosStepper?.canal || processo?.canal || null,
       docidp: dadosStepper?.docidp || processo?.doc_idp || '',
       docids: dadosStepper?.docids || processo?.doc_ids || '',
-      obs: dadosStepper?.obs || processo?.observacao || '',
       titular: dadosStepper?.titular || processo?.titular || '',
       cliente: dadosStepper?.cliente || processo?.cliente || '',
       operacao: dadosStepper?.operacao || processo?.operacao || null,
       referencia: dadosStepper?.referencia || processo?.referencia || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
-      origem_id: dadosStepper?.origem_id || origensList?.find((row) => row.id === processo?.origem_id) || null,
+      entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
+      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
+      origem_id: dadosStepper?.origem_id || origensList?.find(({ id }) => id === processo?.origem_id) || null,
     }),
-    [processo, origensList, dadosStepper, entidadesList]
+    [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo?.balcao]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -78,27 +83,25 @@ export default function FormInfoExterno({ dados }) {
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
 
+  const onSubmit = async () => {
+    submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+  };
+
   return (
-    <FormProvider
-      methods={methods}
-      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-    >
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Box sx={{ width: 1 }}>
         <Card sx={{ mt: 4, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Grid container spacing={3}>
-            <GridItem xs={12} sm={4} lg={2}>
-              <RHFDatePicker name="data_entrada" label="Data entrada" disableFuture />
+            <GridItem sm={4} lg={2}>
+              <RHFDataEntrada name="data_entrada" label="Data entrada" disableFuture />
             </GridItem>
-            <GridItem xs={12} sm={4} lg={2}>
-              <RHFAutocompleteSmp name="canal" label="Canal entrada" options={['Email', 'Correspondência']} />
+            <GridItem sm={4} lg={2}>
+              <RHFAutocompleteSmp dc name="canal" label="Canal entrada" options={['Email', 'Correspondência']} />
             </GridItem>
-            <GridItem xs={12} sm={4} lg={2} children={<RHFTextField name="referencia" label="Referência" />} />
-            <GridItem xs={12} lg={6} children={<RHFTextField name="titular" label="Titular" />} />
-            <GridItem xs={12} md={6}>
-              <RHFAutocompleteObj label="Origem" name="origem_id" options={origensList} />
-            </GridItem>
+            <GridItem sm={4} lg={2} children={<RHFTextField name="referencia" label="Referência" />} />
+            <GridItem lg={6} children={<RHFTextField name="titular" label="Titular" />} />
+            <GridItem md={6} children={<RHFAutocompleteObj label="Origem" name="origem_id" options={origensList} />} />
             <GridItem
-              xs={12}
               sm={values.operacao === 'Cativo/Penhora' ? 6 : 12}
               md={values.operacao === 'Cativo/Penhora' ? 3 : 6}
             >
@@ -115,19 +118,19 @@ export default function FormInfoExterno({ dados }) {
               />
             </GridItem>
             {values.operacao === 'Cativo/Penhora' && (
-              <GridItem xs={12} sm={6} md={3} children={<RHFNumberField name="valor" tipo="CVE" label="Valor" />} />
+              <GridItem sm={6} md={3} children={<RHFNumberField name="valor" tipo="CVE" label="Valor" />} />
             )}
           </Grid>
         </Card>
 
         <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Grid container spacing={3}>
-            <GridItem xs={12} sm={6} lg={3} children={<RHFTextField name="docidp" label="Nº de identificação 1" />} />
-            <GridItem xs={12} sm={6} lg={3} children={<RHFTextField name="docids" label="Nº de identificação 2" />} />
-            <GridItem xs={12} sm={6} lg={3}>
+            <GridItem sm={6} lg={3} children={<RHFTextField name="docidp" label="Nº de identificação 1" />} />
+            <GridItem sm={6} lg={3} children={<RHFTextField name="docids" label="Nº de identificação 2" />} />
+            <GridItem sm={6} lg={3}>
               <RHFNumberField noFormat name="cliente" label="Nº de cliente" />
             </GridItem>
-            <GridItem xs={12} sm={6} lg={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
+            <GridItem sm={6} lg={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
             <Entidades fields={fields} append={append} remove={remove} />
           </Grid>
         </Card>
@@ -136,7 +139,8 @@ export default function FormInfoExterno({ dados }) {
           <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
         </Card>
       </Box>
-      <ButtonsStepper onCancel={() => onClose()} labelCancel="Cancelar" />
+
+      <ButtonsStepper isSaving={isSaving} onCancel={onClose} labelCancel="Cancelar" label={isEdit ? 'Guardar' : ''} />
     </FormProvider>
   );
 }

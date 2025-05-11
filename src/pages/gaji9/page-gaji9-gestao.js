@@ -74,7 +74,7 @@ export default function PageGaji9Gestao() {
     if (done === 'Proposta carregada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
   };
 
-  useNotificacao({ done, afterSuccess: () => navigateTo() });
+  useNotificacao({ done, onClose: () => navigateTo() });
 
   return (
     <Page title="GAJ-i9 | DigitalDocs">

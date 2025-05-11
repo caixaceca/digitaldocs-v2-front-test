@@ -25,7 +25,7 @@ import useAnexos from '../../../hooks/useAnexos';
 import {
   FormProvider,
   RHFTextField,
-  RHFDatePicker,
+  RHFDataEntrada,
   RHFNumberField,
   RHFUploadMultiFile,
   RHFAutocompleteObj,
@@ -46,7 +46,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
     () =>
       !processo?.limpo &&
       !processo?.origem_id &&
-      processo?.assunto !== 'Encerramento de conta' &&
+      processo?.fluxo !== 'Encerramento de conta' &&
       meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id)?.isfinal,
     [meusAmbientes, processo]
   );
@@ -118,7 +118,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
               </Grid>
             )}
             <Grid item xs={12} sm={6}>
-              <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
+              <RHFDataEntrada name="data_entrada" label="Data de entrada" disableFuture />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
@@ -126,7 +126,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
             <Grid item xs={12} sm={6}>
               <RHFTextField name="entidades" label="Nº entidade(s)" />
             </Grid>
-            {processo?.assunto !== 'Encerramento de conta' && (
+            {processo?.fluxo !== 'Encerramento de conta' && (
               <Grid item xs={12} sm={6}>
                 <RHFNumberField noFormat name="conta" label="Nº de conta" />
               </Grid>
@@ -182,7 +182,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
       const params = {
         id,
         msg: 'Processo desarquivado',
-        afterSuccess: () => dispatch(setModal({ modal: '', dados: null })),
+        onClose: () => dispatch(setModal({ modal: '', dados: null })),
       };
       dispatch(updateItem('desarquivar', JSON.stringify(dados), params));
     } catch (error) {

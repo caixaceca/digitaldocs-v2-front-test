@@ -56,6 +56,10 @@ export default function TableInfoFluxo({ item }) {
   const { fluxo, estados, checklist, notificacoes, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
+    setFilter(localStorage.getItem(`filter_${item}`) || '');
+  }, [item]);
+
+  useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);

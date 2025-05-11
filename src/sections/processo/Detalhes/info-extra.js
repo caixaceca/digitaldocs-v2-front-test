@@ -76,7 +76,7 @@ function DadosCredito({ dados }) {
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0.75, mb: 0.5 }}>
           <Typography variant="subtitle1">Pedido</Typography>
         </ListItem>
-        <TextItem title="Nº de proposta:" text={dados?.nproposta || 'Não definido'} />
+        <TextItem title="Nº de proposta:" text={dados?.numero_proposta || 'Não definido'} />
         <TextItem title="Montante solicitado:" text={fCurrency(dados?.montante_solicitado)} />
         {situacao === 'Em análise' && (
           <>
@@ -107,40 +107,27 @@ function DadosCredito({ dados }) {
             <Label color={colorLabel(situacao || 'Em análise')} sx={{ typography: 'subtitle1' }}>
               {situacao || 'Em análise'}
             </Label>
-            {(situacao === 'Em análise' || situacao === 'Aprovado') && (
+            {dados?.modificar && (situacao === 'Em análise' || situacao === 'Aprovado') && (
               <DefaultAction small label="EDITAR" onClick={() => setOpenSituacao('atualizar')} />
             )}
-            {situacao !== 'Em análise' && (
+            {dados?.modificar && situacao !== 'Em análise' && (
               <DefaultAction small label="ELIMINAR" onClick={() => setOpenSituacao('eliminar')} />
             )}
           </Stack>
         </ListItem>
-        {situacao === 'Em análise' ? (
-          <Stack justifyContent="center" sx={{ width: 1, py: 3 }}>
-            <SearchNotFoundSmall message="Sem dados adicionais..." />
-          </Stack>
-        ) : (
-          <>
-            {dados?.montante_aprovado && (
-              <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />
-            )}
-            {dados?.data_aprovacao && <TextItem title="Data de aprovação:" text={ptDate(dados?.data_aprovacao)} />}
-            {dados?.montante_contratado && (
-              <TextItem title="Montante contratado:" text={fCurrency(dados?.montante_contratado)} />
-            )}
-            {dados?.data_contratacao && (
-              <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />
-            )}
-            <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
-            {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
-            <TextItem title="Garantia:" text={dados?.garantia} />
-            <TextItem title="Decisor:" text={dados?.escalao_decisao} />
-            {dados?.data_desistido && <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />}
-            {dados?.data_indeferido && (
-              <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />
-            )}
-          </>
+
+        {dados?.montante_aprovado && <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />}
+        {dados?.data_aprovacao && <TextItem title="Data de aprovação:" text={ptDate(dados?.data_aprovacao)} />}
+        {dados?.montante_contratado && (
+          <TextItem title="Montante contratado:" text={fCurrency(dados?.montante_contratado)} />
         )}
+        {dados?.data_contratacao && <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />}
+        <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
+        {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
+        <TextItem title="Garantia:" text={dados?.garantia} />
+        <TextItem title="Decisor:" text={dados?.escalao_decisao} />
+        {dados?.data_desistido && <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />}
+        {dados?.data_indeferido && <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />}
       </List>
       {openSituacao === 'atualizar' && <FormSituacao onCancel={() => setOpenSituacao('')} />}
       {openSituacao === 'eliminar' && <EliminarDadosSituacao onCancel={() => setOpenSituacao('')} />}
@@ -160,7 +147,7 @@ function Garantias({ dados }) {
 
   const eliminarGarantia = () => {
     const ids = { processoId, id: item?.id, creditoId: id };
-    dispatch(deleteItem('garantias', { ...ids, msg: 'Garantia eliminada', afterSuccess: () => setItem(null) }));
+    dispatch(deleteItem('garantias', { ...ids, msg: 'Garantia eliminada', onClose: () => setItem(null) }));
   };
 
   return (
@@ -182,13 +169,15 @@ function Garantias({ dados }) {
         <TableBody>
           {garantias?.map((row, index) => (
             <TableRow hover key={`${row?.id}_${id}_${index}`}>
-              <TableCell>{row?.tipo_garantia || noDados('Não definido')}</TableCell>
+              <TableCell>{row?.tipo_garantia || noDados('(Não definido)')}</TableCell>
               <TableCell align="right">
-                {row?.valor_garantia ? `${fNumber(row?.valor_garantia)} ${row?.moeda ?? ''}` : noDados('Não definido')}
+                {row?.valor_garantia
+                  ? `${fNumber(row?.valor_garantia)} ${row?.moeda ?? ''}`
+                  : noDados('(Não definido)')}
               </TableCell>
-              <TableCell align="right">{row?.numero_entidade || noDados('Não definido')}</TableCell>
-              <TableCell>{row?.titular || noDados('Não definido')}</TableCell>
-              <TableCell>{row?.conta_dp || noDados('Não definido')}</TableCell>
+              <TableCell align="right">{row?.numero_entidade || noDados('(Não definido)')}</TableCell>
+              <TableCell>{row?.titular || noDados('(Não definido)')}</TableCell>
+              <TableCell>{row?.conta_dp || noDados('(Não definido)')}</TableCell>
               <CellChecked check={row?.ativo} />
 
               <TableCell>
@@ -271,17 +260,17 @@ export function DetalhesGarantia({ dados, closeModal }) {
 
 // ----------------------------------------------------------------------
 
-InfoCon.propTypes = { dados: PropTypes.object, valor: PropTypes.number, numero: PropTypes.number };
+InfoCon.propTypes = { dados: PropTypes.object };
 
-export function InfoCon({ dados, valor, numero }) {
+export function InfoCon({ dados }) {
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 4 }} sx={{ p: { xs: 1, sm: 3 } }}>
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>
           <Typography variant="subtitle1">Operação</Typography>
         </ListItem>
-        <TextItem title="Nº da operação:" text={numero} />
-        {valor && <TextItem title="Valor:" text={fCurrency(valor)} />}
+        <TextItem title="Nº da operação:" text={dados?.numero} />
+        {dados?.valor && <TextItem title="Valor:" text={fCurrency(dados?.valor)} />}
         {dados?.origem_fundo && <TextItem title="Origem do fundo:" text={newLineText(dados?.origem_fundo)} />}
         {dados?.finalidade && <TextItem title="Finalidade do fundo:" text={newLineText(dados?.finalidade)} />}
         <TextItem title="Depositante é o próprio titular:" text={dados?.titular_ordenador ? 'SIM' : 'NÃO'} />
@@ -303,7 +292,7 @@ export function InfoCon({ dados, valor, numero }) {
         />
         <TextItem
           title="Estado civil:"
-          text={estadosCivis?.find((row) => row.id === dados?.estado_civil)?.label || dados?.estado_civil}
+          text={estadosCivis?.find(({ id }) => id === dados?.estado_civil)?.label || dados?.estado_civil}
         />
         {dados?.data_nascimento && <TextItem title="Data nascimento:" text={ptDate(dados?.data_nascimento)} />}
         <TextItem title="Nacionalidade:" text={dados?.nacionalidade} />

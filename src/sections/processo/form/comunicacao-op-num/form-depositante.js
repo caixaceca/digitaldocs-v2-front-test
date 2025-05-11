@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useSnackbar } from 'notistack';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -26,15 +27,19 @@ import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
 // _mock
 import { dis, estadosCivis } from '../../../../_mock';
+//
+import { submitDados } from '../utils-form-processo';
 
 // ----------------------------------------------------------------------
 
 FormDepositante.propTypes = { dados: PropTypes.object };
 
 export default function FormDepositante({ dados }) {
-  const { isEdit, processo } = dados;
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { isEdit, processo, fluxo, onClose } = dados;
   const { dadosStepper } = useSelector((state) => state.stepper);
+  const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
     nif: shapeNumber('NIF', false, '', 'is_cliente'),
@@ -82,21 +87,23 @@ export default function FormDepositante({ dados }) {
   const { watch, setValue, handleSubmit } = methods;
   const values = watch();
 
+  const onSubmit = async () => {
+    const dados = { ...dadosStepper, ...values };
+    submitDados(dados, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+  };
+
   return (
-    <FormProvider
-      methods={methods}
-      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-    >
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
         <Grid container spacing={3} justifyContent="center">
           <GridItem sm={values?.titular_ordenador ? 6 : 4}>
             <RHFSwitch
               name="titular_ordenador"
+              label="Depositante é o próprio titular"
               onChange={(event, value) => {
                 setValue('is_cliente', value);
                 setValue('titular_ordenador', value);
               }}
-              label="Depositante é o próprio titular"
             />
           </GridItem>
           {!values?.titular_ordenador && (
@@ -108,7 +115,7 @@ export default function FormDepositante({ dados }) {
           {values?.is_cliente && (
             <GridItem>
               <Grid container spacing={3} justifyContent="center">
-                <GridItem sm={6} xl={3}>
+                <GridItem sm={6} lg={3}>
                   <RHFNumberField noFormat name="entidade_con" label="Nº da entidade" />
                 </GridItem>
               </Grid>
@@ -144,7 +151,11 @@ export default function FormDepositante({ dados }) {
           <GridItem sm={6} children={<RHFTextField name="local_trabalho" label="Local de trabalho" />} />
         </Grid>
       </Card>
-      <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
+      <ButtonsStepper
+        isSaving={isSaving}
+        label={isEdit ? 'Guardar' : ''}
+        onCancel={() => dispatch(updateDados({ backward: true, dados: values }))}
+      />
     </FormProvider>
   );
 }

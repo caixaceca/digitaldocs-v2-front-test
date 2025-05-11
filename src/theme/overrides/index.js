@@ -33,6 +33,7 @@ import Checkbox from './Checkbox';
 import Accordion from './Accordion';
 import Typography from './Typography';
 import Pagination from './Pagination';
+import DatePicker from './DatePicker';
 import Breadcrumbs from './Breadcrumbs';
 import ButtonGroup from './ButtonGroup';
 import CssBaseline from './CssBaseline';
@@ -79,6 +80,7 @@ export default function ComponentsOverrides(theme) {
     Accordion(theme),
     Typography(theme),
     Pagination(theme),
+    DatePicker(theme),
     ButtonGroup(theme),
     Breadcrumbs(theme),
     CssBaseline(theme),

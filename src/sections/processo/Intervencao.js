@@ -21,7 +21,6 @@ import {
   DomiciliarForm,
   FinalizarOPForm,
   EncaminharStepper,
-  ColocarPendenteForm,
 } from './form/intervencao';
 import { ArquivarForm, DesarquivarForm } from './form/arquivo';
 
@@ -30,14 +29,14 @@ import { ArquivarForm, DesarquivarForm } from './form/arquivo';
 export default function Intervencao() {
   const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);
-  const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
+  const { processo, isSaving } = useSelector((state) => state.digitaldocs);
   const { arquivarProcessos, meusAmbientes } = useSelector((state) => state.parametrizacao);
   const gerencia = useMemo(
-    () => noEstado(processo?.estado_processo?.estado, ['Gerência', 'Caixa Principal']),
-    [processo?.estado_processo?.estado]
+    () => noEstado(processo?.estado?.estado, ['Gerência', 'Caixa Principal']),
+    [processo?.estado?.estado]
   );
   const fromAgencia = useMemo(
-    () => uos?.find((row) => row.id === processo?.uo_origem_id)?.tipo === 'Agências',
+    () => uos?.find(({ id }) => id === processo?.uo_origem_id)?.tipo === 'Agências',
     [processo?.uo_origem_id, uos]
   );
   const destinos = useMemo(() => destinosProcesso(processo, gerencia), [gerencia, processo]);
@@ -45,18 +44,40 @@ export default function Intervencao() {
   return (
     <>
       {destinos?.devolucoes?.length > 0 && (
-        <Encaminhar title="DEVOLVER" gerencia={gerencia} fluxoId={processo?.fluxo_id} destinos={destinos?.devolucoes} />
+        <Encaminhar
+          dados={{ gerencia, destinos: destinos.devolucoes, acao: 'DEVOLVER', fluxoId: processo?.fluxo_id }}
+        />
       )}
 
       {destinos?.seguimentos?.length > 0 && (
         <Encaminhar
-          gerencia={gerencia}
-          destinos={destinos?.seguimentos}
-          title={processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR'}
+          dados={{
+            gerencia,
+            destinos: destinos.seguimentos,
+            acao: processo?.estado_atual === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR',
+          }}
         />
       )}
 
-      <DefaultAction label="PENDENTE" onClick={() => dispatch(setModal({ modal: 'pendencia', dados: processo }))} />
+      <DefaultAction
+        label="PENDENTE"
+        onClick={() =>
+          dispatch(
+            setModal({
+              modal: 'pendencia',
+              dados: {
+                id: processo?.id,
+                pendente: !!processo?.estado?.pendente,
+                estado: processo?.estado?.estado ?? '',
+                obs: processo?.estado?.observacao ?? '',
+                estadoId: processo?.estado?.estado_id ?? '',
+                motivo: processo?.estado?.motivo_pendencia ?? '',
+                motivo_id: processo?.estado?.motivo_pendencia_id ?? '',
+              },
+            })
+          )
+        }
+      />
 
       {processoEstadoInicial(meusAmbientes, processo?.estado_atual_id) && (
         <Domiciliar id={processo?.id} estadoId={processo?.estado_atual_id} />
@@ -65,7 +86,7 @@ export default function Intervencao() {
       {processo?.agendado &&
         processo?.status !== 'Executado' &&
         processo?.estado_atual === 'Autorização SWIFT' &&
-        (processo?.assunto === 'OPE DARH' || processo?.assunto === 'Transferência Internacional') && (
+        (processo?.fluxo === 'OPE DARH' || processo?.fluxo === 'Transferência Internacional') && (
           <FinalizarOP id={processo?.id} isSaving={isSaving} />
         )}
 
@@ -75,44 +96,37 @@ export default function Intervencao() {
           <Finalizar id={processo?.id} cativos={processo?.cativos} />
         )}
 
-      <Libertar dados={{ id: processo?.id, estadoId: processo?.estado_processo?.estado_id }} />
+      <Libertar dados={{ id: processo?.id, estadoId: processo?.estado?.estado_id }} />
 
       <DefaultAction label="EDITAR" onClick={() => dispatch(setModal({ modal: 'editar-processo', dados: null }))} />
 
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
         <Arquivar naoFinal={destinos?.destinosFora?.length > 0 ? destinos?.destinosFora : []} />
       )}
-
-      {/* FORMS */}
-      {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
     </>
   );
 }
 
 // --- ENCAMINHAR/DEVOLVER PROCESSO ------------------------------------------------------------------------------------
 
-Encaminhar.propTypes = {
-  title: PropTypes.string,
-  gerencia: PropTypes.bool,
-  destinos: PropTypes.array,
-  fluxoId: PropTypes.number,
-};
+Encaminhar.propTypes = { dados: PropTypes.object };
 
-export function Encaminhar({ title, destinos, gerencia = false, fluxoId = null }) {
+export function Encaminhar({ dados }) {
   const dispatch = useDispatch();
   const { toggle: open, onOpen, onClose } = useToggle();
+  const { acao, destinos, gerencia = false, fluxoId = null } = dados;
   return (
     <>
       <DefaultAction
-        label={title}
-        color={title === 'DEVOLVER' ? 'warning' : 'success'}
+        label={acao}
+        color={acao === 'DEVOLVER' ? 'warning' : 'success'}
         onClick={() => {
           onOpen();
           dispatch(resetDados());
-          if (title === 'DEVOLVER') dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
+          if (acao === 'DEVOLVER') dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
         }}
       />
-      {open && <EncaminharStepper title={title} destinos={destinos} gerencia={gerencia} onClose={() => onClose()} />}
+      {open && <EncaminharStepper dados={{ acao, destinos, gerencia, onClose }} />}
     </>
   );
 }
@@ -275,7 +289,7 @@ function destinosProcesso(processo, gerencia) {
   const aberturaESemValGFC =
     gerencia &&
     processo.segmento === 'E' &&
-    processo?.assunto === 'Abertura de Conta' &&
+    processo?.fluxo === 'Abertura de Conta' &&
     !processo?.htransicoes?.find((row) => row?.estado_atual?.includes('Compliance') && row?.modo === 'Seguimento');
 
   processo?.destinos?.forEach((row) => {

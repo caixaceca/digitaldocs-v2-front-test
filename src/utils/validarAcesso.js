@@ -114,7 +114,7 @@ export function UosGerente(meusAmbientes) {
 export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) => {
   const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(processo?.estado_atual_id));
   const arqAtendimento = arquivoAtendimento(
-    processo?.assunto,
+    processo?.fluxo,
     processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
   );
   return (

@@ -107,7 +107,7 @@ export default function TableMinutas({ item, inativos }) {
                       <TableCell>{row?.subtitulo}</TableCell>
                       <TableCell>
                         {row?.tipo_titular}
-                        {row?.consumidor ? ' (Consumidor)' : ''}
+                        {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
                       </TableCell>
                       <TableCell>{row?.componente}</TableCell>
                       <TableCell align="center">{row?.versao}</TableCell>

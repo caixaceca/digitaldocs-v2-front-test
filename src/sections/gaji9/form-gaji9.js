@@ -66,7 +66,7 @@ export function ProdutoForm({ onCancel }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
-    const params = { values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, afterSuccess: () => onCancel() };
+    const params = { values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, onClose: () => onCancel() };
     if (isEdit) {
       const formData = JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]);
       dispatch(updateItem('componentes', formData, params));
@@ -364,7 +364,7 @@ export function VariavelForm({ onCancel }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
-    const params = { afterSuccess: onCancel, msg: `Variável ´${isEdit ? 'atualizado' : 'adicionado'}` };
+    const params = { onClose: onCancel, msg: `Variável ´${isEdit ? 'atualizado' : 'adicionado'}` };
     if (isEdit) dispatch(updateItem('variaveis', JSON.stringify([values?.variaveis?.[0]]), params));
     else dispatch(createItem('variaveis', JSON.stringify(values?.variaveis?.map((row) => row)), params));
   };
@@ -516,7 +516,7 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
 
   const params = useMemo(
     () => ({
-      afterSuccess: onCancel,
+      onClose: onCancel,
       getItem: 'selectedItem',
       id: selectedItem?.action === 'add' ? grupoId : selectedItem?.id,
       msg: selectedItem?.action === 'add' ? 'Recurso atualizado' : 'Recursos adicionados',
@@ -692,7 +692,7 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
       id: selectedItem?.id,
       item: 'utilizadores',
       item1: 'selectedItem',
-      afterSuccess: onCancel,
+      onClose: onCancel,
       msg: `Utilizador ${selectedItem?.action === 'edit' ? 'atualizado' : 'adicionado'}`,
     };
     const formData = removerPropriedades(
@@ -770,7 +770,7 @@ export function FuncaoForm({ onCancel }) {
       },
       ['utilizador']
     );
-    const params = { msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, afterSuccess: () => onCancel() };
+    const params = { msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, onClose: () => onCancel() };
     dispatch(
       (isEdit ? updateItem : createItem)('funcoes', JSON.stringify(formData), { id: selectedItem?.id, ...params })
     );
@@ -970,7 +970,7 @@ export function ItemComponent({ item, rows, children }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function submitDados(id, values, isEdit, dispatch, item, onCancel) {
-  const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, afterSuccess: onCancel || null };
+  const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose: onCancel || null };
   if (isEdit) dispatch(updateItem(item, JSON.stringify(values), params));
   else dispatch(createItem(item, JSON.stringify(values), params));
 }

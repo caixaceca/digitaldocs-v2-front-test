@@ -16,7 +16,7 @@ import { useSelector, useDispatch } from '../../../../redux/store';
 // components
 import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
-import { FormProvider, RHFTextField, RHFDatePicker, RHFNumberField } from '../../../../components/hook-form';
+import { FormProvider, RHFTextField, RHFDataEntrada, RHFNumberField } from '../../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -24,7 +24,8 @@ FormOperacao.propTypes = { dados: PropTypes.object };
 
 export default function FormOperacao({ dados }) {
   const dispatch = useDispatch();
-  const { processo, onClose } = dados;
+  const { processo, fluxo, estado, onClose } = dados;
+  const { cc, uos } = useSelector((state) => state.intranet);
   const { dadosStepper } = useSelector((state) => state.stepper);
 
   const formSchema = Yup.object().shape({
@@ -38,6 +39,7 @@ export default function FormOperacao({ dados }) {
 
   const defaultValues = useMemo(
     () => ({
+      fluxo_id: fluxo?.id,
       valor: dadosStepper?.valor || processo?.valor || '',
       conta: dadosStepper?.conta || processo?.conta || '',
       email: dadosStepper?.email || processo?.email || '',
@@ -46,8 +48,9 @@ export default function FormOperacao({ dados }) {
       origem_fundo: dadosStepper?.origem_fundo || processo?.con?.origem_fundo || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       finalidade_fundo: dadosStepper?.finalidade_fundo || processo?.con?.finalidade || '',
+      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
     }),
-    [dadosStepper, processo]
+    [dadosStepper, processo, uos, estado?.uo_id, cc?.uo?.balcao, fluxo?.id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -62,14 +65,12 @@ export default function FormOperacao({ dados }) {
       <Box sx={{ width: 1 }}>
         <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Grid container spacing={3}>
-            <GridItem xs={12} sm={6} lg={3}>
-              <RHFDatePicker name="data_entrada" label="Data de entrada" disableFuture />
+            <GridItem sm={6} lg={3}>
+              <RHFDataEntrada name="data_entrada" label="Data de entrada" disableFuture />
             </GridItem>
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
-            <GridItem xs={12} sm={6} xl={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
-            <GridItem xs={12} sm={6} xl={3}>
-              <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
-            </GridItem>
+            <GridItem sm={6} lg={3} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
+            <GridItem sm={6} lg={3} children={<RHFNumberField tipo="CVE" name="valor" label="Valor" />} />
+            <GridItem sm={6} lg={3} children={<RHFNumberField noFormat name="noperacao" label="Nº de operação" />} />
             <GridItem>
               <RHFTextField name="origem_fundo" label="Origem do fundo" multiline minRows={2} maxRows={4} />
             </GridItem>

@@ -215,6 +215,7 @@ export default function TableControle({ from }) {
                           <Criado
                             caption
                             tipo="data"
+                            sx={{ color: 'text.secondary' }}
                             value1={fToNow(row.trabalhado_em)}
                             value={ptDateTime(row.trabalhado_em)}
                           />

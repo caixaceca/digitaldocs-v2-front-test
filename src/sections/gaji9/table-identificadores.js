@@ -67,6 +67,10 @@ export default function TableIdentificadores({ item, inativos }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
   useEffect(() => {
+    setFilter(localStorage.getItem(`filter${item}`) || '');
+  }, [item]);
+
+  useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, filter]);
@@ -183,9 +187,9 @@ export default function TableIdentificadores({ item, inativos }) {
                               acessoGaji9(utilizador?.acessos, ['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
                             (item === 'componentes' &&
                               acessoGaji9(utilizador?.acessos, ['UPDATE_PRODUTO/COMPONENTE']))) && (
-                            <DefaultAction label="EDITAR" onClick={() => viewItem('update', row)} />
+                            <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
                           )}
-                          <DefaultAction label="DETALHES" onClick={() => viewItem('view', row)} />
+                          <DefaultAction small label="DETALHES" onClick={() => viewItem('view', row)} />
                         </Stack>
                       </TableCell>
                     </TableRow>

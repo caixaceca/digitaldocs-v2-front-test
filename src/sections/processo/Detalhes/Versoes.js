@@ -50,7 +50,7 @@ export default function Versoes({ id }) {
             <SearchNotFound message="O processo ainda não foi modificado..." />
           ) : (
             processo?.hversoes?.map((row, index) => {
-              const colaborador = colaboradores?.find((_row) => _row.perfil_id === row?.updated_by);
+              const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row?.updated_by);
 
               return (
                 <Accordion

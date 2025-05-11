@@ -6,6 +6,7 @@ export { default as FormProvider } from './FormProvider';
 export {
   RHFDateIF,
   RHFDatePicker,
+  RHFDataEntrada,
   RHFNumberField,
   RHFAutocomplete,
   RHFAutocompleteObj,

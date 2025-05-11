@@ -191,7 +191,7 @@ export function getFromGaji9(item, params) {
         }
 
         if (params?.msg) doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-        params?.afterSuccess?.();
+        params?.onClose?.();
       }
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -306,7 +306,7 @@ export function createItem(item, dados, params) {
           );
         }
       }
-      params?.afterSuccess?.();
+      params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -389,7 +389,7 @@ export function updateItem(item, dados, params) {
           }
         }
       }
-      params?.afterSuccess?.();
+      params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -434,7 +434,7 @@ export function deleteItem(item, params) {
         } else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
         else dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
       }
-      params?.afterSuccess?.();
+      params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);

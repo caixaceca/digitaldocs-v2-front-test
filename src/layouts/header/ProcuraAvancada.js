@@ -63,7 +63,7 @@ export default function ProcuraAvancada() {
         uo: avancada && uo?.id ? uo?.id : '',
         noperacao: avancada ? noperacao : '',
         fromArquivo: fromArquivo ? 'true' : 'false',
-        afterSuccess: () => {
+        onClose: () => {
           navigate(PATH_DIGITALDOCS.filaTrabalho.procurar);
           onClose();
         },

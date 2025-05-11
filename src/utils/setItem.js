@@ -5,7 +5,7 @@ export function setDefaultBalcao(balcao, ccUo, balcoes, setBalcao, ls) {
   const balcaoId = (balCli && Number(balCli)) || (ccUo?.tipo === 'Agências' && Number(ccUo.balcao)) || null;
 
   if (balcaoId) {
-    const selectedBalcao = balcoes.find((row) => row.id === balcaoId);
+    const selectedBalcao = balcoes.find(({ id }) => id === balcaoId);
     if (selectedBalcao) setBalcao(selectedBalcao);
   }
 }

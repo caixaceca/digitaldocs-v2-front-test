@@ -4,18 +4,15 @@ import { useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
-import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
-import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import DoneAllOutlinedIcon from '@mui/icons-material/DoneAllOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import MarkChatUnreadOutlinedIcon from '@mui/icons-material/MarkChatUnreadOutlined';
 // utils
 import { sub } from 'date-fns';
@@ -27,6 +24,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // components
+import { IconButtonHeader } from './Items';
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
 import TextMaxLine from '../../components/TextMaxLine';
@@ -40,45 +38,14 @@ export default function Notificacoes() {
   const totalUnRead = notificacoes.filter((item) => !item.vista).length;
   const dataSorted = applySort(notificacoes, getComparator('desc', 'criado_em'));
 
-  const handleOpen = (event) => {
-    setOpen(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setOpen(null);
-  };
-
-  const handleVerTodas = () => {
-    // dispatch(lerTodasNotificacoes(mail));
-    setOpen(null);
-  };
-
   return (
     <>
-      <Tooltip arrow title="Notificações">
-        <IconButtonAnimate
-          color={open ? 'primary' : 'default'}
-          onClick={handleOpen}
-          sx={{
-            p: 0,
-            color: '#fff',
-            width: { xs: 28, sm: 40 },
-            height: { xs: 28, sm: 40 },
-            ...(open && {
-              bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity),
-            }),
-          }}
-        >
-          <Badge badgeContent={totalUnRead} color="error">
-            <NotificationsOutlinedIcon sx={{ width: { xs: 24, sm: 30 }, height: { xs: 24, sm: 30 } }} />
-          </Badge>
-        </IconButtonAnimate>
-      </Tooltip>
+      <IconButtonHeader title="Notificações" open={open} setOpen={setOpen} />
 
       <MenuPopover
         anchorEl={open}
         open={Boolean(open)}
-        onClose={handleClose}
+        onClose={() => setOpen(null)}
         sx={{ width: 360, p: 0, pb: 1, mt: 1.5, ml: 0.75 }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', py: 2, px: 2.5 }}>
@@ -95,7 +62,7 @@ export default function Notificacoes() {
 
           {totalUnRead > 0 && (
             <Tooltip title="Marcar todas como vistas" arrow>
-              <IconButtonAnimate color="primary" onClick={handleVerTodas}>
+              <IconButtonAnimate color="primary" onClick={() => setOpen(null)}>
                 <DoneAllOutlinedIcon />
               </IconButtonAnimate>
             </Tooltip>
@@ -108,14 +75,14 @@ export default function Notificacoes() {
           <Scrollbar sx={{ maxHeight: { xs: 340, sm: 420 } }}>
             <List disablePadding>
               {dataSorted.slice().map((notificacao) => (
-                <NotificationItem key={notificacao.id} notificacao={notificacao} onClose={handleClose} />
+                <NotificationItem key={notificacao.id} notificacao={notificacao} onClose={() => setOpen(null)} />
               ))}
             </List>
           </Scrollbar>
         ) : (
           <Box sx={{ p: 2 }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', pl: 1, fontStyle: 'italic' }}>
-              Não tens nenhuma notificação
+              Não tens nenhuma notificação...
             </Typography>
           </Box>
         )}
@@ -130,18 +97,8 @@ NotificationItem.propTypes = { onClose: PropTypes.func, notificacao: PropTypes.o
 
 function NotificationItem({ notificacao, onClose }) {
   const navigate = useNavigate();
-  const _title = '';
-  const handleViewRow = (_notificacao) => {
-    if (!notificacao?.vista) {
-      // dispatch(getNotificacao(notificacao?.id, mail));
-    }
-    switch (_notificacao.objeto) {
-      case 'norma':
-        navigate(`${PATH_DIGITALDOCS.general}`);
-        break;
-      default:
-        break;
-    }
+  const handleViewRow = () => {
+    navigate(`${PATH_DIGITALDOCS.root}`);
     onClose();
   };
 
@@ -159,7 +116,7 @@ function NotificationItem({ notificacao, onClose }) {
         primary={
           <TextMaxLine line={2}>
             <Typography variant="subtitle2">
-              {_title || notificacao.titulo}
+              {notificacao.titulo}
               <Typography component="span" variant="body2">
                 &nbsp; {notificacao.descricao}
               </Typography>

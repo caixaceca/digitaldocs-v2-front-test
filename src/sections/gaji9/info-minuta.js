@@ -93,7 +93,7 @@ export function TableInfoMinuta({ item, onClose }) {
       patch: true,
       id: minuta?.id,
       getItem: 'minuta',
-      afterSuccess: () => dispatch(getSuccess({ item: 'selectedItem', dados: null })),
+      onClose: () => dispatch(getSuccess({ item: 'selectedItem', dados: null })),
     };
     const msg = `${
       (item === 'tiposGarantias' && 'Tipo de garantia') || (item === 'componentesMinuta' && 'Componente') || 'Cláusula'

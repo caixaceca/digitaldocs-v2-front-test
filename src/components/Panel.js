@@ -20,7 +20,6 @@ import { getFile } from '../utils/getFile';
 import { baralharString } from '../utils/formatText';
 // components
 import Label from './Label';
-import { DefaultAction } from './Actions';
 import MyAvatar, { AvatarBedge } from './MyAvatar';
 
 // ----------------------------------------------------------------------
@@ -75,7 +74,7 @@ Criado.propTypes = {
 export function Criado({ iconText = '', tipo = '', value, value1 = '', caption = false, baralhar = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.disabled' };
   return value ? (
-    <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" sx={{ ...sx, pr: 1.5 }}>
+    <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" sx={{ ...sx, pr: caption ? 1 : 1.5 }}>
       {(tipo === 'uo' && <BusinessIcon sx={{ ...styles }} />) ||
         (tipo === 'data' && <TodayOutlinedIcon sx={{ ...styles }} />) ||
         (tipo === 'warning' && <WarningAmberIcon sx={{ ...styles }} />) ||
@@ -157,30 +156,6 @@ export function ColaboradorInfo({
         {other}
       </Stack>
     </Box>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-Registos.propTypes = { info: PropTypes.object, onClick: PropTypes.func, total: PropTypes.number };
-
-export function Registos({ info, total, onClick }) {
-  return (
-    <Stack spacing={0.5} direction="row" alignItems="center" justifyContent="center" sx={{ color: 'text.secondary' }}>
-      <Typography>{info?.proxima_pagina > 0 ? 'Processos' : 'Total de processos'}:</Typography>
-      {info?.proxima_pagina > 0 && (
-        <>
-          <Typography variant="subtitle1" sx={{ color: 'text.primary' }}>
-            {total || 0}
-          </Typography>
-          <Typography>de</Typography>
-        </>
-      )}
-      <Typography variant="subtitle1" sx={{ color: 'text.primary', pr: 0.5 }}>
-        {info?.total_registos || 0}
-      </Typography>
-      {info?.proxima_pagina > 0 && <DefaultAction small label="Mais processos" onClick={onClick} />}
-    </Stack>
   );
 }
 

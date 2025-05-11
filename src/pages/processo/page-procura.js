@@ -57,7 +57,7 @@ export default function PageProcura() {
   const [estado, setEstado] = useState(localStorage.getItem('estadoSearch') || null);
   const [assunto, setAssunto] = useState(localStorage.getItem('assuntoSearch') || null);
   const { uos } = useSelector((state) => state.intranet);
-  const { pesquisa, processosInfo, isLoading } = useSelector((state) => state.digitaldocs);
+  const { pesquisa, cursor, isLoading } = useSelector((state) => state.digitaldocs);
 
   const {
     page,
@@ -147,8 +147,8 @@ export default function PageProcura() {
     const avancada = localStorage.getItem('tipoPesquisa') === 'avancada';
     dispatch(
       getListaProcessos(avancada ? 'pesquisaAvancada' : 'pesquisaGlobal', {
+        cursor,
         item: 'pesquisa',
-        cursor: processosInfo,
         fromArquivo: localStorage.getItem('fromArquivo'),
         chave: avancada ? '' : localStorage.getItem('chave'),
         uo: avancada ? localStorage.getItem('uoSearch') : '',
@@ -222,12 +222,13 @@ export default function PageProcura() {
                         <TableCell>
                           {row.estado}
                           {row?.transitado_em && (
-                            <Stack direction="row">
-                              <Criado caption tipo="time" value={ptDateTime(row.transitado_em)} />
+                            <Stack direction="row" useFlexGap flexWrap="wrap">
+                              <Criado caption tipo="data" value={ptDateTime(row.transitado_em)} />
                               <Criado
                                 caption
+                                tipo="time"
                                 sx={{ color: 'text.secondary' }}
-                                value={`(${fToNow(row.transitado_em)})`}
+                                value={fToNow(row.transitado_em)}
                               />
                             </Stack>
                           )}
@@ -268,9 +269,7 @@ export default function PageProcura() {
             />
           )}
         </Card>
-        {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && processosInfo && (
-          <MaisProcessos verMais={verMais} />
-        )}
+        {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && cursor && <MaisProcessos verMais={verMais} />}
       </Container>
     </Page>
   );

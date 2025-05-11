@@ -377,9 +377,9 @@ function Resumo({ minutaId, onClose }) {
 
   const handleSubmit = async () => {
     const params = {
+      onClose,
       minutaId,
       id: selectedItem?.id,
-      afterSuccess: () => onClose(),
       getItem: minutaId > 0 ? 'minuta' : '',
       msg: `Cláusula ${isEdit ? 'atualizada' : 'adicionada'}`,
     };

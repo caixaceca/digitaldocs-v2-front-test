@@ -43,7 +43,7 @@ export default function OpcoesClausula() {
 
   const eliminarRegra = () => {
     const params = { minutaId: minuta?.id, condicionalId: openForm, clausulaId: clausula?.clausula_id };
-    dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', afterSuccess: () => setOpenForm('') }));
+    dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', onClose: () => setOpenForm('') }));
   };
 
   return (
@@ -138,7 +138,7 @@ function RegraForm({ dados, minutaId, onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { minutaId, msg: 'Regra adicionada', afterSuccess: () => onCancel(), clausulaId: dados?.id };
+    const params = { minutaId, msg: 'Regra adicionada', onClose: () => onCancel(), clausulaId: dados?.id };
     dispatch(
       createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), params)
     );

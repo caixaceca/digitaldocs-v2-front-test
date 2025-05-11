@@ -108,7 +108,6 @@ export function DefaultAction({
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     ((label === 'Clonar' || label === 'CLONAR') && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
-    ((label === 'EDITAR' || label === 'Composição') && <Editar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Procurar' || label === 'PROCURAR') && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -116,6 +115,9 @@ export function DefaultAction({
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'INFO. DAS CONTAS' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
+    ((label === 'Editar' || label === 'EDITAR' || label === 'Composição') && (
+      <Editar sx={{ width: small ? 18 : 22 }} />
+    )) ||
     ((label === 'ADICIONAR' || label === 'Adicionar' || icon === 'adicionar' || label === 'Mostrar detalhes') && (
       <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
     )) ||

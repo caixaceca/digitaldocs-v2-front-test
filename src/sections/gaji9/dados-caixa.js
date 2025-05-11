@@ -98,7 +98,7 @@ export function InfoForm({ onCancel }) {
     const params = {
       id: infoCaixa?.id,
       getItem: 'infoCaixa',
-      afterSuccess: () => onCancel(),
+      onClose: () => onCancel(),
       msg: `Informações ${infoCaixa ? 'atualizadas' : 'adicionadas'}`,
     };
     dispatch((infoCaixa ? updateItem : createItem)('infoCaixa', JSON.stringify(values), params));
