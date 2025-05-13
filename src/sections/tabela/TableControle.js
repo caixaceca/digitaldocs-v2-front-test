@@ -325,7 +325,7 @@ function tableHeaders(item) {
     { id: item === 'Devoluções' ? 'estado_inicial' : 'nome', label: item === 'Devoluções' ? 'Origem' : 'Estado atual' },
     ...((item === 'Por concluir' && [{ id: 'colaborador', label: 'Criado por' }]) ||
       (item === 'Entradas' && [{ id: 'criado_em', label: 'Criado em' }]) ||
-      (item === 'Trabalhados' && [{ id: 'colaborador', label: 'Trabalhado por' }]) ||
+      (item === 'Trabalhados' && [{ id: 'colaborador', label: 'Colaborador' }]) ||
       (item === 'Devoluções' && [
         { id: 'observacao', label: 'Motivo' },
         { id: 'data_transicao', label: 'Devolvido em' },

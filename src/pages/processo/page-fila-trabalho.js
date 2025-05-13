@@ -148,6 +148,7 @@ TotalProcessos.propTypes = { onCancel: PropTypes.func };
 
 export function TotalProcessos({ onCancel }) {
   const dispatch = useDispatch();
+  const { perfilId } = useSelector((state) => state.intranet);
   const { posicaoAtual } = useSelector((state) => state.indicadores);
   const { meuAmbiente, meusAmbientes } = useSelector((state) => state.parametrizacao);
 
@@ -156,17 +157,10 @@ export function TotalProcessos({ onCancel }) {
 
   useEffect(() => {
     if (estado?.id || fluxo?.id) {
-      dispatch(
-        getIndicadores('posicaoAtual', {
-          item: 'posicaoAtual',
-          fluxoId: fluxo?.id,
-          fluxoKey: 'fluxo_id',
-          estadoId: estado?.id,
-          estadoKey: 'estado_id',
-        })
-      );
+      const keys = { fluxoKey: 'fluxo_id', item: 'posicaoAtual', estadoKey: 'estado_id', perfilKey: 'perfil_cc_id' };
+      dispatch(getIndicadores('posicaoAtual', { perfilId, fluxoId: fluxo?.id, estadoId: estado?.id, ...keys }));
     }
-  }, [dispatch, estado?.id, fluxo?.id]);
+  }, [dispatch, perfilId, estado?.id, fluxo?.id]);
 
   return (
     <Dialog open onClose={onCancel} fullWidth maxWidth="sm">

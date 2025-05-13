@@ -25,7 +25,7 @@ export function DiscoFicheiros() {
     dispatch(getIndicadores('fileSystem', { item: 'fileSystem' }));
   }, [dispatch]);
 
-  const tamanho = 500000000000;
+  const tamanho = 650000000000;
   const chartOptions = useChart({
     chart: { offsetY: -16, sparkline: { enabled: true } },
     grid: { padding: { top: 24, bottom: 24 } },
