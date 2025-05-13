@@ -1,13 +1,10 @@
 export {
-  ParecerForm,
-  AtribuirForm,
-  ResgatarForm,
-  CancelarForm,
-  LibertarForm,
-  FinalizarForm,
-  DomiciliarForm,
-  FinalizarOPForm,
+  AnexosForm,
+  EliminarForm,
+  FinalizarNeForm,
+  FinalizarOpeForm,
   ColocarPendenteForm,
   ConfidencialidadesForm,
-} from './form-intervencao';
+} from './intervencao-processo';
 export { default as EncaminharStepper } from './encaminhar';
+export { AtribuirForm, ResgatarForm, LibertarForm, FocalPointForm, DomiciliarForm } from './intervencao-dono';

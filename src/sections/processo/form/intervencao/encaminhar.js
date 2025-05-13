@@ -78,7 +78,7 @@ export default function EncaminharStepper({ dados }) {
                 }}
               />
             )}
-            <Fechar onClick={() => onClose()} />
+            <Fechar onClick={onClose} />
           </Stack>
         </Stack>
         {!inParalelo && <Steps activeStep={activeStep} steps={['Destino', 'Atribuir/Anexos']} sx={{ mt: 2, mb: 0 }} />}
@@ -241,7 +241,10 @@ export function OutrosEmSerie({ acao }) {
 
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
   const checkList = useMemo(
-    () => checklist.filter(({ transicao_id: trId }) => trId === dadosStepper?.estado?.id),
+    () =>
+      checklist.filter(
+        ({ transicao_id: trId, designacao }) => trId === dadosStepper?.estado?.id && designacao !== 'OUTROS'
+      ),
     [checklist, dadosStepper?.estado?.id]
   );
   const colaboradoresList = useMemo(
@@ -249,7 +252,7 @@ export function OutrosEmSerie({ acao }) {
     [colaboradores, colaboradoresEstado]
   );
 
-  const formSchema = shapeAnexos(outros, checkList);
+  const formSchema = shapeAnexos(outros, checkList, true);
   const defaultValues = useMemo(
     () => ({
       ...defaultAnexos(dadosStepper, checkList, []),
@@ -287,7 +290,7 @@ export function OutrosEmSerie({ acao }) {
 
       appendAnexos(formData, values.anexos, outros, values.checklist);
 
-      const params = { mfd: true, id: processo.id, estadoId: processo?.estado?.estado_id };
+      const params = { mfd: true, id: processo.id, estadoId: processo?.estadoPreso };
       const msg = acao === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado';
       dispatch(updateItem('encaminhar serie', formData, { ...params, msg }));
     } catch (error) {
@@ -299,7 +302,7 @@ export function OutrosEmSerie({ acao }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
         <RHFAutocompleteObj name="colaborador" label="Atribuir processo a" options={colaboradoresList} />
-        <Anexos anexos={[]} outros={!!outros} checklist={checkList} />
+        <Anexos anexos={[]} outros={!!outros} solto />
       </Stack>
       <ButtonsStepper
         label="Enviar"
@@ -329,7 +332,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
   const estados = useMemo(() => destinos?.map(({ estado_final_id: id, label }) => ({ id, label })), [destinos]);
 
   const formSchema = Yup.object().shape({
-    estado: Yup.mixed().required('Identifique o responsável'),
+    estado: Yup.mixed().required('Focal Point não pode ficar vazio'),
     destinos: Yup.array(Yup.object({ estado: Yup.mixed().required('Escolhe o estado') })),
   });
 
@@ -355,7 +358,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2}>
-        <RHFAutocompleteObj dc label="Responsável" options={[estado, ...estados]} name="estado" />
+        <RHFAutocompleteObj dc label="Focal Point" options={[estado, ...estados]} name="estado" />
         {fields.map((item, index) => (
           <Card key={`destino_${index}`} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
             <Stack direction="row" spacing={2} alignItems="center">

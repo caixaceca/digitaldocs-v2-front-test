@@ -14,10 +14,11 @@ import { RHFDatePicker, RHFNumberField, RHFUploadFileSimple } from '../../../../
 
 // ----------------------------------------------------------------------
 
-FormDocumentosChecklist.propTypes = { docIndex: PropTypes.number, dados: PropTypes.object, anexos: PropTypes.array };
+FormDocumentosChecklist.propTypes = { dados: PropTypes.object };
 
-export default function FormDocumentosChecklist({ docIndex, dados, anexos }) {
+export default function FormDocumentosChecklist({ dados }) {
   const { control, setValue } = useFormContext();
+  const { docIndex, row, anexos, solto } = dados;
   const { fields, append, remove } = useFieldArray({ control, name: `checklist.${docIndex}.anexos` });
 
   const handleDrop = useCallback(
@@ -31,7 +32,7 @@ export default function FormDocumentosChecklist({ docIndex, dados, anexos }) {
   return (
     <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ pb: 1 }}>
-        <Typography sx={{ pl: 0.5, typography: 'overline' }}>{dados?.designacao}</Typography>
+        <Typography sx={{ pl: 0.5, typography: 'overline' }}>{row?.designacao}</Typography>
         <DefaultAction
           small
           button
@@ -52,23 +53,23 @@ export default function FormDocumentosChecklist({ docIndex, dados, anexos }) {
             <Stack key={item.id} spacing={1} direction="row" alignItems="center" justifyContent="center">
               <Box sx={{ width: 1 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={(dados?.obriga_prazo_validade && 6) || (dados?.identificador && 3) || 12}>
+                  <Grid item xs={12} md={(row?.obriga_prazo_validade && 6) || (row?.identificador && 3) || 12}>
                     <RHFUploadFileSimple
                       name={`checklist.${docIndex}.anexos.${index}.file`}
                       onDrop={(file) => handleDrop(`checklist.${docIndex}.anexos.${index}.file`, file)}
                     />
                   </Grid>
-                  {(dados?.identificador || dados?.obriga_prazo_validade) && (
-                    <Grid item xs={12} md={dados?.obriga_prazo_validade ? 6 : 3}>
+                  {(row?.identificador || row?.obriga_prazo_validade) && (
+                    <Grid item xs={12} md={row?.obriga_prazo_validade ? 6 : 3}>
                       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                        {dados?.identificador && (
+                        {row?.identificador && (
                           <RHFNumberField
                             noFormat
                             label="Nº entidade"
                             name={`checklist.${docIndex}.anexos.${index}.numero_entidade`}
                           />
                         )}
-                        {dados?.obriga_prazo_validade && (
+                        {row?.obriga_prazo_validade && (
                           <>
                             <RHFDatePicker
                               disableFuture
@@ -87,7 +88,7 @@ export default function FormDocumentosChecklist({ docIndex, dados, anexos }) {
                   )}
                 </Grid>
               </Box>
-              {(!dados?.obrigatorio || anexos?.length > 0 || (dados?.obrigatorio && fields?.length > 1)) && (
+              {(solto || !row?.obrigatorio || anexos?.length > 0 || (row?.obrigatorio && fields?.length > 1)) && (
                 <DefaultAction label="ELIMINAR" small onClick={() => remove(index)} />
               )}
             </Stack>

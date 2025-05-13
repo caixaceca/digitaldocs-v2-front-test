@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useEffect, useMemo } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -54,8 +54,13 @@ export default function FormOperacao({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dadosStepper, processo, uos, estado?.uo_id, cc?.uo?.balcao, fluxo?.id]);
 
   return (
     <FormProvider

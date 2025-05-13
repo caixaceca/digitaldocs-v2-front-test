@@ -66,7 +66,7 @@ export default function Views() {
                   <AccordionDetails>
                     <Stack useFlexGap flexWrap="wrap" direction="row" spacing={2} sx={{ pt: 1 }}>
                       {row?.views?.map((view, index) => (
-                        <Label key={`view_${view?.visto_em}_${index}`}>
+                        <Label key={`view_${view?.visto_em}_${index}`} sx={{ flexGrow: 1 }}>
                           {ptDateTime(view?.visto_em || view?.data_leitura)}
                         </Label>
                       ))}

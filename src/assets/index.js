@@ -6,6 +6,7 @@ export {
   Portal,
   Maximo,
   Arquivo,
+  AddAnexo,
   Libertar,
   Atribuir,
   Eliminar,

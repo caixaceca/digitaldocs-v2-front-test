@@ -26,16 +26,19 @@ DialogConfirmar.propTypes = {
   title: PropTypes.string,
   color: PropTypes.string,
   onClose: PropTypes.func,
+  content: PropTypes.node,
   handleOk: PropTypes.func,
   isSaving: PropTypes.bool,
 };
 
-export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color, onClose, handleOk }) {
+export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color, onClose, handleOk, content = null }) {
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
-        <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>
+        <DialogContentText>
+          {content}Tens a certeza de que pretendes {desc}?
+        </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button color="inherit" variant="outlined" onClick={onClose}>

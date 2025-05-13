@@ -30,53 +30,64 @@ export default function AnexosExistente({ anexos, onOpen = null, noTitle = false
     <>
       {noTitle ? '' : <Typography sx={{ py: 1, pl: 0.5, typography: 'overline' }}>Anexos existente</Typography>}
       <Stack spacing={1} sx={{ pt: noTitle ? 1 : 0 }}>
-        {anexos.map((row) => (
-          <List key={row?.id} sx={{ p: 0 }}>
-            <ListItem sx={{ py: 0.5, pl: 1, borderRadius: 1, bgcolor: 'background.neutral' }}>
-              <ListItemIcon>{getFileThumb(false, null, row?.path || row.name)}</ListItemIcon>
-              <ListItemText
-                primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
-                primary={
-                  !row.tipo || row?.tipo === 'OUTROS' ? (
-                    row?.name || row?.path
-                  ) : (
-                    <>
-                      {`${row.tipo}${row?.entidade ? ` - ${row.entidade}` : ''}`}
-                      <Typography
-                        variant="spam"
-                        sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}
-                      >
-                        &nbsp;({row?.name || row?.path})
-                      </Typography>
-                    </>
-                  )
-                }
-                secondary={
-                  (row?.criado_em || row?.criador || row?.data_emissao || row?.data_validade) && (
-                    <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
-                      {row?.criador && (
-                        <Criado caption tipo="user" value={findColaborador(row?.criador, colaboradores)} baralhar />
-                      )}
-                      {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
-                      {row?.data_emissao && <Criado caption iconText="Emissão:" value={ptDate(row?.data_emissao)} />}
-                      {row?.data_validade && <Criado caption iconText="Validade:" value={ptDate(row?.data_validade)} />}
-                    </Stack>
-                  )
-                }
-              />
-              <ListItemSecondaryAction>
-                <DefaultAction
-                  small
-                  label="ELIMINAR"
-                  onClick={() => {
-                    if (onOpen) onOpen(row.id);
-                    else dispatch(getSuccess({ item: 'selectedAnexoId', dados: row.anexo }));
-                  }}
+        {anexos.map(
+          ({
+            id = '',
+            path = '',
+            name = '',
+            tipo = '',
+            anexo = null,
+            criador = '',
+            entidade = '',
+            criado_em: criado = '',
+            data_emissao: emissao = '',
+            data_validade: validade = '',
+          }) => (
+            <List key={id} sx={{ p: 0 }}>
+              <ListItem sx={{ py: 0.5, pl: 1, borderRadius: 1, bgcolor: 'background.neutral' }}>
+                <ListItemIcon>{getFileThumb(false, null, path || name)}</ListItemIcon>
+                <ListItemText
+                  primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
+                  primary={
+                    !tipo || tipo === 'OUTROS' ? (
+                      name || path
+                    ) : (
+                      <>
+                        {`${tipo}${entidade ? ` - ${entidade}` : ''}`}
+                        <Typography
+                          variant="spam"
+                          sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}
+                        >
+                          &nbsp;({name || path})
+                        </Typography>
+                      </>
+                    )
+                  }
+                  secondary={
+                    (criado || criador || emissao || validade) && (
+                      <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
+                        <Criado caption tipo="user" value={findColaborador(criador, colaboradores)} baralhar />
+                        <Criado caption tipo="data" value={ptDateTime(criado)} />
+                        <Criado caption iconText="Emissão:" value={ptDate(emissao)} />
+                        <Criado caption iconText="Validade:" value={ptDate(validade)} />
+                      </Stack>
+                    )
+                  }
                 />
-              </ListItemSecondaryAction>
-            </ListItem>
-          </List>
-        ))}
+                <ListItemSecondaryAction>
+                  <DefaultAction
+                    small
+                    label="ELIMINAR"
+                    onClick={() => {
+                      if (onOpen) onOpen(id);
+                      else dispatch(getSuccess({ item: '', dados: anexo }));
+                    }}
+                  />
+                </ListItemSecondaryAction>
+              </ListItem>
+            </List>
+          )
+        )}
       </Stack>
     </>
   );

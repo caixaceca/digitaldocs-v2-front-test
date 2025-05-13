@@ -17,7 +17,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 // utils
-import { fNumber, fCurrency } from '../../../utils/formatNumber';
+import { fNumber2, fCurrency } from '../../../utils/formatNumber';
 import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
 import { newLineText, entidadesParse, baralharString, valorPorExtenso } from '../../../utils/formatText';
 // redux
@@ -40,9 +40,9 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 
 // ----------------------------------------------------------------------
 
-DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object };
+DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object, versoes: PropTypes.bool };
 
-export default function DetalhesProcesso({ isPS, processo }) {
+export default function DetalhesProcesso({ isPS = false, processo, versoes = false }) {
   const { origens } = useSelector((state) => state.parametrizacao);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
@@ -57,92 +57,106 @@ export default function DetalhesProcesso({ isPS, processo }) {
 
   return (
     <>
-      <List sx={{ pt: 0 }}>
-        <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-          <Typography variant="subtitle1">Processo</Typography>
-        </ListItem>
-        <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
-        <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
-        <TextItem title="Assunto:" text={processo?.fluxo} />
-        {!isPS && !!processo?.data_entrada && (
-          <TextItem
-            title="Data de entrada:"
-            text={`${ptDate(processo?.data_entrada)}${processo?.canal ? ` (Via ${processo?.canal})` : ''}`}
-          />
-        )}
-        <TextItem title="Referência:" text={processo?.referencia} />
-        {(processo?.estados?.length > 0 || processo?.estado) && (
-          <TextItem
-            title="Estado:"
-            situacao={
-              devolvido && (
-                <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row">
-                  {devolvido && (
+      {(!versoes ||
+        (versoes &&
+          (uo?.label ||
+            processo?.fluxo ||
+            processo?.observacao ||
+            processo?.data_entrada ||
+            processo?.numero_entrada))) && (
+        <List sx={{ pt: 0 }}>
+          <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+            <Typography variant="subtitle1">Processo</Typography>
+          </ListItem>
+          <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
+          <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
+          <TextItem title="Assunto:" text={processo?.fluxo} />
+          {!isPS && !!processo?.data_entrada && (
+            <TextItem
+              title="Data de entrada:"
+              text={`${ptDate(processo?.data_entrada)}${processo?.canal ? ` (Via ${processo?.canal})` : ''}`}
+            />
+          )}
+          <TextItem title="Referência:" text={processo?.referencia} />
+          {(processo?.estados?.length > 0 || processo?.estado) && (
+            <TextItem
+              title="Estado:"
+              situacao={
+                devolvido && (
+                  <Stack direction="row">
                     <Label color="error" startIcon={<ErrorOutlineIcon />}>
                       Devolvido
                     </Label>
-                  )}
-                </Stack>
-              )
-            }
-            label={
-              <Stack spacing={0.75} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
-                {(processo?.estados?.length > 0 ? processo?.estados : [processo?.estado])?.map((row, index) => {
-                  const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
-                  return (
-                    <Stack key={`estado_${row?.id}_${index}`} sx={{ pl: 0.25 }}>
-                      <Stack direction="row" alignItems="flex-end" useFlexGap flexWrap="wrap">
-                        <Typography variant="subtitle1" sx={{ pr: 1 }}>
-                          {row?.estado}
-                        </Typography>
-                        {row?.data_entrada && (
-                          <Stack direction="row" sx={{ color: 'text.secondary' }}>
-                            <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
-                            {row?.estado !== 'Arquivo' && (
-                              <Criado
-                                caption
-                                tipo="time"
-                                value={fToNow(row?.data_entrada)}
-                                sx={{ color: colorProcesso(processo?.cor) }}
-                              />
-                            )}
-                          </Stack>
+                  </Stack>
+                )
+              }
+              label={
+                <Stack spacing={0.75} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
+                  {(processo?.estados?.length > 0 ? processo?.estados : [processo?.estado])?.map((row, index) => {
+                    const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+                    return (
+                      <Stack key={`estado_${row?.id}_${index}`} sx={{ pl: 0.25 }}>
+                        <Stack direction="row" alignItems="flex-end" useFlexGap flexWrap="wrap">
+                          <Typography variant="subtitle2" sx={{ pr: 1 }}>
+                            {row?.estado}
+                          </Typography>
+                          {row?.data_entrada && (
+                            <Stack direction="row" sx={{ color: 'text.secondary' }}>
+                              <Criado caption tipo="data" value={ptDateTime(row?.data_entrada)} />
+                              {row?.estado !== 'Arquivo' && (
+                                <Criado
+                                  caption
+                                  tipo="time"
+                                  value={fToNow(row?.data_entrada)}
+                                  sx={{ color: colorProcesso(processo?.cor) }}
+                                />
+                              )}
+                            </Stack>
+                          )}
+                        </Stack>
+
+                        {colaboradorAfeto && (
+                          <Typography sx={{ typography: 'caption', color: 'info.main' }}>
+                            {row?.preso ? '' : 'Atribuído a '}
+                            <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                              {baralharString(colaboradorAfeto?.perfil?.displayName)}
+                            </Typography>
+                            {row?.preso ? ' está trabalhando neste processo' : ''}.
+                          </Typography>
+                        )}
+
+                        {row?.pendente && !row?.preso && (
+                          <Typography variant="caption" sx={{ color: 'warning.main', fontWeight: 'bold' }}>
+                            <Typography variant="caption">Pendente: </Typography>
+                            {row?.motivo_pendencia}
+                          </Typography>
                         )}
                       </Stack>
-
-                      {colaboradorAfeto && (
-                        <Typography sx={{ typography: 'caption', color: 'info.main' }}>
-                          {row?.preso ? '' : 'Atribuído a '}
-                          <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                            {baralharString(colaboradorAfeto?.perfil?.displayName)}
-                          </Typography>
-                          {row?.preso ? ' está trabalhando neste processo' : ''}.
-                        </Typography>
-                      )}
-
-                      {row?.pendente && !row?.preso && (
-                        <Typography sx={{ typography: 'caption', color: 'warning.main' }}>
-                          Processo pendente: {row?.motivo_pendencia}
-                        </Typography>
-                      )}
+                    );
+                  })}
+                  {processo?.estados?.length > 0 && processo?.estado?.estado && (
+                    <Stack>
+                      <Label color="info">Focal Point: {processo?.estado?.estado}</Label>
                     </Stack>
-                  );
-                })}
-              </Stack>
-            }
-          />
-        )}
-        {processo?.observacao && <TextItem title="Observação:" text={newLineText(processo?.observacao)} />}
-        <TextItem
-          title="Criado:"
-          label={
-            <>
-              <Criado tipo="data" value={ptDateTime(processo?.criado_em)} />
-              <Criado tipo="user" value={processo?.criador ?? ''} baralhar />
-            </>
-          }
-        />
-      </List>
+                  )}
+                </Stack>
+              }
+            />
+          )}
+          {processo?.observacao && <TextItem title="Observação:" text={newLineText(processo?.observacao)} />}
+          {(processo?.criado_em || processo?.criador) && (
+            <TextItem
+              title="Criado:"
+              label={
+                <>
+                  <Criado tipo="data" value={ptDateTime(processo?.criado_em)} />
+                  <Criado tipo="user" value={processo?.criador ?? ''} baralhar />
+                </>
+              }
+            />
+          )}
+        </List>
+      )}
 
       {(entidadesList ||
         processo?.email ||
@@ -183,7 +197,7 @@ export default function DetalhesProcesso({ isPS, processo }) {
             title="Segmento:"
             text={(processo?.segmento === 'P' && 'Particular') || (processo?.segmento === 'E' && 'Empresa') || ''}
           />
-          <TextItem title="Balcão de domicílio:" text={`${processo?.balcao_domicilio ?? ''}${bd ? ` - ${bd}` : ''}`} />
+          <TextItem title="Balcão de domicílio:" text={`${bd ? `${bd} - ` : ''}${processo?.balcao_domicilio ?? ''}`} />
         </List>
       )}
 
@@ -298,8 +312,18 @@ ValorItem.propTypes = { title: PropTypes.string, valor: PropTypes.number, cativo
 function ValorItem({ title, valor, cativos }) {
   const { toggle: open, onOpen, onClose } = useToggle();
   return (
-    <Stack spacing={1} direction="row" alignItems="center" justifyContent="left" sx={{ ...itemStyle }}>
-      <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
+    <Stack
+      useFlexGap
+      flexWrap="wrap"
+      spacing={0.5}
+      direction="row"
+      alignItems="center"
+      justifyContent="left"
+      sx={{ ...itemStyle }}
+    >
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        {title}
+      </Typography>
       <Typography>
         {fCurrency(valor)}
         <Typography variant="spam" sx={{ typography: 'body2' }}>
@@ -308,7 +332,7 @@ function ValorItem({ title, valor, cativos }) {
       </Typography>
       {cativos?.length > 0 && (
         <>
-          <DefaultAction onClick={() => onOpen()} small color="info" label="INFO. DAS CONTAS" />
+          <DefaultAction button onClick={() => onOpen()} small color="info" label="Contas" />
           {open && (
             <Dialog open onClose={onClose} fullWidth maxWidth="md">
               <DialogTitleAlt title="Contas para cativo" onClose={onClose} />
@@ -331,7 +355,7 @@ function ValorItem({ title, valor, cativos }) {
                         <TableRow hover key={`${row?.id}_${index}`}>
                           <TableCell>{row?.conta}</TableCell>
                           <TableCell align="right">
-                            {fNumber(row?.saldo)} {row?.moeda}
+                            {fNumber2(row?.saldo)} {row?.moeda}
                           </TableCell>
                           <TableCell align="right">{fCurrency(row?.saldo_cve)}</TableCell>
                           <CellChecked check={row.enviado_banka} />

@@ -13,9 +13,9 @@ import { RHFUploadMultiFile } from '../../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-Anexos.propTypes = { outros: PropTypes.bool, anexos: PropTypes.array };
+Anexos.propTypes = { outros: PropTypes.bool, anexos: PropTypes.array, solto: PropTypes.bool };
 
-export default function Anexos({ outros, anexos }) {
+export default function Anexos({ outros, anexos, solto = false }) {
   const { watch, control, setValue } = useFormContext();
   const values = watch();
   const { fields } = useFieldArray({ control, name: 'checklist' });
@@ -34,10 +34,13 @@ export default function Anexos({ outros, anexos }) {
         <>
           {fields?.map((row, docIndex) => (
             <FormDocumentosChecklist
-              dados={row}
               key={row?.id}
-              docIndex={docIndex}
-              anexos={anexos.filter(({ ativo, tipo_id: tid }) => ativo && tid === row?.tipo_id)}
+              dados={{
+                row,
+                solto,
+                docIndex,
+                anexos: anexos.filter(({ ativo, tipo_id: tid }) => ativo && tid === row?.tipo_id),
+              }}
             />
           ))}
 

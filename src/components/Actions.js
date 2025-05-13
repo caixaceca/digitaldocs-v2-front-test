@@ -37,7 +37,7 @@ import useResponsive from '../hooks/useResponsive';
 import { useDispatch } from '../redux/store';
 import { openModal, setModal } from '../redux/slices/parametrizacao';
 // assets
-import { Editar, Arquivo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
+import { Editar, Arquivo, AddAnexo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
 //
 import SvgIconStyle from './SvgIconStyle';
 import { DialogConfirmar } from './CustomDialog';
@@ -82,9 +82,21 @@ export function DefaultAction({
   ...others
 }) {
   const colorAlt =
-    (label === 'VERSIONAR' && 'info') ||
-    ((label === 'EDITAR' || label === 'Composição' || label === 'Editar') && 'warning') ||
-    ((label === 'ELIMINAR' || label === 'Eliminar' || label === 'ARQUIVAR' || label === 'REVOGAR') && 'error') ||
+    ((label === 'EDITAR' ||
+      label === 'Editar' ||
+      label === 'RESGATAR' ||
+      label === 'LIBERTAR' ||
+      label === 'Composição' ||
+      label === 'DOMICILIAR' ||
+      label === 'FOCAL POINT') &&
+      'warning') ||
+    ((label === 'REVOGAR' ||
+      label === 'ELIMINAR' ||
+      label === 'Eliminar' ||
+      label === 'ARQUIVAR' ||
+      label === 'DESARQUIVAR') &&
+      'error') ||
+    ((label === 'VERSIONAR' || label === 'ATRIBUIR') && 'info') ||
     ((label === 'Próximo' || label === 'Anterior' || label === 'PENDENTE' || label === 'Gerar contrato') &&
       'inherit') ||
     color;
@@ -104,18 +116,19 @@ export function DefaultAction({
     (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
     (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
     (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
+    (label === 'ADICIONAR ANEXO' && <AddAnexo sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     ((label === 'Clonar' || label === 'CLONAR') && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
+    ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Procurar' || label === 'PROCURAR') && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
-    ((label === 'INFO. DAS CONTAS' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
-    ((label === 'Editar' || label === 'EDITAR' || label === 'Composição') && (
+    ((label === 'Editar' || label === 'EDITAR' || label === 'Composição' || label === 'FOCAL POINT') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
     ((label === 'ADICIONAR' || label === 'Adicionar' || icon === 'adicionar' || label === 'Mostrar detalhes') && (

@@ -4,10 +4,12 @@ import { formatDate } from '../../../../utils/formatTime';
 
 // ----------------------------------------------------------------------
 
-export const shapeAnexos = (outros, checkList) =>
+export const shapeAnexos = (outros, checkList, solto) =>
   Yup.object().shape({
     anexos:
-      outros && checkList?.length === 0 ? Yup.array().min(1, 'Pelo menos um documento é necessário.') : Yup.array(),
+      !solto && outros && checkList?.length === 0
+        ? Yup.array().min(1, 'Pelo menos um documento é necessário.')
+        : Yup.array(),
     checklist: Yup.array().of(
       Yup.object().shape({
         anexos: Yup.array().when(

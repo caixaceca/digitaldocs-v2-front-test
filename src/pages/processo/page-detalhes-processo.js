@@ -7,11 +7,11 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { getProximoAnterior } from '../../utils/formatObject';
-import { pertencoEstadoId, gestorEstado } from '../../utils/validarAcesso';
+import { pertencoEstadoId, gestorEstado, findColaboradores } from '../../utils/validarAcesso';
 // redux
 import { useAcesso } from '../../hooks/useAcesso';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, getInfoProcesso } from '../../redux/slices/digitaldocs';
+import { getSuccess, getInfoProcesso, setModal, deleteItem } from '../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
@@ -21,9 +21,9 @@ import { useProcesso, useIdentificacao } from '../../hooks/useProcesso';
 // components
 import Page from '../../components/Page';
 import { TabCard } from '../../components/TabsWrapper';
-import DialogPreviewDoc from '../../components/CustomDialog';
 import { DefaultAction, Voltar } from '../../components/Actions';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import DialogPreviewDoc, { DialogConfirmar } from '../../components/CustomDialog';
 // sections
 import {
   Views,
@@ -37,9 +37,21 @@ import {
   TodosAnexos,
   TableDetalhes,
 } from '../../sections/processo/Detalhes';
+import {
+  AnexosForm,
+  EliminarForm,
+  AtribuirForm,
+  LibertarForm,
+  ResgatarForm,
+  FocalPointForm,
+  DomiciliarForm,
+  FinalizarNeForm,
+  FinalizarOpeForm,
+  ColocarPendenteForm,
+} from '../../sections/processo/form/intervencao';
+import Intervencao from '../../sections/processo/Intervencao';
 import ProcessoForm from '../../sections/processo/form/form-processo';
-import { ColocarPendenteForm } from '../../sections/processo/form/intervencao';
-import Intervencao, { Libertar, Atribuir, Resgatar, Cancelar, Desarquivar } from '../../sections/processo/Intervencao';
+import { DesarquivarForm } from '../../sections/processo/form/arquivo';
 
 // ----------------------------------------------------------------------
 
@@ -51,10 +63,23 @@ export default function PageProcesso() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados gerais');
 
-  const { perfilId } = useSelector((state) => state.intranet);
-  const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
-  const { processos, done, pdfPreview, isOpenModal, isLoadingFile } = useSelector((state) => state.digitaldocs);
+  const { perfilId, colaboradores } = useSelector((state) => state.intranet);
+  const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado: ce } = useSelector((state) => state.parametrizacao);
+  const { processos, done, pdfPreview, selectedItem, isOpenModal, isSaving, isLoadingFile } = useSelector(
+    (state) => state.digitaldocs
+  );
+
+  const identificador = useIdentificacao({ id });
+  const processo = useProcesso({ id, perfilId });
+  const { estado = null, credito = null, con = null, status = '' } = processo || {};
+  const { estados = [], htransicoes = [], pareceres_estado: pareceres = [] } = processo || {};
+  const { fluxo_id: fluxoId = '', valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
+
+  const proxAnt = getProximoAnterior(processos, id);
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
+  const estadoId = useMemo(() => estado?.estado_id || '', [estado?.estado_id]);
+  const ultimaTransicao = useMemo(() => htransicoes?.[0] || null, [htransicoes]);
+  const colaboradoresList = useMemo(() => findColaboradores(colaboradores, ce), [colaboradores, ce]);
   const linkNavigate = useMemo(
     () =>
       (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
@@ -63,14 +88,6 @@ export default function PageProcesso() {
       `${PATH_DIGITALDOCS.filaTrabalho.lista}`,
     [params]
   );
-
-  const identificador = useIdentificacao({ id });
-  const processo = useProcesso({ id, perfilId });
-  const proxAnt = getProximoAnterior(processos, processo?.id);
-  const estado = useMemo(() => processo?.estado || null, [processo?.estado]);
-  const fluxoId = useMemo(() => processo?.fluxo_id || '', [processo?.fluxo_id]);
-  const estadoId = useMemo(() => processo?.estado?.estado_id || '', [processo?.estado?.estado_id]);
-  const ultimaTransicao = useMemo(() => processo?.htransicoes?.[0] || null, [processo?.htransicoes]);
 
   const handleAceitar = useCallback(
     (estadoId, modo) => dispatch(getInfoProcesso('aceitar', { id, estadoId, modo, msg: 'Processo aceitado' })),
@@ -81,24 +98,17 @@ export default function PageProcesso() {
     const tabs = [];
     tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
 
-    if (processo?.credito)
+    if (credito)
       tabs.push({
         value: 'Info. crédito',
         component: (
-          <InfoCredito
-            dados={{ ...processo.credito, processoId: id, modificar: estado?.preso && estado?.atribuidoAMim }}
-          />
+          <InfoCredito dados={{ ...credito, processoId: id, modificar: estado?.preso && estado?.atribuidoAMim }} />
         ),
       });
 
-    if (processo?.con)
-      tabs.push({
-        value: 'Info. CON',
-        component: <InfoCon dados={{ ...processo?.con, valor: processo?.valor, numero: processo?.numero_operacao }} />,
-      });
+    if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
 
-    if (processo?.estados && processo.estados?.length > 0)
-      tabs.push({ value: 'Pareceres', component: <Estados handleAceitar={handleAceitar} /> });
+    if (estados?.length > 0) tabs.push({ value: 'Pareceres', component: <Estados handleAceitar={handleAceitar} /> });
 
     if (estado?.pareceres && estado.pareceres?.length > 0) {
       tabs.push({
@@ -109,21 +119,16 @@ export default function PageProcesso() {
             estado={estado?.estado}
             pareceres={estado.pareceres}
             estadoId={estado?.estado_id}
-            assunto={`${processo?.fluxo ?? ''} - ${processo?.titular ?? ''}`}
+            assunto={`${fluxo ?? ''} - ${titular ?? ''}`}
           />
         ),
       });
     }
 
-    if (processo?.htransicoes && processo.htransicoes?.length > 0) {
+    if (htransicoes?.length > 0) {
       tabs.push({
         value: 'Encaminhamentos',
-        component: (
-          <Transicoes
-            transicoes={processo.htransicoes}
-            assunto={`${processo?.fluxo ?? ''} - ${processo?.titular ?? ''}`}
-          />
-        ),
+        component: <Transicoes transicoes={htransicoes} assunto={`${fluxo ?? ''} - ${titular ?? ''}`} />,
       });
     }
 
@@ -136,7 +141,7 @@ export default function PageProcesso() {
       );
     }
 
-    // if (processo?.htransicoes?.length > 0) {
+    // if (htransicoes?.length > 0) {
     //   tabs.push({ value: 'Confidencialidades', component: <TableDetalhes id={id} item="confidencialidades" /> });
     // }
 
@@ -145,7 +150,22 @@ export default function PageProcesso() {
     }
 
     return tabs;
-  }, [id, isAdmin, isAuditoria, processo, estado, handleAceitar]);
+  }, [
+    id,
+    con,
+    fluxo,
+    valor,
+    estado,
+    numero,
+    titular,
+    credito,
+    isAdmin,
+    processo,
+    htransicoes,
+    isAuditoria,
+    handleAceitar,
+    estados?.length,
+  ]);
 
   useEffect(() => {
     if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
@@ -155,18 +175,30 @@ export default function PageProcesso() {
     navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${idProcesso}`);
   };
 
+  const openModal = (modal, dados) => {
+    dispatch(setModal({ modal: modal || '', dados: dados || null }));
+  };
+
+  const eliminarAnexo = () => {
+    const { id: anexoId, estadoId, entidade } = selectedItem;
+    const params = { processoId: id, id: anexoId, estadoId, entidade, onClose: openModal };
+    dispatch(deleteItem('anexo', { ...params, msg: 'Anexo eliminado' }));
+  };
+
   useNotificacao({
     done,
     onClose: () => {
+      openModal();
       if (
+        !done.includes('Anexo') &&
         !done.includes('Stiuação') &&
         !done.includes('Garantia') &&
-        done !== 'Anexo eliminado' &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
         done !== 'Processo resgatado' &&
         done !== 'Processo adicionado' &&
         done !== 'Processo atualizado' &&
+        done !== 'Focal Point alterado' &&
         done !== 'Confidencialidade atualizado'
       ) {
         if (proxAnt?.proximo) irParaProcesso(proxAnt?.proximo);
@@ -191,57 +223,64 @@ export default function PageProcesso() {
               <Voltar fab />
               {processo && (
                 <Stack spacing={0.5} direction={{ xs: 'row' }}>
-                  {processo?.status === 'Arquivado' ? (
-                    <>{acessoDesarquivar ? <Desarquivar id={id} /> : ''}</>
+                  {status === 'A' ? (
+                    <>
+                      {acessoDesarquivar && (
+                        <DefaultAction
+                          label="DESARQUIVAR"
+                          onClick={() => {
+                            dispatch(setModal({ modal: 'desarquivar', dados: null }));
+                            dispatch(getInfoProcesso('destinosDesarquivamento', { id }));
+                          }}
+                        />
+                      )}
+                    </>
                   ) : (
                     <>
                       {/* EM SÉRIE */}
-                      {estado && processo?.estados?.length === 0 && (
+                      {estado && estados?.length === 0 && (
                         <>
-                          {pertencoEstadoId(meusAmbientes, estadoId) && processo?.pareceres_estado?.length === 0 && (
+                          {pertencoEstadoId(meusAmbientes, estadoId) && pareceres?.length === 0 && (
                             <>
                               {estado?.preso && estado?.atribuidoAMim && <Intervencao />}
                               {estado?.preso && !estado?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
-                                <Libertar dados={{ id, estadoId }} />
+                                <DefaultAction
+                                  label="LIBERTAR"
+                                  onClick={() => openModal('libertar', { id, estadoId })}
+                                />
                               )}
                               {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
                                 <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
                               )}
                               {!estado?.preso && gestorEstado(meusAmbientes, estadoId) && (
-                                <Atribuir dados={{ estadoId, perfilIdA: estado?.perfil_id, processoId: id }} />
+                                <DefaultAction
+                                  label="ATRIBUIR"
+                                  onClick={() =>
+                                    openModal('atribuir', { estadoId, pid: estado?.perfil_id, processoId: id })
+                                  }
+                                />
                               )}
                             </>
                           )}
                           {/* Resgatar */}
                           {!!ultimaTransicao &&
                             !estado?.preso &&
-                            !processo?.pendente &&
+                            !estado?.pendente &&
                             !ultimaTransicao?.resgate &&
                             !ultimaTransicao?.pareceres?.length &&
                             perfilId === ultimaTransicao?.perfil_id &&
                             pertencoEstadoId(meusAmbientes, ultimaTransicao?.estado_inicial_id) &&
                             !estado?.pareceres?.some(({ parecer_em: parecer }) => parecer) && (
-                              <Resgatar dados={{ id, fluxoId, estadoId: ultimaTransicao?.estado_inicial_id }} />
+                              <DefaultAction label="RESGATAR" onClick={() => openModal('resgatar', null)} />
                             )}
                         </>
                       )}
 
                       {/* EM PARALELO */}
-                      {processo?.estados?.length > 0 && pertencoEstadoId(meusAmbientes, estadoId) && (
+                      {estados?.length > 0 && gestorEstado(meusAmbientes, estadoId) && (
                         <>
-                          {estado?.preso && estado?.atribuidoAMim && (
-                            <>
-                              <Libertar dados={{ id, estadoId }} />
-                              {processo?.estados?.find(({ parecer_em: parecer }) => parecer) ? (
-                                <Cancelar id={id} estadoId={estadoId} fechar />
-                              ) : (
-                                <Cancelar id={id} estadoId={estadoId} />
-                              )}
-                            </>
-                          )}
-                          {!estado?.preso && (
-                            <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
-                          )}
+                          <DefaultAction label="FOCAL POINT" onClick={() => openModal('focal-point', null)} />
+                          <DefaultAction label="RESGATAR" onClick={() => openModal('resgatar', null)} />
                         </>
                       )}
                     </>
@@ -275,9 +314,33 @@ export default function PageProcesso() {
           </Stack>
         )}
 
-        {isOpenModal === 'pendencia' && <ColocarPendenteForm />}
+        {isOpenModal === 'libertar' && <LibertarForm onClose={() => openModal()} />}
+        {isOpenModal === 'adicionar-anexo' && <AnexosForm onClose={() => openModal()} />}
+        {isOpenModal === 'pendencia' && <ColocarPendenteForm onClose={() => openModal()} />}
+        {isOpenModal === 'finalizar-ne' && <FinalizarNeForm onClose={() => openModal()} id={id} />}
+        {isOpenModal === 'finalizar-ope' && <FinalizarOpeForm onClose={() => openModal()} id={id} />}
         {isOpenModal === 'editar-processo' && <ProcessoForm processo={processo} ambientId={estadoId} />}
-
+        {isOpenModal === 'domiciliar' && <DomiciliarForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
+        {isOpenModal === 'focal-point' && <FocalPointForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
+        {isOpenModal === 'eliminar-processo' && <EliminarForm ids={{ id, estadoId }} onClose={() => openModal()} />}
+        {isOpenModal === 'atribuir' && <AtribuirForm colaboradores={colaboradoresList} onClose={() => openModal()} />}
+        {isOpenModal === 'desarquivar' && (
+          <DesarquivarForm id={id} colaboradores={colaboradoresList} onClose={() => openModal()} />
+        )}
+        {isOpenModal === 'resgatar' && (
+          <ResgatarForm
+            onClose={() => openModal()}
+            dados={{ id, fluxoId, estadoId: estados?.length > 0 ? estadoId : ultimaTransicao?.estado_inicial_id }}
+          />
+        )}
+        {isOpenModal === 'eliminar-anexo' && (
+          <DialogConfirmar
+            isSaving={isSaving}
+            handleOk={eliminarAnexo}
+            desc="eliminar este anexo"
+            onClose={() => openModal()}
+          />
+        )}
         {pdfPreview && (
           <DialogPreviewDoc
             onClose={() => dispatch(getSuccess({ item: 'pdfPreview', dados: null }))}

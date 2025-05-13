@@ -20,7 +20,7 @@ import DetalhesProcesso from './DetalhesProcesso';
 
 export default function DadosGerais() {
   const { isLoadingP, processo } = useSelector((state) => state.digitaldocs);
-  const hasAnexos = useMemo(() => processo?.anexos && processo?.anexos?.length > 0, [processo?.anexos]);
+  const anexosAtivos = useMemo(() => processo?.anexos?.filter(({ ativo }) => ativo) || [], [processo?.anexos]);
   const isPS = useMemo(
     () => fluxosGmkt(processo?.fluxo) || processo?.fluxo === 'Diário' || processo?.fluxo === 'Receção de Cartões - DOP',
     [processo?.fluxo]
@@ -34,15 +34,15 @@ export default function DadosGerais() {
         <>
           {processo ? (
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={hasAnexos && 5}>
+              <Grid item xs={12} lg={anexosAtivos?.length && 5}>
                 <Stack id="detalhes">
                   {!isPS && processo?.nota && <NotaProcesso nota={processo?.nota} segmento={processo?.segmento} />}
                   <DetalhesProcesso isPS={isPS} processo={processo} />
                 </Stack>
               </Grid>
-              {hasAnexos && (
+              {!!anexosAtivos?.length && (
                 <Grid item xs={12} lg={7}>
-                  <Anexos anexos={applySort(processo?.anexos, getComparator('asc', 'id'))} />
+                  <Anexos anexos={applySort(anexosAtivos, getComparator('asc', 'id'))} />
                 </Grid>
               )}
             </Grid>

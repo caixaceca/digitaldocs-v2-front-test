@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
+import { useEffect, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -79,9 +79,14 @@ export default function FormInfoExterno({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
+  const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo?.balcao]);
 
   const onSubmit = async () => {
     submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);

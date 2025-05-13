@@ -12,7 +12,7 @@ import TableContainer from '@mui/material/TableContainer';
 import { noDados } from '../../utils/formatText';
 import { transicoesList, transicaoDesc } from '../../utils/formatObject';
 // hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { applySort, getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, getSuccess, setModal } from '../../redux/slices/parametrizacao';
@@ -186,7 +186,7 @@ export default function TableInfoFluxo({ item }) {
 
 // ----------------------------------------------------------------------
 
-function estadosList(transicoes = [], estados = [], uos = []) {
+export function estadosList(transicoes = [], estados = [], uos = []) {
   const estadosProcessados = new Set();
   const estadosLista = [];
 
@@ -209,7 +209,7 @@ function estadosList(transicoes = [], estados = [], uos = []) {
     processarEstado(ef);
   });
 
-  return estadosLista;
+  return applySort(estadosLista, getComparator('asc', 'label'));
 }
 
 function headerTable(item) {

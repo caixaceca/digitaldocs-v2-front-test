@@ -10,37 +10,30 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { pertencoEstadoId } from '../../../utils/validarAcesso';
 // redux
+import { setModal } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, setModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { ColaboradorInfo } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
 //
 import { Info } from './Estados';
-import { ParecerForm } from '../form/intervencao';
 
 // ----------------------------------------------------------------------
 
 Pareceres.propTypes = {
-  id: PropTypes.number,
   estado: PropTypes.string,
   assunto: PropTypes.string,
   pareceres: PropTypes.array,
   estadoId: PropTypes.number,
 };
 
-export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) {
+export default function Pareceres({ pareceres, estado, estadoId, assunto }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-  const { isOpenModal, processo } = useSelector((state) => state.digitaldocs);
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
-  };
-
-  const viewAnexo = (anexo, estadoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { processoId: processo?.id, anexo, estadoId, parecerId }));
   };
 
   return (
@@ -50,16 +43,12 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
           accord={accord}
           assunto={assunto}
           estadoId={estadoId}
-          viewAnexo={viewAnexo}
           key={`parecer_${row?.id}`}
           handleAccord={handleAccord}
           parecer={{ ...row, estado, observacao: row?.descritivo }}
           handleEditar={(item) => dispatch(setModal({ modal: 'parecer-individual', dados: item }))}
         />
       ))}
-      {isOpenModal === 'parecer-individual' && (
-        <ParecerForm onCancel={() => dispatch(setModal({ modal: '', dados: null }))} processoId={id} />
-      )}
     </Box>
   );
 }
@@ -69,24 +58,24 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto, id }) 
 Parecer.propTypes = {
   accord: PropTypes.string,
   parecer: PropTypes.object,
-  viewAnexo: PropTypes.func,
   estadoId: PropTypes.number,
   handleEditar: PropTypes.func,
   handleAccord: PropTypes.func,
 };
 
-export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord, viewAnexo }) {
+export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord }) {
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === parecer?.perfil_id);
-  const temParecer =
-    parecer?.parecer_em && (parecer?.parecer_favoravel === true || parecer?.parecer_favoravel === false);
+
+  const { id, perfil_id: perfil, parecer_favoravel: favoravel, validado, parecer_em: em = '' } = parecer;
+  const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === perfil);
+  const temParecer = em && (favoravel === true || favoravel === false);
 
   return (
     <Stack sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
       <Box sx={{ position: 'absolute', right: 15, p: 2 }}>
         <Stack direction="row" justifyContent="right" alignItems="center" spacing={1} sx={{ zIndex: 2 }}>
-          {pertencoEstadoId(meusAmbientes, estadoId) && parecer?.perfil_id === perfilId && !parecer?.validado && (
+          {pertencoEstadoId(meusAmbientes, estadoId) && perfil === perfilId && !validado && (
             <DefaultAction
               onClick={() => handleEditar(parecer)}
               color={temParecer ? 'warning' : 'success'}
@@ -96,7 +85,7 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
         </Stack>
       </Box>
       <Stack>
-        <Accordion expanded={accord === parecer?.id} onChange={handleAccord(parecer?.id)}>
+        <Accordion expanded={accord === id} onChange={handleAccord(id)}>
           <AccordionSummary sx={{ minHeight: '65px !important' }}>
             <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
               {colaborador && (
@@ -108,8 +97,8 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
                   other={
                     temParecer && (
                       <Box>
-                        <Label color={parecer?.parecer_favoravel ? 'success' : 'error'}>
-                          {parecer?.parecer_favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
+                        <Label color={favoravel ? 'success' : 'error'}>
+                          {favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
                         </Label>
                       </Box>
                     )
@@ -122,7 +111,7 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord,
             <Stack sx={{ pt: 1 }}>
               {temParecer ? (
                 <Stack sx={{ width: 1 }}>
-                  <Info viewAnexo={viewAnexo} temParecer={temParecer} dados={parecer} />
+                  <Info temParecer={temParecer} dados={parecer} />
                 </Stack>
               ) : (
                 <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>

@@ -4,13 +4,16 @@ import PropTypes from 'prop-types';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 // utils
 import { canPreview } from '../../../utils/formatFile';
+import { eliminarAnexo } from '../../../utils/validarAcesso';
 // redux
-import { getAnexo } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
+import { getAnexo, setModal } from '../../../redux/slices/digitaldocs';
 //
 import { AnexoItem } from './Anexos';
+import { SearchNotFound } from '../../../components/table';
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
@@ -18,31 +21,44 @@ import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 export default function TodosAnexos() {
   const dispatch = useDispatch();
   const { processo } = useSelector((state) => state.digitaldocs);
-  const anexos = useMemo(
-    () => anexosPorEstado(processo?.anexos?.filter(({ entidade }) => !entidade)),
-    [processo?.anexos]
-  );
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const { id, estado, anexos } = processo;
+  const anexosEntidades = useMemo(() => anexos?.filter(({ entidade }) => !!entidade), [anexos]);
+  const anexosList = useMemo(() => anexosPorEstado(anexos?.filter(({ entidade }) => !entidade)), [anexos]);
 
   const viewAnexo = (anexo) => {
-    const params = { processoId: processo?.id, anexo: { ...anexo, tipoDoc: canPreview(anexo) } };
+    const params = { processoId: id, anexo: { ...anexo, tipoDoc: canPreview(anexo) } };
     dispatch(getAnexo('fileDownload', params));
   };
 
   const renderAnexos = (anexos, titulo) =>
     anexos?.length > 0 && (
-      <Stack>
-        <AnexosGroup dados={{ titulo, viewAnexo, anexos }} />
-      </Stack>
+      <AnexosGroup
+        dados={{
+          titulo,
+          anexos,
+          viewAnexo,
+          meusAmbientes,
+          estadoId: processo?.estado?.estado_id,
+          modificar: estado?.preso && estado?.atribuidoAMim,
+        }}
+        onEliminar={(id, entidade) =>
+          dispatch(setModal({ modal: 'eliminar-anexo', dados: { id, estadoId: estado?.estado_id, entidade } }))
+        }
+      />
     );
 
   return (
     <CardContent>
       <Stack spacing={3}>
-        {renderAnexos(
-          processo?.anexos?.filter(({ entidade }) => !!entidade),
-          'Anexos das entidades'
+        {anexosList?.length || anexosEntidades?.length ? (
+          <>
+            {renderAnexos(anexosEntidades, 'Anexos das entidades')}
+            {anexosList?.map(({ estado, anexos }) => renderAnexos(anexos, estado))}
+          </>
+        ) : (
+          <SearchNotFound message="Nenhum anexo encontrado..." />
         )}
-        {anexos?.map(({ estado, anexos }) => renderAnexos(anexos, estado))}
       </Stack>
     </CardContent>
   );
@@ -50,10 +66,10 @@ export default function TodosAnexos() {
 
 // ----------------------------------------------------------------------
 
-AnexosGroup.propTypes = { dados: PropTypes.object };
+AnexosGroup.propTypes = { dados: PropTypes.object, onEliminar: PropTypes.func };
 
-function AnexosGroup({ dados }) {
-  const { anexos, titulo = '', viewAnexo } = dados;
+function AnexosGroup({ dados, onEliminar }) {
+  const { anexos, titulo = '', viewAnexo, modificar = false, meusAmbientes = [], estadoId = '' } = dados;
   const [anexosAtivos, anexosInativos] = useMemo(
     () => [anexos?.filter(({ ativo }) => ativo) || [], anexos?.filter(({ ativo }) => !ativo) || []],
     [anexos]
@@ -61,10 +77,19 @@ function AnexosGroup({ dados }) {
 
   return (
     <Stack>
-      <Divider sx={{ m: 1, typography: 'overline' }}>{titulo}</Divider>
+      <Typography textAlign="left" sx={{ mt: 1, typography: 'overline', color: 'text.secondary' }}>
+        {titulo}
+      </Typography>
+      <Divider sx={{ mb: 1 }} />
       <Stack spacing={1}>
         {anexosAtivos.map((row) => (
-          <AnexoItem parecer anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
+          <AnexoItem
+            parecer
+            anexo={row}
+            key={row?.anexo}
+            viewAnexo={viewAnexo}
+            onEliminar={eliminarAnexo(meusAmbientes, modificar, row?.estado_id, estadoId) ? onEliminar : null}
+          />
         ))}
       </Stack>
       {anexosInativos.length > 0 && (

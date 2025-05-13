@@ -94,7 +94,7 @@ export default function FormInfoCredito({ dados }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fluxo?.id, uos, linhas, componentesList, tiposTitularList]);
+  }, [processo, dadosStepper, componentesList, tiposTitularList, uos, estado?.uo_id, cc?.uo?.balcao, fluxo?.id]);
 
   const onSubmit = async () => {
     submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);

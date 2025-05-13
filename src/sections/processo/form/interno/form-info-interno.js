@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
+import { useMemo, useEffect } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -82,8 +82,13 @@ export default function FormInfoInterno({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
+  const { reset, watch, handleSubmit } = methods;
   const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo, estado?.uo_id]);
 
   const onSubmit = async () => {
     submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);

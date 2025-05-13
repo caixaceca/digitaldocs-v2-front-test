@@ -200,7 +200,6 @@ function Transicoes({ options }) {
     <Autocomplete
       fullWidth
       size="small"
-      disableClearable
       sx={{ minWidth: 300 }}
       options={listaTransicoes}
       value={transicao || null}

@@ -17,8 +17,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { updateItem, setModal } from '../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
+import { getInfoProcesso, updateItem, setModal } from '../../../redux/slices/digitaldocs';
 // hooks
 import useAnexos from '../../../hooks/useAnexos';
 // components
@@ -30,6 +30,7 @@ import {
   RHFUploadMultiFile,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
+import GridItem from '../../../components/GridItem';
 import { DialogButons } from '../../../components/Actions';
 
 // --- ARQUIVAR PROCESSO -----------------------------------------------------------------------------------------------
@@ -39,15 +40,20 @@ ArquivarForm.propTypes = { naoFinal: PropTypes.array, onClose: PropTypes.func };
 export function ArquivarForm({ naoFinal, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
+  const { meusAmbientes, checklist } = useSelector((state) => state.parametrizacao);
+  const cheklistOutros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
+
+  useEffect(() => {
+    dispatch(getFromParametrizacao('checklist', { fluxoId: processo?.fluxo_id, reset: { val: [] } }));
+  }, [dispatch, processo?.fluxo_id]);
 
   const informarConta = useMemo(
     () =>
       !processo?.limpo &&
       !processo?.origem_id &&
       processo?.fluxo !== 'Encerramento de conta' &&
-      meusAmbientes?.find((row) => row?.id === processo?.estado_atual_id)?.isfinal,
+      meusAmbientes?.find(({ id }) => id === processo?.estado?.estado_id)?.isfinal,
     [meusAmbientes, processo]
   );
 
@@ -83,10 +89,15 @@ export function ArquivarForm({ naoFinal, onClose }) {
         noperacao: values?.numero_operacao,
         data_entrada: format(values.data_entrada, 'yyyy-MM-dd'),
       };
+
       const anexos = new FormData();
-      await values?.anexos?.forEach((row) => anexos.append('anexos', row));
-      const params = { id: processo?.id, msg: 'Processo arquivado', estadoId: processo?.estado_atual_id };
-      dispatch(updateItem('arquivar', JSON.stringify(formData), { anexos, ...params }));
+      values?.anexos?.forEach((row, index) => {
+        anexos.append(`anexos[${index}].tipo_documento_id`, cheklistOutros?.tipo_id);
+        anexos.append(`anexos[${index}].anexo`, row);
+      });
+
+      const params = { id: processo?.id, msg: 'Processo arquivado', anexos: values?.anexos?.length ? anexos : null };
+      dispatch(updateItem('arquivar', JSON.stringify(formData), { estadoId: processo?.estado?.estado_id, ...params }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -101,7 +112,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ mt: 0 }}>
             {naoFinal?.length > 0 && (
-              <Grid item xs={12}>
+              <GridItem>
                 <Alert severity="error">
                   <Typography variant="caption">
                     Geralmente, este processo é encaminhado para outro estado fora da sua Unidade Orgânica.
@@ -115,28 +126,21 @@ export function ArquivarForm({ naoFinal, onClose }) {
                     </Stack>
                   ))}
                 </Alert>
-              </Grid>
+              </GridItem>
             )}
-            <Grid item xs={12} sm={6}>
-              <RHFDataEntrada name="data_entrada" label="Data de entrada" disableFuture />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <RHFTextField name="entidades" label="Nº entidade(s)" />
-            </Grid>
+            <GridItem sm={6} children={<RHFDataEntrada name="data_entrada" label="Data de entrada" disableFuture />} />
+            <GridItem sm={6} children={<RHFNumberField noFormat name="noperacao" label="Nº de operação" />} />
+            <GridItem sm={6} children={<RHFTextField name="entidades" label="Nº entidade(s)" />} />
             {processo?.fluxo !== 'Encerramento de conta' && (
-              <Grid item xs={12} sm={6}>
-                <RHFNumberField noFormat name="conta" label="Nº de conta" />
-              </Grid>
+              <GridItem sm={6} children={<RHFNumberField noFormat name="conta" label="Nº de conta" />} />
             )}
-            <Grid item xs={12}>
-              <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
-            </Grid>
+            <GridItem children={<RHFTextField name="observacao" multiline rows={4} label="Observação" />} />
+            {!!cheklistOutros && (
+              <GridItem xs={12}>
+                {' '}
+                <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
+              </GridItem>
+            )}
           </Grid>
           <DialogButons color="error" label="Arquivar" isSaving={isSaving} onCancel={onClose} />
         </FormProvider>
@@ -147,9 +151,9 @@ export function ArquivarForm({ naoFinal, onClose }) {
 
 // --- DESARQUIVAR PROCESSO --------------------------------------------------------------------------------------------
 
-DesarquivarForm.propTypes = { id: PropTypes.number, colaboradoresList: PropTypes.array };
+DesarquivarForm.propTypes = { id: PropTypes.number, colaboradores: PropTypes.array };
 
-export function DesarquivarForm({ id, colaboradoresList }) {
+export function DesarquivarForm({ id, colaboradores }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
@@ -163,6 +167,10 @@ export function DesarquivarForm({ id, colaboradoresList }) {
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, setValue, handleSubmit } = methods;
   const values = watch();
+
+  useEffect(() => {
+    if (id) dispatch(getInfoProcesso('destinosDesarquivamento', { id }));
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (values?.estado?.id) {
@@ -179,11 +187,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
         estado_id: values?.estado?.id,
         observacao: values?.observacao,
       };
-      const params = {
-        id,
-        msg: 'Processo desarquivado',
-        onClose: () => dispatch(setModal({ modal: '', dados: null })),
-      };
+      const params = { id, msg: 'Processo desarquivado', onClose: () => dispatch(setModal()) };
       dispatch(updateItem('desarquivar', JSON.stringify(dados), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -191,7 +195,7 @@ export function DesarquivarForm({ id, colaboradoresList }) {
   };
 
   return (
-    <Dialog open onClose={() => dispatch(setModal({ modal: '', dados: null }))} fullWidth maxWidth="sm">
+    <Dialog open onClose={() => dispatch(setModal())} fullWidth maxWidth="sm">
       <DialogTitle>Desarquivar</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -201,15 +205,10 @@ export function DesarquivarForm({ id, colaboradoresList }) {
               label="Estado"
               options={(processo?.destinosDesarquivamento || [])?.map((row) => ({ id: row?.id, label: row?.nome }))}
             />
-            {values?.estado?.id && <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradoresList} />}
+            {values?.estado?.id && <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradores} />}
             <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
           </Stack>
-          <DialogButons
-            color="error"
-            label="Desarquivar"
-            isSaving={isSaving}
-            onCancel={() => dispatch(setModal({ modal: '', dados: null }))}
-          />
+          <DialogButons color="error" label="Desarquivar" isSaving={isSaving} onCancel={() => dispatch(setModal())} />
         </FormProvider>
       </DialogContent>
     </Dialog>

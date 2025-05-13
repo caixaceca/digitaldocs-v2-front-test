@@ -24,15 +24,15 @@ const slice = createSlice({
   initialState,
   reducers: {
     resetEstCredito(state) {
-      state.resumoEstCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
       state.estCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
+      state.resumoEstCredito = { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] };
     },
 
     getSuccess(state, action) {
       actionGet(state, action.payload);
     },
 
-    getResumoEstatisticaCreditoSuccess(state, action) {
+    getResumoSuccess(state, action) {
       const { uoId, dados: allDados = [] } = action.payload || {};
       let dados = allDados;
       if (uoId === -2) dados = dados.filter(({ regiao }) => regiao === 'Norte');
@@ -145,23 +145,26 @@ export function getEstatisticaCredito(item, params) {
             ),
           ];
           const responses = await Promise.all(requests);
-          slice.actions.getSuccess({
-            item: 'estCredito',
-            dados: {
-              entrada: responses[0].data || [],
-              aprovado: responses[1].data || [],
-              contratado: responses[2].data || [],
-              indeferido: responses[3].data || [],
-              desistido: responses[4].data || [],
-            },
-          });
-          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: responses[5].data, uoId: params?.uoID }));
+
+          dispatch(
+            slice.actions.getSuccess({
+              item: 'estCredito',
+              dados: {
+                entrada: responses[0].data || [],
+                aprovado: responses[1].data || [],
+                contratado: responses[2].data || [],
+                indeferido: responses[3].data || [],
+                desistido: responses[4].data || [],
+              },
+            })
+          );
+          dispatch(slice.actions.getResumoSuccess({ dados: responses[5].data, uoId: params?.uoID }));
           break;
         }
         case 'estCreditoIntervalo': {
           const url = `${BASEURLDD}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
           const response = await axios.get(url, options);
-          dispatch(slice.actions.getResumoEstatisticaCreditoSuccess({ dados: response.data, uoId: params?.uoID }));
+          dispatch(slice.actions.getResumoSuccess({ dados: response.data, uoId: params?.uoID }));
           break;
         }
         default:

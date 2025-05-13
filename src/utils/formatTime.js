@@ -41,7 +41,10 @@ export function fToNow(date) {
 }
 
 export function fDistance(date, date1) {
-  return formatDistance(new Date(date), new Date(date1), { addSuffix: false, locale: pt });
+  return formatDistance(new Date(date), new Date(date1), { addSuffix: false, locale: pt })?.replace(
+    'aproximadamente',
+    'aprox.'
+  );
 }
 
 export function dataMaior(date, date1) {

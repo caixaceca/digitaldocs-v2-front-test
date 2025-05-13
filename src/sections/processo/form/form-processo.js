@@ -13,9 +13,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { resetDados } from '../../../redux/slices/stepper';
+import { setModal } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
-import { getSuccess, setModal, updateItem } from '../../../redux/slices/digitaldocs';
 // routes
 import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // hooks
@@ -25,7 +25,6 @@ import Steps from '../../../components/Steps';
 import { Fechar } from '../../../components/Actions';
 import { FormLoading } from '../../../components/skeleton';
 import { SearchNotFound } from '../../../components/table';
-import { DialogConfirmar } from '../../../components/CustomDialog';
 // sections
 import ProcessoInterno from './interno';
 import ProcessoCredito from './credito';
@@ -45,10 +44,13 @@ export default function ProcessoForm({ processo, ambientId }) {
 
   const { activeStep } = useSelector((state) => state.stepper);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const { selectedAnexoId, isSaving, done, processo: newProcesso } = useSelector((state) => state.digitaldocs);
+  const { done, processo: newProcesso } = useSelector((state) => state.digitaldocs);
 
   const estado = useMemo(
-    () => meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null,
+    () =>
+      meusAmbientes?.find(({ id, isinicial }) => id === ambientId && isinicial) ||
+      meusAmbientes.find(({ isinicial }) => isinicial) ||
+      null,
     [ambientId, meusAmbientes]
   );
 
@@ -66,11 +68,6 @@ export default function ProcessoForm({ processo, ambientId }) {
     if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
   }, [dispatch, isEdit, fluxo?.id]);
 
-  const eliminarAnexo = () => {
-    const params = { processo: true, processoId: processo?.id, anexo: selectedAnexoId, msg: 'Anexo eliminado' };
-    dispatch(updateItem('anexo', null, params));
-  };
-
   useNotificacao({
     done,
     onClose: () => {
@@ -79,7 +76,7 @@ export default function ProcessoForm({ processo, ambientId }) {
   });
 
   const onClose = () => {
-    dispatch(setModal({ modal: '', dados: null }));
+    dispatch(setModal());
     dispatch(resetDados());
   };
 
@@ -95,7 +92,7 @@ export default function ProcessoForm({ processo, ambientId }) {
           <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={3} sx={{ p: 2 }}>
             <Stack>
               {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
-              <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold' }}>
+              <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold', pt: 0.25 }}>
                 <CircleIcon sx={{ height: 10, width: 18, color: estado?.nome ? 'success.main' : 'error.main' }} />
                 {estado?.nome || 'Nenhum estado selecionado...'}
               </Typography>
@@ -144,15 +141,6 @@ export default function ProcessoForm({ processo, ambientId }) {
           )}
         </DialogContent>
       </Dialog>
-
-      {!!selectedAnexoId && (
-        <DialogConfirmar
-          isSaving={isSaving}
-          handleOk={eliminarAnexo}
-          desc="eliminar este anexo"
-          onClose={() => dispatch(getSuccess({ item: 'selectedAnexoId', dados: null }))}
-        />
-      )}
     </>
   );
 }

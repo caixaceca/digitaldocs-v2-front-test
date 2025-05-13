@@ -102,16 +102,22 @@ function DadosCredito({ dados }) {
       </List>
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="subtitle1">Situação</Typography>
-            <Label color={colorLabel(situacao || 'Em análise')} sx={{ typography: 'subtitle1' }}>
-              {situacao || 'Em análise'}
-            </Label>
-            {dados?.modificar && (situacao === 'Em análise' || situacao === 'Aprovado') && (
-              <DefaultAction small label="EDITAR" onClick={() => setOpenSituacao('atualizar')} />
-            )}
-            {dados?.modificar && situacao !== 'Em análise' && (
-              <DefaultAction small label="ELIMINAR" onClick={() => setOpenSituacao('eliminar')} />
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ flexGrow: 1 }}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1">Situação</Typography>
+              <Label color={colorLabel(situacao || 'Em análise')} sx={{ typography: 'subtitle1' }}>
+                {situacao || 'Em análise'}
+              </Label>
+            </Stack>
+            {dados?.modificar && (
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {(situacao === 'Em análise' || situacao === 'Aprovado') && (
+                  <DefaultAction button small label="EDITAR" onClick={() => setOpenSituacao('atualizar')} />
+                )}
+                {situacao !== 'Em análise' && (
+                  <DefaultAction button small label="ELIMINAR" onClick={() => setOpenSituacao('eliminar')} />
+                )}
+              </Stack>
             )}
           </Stack>
         </ListItem>

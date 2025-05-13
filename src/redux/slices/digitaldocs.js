@@ -25,7 +25,6 @@ const initialState = {
   pdfPreview: null,
   filePreview: null,
   selectedItem: null,
-  selectedAnexoId: null,
   cartoes: [],
   pesquisa: [],
   arquivos: [],
@@ -56,6 +55,11 @@ const slice = createSlice({
       actionGet(state, action.payload);
     },
 
+    getProcessoSuccess(state, action) {
+      const old = state?.processo ?? null;
+      state.processo = { ...old, ...action.payload };
+    },
+
     getCartoesSuccess(state, action) {
       state.cartoes = action.payload?.map((row) => ({ ...row, numero: row?.numero?.substring(9, 15) }));
     },
@@ -69,12 +73,8 @@ const slice = createSlice({
     getFileSuccess(state, action) {
       const { url, anexo } = action.payload;
       if (url) state.objectURLs.push(url);
-      if (!state.processo) return;
-
-      if (Array.isArray(state.processo.anexos)) {
-        const index = state.processo.anexos.findIndex((item) => item.anexo === anexo);
-        if (index !== -1) state.processo.anexos[index].url = url;
-      }
+      const index = state.processo.anexos.findIndex((item) => item.anexo === anexo);
+      if (index !== -1) state.processo.anexos[index].url = url;
     },
 
     alterarBalcaopSuccess(state, action) {
@@ -83,21 +83,15 @@ const slice = createSlice({
     },
 
     deleteAnexoSuccess(state, action) {
-      const { anexo } = action.payload;
-
-      const updateAnexoStatus = (anexosArray) => {
-        if (!Array.isArray(anexosArray)) return;
-        const index = anexosArray.findIndex((item) => item.anexo === anexo);
-        if (index !== -1) anexosArray[index].ativo = false;
-      };
-
-      updateAnexoStatus(state.processo?.anexos);
-      state.selectedAnexoId = null;
+      const { id } = action.payload;
+      const index = state.processo?.anexos.findIndex(({ id: idA }) => Number(idA) === Number(id));
+      if (index !== -1) state.processo.anexos[index].ativo = false;
+      if (state?.filePreview?.id === id) state.filePreview = null;
     },
 
     setModal(state, action) {
-      state.isOpenModal = action.payload.modal;
-      state.selectedItem = action.payload.dados;
+      state.isOpenModal = action?.payload?.modal || '';
+      state.selectedItem = action?.payload?.dados || null;
     },
   },
 });
@@ -260,8 +254,7 @@ export function getProcesso(item, params) {
       );
 
       if (!data?.objeto) return;
-      const processo = processarProcesso(data.objeto, perfilId, dispatch);
-      dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
+      const processo = processarProcesso(data.objeto, perfilId, dispatch, '', true);
 
       const anexoPreview = (processo.anexos || []).find((item) => item?.ativo && canPreview(item));
       if (anexoPreview) {
@@ -318,14 +311,17 @@ export function getInfoProcesso(item, params) {
           (item === 'hretencoes' && `/v2/processos/ht_retencoes/${idPerfilId}`) ||
           (item === 'hpendencias' && `/v2/processos/ht_pendencias/${idPerfilId}`) ||
           (item === 'hatribuicoes' && `/v2/processos/ht_atribuicoes/${idPerfilId}`) ||
-          (item === 'hversoes' && `/v1/processos/versoes/${perfilId}?processoID=${params?.id}`) ||
           (item === 'hvisualizacoes' && `/v2/processos/visualizacoes/${perfilId}?processo_id=${params?.id}`) ||
           (item === 'aceitar' && `/v2/processos/aceitar/${perfilId}/${params?.id}?&estado_id=${params?.estadoId}`) ||
           (item === 'destinos' && `/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
           (item === 'destinosDesarquivamento' &&
             `/v1/arquivos/destinos/desarquivamento/v2/${perfilId}?processo_id=${params?.id}`) ||
+          (item === 'hversoes' &&
+            `/v2/processos/historico/versoes?perfil_cc_id=${perfilId}&processo_id=${params?.id}`) ||
           (item === 'confidencialidades' &&
             `/v2/processos/confidencialidades?perfil_cc_id=${perfilId}&processo_id=${params?.id}`) ||
+          (item === 'focal-point' &&
+            `/v2/processos/definir/dono/${perfilId}?processo_id=${params?.id}&novo_estado_dono_id=${params?.estado?.id}`) ||
           (item === 'resgatar' &&
             `/v2/processos/resgatar/${perfilId}?processo_id=${params?.id}&fluxo_id=${params?.fluxoId}&estado_id=${params?.estadoId}`) ||
           '';
@@ -333,10 +329,15 @@ export function getInfoProcesso(item, params) {
         if (apiUrl) {
           const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
           if (item === 'resgatar' || item === 'aceitar') {
-            processarProcesso(response.data.objeto, perfilId, dispatch);
+            processarProcesso(response.data.objeto, perfilId, dispatch, item === 'aceitar' ? params?.estadoId : '');
+          } else if (item === 'focal-point') {
+            const estado = { estado_id: params?.estado?.id, estado: params?.estado?.label };
+            dispatch(slice.actions.addItemProcesso({ item: 'estado', dados: estado }));
           } else dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
         }
       }
+      params?.onClose?.();
+      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -453,64 +454,64 @@ export function updateItem(item, dados, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: !!params?.mfd });
 
-      if (params?.anexos?.get('anexos')) {
+      if (params?.anexos) {
         const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
-        const url = `${BASEURLDD}/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`;
-        await axios.patch(url, params?.anexos, options);
+        const url = `/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`;
+        await axios.patch(`${BASEURLDD}${url}`, params?.anexos, options);
       }
 
       const apiUrl =
         // DETALHES
-        (item === 'confirmar emissao multiplo' && `${BASEURLDD}/v1/cartoes/validar/emissoes`) ||
-        (item === 'arquivar' && `${BASEURLDD}/v2/processos/arquivar/${perfilId}/${params?.id}`) ||
-        (item === 'finalizar' && `${BASEURLDD}/v2/processos/finalizar/${perfilId}/${params?.id}`) ||
-        (item === 'confirmar emissao por data' && `${BASEURLDD}/v1/cartoes/validar/todas/emissoes`) ||
-        (item === 'desarquivar' && `${BASEURLDD}/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
-        (item === 'alterar balcao' && `${BASEURLDD}/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
-        (item === 'pendencia' && `${BASEURLDD}/v2/processos/pender/${perfilId}?processo_id=${params?.id}`) ||
-        (item === 'domiciliar' && `${BASEURLDD}/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
-        (item === 'confirmar rececao multiplo' &&
-          `${BASEURLDD}/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||
-        (item === 'confirmar emissao por data' &&
-          `${BASEURLDD}/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`) ||
-        (item === 'anular por balcao e data' &&
-          `${BASEURLDD}/v1/cartoes/anular/validacao/todas?emissao=${params?.emissao}`) ||
-        (item === 'anular multiplo' &&
-          `${BASEURLDD}/v1/cartoes/anular/validacao/listagem?emissao=${params?.emissao}`) ||
+        (item === 'confirmar emissao multiplo' && `/v1/cartoes/validar/emissoes`) ||
+        (item === 'arquivar' && `/v2/processos/arquivar/${perfilId}/${params?.id}`) ||
+        (item === 'finalizar' && `/v2/processos/finalizar/${perfilId}/${params?.id}`) ||
+        (item === 'confirmar emissao por data' && `/v1/cartoes/validar/todas/emissoes`) ||
+        (item === 'desarquivar' && `/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
+        (item === 'alterar balcao' && `/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
+        (item === 'pendencia' && `/v2/processos/pender/${perfilId}?processo_id=${params?.id}`) ||
+        (item === 'domiciliar' && `/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
+        (item === 'confirmar rececao multiplo' && `/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||
+        (item === 'anular multiplo' && `/v1/cartoes/anular/validacao/listagem?emissao=${params?.emissao}`) ||
+        (item === 'confirmar emissao por data' && `/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`) ||
+        (item === 'anular por balcao e data' && `/v1/cartoes/anular/validacao/todas?emissao=${params?.emissao}`) ||
         (item === 'parecer individual' &&
-          `${BASEURLDD}/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`) ||
+          `/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`) ||
         (item === 'parecer estado' &&
-          `${BASEURLDD}/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`) ||
+          `/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`) ||
         (item === 'situacaoCredito' &&
-          `${BASEURLDD}/v2/processos/${params?.id}/operacoes_credito/${perfilId}?credito_id=${params?.creditoId}`) ||
+          `/v2/processos/${params?.id}/operacoes_credito/${perfilId}?credito_id=${params?.creditoId}`) ||
         (item === 'libertar' &&
-          `${BASEURLDD}/v2/processos/abandonar/${perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}`) ||
+          `/v2/processos/abandonar/${perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}`) ||
         (item === 'encaminhar serie' &&
-          `${BASEURLDD}/v2/processos/encaminhar/serie/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}`) ||
+          `/v2/processos/encaminhar/serie/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}`) ||
         (item === 'confidencialidade' &&
-          `${BASEURLDD}/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
+          `/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
         (item === 'cancelar' &&
-          `${BASEURLDD}/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
+          `/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
         (item === 'encaminhar paralelo' &&
-          `${BASEURLDD}/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}&estado_dono_id=${params?.dono}`) ||
+          `/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}&estado_dono_id=${params?.dono}`) ||
         (item === 'garantias' &&
-          `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
+          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
         (item === 'atribuir' &&
-          `${BASEURLDD}/v2/processos/atribuicao/${perfilId}?perfil_afeto_id=${params?.id}&processo_id=${params?.processoId}&estado_id=${params?.estadoId}`) ||
-        (item === 'anexo' &&
-          `${BASEURLDD}/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&anexo=${params?.anexo}&parecer_individual=${!!params?.individual}`) ||
+          `/v2/processos/atribuicao/${perfilId}?perfil_afeto_id=${params?.id}&processo_id=${params?.processoId}&estado_id=${params?.estadoId}`) ||
         '';
 
       if (apiUrl) {
-        const response = await axios.patch(apiUrl, dados, options);
-        if (item === 'anexo') dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
+        const response = await axios.patch(`${BASEURLDD}${apiUrl}`, dados, options);
         if (params?.fillCredito)
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }
       if (item === 'processo') {
         const response = await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
         if (params?.garantias) dispatch(createItem('garantias', params?.garantias, { processoId: params?.id }));
-        processarProcesso(response.data.objeto, perfilId, dispatch);
+        processarProcesso(response.data.objeto, perfilId, dispatch, '', false);
+      }
+      if (item === 'adicionar-anexos') {
+        const { data } = await axios.get(
+          `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
+          options
+        );
+        processarProcesso(data.objeto, perfilId, dispatch, '', false);
       }
       params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
@@ -534,12 +535,17 @@ export function deleteItem(item, params) {
 
       const apiUrl =
         (item === 'garantias' &&
-          `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
+          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
+        (item === 'processo' &&
+          `/v2/processos/marcar/desmarcar/duplicacao?perfil_id=${perfilId}&processo_id=${params?.id}&estado_id=${params?.estadoId}&duplicado=${params?.duplicado}`) ||
+        (item === 'anexo' &&
+          `/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&estado_id=${params?.estadoId}&anexo_id=${params?.id}&parecer_individual=${!!params?.individual}&da_entidade=${!!params?.entidade}`) ||
         '';
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(apiUrl, options);
+        const response = await axios.delete(`${BASEURLDD}${apiUrl}`, options);
+        if (item === 'anexo') dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
         if (item === 'garantias')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }
@@ -555,25 +561,31 @@ export function deleteItem(item, params) {
 
 // ----------------------------------------------------------------------
 
-function processarProcesso(processo, perfilId, dispatch) {
+function processarProcesso(processo, perfilId, dispatch, aceitar, ht) {
   const { estados = [] } = processo;
+  const preso = estados?.find(({ preso, perfil_id: pid }) => preso && pid === perfilId)?.estado_id || '';
 
-  if (estados.length === 1) {
+  if (processo?.status === 'A') processo.estado = { estado: 'Arquivo' };
+  else if (processo?.estado_dono_paralelo_id && processo?.estado_dono_paralelo) {
+    processo.estado = {
+      estado: processo?.estado_dono_paralelo ?? '',
+      estado_id: processo?.estado_dono_paralelo_id ?? '',
+    };
+  } else if (estados.length === 1) {
     processo.estado = { ...(estados?.[0] ?? null), atribuidoAMim: estados?.[0]?.perfil_id === perfilId };
     processo.pareceres_estado = estados[0]?.pareceres?.length ? estados[0].pareceres : [];
     processo.estados = [];
-  } else {
-    processo.estado = { estado_id: processo?.estado_atual_id ?? '', estado: processo?.estado_dono_paralelo ?? '' };
   }
+
+  processo.estadoPreso = preso;
 
   const anexos = anexosEntidades(processo?.anexos_entidades || []);
   processo.anexos = [...processo.anexos, ...anexos];
-  dispatch(slice.actions.getSuccess({ item: 'processo', dados: processo }));
+  dispatch(slice.actions.getProcessoSuccess(processo));
+  dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
 
-  const { estado } = processo;
-  if (estado?.preso && estado?.estado_id && estado?.atribuidoAMim)
-    dispatch(getInfoProcesso('destinos', { id: processo.id, estadoId: estado.estado_id }));
-  dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
+  if (aceitar || preso) dispatch(getInfoProcesso('destinos', { id: processo.id, estadoId: aceitar || preso }));
+  if (ht) dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
 
   return processo;
 }

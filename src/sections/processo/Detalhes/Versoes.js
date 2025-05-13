@@ -8,6 +8,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
+// hooks
+import { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getInfoProcesso } from '../../../redux/slices/digitaldocs';
@@ -25,20 +27,24 @@ Versoes.propTypes = { id: PropTypes.number };
 export default function Versoes({ id }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState('');
+
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, processo } = useSelector((state) => state.digitaldocs);
 
-  const handleAccord = (panel) => (event, isExpanded) => {
-    setAccord(isExpanded ? panel : '');
-  };
+  const { hversoes = {} } = processo;
+  const { versoes = [] } = hversoes;
 
   useEffect(() => {
-    if (processo?.hversoes?.length > 0) setAccord(processo?.hversoes?.[0]?.updated_in);
-  }, [dispatch, processo?.hversoes]);
+    if (versoes && versoes?.length > 0) setAccord(versoes?.[0]?.feito_em);
+  }, [dispatch, versoes]);
 
   useEffect(() => {
     if (id) dispatch(getInfoProcesso('hversoes', { id }));
   }, [dispatch, id]);
+
+  const handleAccord = (panel) => (event, isExpanded) => {
+    setAccord(isExpanded ? panel : '');
+  };
 
   return (
     <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
@@ -46,40 +52,38 @@ export default function Versoes({ id }) {
         <SkeletonBar column={3} height={150} />
       ) : (
         <>
-          {!processo?.hversoes || processo?.hversoes?.length === 0 ? (
+          {!versoes || versoes?.length === 0 ? (
             <SearchNotFound message="O processo ainda não foi modificado..." />
           ) : (
-            processo?.hversoes?.map((row, index) => {
-              const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row?.updated_by);
+            applySort(versoes, getComparator('desc', 'feito_em'))?.map((row, index) => {
+              const colaborador = colaboradores?.find(
+                ({ perfil }) => perfil?.mail?.toLowerCase() === row?.feito_por?.toLowerCase()
+              );
 
               return (
                 <Accordion
                   key={`vr_${index}`}
-                  expanded={accord === row?.updated_in}
-                  onChange={handleAccord(row?.updated_in)}
+                  expanded={accord === row?.feito_em}
+                  onChange={handleAccord(row?.feito_em)}
                 >
                   <AccordionSummary>
                     <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
                       <Stack>
-                        <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                           Alterado em:
                         </Typography>
-                        <Typography variant="subtitle1">{ptDateTime(row?.updated_in)}</Typography>
+                        <Typography variant="subtitle2">{ptDateTime(row?.feito_em)}</Typography>
                       </Stack>
                       <ColaboradorInfo
                         id={colaborador?.id}
                         foto={colaborador?.foto_disk}
                         label={colaborador?.uo?.label}
-                        nome={colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`}
+                        nome={colaborador?.perfil?.displayName || row.feito_por}
                       />
                     </Stack>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <DetalhesProcesso
-                      processo={
-                        index === 0 ? camposAterados(row, processo) : camposAterados(processo?.hversoes[index - 1], row)
-                      }
-                    />
+                    <DetalhesProcesso processo={row} versoes />
                   </AccordionDetails>
                 </Accordion>
               );
@@ -89,19 +93,4 @@ export default function Versoes({ id }) {
       )}
     </Stack>
   );
-}
-
-// ----------------------------------------------------------------------
-
-export function camposAterados(newObj, oldObj) {
-  if (Object.keys(oldObj).length === 0 && Object.keys(newObj).length > 0) return newObj;
-  const chaves = Object.keys(oldObj);
-  const diff = {};
-  chaves?.forEach((key) => {
-    if (newObj[key] && oldObj[key] !== newObj[key]) {
-      diff[key] = newObj[key];
-    }
-  });
-  if (Object.keys(diff).length > 0) return diff;
-  return oldObj;
 }

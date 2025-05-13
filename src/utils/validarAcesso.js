@@ -103,8 +103,8 @@ export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
 
 export function UosGerente(meusAmbientes) {
   const uosGerente = [];
-  meusAmbientes?.forEach((row) => {
-    if (row?.nome?.includes('Gerência')) uosGerente.push(Number(row?.uo_id));
+  meusAmbientes?.forEach(({ nome, uo_id: uoId }) => {
+    if (nome?.includes('Gerência')) uosGerente.push(Number(uoId));
   });
   return uosGerente;
 }
@@ -112,7 +112,7 @@ export function UosGerente(meusAmbientes) {
 // ----------------------------------------------------------------------
 
 export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) => {
-  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(processo?.estado_atual_id));
+  const estadoProcesso = meusAmbientes?.find(({ id }) => id === Number(processo?.estado?.estado_id));
   const arqAtendimento = arquivoAtendimento(
     processo?.fluxo,
     processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
@@ -123,15 +123,8 @@ export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAge
     (estadoProcesso?.isinicial && gerencia) ||
     (estadoProcesso?.isinicial && !fromAgencia) ||
     (estadoProcesso?.isinicial && fromAgencia && arqAtendimento) ||
-    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, processo?.estado_atual_id))
+    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, processo?.estado?.estado_id))
   );
-};
-
-// ----------------------------------------------------------------------
-
-export const arquivarCC = (meusAmbientes, estadoAtualID) => {
-  const estadoProcesso = meusAmbientes?.find((row) => Number(row?.id) === Number(estadoAtualID));
-  return estadoProcesso?.isinicial || estadoProcesso?.isfinal;
 };
 
 // ----------------------------------------------------------------------
@@ -170,6 +163,17 @@ export function fluxoFixo(assunto) {
   );
 }
 
+export function estadoFixo(assunto) {
+  return (
+    assunto === 'Execução OPE' ||
+    assunto === 'Validação OPE' ||
+    assunto === 'Autorização SWIFT' ||
+    assunto === 'Comissão Executiva' ||
+    assunto === 'DOP - Execução Notas Externas' ||
+    assunto === 'DOP - Validação Notas Externas'
+  );
+}
+
 // ----------------------------------------------------------------------
 
 export function noEstado(estado, labels) {
@@ -177,7 +181,7 @@ export function noEstado(estado, labels) {
 }
 
 export function processoEstadoInicial(meusAmbientes, estadoId) {
-  return !!meusAmbientes?.find((row) => Number(row?.id) === Number(estadoId))?.isinicial;
+  return !!meusAmbientes?.find(({ id }) => id === Number(estadoId))?.isinicial;
 }
 
 // ----------------------------------------------------------------------
@@ -189,25 +193,31 @@ export function arquivoAtendimento(assunto, encGer) {
 // ----------------------------------------------------------------------
 
 export function estadoInicial(meusAmbientes) {
-  return !!meusAmbientes?.find((row) => row?.isinicial);
+  return !!meusAmbientes?.find(({ isinicial }) => isinicial);
 }
 
 // ----------------------------------------------------------------------
 
 export function pertencoAoEstado(meusAmbientes, estados) {
-  return !!meusAmbientes?.find((row) => estados?.includes(row?.nome));
+  return !!meusAmbientes?.find(({ nome }) => estados?.includes(nome));
 }
-
-// ----------------------------------------------------------------------
 
 export function pertencoEstadoId(meusAmbientes, estadoId) {
-  return !!meusAmbientes?.find((row) => row?.id === estadoId);
+  return !!meusAmbientes?.find(({ id }) => id === estadoId);
 }
-
-// ----------------------------------------------------------------------
 
 export function gestorEstado(meusAmbientes, estadoId) {
   return !!meusAmbientes?.find(({ id, gestor }) => id === estadoId && gestor);
+}
+
+// ----------------------------------------------------------------------
+
+export function eliminarAnexo(meusAmbientes, modificar, estadoAnexo, estadoId) {
+  return (
+    modificar &&
+    ((estadoAnexo && pertencoEstadoId(meusAmbientes, estadoAnexo)) ||
+      (!estadoAnexo && processoEstadoInicial(meusAmbientes, estadoId)))
+  );
 }
 
 // ----------------------------------------------------------------------

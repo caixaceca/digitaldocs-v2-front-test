@@ -1,3 +1,4 @@
+import { add } from 'date-fns';
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // @mui
@@ -10,8 +11,7 @@ import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator
 // utils
 import { ptDateTime, fDistance } from '../../../utils/formatTime';
 // redux
-import { getAnexo } from '../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
@@ -23,26 +23,18 @@ import { Info, InfoCriador } from './Estados';
 Transicoes.propTypes = { transicoes: PropTypes.array, assunto: PropTypes.string };
 
 export default function Transicoes({ transicoes, assunto }) {
-  const dispatch = useDispatch();
-  const { processo } = useSelector((state) => state.digitaldocs);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
-  const transicoesFiltered = useMemo(() => removeDuplicates(transicoes), [transicoes]);
-
-  const viewAnexo = (anexo, estadoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { processoId: processo?.id, anexo, estadoId, parecerId }));
-  };
 
   return (
     <Timeline position="right" sx={{ px: { xs: 1, sm: 2 }, pb: 2 }}>
-      {transicoesFiltered?.map((row, index) => (
+      {transicoes?.map((row, index) => (
         <Transicao
           uos={uos}
           transicao={row}
           assunto={assunto}
-          viewAnexo={viewAnexo}
           key={`transicao_${index}`}
           colaboradores={colaboradores}
-          addConector={index !== transicoesFiltered?.length - 1}
+          addConector={index !== transicoes?.length - 1}
         />
       ))}
     </Timeline>
@@ -54,37 +46,33 @@ export default function Transicoes({ transicoes, assunto }) {
 Transicao.propTypes = {
   uos: PropTypes.array,
   assunto: PropTypes.string,
-  viewAnexo: PropTypes.func,
   transicao: PropTypes.object,
   addConector: PropTypes.bool,
   colaboradores: PropTypes.array,
 };
 
-function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colaboradores = [] }) {
+function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores = [] }) {
   const acao = useMemo(
     () =>
-      ((transicao?.modo === 'Arquivamento' || transicao?.modo === 'arquivamento') && 'Arquivo') ||
-      ((transicao?.modo === 'desarquivamento' || transicao?.modo === 'Desarquivamento') && 'Desarquivo') ||
-      ((transicao?.resgate || transicao?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') &&
-        'Resgate') ||
-      transicao?.modo,
-    [transicao?.modo, transicao?.resgate, transicao?.observacao]
+      ((t?.modo === 'Arquivamento' || t?.modo === 'arquivamento') && 'Arquivo') ||
+      ((t?.modo === 'desarquivamento' || t?.modo === 'Desarquivamento') && 'Desarquivo') ||
+      ((t?.resgate || t?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') && 'Resgate') ||
+      t?.modo,
+    [t?.modo, t?.resgate, t?.observacao]
   );
+  const { data_entrada: entrada = '', data_saida: saida = '', parecer_data_limite: limite = '' } = t;
   const criador = useMemo(
     () =>
-      transicao?.domiciliacao || acao === 'Restauro'
-        ? colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === transicao?.perfil_id?.toLowerCase())
-        : colaboradores?.find(({ perfil }) => perfil?.id === transicao?.perfil_id),
-    [colaboradores, acao, transicao?.domiciliacao, transicao?.perfil_id]
+      t?.domiciliacao || acao === 'Restauro'
+        ? colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === t?.perfil_id?.toLowerCase())
+        : colaboradores?.find(({ perfil }) => perfil?.id === t?.perfil_id),
+    [colaboradores, acao, t?.domiciliacao, t?.perfil_id]
   );
-  const arqSistema = useMemo(
-    () => transicao?.observacao?.includes('por inatividade a pelo menos 6 meses'),
-    [transicao?.observacao]
-  );
-  const temPareceres = useMemo(() => transicao?.pareceres && transicao?.pareceres?.length > 0, [transicao?.pareceres]);
+  const arqSistema = useMemo(() => t?.observacao?.includes('por inatividade a pelo menos 6 meses'), [t?.observacao]);
+  const temPareceres = useMemo(() => t?.pareceres && t?.pareceres?.length > 0, [t?.pareceres]);
   const temParecer = useMemo(
-    () => transicao?.parecer_em && (transicao?.parecer_favoravel === true || transicao?.parecer_favoravel === false),
-    [transicao?.parecer_em, transicao?.parecer_favoravel]
+    () => t?.parecer_em && (t?.parecer_favoravel === true || t?.parecer_favoravel === false),
+    [t?.parecer_em, t?.parecer_favoravel]
   );
   const color = useMemo(
     () =>
@@ -107,7 +95,8 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
         <Paper sx={{ boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Paper
             sx={{
-              p: { xs: 1, md: 2 },
+              py: 1,
+              px: { xs: 1, md: 2 },
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
               bgcolor: 'background.neutral',
@@ -122,18 +111,47 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
               <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="center" alignItems="center" spacing={1}>
                 <Label color={color}>{acao}</Label>
                 {acao !== 'Resgate' && acao !== 'Arquivo' && acao !== 'Restauro' && (
-                  <Stack alignItems="center" justifyContent="center" spacing={0.5} direction="row">
-                    {acao !== 'Desarquivo' && <Typography variant="subtitle2">{transicao?.estado_inicial}</Typography>}
-                    <DoubleArrowIcon color={color} sx={{ width: 20 }} />
-                    <Typography variant="subtitle2">{transicao?.estado_final}</Typography>
+                  <Stack>
+                    <Stack
+                      useFlexGap
+                      flexWrap="wrap"
+                      direction="row"
+                      alignItems="center"
+                      justifyContent={{ xs: 'center', sm: 'left' }}
+                    >
+                      {acao !== 'Desarquivo' && <Typography variant="subtitle2">{t?.estado_inicial}</Typography>}
+                      <DoubleArrowIcon color={color} sx={{ width: 18, height: 18, mx: 0.5 }} />
+                      <Typography variant="subtitle2">{t?.estado_final}</Typography>
+                    </Stack>
+                    {saida && (
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        sx={{ color: 'text.secondary' }}
+                        justifyContent={{ xs: 'center', sm: 'left' }}
+                      >
+                        <Criado caption tipo="data" value={ptDateTime(saida)} />
+                        {entrada && <Criado caption tipo="time" sx={{ pr: 0.5 }} value={fDistance(entrada, saida)} />}
+                        {saida && limite && new Date(saida) > new Date(add(limite, { hours: 5 })) && (
+                          <Criado
+                            caption
+                            sx={{ color: 'error.main', pr: 0 }}
+                            value={`(${fDistance(saida, limite)} de atraso)`}
+                          />
+                        )}
+                      </Stack>
+                    )}
                   </Stack>
                 )}
               </Stack>
-              <Stack direction="row" alignItems="center">
-                {transicao?.data_saida && <Criado caption tipo="data" value={ptDateTime(transicao?.data_saida)} />}
-                {transicao?.data_saida && transicao?.data_entrada && (
-                  <Criado caption tipo="time" value={fDistance(transicao?.data_entrada, transicao?.data_saida)} />
-                )}
+              <Stack>
+                <Criado sx={{ pr: 0 }} caption iconText="Entrada:" value={ptDateTime(entrada)} />
+                <Criado
+                  caption
+                  sx={{ pr: 0 }}
+                  value={ptDateTime(limite)}
+                  iconText={<span style={{ whiteSpace: 'pre' }}>&nbsp;&nbsp;&nbsp;&nbsp;Prazo:</span>}
+                />
               </Stack>
             </Stack>
           </Paper>
@@ -142,21 +160,21 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
               <InfoCriador
                 criador={criador}
                 temParecer={temParecer}
-                dados={{ ...transicao, assunto, perfil: criador?.perfil, temPareceres }}
+                dados={{ ...t, assunto, perfil: criador?.perfil, temPareceres }}
               />
             )}
             {acao !== 'Resgate' && (
               <Stack sx={{ pl: { md: criador && !temPareceres && !arqSistema ? 6.5 : 0 } }}>
-                {transicao?.domiciliacao && (
+                {t?.domiciliacao && (
                   <Stack sx={{ mt: 1 }} alignItems="center" spacing={0.5} direction="row">
                     <Label color="info">Domiciliação do processo</Label>
                     <Stack alignItems="center" spacing={0.5} direction="row">
                       <Typography variant="body2">
-                        {uos?.find(({ id }) => id === transicao?.uo_origem_id)?.desegnicao || transicao?.uo_origem_id}
+                        {uos?.find(({ id }) => id === t?.uo_origem_id)?.desegnicao || t?.uo_origem_id}
                       </Typography>
-                      <DoubleArrowIcon color="success" sx={{ width: 20, height: 20 }} />
+                      <DoubleArrowIcon color="success" sx={{ width: 18, height: 18 }} />
                       <Typography variant="body2">
-                        {uos?.find(({ id }) => id === transicao?.uo_destino_id)?.desegnicao || transicao?.uo_destino_id}
+                        {uos?.find(({ id }) => id === t?.uo_destino_id)?.desegnicao || t?.uo_destino_id}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -167,11 +185,7 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
                     de, no mínimo, seis meses.
                   </Typography>
                 ) : (
-                  <Info
-                    viewAnexo={viewAnexo}
-                    dados={{ ...transicao, temPareceres }}
-                    colaboradores={temPareceres ? colaboradores : []}
-                  />
+                  <Info dados={{ ...t, temPareceres }} colaboradores={temPareceres ? colaboradores : []} />
                 )}
               </Stack>
             )}
@@ -180,19 +194,4 @@ function Transicao({ transicao, addConector, assunto, viewAnexo, uos = [], colab
       </TimelineContent>
     </TimelineItem>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function removeDuplicates(arr) {
-  const seen = new Map();
-  return arr.filter((item) => {
-    if (item.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.' && item.data_saida) {
-      const key = item.data_saida;
-      if (seen.has(key)) return false;
-      seen.set(key, true);
-      return true;
-    }
-    return true;
-  });
 }

@@ -33,6 +33,7 @@ export default function Dialog(theme) {
       styleOverrides: {
         root: {
           padding: theme.spacing(3, 3, 0),
+          fontSize: `${theme.typography.h6.fontSize} !important`,
         },
       },
     },

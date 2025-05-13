@@ -58,17 +58,18 @@ export default function EstatisticaCredito() {
   const dispatch = useDispatch();
   const { perfilId, cc, uos } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
+
   const [data, setData] = useState(getDataLS('dataEst', new Date()));
+  const [dataf, setDataf] = useState(getDataLS('dataFEst', new Date()));
   const [vista, setVista] = useState(localStorage.getItem('vistaEst') || 'Mensal');
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
-  const [dataf, setDataf] = useState(getDataLS('dataFEst', new Date()));
   const [datai, setDatai] = useState(
     getDataLS('dataIEst', new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   );
   const uosList = useMemo(
     () =>
       UosAcesso(
-        uos?.filter((item) => item?.tipo === 'Agências'),
+        uos?.filter(({ tipo }) => tipo === 'Agências'),
         cc,
         isAdmin || isAuditoria,
         meusAmbientes,
@@ -77,8 +78,8 @@ export default function EstatisticaCredito() {
     [cc, isAdmin, isAuditoria, meusAmbientes, uos]
   );
   const [uo, setUo] = useState(
-    uosList?.find((row) => Number(row?.id) === Number(localStorage.getItem('uoEst'))) ||
-      uosList?.find((row) => Number(row?.id) === Number(cc?.uo?.id)) || { id: -1, label: 'Caixa' }
+    uosList?.find(({ id }) => id === Number(localStorage.getItem('uoEst'))) ||
+      uosList?.find(({ id }) => id === Number(cc?.uo?.id)) || { id: -1, label: 'Caixa' }
   );
 
   const tabsList = useMemo(
@@ -102,9 +103,8 @@ export default function EstatisticaCredito() {
   };
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabEst', false);
-    }
   }, [tabsList, currentTab]);
 
   useEffect(() => {
@@ -297,6 +297,7 @@ TableEstatistica.propTypes = { from: PropTypes.string };
 export function TableEstatistica({ from }) {
   const [filter, setFilter] = useState('');
   const { isLoading, estCredito } = useSelector((state) => state.indicadores);
+
   const total = useMemo(
     () =>
       ((from === 'entrada' || from === 'desistido' || from === 'indeferido') && 'montantes') ||

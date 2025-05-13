@@ -96,6 +96,7 @@ function bodyEditar(dados) {
         formData[key] = format(dados[key], 'yyyy-MM-dd');
       } else if (
         (key === 'linha_id' ||
+          key === 'origem_id' ||
           key === 'tipo_docid' ||
           key === 'estado_civil' ||
           key === 'componente_id' ||

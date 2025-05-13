@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -14,21 +14,17 @@ import { newLineText, baralharString } from '../../../utils/formatText';
 import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
 // redux
+import { setModal } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getAnexo, setModal } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
 import MyAvatar, { AvatarBedge } from '../../../components/MyAvatar';
-// guards
-import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
 import Pareceres from './Pareceres';
-import { AnexoItem } from './Anexos';
 import MinutaParecer from './MinutaParecer';
-import { ParecerForm } from '../form/intervencao';
-import { Atribuir, Libertar } from '../Intervencao';
+import { Encaminhar, destinosProcesso } from '../Intervencao';
 
 // ----------------------------------------------------------------------
 
@@ -37,78 +33,80 @@ Estados.propTypes = { handleAceitar: PropTypes.func };
 export default function Estados({ handleAceitar }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
+  const { processo } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { processo, isOpenModal, isSaving } = useSelector((state) => state.digitaldocs);
+  const { id: idp, fluxo, titular, estadoPreso, estados = [] } = processo;
 
   const handleAccord = (panel) => (event, isExpanded) => {
     setAccord(isExpanded ? panel : false);
   };
 
-  const viewAnexo = (anexo, estadoId, parecerId) => {
-    dispatch(getAnexo('fileDownload', { processoId: processo?.id, anexo, estadoId, parecerId }));
-  };
-
   return (
     <Box sx={{ pb: { xs: 1, sm: 2 } }}>
-      {processo?.estados?.map((row) => {
-        const temPareceres = row?.pareceres && row?.pareceres?.length > 0;
-        const afeto = colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id);
-        const temParecer = row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false);
+      {estados?.map((row) => {
+        const {
+          id,
+          estado = '',
+          preso = false,
+          pareceres = [],
+          perfil_id: pid,
+          observacao = '',
+          pendente = false,
+          data_limite: data,
+          estado_id: estadoId,
+          motivo_pendencia: motivo,
+          motivo_pendencia_id: motivoId,
+        } = row;
+        const destinos = destinosProcesso(processo, false);
+        const temPareceres = pareceres?.length > 0;
+        const afeto = colaboradores?.find(({ perfil_id: pidA }) => pidA === pid);
 
         return (
-          <Stack key={row?.id} sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
+          <Stack key={id} sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
             <Stack>
-              <Accordion expanded={accord === row?.id} onChange={handleAccord(row?.id)}>
+              <Accordion expanded={accord === id} onChange={handleAccord(id)}>
                 <AccordionSummary sx={{ minHeight: '65px !important' }}>
                   <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ flexGrow: 1 }}>
                     <Stack>
                       <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
                         <Typography variant="subtitle1" sx={{ pr: 1 }}>
-                          {row?.estado}
+                          {estado}
                         </Typography>
-                        {temParecer && (
-                          <Label color={row?.parecer_favoravel ? 'success' : 'error'}>
-                            {row?.parecer_favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
-                          </Label>
-                        )}
                       </Stack>
-                      {!!row?.data_limite && !temParecer && <DataParecer data1={row?.data_limite} />}
+                      {!!data && <DataParecer data1={data} />}
                       {afeto && !temPareceres && (
                         <Typography sx={{ typography: 'caption', color: 'info.main' }}>
-                          {row?.preso ? '' : 'Este processo foi tribuído a '}
+                          {preso ? '' : 'Este processo foi tribuído a '}
                           <Typography variant="spam" sx={{ fontWeight: 900 }}>
                             {baralharString(afeto?.perfil?.displayName)}
                           </Typography>
-                          {row?.preso ? ' está trabalhando no processo' : ''} neste estado.
+                          {preso ? ' está trabalhando no processo' : ''} neste estado.
                         </Typography>
                       )}
-                      {row?.pendente && !row?.preso && (
-                        <Typography sx={{ typography: 'caption', color: 'warning.main' }}>
-                          Processo pendente: {row?.motivo_pendencia}
+                      {pendente && !preso && (
+                        <Typography variant="caption" sx={{ color: 'warning.main', fontWeight: 'bold' }}>
+                          <Typography variant="caption">Pendente: </Typography>
+                          {motivo}
                         </Typography>
                       )}
                     </Stack>
 
                     {!temPareceres && (
                       <Stack spacing={0.75} direction="row" alignItems="center" onClick={(e) => e.stopPropagation()}>
-                        {pertencoEstadoId(meusAmbientes, row?.estado_id) && (
+                        {pertencoEstadoId(meusAmbientes, estadoId) && (
                           <>
-                            {!temParecer && !row?.preso && gestorEstado(meusAmbientes, row?.estado_id) && (
-                              <Atribuir
-                                dados={{
-                                  estadoId: row?.estado_id,
-                                  processoId: processo?.id,
-                                  perfilIdA: row?.perfil_id,
-                                }}
+                            {!preso && gestorEstado(meusAmbientes, estadoId) && (
+                              <DefaultAction
+                                label="ATRIBUIR"
+                                onClick={() =>
+                                  dispatch(setModal({ modal: 'atribuir', dados: { processoId: idp, estadoId, pid } }))
+                                }
                               />
                             )}
-                            {row?.preso && row?.perfil_id === perfilId && (
+                            {preso && pid === perfilId && (
                               <>
-                                <DefaultAction
-                                  label={temParecer ? 'Editar' : 'Adicionar'}
-                                  onClick={() => dispatch(setModal({ modal: 'parecer-estado', dados: row }))}
-                                />
+                                <Encaminhar dados={{ destinos: destinos.seguimentos, acao: 'ENCAMINHAR' }} />
                                 <DefaultAction
                                   label="PENDENTE"
                                   onClick={() =>
@@ -116,25 +114,27 @@ export default function Estados({ handleAceitar }) {
                                       setModal({
                                         modal: 'pendencia',
                                         dados: {
-                                          id: processo?.id,
-                                          pendente: !!row?.pendente,
-                                          obs: row?.observacao ?? '',
-                                          estadoId: row?.estado_id ?? '',
-                                          motivo: row?.motivo_pendencia ?? '',
-                                          motivo_id: row?.motivo_pendencia_id ?? '',
+                                          id: idp,
+                                          pendente: !!pendente,
+                                          obs: observacao ?? '',
+                                          estadoId: estadoId ?? '',
+                                          motivo: motivo ?? '',
+                                          motivo_id: motivoId ?? '',
                                         },
                                       })
                                     )
                                   }
                                 />
-                                <Libertar isSaving={isSaving} dados={{ id: processo?.id, estadoId: row?.estado_id }} />
+                                <DefaultAction
+                                  label="LIBERTAR"
+                                  onClick={() =>
+                                    dispatch(setModal({ modal: 'libertar', dados: { id: idp, estadoId } }))
+                                  }
+                                />
                               </>
                             )}
-                            {!row?.preso && (!row?.perfil_id || row?.perfil_id === perfilId) && (
-                              <DefaultAction
-                                label="ACEITAR"
-                                onClick={() => handleAceitar(row?.estado_id, 'paralelo')}
-                              />
+                            {!preso && !estadoPreso && (!pid || pid === perfilId) && (
+                              <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'paralelo')} />
                             )}
                           </>
                         )}
@@ -146,19 +146,19 @@ export default function Estados({ handleAceitar }) {
                   <Stack sx={{ pt: 1 }}>
                     {temPareceres ? (
                       <Pareceres
-                        id={processo?.id}
-                        estado={row?.estado}
-                        estadoId={row?.estado_id}
-                        pareceres={row?.pareceres}
-                        assunto={`${processo?.fluxo ?? ''} - ${processo?.titular ?? ''}`}
+                        id={idp}
+                        estado={estado}
+                        estadoId={estadoId}
+                        pareceres={pareceres}
+                        assunto={`${fluxo ?? ''} - ${titular ?? ''}`}
                       />
                     ) : (
                       <>
-                        {temParecer ? (
+                        {row?.descritivo ? (
                           <Stack>
                             {!!afeto && <InfoCriador criador={afeto} />}
                             <Stack sx={{ pl: { md: afeto ? 6.5 : 0 } }}>
-                              <Info viewAnexo={viewAnexo} temParecer={temParecer} dados={{ ...row }} />
+                              <Info dados={{ ...row }} />
                             </Stack>
                           </Stack>
                         ) : (
@@ -175,24 +175,25 @@ export default function Estados({ handleAceitar }) {
           </Stack>
         );
       })}
-      {isOpenModal === 'parecer-estado' && (
-        <ParecerForm onCancel={() => dispatch(setModal({ modal: '', dados: null }))} processoId={processo?.id} estado />
-      )}
     </Box>
   );
 }
 
 // ----------------------------------------------------------------------
 
-Info.propTypes = { dados: PropTypes.object, viewAnexo: PropTypes.func, colaboradores: PropTypes.array };
+Info.propTypes = { dados: PropTypes.object, colaboradores: PropTypes.array };
 
-export function Info({ dados, viewAnexo, colaboradores }) {
-  const anexosAtivos = useMemo(() => dados?.anexos?.filter(({ ativo }) => ativo), [dados?.anexos]);
-  const anexosInativos = useMemo(() => dados?.anexos?.filter(({ ativo }) => !ativo), [dados?.anexos]);
-
+export function Info({ dados, colaboradores }) {
   return (
     <>
-      {dados?.motivo && <Typography sx={{ textAlign: 'justify', pt: 1.5 }}>Motivo: {dados?.motivo}</Typography>}
+      {dados?.motivo && (
+        <Typography sx={{ pt: 1.5 }}>
+          <Typography variant="spam" sx={{ color: 'info.main' }}>
+            Motivo:&nbsp;
+          </Typography>
+          {dados?.motivo}
+        </Typography>
+      )}
       {(dados?.observacao || dados?.descritivo) && !dados?.temPareceres && (
         <Typography sx={{ textAlign: 'justify', pt: 1 }}>
           {newLineText(dados?.observacao || dados?.descritivo)}
@@ -224,7 +225,7 @@ export function Info({ dados, viewAnexo, colaboradores }) {
                       />
                     )}
                     <Stack sx={{ pl: { md: criador ? 6.5 : 0 } }}>
-                      <Info viewAnexo={viewAnexo} colaboradores={colaboradores} dados={row} />
+                      <Info colaboradores={colaboradores} dados={row} />
                     </Stack>
                   </Stack>
                 </Stack>
@@ -232,40 +233,6 @@ export function Info({ dados, viewAnexo, colaboradores }) {
             })}
           </Stack>
         </>
-      )}
-
-      {anexosAtivos?.length > 0 && (
-        <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap', mt: 2 }}>
-          {anexosAtivos?.map((item) => (
-            <AnexoItem
-              parecer
-              anexo={item}
-              key={item?.anexo}
-              viewAnexo={viewAnexo}
-              parecerId={dados?.processo_estado_id ? dados?.id : ''}
-              estadoId={dados?.processo_estado_id ? dados?.processo_estado_id : dados?.id}
-            />
-          ))}
-        </Stack>
-      )}
-      {anexosInativos?.length > 0 && (
-        <RoleBasedGuard roles={['Todo-111']}>
-          <Divider sx={{ my: 1 }}>
-            <Typography variant="subtitle2">Anexos eliminados</Typography>
-          </Divider>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            {anexosInativos?.map((item) => (
-              <AnexoItem
-                eliminado
-                anexo={item}
-                key={item?.anexo}
-                viewAnexo={viewAnexo}
-                parecerId={dados?.processo_estado_id ? dados?.id : ''}
-                estadoId={dados?.processo_estado_id ? dados?.processo_estado_id : dados?.id}
-              />
-            ))}
-          </Stack>
-        </RoleBasedGuard>
       )}
     </>
   );

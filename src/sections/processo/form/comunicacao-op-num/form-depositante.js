@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
-import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
+import { useEffect, useMemo } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -84,8 +84,13 @@ export default function FormDepositante({ dados }) {
     [isEdit, dadosStepper, processo]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, dadosStepper, processo]);
 
   const onSubmit = async () => {
     const dados = { ...dadosStepper, ...values };

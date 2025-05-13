@@ -9,6 +9,7 @@ import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 // utils
 import { emailCheck } from '../../../utils/validarAcesso';
 import { findColaborador } from '../../../utils/formatObject';
@@ -21,11 +22,10 @@ import { useDispatch, useSelector } from '../../../redux/store';
 import { Criado } from '../../../components/Panel';
 import { SearchNotFound } from '../../../components/table';
 import { Loading } from '../../../components/LoadingScreen';
+import { DefaultAction } from '../../../components/Actions';
 //
 import ModelosRespostas from './ModelosRespostas';
 import { PdfPreview, ImagemPreview } from './FilePreview';
-// guards
-import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 
 // ----------------------------------------------------------------------
 
@@ -45,17 +45,15 @@ export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
   const { mail } = useSelector((state) => state.intranet);
   const { filePreview, isLoadingPreview, processo } = useSelector((state) => state.digitaldocs);
-  const anexosAtivos = useMemo(
-    () => anexos?.filter(({ ativo, anexo }) => ativo && anexo !== filePreview?.anexo),
-    [anexos, filePreview?.anexo]
-  );
-  const anexosInativos = useMemo(
-    () => anexos?.filter(({ ativo, anexo }) => !ativo && anexo !== filePreview?.anexo),
+
+  const { id, estado = {}, status = '', origem_id: origemId } = processo;
+  const anexosList = useMemo(
+    () => anexos?.filter(({ anexo }) => anexo !== filePreview?.anexo),
     [anexos, filePreview?.anexo]
   );
 
   const viewAnexo = (anexo) => {
-    const params = { processoId: processo?.id, anexo: { ...anexo, tipoDoc: canPreview(anexo) } };
+    const params = { processoId: id, anexo: { ...anexo, tipoDoc: canPreview(anexo) } };
     dispatch(getAnexo(canPreview(anexo) ? 'filePreview' : 'fileDownload', params));
   };
 
@@ -88,7 +86,7 @@ export default function Anexos({ anexos }) {
         </>
       )}
       <Stack id="anexos" sx={{ mt: 1 }}>
-        {anexosPorData(anexosAtivos)?.map((row) => (
+        {anexosPorData(anexosList)?.map((row) => (
           <Stack key={row?.data} sx={{ pb: 1 }}>
             <Divider textAlign="left" sx={{ py: 0.5, my: 1, typography: 'overline' }}>
               {row?.data}
@@ -100,20 +98,7 @@ export default function Anexos({ anexos }) {
             </Stack>
           </Stack>
         ))}
-        {anexosInativos?.length > 0 && (
-          <RoleBasedGuard roles={['Todo-111']}>
-            <Divider textAlign="left" sx={{ mb: 0.5, mt: 1, typography: 'overline' }}>
-              Anexos eliminados
-            </Divider>
-            <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>
-              {anexosInativos?.map((row) => (
-                <AnexoItem eliminado anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
-              ))}
-            </Stack>
-          </RoleBasedGuard>
-        )}
-        {((emailCheck(mail, '') && processo?.origem_id) ||
-          (processo?.estado_atual?.includes('Notas Externas') && processo?.estado_atual !== 'Arquivo')) && (
+        {((emailCheck(mail, '') && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
           <ModelosRespostas />
         )}
       </Stack>
@@ -129,31 +114,22 @@ AnexoItem.propTypes = {
   parecer: PropTypes.bool,
   viewAnexo: PropTypes.func,
   eliminado: PropTypes.bool,
-  estadoId: PropTypes.number,
-  parecerId: PropTypes.number,
+  onEliminar: PropTypes.func,
 };
 
-export function AnexoItem({
-  anexo,
-  preview,
-  estadoId = '',
-  parecerId = '',
-  parecer = false,
-  viewAnexo = null,
-  eliminado = false,
-}) {
+export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, eliminado = false, onEliminar = null }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoadingFile } = useSelector((state) => state.digitaldocs);
+  const { id, anexo: file, url = '', nome, tipo = '', entidade = '', criador = '', criado_em: criado = '' } = anexo;
+  const { modificador = '', data_emissao: emissao = '', data_validade: validade = '', modificado_em: mod = '' } = anexo;
 
   return (
     <Button
       variant="soft"
-      color={anexo?.url ? 'success' : 'inherit'}
-      disabled={preview || isLoadingFile === anexo?.anexo}
-      onClick={() => viewAnexo(anexo, estadoId, parecerId)}
-      startIcon={
-        isLoadingFile === anexo?.anexo ? <CircularProgress size={26} /> : getFileThumb(false, null, anexo?.nome)
-      }
+      color={url ? 'success' : 'inherit'}
+      disabled={preview || isLoadingFile === file}
+      onClick={() => viewAnexo(anexo)}
+      startIcon={isLoadingFile === file ? <CircularProgress size={26} /> : getFileThumb(false, null, nome)}
       sx={{
         flexGrow: 1,
         boxShadow: 'none',
@@ -169,36 +145,40 @@ export function AnexoItem({
       <ListItemText
         primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
         primary={
-          !anexo?.tipo || anexo?.tipo === 'OUTROS' ? (
-            anexo?.nome
+          !tipo || tipo === 'OUTROS' ? (
+            nome
           ) : (
             <>
-              {`${anexo?.tipo}${anexo?.entidade ? ` - ${anexo.entidade}` : ''}`}
+              {`${tipo}${entidade ? ` - ${entidade}` : ''}`}
               <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}>
-                &nbsp;({anexo?.nome})
+                &nbsp;({nome})
               </Typography>
             </>
           )
         }
         secondary={
-          (anexo?.criador || anexo?.criado_em || anexo?.data_emissao || anexo?.data_validade) && (
+          (criador || criado || emissao || validade || (eliminado && (modificador || mod))) && (
             <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
-              {anexo?.criador && (
-                <Criado caption tipo="user" value={findColaborador(anexo?.criador, colaboradores)} baralhar />
+              <Criado caption tipo="user" value={findColaborador(criador, colaboradores)} baralhar />
+              <Criado
+                caption
+                tipo={eliminado || parecer ? 'data' : 'time'}
+                value={eliminado || parecer ? ptDateTime(criado) : ptTime(criado)}
+              />
+              <Criado caption iconText="Emissão:" value={ptDate(emissao)} />
+              <Criado caption iconText="Validade:" value={ptDate(validade)} />
+              {eliminado && (modificador || mod) && (
+                <Criado caption iconText="Eliminado:" value={`${modificador}${mod ? ` - ${ptDateTime(mod)}` : ''}`} />
               )}
-              {anexo?.criado_em && (
-                <Criado
-                  caption
-                  tipo={eliminado || parecer ? 'data' : 'time'}
-                  value={eliminado || parecer ? ptDateTime(anexo?.criado_em) : ptTime(anexo?.criado_em)}
-                />
-              )}
-              {anexo?.data_emissao && <Criado caption iconText="Emissão:" value={ptDate(anexo?.data_emissao)} />}
-              {anexo?.data_validade && <Criado caption iconText="Validade:" value={ptDate(anexo?.data_validade)} />}
             </Stack>
           )
         }
       />
+      {onEliminar && (
+        <ListItemSecondaryAction onClick={(e) => e.stopPropagation()}>
+          <DefaultAction small label="ELIMINAR" onClick={() => onEliminar(id, entidade)} />
+        </ListItemSecondaryAction>
+      )}
     </Button>
   );
 }

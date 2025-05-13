@@ -14,6 +14,8 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+// utils
+import { estadoFixo } from '../../utils/validarAcesso';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
@@ -46,6 +48,7 @@ export function EstadoForm({ onCancel }) {
   const { uos } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
   const uosList = useMemo(() => uos?.map(({ id, balcao, label }) => ({ id, balcao, label })), [uos]);
+  const readOnly = isEdit && estadoFixo(selectedItem?.nome);
 
   const formSchema = Yup.object().shape({
     nome: Yup.string().required().label('Nome'),
@@ -93,7 +96,14 @@ export function EstadoForm({ onCancel }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} justifyContent="center" sx={{ mt: 0 }}>
-            <GridItem children={<RHFTextField name="nome" label="Nome" />} />
+            <GridItem>
+              <RHFTextField name="nome" label="Nome" InputProps={{ readOnly }} />
+              {readOnly && (
+                <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
+                  *O nome do estado não pode ser alterado, está em uso para validações na aplicação.
+                </Typography>
+              )}
+            </GridItem>
             <GridItem sm={6} children={<RHFTextField name="email" label="Email" />} />
             <GridItem
               sm={6}

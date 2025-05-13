@@ -1,3 +1,5 @@
+// config
+import { ambiente } from '../../config';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // assets
@@ -30,11 +32,15 @@ const navConfig = [
   {
     subheader: 'Módulos',
     items: [
-      { title: 'Intranet - Teste', path: 'https://intraneteste.caixa.cv', icon: <Home /> },
+      {
+        icon: <Home />,
+        title: `Intranet${ambiente === 'teste' ? ' - Teste' : ''}`,
+        path: `https://${ambiente === 'teste' ? 'intraneteste' : 'intranet'}.caixa.cv`,
+      },
       {
         icon: <Portal />,
-        title: 'Portal do colaborador - Teste',
-        path: 'https://intraneteste.caixa.cv/portal/perfil',
+        title: `Portal do colaborador${ambiente === 'teste' ? ' - Teste' : ''}`,
+        path: `https://${ambiente === 'teste' ? 'intraneteste' : 'intranet'}.caixa.cv/portal/perfil`,
       },
     ],
   },
