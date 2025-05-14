@@ -10,11 +10,9 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
-import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 // utils
 import { noDados } from '../../utils/formatText';
-import { ptDateTime } from '../../utils/formatTime';
 import { colorLabel } from '../../utils/getColorPresets';
 import { sortPermissoes } from '../../utils/formatObject';
 // redux
@@ -23,9 +21,9 @@ import { useSelector, useDispatch } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import { DefaultAction } from '../../components/Actions';
-import { ColaboradorInfo } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
+import { ColaboradorInfo, DataLabel } from '../../components/Panel';
 //
 import { DetalhesContent } from './DetalhesGaji9';
 import { RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
@@ -183,22 +181,5 @@ function RecursosUtilizadores({ id, dados, recursos = false }) {
         </>
       )}
     </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-DataLabel.propTypes = { data: PropTypes.string, termino: PropTypes.bool };
-
-function DataLabel({ data = '', termino = false }) {
-  return (
-    <Stack direction="row" spacing={0.5}>
-      <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>{termino ? 'Término' : 'Início'}:</Typography>
-      <Typography
-        sx={{ typography: 'caption', fontStyle: !data && 'italic', pr: !data && 0.15, color: !data && 'text.disabled' }}
-      >
-        {data ? ptDateTime(data) : '(Não definido)'}
-      </Typography>
-    </Stack>
   );
 }

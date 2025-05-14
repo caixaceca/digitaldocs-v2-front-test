@@ -72,11 +72,11 @@ export default function FormInfoCredito({ dados }) {
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
       // info credito
-      taxa_juro: dadosStepper?.taxa_juro || credito?.taxa_juro || null,
+      taxa_juro: dadosStepper?.taxa_juro || credito?.taxa_juro || '',
       finalidade: dadosStepper?.finalidade || credito?.finalidade || '',
       numero_proposta: dadosStepper?.numero_proposta || credito?.numero_proposta || '',
       setor_atividade: dadosStepper?.setor_atividade || credito?.setor_atividade || '',
-      prazo_amortizacao: dadosStepper?.prazo_amortizacao || credito?.prazo_amortizacao || null,
+      prazo_amortizacao: dadosStepper?.prazo_amortizacao || credito?.prazo_amortizacao || '',
       montante_solicitado: dadosStepper?.montante_solicitado || credito?.montante_solicitado || '',
       linha_id:
         dadosStepper?.linha_id || (credito?.linha_id && { id: credito?.linha_id, label: credito?.linha }) || null,

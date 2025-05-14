@@ -93,7 +93,7 @@ export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...
           fullWidth
           options={options}
           multiple={multiple}
-          disableClearable={other?.dc ?? false}
+          disableClearable={!!other?.dc}
           onChange={(event, newValue) => field.onChange(newValue)}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
           {...other}
@@ -124,8 +124,8 @@ export function RHFAutocompleteObj({ name, options, label, small = false, ...oth
           {...field}
           fullWidth
           options={options}
+          disableClearable={!!other?.dc}
           size={small ? 'small' : 'medium'}
-          disableClearable={other?.dc ?? false}
           getOptionLabel={(option) => option?.label}
           onChange={(event, newValue) => field.onChange(newValue)}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}

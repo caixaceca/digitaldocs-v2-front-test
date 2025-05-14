@@ -25,8 +25,8 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked, Criado } from '../../components/Panel';
 import { DialogConfirmar } from '../../components/CustomDialog';
+import { CellChecked, DataLabel } from '../../components/Panel';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -155,12 +155,8 @@ export default function TableAcessos({ tab }) {
                           <>
                             <TableCell>{row.nome}</TableCell>
                             <TableCell>
-                              <Criado
-                                value={<>Início: {ptDateTime(row.data_inicial) || noDados('(Não definido)')}</>}
-                              />
-                              <Criado
-                                value={<>Término: {ptDateTime(row.data_limite) || noDados('(Não definido)')}</>}
-                              />
+                              <DataLabel data={row?.data_inicial || ''} />
+                              <DataLabel data={row?.data_limite || ''} termino />
                             </TableCell>
                             <CellChecked check={row.padrao} />
                             <CellChecked check={row.gestor} />

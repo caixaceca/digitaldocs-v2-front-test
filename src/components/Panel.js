@@ -17,6 +17,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // utils
 import { getFile } from '../utils/getFile';
+import { ptDateTime } from '../utils/formatTime';
 import { baralharString } from '../utils/formatText';
 // components
 import Label from './Label';
@@ -178,6 +179,23 @@ export function CellChecked({ check }) {
     <TableCell align="center">
       <Checked check={check} />
     </TableCell>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+DataLabel.propTypes = { data: PropTypes.string, termino: PropTypes.bool };
+
+export function DataLabel({ data = '', termino = false }) {
+  return (
+    <Stack direction="row" spacing={0.5}>
+      <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>{termino ? 'Término' : 'Início'}:</Typography>
+      <Typography
+        sx={{ typography: 'caption', fontStyle: !data && 'italic', pr: !data && 0.15, color: !data && 'text.disabled' }}
+      >
+        {data ? ptDateTime(data) : '(Não definido)'}
+      </Typography>
+    </Stack>
   );
 }
 

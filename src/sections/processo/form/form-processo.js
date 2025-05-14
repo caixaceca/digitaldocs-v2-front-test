@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import CircleIcon from '@mui/icons-material/Circle';
 import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -24,7 +23,7 @@ import { useNotificacao } from '../../../hooks/useNotificacao';
 import Steps from '../../../components/Steps';
 import { Fechar } from '../../../components/Actions';
 import { FormLoading } from '../../../components/skeleton';
-import { SearchNotFound } from '../../../components/table';
+import { SearchNotFoundSmall } from '../../../components/table';
 // sections
 import ProcessoInterno from './interno';
 import ProcessoCredito from './credito';
@@ -39,21 +38,31 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [fluxo, setFluxo] = useState(null);
+  const [estado, setEstado] = useState(null);
   const id = useMemo(() => processo?.id || '', [processo?.id]);
 
   const { activeStep } = useSelector((state) => state.stepper);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { done, processo: newProcesso } = useSelector((state) => state.digitaldocs);
 
-  const estado = useMemo(
-    () => meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null,
-    [ambientId, meusAmbientes]
-  );
+  useEffect(() => {
+    const estado =
+      meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null;
+    if (estado) setEstado(estado);
+  }, [ambientId, meusAmbientes]);
 
   const fluxosList = useMemo(
-    () => estado?.fluxos?.filter(({ ativo }) => ativo)?.map((row) => ({ ...row, id: row?.fluxo_id })) || [],
+    () =>
+      estado?.fluxos?.filter(({ ativo }) => ativo)?.map((row) => ({ ...row, id: row?.fluxo_id, nome: row?.assunto })) ||
+      [],
     [estado?.fluxos]
   );
+
+  useEffect(() => dispatch(resetDados()), [dispatch]);
+
+  useEffect(() => {
+    if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
+  }, [dispatch, isEdit, fluxo?.id]);
 
   useEffect(() => {
     const fluxoProcesso = fluxosList?.find(({ id }) => id === processo?.fluxo_id) || null;
@@ -84,16 +93,14 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   return (
     <>
       <Dialog open fullWidth maxWidth={fluxo || (isEdit && !fluxo) ? 'lg' : 'md'}>
-        <DialogTitle sx={{ p: 0 }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={3} sx={{ p: 2 }}>
-            <Stack>
-              {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
-              <Typography sx={{ color: 'text.secondary', typography: 'caption', fontWeight: 'bold', pt: 0.25 }}>
-                <CircleIcon sx={{ height: 10, width: 18, color: estado?.nome ? 'success.main' : 'error.main' }} />
-                {estado?.nome || 'Nenhum estado selecionado...'}
-              </Typography>
-            </Stack>
-            {fluxo && <Assunto dados={{ fluxo, changeFluxo, fluxosList, small: true }} />}
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
+            <CircleIcon sx={{ mr: 0.5, width: 14, color: isEdit ? 'warning.main' : 'success.main' }} />
+            {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
+          </Stack>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ pb: 2 }}>
+            <EstadoAssunto dados={{ value: estado, setValue: setEstado, options: meusAmbientes, isEdit }} />
+            <EstadoAssunto dados={{ value: fluxo, setValue: changeFluxo, options: fluxosList, label: 'Assunto' }} />
           </Stack>
           {fluxo?.iscon && (
             <Steps
@@ -123,15 +130,14 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
                     )) || <ProcessoExterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />}
                 </>
               ) : (
-                <>
-                  {!fluxo ? (
-                    <Stack justifyContent="center" alignItems="center" sx={{ py: 5, px: { xs: 0, md: 10 } }}>
-                      <Assunto dados={{ fluxo, changeFluxo, fluxosList }} />
-                    </Stack>
-                  ) : (
-                    <SearchNotFound message={isEdit ? '' : `Estado atual não permite editar o processo...`} />
-                  )}
-                </>
+                <SearchNotFoundSmall
+                  message={
+                    (!estado && 'Seleciona um assunto...') ||
+                    (!fluxo && 'Seleciona um assunto...') ||
+                    (isEdit && 'Estado atual não permite editar o processo...') ||
+                    ''
+                  }
+                />
               )}
             </>
           )}
@@ -143,23 +149,22 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-Assunto.propTypes = { dados: PropTypes.object };
+EstadoAssunto.propTypes = { dados: PropTypes.object };
 
-export function Assunto({ dados }) {
-  const { fluxo, changeFluxo, fluxosList, small } = dados;
+export function EstadoAssunto({ dados }) {
+  const { value = null, setValue, options = [], label = 'Estado', isEdit = false } = dados;
   return (
     <Autocomplete
-      value={fluxo}
+      fullWidth
+      size="small"
+      value={value}
       disableClearable
-      options={fluxosList}
-      size={small ? 'small' : 'medium'}
-      getOptionLabel={(option) => option?.assunto}
-      onChange={(event, newValue) => changeFluxo(newValue)}
+      options={options}
+      disabled={isEdit}
+      getOptionLabel={(option) => option?.nome}
+      onChange={(event, newValue) => setValue(newValue)}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      sx={{ minWidth: { xs: 1, md: small ? 450 : 1 }, pr: { xs: 0, md: 5 } }}
-      renderInput={(params) => (
-        <TextField {...params} fullWidth label="Assunto" variant="standard" focused={small} color="success" />
-      )}
+      renderInput={(params) => <TextField {...params} label={label} color="success" variant="filled" />}
     />
   );
 }
