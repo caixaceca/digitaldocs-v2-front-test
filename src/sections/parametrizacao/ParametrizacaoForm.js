@@ -528,7 +528,7 @@ export function DocumentoForm({ onCancel }) {
       <DialogTitle>{isEdit ? 'Editar documento' : 'Adicionar documento'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          {values?.designacao === 'OUTROS' ? (
+          {isEdit && selectedItem?.designacao === 'OUTROS' ? (
             <Stack sx={{ pt: 3, pb: 1 }}>
               <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
                 Este documento não pode ser editado, está em uso para validações na aplicação.

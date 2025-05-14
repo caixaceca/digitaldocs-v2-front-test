@@ -224,6 +224,7 @@ export function SearchToolbarEntradas({
               value={colaborador || null}
               options={colaboradoresList?.sort()}
               sx={{ width: { md: 180, xl: 230 } }}
+              disableClearable={colaboradoresList?.length === 1}
               renderInput={(params) => <TextField {...params} label="Colaborador" />}
               onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorC')}
             />
@@ -258,7 +259,7 @@ export function SearchToolbarEntradas({
               setItemValue('', setFilter, 'filterC');
               setItemValue('', setEstado, 'estadoC');
               setItemValue('', setAssunto, 'assuntoC');
-              setItemValue('', setColaborador, 'colaboradorC');
+              setItemValue(colaboradoresList?.length === 1 ? colaboradoresList[0] : '', setColaborador, 'colaboradorC');
             }}
           />
         )}

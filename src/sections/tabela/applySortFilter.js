@@ -9,8 +9,9 @@ export default function applySortFilter({ from, dados, comparator, filter, colab
   dados = applySort(dados, comparator);
 
   if (assunto) dados = dados.filter(({ assunto: ass }) => ass === assunto);
-  if (from === 'Devoluções' && colaborador) dados = dados.filter(({ dono }) => dono === colaborador);
-  if (from === 'Entradas' && colaborador) dados = dados.filter(({ colaborador: colab }) => colab === colaborador);
+  if (colaborador && from === 'Devoluções') dados = dados.filter(({ dono }) => dono === colaborador);
+  if (colaborador && (from === 'Entradas' || from === 'Trabalhados'))
+    dados = dados.filter(({ colaborador: colab }) => colab === colaborador);
 
   if (estado === 'Excepto Arquivo') dados = dados.filter(({ nome }) => nome !== 'Arquivo');
   else if (estado === 'Pendente') dados = dados.filter(({ motivo }) => motivo);

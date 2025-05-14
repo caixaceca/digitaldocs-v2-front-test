@@ -88,7 +88,10 @@ export default function Intervencao() {
         }
       />
 
-      <DefaultAction label="LIBERTAR" onClick={() => openModal('libertar', { id, estadoId: estado?.estado_id })} />
+      <DefaultAction
+        label="LIBERTAR"
+        onClick={() => openModal('libertar', { id, estadoId: estado?.estado_id, perfilId: estado?.perfil_id })}
+      />
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
         <DefaultAction label="ARQUIVAR" onClick={() => openModal('arquivar', null)} />
       )}

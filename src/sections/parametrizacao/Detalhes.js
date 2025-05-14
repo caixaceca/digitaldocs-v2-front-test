@@ -57,8 +57,6 @@ const fields = [
   { key: 'is_inicial', title: 'Estado inicial:' },
   { key: 'is_final', title: 'Estado final:' },
   { key: 'is_decisao', title: 'Estado de decisão:' },
-  { key: 'credito_funcionario', title: 'Crédito colaborador:' },
-  { key: 'funcionario', title: 'Crédito colaborador:' },
   { key: 'para_aprovacao', title: 'Aprovação:' },
   { key: 'facultativo', title: 'Facultativo:' },
   { key: 'padrao', title: 'Padrão:' },

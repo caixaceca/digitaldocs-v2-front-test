@@ -112,16 +112,20 @@ export default function TableControle({ from }) {
         : ColaboradoresAcesso(colaboradores, cc, true, []),
     [cc, from, colaboradores, isAdmin, isAuditoria, meusAmbientes]
   );
-  const dados = useMemo(
+  const { dados, colaboradoresList, estadosList, assuntosList } = useMemo(
     () => dadosList(dadosControle, colaboradoresAcesso, uos, from),
     [colaboradoresAcesso, dadosControle, from, uos]
   );
   const dataFiltered = applySortFilter({
-    dados: dados?.dados,
     comparator: getComparator(order, orderBy),
-    ...{ from, filter, estado, assunto, colaborador },
+    ...{ dados, from, filter, estado, assunto, colaborador },
   });
   const isNotFound = !dataFiltered.length;
+
+  useEffect(() => {
+    if (colaboradoresList?.length === 1 && cc?.perfil?.displayName === colaboradoresList[0])
+      setColaborador(colaboradoresList[0]);
+  }, [cc?.perfil?.displayName, colaboradoresList]);
 
   useEffect(() => {
     setPage(0);
@@ -168,7 +172,7 @@ export default function TableControle({ from }) {
       />
 
       {from === 'Trabalhados' && (
-        <ResumoTrabalhados dados={dados?.dados} assunto={assunto} colaborador={colaborador} uo={uo?.label} />
+        <ResumoTrabalhados dados={dados} assunto={assunto} colaborador={colaborador} uo={uo?.label} />
       )}
 
       <Card sx={{ p: 1 }}>
@@ -181,10 +185,10 @@ export default function TableControle({ from }) {
           setEstado={setEstado}
           setAssunto={setAssunto}
           colaborador={colaborador}
+          estadosList={estadosList}
+          assuntosList={assuntosList}
           setColaborador={setColaborador}
-          estadosList={dados?.estadosList || []}
-          assuntosList={dados?.assuntosList || []}
-          colaboradoresList={dados?.colaboradoresList || []}
+          colaboradoresList={colaboradoresList}
         />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>

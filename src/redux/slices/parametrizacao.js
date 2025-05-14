@@ -184,9 +184,9 @@ export function getFromParametrizacao(item, params) {
         (item === 'fluxos' && `/v1/fluxos/${perfilId}`) ||
         (item === 'estados' && `/v1/estados/${perfilId}`) ||
         (item === 'origens' && `/v1/origens/${perfilId}`) ||
-        (item === 'acessos' && `/v1/acessos?perfilID=${perfilId}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/all/${perfilId}`) ||
         (item === 'meusacessos' && `/v1/acessos?perfilID=${perfilId}`) ||
+        (item === 'acessos' && `/v1/acessos?perfilID=${params?.perfilId}`) ||
         (item === 'componentes' && `/v2/processos/componentes/${perfilId}`) ||
         (item === 'transicao' && `/v1/transicoes/${params?.id}/${perfilId}`) ||
         (item === 'meusambientes' && `/v1/fluxos/meusambientes/v2/${perfilId}`) ||

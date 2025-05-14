@@ -32,8 +32,8 @@ export default function PageAcessosPerfil() {
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabAcesso') || 'Acessos');
 
   useEffect(() => {
-    if (id && mail) dispatch(getFromParametrizacao('acessos', { perfilId: id }));
-    if (id && mail) dispatch(getFromParametrizacao('estadosPerfil', { estadoId: id }));
+    if (id && mail) dispatch(getFromParametrizacao('acessos', { perfilId: id, reset: { val: [] } }));
+    if (id && mail) dispatch(getFromParametrizacao('estadosPerfil', { estadoId: id, reset: { val: [] } }));
   }, [dispatch, mail, id]);
 
   const TABS = [

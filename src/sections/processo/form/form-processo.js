@@ -33,10 +33,9 @@ import ProcessoCON from './comunicacao-op-num';
 
 // ----------------------------------------------------------------------
 
-ProcessoForm.propTypes = { processo: PropTypes.object, ambientId: PropTypes.number };
+ProcessoForm.propTypes = { isEdit: PropTypes.bool, processo: PropTypes.object, ambientId: PropTypes.number };
 
-export default function ProcessoForm({ processo, ambientId }) {
-  const isEdit = !!processo;
+export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [fluxo, setFluxo] = useState(null);
@@ -47,10 +46,7 @@ export default function ProcessoForm({ processo, ambientId }) {
   const { done, processo: newProcesso } = useSelector((state) => state.digitaldocs);
 
   const estado = useMemo(
-    () =>
-      meusAmbientes?.find(({ id, isinicial }) => id === ambientId && isinicial) ||
-      meusAmbientes.find(({ isinicial }) => isinicial) ||
-      null,
+    () => meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null,
     [ambientId, meusAmbientes]
   );
 

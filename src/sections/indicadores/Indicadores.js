@@ -214,7 +214,7 @@ export function CardInfo({ title, label, total, conclusao = false, dev = false, 
               {label}
             </Typography>
           )}
-          <Typography variant="h5">
+          <Typography variant="h6">
             {conclusao ? `${total?.toFixed(2)} ${total > 1 ? 'dias' : 'dia'}` : fNumber(total)}
           </Typography>
         </Stack>

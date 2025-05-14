@@ -246,7 +246,7 @@ export default function PageProcesso() {
                               {estado?.preso && !estado?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
                                 <DefaultAction
                                   label="LIBERTAR"
-                                  onClick={() => openModal('libertar', { id, estadoId })}
+                                  onClick={() => openModal('libertar', { id, estadoId, perfilId: estado?.perfil_id })}
                                 />
                               )}
                               {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
@@ -319,9 +319,9 @@ export default function PageProcesso() {
         {isOpenModal === 'pendencia' && <ColocarPendenteForm onClose={() => openModal()} />}
         {isOpenModal === 'finalizar-ne' && <FinalizarNeForm onClose={() => openModal()} id={id} />}
         {isOpenModal === 'finalizar-ope' && <FinalizarOpeForm onClose={() => openModal()} id={id} />}
-        {isOpenModal === 'editar-processo' && <ProcessoForm processo={processo} ambientId={estadoId} />}
         {isOpenModal === 'domiciliar' && <DomiciliarForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
         {isOpenModal === 'focal-point' && <FocalPointForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
+        {isOpenModal === 'editar-processo' && <ProcessoForm isEdit processo={processo} ambientId={estadoId} />}
         {isOpenModal === 'eliminar-processo' && <EliminarForm ids={{ id, estadoId }} onClose={() => openModal()} />}
         {isOpenModal === 'atribuir' && <AtribuirForm colaboradores={colaboradoresList} onClose={() => openModal()} />}
         {isOpenModal === 'desarquivar' && (

@@ -118,7 +118,7 @@ export function getFromGaji9(item, params) {
     if (!params?.notLoading) dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     try {
       const accessToken = await getAccessToken();
-      // console.log(accessToken);
+      console.log(accessToken);
       const apiUrl =
         // DETALHES
         (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao`) ||

@@ -137,12 +137,12 @@ export default function Acessos() {
 
 function applySortFilter({ colaboradores, comparator, filter, uo }) {
   colaboradores = applySort(colaboradores, comparator);
-  if (uo) {
-    colaboradores = colaboradores.filter((row) => row?.uo?.label === uo);
-  }
+  if (uo) colaboradores = colaboradores.filter(({ uo }) => uo?.label === uo);
   if (filter && filter !== null) {
     colaboradores = colaboradores.filter(
-      (row) => row?.nome && normalizeText(row?.nome).indexOf(normalizeText(filter)) !== -1
+      ({ nome, nomeacao }) =>
+        (nome && normalizeText(nome).indexOf(normalizeText(filter)) !== -1) ||
+        (nomeacao && normalizeText(nomeacao).indexOf(normalizeText(filter)) !== -1)
     );
   }
   return colaboradores;

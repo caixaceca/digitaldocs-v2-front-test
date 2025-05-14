@@ -480,10 +480,10 @@ export function updateItem(item, dados, params) {
           `/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`) ||
         (item === 'situacaoCredito' &&
           `/v2/processos/${params?.id}/operacoes_credito/${perfilId}?credito_id=${params?.creditoId}`) ||
-        (item === 'libertar' &&
-          `/v2/processos/abandonar/${perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}`) ||
         (item === 'encaminhar serie' &&
           `/v2/processos/encaminhar/serie/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}`) ||
+        (item === 'libertar' &&
+          `/v2/processos/abandonar/${params?.perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}`) ||
         (item === 'confidencialidade' &&
           `/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
         (item === 'cancelar' &&

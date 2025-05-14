@@ -57,6 +57,7 @@ export function FluxoForm({ onCancel }) {
   const defaultValues = useMemo(
     () => ({
       perfilID: perfilId,
+      credito_funcionario: false,
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
       modelo: selectedItem?.modelo || null,
@@ -65,7 +66,6 @@ export function FluxoForm({ onCancel }) {
       is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
       is_ativo: isEdit ? selectedItem?.is_ativo : true,
-      credito_funcionario: selectedItem?.credito_funcionario || false,
     }),
     [selectedItem, isEdit, perfilId]
   );
@@ -111,10 +111,9 @@ export function FluxoForm({ onCancel }) {
               />
               <GridItem xs={6} sm={isEdit ? 3 : 6} children={<RHFSwitch name="is_interno" label="Interno" />} />
               {isEdit && <GridItem xs={6} sm={3} children={<RHFSwitch name="is_ativo" label="Ativo" />} />}
-              <GridItem xs={6} children={<RHFSwitch name="is_credito" label="Crédito" />} />
-              <GridItem xs={6} children={<RHFSwitch name="credito_funcionario" label="Crédito colaborador" />} />
-              <GridItem xs={6} children={<RHFSwitch name="limpo" label="Limpo" />} />
-              <GridItem xs={6} children={<RHFSwitch name="is_con" label="Com. Op. Numerário" />} />
+              <GridItem xs={4} children={<RHFSwitch name="is_credito" label="Crédito" />} />
+              <GridItem xs={4} children={<RHFSwitch name="limpo" label="Limpo" />} />
+              <GridItem xs={4} children={<RHFSwitch name="is_con" label="CON" />} />
               <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
             </Grid>
             <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
@@ -142,13 +141,13 @@ export function ClonarFluxoForm({ onCancel }) {
       is_ativo: true,
       observacao: '',
       perfilID: perfilId,
+      credito_funcionario: false,
       is_con: selectedItem?.is_con,
       modelo: selectedItem?.modelo || '',
       limpo: selectedItem?.limpo || false,
       assunto: selectedItem?.assunto || '',
       is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
-      credito_funcionario: selectedItem?.credito_funcionario || false,
     }),
     [selectedItem, perfilId]
   );

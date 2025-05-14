@@ -114,12 +114,8 @@ export default function Estados({ handleAceitar }) {
                                       setModal({
                                         modal: 'pendencia',
                                         dados: {
-                                          id: idp,
-                                          pendente: !!pendente,
-                                          obs: observacao ?? '',
-                                          estadoId: estadoId ?? '',
-                                          motivo: motivo ?? '',
-                                          motivo_id: motivoId ?? '',
+                                          ...{ id: idp, estadoId: estadoId ?? '', motivo_id: motivoId ?? '' },
+                                          ...{ motivo: motivo ?? '', pendente: !!pendente, obs: observacao ?? '' },
                                         },
                                       })
                                     )
@@ -128,7 +124,9 @@ export default function Estados({ handleAceitar }) {
                                 <DefaultAction
                                   label="LIBERTAR"
                                   onClick={() =>
-                                    dispatch(setModal({ modal: 'libertar', dados: { id: idp, estadoId } }))
+                                    dispatch(
+                                      setModal({ modal: 'libertar', dados: { id: idp, estadoId, perfilId: pid } })
+                                    )
                                   }
                                 />
                               </>
@@ -218,9 +216,7 @@ export function Info({ dados, colaboradores }) {
                         }
                         dados={{
                           ...row,
-                          perfil: criador?.perfil,
-                          assunto: dados?.observacao,
-                          estado: dados?.estado_inicial,
+                          ...{ perfil: criador?.perfil, assunto: dados?.observacao, estado: dados?.estado_inicial },
                         }}
                       />
                     )}

@@ -782,7 +782,7 @@ function CardResumo({ total, label, qtd }) {
           <Typography variant="body2" sx={{ color: theme.palette[color].main, py: 0.5 }}>
             <b>{fNumber(qtd)}</b> processo{qtd > 1 ? 's' : ''}
           </Typography>
-          <Typography variant="h5">{fCurrency(total)}</Typography>
+          <Typography variant="h6">{fCurrency(total)}</Typography>
         </Stack>
         <Stack
           sx={{

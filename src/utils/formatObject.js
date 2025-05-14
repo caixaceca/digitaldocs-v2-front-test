@@ -154,7 +154,7 @@ export function meusAcessosGaji9(grupos) {
 // ----------------------------------------------------------------------
 
 export const getProximoAnterior = (processos, selectedId) => {
-  const index = processos.findIndex((p) => p.id === selectedId);
+  const index = processos.findIndex((p) => p.id === Number(selectedId));
 
   if (index === -1) return { anterior: '', proximo: '' };
 
