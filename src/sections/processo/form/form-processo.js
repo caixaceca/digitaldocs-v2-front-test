@@ -45,20 +45,22 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { done, processo: newProcesso } = useSelector((state) => state.digitaldocs);
 
+  const fluxosList = useMemo(() => {
+    if (!estado?.fluxos) return [];
+    return estado.fluxos.filter((f) => f.ativo).map((f) => ({ ...f, id: f.fluxo_id, nome: f.assunto }));
+  }, [estado?.fluxos]);
+
+  const estadosList = useMemo(() => meusAmbientes?.filter(({ isinicial }) => isinicial) || [], [meusAmbientes]);
+
+  useEffect(() => {
+    dispatch(resetDados());
+  }, [dispatch]);
+
   useEffect(() => {
     const estado =
       meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null;
     if (estado) setEstado(estado);
   }, [ambientId, meusAmbientes]);
-
-  const fluxosList = useMemo(
-    () =>
-      estado?.fluxos?.filter(({ ativo }) => ativo)?.map((row) => ({ ...row, id: row?.fluxo_id, nome: row?.assunto })) ||
-      [],
-    [estado?.fluxos]
-  );
-
-  useEffect(() => dispatch(resetDados()), [dispatch]);
 
   useEffect(() => {
     if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
@@ -91,59 +93,57 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   };
 
   return (
-    <>
-      <Dialog open fullWidth maxWidth={fluxo || (isEdit && !fluxo) ? 'lg' : 'md'}>
-        <DialogTitle>
-          <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
-            <CircleIcon sx={{ mr: 0.5, width: 14, color: isEdit ? 'warning.main' : 'success.main' }} />
-            {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
-          </Stack>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ pb: 2 }}>
-            <EstadoAssunto dados={{ value: estado, setValue: setEstado, options: meusAmbientes, isEdit }} />
-            <EstadoAssunto dados={{ value: fluxo, setValue: changeFluxo, options: fluxosList, label: 'Assunto' }} />
-          </Stack>
-          {fluxo?.iscon && (
-            <Steps
-              sx={{ mt: 1, mb: 0 }}
-              activeStep={activeStep}
-              steps={isEdit ? ['Operação', 'Depositante'] : ['Operação', 'Depositante', 'Anexos']}
-            />
-          )}
-          {!isEdit && fluxo && !fluxo?.iscon && (
-            <Steps sx={{ mt: 1, mb: 0 }} activeStep={activeStep} steps={['Dados gerais', 'Anexos']} />
-          )}
-          <Box sx={{ top: 15, right: 15, position: 'absolute' }}>
-            <Fechar onClick={() => onClose()} />
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {isEdit && !fluxo ? (
-            <FormLoading />
-          ) : (
-            <>
-              {estado && fluxo ? (
-                <>
-                  {(fluxo?.iscredito && <ProcessoCredito dados={{ isEdit, id, processo, fluxo, estado, onClose }} />) ||
-                    (fluxo?.iscon && <ProcessoCON dados={{ isEdit, id, processo, fluxo, estado, onClose }} />) ||
-                    (fluxo?.isinterno && (
-                      <ProcessoInterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />
-                    )) || <ProcessoExterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />}
-                </>
-              ) : (
-                <SearchNotFoundSmall
-                  message={
-                    (!estado && 'Seleciona um assunto...') ||
-                    (!fluxo && 'Seleciona um assunto...') ||
-                    (isEdit && 'Estado atual não permite editar o processo...') ||
-                    ''
-                  }
-                />
-              )}
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open fullWidth maxWidth={fluxo || (isEdit && !fluxo) ? 'lg' : 'md'}>
+      <DialogTitle>
+        <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
+          <CircleIcon sx={{ mr: 0.5, width: 14, color: isEdit ? 'warning.main' : 'success.main' }} />
+          {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
+        </Stack>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ pb: 2 }}>
+          <EstadoAssunto dados={{ value: estado, setValue: setEstado, options: estadosList, isEdit }} />
+          <EstadoAssunto dados={{ value: fluxo, setValue: changeFluxo, options: fluxosList, label: 'Assunto' }} />
+        </Stack>
+        {!!fluxo?.iscon && (
+          <Steps
+            sx={{ mt: 1, mb: 0 }}
+            activeStep={activeStep}
+            steps={isEdit ? ['Operação', 'Depositante'] : ['Operação', 'Depositante', 'Anexos']}
+          />
+        )}
+        {!isEdit && fluxo && !fluxo?.iscon && (
+          <Steps sx={{ mt: 1, mb: 0 }} activeStep={activeStep} steps={['Dados gerais', 'Anexos']} />
+        )}
+        <Box sx={{ top: 15, right: 15, position: 'absolute' }}>
+          <Fechar onClick={() => onClose()} />
+        </Box>
+      </DialogTitle>
+      <DialogContent>
+        {isEdit && !fluxo ? (
+          <FormLoading />
+        ) : (
+          <>
+            {estado && fluxo ? (
+              <>
+                {(fluxo?.iscredito && <ProcessoCredito dados={{ isEdit, id, processo, fluxo, estado, onClose }} />) ||
+                  (fluxo?.iscon && <ProcessoCON dados={{ isEdit, id, processo, fluxo, estado, onClose }} />) ||
+                  (fluxo?.isinterno && (
+                    <ProcessoInterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />
+                  )) || <ProcessoExterno dados={{ isEdit, id, processo, fluxo, estado, onClose }} />}
+              </>
+            ) : (
+              <SearchNotFoundSmall
+                message={
+                  (!estado && 'Seleciona um assunto...') ||
+                  (!fluxo && 'Seleciona um assunto...') ||
+                  (isEdit && 'Estado atual não permite editar o processo...') ||
+                  ''
+                }
+              />
+            )}
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
