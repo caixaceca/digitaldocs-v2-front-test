@@ -43,10 +43,11 @@ export default function FormDepositante({ dados }) {
 
   const formSchema = Yup.object().shape({
     nif: shapeNumber('NIF', false, '', 'is_cliente'),
+    morada: shapeText('Morada', false, '', 'is_cliente'),
     mae: shapeText('Nome da Mãe', false, '', 'is_cliente'),
     pai: shapeText('Nome do Pai', false, '', 'is_cliente'),
     profissao: shapeText('Profissão', false, '', 'is_cliente'),
-    telefone: shapeText('Nº de telefone', false, '', 'is_cliente'),
+    telemovel: shapeText('Nº de telemóvel', false, '', 'is_cliente'),
     estado_civil: shapeMixed('Estado civil', false, '', 'is_cliente'),
     docid: shapeText('Doc. de identificação', false, '', 'is_cliente'),
     nacionalidade: shapeText('Nacionalidade', false, '', 'is_cliente'),
@@ -74,10 +75,10 @@ export default function FormDepositante({ dados }) {
       nacionalidade: dadosStepper?.nacionalidade || processo?.con?.nacionalidade || '',
       residente: dadosStepper?.residente || (isEdit && processo?.con?.residente) || true,
       local_trabalho: dadosStepper?.local_trabalho || processo?.con?.local_trabalho || '',
+      titular_ordenador: dadosStepper?.titular_ordenador || processo?.con?.titular_ordenador || false,
       data_nascimento: dadosStepper?.data_nascimento || fillData(processo?.con?.data_nascimento, null),
       local_pais_nascimento: dadosStepper?.local_pais_nascimento || processo?.con?.local_pais_nascimento || '',
       tipo_docid: dadosStepper?.tipo_docid || dis?.find((row) => row?.id === processo?.con?.tipo_docid) || null,
-      titular_ordenador: dadosStepper?.titular_ordenador || (isEdit && processo?.con?.titular_ordenador) || true,
       estado_civil:
         dadosStepper?.estado_civil || estadosCivis?.find((row) => row?.id === processo?.con?.estado_civil) || null,
     }),
