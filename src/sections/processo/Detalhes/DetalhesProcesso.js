@@ -46,31 +46,28 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
   const { origens } = useSelector((state) => state.parametrizacao);
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
-  const entidadesList = useMemo(() => entidadesParse(processo?.entidade), [processo?.entidade]);
-  const devolvido = useMemo(() => processo?.htransicoes?.[0]?.modo === 'Devolução', [processo?.htransicoes]);
-  const origem = useMemo(() => origens?.find(({ id }) => id === processo?.origem_id), [origens, processo?.origem_id]);
+  const { estados = [], htransicoes = [], estado = null } = processo;
+  const { bi_cni: docId = '', doc_idp: docIdP = '', doc_ids: docIdS } = processo;
+  const { balcao_domicilio: balcao = '', origem_id: origemId = '', fluxo = '' } = processo;
+  const { entidade = '', cliente = '', conta = '', titular = '', email = '', observacao = '' } = processo;
+
+  const entidadesList = useMemo(() => entidadesParse(entidade), [entidade]);
+  const devolvido = useMemo(() => htransicoes?.[0]?.modo === 'Devolução', [htransicoes]);
+  const origem = useMemo(() => origens?.find(({ id }) => id === origemId), [origens, origemId]);
   const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
-  const bd = useMemo(
-    () => uos?.find(({ balcao }) => balcao === processo?.balcao_domicilio)?.label,
-    [processo?.balcao_domicilio, uos]
-  );
+  const bd = useMemo(() => uos?.find(({ balcao: balcaoUo }) => balcaoUo === balcao)?.label, [balcao, uos]);
 
   return (
     <>
       {(!versoes ||
-        (versoes &&
-          (uo?.label ||
-            processo?.fluxo ||
-            processo?.observacao ||
-            processo?.data_entrada ||
-            processo?.numero_entrada))) && (
+        (versoes && (uo?.label || fluxo || observacao || processo?.data_entrada || processo?.numero_entrada))) && (
         <List sx={{ pt: 0 }}>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
           <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
           <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
-          <TextItem title="Assunto:" text={processo?.fluxo} />
+          <TextItem title="Assunto:" text={fluxo} />
           {!isPS && !!processo?.data_entrada && (
             <TextItem
               title="Data de entrada:"
@@ -78,22 +75,28 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             />
           )}
           <TextItem title="Referência:" text={processo?.referencia} />
-          {(processo?.estados?.length > 0 || processo?.estado) && (
+          {(estados?.length > 0 || estado) && (
             <TextItem
               title="Estado:"
               situacao={
-                devolvido && (
-                  <Stack direction="row">
+                (devolvido || estado?.duplicado) && (
+                  <Stack direction="row" spacing={1}>
                     <Label color="error" startIcon={<ErrorOutlineIcon />}>
-                      Devolvido
+                      {devolvido ? 'Devolvido' : 'Eliminado'}
                     </Label>
+                    {(estado?.ccDup || estado?.dataDup) && (
+                      <Stack direction="row" sx={{ color: 'text.secondary' }}>
+                        <Criado caption tipo="user" value={estado?.ccDup} />
+                        <Criado caption tipo="data" value={ptDateTime(estado?.dataDup)} sx={{ pr: 0 }} />
+                      </Stack>
+                    )}
                   </Stack>
                 )
               }
               label={
                 <Stack spacing={0.75} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
-                  {(processo?.estados?.length > 0 ? processo?.estados : [processo?.estado])?.map((row, index) => {
-                    const colaboradorAfeto = colaboradores?.find((item) => item?.perfil_id === row?.perfil_id);
+                  {(estados?.length > 0 ? estados : [estado])?.map((row, index) => {
+                    const colaboradorAfeto = colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id);
                     return (
                       <Stack key={`estado_${row?.id}_${index}`} sx={{ pl: 0.25 }}>
                         <Stack direction="row" alignItems="flex-end" useFlexGap flexWrap="wrap">
@@ -108,7 +111,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                                   caption
                                   tipo="time"
                                   value={fToNow(row?.data_entrada)}
-                                  sx={{ color: colorProcesso(processo?.cor) }}
+                                  sx={{ pr: 0, color: colorProcesso(processo?.cor) }}
                                 />
                               )}
                             </Stack>
@@ -134,23 +137,23 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                       </Stack>
                     );
                   })}
-                  {processo?.estados?.length > 0 && processo?.estado?.estado && (
+                  {estados?.length > 0 && estado?.estado && (
                     <Stack>
-                      <Label color="info">Focal Point: {processo?.estado?.estado}</Label>
+                      <Label color="info">Focal Point: {estado?.estado}</Label>
                     </Stack>
                   )}
                 </Stack>
               }
             />
           )}
-          {processo?.observacao && <TextItem title="Observação:" text={newLineText(processo?.observacao)} />}
+          {observacao && <TextItem title="Observação:" text={newLineText(observacao)} />}
           {(processo?.criado_em || processo?.criador) && (
             <TextItem
               title="Criado:"
               label={
                 <>
-                  <Criado tipo="data" value={ptDateTime(processo?.criado_em)} />
-                  <Criado tipo="user" value={processo?.criador ?? ''} baralhar />
+                  <Criado tipo="data" value={ptDateTime(processo?.criado_em)} sx={{ pr: 0 }} />
+                  <Criado tipo="user" value={processo?.criador ?? ''} baralhar sx={{ pr: 0 }} />
                 </>
               }
             />
@@ -158,46 +161,35 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
         </List>
       )}
 
-      {(entidadesList ||
-        processo?.email ||
-        processo?.conta ||
-        processo?.bi_cni ||
-        processo?.doc_idp ||
-        processo?.doc_ids ||
-        processo?.cliente ||
-        processo?.titular) && (
+      {(email || conta || titular || cliente || entidadesList || docId || docIdP || docIdS) && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
-          <TextItem text={processo?.titular} title={isPS ? 'Descrição:' : 'Titular:'} baralhar={!isPS} />
-          <TextItem
-            baralhar
-            text={processo?.email}
-            title={processo?.fluxo === 'Formulário' ? 'Codificação/Nome:' : 'Email:'}
-          />
-          {processo?.doc_idp && (
+          <TextItem text={titular} title={isPS ? 'Descrição:' : 'Titular:'} baralhar={!isPS} />
+          <TextItem baralhar text={email} title={fluxo === 'Formulário' ? 'Codificação/Nome:' : 'Email:'} />
+          {docIdP && (
             <TextItem
               baralhar
-              text={processo?.doc_idp?.toString()}
-              title={`${dis?.find(({ id }) => id === processo?.tipo_doc_idp)?.label || 'Doc. primário'}:`}
+              text={docIdP?.toString()}
+              title={`${dis?.find(({ id }) => id === docIdP)?.label || 'Doc. primário'}:`}
             />
           )}
-          {processo?.doc_ids && (
+          {docIdS && (
             <TextItem
               baralhar
-              text={processo?.doc_ids?.toString()}
-              title={`${dis?.find(({ id }) => id === processo?.tipo_doc_ids)?.label || 'Doc. secundário'}:`}
+              text={docIdS?.toString()}
+              title={`${dis?.find(({ id }) => id === docIdS)?.label || 'Doc. secundário'}:`}
             />
           )}
           {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} baralhar />}
-          {processo?.cliente && <TextItem title="Nº de cliente:" text={processo?.cliente?.toString()} baralhar />}
-          {processo?.conta && <TextItem title="Nº de conta:" text={processo?.conta?.toString()} baralhar />}
+          {cliente && <TextItem title="Nº de cliente:" text={cliente?.toString()} baralhar />}
+          {conta && <TextItem title="Nº de conta:" text={conta?.toString()} baralhar />}
           <TextItem
             title="Segmento:"
             text={(processo?.segmento === 'P' && 'Particular') || (processo?.segmento === 'E' && 'Empresa') || ''}
           />
-          <TextItem title="Balcão de domicílio:" text={`${bd ? `${bd} - ` : ''}${processo?.balcao_domicilio ?? ''}`} />
+          <TextItem title="Balcão de domicílio:" text={`${bd ? `${bd} - ` : ''}${balcao}`} />
         </List>
       )}
 
@@ -208,7 +200,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
           </ListItem>
           <TextItem title="Nº da operação:" text={processo?.numero_operacao} />
           <TextItem title="Descrição:" text={processo?.operacao} />
-          {origem && origem?.id === processo?.origem_id && (
+          {origem && origem?.id === origemId && (
             <TextItem
               title="Origem:"
               label={
@@ -217,10 +209,10 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                   {origem?.seguimento && <Typography>{origem.seguimento}</Typography>}
                   {(origem?.tipo || origem?.codigo || origem?.telefone || origem?.email) && (
                     <Stack useFlexGap spacing={1} flexWrap="wrap" direction="row" alignItems="center">
-                      {origem?.codigo && <SubItem value={origem.codigo} label="Código:" />}
-                      {origem?.tipo && <SubItem value={origem.tipo} label="Tipo:" />}
-                      {origem?.telefone && <SubItem value={origem.telefone} label="Telefone:" />}
-                      {origem?.email && <SubItem value={origem.email} label="Email:" />}
+                      <SubItem value={origem.codigo} label="Código:" />
+                      <SubItem value={origem.tipo} label="Tipo:" />
+                      <SubItem value={origem.telefone} label="Telefone:" />
+                      <SubItem value={origem.email} label="Email:" />
                     </Stack>
                   )}
                 </Stack>
@@ -295,13 +287,15 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
 SubItem.propTypes = { value: PropTypes.string, label: PropTypes.string };
 
 export function SubItem({ value, label }) {
-  return (
+  return value ? (
     <Typography variant="body2">
       <Typography variant="spam" sx={{ color: 'text.secondary' }}>
         {label}
       </Typography>
       &nbsp;{value}
     </Typography>
+  ) : (
+    ''
   );
 }
 
@@ -362,8 +356,8 @@ function ValorItem({ title, valor, cativos }) {
                           <TableCell align="center">
                             {row?.executado ? (
                               <>
-                                <Criado tipo="user" value={row?.cativador} baralhar />
-                                <Criado tipo="data" value={ptDate(row?.data_cativo)} />
+                                <Criado tipo="user" value={row?.cativador} baralhar sx={{ pr: 0 }} />
+                                <Criado tipo="data" value={ptDate(row?.data_cativo)} sx={{ pr: 0 }} />
                               </>
                             ) : (
                               <Checked check={row?.executado} />

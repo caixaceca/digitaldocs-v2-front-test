@@ -129,12 +129,12 @@ export function EncaminharEmSerie({ dados }) {
     () => ({
       mobs: dadosStepper?.mobs || '',
       parecer: dadosStepper?.parecer || null,
-      noperacao: dadosStepper?.noperacao || '',
       observacao: dadosStepper?.observacao || '',
       motivo_devolucao: dadosStepper?.motivo_devolucao || null,
+      noperacao: dadosStepper?.noperacao || processo?.numero_operacao || '',
       estado: dadosStepper?.estado || (destinos?.length === 1 && destinos?.[0]) || null,
     }),
-    [dadosStepper, destinos]
+    [dadosStepper, destinos, processo?.numero_operacao]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -251,18 +251,21 @@ export function OutrosEmSerie({ acao }) {
     () => findColaboradores(colaboradores, colaboradoresEstado),
     [colaboradores, colaboradoresEstado]
   );
+  const criador = useMemo(
+    () =>
+      acao === 'DEVOLVER' && dadosStepper?.estado?.inicial
+        ? colaboradoresList?.find(({ mail }) => mail?.toLowerCase() === processo?.criador?.toLowerCase())
+        : null,
+    [acao, colaboradoresList, dadosStepper?.estado?.inicial, processo?.criador]
+  );
 
   const formSchema = shapeAnexos(outros, checkList, true);
   const defaultValues = useMemo(
     () => ({
       ...defaultAnexos(dadosStepper, checkList, []),
-      colaborador:
-        colaboradoresList?.find(({ id }) => id === dadosStepper?.colaborador?.id) ||
-        (acao === 'DEVOLVER' &&
-          colaboradoresList?.find(({ mail }) => mail?.toLowerCase() === processo?.criador?.toLowerCase())) ||
-        null,
+      colaborador: colaboradoresList?.find(({ id }) => id === dadosStepper?.colaborador?.id) || criador,
     }),
-    [acao, checkList, colaboradoresList, dadosStepper, processo?.criador]
+    [checkList, colaboradoresList, criador, dadosStepper]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -276,6 +279,7 @@ export function OutrosEmSerie({ acao }) {
       if (dadosStepper?.noperacao) formData.append('noperacao', dadosStepper.noperacao);
       if (dadosStepper?.observacao) formData.append('observacao', dadosStepper.observacao);
       if (values?.colaborador?.id) formData.append('perfil_afeto_id', values.colaborador.id);
+      else if (criador?.id) formData.append('perfil_afeto_id', criador.id);
       if (dadosStepper?.motivo_devolucao?.id) formData.append('motivo_id', dadosStepper.motivo_devolucao?.id);
 
       if (dadosStepper?.parecer === 'Favorável') formData.append('parecer_favoravel', true);

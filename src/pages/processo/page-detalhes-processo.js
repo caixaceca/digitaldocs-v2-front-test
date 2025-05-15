@@ -319,7 +319,7 @@ export default function PageProcesso() {
         {isOpenModal === 'pendencia' && <ColocarPendenteForm onClose={() => openModal()} />}
         {isOpenModal === 'finalizar-ne' && <FinalizarNeForm onClose={() => openModal()} id={id} />}
         {isOpenModal === 'finalizar-ope' && <FinalizarOpeForm onClose={() => openModal()} id={id} />}
-        {isOpenModal === 'domiciliar' && <DomiciliarForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
+        {isOpenModal === 'domiciliar' && <DomiciliarForm ids={{ id, estadoId }} onClose={() => openModal()} />}
         {isOpenModal === 'focal-point' && <FocalPointForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
         {isOpenModal === 'editar-processo' && <ProcessoForm isEdit processo={processo} ambientId={estadoId} />}
         {isOpenModal === 'eliminar-processo' && <EliminarForm ids={{ id, estadoId }} onClose={() => openModal()} />}

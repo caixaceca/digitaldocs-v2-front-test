@@ -73,7 +73,7 @@ const slice = createSlice({
     getFileSuccess(state, action) {
       const { url, anexo } = action.payload;
       if (url) state.objectURLs.push(url);
-      const index = state.processo.anexos.findIndex((item) => item.anexo === anexo);
+      const index = state.processo.anexos.findIndex(({ item: anexoItem }) => anexoItem === anexo);
       if (index !== -1) state.processo.anexos[index].url = url;
     },
 
@@ -562,30 +562,33 @@ export function deleteItem(item, params) {
 // ----------------------------------------------------------------------
 
 function processarProcesso(processo, perfilId, dispatch, aceitar, ht) {
-  const { estados = [] } = processo;
+  const { estados = [], anexos_entidades: anexosEnt = [], anexos = [] } = processo;
+  const { estado_dono_paralelo_id: donoId, estado_dono_paralelo: donoLabel } = processo;
+  const { id, status = '', duplicado = false, data_duplicacao: dataDup = '', cc_duplicacao: ccDup = '' } = processo;
+
   const preso = estados?.find(({ preso, perfil_id: pid }) => preso && pid === perfilId)?.estado_id || '';
 
-  if (processo?.status === 'A') processo.estado = { estado: 'Arquivo' };
-  else if (processo?.estado_dono_paralelo_id && processo?.estado_dono_paralelo) {
+  if (status === 'A') processo.estado = { estado: 'Arquivo', duplicado, dataDup, ccDup };
+  else if (donoId && donoLabel) processo.estado = { estado: donoLabel, estado_id: donoId, duplicado, dataDup, ccDup };
+  else if (estados.length === 1) {
     processo.estado = {
-      estado: processo?.estado_dono_paralelo ?? '',
-      estado_id: processo?.estado_dono_paralelo_id ?? '',
+      ...(estados?.[0] ?? null),
+      ...{ duplicado, dataDup, ccDup },
+      atribuidoAMim: estados?.[0]?.perfil_id === perfilId,
     };
-  } else if (estados.length === 1) {
-    processo.estado = { ...(estados?.[0] ?? null), atribuidoAMim: estados?.[0]?.perfil_id === perfilId };
     processo.pareceres_estado = estados[0]?.pareceres?.length ? estados[0].pareceres : [];
     processo.estados = [];
   }
 
   processo.estadoPreso = preso;
 
-  const anexos = anexosEntidades(processo?.anexos_entidades || []);
-  processo.anexos = [...processo.anexos, ...anexos];
+  const anexosEnts = anexosEntidades(anexosEnt);
+  processo.anexos = [...anexos, ...anexosEnts];
   dispatch(slice.actions.getProcessoSuccess(processo));
   dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: false }));
 
-  if (aceitar || preso) dispatch(getInfoProcesso('destinos', { id: processo.id, estadoId: aceitar || preso }));
-  if (ht) dispatch(getInfoProcesso('htransicoes', { id: processo.id }));
+  if (aceitar || preso) dispatch(getInfoProcesso('destinos', { id, estadoId: aceitar || preso }));
+  if (ht) dispatch(getInfoProcesso('htransicoes', { id }));
 
   return processo;
 }

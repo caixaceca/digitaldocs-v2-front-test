@@ -141,19 +141,20 @@ export function destinosProcesso(processo, gerencia) {
     fluxo === 'Abertura de Conta' &&
     !htransicoes?.find(({ modo, estado_atual: estado }) => estado?.includes('Compliance') && modo === 'Seguimento');
 
-  destinos?.forEach((row) => {
-    if (uoId !== row?.uo_id) destinosFora.push(row?.nome);
+  destinos?.forEach(({ modo, nome, hasopnumero, paralelo, transicao_id: id, is_inicial: inicial, ...res }) => {
+    if (uoId !== res?.uo_id) destinosFora.push(nome);
     const destino = {
-      modo: row.modo,
-      label: row?.nome,
-      id: row.transicao_id,
-      paralelo: row?.paralelo,
-      hasopnumero: row.hasopnumero,
-      estado_final_id: row.estado_id,
-      requer_parecer: row?.requer_parecer,
+      id,
+      modo,
+      inicial,
+      paralelo,
+      hasopnumero,
+      label: nome,
+      estado_final_id: res.estado_id,
+      requer_parecer: res?.requer_parecer,
     };
-    if (row.modo === 'Seguimento') {
-      if (aberturaESemValGFC && row?.nome?.includes('Compliance')) seguimentos?.push(destino);
+    if (modo === 'Seguimento') {
+      if (aberturaESemValGFC && nome?.includes('Compliance')) seguimentos?.push(destino);
       else if (!aberturaESemValGFC) seguimentos?.push(destino);
     } else devolucoes.push(destino);
   });
