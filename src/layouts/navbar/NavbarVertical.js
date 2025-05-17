@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 import { NavLink as RouterLink } from 'react-router-dom';
 // @mui
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
@@ -91,14 +92,11 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
       />
 
       {!isCollapse && (
-        <Stack spacing={3} alignItems="center" sx={{ px: 5.5, pb: 5, my: 10, width: 1, textAlign: 'center' }}>
-          {certificacoes.map((cert) => (
-            <Image
-              key={cert.designacao}
-              alt={cert.designacao}
-              src={`${BASEURL}/certificacao/file/certificacao/${cert?.imagem_disco}`}
-              sx={{ width: '100%', height: 'auto', borderRadius: 1.5, flexShrink: 0, px: 3 }}
-            />
+        <Stack spacing={3} alignItems="center" sx={{ p: 5, width: 1, textAlign: 'center' }}>
+          {certificacoes.map(({ designacao, imagem_disco: imagem }, index) => (
+            <Box key={designacao || `cert_${index}`} sx={{ px: 3 }}>
+              <Image alt={designacao} src={`${BASEURL}/certificacao/file/certificacao/${imagem}`} />
+            </Box>
           ))}
         </Stack>
       )}

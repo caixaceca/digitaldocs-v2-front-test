@@ -17,7 +17,6 @@ import useTable, { applySort, getComparator } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, getSuccess, setModal } from '../../redux/slices/parametrizacao';
 // Components
-import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
 import { CellChecked } from '../../components/Panel';
@@ -46,10 +45,7 @@ export default function TableInfoFluxo({ item }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({
-    defaultOrder: item === 'transicoes' ? 'desc' : 'asc',
-    defaultOrderBy: item === 'transicoes' ? 'id' : 'nome',
-  });
+  } = useTable({});
   const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
@@ -70,7 +66,6 @@ export default function TableInfoFluxo({ item }) {
     comparator: getComparator(order, orderBy),
     dados:
       (item === 'checklist' && checklist) ||
-      (item === 'transicoes' && transicoes) ||
       (item === 'notificacoes' && notificacoes) ||
       (item === 'estados' && estadosList(fluxo?.transicoes, estados, uos)) ||
       [],
@@ -82,7 +77,6 @@ export default function TableInfoFluxo({ item }) {
     const dadosModal = item === 'notificacoes' || modal === 'eliminar-item' ? dados : null;
     dispatch(setModal({ item: modal, isEdit: true, dados: dadosModal }));
     if (modal !== 'eliminar-item') {
-      if (item === 'transicoes') dispatch(getFromParametrizacao('transicao', { id, item: 'selectedItem' }));
       if (item === 'checklist') dispatch(getFromParametrizacao('checklistitem', { id, item: 'selectedItem' }));
       if (item === 'notificacoes') {
         dispatch(getSuccess({ item: 'destinatarios', dados: [] }));
@@ -105,22 +99,7 @@ export default function TableInfoFluxo({ item }) {
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
-                      {(item === 'transicoes' && (
-                        <>
-                          <TableCell>{row.estado_inicial}</TableCell>
-                          <TableCell>{row.estado_final}</TableCell>
-                          <TableCell align="center">
-                            <Label color={row?.modo === 'Seguimento' ? 'success' : 'error'}>
-                              {row?.modo}
-                              {row?.is_after_devolucao ? ' - DD' : ''}
-                            </Label>
-                          </TableCell>
-                          <TableCell align="center">
-                            {row.prazoemdias > 1 ? `${row.prazoemdias} dias` : `${row.prazoemdias} dia`}
-                          </TableCell>
-                        </>
-                      )) ||
-                        (item === 'estados' && <EstadoDetail row={row} />) ||
+                      {(item === 'estados' && <EstadoDetail row={row} />) ||
                         (item === 'checklist' && (
                           <>
                             <TableCell>{row?.designacao || row?.tipo_documento}</TableCell>
@@ -186,7 +165,7 @@ export default function TableInfoFluxo({ item }) {
 
 // ----------------------------------------------------------------------
 
-export function estadosList(transicoes = [], estados = [], uos = []) {
+export function estadosList(dados = [], estados = [], uos = []) {
   const estadosProcessados = new Set();
   const estadosLista = [];
 
@@ -204,7 +183,7 @@ export function estadosList(transicoes = [], estados = [], uos = []) {
     estadosProcessados.add(id);
   };
 
-  transicoes.forEach(({ estado_inicial_id: ei, estado_final_id: ef }) => {
+  dados.forEach(({ estado_inicial_id: ei, estado_final_id: ef }) => {
     processarEstado(ei);
     processarEstado(ef);
   });
@@ -213,12 +192,6 @@ export function estadosList(transicoes = [], estados = [], uos = []) {
 }
 
 function headerTable(item) {
-  const transicoes = [
-    { id: 'estado_inicial', label: 'Origem' },
-    { id: 'estado_final', label: 'Destino' },
-    { id: 'modo', label: 'Modo', align: 'center' },
-    { id: 'prazoemdias', label: 'Prazo', align: 'center' },
-  ];
   const estados = [
     { id: 'nome', label: 'Nome' },
     { id: 'uo', label: 'U.O' },
@@ -241,7 +214,6 @@ function headerTable(item) {
   const header = [
     ...((item === 'estados' && estados) ||
       (item === 'checklist' && checklist) ||
-      (item === 'transicoes' && transicoes) ||
       (item === 'notificacoes' && notificacoes) ||
       []),
     ...(item !== 'estados' ? [{ id: '', width: 10 }] : []),

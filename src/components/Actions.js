@@ -84,6 +84,7 @@ export function DefaultAction({
   const colorAlt =
     ((label === 'EDITAR' ||
       label === 'Editar' ||
+      label === 'REATIVAR' ||
       label === 'RESGATAR' ||
       label === 'LIBERTAR' ||
       label === 'Composição' ||
@@ -110,7 +111,6 @@ export function DefaultAction({
     (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
     (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
     (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
-    (label === 'RESGATAR' && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'REVOGAR' && <UnpublishedOutlinedIcon sx={{ width: 20 }} />) ||
     (label === 'VERSIONAR' && <DifferenceOutlinedIcon sx={{ width: 20 }} />) ||
     (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
@@ -122,6 +122,7 @@ export function DefaultAction({
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     ((label === 'Clonar' || label === 'CLONAR') && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
+    ((label === 'RESGATAR' || label === 'REATIVAR') && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Procurar' || label === 'PROCURAR') && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -131,9 +132,11 @@ export function DefaultAction({
     ((label === 'Editar' || label === 'EDITAR' || label === 'Composição' || label === 'FOCAL POINT') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
-    ((label === 'ADICIONAR' || label === 'Adicionar' || icon === 'adicionar' || label === 'Mostrar detalhes') && (
-      <AddCircleIcon sx={{ width: small ? 18 : 22 }} />
-    )) ||
+    ((icon === 'adicionar' ||
+      label === 'ADICIONAR' ||
+      label === 'Adicionar' ||
+      label === 'Mostrar detalhes' ||
+      label === 'Carregar proposta') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'CONTRATO' || label === 'Pré-visualizar') &&
       getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
     ((label === 'Gerir acessos' || label === 'Transições' || label === 'Comparar colaboradores') && (

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 // utils
-import { noEstado, podeArquivar, processoEstadoInicial } from '../../utils/validarAcesso';
+import { noEstado, podeArquivar, processoEstadoInicial, gestorEstado } from '../../utils/validarAcesso';
 // redux
 import { resetDados } from '../../redux/slices/stepper';
 import { useDispatch, useSelector } from '../../redux/store';
@@ -95,7 +95,7 @@ export default function Intervencao() {
       {podeArquivar(processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) && (
         <DefaultAction label="ARQUIVAR" onClick={() => openModal('arquivar', null)} />
       )}
-      {processoEstadoInicial(meusAmbientes, estado?.estado_id) && (
+      {processoEstadoInicial(meusAmbientes, estado?.estado_id) && gestorEstado(meusAmbientes, estado?.estado_id) && (
         <DefaultAction label="ELIMINAR" onClick={() => openModal('eliminar-processo', null)} />
       )}
       {isOpenModal === 'arquivar' && <ArquivarForm onClose={() => openModal()} naoFinal={destinos?.destinosFora} />}

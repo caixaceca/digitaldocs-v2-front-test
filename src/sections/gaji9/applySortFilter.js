@@ -18,12 +18,14 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.codigo && normalizeText(row?.codigo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.titulo && normalizeText(row?.titulo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.sufixo && normalizeText(row?.sufixo).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
         (row?.prefixo && normalizeText(row?.prefixo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.subtitulo && normalizeText(row?.subtitulo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.componente && normalizeText(row?.componente).indexOf(normalizeText(filter)) !== -1) ||
         (row?.descritivo && normalizeText(row?.descritivo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1) ||
+        (row?.finalidade && normalizeText(row?.finalidade).indexOf(normalizeText(filter)) !== -1) ||
         (row?.tipo_titular && normalizeText(row?.tipo_titular).indexOf(normalizeText(filter)) !== -1) ||
         (row?.tipo_conteudo && normalizeText(row?.tipo_conteudo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.numero_proposta && normalizeText(row?.numero_proposta).indexOf(normalizeText(filter)) !== -1) ||

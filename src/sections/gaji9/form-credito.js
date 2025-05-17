@@ -51,6 +51,8 @@ export default function CreditoForm({ onCancel }) {
     taxa_imposto_selo: Yup.number().min(0).required().label('Taxa imposto de selo'),
     prazo_contratual: Yup.number().positive(0).required().label('Prazo contratual'),
     valor_comissao: Yup.number().min(0).required().label('Valor total de comissões'),
+    taxa_juro_precario: Yup.number().min(0).required().label('Taxa de juros preçario'),
+    taxa_juro_desconto: Yup.number().min(0).required().label('Taxa de juros desconto'),
     valor_imposto_selo: Yup.number().min(0).required().label('Valor total de imposto selo'),
     taxa_comissao_abertura: Yup.number().min(0).required().label('Taxa comissão de abertura'),
     data_vencimento_prestacao1: Yup.date().typeError().required().label('Venc. 1ª prestação'),
@@ -70,6 +72,8 @@ export default function CreditoForm({ onCancel }) {
       taxa_imposto_selo: credito?.taxa_imposto_selo ?? 0,
       valor_imposto_selo: credito?.valor_imposto_selo ?? '',
       valor_premio_seguro: credito?.valor_premio_seguro ?? 0,
+      taxa_juro_precario: credito?.taxa_juro_precario ?? '',
+      taxa_juro_desconto: credito?.taxa_juro_desconto ?? '',
       taxa_comissao_abertura: credito?.taxa_comissao_abertura ?? '',
       valor_prestacao_sem_desconto: credito?.valor_prestacao_sem_desconto ?? '',
       data_vencimento_prestacao1: fillData(credito?.data_vencimento_prestacao1, null),
@@ -112,34 +116,40 @@ export default function CreditoForm({ onCancel }) {
             <GridItem xs={6} md={4}>
               <RHFDatePicker name="data_vencimento_prestacao1" label="Venc. 1ª prestação" />
             </GridItem>
-            <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Prêmio do seguro" name="valor_premio_seguro" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Valor total de juros" name="valor_juro" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Valor prestação sem desconto" name="valor_prestacao_sem_desconto" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Valor total de imposto selo" name="valor_imposto_selo" tipo="CVE" />
+            </GridItem>
+            <GridItem xs={6} md={4}>
+              <RHFNumberField label="Valor total de comissões" name="valor_comissao" tipo="CVE" />
+            </GridItem>
             <GridItem xs={6} md={4}>
               <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
             </GridItem>
+            <GridItem xs={6} md={4} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" tipo="%" />} />
             <GridItem xs={6} md={4}>
               <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
             </GridItem>
-            <GridItem xs={6} md={3} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" tipo="%" />} />
+            <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Taxa de juros preçario" name="taxa_juro_precario" tipo="%" />
+            </GridItem>
+            <GridItem xs={6} md={3}>
+              <RHFNumberField label="Taxa de juros desconto" name="taxa_juro_desconto" tipo="%" />
+            </GridItem>
             <GridItem xs={6} md={3}>
               <RHFNumberField label="Taxa comissão de abertura" name="taxa_comissao_abertura" tipo="%" />
             </GridItem>
             <GridItem xs={6} md={3}>
               <RHFNumberField label="Taxa imposto de selo" name="taxa_imposto_selo" tipo="%" />
-            </GridItem>
-            <GridItem xs={6} md={3}>
-              <RHFNumberField label="Prêmio do seguro" name="valor_premio_seguro" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} md={3}>
-              <RHFNumberField label="Valor total de juros" name="valor_juro" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} md={3}>
-              <RHFNumberField label="Valor total de imposto selo" name="valor_imposto_selo" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} md={3}>
-              <RHFNumberField label="Valor total de comissões" name="valor_comissao" tipo="CVE" />
-            </GridItem>
-            <GridItem xs={6} md={3}>
-              <RHFNumberField label="Valor prestação sem desconto" name="valor_prestacao_sem_desconto" tipo="CVE" />
             </GridItem>
             <GridItem children={<RHFTextField label="Finalidade" name="finalidade" />} />
           </Grid>
@@ -321,43 +331,23 @@ PreviewForm.propTypes = { item: PropTypes.string, onCancel: PropTypes.func };
 
 export function PreviewForm({ item, onCancel }) {
   const dispatch = useDispatch();
-  const { isLoadingDoc, credito, minutasPublicas, representantes } = useSelector((state) => state.gaji9);
+  const { isLoadingDoc, credito, minutaContrato, representantes } = useSelector((state) => state.gaji9);
+  const { id, balcao_domicilio: balcao, cliente = '' } = credito;
 
   useEffect(() => {
-    dispatch(getFromGaji9('representantes', { notLoading: true }));
-    dispatch(getFromGaji9('minutasPublicas', { notLoading: true }));
-  }, [dispatch]);
+    dispatch(getFromGaji9('representantes', { notLoading: true, reset: { val: [] } }));
+    dispatch(getFromGaji9('minutaContrato', { notLoading: true, id, reset: { val: null } }));
+  }, [dispatch, id]);
 
   const representantesList = useMemo(
-    () =>
-      representantes
-        ?.filter(({ balcao }) => balcao === credito?.balcao_domicilio)
-        ?.map(({ id, nome }) => ({ id, label: nome })),
-    [credito?.balcao_domicilio, representantes]
+    () => representantes?.filter(({ balcao: balc }) => balc === balcao)?.map(({ id, nome }) => ({ id, label: nome })),
+    [balcao, representantes]
   );
 
-  const minutasList = useMemo(
-    () =>
-      minutasPublicas
-        ?.filter(
-          ({ componente_id: cp, tipo_titular_id: tt }) =>
-            cp === credito?.componente_id && tt === credito?.tipo_titular_id
-        )
-        ?.map(({ id, titulo, subtitulo }) => ({ id, label: `${titulo} - ${subtitulo}` })),
-    [credito?.componente_id, credito?.tipo_titular_id, minutasPublicas]
-  );
-
-  const formSchema = Yup.object().shape({
-    minuta: Yup.mixed().required().label('Minuta'),
-    representante: Yup.mixed().required().label('Representante'),
-  });
+  const formSchema = Yup.object().shape({ representante: Yup.mixed().required().label('Representante') });
   const defaultValues = useMemo(
-    () => ({
-      cache: false,
-      minuta: minutasList?.length === 1 ? minutasList[0] : null,
-      representante: representantesList?.length === 1 ? representantesList[0] : null,
-    }),
-    [minutasList, representantesList]
+    () => ({ cache: false, representante: representantesList?.length === 1 ? representantesList[0] : null }),
+    [representantesList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -367,15 +357,15 @@ export function PreviewForm({ item, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minutasList, representantesList]);
+  }, [minutaContrato, representantesList]);
 
   const onSubmit = async () => {
-    const params = { creditoId: credito?.id, minutaId: values?.minuta?.id, representanteId: values?.representante?.id };
+    const params = { creditoId: id, minutaId: minutaContrato?.id, representanteId: values?.representante?.id };
     dispatch(
       getDocumento(item, {
         ...params,
         cache: !values?.cache,
-        titulo: `${item === 'preview-contrato' ? 'Pré-visualização de ' : ''}Contrato: Cliente ${credito?.cliente}`,
+        titulo: `${item === 'preview-contrato' ? 'Pré-visualização de ' : ''}Contrato: Cliente ${cliente}`,
       })
     );
   };
@@ -397,7 +387,13 @@ export function PreviewForm({ item, onCancel }) {
                 </Typography>
               </Alert>
             )}
-            <RHFAutocompleteObj dc name="minuta" label="Minuta" options={minutasList} />
+            {minutaContrato && (
+              <Stack>
+                <Typography sx={{ color: 'text.secondary' }}>Minuta:</Typography>
+                <Typography variant="subtitle2">{minutaContrato?.titulo}</Typography>
+                <Typography variant="subtitle2">{minutaContrato?.subtitulo}</Typography>
+              </Stack>
+            )}
             <RHFAutocompleteObj dc name="representante" label="Representante" options={representantesList} />
             <RHFSwitch name="cache" label="Forçar atualização dos dados da banca" />
           </Stack>

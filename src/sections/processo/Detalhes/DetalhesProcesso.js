@@ -80,15 +80,24 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
               title="Estado:"
               situacao={
                 (devolvido || estado?.duplicado) && (
-                  <Stack direction="row" spacing={1}>
-                    <Label color="error" startIcon={<ErrorOutlineIcon />}>
-                      {devolvido ? 'Devolvido' : 'Eliminado'}
-                    </Label>
-                    {(estado?.ccDup || estado?.dataDup) && (
-                      <Stack direction="row" sx={{ color: 'text.secondary' }}>
-                        <Criado caption tipo="user" value={estado?.ccDup} />
-                        <Criado caption tipo="data" value={ptDateTime(estado?.dataDup)} sx={{ pr: 0 }} />
-                      </Stack>
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                    {devolvido && (
+                      <Label color="error" startIcon={<ErrorOutlineIcon />}>
+                        Devolvido
+                      </Label>
+                    )}
+                    {estado?.duplicado && (
+                      <>
+                        <Label color="error" startIcon={<ErrorOutlineIcon />}>
+                          Eliminado
+                        </Label>
+                        {(estado?.ccDup || estado?.dataDup) && (
+                          <Stack direction="row" sx={{ color: 'text.secondary' }}>
+                            <Criado caption tipo="user" value={estado?.ccDup} />
+                            <Criado caption tipo="data" value={ptDateTime(estado?.dataDup)} sx={{ pr: 0 }} />
+                          </Stack>
+                        )}
+                      </>
                     )}
                   </Stack>
                 )

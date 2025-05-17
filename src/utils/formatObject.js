@@ -16,13 +16,6 @@ export function colaboradorByPerfilId(id, colaboradores) {
 
 // ----------------------------------------------------------------------
 
-export function balcoesList(uos) {
-  if (!uos) return [];
-  return uos.filter((item) => item.tipo === 'Agências').map(({ balcao, label }) => ({ id: balcao, label }));
-}
-
-// ----------------------------------------------------------------------
-
 export function setItemValue(newValue, setItem, localS, id) {
   if (setItem) setItem(newValue);
   if (localS) localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');

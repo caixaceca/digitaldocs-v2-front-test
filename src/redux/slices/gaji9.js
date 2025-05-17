@@ -36,6 +36,7 @@ const initialState = {
   utilizador: null,
   previewFile: null,
   selectedItem: null,
+  minutaContrato: null,
   estadoMinutas: localStorage.getItem('estadoMinutas') || 'Em análise',
   grupos: [],
   minutas: [],
@@ -50,7 +51,6 @@ const initialState = {
   tiposGarantias: [],
   tiposTitulares: [],
   representantes: [],
-  minutasPublicas: [],
 };
 
 const slice = createSlice({
@@ -118,7 +118,7 @@ export function getFromGaji9(item, params) {
     if (!params?.notLoading) dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     try {
       const accessToken = await getAccessToken();
-      console.log(accessToken);
+      // console.log(accessToken);
       const apiUrl =
         // DETALHES
         (item === 'infoCaixa' && `${BASEURLGAJI9}/v1/suportes/instituicao`) ||
@@ -136,12 +136,12 @@ export function getFromGaji9(item, params) {
         (item === 'credito' && `${BASEURLGAJI9}/v1/suportes/creditos/detail?credito_id=${params?.id}`) ||
         (item === 'entidade' && `${BASEURLGAJI9}/v1/suportes/entidades/detail?entidade_id=${params?.id}`) ||
         (item === 'gerarDocumento' && `${BASEURLGAJI9}/v1/minutas/gerar/documento?minuta_id=${params?.id}`) ||
+        (item === 'minutaContrato' && `${BASEURLGAJI9}/v1/suportes/creditos/minuta?credito_id=${params?.id}`) ||
         ((item === 'utilizador' || item === 'funcao') &&
           `${BASEURLGAJI9}/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
           `${BASEURLGAJI9}/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${!!params?.credibox}`) ||
         // LISTA
-        (item === 'minutasPublicas' && `${BASEURLGAJI9}/v1/minutas/publicas`) ||
         (item === 'importar componentes' && `${BASEURLGAJI9}/v1/produtos/importar`) ||
         (item === 'grupos' && `${BASEURLGAJI9}/v1/acs/grupos/lista?ativo=${!params?.inativos}`) ||
         (item === 'funcoes' && `${BASEURLGAJI9}/v1/acs/roles/lista?ativo=${!params?.inativos}`) ||
@@ -154,15 +154,16 @@ export function getFromGaji9(item, params) {
         (item === 'tiposTitulares' && `${BASEURLGAJI9}/v1/tipos_titulares/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposGarantias' && `${BASEURLGAJI9}/v1/tipos_garantias/lista?ativo=${!params?.inativos}`) ||
         (item === 'representantes' && `${BASEURLGAJI9}/v1/acs/representantes/lista?ativo=${!params?.inativos}`) ||
-        (item === 'creditos' &&
-          `${BASEURLGAJI9}/v1/suportes/creditos/por_balcao?balcao=${params?.balcao}&cursor=${params?.cursor || 0}`) ||
         (item === 'minutas' &&
           `${BASEURLGAJI9}/v1/minutas/lista?em_analise=${params?.emAnalise}&em_vigor=${params?.emVigor}&revogado=${params?.revogado}&ativo=${!params?.inativos}`) ||
+        (item === 'creditos' &&
+          `${BASEURLGAJI9}/v1/suportes/creditos/localizar?cursor=${params?.cursor || 0}${params?.balcao ? `&balcao=${params?.balcao}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.codigo ? `&codigo=${params?.codigo}` : ''}${params?.proposta ? `&numero_proposta=${params?.proposta}` : ''}`) ||
         (item === 'clausulas' &&
           `${BASEURLGAJI9}/v1/clausulas/lista?ativo=${!params?.inativos}${params?.solta ? `&solta=true` : ''}${params?.condicional ? `&condicional=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.componenteId ? `&componente_id=${params?.componenteId}` : ''}`) ||
         '';
       if (apiUrl) {
-        if (params?.resetLista) dispatch(slice.actions.getSuccess({ item, dados: item === 'creditos' ? 'reset' : [] }));
+        if (params?.reset)
+          dispatch(slice.actions.getSuccess({ item, dados: item === 'creditos' ? 'reset' : params?.reset?.val }));
 
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         const response = await axios.get(apiUrl, headers);

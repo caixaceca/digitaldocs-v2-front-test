@@ -39,7 +39,6 @@ import {
 } from '../../sections/processo/Detalhes';
 import {
   AnexosForm,
-  EliminarForm,
   AtribuirForm,
   LibertarForm,
   ResgatarForm,
@@ -47,6 +46,7 @@ import {
   DomiciliarForm,
   FinalizarNeForm,
   FinalizarOpeForm,
+  EliminarReativar,
   ColocarPendenteForm,
 } from '../../sections/processo/form/intervencao';
 import Intervencao from '../../sections/processo/Intervencao';
@@ -322,8 +322,8 @@ export default function PageProcesso() {
         {isOpenModal === 'domiciliar' && <DomiciliarForm ids={{ id, estadoId }} onClose={() => openModal()} />}
         {isOpenModal === 'focal-point' && <FocalPointForm ids={{ id, fluxoId }} onClose={() => openModal()} />}
         {isOpenModal === 'editar-processo' && <ProcessoForm isEdit processo={processo} ambientId={estadoId} />}
-        {isOpenModal === 'eliminar-processo' && <EliminarForm ids={{ id, estadoId }} onClose={() => openModal()} />}
         {isOpenModal === 'atribuir' && <AtribuirForm colaboradores={colaboradoresList} onClose={() => openModal()} />}
+        {isOpenModal === 'eliminar-processo' && <EliminarReativar ids={{ id, estadoId }} onClose={() => openModal()} />}
         {isOpenModal === 'desarquivar' && (
           <DesarquivarForm id={id} colaboradores={colaboradoresList} onClose={() => openModal()} />
         )}

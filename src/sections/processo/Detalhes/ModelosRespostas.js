@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
-import { Packer, Header, Footer, TextRun, Document, ImageRun, Paragraph, PageNumber, AlignmentType } from 'docx';
+import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
 // @mui
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -13,6 +13,8 @@ import { getFileThumb } from '../../../utils/formatFile';
 import { valorPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';
+//
+import { CabecalhoWord, RodapeWord } from '../../../components/ExportDados';
 
 // ----------------------------------------------------------------------
 
@@ -22,9 +24,9 @@ export default function ModelosRespostas() {
   const origem = origens?.find((row) => row?.id === processo?.origem_id);
 
   const exportToWord = async (tipo) => {
-    const logo = await fetch('/assets/caixa_logo_carta.png').then((r) => r.blob());
-    const iso27001 = await fetch('/assets/ISO27001.png').then((r) => r.blob());
-    const iso9001 = await fetch('/assets/ISO9001.png').then((r) => r.blob());
+    const logo = await fetch('/assets/caixa_logo_carta.png').then((r1) => r1.arrayBuffer());
+    const iso27001 = await fetch('/assets/iso27001.png').then((r2) => r2.arrayBuffer());
+    const iso9001 = await fetch('/assets/iso9001.png').then((r3) => r3.arrayBuffer());
     const alignSpacing = { spacing: { line: 360 }, alignment: AlignmentType.JUSTIFIED };
 
     const cativosList = () => {
@@ -182,69 +184,9 @@ export default function ModelosRespostas() {
       },
       sections: [
         {
-          properties: { page: { margin: { top: '54mm', right: '53mm', bottom: '35mm', left: '25mm' } } },
-          headers: {
-            default: new Header({
-              children: [
-                new Paragraph({
-                  style: 'codificacao',
-                  indent: { left: '25mm' },
-                  spacing: { before: '10mm' },
-                  frame: { anchor: { horizontal: 'page', vertical: 'page', wrap: 'tight' } },
-                  children: [
-                    new TextRun('MKTG.FM.U.001.02 | 2021.04.09 |'),
-                    new TextRun({ children: [' ', PageNumber.CURRENT] }),
-                    new TextRun({ children: ['/', PageNumber.TOTAL_PAGES] }),
-                  ],
-                }),
-                new Paragraph({
-                  indent: { left: '159mm' },
-                  frame: { anchor: { horizontal: 'page', vertical: 'page' }, wrap: 'tight' },
-                  children: [new ImageRun({ data: logo, transformation: { width: 193, height: 185 } })],
-                }),
-                new Paragraph({
-                  style: 'slogan',
-                  spacing: { before: '51mm' },
-                  alignment: AlignmentType.RIGHT,
-                  text: 'o banco que combina comigo',
-                  frame: { height: '51mm', anchor: { horizontal: 'page', vertical: 'page' }, width: '19.94cm' },
-                }),
-              ],
-            }),
-          },
-          footers: {
-            default: new Footer({
-              children: [
-                new Paragraph({
-                  style: 'slogan',
-                  alignment: AlignmentType.RIGHT,
-                  children: [
-                    new TextRun({ text: 'Caixa Económica de Cabo Verde, S.A.', break: 1 }),
-                    new TextRun({
-                      text: 'Capital social nominal de 1.392.000.000$00, Conserv. do Reg. Comerc. da Praia nº 336',
-                      break: 1,
-                    }),
-                    new TextRun({
-                      text: 'Sede: Av. Cidade de Lisboa, C.P. 199, Praia, Ilha de Santiago, Cabo Verde',
-                      break: 1,
-                    }),
-                    new TextRun({ text: 'Tel. +238 260 36 00, fax +238 261 55 60, e-mail: caixa@caixa.cv', break: 1 }),
-                    new TextRun({ text: 'NIF: 200131753, Swift: CXEC CV CV', break: 1 }),
-                    new TextRun({ text: 'O único banco em Cabo Verde certificado ISO 9001 e ISO 27001', break: 1 }),
-                  ],
-                }),
-                new Paragraph({
-                  frame: { position: { x: '168mm' }, anchor: { horizontal: 'page', vertical: 'text' } },
-                  children: [new ImageRun({ data: iso27001, transformation: { width: 105, height: 45 } })],
-                }),
-                new Paragraph({
-                  spacing: { before: '1mm', after: '11mm' },
-                  frame: { position: { x: '168mm' }, anchor: { horizontal: 'page', vertical: 'text' } },
-                  children: [new ImageRun({ data: iso9001, transformation: { width: 105, height: 45 } })],
-                }),
-              ],
-            }),
-          },
+          properties: { page: { margin: { top: '54mm', bottom: '35mm', right: '53mm', left: '25mm' } } },
+          headers: CabecalhoWord(true, logo, 'MKTG.FM.U.001.02 | 2021.04.09'),
+          footers: RodapeWord(true, iso27001, iso9001),
           children: [
             new Paragraph({
               spacing: { line: 360 },

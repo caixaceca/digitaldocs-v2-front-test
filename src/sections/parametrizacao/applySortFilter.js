@@ -34,9 +34,7 @@ export function applySortFilter({ dados, filter, comparator }) {
         (row?.descritivo && normalizeText(row?.descritivo).indexOf(normalizeText(filter)) !== -1) ||
         (row?.designacao && normalizeText(row?.designacao).indexOf(normalizeText(filter)) !== -1) ||
         (row?.seguimento && normalizeText(row?.seguimento).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.referencia && normalizeText(row?.referencia).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.estado_final && normalizeText(row?.estado_final).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.estado_inicial && normalizeText(row?.estado_inicial).indexOf(normalizeText(filter)) !== -1)
+        (row?.referencia && normalizeText(row?.referencia).indexOf(normalizeText(filter)) !== -1)
     );
   }
 

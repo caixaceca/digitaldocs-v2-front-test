@@ -19,7 +19,7 @@ export function actionGet(state, payload) {
 
     case 'creditos':
       state.creditos = dados === 'reset' ? [] : [...(state.creditos || []), ...(dados?.objeto || [])];
-      state.infoPag = { proximo_cursor: dados?.proximo_cursor || null, ha_mais: dados?.ha_mais || null };
+      state.infoPag = { proximo: dados?.proximo_cursor || null, mais: dados?.ha_mais || null };
       break;
 
     default:

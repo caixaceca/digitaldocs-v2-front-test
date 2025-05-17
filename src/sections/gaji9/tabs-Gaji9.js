@@ -40,9 +40,7 @@ export default function TabGaji9({ item, label }) {
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
           heading={label}
-          action={
-            label !== 'Minutas públicas' && <Actions inativos={inativos} setInativos={setInativos} label={label} />
-          }
+          action={<Actions inativos={inativos} setInativos={setInativos} label={label} />}
         />
         {(item === 'clausulas' && <TableClausula inativos={inativos} />) ||
           (item === 'creditos' && <TableCredito />) || <TableMinutas item={item} inativos={inativos} />}

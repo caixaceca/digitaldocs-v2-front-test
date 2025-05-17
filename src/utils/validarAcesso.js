@@ -112,10 +112,11 @@ export function UosGerente(meusAmbientes) {
 // ----------------------------------------------------------------------
 
 export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) => {
-  const estadoProcesso = meusAmbientes?.find(({ id }) => id === Number(processo?.estado?.estado_id));
+  const { fluxo, estado, htransicoes } = processo;
+  const estadoProcesso = meusAmbientes?.find(({ id }) => id === Number(estado?.estado_id));
   const arqAtendimento = arquivoAtendimento(
-    processo?.fluxo,
-    processo?.htransicoes?.[0]?.modo === 'Seguimento' && !processo?.htransicoes?.[0]?.resgate
+    fluxo,
+    htransicoes?.[0]?.modo === 'Seguimento' && !htransicoes?.[0]?.resgate
   );
   return (
     arquivarProcessos ||
@@ -123,7 +124,7 @@ export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAge
     (estadoProcesso?.isinicial && gerencia) ||
     (estadoProcesso?.isinicial && !fromAgencia) ||
     (estadoProcesso?.isinicial && fromAgencia && arqAtendimento) ||
-    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, processo?.estado?.estado_id))
+    (estadoProcesso?.isinicial && fromAgencia && gestorEstado(meusAmbientes, estado?.estado_id))
   );
 };
 

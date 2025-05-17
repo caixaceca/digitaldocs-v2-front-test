@@ -1,8 +1,8 @@
 export {
   AnexosForm,
-  EliminarForm,
   FinalizarNeForm,
   FinalizarOpeForm,
+  EliminarReativar,
   ColocarPendenteForm,
   ConfidencialidadesForm,
 } from './intervencao-processo';

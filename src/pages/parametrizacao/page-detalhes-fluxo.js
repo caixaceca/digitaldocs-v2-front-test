@@ -35,6 +35,7 @@ import {
   NotificacaoForm,
 } from '../../sections/parametrizacao/form-fluxo';
 import TableInfoFluxo from '../../sections/parametrizacao/table-info-fluxo';
+import TableTransicoes from '../../sections/parametrizacao/table-transicoes';
 import { Detalhes, DetalhesContent } from '../../sections/parametrizacao/Detalhes';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
@@ -76,7 +77,7 @@ export default function PageDetalhesFluxo() {
         </Card>
       ),
     },
-    { value: 'Transições', component: <TableInfoFluxo item="transicoes" /> },
+    { value: 'Transições', component: <TableTransicoes /> },
     { value: 'Estados', component: <TableInfoFluxo item="estados" /> },
     { value: 'Checklist', component: <TableInfoFluxo item="checklist" /> },
     { value: 'Notificações', component: <TableInfoFluxo item="notificacoes" /> },
@@ -116,7 +117,7 @@ export default function PageDetalhesFluxo() {
           title={fluxo?.assunto || 'Detalhes do fluxo'}
         />
         <HeaderBreadcrumbs
-          options={{ voltar: currentTab === 'Dados', sx: { px: 1 } }}
+          sx={{ px: 1 }}
           heading={currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },

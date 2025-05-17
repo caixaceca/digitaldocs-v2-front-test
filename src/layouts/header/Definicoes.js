@@ -32,7 +32,7 @@ export default function Definicoes() {
         anchorEl={open}
         open={Boolean(open)}
         onClose={() => setOpen(null)}
-        sx={{ width: 260, p: 0, pb: 1, mt: 1.5, ml: 0.75 }}
+        sx={{ width: 260, p: 0, pb: 1, mt: 1.5, ml: 0.75, overflow: 'inherit' }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2, pr: 1, pl: 2.5 }}>
           <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>

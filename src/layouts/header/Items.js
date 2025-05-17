@@ -82,7 +82,7 @@ export function LinksUteis() {
         anchorEl={open}
         open={Boolean(open)}
         onClose={() => setOpen(false)}
-        sx={{ width: 360, p: 0, pb: 1, mt: 1.5, ml: 0.75 }}
+        sx={{ width: 360, p: 0, pb: 1, mt: 1.5, ml: 0.75, overflow: 'inherit' }}
       >
         <Typography variant="subtitle1" sx={{ p: 2 }}>
           Links úteis

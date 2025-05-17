@@ -48,14 +48,6 @@ export default function PageGaji9Gestao() {
             ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
               ? [{ value: 'Minutas', component: <TabGaji9 item="minutas" label="Minutas" /> }]
               : []),
-            // ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
-            //   ? [
-            //       {
-            //         value: 'Minutas públicas',
-            //         component: <TabGaji9 item="minutasPublicas" label="Minutas públicas" />,
-            //       },
-            //     ]
-            //   : []),
             ...(adminGaji9 || utilizador?._role === 'GERENTE' || acessoGaji9(utilizador?.acessos, ['READ_CREDITO'])
               ? [{ value: 'Créditos', component: <TabGaji9 item="creditos" label="Créditos" /> }]
               : []),

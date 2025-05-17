@@ -371,9 +371,9 @@ export function AnexosForm({ onClose }) {
 
 // --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
 
-EliminarForm.propTypes = { ids: PropTypes.object, onClose: PropTypes.func };
+EliminarReativar.propTypes = { ids: PropTypes.object, onClose: PropTypes.func };
 
-export function EliminarForm({ ids, onClose }) {
+export function EliminarReativar({ ids, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
 

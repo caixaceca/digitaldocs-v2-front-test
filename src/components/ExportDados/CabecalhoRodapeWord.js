@@ -1,17 +1,4 @@
-import {
-  Header,
-  Footer,
-  TextRun,
-  ImageRun,
-  Table,
-  TableCell,
-  TableRow,
-  Paragraph,
-  PageNumber,
-  WidthType,
-  BorderStyle,
-  AlignmentType,
-} from 'docx';
+import { Header, Footer, TextRun, ImageRun, Paragraph, PageNumber, AlignmentType } from 'docx';
 
 // ----------------------------------------------------------------------
 
@@ -22,19 +9,21 @@ export function CabecalhoWord(cabecalho, logo, codificacao) {
           children: [
             new Paragraph({
               style: 'codificacao',
-              frame: { position: { x: '24mm', y: '10mm' }, anchor: { horizontal: 'page', vertical: 'page' } },
+              frame: { position: { x: 1361, y: 557 }, anchor: { horizontal: 'page', vertical: 'page' } },
               children: [
-                new TextRun({ children: [codificacao, ' | ', PageNumber.CURRENT, '/', PageNumber.TOTAL_PAGES] }),
+                new TextRun(codificacao),
+                new TextRun({ children: [' | ', PageNumber.CURRENT] }),
+                new TextRun({ children: ['/', PageNumber.TOTAL_PAGES] }),
               ],
             }),
             new Paragraph({
-              children: [new ImageRun({ data: logo, transformation: { width: 193, height: 185 } })],
-              frame: { position: { x: '159mm' }, anchor: { horizontal: 'page', vertical: 'page' } },
+              children: [new ImageRun({ data: logo, type: 'png', transformation: { width: 193, height: 185 } })],
+              frame: { position: { x: 9015 }, anchor: { horizontal: 'page', vertical: 'page' } },
             }),
             new Paragraph({
               style: 'slogan',
               text: 'o banco que combina comigo',
-              frame: { position: { x: '159mm', y: '51mm' }, anchor: { horizontal: 'page', vertical: 'page' } },
+              frame: { position: { x: 9015, y: 2891 }, anchor: { horizontal: 'page', vertical: 'page' } },
             }),
           ],
         })
@@ -68,57 +57,15 @@ export function RodapeWord(rodape, iso27001, iso9001) {
               ],
             }),
             new Paragraph({
-              frame: { position: { x: '168mm' }, anchor: { horizontal: 'page', vertical: 'text' } },
-              children: [new ImageRun({ data: iso27001, transformation: { width: 94, height: 40 } })],
+              indent: { left: 300 },
+              frame: { position: { x: 9000 }, anchor: { horizontal: 'page', vertical: 'text' }, width: 2778 },
+              children: [new ImageRun({ data: iso27001, type: 'png', transformation: { width: 108.3, height: 42 } })],
             }),
             new Paragraph({
-              spacing: { after: '10mm' },
-              frame: { position: { x: '168mm' }, anchor: { horizontal: 'page', vertical: 'text' } },
-              children: [new ImageRun({ data: iso9001, transformation: { width: 94, height: 40 } })],
-            }),
-          ],
-        })
-      : new Footer({ children: [] }),
-  };
-}
-
-export function RodapeWordAlt(rodape, codificacao) {
-  return {
-    default: rodape
-      ? new Footer({
-          children: [
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              borders: {
-                top: { style: BorderStyle.NONE },
-                left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.NONE },
-                bottom: { style: BorderStyle.NONE },
-                insideVertical: { style: BorderStyle.NONE },
-                insideHorizontal: { style: BorderStyle.NONE },
-              },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [new Paragraph({ children: [new TextRun({ text: codificacao, size: '8pt' })] })],
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          children: [
-                            new TextRun({
-                              children: ['Página ', PageNumber.CURRENT, ' de ', PageNumber.TOTAL_PAGES],
-                              size: '8pt',
-                            }),
-                          ],
-                          alignment: AlignmentType.RIGHT,
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
+              indent: { left: 300 },
+              spacing: { after: 650, before: 100 },
+              frame: { position: { x: 9000 }, anchor: { horizontal: 'page', vertical: 'text' }, width: 2778 },
+              children: [new ImageRun({ data: iso9001, type: 'png', transformation: { width: 108.3, height: 42 } })],
             }),
           ],
         })

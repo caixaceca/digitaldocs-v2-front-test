@@ -39,6 +39,50 @@ export function SearchToolbarSimple({ filter, item = '', setFilter, children = n
 
 // ----------------------------------------------------------------------
 
+SearchTransicao.propTypes = { options: PropTypes.object };
+
+export function SearchTransicao({ options }) {
+  const { modo, origem, destino, setModo, setDestino, setOrigem, estadosList } = options;
+  return (
+    <Stack direction="row" sx={{ pb: 1, pt: 0 }} alignItems="center" spacing={1}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexGrow: 1 }}>
+        <Autocomplete
+          fullWidth
+          value={origem || null}
+          options={estadosList?.sort()}
+          renderInput={(params) => <TextField {...params} label="Origem" />}
+          onChange={(event, newValue) => setItemValue(newValue, setOrigem, 'origemTransicao')}
+        />
+        <Autocomplete
+          fullWidth
+          value={destino || null}
+          options={estadosList?.sort()}
+          renderInput={(params) => <TextField {...params} label="Destino" />}
+          onChange={(event, newValue) => setItemValue(newValue, setDestino, 'destinoTransicao')}
+        />
+        <Autocomplete
+          fullWidth
+          value={modo || null}
+          options={['Seguimento', 'Seguimento depois devolução', 'Devolução']}
+          renderInput={(params) => <TextField {...params} label="Modo" />}
+          onChange={(event, newValue) => setItemValue(newValue, setModo, 'modoTransicao')}
+        />
+      </Stack>
+      {(modo || origem || destino) && (
+        <RemoverFiltros
+          removerFiltro={() => {
+            setItemValue('', setModo, 'modoTransicao');
+            setItemValue('', setOrigem, 'origemTransicao');
+            setItemValue('', setDestino, 'destinoTransicao');
+          }}
+        />
+      )}
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 SearchToolbarProcura.propTypes = { options: PropTypes.object };
 
 export function SearchToolbarProcura({ options }) {

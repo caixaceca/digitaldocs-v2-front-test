@@ -52,7 +52,7 @@ export default function TableMinutas({ item, inativos }) {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
 
-  const { minutas, isLoading, isOpenModal, estadoMinutas, minutasPublicas } = useSelector((state) => state.gaji9);
+  const { minutas, isLoading, isOpenModal, estadoMinutas } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     setPage(0);
@@ -73,7 +73,7 @@ export default function TableMinutas({ item, inativos }) {
   const dataFiltered = applySortFilter({
     filter,
     comparator: getComparator(order, orderBy),
-    dados: (item === 'minutas' && minutas) || (item === 'minutasPublicas' && minutasPublicas) || [],
+    dados: (item === 'minutas' && minutas) || [],
   });
   const isNotFound = !dataFiltered.length;
 

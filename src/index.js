@@ -1,8 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
 // highlight
 import './utils/highlight';
-// styles
-import './style.css';
 
 // scroll bar
 import 'simplebar-react/dist/simplebar.min.css';
