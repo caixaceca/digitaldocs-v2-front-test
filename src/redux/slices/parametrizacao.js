@@ -199,8 +199,7 @@ export function getFromParametrizacao(item, params) {
         (item === 'despesas' && `/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'documentos' && `/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'motivosTransicao' &&
-          !!params?.fluxoId &&
-          `/v1/motivos_transicoes/lista/${perfilId}?fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}`) ||
+          `/v1/motivos_transicoes/lista/${perfilId}?ativo=${!params?.inativos}${params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}`) ||
         (item === 'checklist' &&
           `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}${params?.transicaoId ? `&transicao_id=${params?.transicaoId}` : ''}`) ||
         '';

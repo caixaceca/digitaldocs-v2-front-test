@@ -82,6 +82,7 @@ export default function Acessos() {
                     <TableRow key={row?.id} hover>
                       <TableCell>
                         <ColaboradorInfo
+                          caption
                           id={row?.id}
                           nome={row?.nome}
                           foto={row?.foto_disk}

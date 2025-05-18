@@ -182,6 +182,7 @@ export function getFromIntranet(item, params) {
 export function createItem(item, dados, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+    if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: true }));
 
     try {
       const accessToken = await getAccessToken();
@@ -194,7 +195,6 @@ export function createItem(item, dados, params) {
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail, cc: false, ct: true, mfd: item !== 'disposicao' });
         await axios.post(apiUrl, dados, options);
-        if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: true }));
       }
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
     } catch (error) {

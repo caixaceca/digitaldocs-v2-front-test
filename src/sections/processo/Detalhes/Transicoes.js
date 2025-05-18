@@ -156,15 +156,15 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
             </Stack>
           </Paper>
           <Stack sx={{ width: 1, p: { xs: 1, sm: 2 } }}>
-            {!!criador && !arqSistema && (!temPareceres || acao === 'Resgate') && (
+            {!arqSistema && (!temPareceres || acao === 'Resgate') && (
               <InfoCriador
-                criador={criador}
                 temParecer={temParecer}
+                criador={criador || { perfil_id: t?.perfil_id }}
                 dados={{ ...t, assunto, perfil: criador?.perfil, temPareceres }}
               />
             )}
             {acao !== 'Resgate' && (
-              <Stack sx={{ pl: { md: criador && !temPareceres && !arqSistema ? 6.5 : 0 } }}>
+              <Stack sx={{ pl: { md: !temPareceres && !arqSistema ? 6.5 : 0 } }}>
                 {t?.domiciliacao && (
                   <Stack sx={{ mt: 1 }} alignItems="center" spacing={0.5} direction="row">
                     <Label color="info">Domiciliação do processo</Label>

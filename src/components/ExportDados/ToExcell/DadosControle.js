@@ -31,18 +31,18 @@ export function ExportarDados({ titulo, dados, tabela }) {
         : []),
       ...((tabela === 'Entradas' && [
         { header: 'Estado atual', key: 'estado_atual' },
-        { header: 'Criado por', key: 'criado_por' },
-        { header: 'Criado em', key: 'criado_em' },
+        { header: 'Criado', key: 'criado_por' },
+        { header: 'Criado', key: 'criado_em' },
       ]) ||
         (tabela === 'Por concluir' && [
           { header: 'Estado atual', key: 'estado_atual' },
           { header: 'Data envio', key: 'data_envio' },
           { header: 'Motivo pendência', key: 'motivo_pendencia' },
-          { header: 'Criado por', key: 'criado_por' },
+          { header: 'Criado', key: 'criado_por' },
           { header: 'Unidade orgânica', key: 'uo' },
         ]) ||
         (tabela === 'Devoluções' && [
-          { header: 'Criado por', key: 'criado_por' },
+          { header: 'Criado', key: 'criado_por' },
           { header: 'Origem', key: 'origem' },
           { header: 'Destino', key: 'destino' },
           { header: 'Devolvido por', key: 'devolvido_por' },
@@ -61,7 +61,7 @@ export function ExportarDados({ titulo, dados, tabela }) {
           { header: 'Documento 2', key: 'doc_2' },
           { header: 'Estado atual', key: 'estado_atual' },
           { header: 'Data entrada', key: 'data_entrada' },
-          { header: 'Criado em', key: 'criado_em' },
+          { header: 'Criado', key: 'criado_em' },
         ]) ||
         (tabela === 'CON' && [
           { header: 'Cliente', key: 'nome_cliente' },
@@ -79,7 +79,7 @@ export function ExportarDados({ titulo, dados, tabela }) {
           { header: 'Origem do fundo', key: 'origem_fundo' },
           { header: 'Finalidade do fundo', key: 'finalidade_fundo' },
           { header: 'Data entrada', key: 'data_entrada' },
-          { header: 'Criado em', key: 'criado_em' },
+          { header: 'Criado', key: 'criado_em' },
           { header: '', key: '' },
           { header: 'Titular ordenador', key: 'titular_ordenador' },
           { header: 'Ordenador', key: 'ordenador' },

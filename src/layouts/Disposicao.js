@@ -12,6 +12,8 @@ import SentimentNeutralOutlinedIcon from '@mui/icons-material/SentimentNeutralOu
 import SentimentSatisfiedOutlinedIcon from '@mui/icons-material/SentimentSatisfiedOutlined';
 import SentimentDissatisfiedOutlinedIcon from '@mui/icons-material/SentimentDissatisfiedOutlined';
 import SentimentVerySatisfiedOutlinedIcon from '@mui/icons-material/SentimentVerySatisfiedOutlined';
+// utils
+import { saudacao } from '../utils/formatText';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { createItem, getSuccess } from '../redux/slices/intranet';
@@ -48,10 +50,11 @@ export default function Disposicao() {
   const dispatch = useDispatch();
   const value = React.useState(null);
   const radioGroupRef = React.useRef(null);
-  const { mail, frase } = useSelector((state) => state.intranet);
+  const { frase, cc } = useSelector((state) => state.intranet);
 
   const handleChange = (event) => {
-    dispatch(createItem('disposicao', JSON.stringify({ disposicao: event.target.value }), { mail, msg: 'disposicao' }));
+    const msg = `${saudacao()} ${cc?.perfil?.displayName}!`;
+    dispatch(createItem('disposicao', JSON.stringify({ disposicao: event.target.value }), { msg }));
   };
 
   return (

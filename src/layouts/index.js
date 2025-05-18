@@ -50,9 +50,9 @@ export default function IntranetLayout() {
   const { error: erroGaji9 } = useSelector((state) => state.gaji9);
   const { error: erroIndic } = useSelector((state) => state.indicadores);
   const { error: erroParam } = useSelector((state) => state.parametrizacao);
-  const { disposicao, error: erroIntranet } = useSelector((state) => state.intranet);
+  const { disposicao, error: erroIntranet, done } = useSelector((state) => state.intranet);
 
-  useNotificacao({ error: error || erroIntranet || erroGaji9 || erroParam || erroIndic });
+  useNotificacao({ done, error: error || erroIntranet || erroGaji9 || erroParam || erroIndic });
 
   if (verticalLayout) {
     return (

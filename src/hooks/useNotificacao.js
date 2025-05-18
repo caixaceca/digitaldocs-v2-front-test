@@ -7,7 +7,9 @@ export function useNotificacao({ done, error, onClose }) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (done) {
+    if (done && (done?.includes('Bom dia') || done?.includes('Boa tarde') || done?.includes('Boa noite')))
+      enqueueSnackbar(done, { variant: 'success' });
+    else if (done) {
       enqueueSnackbar(`${done} com sucesso`, { variant: 'success' });
       onClose?.();
     }

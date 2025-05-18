@@ -73,7 +73,7 @@ const slice = createSlice({
     getFileSuccess(state, action) {
       const { url, anexo } = action.payload;
       if (url) state.objectURLs.push(url);
-      const index = state.processo.anexos.findIndex(({ item: anexoItem }) => anexoItem === anexo);
+      const index = state.processo.anexos.findIndex(({ anexo: anexoItem }) => anexoItem === anexo);
       if (index !== -1) state.processo.anexos[index].url = url;
     },
 
@@ -369,8 +369,7 @@ export function getAnexo(item, params) {
         );
         const blob = await new Blob([response.data], { type: params?.anexo?.conteudo });
         url = await URL.createObjectURL(blob);
-        const ids = { estadoId: params?.estadoId || '', parecerId: params?.parecerId || '' };
-        await dispatch(slice.actions.getFileSuccess({ url, anexo: params?.anexo?.anexo, ...ids }));
+        dispatch(slice.actions.getFileSuccess({ url, anexo: params?.anexo?.anexo }));
       }
       if (item === 'filePreview')
         dispatch(slice.actions.getSuccess({ item: 'filePreview', dados: { ...params?.anexo, url } }));

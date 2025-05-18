@@ -204,23 +204,21 @@ export function Info({ dados, colaboradores }) {
           <Divider flexItem sx={{ pt: 3 }} />
           <Stack spacing={3} divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} sx={{ mt: 3 }}>
             {dados?.pareceres?.map((row, index) => {
-              const criador = colaboradores?.find((colab) => colab?.perfil?.id === row?.perfil_id);
+              const criador = colaboradores?.find(({ perfil }) => perfil?.id === row?.perfil_id);
               return (
                 <Stack key={`parecer_${index}_${row?.id}`} direction="row" spacing={1.5}>
                   <Stack sx={{ width: 1 }}>
-                    {!!criador && (
-                      <InfoCriador
-                        criador={criador}
-                        temParecer={
-                          row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false)
-                        }
-                        dados={{
-                          ...row,
-                          ...{ perfil: criador?.perfil, assunto: dados?.observacao, estado: dados?.estado_inicial },
-                        }}
-                      />
-                    )}
-                    <Stack sx={{ pl: { md: criador ? 6.5 : 0 } }}>
+                    <InfoCriador
+                      criador={criador || { perfil_id: row?.perfil_id }}
+                      temParecer={
+                        row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false)
+                      }
+                      dados={{
+                        ...row,
+                        ...{ perfil: criador?.perfil, assunto: dados?.observacao, estado: dados?.estado_inicial },
+                      }}
+                    />
+                    <Stack sx={{ pl: { md: 6.5 } }}>
                       <Info colaboradores={colaboradores} dados={row} />
                     </Stack>
                   </Stack>
@@ -268,13 +266,12 @@ export function DataParecer({ data1, data2 = '', envio = false }) {
 InfoCriador.propTypes = { dados: PropTypes.object, criador: PropTypes.object, temParecer: PropTypes.bool };
 
 export function InfoCriador({ criador = null, temParecer = false, dados = null }) {
+  const { id, perfil_id: pid = '', perfil = null, uo = null, foto_disk: foto = '' } = criador;
   return (
     <Stack direction="row" spacing={1.5}>
-      {!!criador && (
-        <AvatarBedge id={criador?.id}>
-          <MyAvatar name={criador?.perfil?.displayName} src={getFile('colaborador', criador?.foto_disk)} />
-        </AvatarBedge>
-      )}
+      <AvatarBedge id={id}>
+        <MyAvatar src={getFile('colaborador', foto)} />
+      </AvatarBedge>
       <Stack
         useFlexGap
         spacing={2}
@@ -282,22 +279,24 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
         direction="row"
         divider={<Divider orientation="vertical" flexItem />}
       >
-        {!!criador && (
-          <Box>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <Typography noWrap variant="subtitle2">
-                {criador?.perfil?.displayName}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                ({criador?.uo?.label})
-              </Typography>
-            </Stack>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {criador?.perfil?.mail}
-              {criador?.perfil?.businessPhones?.[0] ? ` | ${criador?.perfil?.businessPhones?.[0]}` : ''}
+        <Box>
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Typography noWrap variant="subtitle2">
+              {perfil?.displayName || `Perfil ID: ${pid}`}
             </Typography>
-          </Box>
-        )}
+            {uo?.label && (
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                ({uo?.label})
+              </Typography>
+            )}
+          </Stack>
+          {perfil?.mail && (
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {perfil?.mail}
+              {perfil?.businessPhones?.[0] ? ` | ${perfil?.businessPhones?.[0]}` : ''}
+            </Typography>
+          )}
+        </Box>
         {temParecer && (
           <Box>
             <Stack spacing={1} direction="row" alignItems="center">

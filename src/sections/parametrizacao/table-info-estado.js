@@ -11,9 +11,8 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
-import { ptDateTime } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
-import { nomeacaoBySexo, noDados } from '../../utils/formatText';
+import { nomeacaoBySexo } from '../../utils/formatText';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -23,7 +22,7 @@ import Scrollbar from '../../components/Scrollbar';
 import { ActionButton } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, ColaboradorInfo, Criado } from '../../components/Panel';
+import { CellChecked, ColaboradorInfo, DataLabel } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from './applySortFilter';
@@ -81,6 +80,7 @@ export default function TableInfoEstado({ item, dados }) {
                     <TableRow hover key={`${item}_${index}`}>
                       <TableCell>
                         <ColaboradorInfo
+                          caption
                           id={row?.cid}
                           foto={row?.foto_disk}
                           nome={row?.nome || `Perfil: ${row.perfil_id}`}
@@ -96,14 +96,8 @@ export default function TableInfoEstado({ item, dados }) {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Criado
-                              value={
-                                <>
-                                  Início: {ptDateTime(row.data_inicio || row.data_inicial) || noDados('(Não definido)')}
-                                </>
-                              }
-                            />
-                            <Criado value={<>Término: {ptDateTime(row.data_limite) || noDados('(Não definido)')}</>} />
+                            <DataLabel data={row?.data_inicio || ''} />
+                            <DataLabel data={row?.data_limite || ''} termino />
                           </TableCell>
                           <CellChecked check={row.padrao} />
                           <CellChecked check={row.gestor} />

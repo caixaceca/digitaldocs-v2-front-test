@@ -327,8 +327,8 @@ function tableHeaders(item) {
     { id: 'entidades', label: 'Cliente' },
     { id: 'assunto', label: 'Assunto' },
     { id: item === 'Devoluções' ? 'estado_inicial' : 'nome', label: item === 'Devoluções' ? 'Origem' : 'Estado atual' },
-    ...((item === 'Por concluir' && [{ id: 'colaborador', label: 'Criado por' }]) ||
-      (item === 'Entradas' && [{ id: 'criado_em', label: 'Criado em' }]) ||
+    ...((item === 'Por concluir' && [{ id: 'colaborador', label: 'Criado' }]) ||
+      (item === 'Entradas' && [{ id: 'criado_em', label: 'Criado' }]) ||
       (item === 'Trabalhados' && [{ id: 'colaborador', label: 'Colaborador' }]) ||
       (item === 'Devoluções' && [
         { id: 'observacao', label: 'Motivo' },

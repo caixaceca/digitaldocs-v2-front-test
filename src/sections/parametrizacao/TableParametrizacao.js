@@ -197,8 +197,8 @@ export default function TableParametrizacao({ item }) {
                             <TableCell>
                               {row.ilha} - {row.cidade}
                             </TableCell>
-                            <TableCell>{row.email}</TableCell>
-                            <TableCell>{row.telefone}</TableCell>
+                            <TableCell>{row.email || noDados('(Não definido)')}</TableCell>
+                            <TableCell>{row.telefone || noDados('(Não definido)')}</TableCell>
                           </>
                         )) ||
                         (item === 'documentos' && (
@@ -299,7 +299,6 @@ function Fluxos({ fluxo = null, setFluxo }) {
   return (
     <Autocomplete
       fullWidth
-      disableClearable
       options={fluxosList}
       value={fluxo || null}
       sx={{ maxWidth: { sm: 250, md: 350 } }}
