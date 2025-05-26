@@ -155,3 +155,11 @@ export function saudacao() {
   if (hora >= 12 && hora < 18) return 'Boa tarde';
   return 'Boa noite';
 }
+
+// ----------------------------------------------------------------------
+
+export const pdfInfo = {
+  modificationDate: new Date(),
+  producer: 'react-pdf/renderer',
+  creator: 'Intranet - Caixa Económica de Cabo Verde',
+};

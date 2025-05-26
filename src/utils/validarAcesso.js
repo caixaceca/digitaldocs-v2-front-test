@@ -166,6 +166,7 @@ export function fluxoFixo(assunto) {
 
 export function estadoFixo(assunto) {
   return (
+    assunto === 'Compliance' ||
     assunto === 'Execução OPE' ||
     assunto === 'Validação OPE' ||
     assunto === 'Autorização SWIFT' ||

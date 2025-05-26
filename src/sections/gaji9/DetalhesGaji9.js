@@ -27,28 +27,33 @@ import { SearchNotFoundSmall } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
-import GrupoDetail from './detalhes-grupo';
 import OpcoesClausula from './opcoes-clausulas';
+import GrupoDetail, { BalcoesRepresentante } from './detalhes-grupo';
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 
 // ----------------------------------------------------------------------
 
-DetalhesGaji9.propTypes = { closeModal: PropTypes.func, item: PropTypes.string };
+DetalhesGaji9.propTypes = { closeModal: PropTypes.func, item: PropTypes.string, opcao: PropTypes.bool };
 
-export default function DetalhesGaji9({ closeModal, item }) {
-  const { selectedItem } = useSelector((state) => state.gaji9);
+export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
+  const { selectedItem, clausulaOpcional } = useSelector((state) => state.gaji9);
 
   return (
     <Dialog
       open
       fullWidth
       onClose={closeModal}
-      maxWidth={item === 'grupos' || item === 'clausulas' || item === 'clausulaMinuta' ? 'md' : 'sm'}
+      maxWidth={
+        item === 'grupos' || item === 'clausulas' || item === 'clausulaMinuta' || item === 'representantes'
+          ? 'md'
+          : 'sm'
+      }
     >
       <DialogTitleAlt title="Detalhes" onClose={closeModal} />
       <DialogContent>
-        {(item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
-          ((item === 'clausulas' || item === 'clausulaMinuta' || item === 'funcoes') && (
+        {(opcao && <DetalhesTab item={item} dados={clausulaOpcional} />) ||
+          (item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
+          ((item === 'clausulas' || item === 'clausulaMinuta' || item === 'funcoes' || item === 'representantes') && (
             <DetalhesTab item={item} dados={selectedItem} />
           )) || <DetalhesContent dados={selectedItem} item={item} />}
       </DialogContent>
@@ -66,6 +71,9 @@ function DetalhesTab({ item, dados }) {
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
     ...((item === 'clausulas' && [{ value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
+      (item === 'representantes' && [
+        { value: 'Balcões', component: <BalcoesRepresentante id={dados?.id} dados={dados?.balcoes} /> },
+      ]) ||
       (item === 'clausulaMinuta' && [
         { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
         { value: 'Cláusulas opcionais', component: <OpcoesClausula /> },
@@ -123,15 +131,15 @@ function AlineasClausula({ dados = [] }) {
         <SearchNotFoundSmall message="Nenhum número adicionado..." />
       ) : (
         <>
-          {dados?.map((row, index) => (
+          {dados?.map(({ numero_ordem: numero, conteudo, sub_alineas: alineas }, index) => (
             <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
-              <Typography variant="subtitle2">{row?.numero_ordem}.</Typography>
+              <Typography variant="subtitle2">{numero}.</Typography>
               <Stack>
-                <Typography variant="body2">{newLineText(row?.conteudo)}</Typography>
-                {row?.sub_alineas?.map((item, index1) => (
+                <Typography variant="body2">{newLineText(conteudo)}</Typography>
+                {alineas?.map(({ numero_ordem: numero, conteudo }, index1) => (
                   <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                    <Typography variant="subtitle2">{item?.numero_ordem}.</Typography>
-                    <Typography variant="body2">{newLineText(item?.conteudo)}</Typography>
+                    <Typography variant="subtitle2">{numero}.</Typography>
+                    <Typography variant="body2">{newLineText(conteudo)}</Typography>
                   </Stack>
                 ))}
               </Stack>

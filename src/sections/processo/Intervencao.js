@@ -27,7 +27,10 @@ export default function Intervencao() {
   const { id, estado, uo_origem_id: uoId = '', operacao = '', fluxo = '', status = '' } = processo;
   const gerencia = useMemo(() => noEstado(estado?.estado, ['Gerência', 'Caixa Principal']), [estado?.estado]);
   const fromAgencia = useMemo(() => uos?.find(({ id }) => id === uoId)?.tipo === 'Agências', [uoId, uos]);
-  const destinos = useMemo(() => destinosProcesso(processo, gerencia), [gerencia, processo]);
+  const { seguimentos, devolucoes, destinosFora } = useMemo(
+    () => destinosProcesso(processo, gerencia),
+    [gerencia, processo]
+  );
 
   const openModal = (modal, dados) => {
     dispatch(setModal({ modal: modal || '', dados: dados || null }));
@@ -35,15 +38,13 @@ export default function Intervencao() {
 
   return (
     <>
-      {destinos?.devolucoes?.length > 0 && (
-        <Encaminhar dados={{ gerencia, destinos: destinos.devolucoes, acao: 'DEVOLVER', fluxoId }} />
-      )}
+      {devolucoes?.length > 0 && <Encaminhar dados={{ gerencia, destinos: devolucoes, acao: 'DEVOLVER', fluxoId }} />}
 
-      {destinos?.seguimentos?.length > 0 && (
+      {seguimentos?.length > 0 && (
         <Encaminhar
           dados={{
             gerencia,
-            destinos: destinos.seguimentos,
+            destinos: seguimentos,
             acao: estado?.estado === 'Comissão Executiva' ? 'DESPACHO' : 'ENCAMINHAR',
           }}
         />
@@ -98,7 +99,7 @@ export default function Intervencao() {
       {processoEstadoInicial(meusAmbientes, estado?.estado_id) && gestorEstado(meusAmbientes, estado?.estado_id) && (
         <DefaultAction label="ELIMINAR" onClick={() => openModal('eliminar-processo', null)} />
       )}
-      {isOpenModal === 'arquivar' && <ArquivarForm onClose={() => openModal()} naoFinal={destinos?.destinosFora} />}
+      {isOpenModal === 'arquivar' && <ArquivarForm onClose={() => openModal()} naoFinal={destinosFora} />}
     </>
   );
 }
@@ -135,11 +136,11 @@ export function destinosProcesso(processo, gerencia) {
   const destinosFora = [];
   const { segmento = '', fluxo = '', htransicoes = [], destinos = [], uo_origem_id: uoId = '' } = processo;
 
-  const aberturaESemValGFC =
+  const aberturaEmpresaSemValGFC =
     gerencia &&
     segmento === 'E' &&
     fluxo === 'Abertura de Conta' &&
-    !htransicoes?.find(({ modo, estado_atual: estado }) => estado?.includes('Compliance') && modo === 'Seguimento');
+    !htransicoes?.find(({ modo, estado_inicial: estado }) => estado?.includes('Compliance') && modo === 'Seguimento');
 
   destinos?.forEach(({ modo, nome, hasopnumero, paralelo, transicao_id: id, is_inicial: inicial, ...res }) => {
     if (uoId !== res?.uo_id) destinosFora.push(nome);
@@ -150,12 +151,13 @@ export function destinosProcesso(processo, gerencia) {
       paralelo,
       hasopnumero,
       label: nome,
+      uo_id: res?.uo_id,
       estado_final_id: res.estado_id,
       requer_parecer: res?.requer_parecer,
     };
     if (modo === 'Seguimento') {
-      if (aberturaESemValGFC && nome?.includes('Compliance')) seguimentos?.push(destino);
-      else if (!aberturaESemValGFC) seguimentos?.push(destino);
+      if (aberturaEmpresaSemValGFC && nome?.includes('Compliance')) seguimentos?.push(destino);
+      else if (!aberturaEmpresaSemValGFC) seguimentos?.push(destino);
     } else devolucoes.push(destino);
   });
 

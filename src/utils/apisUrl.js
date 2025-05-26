@@ -16,5 +16,5 @@ export const BASEURLGAJI9 = 'https://gaji9teste.caixa.cv/gaji9/api';
 
 // export const BASEURL = 'https://intranet.caixa.cv:5000';
 // export const BASEURLSLIM = 'https://intranet.caixa.cv:8090';
-// export const BASEURLGAJI9 = 'https://gaji9.caixa.cv/gaji9/api';
 // export const BASEURLDD = 'https://digitaldocs.caixa.cv/forminga';
+// export const BASEURLGAJI9 = 'https://digitaldocs.caixa.cv/gaji9/api';

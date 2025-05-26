@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
-import Paper from '@mui/material/Paper';
+// import Paper from '@mui/material/Paper';
 import Dialog from '@mui/material/Dialog';
 import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
@@ -14,7 +14,7 @@ import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+// import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
 import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
@@ -90,7 +90,7 @@ function DadosCredito({ dados }) {
         <TextItem title="Tipo de titular:" text={dados?.tipo_titular || 'Não definido'} />
         <TextItem title="Segmento:" text={dados?.segmento} />
         <TextItem title="Ent. patronal/Set. atividade:" text={dados?.setor_atividade} />
-        {dados?.valor_divida && (
+        {/* {dados?.valor_divida && (
           <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
             <Label color="info" startIcon={<InfoOutlinedIcon />}>
               Entidade com crédito em dívida
@@ -98,7 +98,7 @@ function DadosCredito({ dados }) {
             <TextItem title="Valor:" text={fCurrency(dados?.valor_divida * 1000)} />
             {dados?.periodo && <TextItem title="Data:" text={ptDate(dados?.periodo)} />}
           </Paper>
-        )}
+        )} */}
       </List>
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>

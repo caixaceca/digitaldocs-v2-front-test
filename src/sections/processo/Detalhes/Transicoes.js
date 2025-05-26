@@ -63,21 +63,21 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
   const { data_entrada: entrada = '', data_saida: saida = '', parecer_data_limite: limite = '' } = t;
   const criador = useMemo(
     () =>
-      t?.domiciliacao || acao === 'Restauro'
+      t?.domiciliacao
         ? colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === t?.perfil_id?.toLowerCase())
         : colaboradores?.find(({ perfil }) => perfil?.id === t?.perfil_id),
-    [colaboradores, acao, t?.domiciliacao, t?.perfil_id]
+    [colaboradores, t?.domiciliacao, t?.perfil_id]
   );
   const arqSistema = useMemo(() => t?.observacao?.includes('por inatividade a pelo menos 6 meses'), [t?.observacao]);
   const temPareceres = useMemo(() => t?.pareceres && t?.pareceres?.length > 0, [t?.pareceres]);
   const temParecer = useMemo(
-    () => t?.parecer_em && (t?.parecer_favoravel === true || t?.parecer_favoravel === false),
-    [t?.parecer_em, t?.parecer_favoravel]
+    () => t?.data_parecer && (t?.parecer_favoravel === true || t?.parecer_favoravel === false),
+    [t?.data_parecer, t?.parecer_favoravel]
   );
   const color = useMemo(
     () =>
       (acao === 'Arquivo' && 'info') ||
-      ((acao === 'Resgate' || acao === 'Restauro') && 'warning') ||
+      (acao === 'Resgate' && 'warning') ||
       ((acao === 'Devolução' || acao === 'Desarquivo') && 'error') ||
       'success',
     [acao]
@@ -110,7 +110,7 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
             >
               <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="center" alignItems="center" spacing={1}>
                 <Label color={color}>{acao}</Label>
-                {acao !== 'Resgate' && acao !== 'Arquivo' && acao !== 'Restauro' && (
+                {acao !== 'Resgate' && acao !== 'Arquivo' ? (
                   <Stack>
                     <Stack
                       useFlexGap
@@ -123,25 +123,10 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
                       <DoubleArrowIcon color={color} sx={{ width: 18, height: 18, mx: 0.5 }} />
                       <Typography variant="subtitle2">{t?.estado_final}</Typography>
                     </Stack>
-                    {saida && (
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        sx={{ color: 'text.secondary' }}
-                        justifyContent={{ xs: 'center', sm: 'left' }}
-                      >
-                        <Criado caption tipo="data" value={ptDateTime(saida)} />
-                        {entrada && <Criado caption tipo="time" sx={{ pr: 0.5 }} value={fDistance(entrada, saida)} />}
-                        {saida && limite && new Date(saida) > new Date(add(limite, { hours: 5 })) && (
-                          <Criado
-                            caption
-                            sx={{ color: 'error.main', pr: 0 }}
-                            value={`(${fDistance(saida, limite)} de atraso)`}
-                          />
-                        )}
-                      </Stack>
-                    )}
+                    <Data saida={saida} entrada={entrada} limite={limite} />
                   </Stack>
+                ) : (
+                  <Data saida={saida} entrada={entrada} limite={limite} />
                 )}
               </Stack>
               <Stack>
@@ -193,5 +178,30 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
         </Paper>
       </TimelineContent>
     </TimelineItem>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Data.propTypes = { entrada: PropTypes.string, saida: PropTypes.string, limite: PropTypes.string };
+
+export function Data({ entrada, saida, limite }) {
+  return (
+    <>
+      {saida && (
+        <Stack
+          direction="row"
+          alignItems="center"
+          sx={{ color: 'text.secondary' }}
+          justifyContent={{ xs: 'center', sm: 'left' }}
+        >
+          <Criado caption tipo="data" value={ptDateTime(saida)} />
+          {entrada && <Criado caption tipo="time" sx={{ pr: 0.5 }} value={fDistance(entrada, saida)} />}
+          {saida && limite && new Date(saida) > new Date(add(limite, { hours: 5 })) && (
+            <Criado caption sx={{ color: 'error.main', pr: 0 }} value={`(${fDistance(saida, limite)} de atraso)`} />
+          )}
+        </Stack>
+      )}
+    </>
   );
 }

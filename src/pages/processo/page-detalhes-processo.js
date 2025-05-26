@@ -36,6 +36,7 @@ import {
   InfoCredito,
   TodosAnexos,
   TableDetalhes,
+  PareceresEstado,
 } from '../../sections/processo/Detalhes';
 import {
   AnexosForm,
@@ -125,6 +126,13 @@ export default function PageProcesso() {
       });
     }
 
+    if (pareceres?.length > 0) {
+      tabs.push({
+        value: 'Pareceres',
+        component: <PareceresEstado pareceres={pareceres} assunto={`${fluxo ?? ''} - ${titular ?? ''}`} />,
+      });
+    }
+
     if (htransicoes?.length > 0) {
       tabs.push({
         value: 'Encaminhamentos',
@@ -161,6 +169,7 @@ export default function PageProcesso() {
     credito,
     isAdmin,
     processo,
+    pareceres,
     htransicoes,
     isAuditoria,
     handleAceitar,
@@ -240,28 +249,29 @@ export default function PageProcesso() {
                       {/* EM SÉRIE */}
                       {estado && estados?.length === 0 && (
                         <>
-                          {pertencoEstadoId(meusAmbientes, estadoId) && pareceres?.length === 0 && (
-                            <>
-                              {estado?.preso && estado?.atribuidoAMim && <Intervencao />}
-                              {estado?.preso && !estado?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
-                                <DefaultAction
-                                  label="LIBERTAR"
-                                  onClick={() => openModal('libertar', { id, estadoId, perfilId: estado?.perfil_id })}
-                                />
-                              )}
-                              {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
-                                <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
-                              )}
-                              {!estado?.preso && gestorEstado(meusAmbientes, estadoId) && (
-                                <DefaultAction
-                                  label="ATRIBUIR"
-                                  onClick={() =>
-                                    openModal('atribuir', { estadoId, pid: estado?.perfil_id, processoId: id })
-                                  }
-                                />
-                              )}
-                            </>
-                          )}
+                          {pertencoEstadoId(meusAmbientes, estadoId) &&
+                            (!estado?.pareceres || estado?.pareceres?.length === 0) && (
+                              <>
+                                {estado?.preso && estado?.atribuidoAMim && <Intervencao />}
+                                {estado?.preso && !estado?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
+                                  <DefaultAction
+                                    label="LIBERTAR"
+                                    onClick={() => openModal('libertar', { id, estadoId, perfilId: estado?.perfil_id })}
+                                  />
+                                )}
+                                {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
+                                  <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
+                                )}
+                                {!estado?.preso && gestorEstado(meusAmbientes, estadoId) && (
+                                  <DefaultAction
+                                    label="ATRIBUIR"
+                                    onClick={() =>
+                                      openModal('atribuir', { estadoId, pid: estado?.perfil_id, processoId: id })
+                                    }
+                                  />
+                                )}
+                              </>
+                            )}
                           {/* Resgatar */}
                           {!!ultimaTransicao &&
                             !estado?.preso &&
@@ -270,7 +280,7 @@ export default function PageProcesso() {
                             !ultimaTransicao?.pareceres?.length &&
                             perfilId === ultimaTransicao?.perfil_id &&
                             pertencoEstadoId(meusAmbientes, ultimaTransicao?.estado_inicial_id) &&
-                            !estado?.pareceres?.some(({ parecer_em: parecer }) => parecer) && (
+                            !estado?.pareceres?.some(({ data_parecer: parecer }) => parecer) && (
                               <DefaultAction label="RESGATAR" onClick={() => openModal('resgatar', null)} />
                             )}
                         </>

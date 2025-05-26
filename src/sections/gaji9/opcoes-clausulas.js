@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
+import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
@@ -21,6 +22,7 @@ import { fNumber } from '../../utils/formatNumber';
 import { useSelector, useDispatch } from '../../redux/store';
 import { getFromGaji9, createItem, deleteItem } from '../../redux/slices/gaji9';
 // components
+import DetalhesGaji9 from './DetalhesGaji9';
 import GridItem from '../../components/GridItem';
 import { CellChecked } from '../../components/Panel';
 import { TableSearchNotFound } from '../../components/table';
@@ -32,7 +34,7 @@ import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../
 
 export default function OpcoesClausula() {
   const dispatch = useDispatch();
-  const [openForm, setOpenForm] = useState('');
+  const [modal, setModal] = useState('');
   const { isSaving, selectedItem, minuta } = useSelector((state) => state.gaji9);
   const clausula = minuta?.clausulas?.find(({ clausula_id: cid }) => cid === selectedItem?.id);
   const opcoes = clausula?.opcoes || [];
@@ -41,9 +43,14 @@ export default function OpcoesClausula() {
     dispatch(getFromGaji9('clausulas', { condicional: true }));
   }, [dispatch]);
 
+  const openModal = (modal, id) => {
+    setModal(modal);
+    if (modal === 'detalhes') dispatch(getFromGaji9('clausula', { id, item: 'clausulaOpcional' }));
+  };
+
   const eliminarRegra = () => {
-    const params = { minutaId: minuta?.id, condicionalId: openForm, clausulaId: clausula?.clausula_id };
-    dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', onClose: () => setOpenForm('') }));
+    const params = { minutaId: minuta?.id, condicionalId: modal, clausulaId: clausula?.clausula_id };
+    dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', onClose: () => setModal('') }));
   };
 
   return (
@@ -61,8 +68,10 @@ export default function OpcoesClausula() {
             <TableCell size="small">Taxa negociada</TableCell>
             <TableCell size="small">2ª habitação</TableCell>
             <TableCell size="small">Isenção comissão</TableCell>
-            <TableCell size="small" width={10}>
-              <DefaultAction small label="Adicionar" onClick={() => setOpenForm('create')} />
+            <TableCell size="small" align="rigth" width={10}>
+              <Stack direction="row" justifyContent="right">
+                <DefaultAction small label="Adicionar" onClick={() => openModal('create', '')} />
+              </Stack>
             </TableCell>
           </TableRow>
         </TableHead>
@@ -87,21 +96,24 @@ export default function OpcoesClausula() {
                 <CellChecked check={row?.segunda_habitacao} />
                 <CellChecked check={row?.isencao_comissao} />
                 <TableCell>
-                  <DefaultAction small label="ELIMINAR" onClick={() => setOpenForm(row?.clausula_id)} />
+                  <Stack direction="row" spacing={0.75}>
+                    <DefaultAction small label="ELIMINAR" onClick={() => openModal(row?.clausula_id, '')} />
+                    <DefaultAction small label="DETALHES" onClick={() => openModal('detalhes', row?.clausula_id)} />
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         )}
       </Table>
-      {openForm === 'create' && (
-        <RegraForm onCancel={() => setOpenForm('')} dados={selectedItem} minutaId={minuta?.id} />
-      )}
-      {!!openForm && openForm !== 'create' && (
+
+      {modal === 'detalhes' && <DetalhesGaji9 closeModal={() => setModal('')} item="clausulas" opcao />}
+      {modal === 'create' && <RegraForm onCancel={() => setModal('')} dados={selectedItem} minutaId={minuta?.id} />}
+      {!!modal && modal !== 'create' && modal !== 'detalhes' && (
         <DialogConfirmar
           isSaving={isSaving}
           desc="eliminar esta regra"
-          onClose={() => setOpenForm('')}
+          onClose={() => setModal('')}
           handleOk={() => eliminarRegra()}
         />
       )}

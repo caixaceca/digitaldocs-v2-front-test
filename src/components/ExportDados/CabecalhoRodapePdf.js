@@ -132,8 +132,8 @@ export function RodapeAlt({ rodape = false }) {
             <Text>O único banco em Cabo Verde certificado ISO 9001 e ISO 27001</Text>
           </View>
           <View style={[styles.footerCertificacoes]}>
-            <Image src="/assets/ISO9001.png" style={{ marginBottom: '1mm', marginTop: '2mm', width: '23mm' }} />
-            <Image src="/assets/ISO27001.png" style={{ width: '23mm' }} />
+            <Image src="/assets/iso9001.png" style={{ marginTop: '2mm', width: 82.5, height: 32 }} />
+            <Image src="/assets/iso27001.png" style={{ marginTop: '1mm', width: 82.5, height: 32 }} />
           </View>
         </View>
       ) : (

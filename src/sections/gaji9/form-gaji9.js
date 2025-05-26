@@ -822,7 +822,7 @@ export function RepresentanteForm({ onCancel }) {
     utilizador: Yup.mixed().required().label('Colaborador'),
     residencia: Yup.string().required().label('Residência'),
     cni: Yup.string().required().label('Doc. identificação'),
-    balcao: Yup.number().positive().required().label('Bacão'),
+    balcao: Yup.number().positive().required().label('Balcão'),
     local_emissao: Yup.string().required().label('Local emissão'),
     data_emissao: Yup.date().typeError().required().label('Data de nacimento'),
   });
@@ -843,7 +843,7 @@ export function RepresentanteForm({ onCancel }) {
       ativo: isEdit ? selectedItem?.ativo : true,
       local_emissao: selectedItem?.local_emissao || null,
       data_emissao: fillData(selectedItem?.data_emissao, null),
-      utilizador: colaboradoresList?.find((row) => row?.id === selectedItem?.utilizador_id) || null,
+      utilizador: colaboradoresList?.find(({ id }) => id === selectedItem?.utilizador_id) || null,
     }),
     [colaboradoresList, isEdit, selectedItem]
   );
@@ -948,6 +948,64 @@ export function RepresentanteForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+BalcaoForm.propTypes = { id: PropTypes.number, item: PropTypes.object, onClose: PropTypes.func };
+
+export function BalcaoForm({ id, item, onClose }) {
+  const dispatch = useDispatch();
+  const isEdit = item?.action === 'editar';
+  const { uos } = useSelector((state) => state.intranet);
+  const { isSaving } = useSelector((state) => state.gaji9);
+  const balcoesList = useMemo(() => uos?.map(({ balcao, label }) => ({ id: balcao, label })), [uos]);
+
+  const formSchema = Yup.object().shape({ balcao: Yup.mixed().required().label('Balcão') });
+  const defaultValues = useMemo(
+    () => ({
+      balcao: balcoesList?.find(({ id }) => id === item?.balcao) || null,
+      data_inicio: item?.data_inicio ? new Date(item?.data_inicio) : null,
+      data_termino: item?.data_termino ? new Date(item?.data_termino) : null,
+    }),
+    [balcoesList, item]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balcoesList, item]);
+
+  const onSubmit = async () => {
+    const formData = { ...values, balcao: values?.balcao?.id };
+    const params = {
+      ...{ id: item?.id, repId: id, getItem: 'selectedItem' },
+      ...{ msg: `Balcão ${isEdit ? 'atualizado' : 'adicionado'}`, onClose },
+    };
+    dispatch((isEdit ? updateItem : createItem)('balcoes', JSON.stringify(formData), params));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Atualizar balcão' : 'Adicionar balcão'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFAutocompleteObj name="balcao" label="Balcão" options={balcoesList} />
+            <Stack spacing={3} direction="row">
+              <RHFDatePicker dateTime name="data_inicio" label="Data de início" />
+              <RHFDatePicker dateTime disablePast name="data_termino" label="Data de término" />
+            </Stack>
+          </Stack>
+          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onClose} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 ItemComponent.propTypes = { item: PropTypes.object, rows: PropTypes.number, children: PropTypes.node };
 
 export function ItemComponent({ item, rows, children }) {
@@ -971,6 +1029,5 @@ export function ItemComponent({ item, rows, children }) {
 
 export function submitDados(id, values, isEdit, dispatch, item, onCancel) {
   const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose: onCancel || null };
-  if (isEdit) dispatch(updateItem(item, JSON.stringify(values), params));
-  else dispatch(createItem(item, JSON.stringify(values), params));
+  dispatch((isEdit ? updateItem : createItem)(item, JSON.stringify(values), params));
 }

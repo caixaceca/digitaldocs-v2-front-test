@@ -47,20 +47,20 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
   const { estados = [], htransicoes = [], estado = null } = processo;
-  const { bi_cni: docId = '', doc_idp: docIdP = '', doc_ids: docIdS } = processo;
   const { balcao_domicilio: balcao = '', origem_id: origemId = '', fluxo = '' } = processo;
   const { entidade = '', cliente = '', conta = '', titular = '', email = '', observacao = '' } = processo;
+  const { doc_idp: docIdP = '', tipo_doc_idp: tipoIdP, doc_ids: docIdS, tipo_doc_ids: tipoIdS } = processo;
 
   const entidadesList = useMemo(() => entidadesParse(entidade), [entidade]);
   const devolvido = useMemo(() => htransicoes?.[0]?.modo === 'Devolução', [htransicoes]);
   const origem = useMemo(() => origens?.find(({ id }) => id === origemId), [origens, origemId]);
-  const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
   const bd = useMemo(() => uos?.find(({ balcao: balcaoUo }) => balcaoUo === balcao)?.label, [balcao, uos]);
+  const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
 
   return (
     <>
       {(!versoes ||
-        (versoes && (uo?.label || fluxo || observacao || processo?.data_entrada || processo?.numero_entrada))) && (
+        (versoes && (uo?.label || fluxo || observacao || processo?.data_entrada || processo?.duplicado))) && (
         <List sx={{ pt: 0 }}>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Processo</Typography>
@@ -86,19 +86,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                         Devolvido
                       </Label>
                     )}
-                    {estado?.duplicado && (
-                      <>
-                        <Label color="error" startIcon={<ErrorOutlineIcon />}>
-                          Eliminado
-                        </Label>
-                        {(estado?.ccDup || estado?.dataDup) && (
-                          <Stack direction="row" sx={{ color: 'text.secondary' }}>
-                            <Criado caption tipo="user" value={estado?.ccDup} />
-                            <Criado caption tipo="data" value={ptDateTime(estado?.dataDup)} sx={{ pr: 0 }} />
-                          </Stack>
-                        )}
-                      </>
-                    )}
+                    {estado?.duplicado && <Duplicado ccDup={estado?.ccDup} dataDup={estado?.dataDup} />}
                   </Stack>
                 )
               }
@@ -167,10 +155,19 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
               }
             />
           )}
+          {processo?.duplicado && (
+            <TextItem
+              label={
+                <Stack direction="row" spacing={1}>
+                  <Duplicado ccDup={processo?.duplicado_por} dataDup={processo?.duplicado_em} />
+                </Stack>
+              }
+            />
+          )}
         </List>
       )}
 
-      {(email || conta || titular || cliente || entidadesList || docId || docIdP || docIdS) && (
+      {(email || conta || titular || cliente || entidadesList || docIdP || docIdS) && (
         <List>
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Identificação</Typography>
@@ -181,14 +178,14 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             <TextItem
               baralhar
               text={docIdP?.toString()}
-              title={`${dis?.find(({ id }) => id === docIdP)?.label || 'Doc. primário'}:`}
+              title={`${dis?.find(({ id }) => id === tipoIdP)?.label || 'Doc. primário'}:`}
             />
           )}
           {docIdS && (
             <TextItem
               baralhar
               text={docIdS?.toString()}
-              title={`${dis?.find(({ id }) => id === docIdS)?.label || 'Doc. secundário'}:`}
+              title={`${dis?.find(({ id }) => id === tipoIdS)?.label || 'Doc. secundário'}:`}
             />
           )}
           {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} baralhar />}
@@ -198,7 +195,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             title="Segmento:"
             text={(processo?.segmento === 'P' && 'Particular') || (processo?.segmento === 'E' && 'Empresa') || ''}
           />
-          <TextItem title="Balcão de domicílio:" text={`${bd ? `${bd} - ` : ''}${balcao}`} />
+          <TextItem title="Balcão de domicílio:" text={`${balcao || ''}${bd ? ` - ${bd}` : ''}`} />
         </List>
       )}
 
@@ -288,6 +285,26 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
     </Stack>
   ) : (
     ''
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Duplicado.propTypes = { ccDup: PropTypes.string, dataDup: PropTypes.string };
+
+export function Duplicado({ ccDup, dataDup }) {
+  return (
+    <>
+      <Label color="error" startIcon={<ErrorOutlineIcon />}>
+        Eliminado
+      </Label>
+      {(ccDup || dataDup) && (
+        <Stack direction="row" sx={{ color: 'text.secondary' }}>
+          <Criado caption tipo="user" value={ccDup} />
+          <Criado caption tipo="data" value={ptDateTime(dataDup)} sx={{ pr: 0 }} />
+        </Stack>
+      )}
+    </>
   );
 }
 

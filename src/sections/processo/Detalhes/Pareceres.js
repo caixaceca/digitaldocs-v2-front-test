@@ -14,10 +14,11 @@ import { setModal } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
-import { ColaboradorInfo } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
+import { ColaboradorInfo } from '../../../components/Panel';
 //
-import { Info } from './Estados';
+import { Info, InfoCriador } from './Estados';
+import ParecerExport, { DownloadPdf } from './MinutaParecer';
 
 // ----------------------------------------------------------------------
 
@@ -67,9 +68,9 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
 
-  const { id, perfil_id: perfil, parecer_favoravel: favoravel, validado, parecer_em: em = '' } = parecer;
+  const { id, perfil_id: perfil, parecer: parecerDado, validado, data_parecer: em = '' } = parecer;
   const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === perfil);
-  const temParecer = em && (favoravel === true || favoravel === false);
+  const temParecer = em && parecerDado;
 
   return (
     <Stack sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
@@ -97,8 +98,8 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
                   other={
                     temParecer && (
                       <Box>
-                        <Label color={favoravel ? 'success' : 'error'}>
-                          {favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
+                        <Label color={parecerDado === 'Favorável' ? 'success' : 'error'}>
+                          {parecerDado === 'Favorável' ? 'Parecer favorável' : 'Parecer não favorável'}
                         </Label>
                       </Box>
                     )
@@ -123,5 +124,67 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
         </Accordion>
       </Stack>
     </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+PareceresEstado.propTypes = { assunto: PropTypes.string, pareceres: PropTypes.array };
+
+export function PareceresEstado({ pareceres, assunto }) {
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const [accord, setAccord] = useState(false);
+
+  const handleAccord = (panel) => (event, isExpanded) => {
+    setAccord(isExpanded ? panel : false);
+  };
+
+  return (
+    <Box sx={{ pb: 3 }}>
+      {pareceres?.map((row) => {
+        const { id, nome, estado_id: estadoId, estado, perfil_id: perfilId, parecer_obs: obs = '', parecer = '' } = row;
+        const criador = colaboradores?.find(({ perfil_id: pid }) => pid === perfilId);
+
+        return (
+          <Stack key={`parecer_${row?.id}`} sx={{ px: { xs: 1, sm: 2 }, pt: { xs: 1, sm: 2 } }}>
+            <Accordion expanded={accord === id} onChange={handleAccord(id)}>
+              <AccordionSummary sx={{ minHeight: '65px !important' }}>
+                <Stack spacing={1} direction="row" alignItems="center">
+                  <Typography variant="subtitle1">{nome || `Estado ID: ${estadoId}`}</Typography>
+                  <Label
+                    color={
+                      (!parecer && 'default') ||
+                      (parecer === 'Favorável' && 'success') ||
+                      (parecer === 'Não favorável' && 'error') ||
+                      'warning'
+                    }
+                  >
+                    {parecer || 'Sem parecer'}
+                  </Label>
+                  {accord === id && parecer && (
+                    <Box onClick={(e) => e.stopPropagation()}>
+                      <DownloadPdf
+                        ficheiro={`Minuta do parecer - ${estado || estadoId}.pdf`}
+                        documento={<ParecerExport dados={{ ...row, assunto, perfil: criador?.perfil }} />}
+                      />
+                    </Box>
+                  )}
+                </Stack>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack sx={{ width: 1, pt: 1 }}>
+                  <InfoCriador
+                    temParecer
+                    criador={criador || { perfil_id: perfilId }}
+                    dados={{ ...row, assunto, perfil: criador?.perfil }}
+                  />
+                  <Info temParecer dados={{ ...row, observacao: obs }} />
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Stack>
+        );
+      })}
+    </Box>
   );
 }

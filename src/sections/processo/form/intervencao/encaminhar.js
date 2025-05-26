@@ -237,9 +237,14 @@ export function OutrosEmSerie({ acao }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const { colaboradoresEstado, checklist } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes, colaboradoresEstado, checklist } = useSelector((state) => state.parametrizacao);
+  const { id, estado, estadoPreso, criador: criadorP } = processo;
 
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
+  const mesmaUo = useMemo(
+    () => meusAmbientes?.find(({ id }) => id === estado?.estado_id)?.uo_id === dadosStepper?.estado?.uo_id,
+    [dadosStepper?.estado?.uo_id, estado?.estado_id, meusAmbientes]
+  );
   const checkList = useMemo(
     () =>
       checklist.filter(
@@ -254,9 +259,9 @@ export function OutrosEmSerie({ acao }) {
   const criador = useMemo(
     () =>
       acao === 'DEVOLVER' && dadosStepper?.estado?.inicial
-        ? colaboradoresList?.find(({ mail }) => mail?.toLowerCase() === processo?.criador?.toLowerCase())
+        ? colaboradoresList?.find(({ mail }) => mail?.toLowerCase() === criadorP?.toLowerCase())
         : null,
-    [acao, colaboradoresList, dadosStepper?.estado?.inicial, processo?.criador]
+    [acao, colaboradoresList, dadosStepper?.estado?.inicial, criadorP]
   );
 
   const formSchema = shapeAnexos(outros, checkList, true);
@@ -294,7 +299,7 @@ export function OutrosEmSerie({ acao }) {
 
       appendAnexos(formData, values.anexos, outros, values.checklist);
 
-      const params = { mfd: true, id: processo.id, estadoId: processo?.estadoPreso };
+      const params = { mfd: true, id, estadoId: estadoPreso };
       const msg = acao === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado';
       dispatch(updateItem('encaminhar serie', formData, { ...params, msg }));
     } catch (error) {
@@ -305,7 +310,7 @@ export function OutrosEmSerie({ acao }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        <RHFAutocompleteObj name="colaborador" label="Atribuir processo a" options={colaboradoresList} />
+        {mesmaUo && <RHFAutocompleteObj name="colaborador" label="Atribuir processo a" options={colaboradoresList} />}
         <Anexos anexos={[]} outros={!!outros} solto />
       </Stack>
       <ButtonsStepper

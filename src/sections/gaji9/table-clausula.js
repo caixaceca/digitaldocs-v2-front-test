@@ -123,16 +123,8 @@ export default function TableClausula({ inativos }) {
                       <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
                       <TableCell>{row?.componente || noDados()}</TableCell>
                       <TableCell width={10}>
-                        {(row?.ultima_modificacao || row?.modificado_em) && (
-                          <Criado
-                            caption
-                            tipo="data"
-                            value={ptDateTime(row?.ultima_modificacao || row?.modificado_em)}
-                          />
-                        )}
-                        {(row?.feito_por || row?.modificador) && (
-                          <Criado tipo="user" value={row?.feito_por || row?.modificador} baralhar caption />
-                        )}
+                        <Criado caption tipo="data" value={ptDateTime(row?.ultima_modificacao || row?.modificado_em)} />
+                        <Criado tipo="user" value={row?.feito_por || row?.modificador} baralhar caption />
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">

@@ -331,23 +331,23 @@ PreviewForm.propTypes = { item: PropTypes.string, onCancel: PropTypes.func };
 
 export function PreviewForm({ item, onCancel }) {
   const dispatch = useDispatch();
-  const { isLoadingDoc, credito, minutaContrato, representantes } = useSelector((state) => state.gaji9);
+  const { isLoadingDoc, credito, minutaContrato, representsBalcao } = useSelector((state) => state.gaji9);
   const { id, balcao_domicilio: balcao, cliente = '' } = credito;
 
   useEffect(() => {
-    dispatch(getFromGaji9('representantes', { notLoading: true, reset: { val: [] } }));
+    dispatch(getFromGaji9('representsBalcao', { balcao, notLoading: true, reset: { val: [] } }));
     dispatch(getFromGaji9('minutaContrato', { notLoading: true, id, reset: { val: null } }));
-  }, [dispatch, id]);
+  }, [dispatch, balcao, id]);
 
-  const representantesList = useMemo(
-    () => representantes?.filter(({ balcao: balc }) => balc === balcao)?.map(({ id, nome }) => ({ id, label: nome })),
-    [balcao, representantes]
+  const representsBalcaoList = useMemo(
+    () => representsBalcao?.map(({ id, nome }) => ({ id, label: nome })),
+    [representsBalcao]
   );
 
   const formSchema = Yup.object().shape({ representante: Yup.mixed().required().label('Representante') });
   const defaultValues = useMemo(
-    () => ({ cache: false, representante: representantesList?.length === 1 ? representantesList[0] : null }),
-    [representantesList]
+    () => ({ cache: false, representante: representsBalcaoList?.length === 1 ? representsBalcaoList[0] : null }),
+    [representsBalcaoList]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -357,7 +357,7 @@ export function PreviewForm({ item, onCancel }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minutaContrato, representantesList]);
+  }, [minutaContrato, representsBalcao]);
 
   const onSubmit = async () => {
     const params = { creditoId: id, minutaId: minutaContrato?.id, representanteId: values?.representante?.id };
@@ -375,7 +375,7 @@ export function PreviewForm({ item, onCancel }) {
       <DialogTitleAlt sx={{ mb: 2 }} title={`${item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'} contrato`} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 1 }}>
+          <Stack spacing={3}>
             {item === 'gerar-contrato' && (
               <Alert severity="warning">
                 <Typography variant="body2">
@@ -387,19 +387,27 @@ export function PreviewForm({ item, onCancel }) {
                 </Typography>
               </Alert>
             )}
-            {minutaContrato && (
-              <Stack>
-                <Typography sx={{ color: 'text.secondary' }}>Minuta:</Typography>
-                <Typography variant="subtitle2">{minutaContrato?.titulo}</Typography>
-                <Typography variant="subtitle2">{minutaContrato?.subtitulo}</Typography>
-              </Stack>
-            )}
-            <RHFAutocompleteObj dc name="representante" label="Representante" options={representantesList} />
+
+            <Stack>
+              <Typography sx={{ color: 'text.secondary' }}>Minuta:</Typography>
+              {minutaContrato ? (
+                <>
+                  <Typography variant="subtitle2">{minutaContrato?.titulo}</Typography>
+                  <Typography variant="subtitle2">{minutaContrato?.subtitulo}</Typography>
+                </>
+              ) : (
+                <Typography variant="body2" sx={{ color: 'text.error', opacity: 0.75, fontStyle: 'italic' }}>
+                  *Não foi possível localizar qualquer minuta aplicável ao crédito.
+                </Typography>
+              )}
+            </Stack>
+            <RHFAutocompleteObj dc name="representante" label="Representante" options={representsBalcaoList} />
             <RHFSwitch name="cache" label="Forçar atualização dos dados da banca" />
           </Stack>
           <DialogButons
             onCancel={onCancel}
             isSaving={isLoadingDoc}
+            hideSubmit={!minutaContrato || !values?.representante?.id}
             label={item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'}
           />
         </FormProvider>

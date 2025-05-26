@@ -535,7 +535,7 @@ export function deleteItem(item, params) {
       const apiUrl =
         (item === 'garantias' &&
           `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
-        (item === 'eliminarReativar' &&
+        (item === 'processo' &&
           `/v2/processos/marcar/desmarcar/duplicacao?perfil_id=${perfilId}&processo_id=${params?.id}&estado_id=${params?.estadoId}&duplicado=${params?.duplicado}`) ||
         (item === 'anexo' &&
           `/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&estado_id=${params?.estadoId}&anexo_id=${params?.id}&parecer_individual=${!!params?.individual}&da_entidade=${!!params?.entidade}`) ||

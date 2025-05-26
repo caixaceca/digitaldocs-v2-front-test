@@ -13,20 +13,22 @@ import TableHead from '@mui/material/TableHead';
 import CloseIcon from '@mui/icons-material/Close';
 // utils
 import { noDados } from '../../utils/formatText';
+import { ptDateTime } from '../../utils/formatTime';
 import { colorLabel } from '../../utils/getColorPresets';
 import { sortPermissoes } from '../../utils/formatObject';
 // redux
-import { updateItem } from '../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../redux/store';
+import { updateItem, deleteItem } from '../../redux/slices/gaji9';
 // components
 import Label from '../../components/Label';
 import { DefaultAction } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
+import { DialogConfirmar } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import { ColaboradorInfo, DataLabel } from '../../components/Panel';
+import { Criado, ColaboradorInfo, DataLabel } from '../../components/Panel';
 //
 import { DetalhesContent } from './DetalhesGaji9';
-import { RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
+import { BalcaoForm, RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
 
 // ----------------------------------------------------------------------
 
@@ -50,9 +52,8 @@ export default function GrupoDetail({ dados }) {
           dados={dados?.utilizadores?.map((row) => ({
             ...row,
             colaborador: colaboradores?.find(
-              (item) =>
-                item?.perfil?.id_aad === row?.utilizador_id ||
-                item?.perfil?.mail?.toLowerCase() === row?.email?.toLowerCase()
+              ({ perfil }) =>
+                perfil?.id_aad === row?.utilizador_id || perfil?.mail?.toLowerCase() === row?.email?.toLowerCase()
             ),
           }))}
         />
@@ -68,7 +69,7 @@ export default function GrupoDetail({ dados }) {
         sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
         changeTab={(_, newValue) => setCurrentTab(newValue)}
       />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -77,7 +78,7 @@ export default function GrupoDetail({ dados }) {
 
 RecursosUtilizadores.propTypes = { id: PropTypes.string, dados: PropTypes.array, recursos: PropTypes.bool };
 
-function RecursosUtilizadores({ id, dados, recursos = false }) {
+function RecursosUtilizadores({ id, dados = [], recursos = false }) {
   const dispatch = useDispatch();
   const [item, setItem] = useState(null);
 
@@ -162,7 +163,7 @@ function RecursosUtilizadores({ id, dados, recursos = false }) {
               </TableCell>
             </TableRow>
           ))}
-          {(!dados || dados?.length === 0) && (
+          {dados?.length === 0 && (
             <TableRow>
               <TableCell colSpan={5}>
                 <SearchNotFoundSmall message="Nenhum registo disponível..." />
@@ -179,6 +180,89 @@ function RecursosUtilizadores({ id, dados, recursos = false }) {
             <UtilizadorGrupoForm grupoId={id} selectedItem={item} onCancel={() => setItem(null)} />
           )}
         </>
+      )}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+BalcoesRepresentante.propTypes = { id: PropTypes.string, dados: PropTypes.array };
+
+export function BalcoesRepresentante({ id, dados = [] }) {
+  const dispatch = useDispatch();
+  const [item, setItem] = useState(null);
+  const { uos } = useSelector((state) => state.intranet);
+  const { isSaving } = useSelector((state) => state.gaji9);
+  const params = { item1: 'selectedItem', repId: id, msg: 'Balcão eliminado', onClose: () => setItem(null) };
+
+  return (
+    <>
+      <Table sx={{ mt: 3 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small">Balcão</TableCell>
+            <TableCell size="small">Data</TableCell>
+            <TableCell size="small">Criado</TableCell>
+            <TableCell size="small">Alterado</TableCell>
+            <TableCell size="small" width={10}>
+              <Stack direction="row" justifyContent="right">
+                {!!id && <DefaultAction label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
+              </Stack>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {dados?.map((row, index) => {
+            const uo = uos?.find(({ balcao }) => Number(balcao) === Number(row?.balcao))?.label;
+            return (
+              <TableRow hover key={`${row?.id}_${id}_${index}`}>
+                <TableCell>{uo ? `${row?.balcao} - ${uo}` : row?.balcao}</TableCell>
+                <TableCell>
+                  <DataLabel data={row?.data_inicio || ''} />
+                  <DataLabel data={row?.data_termino || ''} termino />
+                </TableCell>
+                <TableCell>
+                  <Criado tipo="data" value={ptDateTime(row?.criado_em)} caption />
+                  <Criado tipo="user" value={row?.criado_por} baralhar caption />
+                </TableCell>
+                <TableCell>
+                  {!row?.modificado_em && !row?.modificado_em && noDados('Sem alterções...')}
+                  <Criado tipo="data" value={ptDateTime(row?.modificado_em)} caption />
+                  <Criado tipo="user" value={row?.modificado_por} baralhar caption />
+                </TableCell>
+                <TableCell>
+                  {row?.ativo ? (
+                    <Stack direction="row" spacing={0.75}>
+                      <DefaultAction small label="EDITAR" onClick={() => setItem({ action: 'editar', ...row })} />
+                      <DefaultAction small label="ELIMINAR" onClick={() => setItem({ action: 'eliminar', ...row })} />
+                    </Stack>
+                  ) : (
+                    <Label>Inativo</Label>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+          {(!dados || dados?.length === 0) && (
+            <TableRow>
+              <TableCell colSpan={6}>
+                <SearchNotFoundSmall message="Nenhum registo disponível..." />
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      {(item?.action === 'add' || item?.action === 'editar') && (
+        <BalcaoForm id={id} item={item} onClose={() => setItem(null)} />
+      )}
+      {item?.action === 'eliminar' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          onClose={() => setItem(null)}
+          desc="eliminar este balcão da lista de balcões representados"
+          handleOk={() => dispatch(deleteItem('balcoes', { id: item?.id, ...params }))}
+        />
       )}
     </>
   );

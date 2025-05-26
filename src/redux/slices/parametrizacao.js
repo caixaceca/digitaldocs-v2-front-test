@@ -75,11 +75,16 @@ const slice = createSlice({
         ...item,
         id: item.estado_id,
       }));
-      const meuAmbiente = ambientes.find(({ padrao }) => padrao) ?? ambientes[0];
+      const meuAmbiente =
+        ambientes.find(({ id }) => id === Number(localStorage.getItem('meuAmbiente'))) ||
+        ambientes.find(({ padrao }) => padrao) ||
+        ambientes[0];
+      const fluxosAmbiente = meusFluxos(meuAmbiente?.fluxos ?? []);
 
       state.meusAmbientes = ambientes;
       state.meuAmbiente = meuAmbiente;
-      state.meusFluxos = meusFluxos(meuAmbiente?.fluxos ?? []);
+      state.meusFluxos = fluxosAmbiente;
+      state.meuFluxo = fluxosAmbiente.find(({ id }) => id === Number(localStorage.getItem('meuFluxo'))) ?? null;
     },
 
     getMeusAcessosSuccess(state, action) {

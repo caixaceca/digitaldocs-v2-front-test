@@ -40,7 +40,7 @@ const TABLE_HEAD_CON = [
   { id: 'Valor', label: 'Valor', align: 'right' },
   { id: 'cdg_operacao', label: 'Cod. operação', align: 'right' },
   { id: 'data_entrada', label: 'Data', align: 'center' },
-  { id: 'empty', width: 10 },
+  { id: '', width: 10 },
 ];
 
 const TABLE_HEAD_JF = [
@@ -50,7 +50,7 @@ const TABLE_HEAD_JF = [
   { id: 'doc_1', label: 'Doc. identificação', align: 'left' },
   { id: 'operacao', label: 'Operação', align: 'left' },
   { id: 'data_entrada', label: 'Registo', align: 'left' },
-  { id: 'empty', width: 10 },
+  { id: '', width: 10 },
 ];
 
 // ----------------------------------------------------------------------
@@ -103,14 +103,6 @@ export default function TableCON({ item = 'con' }) {
     comparator: getComparator(order, orderBy),
   });
   const isNotFound = !dataFiltered.length;
-
-  const handleView = (id) => {
-    navigate(`${PATH_DIGITALDOCS.controle.root}/${id}?from=Controle`);
-  };
-
-  const verMais = () => {
-    dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor }));
-  };
 
   return (
     <>
@@ -179,7 +171,12 @@ export default function TableCON({ item = 'con' }) {
                       </>
                     )}
                     <TableCell align="center">
-                      <DefaultAction label="DETALHES" onClick={() => handleView(row?.processo_id || row?.id)} />
+                      <DefaultAction
+                        label="DETALHES"
+                        onClick={() =>
+                          navigate(`${PATH_DIGITALDOCS.controle.root}/${row?.processo_id || row?.id}?from=Controle`)
+                        }
+                      />
                     </TableCell>
                   </TableRow>
                 ))
@@ -204,7 +201,9 @@ export default function TableCON({ item = 'con' }) {
           />
         )}
       </Card>
-      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && cursor && <MaisProcessos verMais={verMais} />}
+      {page + 1 === Math.ceil(dataFiltered.length / rowsPerPage) && cursor && (
+        <MaisProcessos verMais={() => dispatch(getListaProcessos('pjf', { item: 'dadosControle', cursor }))} />
+      )}
     </>
   );
 }

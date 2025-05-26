@@ -90,11 +90,11 @@ export default function TableIdentificadores({ item, inativos }) {
       (item === 'representantes' &&
         representantes?.map((row) => ({
           ...row,
-          uo: uos?.find((item) => item?.balcao === row?.balcao)?.label || '',
+          uo: uos?.find(({ balcao }) => balcao === row?.balcao)?.label || '',
           colaborador: colaboradores?.find(
-            (item) =>
-              item?.perfil?.id_aad === row?.utilizador_id ||
-              item?.perfil?.mail?.toLowerCase() === row?.utilizador_email?.toLowerCase()
+            ({ perfil }) =>
+              perfil?.id_aad === row?.utilizador_id ||
+              perfil?.mail?.toLowerCase() === row?.utilizador_email?.toLowerCase()
           ),
         }))) ||
       [],

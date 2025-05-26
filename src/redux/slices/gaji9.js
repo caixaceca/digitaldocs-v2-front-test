@@ -37,6 +37,7 @@ const initialState = {
   previewFile: null,
   selectedItem: null,
   minutaContrato: null,
+  clausulaOpcional: null,
   estadoMinutas: localStorage.getItem('estadoMinutas') || 'Em análise',
   grupos: [],
   minutas: [],
@@ -51,6 +52,7 @@ const initialState = {
   tiposGarantias: [],
   tiposTitulares: [],
   representantes: [],
+  representsBalcao: [],
 };
 
 const slice = createSlice({
@@ -137,6 +139,7 @@ export function getFromGaji9(item, params) {
         (item === 'entidade' && `/v1/suportes/entidades/detail?entidade_id=${params?.id}`) ||
         (item === 'gerarDocumento' && `/v1/minutas/gerar/documento?minuta_id=${params?.id}`) ||
         (item === 'minutaContrato' && `/v1/suportes/creditos/minuta?credito_id=${params?.id}`) ||
+        (item === 'representsBalcao' && `/v1/acs/representantes/credito?balcao=${params?.balcao}`) ||
         ((item === 'utilizador' || item === 'funcao') && `/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
           `/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${!!params?.credibox}`) ||
@@ -278,6 +281,7 @@ export function createItem(item, dados, params) {
         (item === 'componentesMinuta' && `/v1/minutas/${params?.id}/componentes_compativeis`) ||
         (item === 'recursosGrupo' && `/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
         (item === 'intervenientes' && `/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
+        (item === 'balcoes' && `/v1/acs/representantes/acumular/balcao?representante_id=${params?.repId}`) ||
         (item === 'coposicaoMinuta' &&
           `/v1/minutas/compor?minuta_id=${params?.id}&carregar_clausulas_garantias=false`) ||
         (item === 'regrasClausula' &&
@@ -352,6 +356,8 @@ export function updateItem(item, dados, params) {
         (item === 'coposicaoMinuta' && `/v1/minutas/atualizar/composicao?minuta_id=${params?.id}`) ||
         (item === 'clausulaMinuta' &&
           `/v1/minutas/atualizar/clausula?minuta_id=${params?.minutaId}&clausula_id=${params?.id}`) ||
+        (item === 'balcoes' &&
+          `/v1/acs/representantes/acumular/balcao?id=${params?.id}&representante_id=${params?.repId}`) ||
         '';
 
       if (apiUrl) {
@@ -414,6 +420,8 @@ export function deleteItem(item, params) {
         (item === 'clausulaMinuta' && `/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.creditoId}&contrato_id=${params?.id}`) ||
         (item === 'componentesMinuta' && `/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
+        (item === 'balcoes' &&
+          `/v1/acs/representantes/acumular/balcao?id=${params?.id}&representante_id=${params?.repId}`) ||
         (item === 'intervenientes' &&
           `/v1/suportes/creditos/intervenientes?credito_id=${params?.id}&participante_id=${params?.numero}`) ||
         (item === 'eliminarRegra' &&
@@ -429,7 +437,10 @@ export function deleteItem(item, params) {
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
           dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
         } else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
-        else dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
+        else {
+          const desativar = item === 'balcoes';
+          dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id, desativar }));
+        }
       }
       params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);

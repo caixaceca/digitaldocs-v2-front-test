@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
@@ -13,7 +14,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 // utils
 import cssStyles from '../../utils/cssStyles';
 // hooks
-import useToggle from '../../hooks/useToggle';
 import useOffSetTop from '../../hooks/useOffSetTop';
 import useResponsive from '../../hooks/useResponsive';
 // config
@@ -76,7 +76,7 @@ DashboardHeader.propTypes = {
 
 export default function DashboardHeader({ onOpenSidebar, isCollapse = false, verticalLayout = false }) {
   const isDesktop = useResponsive('up', 'lg');
-  const { toggle: open, onOpen, onClose } = useToggle();
+  const [openModal, setOpenModal] = useState('');
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
 
   return (
@@ -112,31 +112,37 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
       </RootStyle>
 
       <Box sx={{ top: 12, bottom: 12, right: 0, position: 'fixed', zIndex: 2001 }}>
-        <Box
-          sx={{
-            p: 0.25,
-            left: -70,
-            bottom: 10,
-            borderRadius: '50%',
-            position: 'absolute',
-            color: 'common.white',
-            bgcolor: 'success.main',
-            boxShadow: (theme) => theme.customShadows.z8,
-          }}
-        >
-          <Tooltip arrow title="Sugestão">
-            <Fab
-              size="small"
-              color="success"
-              onClick={onOpen}
-              sx={{ p: 0, width: 47, height: 47, color: 'common.white' }}
-            >
-              <SvgIconStyle src="/assets/icons/sugestao.svg" sx={{ width: 30, height: 30 }} />
-            </Fab>
-          </Tooltip>
-        </Box>
+        <HelpButton title="Sugestão" action={() => setOpenModal('sugestao')} />
       </Box>
-      {open && <FormSugestao open onCancel={onClose} />}
+
+      {openModal === 'sugestao' && <FormSugestao onCancel={() => setOpenModal('')} />}
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+HelpButton.propTypes = { title: PropTypes.string, action: PropTypes.func };
+
+function HelpButton({ title, action }) {
+  return (
+    <Box
+      sx={{
+        p: 0.25,
+        bottom: 10,
+        borderRadius: '50%',
+        position: 'absolute',
+        color: 'common.white',
+        bgcolor: 'success.main',
+        left: title === 'Sugestão' ? -70 : -125,
+        boxShadow: (theme) => theme.customShadows.z8,
+      }}
+    >
+      <Tooltip arrow title={title}>
+        <Fab size="small" onClick={action} color="success" sx={{ p: 0, width: 47, height: 47, color: 'common.white' }}>
+          {title === 'Sugestão' && <SvgIconStyle src="/assets/icons/sugestao.svg" sx={{ width: 30, height: 30 }} />}
+        </Fab>
+      </Tooltip>
+    </Box>
   );
 }

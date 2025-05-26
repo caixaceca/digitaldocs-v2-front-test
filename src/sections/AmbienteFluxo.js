@@ -19,7 +19,7 @@ export function Ambiente({ ...other }) {
       sx={{ width: { md: 200, xl: 250 } }}
       getOptionLabel={(option) => option?.nome}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      renderInput={(params) => <TextField {...params} label="Estado" margin="none" />}
+      renderInput={(params) => <TextField {...params} label="Estado" />}
       onChange={(event, newValue) => {
         dispatch(changeMeuAmbiente(newValue));
         localStorage.setItem('meuAmbiente', newValue?.id);
@@ -43,8 +43,11 @@ export function Fluxo({ ...other }) {
       sx={{ width: { md: 200, xl: 250 } }}
       getOptionLabel={(option) => option?.assunto}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
-      onChange={(event, newValue) => dispatch(getSuccess({ item: 'meuFluxo', dados: newValue }))}
+      renderInput={(params) => <TextField {...params} label="Fluxo" />}
+      onChange={(event, newValue) => {
+        dispatch(getSuccess({ item: 'meuFluxo', dados: newValue }));
+        localStorage.setItem('meuFluxo', newValue?.id);
+      }}
       {...other}
     />
   );

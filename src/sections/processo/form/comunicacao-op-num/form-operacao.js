@@ -30,7 +30,6 @@ export default function FormOperacao({ dados }) {
 
   const formSchema = Yup.object().shape({
     valor: Yup.number().positive().required().label('Valor'),
-    noperacao: Yup.number().positive().label('Nº de operação'),
     conta: Yup.number().positive().integer().label('Nº de conta'),
     origem_fundo: Yup.string().required().label('Origem do fundo'),
     finalidade_fundo: Yup.string().required().label('Finalidade do fundo'),

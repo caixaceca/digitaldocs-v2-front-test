@@ -88,10 +88,14 @@ export function actionDelete(state, payload) {
 
   if (!Array.isArray(target)) return;
 
-  if (item1) state[item1][item] = target.filter(({ id: idt }) => idt !== id);
-  else if (desativar) {
+  if (item1 && desativar) {
     const index = target.findIndex(({ id: idt }) => idt === id);
-    state[item][index].ativo = false;
+    if (index > -1) state[item1][item][index].ativo = false;
+  } else if (item1) {
+    state[item1][item] = target.filter(({ id: idt }) => idt !== id);
+  } else if (desativar) {
+    const index = target.findIndex(({ id: idt }) => idt === id);
+    if (index > -1) state[item][index].ativo = false;
   } else state[item] = target.filter(({ id: idt }) => idt !== id);
 }
 

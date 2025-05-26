@@ -17,13 +17,11 @@ import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
 import { setModal } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
 // components
-import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
 import MyAvatar, { AvatarBedge } from '../../../components/MyAvatar';
 //
 import Pareceres from './Pareceres';
-import MinutaParecer from './MinutaParecer';
 import { Encaminhar, destinosProcesso } from '../Intervencao';
 
 // ----------------------------------------------------------------------
@@ -210,9 +208,7 @@ export function Info({ dados, colaboradores }) {
                   <Stack sx={{ width: 1 }}>
                     <InfoCriador
                       criador={criador || { perfil_id: row?.perfil_id }}
-                      temParecer={
-                        row?.parecer_em && (row?.parecer_favoravel === true || row?.parecer_favoravel === false)
-                      }
+                      temParecer={row?.data_parecer && row?.parecer}
                       dados={{
                         ...row,
                         ...{ perfil: criador?.perfil, assunto: dados?.observacao, estado: dados?.estado_inicial },
@@ -268,7 +264,7 @@ InfoCriador.propTypes = { dados: PropTypes.object, criador: PropTypes.object, te
 export function InfoCriador({ criador = null, temParecer = false, dados = null }) {
   const { id, perfil_id: pid = '', perfil = null, uo = null, foto_disk: foto = '' } = criador;
   return (
-    <Stack direction="row" spacing={1.5}>
+    <Stack direction="row" spacing={1.5} alignItems="center">
       <AvatarBedge id={id}>
         <MyAvatar src={getFile('colaborador', foto)} />
       </AvatarBedge>
@@ -277,6 +273,7 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
         spacing={2}
         flexWrap="wrap"
         direction="row"
+        alignItems="center"
         divider={<Divider orientation="vertical" flexItem />}
       >
         <Box>
@@ -299,17 +296,8 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
         </Box>
         {temParecer && (
           <Box>
-            <Stack spacing={1} direction="row" alignItems="center">
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Parecer:
-              </Typography>
-              <Label color={dados?.parecer_favoravel ? 'success' : 'error'} variant="outlined">
-                {dados?.parecer_favoravel ? 'Favorável' : 'Não Favorável'}
-              </Label>
-              {!dados?.temPareceres && <MinutaParecer dados={{ ...dados }} />}
-            </Stack>
-            {!!dados?.parecer_em && <DataParecer data1={dados?.parecer_em} envio />}
-            {!!dados?.data_limite && <DataParecer data1={dados?.data_limite} data2={dados?.parecer_em} />}
+            {!!dados?.data_parecer && <DataParecer data1={dados?.data_parecer} envio />}
+            {!!dados?.data_limite && <DataParecer data1={dados?.data_limite} data2={dados?.data_parecer} />}
           </Box>
         )}
       </Stack>

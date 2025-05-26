@@ -17,7 +17,7 @@ import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fPercent } from '../../utils/formatNumber';
 import { ptDateTime, ptDate } from '../../utils/formatTime';
-import { nomeacaoBySexo, noDados } from '../../utils/formatText';
+import { nomeacaoBySexo } from '../../utils/formatText';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -26,10 +26,10 @@ import { useSelector } from '../../redux/store';
 import Label from '../../components/Label';
 import Markdown from '../../components/Markdown';
 import { DefaultAction } from '../../components/Actions';
-import { Criado, CellChecked } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
+import { Criado, CellChecked, DataLabel } from '../../components/Panel';
 //
 import { DestinatarioForm } from './form-fluxo';
 import DetalhesTransicao from './detalhes-transicao';
@@ -312,8 +312,8 @@ function Notificacoes({ destinatarios, id }) {
                 <Typography variant="body2">{row?.telefone}</Typography>
               </TableCell>
               <TableCell>
-                <Criado value={<>Início: {ptDate(row.data_inicio) || noDados('(Não definido)')}</>} caption />
-                <Criado value={<>Fim: {ptDate(row.data_fim) || noDados('(Não definido)')}</>} caption />
+                <DataLabel data={row?.data_inicio || ''} />
+                <DataLabel data={row?.data_fim || ''} termino />
               </TableCell>
               <CellChecked check={row.ativo} />
               <TableCell>

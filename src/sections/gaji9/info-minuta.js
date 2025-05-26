@@ -141,7 +141,7 @@ export function TableInfoMinuta({ item, onClose }) {
                 {item === 'componentesMinuta' && (
                   <TableCell>
                     <Criado caption tipo="data" value={ptDateTime(row?.ultima_modificacao)} />
-                    {row?.feito_por && <Criado caption tipo="user" value={row.feito_por} />}
+                    <Criado caption tipo="user" value={row.feito_por} />
                   </TableCell>
                 )}
                 <TableCell align="center" width={50}>

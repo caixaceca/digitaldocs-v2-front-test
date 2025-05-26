@@ -154,8 +154,8 @@ export default function TableDetalhes({ id, item }) {
                         <>
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
-                            {row?.atribuido_em && <Criado caption tipo="data" value={ptDateTime(row?.atribuido_em)} />}
-                            {row?.atribuidor && <Criado caption tipo="user" value={row?.atribuidor} baralhar />}
+                            <Criado caption tipo="data" value={ptDateTime(row?.atribuido_em)} />
+                            <Criado caption tipo="user" value={row?.atribuidor} baralhar />
                           </TableCell>
                         </>
                       )) ||
@@ -171,15 +171,11 @@ export default function TableDetalhes({ id, item }) {
                                 <Criado caption tipo="time" value={fToNow(row?.data_pendente)} />
                               )) ||
                               noDados('--')}
-                            {row?.data_libertado && (
-                              <Criado caption tipo="data" value={ptDateTime(row?.data_libertado)} />
-                            )}
+                            <Criado caption tipo="data" value={ptDateTime(row?.data_libertado)} />
                           </TableCell>
                           <TableCell>
-                            {row?.nome && <Criado caption tipo="user" value={row?.nome} baralhar />}
-                            {row?.data_pendente && (
-                              <Criado caption tipo="data" value={ptDateTime(row?.data_pendente)} />
-                            )}
+                            <Criado caption tipo="user" value={row?.nome} baralhar />
+                            <Criado caption tipo="data" value={ptDateTime(row?.data_pendente)} />
                           </TableCell>
                         </>
                       )) ||

@@ -231,6 +231,7 @@ export function DomiciliarForm({ ids, onClose }) {
                 options={estados
                   ?.filter(({ uo_id: uoId }) => uoId === values?.uo?.id)
                   ?.map(({ id, nome }) => ({ id, label: nome }))}
+                onChange={(event, newValue) => setValue('estado', newValue, vsv)}
               />
             )}
             <RHFTextField name="observacao" multiline rows={3} label="Observação" />
