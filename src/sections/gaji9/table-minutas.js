@@ -141,7 +141,7 @@ export default function TableMinutas({ item, inativos }) {
           />
         )}
       </Card>
-      {isOpenModal && item === 'minutas' && <MinutaForm onCancel={handleCloseModal} action="Adicionar" />}
+      {isOpenModal && item === 'minutas' && <MinutaForm onClose={handleCloseModal} action="Adicionar" />}
     </>
   );
 }

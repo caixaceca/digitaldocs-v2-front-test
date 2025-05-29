@@ -26,14 +26,14 @@ import { DetalhesContent } from './DetalhesGaji9';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-InfoCaixa.propTypes = { onCancel: PropTypes.func, item: PropTypes.string };
+InfoCaixa.propTypes = { onClose: PropTypes.func, item: PropTypes.string };
 
-export default function InfoCaixa({ onCancel, item }) {
-  const { toggle: open, onOpen, onClose } = useToggle();
+export default function InfoCaixa({ onClose, item }) {
+  const { toggle: open, onOpen, onClose: onClose1 } = useToggle();
   const { isLoading, infoCaixa, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
 
   return (
-    <Dialog open onClose={() => onCancel()} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitleAlt
         title="Informações da Caixa"
         action={
@@ -48,12 +48,12 @@ export default function InfoCaixa({ onCancel, item }) {
                 )}
               </>
             )}
-            <Fechar onClick={() => onCancel()} />
+            <Fechar onClick={onClose} />
           </Stack>
         }
       />
       <DialogContent>
-        {open ? <InfoForm onCancel={() => onClose()} /> : <DetalhesContent dados={infoCaixa} item={item} />}
+        {open ? <InfoForm onClose={onClose1} /> : <DetalhesContent dados={infoCaixa} item={item} />}
       </DialogContent>
     </Dialog>
   );
@@ -61,9 +61,9 @@ export default function InfoCaixa({ onCancel, item }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-InfoForm.propTypes = { onCancel: PropTypes.func };
+InfoForm.propTypes = { onClose: PropTypes.func };
 
-export function InfoForm({ onCancel }) {
+export function InfoForm({ onClose }) {
   const dispatch = useDispatch();
   const { isSaving, infoCaixa } = useSelector((state) => state.gaji9);
 
@@ -96,9 +96,9 @@ export function InfoForm({ onCancel }) {
 
   const onSubmit = async () => {
     const params = {
+      onClose,
       id: infoCaixa?.id,
       getItem: 'infoCaixa',
-      onClose: () => onCancel(),
       msg: `Informações ${infoCaixa ? 'atualizadas' : 'adicionadas'}`,
     };
     dispatch((infoCaixa ? updateItem : createItem)('infoCaixa', JSON.stringify(values), params));
@@ -116,7 +116,7 @@ export function InfoForm({ onCancel }) {
         <GridItem sm={6} children={<RHFTextField name="morada_eletronico" label="Email" />} />
         <GridItem sm={6} children={<RHFTextField name="morada_sede" label="Endereço" />} />
       </Grid>
-      <DialogButons edit={!!infoCaixa} isSaving={isSaving} onCancel={onCancel} />
+      <DialogButons edit={!!infoCaixa} isSaving={isSaving} onClose={onClose} />
     </FormProvider>
   );
 }

@@ -64,7 +64,7 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
   const criador = useMemo(
     () =>
       t?.domiciliacao
-        ? colaboradores?.find(({ perfil }) => perfil?.mail?.toLowerCase() === t?.perfil_id?.toLowerCase())
+        ? colaboradores?.find(({ email }) => email?.toLowerCase() === t?.perfil_id?.toLowerCase())
         : colaboradores?.find(({ perfil }) => perfil?.id === t?.perfil_id),
     [colaboradores, t?.domiciliacao, t?.perfil_id]
   );

@@ -204,8 +204,8 @@ export default function TableAcessos({ tab }) {
           )}
         </Card>
 
-        {modalParams === 'form-acessos' && <AcessoForm onCancel={() => dispatch(setModal())} perfilIdA={id} />}
-        {modalParams === 'form-estados' && <EstadosPerfilForm onCancel={() => dispatch(setModal())} perfilIdE={id} />}
+        {modalParams === 'form-acessos' && <AcessoForm onClose={() => dispatch(setModal())} perfilIdA={id} />}
+        {modalParams === 'form-estados' && <EstadosPerfilForm onClose={() => dispatch(setModal())} perfilIdE={id} />}
         {modalParams === 'eliminar-item' && (
           <DialogConfirmar
             isSaving={isSaving}

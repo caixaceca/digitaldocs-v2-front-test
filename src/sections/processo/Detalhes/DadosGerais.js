@@ -15,6 +15,7 @@ import { SkeletonProcesso } from '../../../components/skeleton';
 import Anexos from './Anexos';
 import NotaProcesso from './NotaProcesso';
 import DetalhesProcesso from './DetalhesProcesso';
+import GridItem from '../../../components/GridItem';
 
 // ----------------------------------------------------------------------
 
@@ -34,16 +35,16 @@ export default function DadosGerais() {
         <>
           {processo ? (
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={anexosAtivos?.length && 5}>
+              <GridItem lg={anexosAtivos?.length && 5}>
                 <Stack id="detalhes">
                   {!isPS && processo?.nota && <NotaProcesso nota={processo?.nota} segmento={processo?.segmento} />}
                   <DetalhesProcesso isPS={isPS} processo={processo} />
                 </Stack>
-              </Grid>
+              </GridItem>
               {!!anexosAtivos?.length && (
-                <Grid item xs={12} lg={7}>
+                <GridItem lg={7}>
                   <Anexos anexos={applySort(anexosAtivos, getComparator('asc', 'id'))} />
-                </Grid>
+                </GridItem>
               )}
             </Grid>
           ) : (

@@ -124,9 +124,9 @@ export default function PageCreditoDetalhes() {
                 />
               )}
 
-              {modalGaji9 === 'form-credito' && <CreditoForm onCancel={openForm} />}
+              {modalGaji9 === 'form-credito' && <CreditoForm onClose={openForm} />}
               {(modalGaji9 === 'preview-contrato' || modalGaji9 === 'gerar-contrato') && (
-                <PreviewForm item={modalGaji9} onCancel={openForm} />
+                <PreviewForm item={modalGaji9} onClose={() => openForm()} />
               )}
               {modalGaji9 === 'eliminar-credito' && (
                 <DialogConfirmar

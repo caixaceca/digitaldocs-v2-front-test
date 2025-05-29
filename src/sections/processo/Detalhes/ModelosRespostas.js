@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
 import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
 // @mui
-import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 // utils
@@ -14,6 +13,7 @@ import { valorPorExtenso } from '../../../utils/formatText';
 // redux
 import { useSelector } from '../../../redux/store';
 //
+import GridItem from '../../../components/GridItem';
 import { CabecalhoWord, RodapeWord } from '../../../components/ExportDados';
 
 // ----------------------------------------------------------------------
@@ -21,7 +21,7 @@ import { CabecalhoWord, RodapeWord } from '../../../components/ExportDados';
 export default function ModelosRespostas() {
   const { processo } = useSelector((state) => state.digitaldocs);
   const { origens } = useSelector((state) => state.parametrizacao);
-  const origem = origens?.find((row) => row?.id === processo?.origem_id);
+  const origem = origens?.find(({ id }) => id === processo?.origem_id);
 
   const exportToWord = async (tipo) => {
     const logo = await fetch('/assets/caixa_logo_carta.png').then((r1) => r1.arrayBuffer());
@@ -235,7 +235,7 @@ export default function ModelosRespostas() {
   };
 
   return (
-    <Grid item xs={12}>
+    <GridItem>
       <Divider textAlign="left" sx={{ mt: 1.5, mb: 0.25, typography: 'overline' }}>
         Modelos de resposta
       </Divider>
@@ -262,7 +262,7 @@ export default function ModelosRespostas() {
             <ButtonModelo modelo="4: Cliente com valor total.docx" evento={() => exportToWord('com saldo total')} />
           </>
         )) || <ButtonModelo modelo="1: Modelo de nota.docx" evento={() => exportToWord('outro')} />}
-    </Grid>
+    </GridItem>
   );
 }
 

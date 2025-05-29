@@ -108,7 +108,7 @@ export default function OpcoesClausula() {
       </Table>
 
       {modal === 'detalhes' && <DetalhesGaji9 closeModal={() => setModal('')} item="clausulas" opcao />}
-      {modal === 'create' && <RegraForm onCancel={() => setModal('')} dados={selectedItem} minutaId={minuta?.id} />}
+      {modal === 'create' && <RegraForm onClose={() => setModal('')} dados={selectedItem} minutaId={minuta?.id} />}
       {!!modal && modal !== 'create' && modal !== 'detalhes' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -123,9 +123,9 @@ export default function OpcoesClausula() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-RegraForm.propTypes = { dados: PropTypes.object, minutaId: PropTypes.number, onCancel: PropTypes.func };
+RegraForm.propTypes = { dados: PropTypes.object, minutaId: PropTypes.number, onClose: PropTypes.func };
 
-function RegraForm({ dados, minutaId, onCancel }) {
+function RegraForm({ dados, minutaId, onClose }) {
   const dispatch = useDispatch();
   const { isSaving, clausulas } = useSelector((state) => state.gaji9);
 
@@ -150,14 +150,14 @@ function RegraForm({ dados, minutaId, onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { minutaId, msg: 'Regra adicionada', onClose: () => onCancel(), clausulaId: dados?.id };
+    const params = { minutaId, msg: 'Regra adicionada', onClose, clausulaId: dados?.id };
     dispatch(
       createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), params)
     );
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitleAlt title="Adicionar regras" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -182,7 +182,7 @@ function RegraForm({ dados, minutaId, onCancel }) {
             <GridItem xs={6} children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" />} />
             <GridItem xs={6} children={<RHFSwitch name="representante" label="Representante" />} />
           </Grid>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>

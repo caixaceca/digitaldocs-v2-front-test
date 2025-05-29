@@ -90,7 +90,7 @@ export function AtribuirForm({ colaboradores, onClose }) {
             label="Colaborador"
             options={applySort(colaboradores, getComparator('asc', 'label'))}
           />
-          <DialogButons label="Atribuir" isSaving={isSaving} onCancel={onClose} />
+          <DialogButons label="Atribuir" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -167,7 +167,7 @@ export function FocalPointForm({ ids, onClose }) {
           <Stack sx={{ pt: 3 }}>
             <RHFAutocompleteObj name="estado" label="Focal Point" options={estadosL} />
           </Stack>
-          <DialogButons edit isSaving={isSaving} onCancel={onClose} />
+          <DialogButons edit isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -236,7 +236,7 @@ export function DomiciliarForm({ ids, onClose }) {
             )}
             <RHFTextField name="observacao" multiline rows={3} label="Observação" />
           </Stack>
-          <DialogButons color="warning" label="Enviar" isSaving={isSaving} onCancel={onClose} />
+          <DialogButons color="warning" label="Enviar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>

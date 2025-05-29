@@ -317,14 +317,14 @@ function applySortFilter({ dados, comparator, filter }) {
 function dadosComColaboradores(dados, colaboradores) {
   const dadosList = [];
   dados?.forEach((row) => {
-    const colaborador = colaboradores.find((item) => Number(item?.perfil_id) === Number(row?.perfil_id));
+    const colaborador = colaboradores.find(({ perfil_id: pid }) => Number(pid) === Number(row?.perfil_id));
     dadosList.push({
       ...row,
       idColab: colaborador?.id,
+      mail: colaborador?.email,
       uo: colaborador?.uo?.label,
       foto: colaborador?.foto_disk,
-      mail: colaborador?.perfil?.mail,
-      nome: colaborador?.perfil?.displayName || `Perfil: ${row.perfil_id}`,
+      nome: colaborador?.nome || `Perfil: ${row.perfil_id}`,
     });
   });
   return dadosList;

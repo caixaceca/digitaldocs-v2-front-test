@@ -117,12 +117,7 @@ export default function ListSelect({ disponiveis, atribuidos, changeItems }) {
       <Stack sx={{ p: 1, pb: 0 }}>
         {title === 'Disponíveis' ? searchField(filterL, setFilterL) : searchField(filterR, setFilterR)}
       </Stack>
-      <List
-        dense
-        role="list"
-        component="div"
-        sx={{ maxWidth: { xs: 200, md: 320 }, minWidth: { xs: 200, md: 320 }, height: 300, overflow: 'auto' }}
-      >
+      <List dense role="list" component="div" sx={{ maxWidth: 320, minWidth: 200, height: 300, overflow: 'auto' }}>
         <Scrollbar>
           {items.map((value) => (
             <ListItemButton key={value?.label} role="listitem" onClick={handleToggle(value)}>
@@ -139,16 +134,16 @@ export default function ListSelect({ disponiveis, atribuidos, changeItems }) {
 
   return (
     <Scrollbar>
-      <Grid container justifyContent="center" alignItems="center" sx={{ py: 1, minWidth: 660 }}>
-        <Grid item>{customList('Disponíveis', filterDados(left, filterL))}</Grid>
-        <Grid item>
+      <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 1, minWidth: 660 }}>
+        <Stack>{customList('Disponíveis', filterDados(left, filterL))}</Stack>
+        <Stack>
           <Grid container direction="column" alignItems="center" sx={{ p: 1.5 }}>
             {buttonChange(true, handleCheckedRight, leftChecked.length === 0)}
             {buttonChange(false, handleCheckedLeft, rightChecked.length === 0)}
           </Grid>
-        </Grid>
-        <Grid item>{customList('Atribuídos', filterDados(right, filterR))}</Grid>
-      </Grid>
+        </Stack>
+        <Stack>{customList('Atribuídos', filterDados(right, filterR))}</Stack>
+      </Stack>
     </Scrollbar>
   );
 }
@@ -157,6 +152,6 @@ export default function ListSelect({ disponiveis, atribuidos, changeItems }) {
 
 function filterDados(dados, filter) {
   return filter
-    ? dados?.filter((row) => row?.label && normalizeText(row?.label).indexOf(normalizeText(filter)) !== -1)
+    ? dados?.filter(({ label }) => label && normalizeText(label).indexOf(normalizeText(filter)) !== -1)
     : dados;
 }

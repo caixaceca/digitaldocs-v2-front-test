@@ -10,6 +10,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import useSettings from '../../../hooks/useSettings';
 //
 import BoxMask from './BoxMask';
+import GridItem from '../../GridItem';
 
 // ----------------------------------------------------------------------
 
@@ -29,20 +30,20 @@ export default function SettingLayout() {
 
   return (
     <RadioGroup name="themeLayout" value={themeLayout} onChange={onChangeLayout}>
-      <Grid dir="ltr" container spacing={2.5}>
+      <Grid container dir="ltr" spacing={2.5}>
         {['horizontal', 'vertical'].map((layout) => {
           const isSelected = themeLayout === layout;
           const isVertical = layout === 'vertical';
 
           return (
-            <Grid key={layout} item xs={6}>
+            <GridItem key={layout} xs={6}>
               <BoxStyle
                 sx={{ ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }) }}
               >
                 {isVertical ? <VerticalBox isSelected={isSelected} /> : <HorizontalBox isSelected={isSelected} />}
                 <BoxMask value={layout} />
               </BoxStyle>
-            </Grid>
+            </GridItem>
           );
         })}
       </Grid>

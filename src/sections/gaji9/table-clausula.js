@@ -160,7 +160,7 @@ export default function TableClausula({ inativos }) {
         )}
       </Card>
 
-      {modalGaji9 === 'form-clausula' && <ClausulaForm onCancel={() => dispatch(closeModal())} />}
+      {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
       {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={() => dispatch(closeModal())} item="clausulas" />}
       {modalGaji9 === 'eliminar-clausula' && (
         <DialogConfirmar

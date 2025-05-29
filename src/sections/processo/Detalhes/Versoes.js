@@ -57,7 +57,7 @@ export default function Versoes({ id }) {
           ) : (
             applySort(versoes, getComparator('desc', 'feito_em'))?.map((row, index) => {
               const colaborador = colaboradores?.find(
-                ({ perfil }) => perfil?.mail?.toLowerCase() === row?.feito_por?.toLowerCase()
+                ({ email }) => email?.toLowerCase() === row?.feito_por?.toLowerCase()
               );
 
               return (

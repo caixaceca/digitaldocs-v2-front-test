@@ -176,11 +176,11 @@ export default function TableParamsGaji9({ item, inativos }) {
 
       {isOpenModal && (
         <>
-          {item === 'grupos' && <GrupoForm onCancel={handleCloseModal} />}
-          {item === 'funcoes' && <FuncaoForm onCancel={handleCloseModal} />}
-          {item === 'recursos' && <RecursoForm onCancel={handleCloseModal} />}
-          {item === 'variaveis' && <VariavelForm onCancel={handleCloseModal} />}
-          {item === 'marcadores' && <MarcadorForm onCancel={handleCloseModal} />}
+          {item === 'grupos' && <GrupoForm onClose={handleCloseModal} />}
+          {item === 'funcoes' && <FuncaoForm onClose={handleCloseModal} />}
+          {item === 'recursos' && <RecursoForm onClose={handleCloseModal} />}
+          {item === 'variaveis' && <VariavelForm onClose={handleCloseModal} />}
+          {item === 'marcadores' && <MarcadorForm onClose={handleCloseModal} />}
         </>
       )}
     </>

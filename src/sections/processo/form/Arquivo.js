@@ -142,7 +142,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
               </GridItem>
             )}
           </Grid>
-          <DialogButons color="error" label="Arquivar" isSaving={isSaving} onCancel={onClose} />
+          <DialogButons color="error" label="Arquivar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -208,7 +208,7 @@ export function DesarquivarForm({ id, colaboradores }) {
             {values?.estado?.id && <RHFAutocompleteObj name="perfil" label="Colaborador" options={colaboradores} />}
             <RHFTextField name="observacao" multiline minRows={4} maxRows={6} label="Observação" />
           </Stack>
-          <DialogButons color="error" label="Desarquivar" isSaving={isSaving} onCancel={() => dispatch(setModal())} />
+          <DialogButons color="error" label="Desarquivar" isSaving={isSaving} onClose={() => dispatch(setModal())} />
         </FormProvider>
       </DialogContent>
     </Dialog>

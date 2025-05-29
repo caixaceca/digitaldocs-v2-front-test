@@ -249,14 +249,14 @@ export default function TableParametrizacao({ item }) {
       {isOpenView && <Detalhes item={item} closeModal={() => dispatch(closeModal())} />}
       {isOpenModal && (
         <>
-          {item === 'linhas' && <LinhaForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'fluxos' && <FluxoForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'estados' && <EstadoForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'origens' && <OrigemForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'despesas' && <DespesaForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'documentos' && <DocumentoForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'motivosPendencia' && <MotivoPendenciaForm onCancel={() => dispatch(closeModal())} />}
-          {item === 'motivosTransicao' && <MotivoTransicaoForm onCancel={() => dispatch(closeModal())} />}
+          {item === 'linhas' && <LinhaForm onClose={() => dispatch(closeModal())} />}
+          {item === 'fluxos' && <FluxoForm onClose={() => dispatch(closeModal())} />}
+          {item === 'estados' && <EstadoForm onClose={() => dispatch(closeModal())} />}
+          {item === 'origens' && <OrigemForm onClose={() => dispatch(closeModal())} />}
+          {item === 'despesas' && <DespesaForm onClose={() => dispatch(closeModal())} />}
+          {item === 'documentos' && <DocumentoForm onClose={() => dispatch(closeModal())} />}
+          {item === 'motivosPendencia' && <MotivoPendenciaForm onClose={() => dispatch(closeModal())} />}
+          {item === 'motivosTransicao' && <MotivoTransicaoForm onClose={() => dispatch(closeModal())} />}
         </>
       )}
     </>

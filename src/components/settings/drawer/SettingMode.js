@@ -9,6 +9,7 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import useSettings from '../../../hooks/useSettings';
 //
 import BoxMask from './BoxMask';
+import GridItem from '../../GridItem';
 
 // ----------------------------------------------------------------------
 
@@ -29,12 +30,12 @@ export default function SettingMode() {
 
   return (
     <RadioGroup name="themeMode" value={themeMode} onChange={onChangeMode}>
-      <Grid dir="ltr" container spacing={2.5}>
+      <Grid container dir="ltr" spacing={2.5}>
         {['light', 'dark'].map((mode, index) => {
           const isSelected = themeMode === mode;
 
           return (
-            <Grid key={mode} item xs={6}>
+            <GridItem key={mode} xs={6}>
               <BoxStyle
                 sx={{
                   bgcolor: mode === 'light' ? 'common.white' : 'grey.800',
@@ -48,7 +49,7 @@ export default function SettingMode() {
                 )}
                 <BoxMask value={mode} />
               </BoxStyle>
-            </Grid>
+            </GridItem>
           );
         })}
       </Grid>

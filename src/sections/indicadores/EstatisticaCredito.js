@@ -41,6 +41,7 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getEstatisticaCredito } from '../../redux/slices/indicadores';
 // components
 import { BoxMask } from '../../components/Panel';
+import GridItem from '../../components/GridItem';
 import { RHFDateIF } from '../../components/hook-form';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
@@ -205,18 +206,18 @@ export function Totais() {
   return (
     <Grid container spacing={3}>
       {isLoading ? (
-        <Grid item xs={12}>
+        <GridItem>
           <Card>
             <BarChart />
           </Card>
-        </Grid>
+        </GridItem>
       ) : (
         <>
           <CardResumo label="Entrada" qtd={totais.qtdEnt} total={totais.valorEnt} />
           <CardResumo label="Aprovado" qtd={totais.qtdAp} total={totais.valorAp} />
           <CardResumo label="Contratado" qtd={totais.qtdCont} total={totais.valorCont} />
           <CardResumo label="Indeferido/Desistido" qtd={totais.qtdId} total={totais.valorId} />
-          <Grid item xs={12}>
+          <GridItem>
             <Card sx={{ p: 1 }}>
               <TableContainer>
                 <Table size="small" id="tabel-estatistica-credito">
@@ -283,7 +284,7 @@ export function Totais() {
                 </Table>
               </TableContainer>
             </Card>
-          </Grid>
+          </GridItem>
         </>
       )}
     </Grid>
@@ -764,7 +765,7 @@ function CardResumo({ total, label, qtd }) {
     (label === 'Contratado' && 'primary') ||
     'error';
   return (
-    <Grid item xs={12} sm={6} lg={3}>
+    <GridItem sm={6} lg={3}>
       <Card
         sx={{
           p: 2.5,
@@ -810,7 +811,7 @@ function CardResumo({ total, label, qtd }) {
             )}
         </Stack>
       </Card>
-    </Grid>
+    </GridItem>
   );
 }
 

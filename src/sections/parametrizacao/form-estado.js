@@ -40,9 +40,9 @@ const ps = { perfil_id: null, gestor: false, padrao: false, observador: false, d
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadoForm.propTypes = { onCancel: PropTypes.func };
+EstadoForm.propTypes = { onClose: PropTypes.func };
 
-export function EstadoForm({ onCancel }) {
+export function EstadoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { uos } = useSelector((state) => state.intranet);
@@ -91,7 +91,7 @@ export function EstadoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -117,7 +117,7 @@ export function EstadoForm({ onCancel }) {
             )}
             <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
           </Grid>
-          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -126,9 +126,9 @@ export function EstadoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.number, estadoId: PropTypes.number };
+EstadosPerfilForm.propTypes = { onClose: PropTypes.func, perfilIdE: PropTypes.number, estadoId: PropTypes.number };
 
-export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onCancel }) {
+export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -174,7 +174,7 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -201,7 +201,7 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onCancel }) {
                 />
               )}
             </Grid>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} edit={isEdit} />
+            <DialogButons isSaving={isSaving} onClose={onClose} edit={isEdit} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -211,9 +211,9 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-PerfisEstadoForm.propTypes = { onCancel: PropTypes.func };
+PerfisEstadoForm.propTypes = { onClose: PropTypes.func };
 
-export function PerfisEstadoForm({ onCancel }) {
+export function PerfisEstadoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving, estado } = useSelector((state) => state.parametrizacao);
@@ -232,7 +232,7 @@ export function PerfisEstadoForm({ onCancel }) {
     try {
       const formData = { estado_id: estado?.id, perfil_id_cc: perfilId, perfis: [] };
       values?.perfis?.forEach((row) => formData?.perfis?.push({ ...row, perfil_id: row?.perfil_id?.id }));
-      const params = { item1: 'estado', msg: 'Perfis adicionados', onClose: () => onCancel() };
+      const params = { item1: 'estado', msg: 'Perfis adicionados', onClose };
       dispatch(createItem('perfis', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -240,7 +240,7 @@ export function PerfisEstadoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt
         title="Adicionar colaborador"
         action={<AddItem dados={{ small: true, label: 'Colaborador' }} onClick={() => append(ps)} />}
@@ -275,7 +275,7 @@ export function PerfisEstadoForm({ onCancel }) {
               </Stack>
             ))}
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -287,11 +287,11 @@ export function PerfisEstadoForm({ onCancel }) {
 RegrasForm.propTypes = {
   item: PropTypes.object,
   estado: PropTypes.bool,
-  onCancel: PropTypes.func,
+  onClose: PropTypes.func,
   selectedItem: PropTypes.object,
 };
 
-export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
+export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -327,9 +327,9 @@ export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
   }, [selectedItem]);
 
   const paramsComum = {
+    onClose,
     estadoId: item?.id,
     id: selectedItem?.id,
-    onClose: () => onCancel(),
     getItem: estado ? 'estado' : 'selectedItem',
   };
   const action = estado ? 'regrasEstado' : 'regrasTransicao';
@@ -349,7 +349,7 @@ export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
           {isEdit ? 'Editar regra' : 'Adicionar regras'}
@@ -383,7 +383,7 @@ export function RegrasForm({ item, onCancel, estado = false, selectedItem }) {
           <DialogButons
             edit={isEdit}
             isSaving={isSaving}
-            onCancel={onCancel}
+            onClose={onClose}
             handleDelete={handleDelete}
             desc={isEdit ? 'eliminar esta regra' : ''}
           />

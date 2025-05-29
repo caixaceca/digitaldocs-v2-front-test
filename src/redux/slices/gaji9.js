@@ -278,6 +278,7 @@ export function createItem(item, dados, params) {
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `/v1/acs/representantes/definir`) ||
         (item === 'clonarMinuta' && `/v1/minutas/com/base?minuta_base_id=${params?.id}`) ||
+        (item === 'subtipos' && `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}`) ||
         (item === 'componentesMinuta' && `/v1/minutas/${params?.id}/componentes_compativeis`) ||
         (item === 'recursosGrupo' && `/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
         (item === 'intervenientes' && `/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
@@ -354,6 +355,8 @@ export function updateItem(item, dados, params) {
         (item === 'removeGarant' && `/v1/minutas/remover/tipos_garantias?id=${params?.id}`) ||
         (item === 'garantiasMinuta' && `/v1/minutas/adicionar/tipos_garantias?id=${params?.id}`) ||
         (item === 'coposicaoMinuta' && `/v1/minutas/atualizar/composicao?minuta_id=${params?.id}`) ||
+        (item === 'subtipos' &&
+          `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}&subtipo_id=${params?.id}`) ||
         (item === 'clausulaMinuta' &&
           `/v1/minutas/atualizar/clausula?minuta_id=${params?.minutaId}&clausula_id=${params?.id}`) ||
         (item === 'balcoes' &&
@@ -420,6 +423,8 @@ export function deleteItem(item, params) {
         (item === 'clausulaMinuta' && `/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.creditoId}&contrato_id=${params?.id}`) ||
         (item === 'componentesMinuta' && `/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
+        (item === 'subtipos' &&
+          `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}&subtipo_id=${params?.id}`) ||
         (item === 'balcoes' &&
           `/v1/acs/representantes/acumular/balcao?id=${params?.id}&representante_id=${params?.repId}`) ||
         (item === 'intervenientes' &&

@@ -160,7 +160,7 @@ export default function FormDepositante({ dados }) {
       <ButtonsStepper
         isSaving={isSaving}
         label={isEdit ? 'Guardar' : ''}
-        onCancel={() => dispatch(updateDados({ backward: true, dados: values }))}
+        onClose={() => dispatch(updateDados({ backward: true, dados: values }))}
       />
     </FormProvider>
   );

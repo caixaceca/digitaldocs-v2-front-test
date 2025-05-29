@@ -25,6 +25,7 @@ import { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector } from '../../redux/store';
 // components
+import GridItem from '../../components/GridItem';
 import MyAvatar from '../../components/MyAvatar';
 import { DefaultAction } from '../../components/Actions';
 import { DialogTitleAlt } from '../../components/CustomDialog';
@@ -86,7 +87,7 @@ export function EntradasTrabalhados({ indicadores }) {
         </Card>
       ) : (
         <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} md={6} lg={4}>
+          <GridItem md={6} lg={4}>
             <Card sx={{ height: 1, p: 2, pt: 1 }}>
               <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
                 <Typography variant="h5" sx={{ color: 'text.secondary' }}>
@@ -191,7 +192,7 @@ export function EntradasTrabalhados({ indicadores }) {
                 </>
               )}
             </Card>
-          </Grid>
+          </GridItem>
           {dadosByColaborador?.map((row) => (
             <ColaboradorCard
               total={total}
@@ -218,7 +219,7 @@ ColaboradorComp.propTypes = {
 
 export function ColaboradorComp({ colaborador, colaboradoresList = [], colaboradorComp, setColaborador }) {
   return (
-    <Grid item xs={12} sm={6}>
+    <GridItem sm={6}>
       <Stack
         spacing={1}
         direction="row"
@@ -241,7 +242,7 @@ export function ColaboradorComp({ colaborador, colaboradoresList = [], colaborad
           renderInput={(params) => <TextField {...params} label="Colaborador 1" />}
         />
       </Stack>
-    </Grid>
+    </GridItem>
   );
 }
 
@@ -262,7 +263,7 @@ export function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSu
   const totalT = trabalhadoC1 > trabalhadoC2 ? trabalhadoC1 : trabalhadoC2;
   return (
     <>
-      <Grid item xs={12} sx={{ mt: 1.25 }}>
+      <GridItem sx={{ mt: 1.25 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant={isTotal ? 'h6' : 'subtitle1'}>{fNumber(trabalhadoC1)}</Typography>
           <Typography variant={isTotal ? 'body1' : 'body2'} noWrap sx={{ textAlign: 'center' }}>
@@ -270,19 +271,19 @@ export function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSu
           </Typography>
           <Typography variant={isTotal ? 'h6' : 'subtitle1'}>{fNumber(trabalhadoC2)}</Typography>
         </Stack>
-      </Grid>
-      <Grid item xs={6} sx={{ pt: '6px !important' }}>
+      </GridItem>
+      <GridItem xs={6} sx={{ pt: '6px !important' }}>
         <Stack direction="column" alignItems="flex-end">
           <Box sx={{ width: `${(trabalhadoC1 * 100) / totalT}%`, border: `2px solid ${colorLeft}` }}> </Box>
           <Box sx={{ width: '100%', border: `1px solid ${colorLeft}` }}> </Box>
         </Stack>
-      </Grid>
-      <Grid item xs={6} sx={{ pt: '6px !important' }}>
+      </GridItem>
+      <GridItem xs={6} sx={{ pt: '6px !important' }}>
         <Stack direction="column" alignItems="flex-start">
           <Box sx={{ width: `${(trabalhadoC2 * 100) / totalT}%`, border: `2px solid ${colorRight}` }}> </Box>
           <Box sx={{ width: '100%', border: `1px solid ${colorRight}` }}> </Box>
         </Stack>
-      </Grid>
+      </GridItem>
     </>
   );
 }

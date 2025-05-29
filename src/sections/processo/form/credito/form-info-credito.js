@@ -53,6 +53,7 @@ export default function FormInfoCredito({ dados }) {
 
   const formSchema = Yup.object().shape({
     linha_id: Yup.mixed().required().label('Linha'),
+    garantia: Yup.string().required().label('Garantia'),
     finalidade: Yup.string().required().label('Finalidade'),
     cliente: Yup.number().positive().required().label('Nº cliente'),
     tipo_titular_id: Yup.mixed().required().label('Tipo de titular'),
@@ -72,6 +73,7 @@ export default function FormInfoCredito({ dados }) {
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
       // info credito
+      garantia: dadosStepper?.garantia || credito?.garantia || '',
       taxa_juro: dadosStepper?.taxa_juro || credito?.taxa_juro || '',
       finalidade: dadosStepper?.finalidade || credito?.finalidade || '',
       numero_proposta: dadosStepper?.numero_proposta || credito?.numero_proposta || '',
@@ -144,13 +146,14 @@ export default function FormInfoCredito({ dados }) {
                   )}
                 />
               </GridItem>
-              <GridItem md={4}>
+              <GridItem md={6}>
                 <RHFAutocompleteObj dc name="componente_id" label="Produto/Componente" options={componentesList} />
               </GridItem>
-              <GridItem sm={4}>
+              <GridItem sm={6}>
                 <RHFTextField name="setor_atividade" label="Ent. patronal/Set. atividade" />
               </GridItem>
-              <GridItem sm={4} children={<RHFTextField name="finalidade" label="Finalidade" />} />
+              <GridItem sm={6} children={<RHFTextField name="finalidade" label="Finalidade" />} />
+              <GridItem sm={6} children={<RHFTextField name="garantia" label="Garantia" />} />
             </Grid>
           </Card>
           <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
@@ -158,7 +161,7 @@ export default function FormInfoCredito({ dados }) {
           </Card>
         </Box>
       </Stack>
-      <ButtonsStepper isSaving={isSaving} labelCancel="Cancelar" onCancel={onClose} label={isEdit ? 'Guardar' : ''} />
+      <ButtonsStepper isSaving={isSaving} labelCancel="Cancelar" onClose={onClose} label={isEdit ? 'Guardar' : ''} />
     </FormProvider>
   );
 }

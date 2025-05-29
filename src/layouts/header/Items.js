@@ -39,7 +39,7 @@ export function ValidarDocumento() {
   return (
     <>
       <IconButtonHeader title="Validação de documento" open={open} setOpen={onOpen} />
-      {open && <ValidarDocForm open onCancel={onClose} />}
+      {open && <ValidarDocForm open onClose={onClose} />}
     </>
   );
 }
@@ -62,7 +62,7 @@ export function Denuncia() {
       <IconButtonHeader title="Denúncia" open={open} setOpen={onOpen} />
       {open && (
         <Dialog open onClose={onClose} fullWidth maxWidth="md">
-          <DenunciaForm onCancel={onClose} />
+          <DenunciaForm onClose={onClose} />
         </Dialog>
       )}
     </>

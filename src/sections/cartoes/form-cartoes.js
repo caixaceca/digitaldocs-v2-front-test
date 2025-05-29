@@ -33,6 +33,7 @@ import useTable from '../../hooks/useTable';
 import { useSelector, useDispatch } from '../../redux/store';
 import { updateItem, alterarBalcaopSuccess } from '../../redux/slices/digitaldocs';
 // components
+import GridItem from '../../components/GridItem';
 import { DialogButons } from '../../components/Actions';
 import { TableHeadCustom } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
@@ -44,10 +45,10 @@ ValidarMultiploForm.propTypes = {
   fase: PropTypes.string,
   balcao: PropTypes.number,
   cartoes: PropTypes.array,
-  onCancel: PropTypes.func,
+  onClose: PropTypes.func,
 };
 
-export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
+export function ValidarMultiploForm({ fase, cartoes = [], balcao, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
@@ -82,7 +83,7 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
               data_rececao_sisp: fase === 'Emissão' ? dataSisp : '',
             }))
           ),
-          { balcao, onClose: () => onCancel(), msg: 'Receção dos cartões confirmada' }
+          { balcao, onClose: () => onClose(), msg: 'Receção dos cartões confirmada' }
         )
       );
     } catch (error) {
@@ -92,7 +93,7 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
 
   return (
     <Dialog open fullWidth maxWidth="md">
-      <DialogTitleAlt title="Confirmar receção de cartões" onClose={onCancel} sx={{ mb: 2 }} />
+      <DialogTitleAlt title="Confirmar receção de cartões" onClose={onClose} sx={{ mb: 2 }} />
       <DialogContent sx={{ p: 0 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Table size="small">
@@ -136,7 +137,7 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onCancel }) {
             </TableBody>
           </Table>
           <Stack sx={{ pb: 3, pr: 3 }}>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
+            <DialogButons isSaving={isSaving} onClose={onClose} label="Confirmar" />
           </Stack>
         </FormProvider>
       </DialogContent>
@@ -151,10 +152,10 @@ ConfirmarPorDataForm.propTypes = {
   datai: PropTypes.object,
   dataf: PropTypes.object,
   balcao: PropTypes.object,
-  onCancel: PropTypes.func,
+  onClose: PropTypes.func,
 };
 
-export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null, onCancel }) {
+export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
@@ -182,7 +183,7 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
             data_emissao: format(values.data, 'yyyy-MM-dd'),
             data_rececao_sisp: fase === 'Emissão' ? values.dataSisp : null,
           }),
-          { fase, balcao: balcao?.id, onClose: () => onCancel(), msg: 'Receção dos cartões confirmada' }
+          { fase, balcao: balcao?.id, onClose, msg: 'Receção dos cartões confirmada' }
         )
       );
     } catch (error) {
@@ -191,7 +192,7 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth={fase === 'Emissão' ? 'sm' : 'xs'}>
+    <Dialog open onClose={onClose} fullWidth maxWidth={fase === 'Emissão' ? 'sm' : 'xs'}>
       <DialogTitle>Confirmar receção de cartões</DialogTitle>
       <DialogContent>
         <Stack direction="row" spacing={1} justifyContent="center" sx={{ py: 3 }}>
@@ -202,19 +203,17 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
         </Stack>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={fase === 'Emissão' ? 6 : 12}>
+            <GridItem sm={fase === 'Emissão' ? 6 : 12}>
               <RHFDatePicker name="data" label="Data de emissão" minDate={datai} maxDate={dataf} disableFuture />
-            </Grid>
+            </GridItem>
             {fase === 'Emissão' && (
-              <Grid item xs={12} sm={6}>
+              <GridItem sm={6}>
                 <RHFDatePicker name="dataSisp" label="Data de recessão SISP" disableFuture />
-              </Grid>
+              </GridItem>
             )}
-            <Grid item xs={12}>
-              <RHFTextField name="nota" label="Nota" />
-            </Grid>
+            <GridItem children={<RHFTextField name="nota" label="Nota" />} />
           </Grid>
-          <DialogButons edit isSaving={isSaving} onCancel={onCancel} label="Confirmar" />
+          <DialogButons edit isSaving={isSaving} onClose={onClose} label="Confirmar" />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -223,9 +222,9 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-BalcaoEntregaForm.propTypes = { onCancel: PropTypes.func };
+BalcaoEntregaForm.propTypes = { onClose: PropTypes.func };
 
-export function BalcaoEntregaForm({ onCancel }) {
+export function BalcaoEntregaForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { uos } = useSelector((state) => state.intranet);
@@ -267,16 +266,14 @@ export function BalcaoEntregaForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>Alterar balão de entrega</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ mt: 0 }}>
-            <Grid item xs={12}>
-              <RHFAutocompleteObj name="balcao" label="Balcão de entrega" options={uosList} />
-            </Grid>
-          </Grid>
-          <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
+          <Stack sx={{ pt: 3 }}>
+            <RHFAutocompleteObj name="balcao" label="Balcão de entrega" options={uosList} />
+          </Stack>
+          <DialogButons edit isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -290,10 +287,10 @@ AnularForm.propTypes = {
   fase: PropTypes.string,
   uosList: PropTypes.array,
   cartoes: PropTypes.array,
-  onCancel: PropTypes.func,
+  onClose: PropTypes.func,
 };
 
-export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
+export function AnularForm({ fase, cartoes, uo, uosList, onClose }) {
   const { order, orderBy, selected, onSelectRow, onSelectAllRows, onSort } = useTable({
     defaultOrder: 'asc',
     defaultOrderBy: 'numero',
@@ -329,8 +326,8 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
   const handleAnular = async () => {
     try {
       const params = {
+        onClose,
         msg: 'Confirmação anulada',
-        onClose: () => onCancel(),
         emissao: fase === 'Emissão' ? 'true' : 'false',
       };
       dispatch(updateItem('anular multiplo', JSON.stringify(selected?.map((row) => ({ id: row }))), params));
@@ -340,7 +337,7 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle sx={{ mb: 2 }}>Anular confirmação de receção de cartões</DialogTitle>
       <DialogContent>
         <Stack direction="row" justifyContent="center" sx={{ mb: 2, width: 1 }}>
@@ -352,19 +349,19 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
         {uoData ? (
           <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={8}>
+              <GridItem sm={8}>
                 <RHFAutocompleteObj name="uo" label="Balcão de entrega" options={uosList} />
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              </GridItem>
+              <GridItem sm={4}>
                 <RHFDatePicker
                   name="data"
                   disableFuture
                   label="Data de emissão"
                   minDate={fase === 'Emissão' ? sub(new Date(), { years: 1 }) : sub(new Date(), { months: 1 })}
                 />
-              </Grid>
+              </GridItem>
             </Grid>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} color="error" label="Anular" />
+            <DialogButons isSaving={isSaving} onClose={onClose} color="error" label="Anular" />
           </FormProvider>
         ) : (
           <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
@@ -408,7 +405,7 @@ export function AnularForm({ fase, cartoes, uo, uosList, onCancel }) {
       {!uoData && (
         <DialogActions>
           <Box sx={{ flexGrow: 1 }} />
-          <Button variant="outlined" color="inherit" onClick={onCancel}>
+          <Button variant="outlined" color="inherit" onClick={onClose}>
             Cancelar
           </Button>
           {selected.length > 0 && (

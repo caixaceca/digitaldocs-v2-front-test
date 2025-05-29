@@ -21,13 +21,13 @@ import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/sli
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter } from './applySortFilter';
-import { ProdutoForm, GarantiaForm, TipoTitularForm, RepresentanteForm, FreguesiaForm } from './form-gaji9';
+import { ProdutoForm, GarantiaForm, TipoTitularForm, RepresentanteForm, FreguesiaForm } from './form-identificadores';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -221,11 +221,11 @@ export default function TableIdentificadores({ item, inativos }) {
 
       {isOpenModal && (
         <>
-          {item === 'componentes' && <ProdutoForm onCancel={handleCloseModal} />}
-          {item === 'freguesias' && <FreguesiaForm onCancel={handleCloseModal} />}
-          {item === 'tiposGarantias' && <GarantiaForm onCancel={handleCloseModal} />}
-          {item === 'tiposTitulares' && <TipoTitularForm onCancel={handleCloseModal} />}
-          {item === 'representantes' && <RepresentanteForm onCancel={handleCloseModal} />}
+          {item === 'componentes' && <ProdutoForm onClose={handleCloseModal} />}
+          {item === 'freguesias' && <FreguesiaForm onClose={handleCloseModal} />}
+          {item === 'tiposGarantias' && <GarantiaForm onClose={handleCloseModal} />}
+          {item === 'tiposTitulares' && <TipoTitularForm onClose={handleCloseModal} />}
+          {item === 'representantes' && <RepresentanteForm onClose={handleCloseModal} />}
         </>
       )}
     </>

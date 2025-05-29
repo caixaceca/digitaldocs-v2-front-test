@@ -21,6 +21,7 @@ import { useSelector } from '../../redux/store';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // components
+import GridItem from '../../components/GridItem';
 import Chart, { useChart } from '../../components/chart';
 import { TableHeadCustom } from '../../components/table';
 import { SearchIndicadores } from '../../components/SearchToolbar';
@@ -94,64 +95,60 @@ export function EntradaTrabalhado({ entradas, saidas }) {
           <IndicadorItem isLoading={isLoading} isNotFound={isNotFound} />
         </Card>
       ) : (
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Card sx={{ p: 1 }}>
-              <TableContainer>
-                <Table id="table-to-xls-tipo">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell> </TableCell>
-                      {mesesAbr?.map((row, index) => (
-                        <TableCell key={`mes_${index}`} align="right">
-                          {row?.label}
+        <Stack spacing={3}>
+          <Card sx={{ p: 1 }}>
+            <TableContainer>
+              <Table id="table-to-xls-tipo">
+                <TableHead>
+                  <TableRow>
+                    <TableCell> </TableCell>
+                    {mesesAbr?.map((row, index) => (
+                      <TableCell key={`mes_${index}`} align="right">
+                        {row?.label}
+                      </TableCell>
+                    ))}
+                    <TableCell align="right" sx={{ typography: 'subtitle1' }}>
+                      Total
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {['Entrada', 'Trabalhado', 'Desvio', 'Rácio']?.map((item) => (
+                    <TableRow hover key={item}>
+                      <TableCell sx={{ typography: 'subtitle2' }}>{item}</TableCell>
+                      {dados?.map((row, index) => (
+                        <TableCell
+                          align="right"
+                          key={`${item}_${index}`}
+                          sx={{
+                            color:
+                              (item === 'Desvio' && row?.desvio > 0 && 'success.main') ||
+                              (item === 'Desvio' && row?.desvio < 0 && 'error.main'),
+                          }}
+                        >
+                          {(item === 'Entrada' && fNumber(row?.entrada)) ||
+                            (item === 'Trabalhado' && fNumber(row?.saida)) ||
+                            (item === 'Desvio' && fNumber(row?.desvio)) ||
+                            (row?.entrada === 0 && '--') ||
+                            fPercent(row?.racio)}
                         </TableCell>
                       ))}
                       <TableCell align="right" sx={{ typography: 'subtitle1' }}>
-                        Total
+                        {(item === 'Entrada' && fNumber(sumBy(dados, 'entrada'))) ||
+                          (item === 'Trabalhado' && fNumber(sumBy(dados, 'saida'))) ||
+                          (item === 'Desvio' && fNumber(sumBy(dados, 'desvio'))) ||
+                          fPercent((sumBy(dados, 'saida') * 100) / sumBy(dados, 'entrada'))}
                       </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {['Entrada', 'Trabalhado', 'Desvio', 'Rácio']?.map((item) => (
-                      <TableRow hover key={item}>
-                        <TableCell sx={{ typography: 'subtitle2' }}>{item}</TableCell>
-                        {dados?.map((row, index) => (
-                          <TableCell
-                            align="right"
-                            key={`${item}_${index}`}
-                            sx={{
-                              color:
-                                (item === 'Desvio' && row?.desvio > 0 && 'success.main') ||
-                                (item === 'Desvio' && row?.desvio < 0 && 'error.main'),
-                            }}
-                          >
-                            {(item === 'Entrada' && fNumber(row?.entrada)) ||
-                              (item === 'Trabalhado' && fNumber(row?.saida)) ||
-                              (item === 'Desvio' && fNumber(row?.desvio)) ||
-                              (row?.entrada === 0 && '--') ||
-                              fPercent(row?.racio)}
-                          </TableCell>
-                        ))}
-                        <TableCell align="right" sx={{ typography: 'subtitle1' }}>
-                          {(item === 'Entrada' && fNumber(sumBy(dados, 'entrada'))) ||
-                            (item === 'Trabalhado' && fNumber(sumBy(dados, 'saida'))) ||
-                            (item === 'Desvio' && fNumber(sumBy(dados, 'desvio'))) ||
-                            fPercent((sumBy(dados, 'saida') * 100) / sumBy(dados, 'entrada'))}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Card>
-          </Grid>
-          <Grid item xs={12}>
-            <Card sx={{ p: 1, pt: 3 }}>
-              <Chart type="line" series={series} options={chartOptions} height={500} />
-            </Card>
-          </Grid>
-        </Grid>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+          <Card sx={{ p: 1, pt: 3 }}>
+            <Chart type="line" series={series} options={chartOptions} height={500} />
+          </Card>
+        </Stack>
       )}
     </>
   );
@@ -387,7 +384,7 @@ export function DadosMes({
     { id: '', label: '%', align: 'right' },
   ];
   return (
-    <Grid item xs={12} md={item === 'Total' ? 12 : 6} xl={item === 'Total' ? 12 : 4}>
+    <GridItem md={item === 'Total' ? 12 : 6} xl={item === 'Total' ? 12 : 4}>
       <Card sx={{ height: 1 }}>
         <Stack
           spacing={0.5}
@@ -461,7 +458,7 @@ export function DadosMes({
           </CardContent>
         )}
       </Card>
-    </Grid>
+    </GridItem>
   );
 }
 

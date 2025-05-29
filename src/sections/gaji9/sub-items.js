@@ -5,12 +5,14 @@ import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 import CloseIcon from '@mui/icons-material/Close';
+import DialogContent from '@mui/material/DialogContent';
 // utils
 import { noDados } from '../../utils/formatText';
 import { ptDateTime } from '../../utils/formatTime';
@@ -23,18 +25,19 @@ import { updateItem, deleteItem } from '../../redux/slices/gaji9';
 import Label from '../../components/Label';
 import { DefaultAction } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
-import { DialogConfirmar } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import { Criado, ColaboradorInfo, DataLabel } from '../../components/Panel';
+import { DialogConfirmar, DialogTitleAlt } from '../../components/CustomDialog';
+import { ColaboradorInfo, DataLabel, CellChecked } from '../../components/Panel';
 //
 import { DetalhesContent } from './DetalhesGaji9';
+import { SubtiposForm } from './form-identificadores';
 import { BalcaoForm, RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
 
 // ----------------------------------------------------------------------
 
 GrupoDetail.propTypes = { dados: PropTypes.object };
 
-export default function GrupoDetail({ dados }) {
+export function GrupoDetail({ dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
   const { colaboradores } = useSelector((state) => state.intranet);
 
@@ -163,21 +166,15 @@ function RecursosUtilizadores({ id, dados = [], recursos = false }) {
               </TableCell>
             </TableRow>
           ))}
-          {dados?.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={5}>
-                <SearchNotFoundSmall message="Nenhum registo disponível..." />
-              </TableCell>
-            </TableRow>
-          )}
+          {dados?.length === 0 && <SemDados />}
         </TableBody>
       </Table>
       {!!item && (
         <>
           {recursos ? (
-            <RecursoGrupoForm grupoId={id} selectedItem={item} onCancel={() => setItem(null)} />
+            <RecursoGrupoForm grupoId={id} selectedItem={item} onClose={() => setItem(null)} />
           ) : (
-            <UtilizadorGrupoForm grupoId={id} selectedItem={item} onCancel={() => setItem(null)} />
+            <UtilizadorGrupoForm grupoId={id} selectedItem={item} onClose={() => setItem(null)} />
           )}
         </>
       )}
@@ -201,13 +198,17 @@ export function BalcoesRepresentante({ id, dados = [] }) {
       <Table sx={{ mt: 3 }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small">Balcão</TableCell>
-            <TableCell size="small">Data</TableCell>
-            <TableCell size="small">Criado</TableCell>
-            <TableCell size="small">Alterado</TableCell>
+            {[
+              { label: 'Balcão' },
+              { label: 'Data iníco', center: true },
+              { label: 'Data término', center: true },
+              { label: 'Ativo', center: true },
+            ]?.map((row) => (
+              <CellHeader key={row?.label} dados={row} />
+            ))}
             <TableCell size="small" width={10}>
               <Stack direction="row" justifyContent="right">
-                {!!id && <DefaultAction label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
+                {!!id && <DefaultAction button label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
               </Stack>
             </TableCell>
           </TableRow>
@@ -218,44 +219,20 @@ export function BalcoesRepresentante({ id, dados = [] }) {
             return (
               <TableRow hover key={`${row?.id}_${id}_${index}`}>
                 <TableCell>{uo ? `${row?.balcao} - ${uo}` : row?.balcao}</TableCell>
-                <TableCell>
-                  <DataLabel data={row?.data_inicio || ''} />
-                  <DataLabel data={row?.data_termino || ''} termino />
-                </TableCell>
-                <TableCell>
-                  <Criado tipo="data" value={ptDateTime(row?.criado_em)} caption />
-                  <Criado tipo="user" value={row?.criado_por} baralhar caption />
-                </TableCell>
-                <TableCell>
-                  {!row?.modificado_em && !row?.modificado_em && noDados('Sem alterções...')}
-                  <Criado tipo="data" value={ptDateTime(row?.modificado_em)} caption />
-                  <Criado tipo="user" value={row?.modificado_por} baralhar caption />
-                </TableCell>
-                <TableCell>
-                  {row?.ativo ? (
-                    <Stack direction="row" spacing={0.75}>
-                      <DefaultAction small label="EDITAR" onClick={() => setItem({ action: 'editar', ...row })} />
-                      <DefaultAction small label="ELIMINAR" onClick={() => setItem({ action: 'eliminar', ...row })} />
-                    </Stack>
-                  ) : (
-                    <Label>Inativo</Label>
-                  )}
-                </TableCell>
+                <TableCell align="center">{ptDateTime(row?.data_inicio) || noDados('(Não definido)')}</TableCell>
+                <TableCell align="center">{ptDateTime(row?.data_termino) || noDados('(Não definido)')}</TableCell>
+                <CellChecked check={row?.ativo} />
+                <Actions row={row} setItem={setItem} />
               </TableRow>
             );
           })}
-          {(!dados || dados?.length === 0) && (
-            <TableRow>
-              <TableCell colSpan={6}>
-                <SearchNotFoundSmall message="Nenhum registo disponível..." />
-              </TableCell>
-            </TableRow>
-          )}
+          {(!dados || dados?.length === 0) && <SemDados />}
         </TableBody>
       </Table>
       {(item?.action === 'add' || item?.action === 'editar') && (
         <BalcaoForm id={id} item={item} onClose={() => setItem(null)} />
       )}
+      {item?.action === 'detalhes' && <Detalhes dados={item} onClose={() => setItem(null)} />}
       {item?.action === 'eliminar' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -265,5 +242,115 @@ export function BalcoesRepresentante({ id, dados = [] }) {
         />
       )}
     </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+SubtiposGarantias.propTypes = { id: PropTypes.string, dados: PropTypes.array };
+
+export function SubtiposGarantias({ id, dados = [] }) {
+  const dispatch = useDispatch();
+  const [item, setItem] = useState(null);
+  const { isSaving } = useSelector((state) => state.gaji9);
+  const params = { item1: 'selectedItem', garantiaId: id, msg: 'Subtipo  eliminado', onClose: () => setItem(null) };
+
+  return (
+    <>
+      <Table sx={{ mt: 3 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small">Designação</TableCell>
+            <TableCell size="small">Descritivo</TableCell>
+            <TableCell size="small" width={10}>
+              <Stack direction="row" justifyContent="right">
+                {!!id && <DefaultAction button label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
+              </Stack>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {dados?.map((row, index) => (
+            <TableRow hover key={`${row?.id}_${id}_${index}`}>
+              <TableCell>{row?.designacao || noDados('(Não definido)')}</TableCell>
+              <TableCell>{row?.descritivo || noDados('(Não definido)')}</TableCell>
+              <Actions row={row} setItem={setItem} />
+            </TableRow>
+          ))}
+          {(!dados || dados?.length === 0) && <SemDados />}
+        </TableBody>
+      </Table>
+      {(item?.action === 'add' || item?.action === 'editar') && (
+        <SubtiposForm id={id} item={item} onClose={() => setItem(null)} />
+      )}
+      {item?.action === 'detalhes' && <Detalhes dados={item} onClose={() => setItem(null)} />}
+      {item?.action === 'eliminar' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          onClose={() => setItem(null)}
+          desc="eliminar este subtipo da garantia"
+          handleOk={() => dispatch(deleteItem('subtipos', { id: item?.id, ...params }))}
+        />
+      )}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Detalhes.propTypes = { onClose: PropTypes.func, dados: PropTypes.object };
+
+function Detalhes({ dados, onClose }) {
+  return (
+    <Dialog open fullWidth onClose={onClose} maxWidth="sm">
+      <DialogTitleAlt title="Detalhes" onClose={onClose} />
+      <DialogContent>
+        <DetalhesContent dados={dados} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+Actions.propTypes = { setItem: PropTypes.func, row: PropTypes.object };
+
+function Actions({ row, setItem }) {
+  return (
+    <TableCell>
+      <Stack direction="row" spacing={0.5} justifyContent="right">
+        {row?.ativo && (
+          <>
+            <DefaultAction small label="EDITAR" onClick={() => setItem({ action: 'editar', ...row })} />
+            <DefaultAction small label="ELIMINAR" onClick={() => setItem({ action: 'eliminar', ...row })} />
+          </>
+        )}
+        <DefaultAction small label="DETALHES" onClick={() => setItem({ action: 'detalhes', ...row })} />
+      </Stack>
+    </TableCell>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+CellHeader.propTypes = { dados: PropTypes.object };
+
+function CellHeader({ dados }) {
+  return (
+    <TableCell size="small" align={dados?.center ? 'center' : 'left'}>
+      {dados?.label}
+    </TableCell>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function SemDados() {
+  return (
+    <TableRow>
+      <TableCell colSpan={6}>
+        <SearchNotFoundSmall message="Nenhum registo disponível..." />
+      </TableCell>
+    </TableRow>
   );
 }

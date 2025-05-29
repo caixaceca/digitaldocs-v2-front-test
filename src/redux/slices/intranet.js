@@ -125,6 +125,7 @@ export function getFromIntranet(item, params) {
           // ?.filter(({ is_active: ativo }) => ativo)
           ?.map((row) => ({
             ...row,
+            email: row?.perfil?.mail,
             nome: row?.perfil?.displayName,
             perfil: perfis?.data?.find(({ id }) => Number(id) === Number(row?.perfil_id)) || row?.perfil,
           }));

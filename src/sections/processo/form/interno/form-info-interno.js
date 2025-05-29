@@ -106,27 +106,27 @@ export default function FormInfoInterno({ dados }) {
               <GridItem children={<RHFSwitch name="agendado" label="Agendar" otherSx={{ mt: 0 }} />} />
               {values.agendado && (
                 <>
-                  <Grid item xs={6} md={3}>
+                  <GridItem xs={6} md={3}>
                     <RHFAutocompleteSmp
                       name="periodicidade"
                       label="Periodicidade"
                       options={['Mensal', 'Trimestral', 'Semestral', 'Anual']}
                     />
-                  </Grid>
-                  <Grid item xs={6} md={3}>
+                  </GridItem>
+                  <GridItem xs={6} md={3}>
                     <RHFNumberField name="diadomes" label="Dia do mês" />
-                  </Grid>
-                  <Grid item xs={6} md={3}>
+                  </GridItem>
+                  <GridItem xs={6} md={3}>
                     <RHFDatePicker name="data_inicio" label="Data de início" />
-                  </Grid>
-                  <Grid item xs={6} md={3}>
+                  </GridItem>
+                  <GridItem xs={6} md={3}>
                     <RHFDatePicker
                       label="Data de término"
                       name="data_arquivamento"
                       minDate={values.data_inicio}
                       disabled={!values.data_inicio}
                     />
-                  </Grid>
+                  </GridItem>
                 </>
               )}
             </Grid>
@@ -137,7 +137,7 @@ export default function FormInfoInterno({ dados }) {
           <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
         </Card>
       </Box>
-      <ButtonsStepper isSaving={isSaving} onCancel={onClose} labelCancel="Cancelar" label={isEdit ? 'Guardar' : ''} />
+      <ButtonsStepper isSaving={isSaving} onClose={onClose} labelCancel="Cancelar" label={isEdit ? 'Guardar' : ''} />
     </FormProvider>
   );
 }

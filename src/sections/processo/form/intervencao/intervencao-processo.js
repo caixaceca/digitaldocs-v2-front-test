@@ -94,7 +94,7 @@ export function ConfidencialidadesForm({ processoId }) {
             estadosIncluidos="estados_incluidos"
             estadosExcluidos="estados_excluidos"
           />
-          <DialogButons edit isSaving={isSaving} onCancel={() => dispatch(setModal())} />
+          <DialogButons edit isSaving={isSaving} onClose={() => dispatch(setModal())} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -186,7 +186,7 @@ export function ColocarPendenteForm({ onClose }) {
               />
               <RHFTextField name="mobs" label="Observação" disabled={values?.pendenteLevantamento} />
             </Stack>
-            <DialogButons edit isSaving={isSaving} onCancel={onClose} />
+            <DialogButons edit isSaving={isSaving} onClose={onClose} />
           </FormProvider>
         )}
       </DialogContent>
@@ -281,7 +281,7 @@ export function FinalizarNeForm({ id, onClose }) {
               </TableBody>
             </Table>
           </TableContainer>
-          <DialogButons label="Finalizar" isSaving={isSaving} onCancel={onClose} hideSubmit={!selecionados?.length} />
+          <DialogButons label="Finalizar" isSaving={isSaving} onClose={onClose} hideSubmit={!selecionados?.length} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -362,7 +362,7 @@ export function AnexosForm({ onClose }) {
           <Stack spacing={3} sx={{ pt: 3 }}>
             <Anexos anexos={[]} outros={!!outros} solto />
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onClose} hideSubmit={!outros && !checkList?.length} />
+          <DialogButons isSaving={isSaving} onClose={onClose} hideSubmit={!outros && !checkList?.length} />
         </FormProvider>
       </DialogContent>
     </Dialog>

@@ -341,11 +341,11 @@ export function TableInfoCredito({ params, dados = [] }) {
       {modalGaji9 === 'form-interveniente' && (
         <IntervenienteForm
           id={id}
-          onCancel={() => openModal()}
+          onClose={() => openModal()}
           dados={dados?.filter(({ mutuario, fiador }) => mutuario || fiador)}
         />
       )}
-      {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onCancel={() => openModal()} />}
+      {modalGaji9 === 'data-contrato' && <DataContrato creditoId={id} onClose={() => openModal()} />}
       {modalGaji9 === 'view-contrato' && <DetalhesGaji9 closeModal={() => openModal()} item="contrato" />}
     </>
   );

@@ -7,6 +7,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import useSettings from '../../../hooks/useSettings';
 //
 import BoxMask from './BoxMask';
+import GridItem from '../../GridItem';
 import { Contraste, ContrasteAlt } from '../../../assets';
 
 // ----------------------------------------------------------------------
@@ -28,19 +29,19 @@ export default function SettingContrast() {
 
   return (
     <RadioGroup name="themeContrast" value={themeContrast} onChange={onChangeContrast}>
-      <Grid dir="ltr" container spacing={2.5}>
+      <Grid container dir="ltr" spacing={2.5}>
         {['default', 'bold'].map((contrast, index) => {
           const isSelected = themeContrast === contrast;
 
           return (
-            <Grid key={contrast} item xs={6}>
+            <GridItem key={contrast} xs={6}>
               <BoxStyle
                 sx={{ ...(isSelected && { color: 'primary.main', boxShadow: (theme) => theme.customShadows.z20 }) }}
               >
                 {index === 0 ? <ContrasteAlt sx={{ width: 28 }} /> : <Contraste sx={{ width: 30 }} />}
                 <BoxMask value={contrast} />
               </BoxStyle>
-            </Grid>
+            </GridItem>
           );
         })}
       </Grid>

@@ -51,9 +51,9 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
       )}
       {fluxosGmkt(fluxo?.assunto) && (
         <>
-          <Grid item xs={12} sm={fluxo?.assunto === 'Formulário' ? 6 : 12}>
+          <GridItem sm={fluxo?.assunto === 'Formulário' ? 6 : 12}>
             <RHFTextField name="titular" label="Descrição" />
-          </Grid>
+          </GridItem>
           {fluxo?.assunto === 'Formulário' && (
             <GridItem sm={6} children={<RHFTextField name="email" label="Codificação/Nome" />} />
           )}
@@ -78,7 +78,7 @@ export function Entidades({ fields = [], append, remove }) {
   return (
     <>
       {fields.map((item, index) => (
-        <Grid item xs={12} sm={6} lg={3} key={index}>
+        <GridItem sm={6} lg={3} key={index}>
           <RHFTextField
             name={`entidades[${index}].numero`}
             label={`Nº de entidade ${fields?.length > 1 ? index + 1 : ''}`}
@@ -91,15 +91,15 @@ export function Entidades({ fields = [], append, remove }) {
               ),
             }}
           />
-        </Grid>
+        </GridItem>
       ))}
-      <Grid item xs={12} sm={6} lg={3}>
+      <GridItem sm={6} lg={3}>
         <Stack justifyContent="center" alignItems="flex-start" sx={{ height: 1 }}>
           <Button variant="soft" startIcon={<AddCircleIcon />} onClick={() => append({ numero: '' })}>
             Entidade
           </Button>
         </Stack>
-      </Grid>
+      </GridItem>
     </>
   );
 }

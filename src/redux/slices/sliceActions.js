@@ -108,7 +108,8 @@ export function actionOpenModal(state, payload) {
 }
 
 export function actionCloseModal(state) {
-  if (state?.modalGaji9) state.modalGaji9 = false;
+  if (state?.isEdit) state.isEdit = false;
+  if (state?.modalGaji9) state.modalGaji9 = '';
   if (state?.isOpenView) state.isOpenView = false;
   if (state?.isOpenModal) state.isOpenModal = false;
   state.selectedItem = null;

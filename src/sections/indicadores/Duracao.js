@@ -21,6 +21,7 @@ import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // redux
 import { useSelector } from '../../redux/store';
 // components
+import GridItem from '../../components/GridItem';
 import Chart, { useChart } from '../../components/chart';
 import { SkeletonTable } from '../../components/skeleton';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndicadores';
@@ -47,13 +48,13 @@ export function Execucao({ indicadores }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { fluxos, estados } = useSelector((state) => state.parametrizacao);
   const fluxo = localStorage.getItem('fluxoIndic')
-    ? fluxos?.find((row) => Number(row?.id) === Number(localStorage.getItem('fluxoIndic')))
+    ? fluxos?.find(({ id }) => Number(id) === Number(localStorage.getItem('fluxoIndic')))
     : '';
   const estado = localStorage.getItem('estadoIndic')
-    ? estados?.find((row) => Number(row?.id) === Number(localStorage.getItem('estadoIndic')))
+    ? estados?.find(({ id }) => Number(id) === Number(localStorage.getItem('estadoIndic')))
     : '';
   const colaborador = localStorage.getItem('colaboradorIndic')
-    ? colaboradores?.find((row) => Number(row?.perfil?.id) === Number(localStorage.getItem('colaboradorIndic')))
+    ? colaboradores?.find(({ perfil }) => Number(perfil?.id) === Number(localStorage.getItem('colaboradorIndic')))
     : '';
   const {
     page,
@@ -208,11 +209,11 @@ export function Conclusao({ indicadores }) {
   const { isLoading } = useSelector((state) => state.indicadores);
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const conclusaoByItem = useMemo(() => conclusaoP(indicadores, uos), [indicadores, uos]);
-  const isNotFound = !conclusaoByItem?.filter((row) => row?.dias).length;
+  const isNotFound = !conclusaoByItem?.filter(({ dias }) => dias).length;
 
   const resumo = useMemo(() => dadosResumo(conclusaoByItem, 'dias', 'label'), [conclusaoByItem]);
   const series = useMemo(
-    () => [{ name: 'Média em dias', data: conclusaoByItem?.map((row) => row?.dias) }],
+    () => [{ name: 'Média em dias', data: conclusaoByItem?.map(({ dias }) => dias) }],
     [conclusaoByItem]
   );
 
@@ -220,7 +221,7 @@ export function Conclusao({ indicadores }) {
     stroke: { show: false },
     plotOptions: { bar: { columnWidth: '25%' } },
     tooltip: { y: { formatter: (value) => fNumber2(value) } },
-    xaxis: { categories: conclusaoByItem?.map((row) => row?.label) },
+    xaxis: { categories: conclusaoByItem?.map(({ label }) => label) },
     grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
     yaxis: { title: { text: 'Dias' }, labels: { formatter: (value) => fNumber(value) } },
   });
@@ -239,18 +240,18 @@ export function Conclusao({ indicadores }) {
         isNotFound={isNotFound}
         children={
           <Grid container spacing={3}>
-            {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={4}>
-                <CardInfo title={row?.label} total={row?.valor} label={row?.desc} conclusao />
-              </Grid>
+            {resumo?.map(({ label, valor, desc }) => (
+              <GridItem key={label} sm={4}>
+                <CardInfo title={label} total={valor} label={desc} conclusao />
+              </GridItem>
             ))}
-            <Grid item xs={12}>
+            <GridItem>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="bar" series={series} options={chartOptions} height={500} />
               ) : (
                 <TableExport label="Estado" label1="Média em dias" dados={conclusaoByItem} />
               )}
-            </Grid>
+            </GridItem>
           </Grid>
         }
       />
@@ -276,7 +277,7 @@ export function DuracaoEquipa({ indicadores }) {
       ) : (
         <Grid container spacing={3} justifyContent="center">
           {duracao?.map((row, index) => (
-            <Grid key={`mes__${index}`} item xs={12} md={6} xl={4}>
+            <GridItem key={`mes__${index}`} md={6} xl={4}>
               <Card sx={{ height: 1 }}>
                 <CardHeader sx={{ p: 2, pb: 1 }} title={row?.item} />
                 <CardContent sx={{ p: 1, pb: '10px !important' }}>
@@ -300,7 +301,7 @@ export function DuracaoEquipa({ indicadores }) {
                   </Table>
                 </CardContent>
               </Card>
-            </Grid>
+            </GridItem>
           ))}
         </Grid>
       )}
@@ -315,7 +316,7 @@ function duracaoGroup(dados, item) {
   dados = applySort(dados, getComparator('asc', 'mes'));
   dados.reduce((res, value) => {
     if (!res[value[item]]) {
-      res[value[item]] = { item: meses?.find((row) => row?.id === value[item])?.label || value[item], indicadores: [] };
+      res[value[item]] = { item: meses?.find(({ id }) => id === value[item])?.label || value[item], indicadores: [] };
       dadosGrouped.push(res[value[item]]);
     }
     res[value[item]].indicadores.push({ media: value?.media, fluxo: value?.fluxo, unidade: value?.unidade });
@@ -328,7 +329,7 @@ function duracaoGroup(dados, item) {
 function conclusaoP(indicadores, uos) {
   const conclusaoByItem = [];
   indicadores?.forEach((row) => {
-    const uo = uos?.find((uo) => uo.id === row?.uo_origem_id);
+    const uo = uos?.find(({ id }) => id === row?.uo_origem_id);
     conclusaoByItem.push({ dias: row?.dmedh / 24, label: uo?.label || row?.uo_origem_id });
   });
 

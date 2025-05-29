@@ -115,7 +115,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
         <HelpButton title="Sugestão" action={() => setOpenModal('sugestao')} />
       </Box>
 
-      {openModal === 'sugestao' && <FormSugestao onCancel={() => setOpenModal('')} />}
+      {openModal === 'sugestao' && <FormSugestao onClose={() => setOpenModal('')} />}
     </>
   );
 }

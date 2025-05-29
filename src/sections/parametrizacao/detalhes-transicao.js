@@ -109,7 +109,7 @@ function RegrasTransicoes({ dados }) {
       </Table>
       {!!item && (
         <RegrasForm
-          onCancel={() => setItem(null)}
+          onClose={() => setItem(null)}
           item={{ ...dados, perfis: colaboradoresEstado }}
           selectedItem={item?.action === 'add' ? null : item}
         />

@@ -158,12 +158,12 @@ export default function PageDetalhesFluxo() {
             <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
           )}
 
-          {modalParams === 'form-fluxo' && <FluxoForm onCancel={() => closeModal()} />}
-          {modalParams === 'form-clonar' && <ClonarFluxoForm onCancel={() => closeModal()} />}
-          {modalParams === 'form-checklist' && <ChecklistForm onCancel={() => closeModal()} fluxo={fluxo} />}
-          {modalParams === 'form-transicoes' && <TransicaoForm onCancel={() => closeModal()} fluxoId={fluxo?.id} />}
+          {modalParams === 'form-fluxo' && <FluxoForm onClose={() => closeModal()} />}
+          {modalParams === 'form-clonar' && <ClonarFluxoForm onClose={() => closeModal()} />}
+          {modalParams === 'form-checklist' && <ChecklistForm onClose={() => closeModal()} fluxo={fluxo} />}
+          {modalParams === 'form-transicoes' && <TransicaoForm onClose={() => closeModal()} fluxoId={fluxo?.id} />}
           {modalParams === 'form-notificacoes' && (
-            <NotificacaoForm onCancel={() => closeModal()} transicao={transicao} fluxo={fluxo} />
+            <NotificacaoForm onClose={() => closeModal()} transicao={transicao} fluxo={fluxo} />
           )}
           {modalParams === 'detalhes-fluxo' && <Detalhes item={currentTab} closeModal={() => closeModal()} />}
           {modalParams === 'eliminar-item' && (

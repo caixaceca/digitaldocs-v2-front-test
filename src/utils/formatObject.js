@@ -4,7 +4,7 @@ import { applySort, getComparator } from '../hooks/useTable';
 // ----------------------------------------------------------------------
 
 export function findColaborador(mail, colaboradores) {
-  const colaborador = colaboradores?.find((row) => row?.perfil?.mail?.toLowerCase() === mail?.toLowerCase());
+  const colaborador = colaboradores?.find(({ email }) => email?.toLowerCase() === mail?.toLowerCase());
   return colaborador
     ? `${colaborador?.perfil?.displayName} ${colaborador?.uo?.label ? `(${colaborador?.uo?.label})` : ''}`
     : mail;
@@ -75,11 +75,11 @@ export function removerPropriedades(obj, propriedades) {
 
 export function perfisAad(colaboradores, from) {
   return colaboradores
-    ?.filter((item) => item?.perfil?.id_aad)
+    ?.filter(({ perfil }) => perfil?.id_aad)
     ?.map((row) => ({
       label: row?.nome,
+      email: row?.email,
       id: row?.perfil?.id_aad,
-      email: row?.perfil?.mail,
       ...(from === 'representantes'
         ? {
             sexo: row?.sexo,
@@ -96,10 +96,10 @@ export function perfisAad(colaboradores, from) {
 // ----------------------------------------------------------------------
 
 export function utilizadoresGaji9(colaboradores, funcoes, from) {
-  const idsFuncoes = funcoes?.map((row) => row?.utilizador_id) || [];
+  const idsFuncoes = funcoes?.map(({ utilizador_id: utId }) => utId) || [];
 
   return perfisAad(
-    colaboradores?.filter((row) => idsFuncoes?.includes(row?.perfil?.id_aad)),
+    colaboradores?.filter(({ perfil }) => idsFuncoes?.includes(perfil?.id_aad)),
     from
   );
 }
@@ -126,9 +126,9 @@ export function meusAcessosGaji9(grupos) {
   const resultado = [];
   const dataAtual = new Date();
 
-  grupos.forEach((grupo) => {
-    if (grupo.ativo) {
-      grupo.recursos_permissoes.forEach((item) => {
+  grupos.forEach(({ ativo, recursos_permissoes: recursos }) => {
+    if (ativo && recursos?.length > 0) {
+      recursos.forEach((item) => {
         if (item.ativo) {
           const inicio = new Date(item.data_inicio);
           const termino = item.data_termino ? new Date(item.data_termino) : null;
@@ -147,7 +147,7 @@ export function meusAcessosGaji9(grupos) {
 // ----------------------------------------------------------------------
 
 export const getProximoAnterior = (processos, selectedId) => {
-  const index = processos.findIndex((p) => p.id === Number(selectedId));
+  const index = processos.findIndex(({ id }) => id === Number(selectedId));
 
   if (index === -1) return { anterior: '', proximo: '' };
 

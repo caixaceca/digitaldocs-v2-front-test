@@ -46,18 +46,18 @@ import { listaTitrulares, listaGarantias, listaProdutos } from './applySortFilte
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ClausulaForm.propTypes = { onCancel: PropTypes.func, minutaId: PropTypes.number };
+ClausulaForm.propTypes = { onClose: PropTypes.func, minutaId: PropTypes.number };
 
-export default function ClausulaForm({ onCancel, minutaId = 0 }) {
+export default function ClausulaForm({ onClose, minutaId = 0 }) {
   const dispatch = useDispatch();
   const [variavel, setVariavel] = useState(null);
   const { activeStep } = useSelector((state) => state.stepper);
   const { isEdit, variaveis, selectedItem } = useSelector((state) => state.gaji9);
 
-  const onClose = useCallback(() => {
-    onCancel();
+  const onClose1 = useCallback(() => {
+    onClose();
     dispatch(resetDados());
-  }, [onCancel, dispatch]);
+  }, [onClose, dispatch]);
 
   useEffect(() => {
     dispatch(getFromGaji9('variaveis'));
@@ -66,7 +66,7 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
   return (
     <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
-        onClose={() => onClose()}
+        onClose={() => onClose1()}
         title={isEdit ? 'Editar cláusula' : 'Adicionar cláusula'}
         stepper={
           <>
@@ -103,19 +103,19 @@ export default function ClausulaForm({ onCancel, minutaId = 0 }) {
       />
       <DialogContent>
         <ItemComponent item={selectedItem} rows={3}>
-          {activeStep === 0 && <Identificacao onCancel={onClose} />}
+          {activeStep === 0 && <Identificacao onClose={onClose1} />}
           {activeStep === 1 && <Conteudo />}
           {activeStep === 2 && <Numeros />}
-          {activeStep === 3 && <Resumo minutaId={minutaId} onClose={onClose} />}
+          {activeStep === 3 && <Resumo minutaId={minutaId} onClose={onClose1} />}
         </ItemComponent>
       </DialogContent>
     </Dialog>
   );
 }
 
-Identificacao.propTypes = { onCancel: PropTypes.func };
+Identificacao.propTypes = { onClose: PropTypes.func };
 
-function Identificacao({ onCancel }) {
+function Identificacao({ onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { tiposTitulares, tiposGarantias, componentes, selectedItem } = useSelector((state) => state.gaji9);
@@ -129,18 +129,18 @@ function Identificacao({ onCancel }) {
       condicional: dadosStepper?.condicional || !!selectedItem?.condicional,
       titular:
         dadosStepper?.titular ||
-        titularesList?.find((row) => Number(row?.id) === Number(selectedItem?.tipo_titular_id)) ||
-        titularesList?.find((row) => Number(row?.id) === Number(localStorage.getItem('titularCl'))) ||
+        titularesList?.find(({ id }) => Number(id) === Number(selectedItem?.tipo_titular_id)) ||
+        titularesList?.find(({ id }) => Number(id) === Number(localStorage.getItem('titularCl'))) ||
         null,
       garantia:
         dadosStepper?.garantia ||
-        garantiasList?.find((row) => Number(row?.id) === Number(selectedItem?.tipo_garantia_id)) ||
-        garantiasList?.find((row) => Number(row?.id) === Number(localStorage.getItem('garantiaCl'))) ||
+        garantiasList?.find(({ id }) => Number(id) === Number(selectedItem?.tipo_garantia_id)) ||
+        garantiasList?.find(({ id }) => Number(id) === Number(localStorage.getItem('garantiaCl'))) ||
         null,
       componente:
         dadosStepper?.componente ||
-        componentesList?.find((row) => Number(row?.id) === Number(selectedItem?.componente_id)) ||
-        componentesList?.find((row) => Number(row?.id) === Number(localStorage.getItem('componenteCl'))) ||
+        componentesList?.find(({ id }) => Number(id) === Number(selectedItem?.componente_id)) ||
+        componentesList?.find(({ id }) => Number(id) === Number(localStorage.getItem('componenteCl'))) ||
         null,
       seccao:
         dadosStepper?.seccao ||
@@ -183,7 +183,7 @@ function Identificacao({ onCancel }) {
           <RHFAutocompleteObj name="garantia" label="Tipo de garantia" options={garantiasList} />
         </Stack>
 
-        <ButtonsStepper onCancel={onCancel} labelCancel="Cancelar" />
+        <ButtonsStepper onClose={onClose} labelCancel="Cancelar" />
       </FormProvider>
     </>
   );
@@ -230,7 +230,7 @@ function Conteudo() {
         )}
         <RHFTextField name="conteudo" label="Conteúdo" multiline minRows={8} maxRows={12} />
       </Stack>
-      <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
+      <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
     </FormProvider>
   );
 }
@@ -307,7 +307,7 @@ function Numeros() {
             />
           </Stack>
         </Stack>
-        <ButtonsStepper onCancel={() => dispatch(updateDados({ backward: true, dados: values }))} />
+        <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
       </FormProvider>
 
       {item !== null && (
@@ -464,7 +464,7 @@ function Resumo({ minutaId, onClose }) {
           Não foi adicionado nenhum número...
         </Typography>
       )}
-      <ButtonsStepper onCancel={() => dispatch(backStep())} handleSubmit={handleSubmit} isSaving={isSaving} />
+      <ButtonsStepper onClose={() => dispatch(backStep())} handleSubmit={handleSubmit} isSaving={isSaving} />
     </List>
   );
 }

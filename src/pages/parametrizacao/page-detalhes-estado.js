@@ -120,12 +120,12 @@ export default function PageDetalhesEstado() {
             <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
           )}
 
-          {modalParams === 'form-estado' && <EstadoForm onCancel={() => closeModal()} />}
-          {modalParams === 'Colaboradores' && <PerfisEstadoForm onCancel={() => closeModal()} />}
+          {modalParams === 'form-estado' && <EstadoForm onClose={() => closeModal()} />}
+          {modalParams === 'Colaboradores' && <PerfisEstadoForm onCaonClosencel={() => closeModal()} />}
           {modalParams === 'detalhes-estado' && <Detalhes item="" closeModal={() => closeModal()} />}
-          {modalParams === 'colaboradores' && <EstadosPerfilForm estadoId={id} onCancel={() => closeModal()} />}
+          {modalParams === 'colaboradores' && <EstadosPerfilForm estadoId={id} onClose={() => closeModal()} />}
           {(modalParams === 'Regras parecer' || modalParams === 'regrasEstado') && (
-            <RegrasForm item={estado} estado selectedItem={selectedItem} onCancel={() => closeModal()} />
+            <RegrasForm item={estado} estado selectedItem={selectedItem} onClose={() => closeModal()} />
           )}
           {modalParams === 'eliminar-item' && (
             <DialogConfirmar

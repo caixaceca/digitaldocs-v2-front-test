@@ -4,10 +4,10 @@ import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
 import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
-import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
 // components
 import Image from '../../../components/Image';
+import GridItem from '../../../components/GridItem';
 import LightboxModal from '../../../components/LightboxModal';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ export function PdfPreview({ url }) {
     document?.getElementById('detalhes')?.clientHeight - document?.getElementById('anexos')?.clientHeight - 52;
 
   return (
-    <Grid item xs={12} sx={{ height: `${heightContent}px`, minHeight: '660px' }}>
+    <GridItem sx={{ height: `${heightContent}px`, minHeight: '660px' }}>
       <Viewer
         fileUrl={url}
         localization={pt}
@@ -29,7 +29,7 @@ export function PdfPreview({ url }) {
         plugins={[defaultLayoutPluginInstance]}
         defaultScale={SpecialZoomLevel.PageWidth}
       />
-    </Grid>
+    </GridItem>
   );
 }
 
@@ -47,7 +47,7 @@ export function ImagemPreview({ imagem }) {
   };
 
   return (
-    <Grid item xs={12}>
+    <GridItem>
       <Image
         src={imagem}
         sx={{
@@ -69,6 +69,6 @@ export function ImagemPreview({ imagem }) {
         setPhotoIndex={setSelectedImage}
         onCloseRequest={() => setOpenLightbox(false)}
       />
-    </Grid>
+    </GridItem>
   );
 }

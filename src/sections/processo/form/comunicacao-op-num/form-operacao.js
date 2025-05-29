@@ -87,7 +87,7 @@ export default function FormOperacao({ dados }) {
           <RHFTextField name="obs" multiline minRows={3} maxRows={5} label="Observação" />
         </Card>
       </Box>
-      <ButtonsStepper onCancel={() => onClose()} labelCancel="Cancelar" />
+      <ButtonsStepper onClose={() => onClose()} labelCancel="Cancelar" />
     </FormProvider>
   );
 }

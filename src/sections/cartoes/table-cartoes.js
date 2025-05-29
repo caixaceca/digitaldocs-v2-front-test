@@ -320,12 +320,12 @@ export default function TableCartoes() {
       </Card>
 
       {isOpenModal === 'detalhes-cartao' && <Detalhes closeModal={openModal} />}
-      {isOpenModal === 'balcao-entrega' && <BalcaoEntregaForm onCancel={openModal} />}
+      {isOpenModal === 'balcao-entrega' && <BalcaoEntregaForm onClose={openModal} />}
       {isOpenModal === 'validar-multiplo' && (
         <ValidarMultiploForm
           fase={fase}
           balcao={uo?.id}
-          onCancel={openModal}
+          onClose={openModal}
           cartoes={
             fase === 'Emissão'
               ? dadosNaoValidados?.filter(({ id }) => selected.includes(id))
@@ -334,10 +334,10 @@ export default function TableCartoes() {
         />
       )}
       {isOpenModal === 'validar-por-data' && (
-        <ConfirmarPorDataForm balcao={uo} fase={fase} datai={datai} onCancel={openModal} dataf={dataf} />
+        <ConfirmarPorDataForm balcao={uo} fase={fase} datai={datai} onClose={openModal} dataf={dataf} />
       )}
       {isOpenModal === 'anular' && (isAdmin || (confirmarCartoes && (acessoAgencia || acessoDop))) && (
-        <AnularForm uo={uo} fase={fase} dense={dense} uosList={uosList} onCancel={openModal} cartoes={dadosValidados} />
+        <AnularForm uo={uo} fase={fase} dense={dense} uosList={uosList} onClose={openModal} cartoes={dadosValidados} />
       )}
     </>
   );

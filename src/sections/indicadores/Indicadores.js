@@ -5,7 +5,6 @@ import { useState, useMemo } from 'react';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
-import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -28,6 +27,7 @@ import { useSelector } from '../../redux/store';
 // components
 import MyAvatar from '../../components/MyAvatar';
 import { BoxMask } from '../../components/Panel';
+import GridItem from '../../components/GridItem';
 import { BarChart } from '../../components/skeleton';
 import { SearchNotFound } from '../../components/table';
 //
@@ -246,7 +246,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
   const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === colaboradorDados.item);
 
   return (
-    <Grid item xs={12} md={6} lg={4}>
+    <GridItem md={6} lg={4}>
       <Card sx={{ height: 1, p: 1 }}>
         <Stack
           spacing={2}
@@ -303,7 +303,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           </Stack>
         )}
       </Card>
-    </Grid>
+    </GridItem>
   );
 }
 

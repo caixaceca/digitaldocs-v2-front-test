@@ -30,6 +30,7 @@ import { useNotificacao } from '../../hooks/useNotificacao';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getSuccess, createItem, getFromIntranet } from '../../redux/slices/intranet';
 // components
+import GridItem from '../../components/GridItem';
 import { DialogButons } from '../../components/Actions';
 import { Loading } from '../../components/LoadingScreen';
 import { DialogTitleAlt } from '../../components/CustomDialog';
@@ -37,15 +38,15 @@ import { RHFSwitch, FormProvider, RHFTextField, RHFEditor, RHFUploadSingleFile }
 
 // ----------------------------------------------------------------------
 
-FormSugestao.propTypes = { onCancel: PropTypes.func };
+FormSugestao.propTypes = { onClose: PropTypes.func };
 
-export function FormSugestao({ onCancel }) {
+export function FormSugestao({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail } = useSelector((state) => state.intranet);
   const { done, isSaving } = useSelector((state) => state.intranet);
 
-  useNotificacao({ done, onClose: () => onCancel() });
+  useNotificacao({ done, onClose });
 
   const formSchema = Yup.object().shape({
     titulo: Yup.string().required('Título não pode ficar vazio'),
@@ -82,22 +83,16 @@ export function FormSugestao({ onCancel }) {
   );
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Deixe-nos a tua sugestão/feedback</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ pt: 1 }}>
-            <Grid item xs={12}>
-              <RHFTextField name="titulo" label="Título" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFTextField multiline minRows={6} maxRows={8} name="descricao" label="Descrição" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFUploadSingleFile name="imagem" onDrop={handleDropSingle} />
-            </Grid>
-          </Grid>
-          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <RHFTextField name="titulo" label="Título" />
+            <RHFTextField multiline minRows={6} maxRows={8} name="descricao" label="Descrição" />
+            <RHFUploadSingleFile name="imagem" onDrop={handleDropSingle} />
+          </Stack>
+          <DialogButons label="Enviar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -106,14 +101,14 @@ export function FormSugestao({ onCancel }) {
 
 // ----------------------------------------------------------------------
 
-DenunciaForm.propTypes = { onCancel: PropTypes.func };
+DenunciaForm.propTypes = { onClose: PropTypes.func };
 
-export function DenunciaForm({ onCancel }) {
+export function DenunciaForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { mail, done, isSaving } = useSelector((state) => state.intranet);
 
-  useNotificacao({ done, onClose: () => onCancel() });
+  useNotificacao({ done, onClose });
 
   const formSchema = Yup.object().shape({
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
@@ -135,10 +130,8 @@ export function DenunciaForm({ onCancel }) {
       formData.append('assunto', values.assunto);
       formData.append('denuncia', values.denuncia);
       formData.append('contato_or_email', values.contato_or_email);
-      if (values.comprovativo instanceof File) {
-        formData.append('comprovativo', values.comprovativo);
-      }
-      dispatch(createItem('denuncia', formData, { mail, msg: 'Denúncia enviada' }));
+      if (values.comprovativo instanceof File) formData.append('comprovativo', values.comprovativo);
+      dispatch(createItem('denuncia', formData, { msg: 'Denúncia enviada' }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -147,33 +140,23 @@ export function DenunciaForm({ onCancel }) {
   const handleDropSingle = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
-      if (file) {
-        setValue('comprovativo', Object.assign(file, { preview: URL.createObjectURL(file) }));
-      }
+      if (file) setValue('comprovativo', Object.assign(file, { preview: URL.createObjectURL(file) }));
     },
     [setValue]
   );
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Denúncia</DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 1 }}>
-            <Grid item xs={12} sm={7}>
-              <RHFTextField name="assunto" label="Assunto" />
-            </Grid>
-            <Grid item xs={12} sm={5}>
-              <RHFTextField name="contato_or_email" label="Contacto" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFEditor simple name="denuncia" />
-            </Grid>
-            <Grid item xs={12}>
-              <RHFUploadSingleFile name="comprovativo" onDrop={handleDropSingle} />
-            </Grid>
+            <GridItem sm={7} children={<RHFTextField name="assunto" label="Assunto" />} />
+            <GridItem sm={5} children={<RHFTextField name="contato_or_email" label="Contacto" />} />
+            <GridItem children={<RHFEditor simple name="denuncia" />} />
+            <GridItem children={<RHFUploadSingleFile name="comprovativo" onDrop={handleDropSingle} />} />
           </Grid>
-          <DialogButons label="Enviar" isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons label="Enviar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -182,9 +165,9 @@ export function DenunciaForm({ onCancel }) {
 
 // ----------------------------------------------------------------------
 
-ValidarDocForm.propTypes = { onCancel: PropTypes.func };
+ValidarDocForm.propTypes = { onClose: PropTypes.func };
 
-export function ValidarDocForm({ onCancel }) {
+export function ValidarDocForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { docIdentificacao, isLoading } = useSelector((state) => state.intranet);
@@ -213,88 +196,82 @@ export function ValidarDocForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitleAlt title="Validação de documento" onClose={onCancel} />
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitleAlt title="Validação de documento" onClose={onClose} />
       <DialogContent sx={{ mt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ pt: 1 }}>
-            <Grid item xs={12}>
-              <Stack spacing={1}>
-                <RHFTextField
-                  maxWidth
-                  name="documento"
-                  label="Nº de documento"
-                  InputProps={{
-                    endAdornment: values?.documento && (
-                      <InputAdornment position="end">
-                        <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
-                          <Tooltip title="Limpar" arrow>
-                            <IconButton onClick={limparDados} sx={{ width: 24, height: 24 }}>
-                              <CloseOutlinedIcon sx={{ width: 18, opacity: 0.5 }} />
-                            </IconButton>
-                          </Tooltip>
-                          <Fab size="small" type="submit" variant="soft" loading={isLoading}>
-                            <SearchIcon />
-                          </Fab>
-                        </Stack>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <RHFSwitch name="cache" label="Forçar atualização dos dados" />
-              </Stack>
-            </Grid>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <Stack spacing={1}>
+              <RHFTextField
+                maxWidth
+                name="documento"
+                label="Nº de documento"
+                InputProps={{
+                  endAdornment: values?.documento && (
+                    <InputAdornment position="end">
+                      <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
+                        <Tooltip title="Limpar" arrow>
+                          <IconButton onClick={limparDados} sx={{ width: 24, height: 24 }}>
+                            <CloseOutlinedIcon sx={{ width: 18, opacity: 0.5 }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Fab size="small" type="submit" variant="soft" loading={isLoading}>
+                          <SearchIcon />
+                        </Fab>
+                      </Stack>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <RHFSwitch name="cache" label="Forçar atualização dos dados" />
+            </Stack>
             {isLoading ? (
-              <Grid item xs={12}>
-                <Stack direction="column" justifyContent="center" alignItems="center" sx={{ height: 300 }}>
-                  <Loading />
-                </Stack>
-              </Grid>
+              <Stack direction="column" justifyContent="center" alignItems="center" sx={{ height: 300 }}>
+                <Loading />
+              </Stack>
             ) : (
               <>
                 {docIdentificacao && (
-                  <Grid item xs={12}>
-                    <Table size="small">
-                      {docIdentificacao?.caregadoEm && (
-                        <TableHead>
-                          <TableRow>
-                            <TableCell align="right" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                              Data carregamento
-                            </TableCell>
-                            <TableCell>{ptDateTime(docIdentificacao.caregadoEm)}</TableCell>
-                          </TableRow>
-                        </TableHead>
+                  <Table size="small">
+                    {docIdentificacao?.caregadoEm && (
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                            Data carregamento
+                          </TableCell>
+                          <TableCell>{ptDateTime(docIdentificacao.caregadoEm)}</TableCell>
+                        </TableRow>
+                      </TableHead>
+                    )}
+                    <TableBody>
+                      <TableRowItem title="Tipo de documento" desc={docIdentificacao?.id_tp_doc} />
+                      <TableRowItem title="Nº do documento" desc={docIdentificacao?.NUM_DOCUMENTO} />
+                      <TableRowItem title="Nome completo" desc={docIdentificacao?.NOME_COMPLETO} />
+                      <TableRowItem title="Nome normalizado" desc={docIdentificacao?.nome_normaliz} />
+                      <TableRowItem title="Nome da Mãe" desc={docIdentificacao?.NOME_MAE_COMPLETO} />
+                      <TableRowItem title="Nome do Pai" desc={docIdentificacao?.NOME_PAI_COMPLETO} />
+                      <TableRowItem title="Data de nascimento" desc={docIdentificacao?.DATA_NASC} />
+                      {docIdentificacao?.SEXO && (
+                        <TableRowItem
+                          title="Sexo"
+                          desc={
+                            (docIdentificacao?.SEXO === 'F' && 'FEMININO') ||
+                            (docIdentificacao?.SEXO === 'M' && 'MASCULINO') ||
+                            docIdentificacao?.SEXO
+                          }
+                        />
                       )}
-                      <TableBody>
-                        <TableRowItem title="Tipo de documento" desc={docIdentificacao?.id_tp_doc} />
-                        <TableRowItem title="Nº do documento" desc={docIdentificacao?.NUM_DOCUMENTO} />
-                        <TableRowItem title="Nome completo" desc={docIdentificacao?.NOME_COMPLETO} />
-                        <TableRowItem title="Nome normalizado" desc={docIdentificacao?.nome_normaliz} />
-                        <TableRowItem title="Nome da Mãe" desc={docIdentificacao?.NOME_MAE_COMPLETO} />
-                        <TableRowItem title="Nome do Pai" desc={docIdentificacao?.NOME_PAI_COMPLETO} />
-                        <TableRowItem title="Data de nascimento" desc={docIdentificacao?.DATA_NASC} />
-                        {docIdentificacao?.SEXO && (
-                          <TableRowItem
-                            title="Sexo"
-                            desc={
-                              (docIdentificacao?.SEXO === 'F' && 'FEMININO') ||
-                              (docIdentificacao?.SEXO === 'M' && 'MASCULINO') ||
-                              docIdentificacao?.SEXO
-                            }
-                          />
-                        )}
-                        <TableRowItem title="NIF" desc={docIdentificacao?.NIF} />
-                        <TableRowItem title="ID Freguêsia" desc={docIdentificacao?.FREGUESIA_ID} />
-                        <TableRowItem title="ID Estado civil" desc={docIdentificacao?.ID_CIVIL} />
-                        <TableRowItem title="ID Localidade" desc={docIdentificacao?.LOCALIDADE_ID} />
-                        <TableRowItem title="ID País" desc={docIdentificacao?.PAIS_ID} />
-                      </TableBody>
-                    </Table>
-                  </Grid>
+                      <TableRowItem title="NIF" desc={docIdentificacao?.NIF} />
+                      <TableRowItem title="ID Freguêsia" desc={docIdentificacao?.FREGUESIA_ID} />
+                      <TableRowItem title="ID Estado civil" desc={docIdentificacao?.ID_CIVIL} />
+                      <TableRowItem title="ID Localidade" desc={docIdentificacao?.LOCALIDADE_ID} />
+                      <TableRowItem title="ID País" desc={docIdentificacao?.PAIS_ID} />
+                    </TableBody>
+                  </Table>
                 )}
               </>
             )}
-          </Grid>
+          </Stack>
         </FormProvider>
       </DialogContent>
     </Dialog>

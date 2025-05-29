@@ -135,7 +135,7 @@ export default function PageFilaTrabalho() {
 
         <Box>{tabs.find((tab) => tab.value === currentTab)?.component}</Box>
 
-        {open && <TotalProcessos onCancel={() => onClose()} />}
+        {open && <TotalProcessos onClose={() => onClose()} />}
         {isOpenModal === 'adicionar-processo' && <ProcessoForm processo={null} ambientId={meuAmbiente?.id} />}
       </Container>
     </Page>
@@ -144,9 +144,9 @@ export default function PageFilaTrabalho() {
 
 // ----------------------------------------------------------------------
 
-TotalProcessos.propTypes = { onCancel: PropTypes.func };
+TotalProcessos.propTypes = { onClose: PropTypes.func };
 
-export function TotalProcessos({ onCancel }) {
+export function TotalProcessos({ onClose }) {
   const dispatch = useDispatch();
   const { perfilId } = useSelector((state) => state.intranet);
   const { posicaoAtual } = useSelector((state) => state.indicadores);
@@ -163,8 +163,8 @@ export function TotalProcessos({ onCancel }) {
   }, [dispatch, perfilId, estado?.id, fluxo?.id]);
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitleAlt title="Nº de processos" onClose={() => onCancel()} />
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitleAlt title="Nº de processos" onClose={() => onClose()} />
       <DialogContent sx={{ mt: 1 }}>
         <Stack direction="row" spacing={1} sx={{ pt: 2 }}>
           <Autocomplete

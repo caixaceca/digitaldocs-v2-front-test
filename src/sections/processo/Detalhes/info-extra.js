@@ -122,21 +122,21 @@ function DadosCredito({ dados }) {
           </Stack>
         </ListItem>
 
-        {dados?.montante_aprovado && <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />}
-        {dados?.data_aprovacao && <TextItem title="Data de aprovação:" text={ptDate(dados?.data_aprovacao)} />}
+        {dados?.data_contratacao && <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />}
         {dados?.montante_contratado && (
           <TextItem title="Montante contratado:" text={fCurrency(dados?.montante_contratado)} />
         )}
-        {dados?.data_contratacao && <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />}
-        <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
-        {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
-        <TextItem title="Garantia:" text={dados?.garantia} />
+        {dados?.data_aprovacao && <TextItem title="Data de aprovação:" text={ptDate(dados?.data_aprovacao)} />}
+        {dados?.montante_aprovado && <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />}
         <TextItem title="Decisor:" text={dados?.escalao_decisao} />
+        {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
+        <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
+        <TextItem title="Garantia:" text={dados?.garantia} />
         {dados?.data_desistido && <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />}
         {dados?.data_indeferido && <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />}
       </List>
-      {openSituacao === 'atualizar' && <FormSituacao onCancel={() => setOpenSituacao('')} />}
-      {openSituacao === 'eliminar' && <EliminarDadosSituacao onCancel={() => setOpenSituacao('')} />}
+      {openSituacao === 'atualizar' && <FormSituacao onClose={() => setOpenSituacao('')} />}
+      {openSituacao === 'eliminar' && <EliminarDadosSituacao onClose={() => setOpenSituacao('')} />}
     </Stack>
   );
 }
@@ -217,9 +217,7 @@ function Garantias({ dados }) {
             handleOk={() => eliminarGarantia()}
           />
         )) ||
-        (!!item && (
-          <GarantiasSeparados dados={{ ...item, creditoId: id, processoId, onCancel: () => setItem(null) }} />
-        ))}
+        (!!item && <GarantiasSeparados dados={{ ...item, creditoId: id, processoId, onClose: () => setItem(null) }} />)}
     </>
   );
 }

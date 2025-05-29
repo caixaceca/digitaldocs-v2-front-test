@@ -30,9 +30,9 @@ import DetalhesGaji9, { DetalhesContent } from './DetalhesGaji9';
 
 // ----------------------------------------------------------------------
 
-InfoMinuta.propTypes = { onCancel: PropTypes.func };
+InfoMinuta.propTypes = { onClose: PropTypes.func };
 
-export default function InfoMinuta({ onCancel }) {
+export default function InfoMinuta({ onClose }) {
   const { minuta } = useSelector((state) => state.gaji9);
 
   return (
@@ -43,8 +43,8 @@ export default function InfoMinuta({ onCancel }) {
         </Card>
       </Stack>
       <Stack sx={{ width: 1 }} spacing={3}>
-        <GarantiaComponente onCancel={onCancel} garantia hideAdd={!minuta?.em_analise} />
-        {minuta?.em_vigor && <GarantiaComponente onCancel={onCancel} />}
+        <GarantiaComponente onClose={onClose} garantia hideAdd={!minuta?.em_analise} />
+        {minuta?.em_vigor && <GarantiaComponente onClose={onClose} />}
       </Stack>
     </Stack>
   );
@@ -180,10 +180,10 @@ export function TableInfoMinuta({ item, onClose }) {
         />
       )}
 
-      {modalGaji9 === 'form-garantia' && <GarantiasForm onCancel={onClose} />}
-      {modalGaji9 === 'form-componente' && <ComponentesForm onCancel={onClose} />}
+      {modalGaji9 === 'form-garantia' && <GarantiasForm onClose={onClose} />}
+      {modalGaji9 === 'form-componente' && <ComponentesForm onClose={onClose} />}
       {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={onClose} item={item} />}
-      {modalGaji9 === 'form-clausula' && <ClausulaForm onCancel={onClose} minutaId={minuta?.id} />}
+      {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={onClose} minutaId={minuta?.id} />}
 
       {modalGaji9 === 'eliminar-item' && (
         <DialogConfirmar
@@ -203,9 +203,9 @@ export function TableInfoMinuta({ item, onClose }) {
 
 // ----------------------------------------------------------------------
 
-GarantiaComponente.propTypes = { onCancel: PropTypes.func, garantia: PropTypes.bool, hideAdd: PropTypes.bool };
+GarantiaComponente.propTypes = { onClose: PropTypes.func, garantia: PropTypes.bool, hideAdd: PropTypes.bool };
 
-function GarantiaComponente({ onCancel, garantia = false, hideAdd = false }) {
+function GarantiaComponente({ onClose, garantia = false, hideAdd = false }) {
   const dispatch = useDispatch();
 
   return (
@@ -221,7 +221,7 @@ function GarantiaComponente({ onCancel, garantia = false, hideAdd = false }) {
           />
         )}
       </Stack>
-      <TableInfoMinuta item={garantia ? 'tiposGarantias' : 'componentesMinuta'} onClose={onCancel} />
+      <TableInfoMinuta item={garantia ? 'tiposGarantias' : 'componentesMinuta'} onClose={onClose} />
     </Card>
   );
 }

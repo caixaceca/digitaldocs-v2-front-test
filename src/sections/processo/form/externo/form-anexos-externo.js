@@ -79,7 +79,7 @@ export default function FormAnexosExterno({ dados }) {
         <ButtonsStepper
           label="Adicionar"
           isSaving={isSaving}
-          onCancel={() => dispatch(updateDados({ backward: true, dados: values }))}
+          onClose={() => dispatch(updateDados({ backward: true, dados: values }))}
         />
       </Stack>
     </FormProvider>

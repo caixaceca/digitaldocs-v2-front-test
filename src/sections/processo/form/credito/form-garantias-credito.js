@@ -52,7 +52,7 @@ export function GarantiasSeparados({ dados }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { tiposGarantia } = useSelector((state) => state.parametrizacao);
 
-  const { isEdit, garantia, creditoId, processoId, onCancel } = dados;
+  const { isEdit, garantia, creditoId, processoId, onClose } = dados;
   const garantiasList = useMemo(() => listaGarantias(tiposGarantia), [tiposGarantia]);
 
   useEffect(() => {
@@ -78,11 +78,11 @@ export function GarantiasSeparados({ dados }) {
 
   const onSubmit = async () => {
     const params = {
+      onClose,
       creditoId,
       processoId,
       fillCredito: true,
       id: garantia?.id || '',
-      onClose: () => onCancel(),
       msg: isEdit ? 'Garantia atualizada' : 'Garantias adicionadas',
     };
     const formData = garantiasAssociadas(values.garantias);
@@ -93,13 +93,13 @@ export function GarantiasSeparados({ dados }) {
 
   return (
     <Dialog open fullWidth maxWidth="lg">
-      <DialogTitleAlt title={isEdit ? 'Atualizar garantia' : 'Adicionar garantias'} onClose={onCancel} />
+      <DialogTitleAlt title={isEdit ? 'Atualizar garantia' : 'Adicionar garantias'} onClose={onClose} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <FormGarantias dados={{ fields, append, remove, garantiasList, isEdit }} />
           <DialogButons
             isSaving={isSaving}
-            onCancel={onCancel}
+            onClose={onClose}
             label={isEdit ? 'Guardar' : ''}
             hideSubmit={fields?.length === 0}
           />

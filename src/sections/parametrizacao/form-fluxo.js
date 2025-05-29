@@ -40,9 +40,9 @@ import { ItemComponent } from './ParametrizacaoForm';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-FluxoForm.propTypes = { onCancel: PropTypes.func };
+FluxoForm.propTypes = { onClose: PropTypes.func };
 
-export function FluxoForm({ onCancel }) {
+export function FluxoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -91,7 +91,7 @@ export function FluxoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar fluxo' : 'Adicionar fluxo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -116,7 +116,7 @@ export function FluxoForm({ onCancel }) {
               <GridItem xs={4} children={<RHFSwitch name="is_con" label="CON" />} />
               <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
             </Grid>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -126,9 +126,9 @@ export function FluxoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ClonarFluxoForm.propTypes = { onCancel: PropTypes.func };
+ClonarFluxoForm.propTypes = { onClose: PropTypes.func };
 
-export function ClonarFluxoForm({ onCancel }) {
+export function ClonarFluxoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -175,7 +175,7 @@ export function ClonarFluxoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Clonar fluxo</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -186,7 +186,7 @@ export function ClonarFluxoForm({ onCancel }) {
             </Alert>
             <RHFTextField name="assunto" label="Assunto" />
           </Stack>
-          <DialogButons label="Clonar" isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons label="Clonar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -195,9 +195,9 @@ export function ClonarFluxoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-TransicaoForm.propTypes = { onCancel: PropTypes.func, fluxoId: PropTypes.number };
+TransicaoForm.propTypes = { onClose: PropTypes.func, fluxoId: PropTypes.number };
 
-export function TransicaoForm({ onCancel, fluxoId }) {
+export function TransicaoForm({ onClose, fluxoId }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -249,7 +249,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>{isEdit ? 'Editar transição' : 'Adicionar transição'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -269,7 +269,7 @@ export function TransicaoForm({ onCancel, fluxoId }) {
               <GridItem sm={4} children={<RHFSwitch name="hasopnumero" label="Indicar nº de operação" />} />
               <GridItem sm={4} children={<RHFSwitch name="arqhasopnumero" label="Nº de operação no arquivo" />} />
             </Grid>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -279,9 +279,9 @@ export function TransicaoForm({ onCancel, fluxoId }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-ChecklistForm.propTypes = { fluxo: PropTypes.object, onCancel: PropTypes.func };
+ChecklistForm.propTypes = { fluxo: PropTypes.object, onClose: PropTypes.func };
 
-export function ChecklistForm({ fluxo, onCancel }) {
+export function ChecklistForm({ fluxo, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isEdit, isSaving, selectedItem, estados, documentos } = useSelector((state) => state.parametrizacao);
@@ -303,9 +303,9 @@ export function ChecklistForm({ fluxo, onCancel }) {
     () => ({
       ativo: isEdit ? selectedItem?.ativo : true,
       obrigatorio: isEdit ? selectedItem?.obrigatorio : false,
-      transicao: listaTransicoes?.find((row) => row?.id === selectedItem?.transicao_id) || null,
+      transicao: listaTransicoes?.find(({ id }) => id === selectedItem?.transicao_id) || null,
       documentos: isEdit ? [] : [{ tipo_documento: null, transicao: null, obrigatorio: false }],
-      tipo_documento: documentos?.find((row) => row?.id === selectedItem?.tipo_documento_id) || null,
+      tipo_documento: documentos?.find(({ id }) => id === selectedItem?.tipo_documento_id) || null,
     }),
     [isEdit, selectedItem, listaTransicoes, documentos]
   );
@@ -339,7 +339,7 @@ export function ChecklistForm({ fluxo, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {isEdit ? 'Editar documento' : 'Adicionar documentos'}
@@ -391,7 +391,7 @@ export function ChecklistForm({ fluxo, onCancel }) {
                 ))}
               </Stack>
             )}
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -401,9 +401,9 @@ export function ChecklistForm({ fluxo, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-NotificacaoForm.propTypes = { fluxo: PropTypes.object, transicao: PropTypes.object, onCancel: PropTypes.func };
+NotificacaoForm.propTypes = { fluxo: PropTypes.object, transicao: PropTypes.object, onClose: PropTypes.func };
 
-export function NotificacaoForm({ fluxo, transicao, onCancel }) {
+export function NotificacaoForm({ fluxo, transicao, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
@@ -442,7 +442,7 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>{isEdit ? 'Editar notificação' : 'Adicionar notificação'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -452,7 +452,7 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
             <GridItem sm={8} children={<RHFTextField name="assunto" label="Assunto" />} />
             <GridItem children={<RHFEditor simple name="corpo" />} />
           </Grid>
-          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -461,16 +461,16 @@ export function NotificacaoForm({ fluxo, transicao, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DestinatarioForm.propTypes = { id: PropTypes.number, selectedItem: PropTypes.object, onCancel: PropTypes.func };
+DestinatarioForm.propTypes = { id: PropTypes.number, selectedItem: PropTypes.object, onClose: PropTypes.func };
 
-export function DestinatarioForm({ id, onCancel, selectedItem }) {
+export function DestinatarioForm({ id, onClose, selectedItem }) {
   const isEdit = selectedItem?.id;
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.parametrizacao);
   const { colaboradores } = useSelector((state) => state.intranet);
   const perfisList = useMemo(
-    () => colaboradores?.map((row) => ({ id: row?.id, label: row?.perfil?.displayName, email: row?.perfil?.mail })),
+    () => colaboradores?.map(({ id, nome, email }) => ({ id, label: nome, email })),
     [colaboradores]
   );
 
@@ -486,7 +486,7 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
       data_termino: fillData(selectedItem?.data_termino, null),
       destinatarios: isEdit ? [] : [{ perfil: null, data_inicio: null, data_termino: null, telefone: '' }],
       perfil: isEdit
-        ? perfisList?.find((row) => row?.email?.toLowerCase() === selectedItem?.email?.toLowerCase())
+        ? perfisList?.find(({ email }) => email?.toLowerCase() === selectedItem?.email?.toLowerCase())
         : null,
     }),
     [selectedItem, isEdit, perfisList]
@@ -524,7 +524,7 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
+    <Dialog open onClose={onClose} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {isEdit ? 'Editar destinatário' : 'Adicionar destinatários'}
@@ -548,19 +548,19 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
               </>
             ) : (
               fields.map((item, index) => (
-                <Grid item xs={12} key={item.id}>
+                <GridItem key={item.id}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={5}>
+                    <GridItem md={5}>
                       <RHFAutocompleteObj
                         label="Colaborador"
                         options={perfisList}
                         name={`destinatarios[${index}].perfil`}
                       />
-                    </Grid>
-                    <Grid item xs={12} md={2}>
+                    </GridItem>
+                    <GridItem md={2}>
                       <RHFTextField label="Telefone" name={`destinatarios[${index}].telefone`} />
-                    </Grid>
-                    <Grid item xs={12} md={5}>
+                    </GridItem>
+                    <GridItem md={5}>
                       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
                         <RHFDatePicker label="Data de início" name={`destinatarios[${index}].data_inicio`} />
                         <RHFDatePicker label="Data de fim" name={`destinatarios[${index}].data_termino`} />
@@ -568,16 +568,16 @@ export function DestinatarioForm({ id, onCancel, selectedItem }) {
                           <DefaultAction label="ELIMINAR" onClick={() => remove(index)} />
                         )}
                       </Stack>
-                    </Grid>
+                    </GridItem>
                   </Grid>
-                </Grid>
+                </GridItem>
               ))
             )}
           </Grid>
           <DialogButons
             edit={isEdit}
             isSaving={isSaving}
-            onCancel={onCancel}
+            onClose={onClose}
             desc={isEdit ? 'eliminar esta destinatário' : ''}
             handleDelete={() =>
               dispatch(deleteItem('destinatarios', { id: selectedItem?.id, msg: 'Destinatário eliminado' }))
@@ -595,7 +595,7 @@ Transicao.propTypes = { item: PropTypes.string, transicao: PropTypes.string, flu
 
 export function Transicao({ item, transicao, fluxo = false }) {
   return (
-    <Grid item xs={12}>
+    <GridItem>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Typography sx={{ color: 'text.secondary' }}>{fluxo ? 'Fluxo:' : 'Estado:'}</Typography>
         <Typography>{item}</Typography>
@@ -604,6 +604,6 @@ export function Transicao({ item, transicao, fluxo = false }) {
         <Typography sx={{ color: 'text.secondary' }}>Transição:</Typography>
         <Typography>{transicao}</Typography>
       </Stack>
-    </Grid>
+    </GridItem>
   );
 }

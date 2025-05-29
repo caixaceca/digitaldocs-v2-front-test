@@ -28,8 +28,8 @@ import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
 import OpcoesClausula from './opcoes-clausulas';
-import GrupoDetail, { BalcoesRepresentante } from './detalhes-grupo';
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
+import { GrupoDetail, BalcoesRepresentante, SubtiposGarantias } from './sub-items';
 
 // ----------------------------------------------------------------------
 
@@ -37,25 +37,18 @@ DetalhesGaji9.propTypes = { closeModal: PropTypes.func, item: PropTypes.string, 
 
 export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
   const { selectedItem, clausulaOpcional } = useSelector((state) => state.gaji9);
+  const hasTabs =
+    item === 'clausulas' || item === 'clausulaMinuta' || item === 'representantes' || item === 'tiposGarantias';
 
   return (
-    <Dialog
-      open
-      fullWidth
-      onClose={closeModal}
-      maxWidth={
-        item === 'grupos' || item === 'clausulas' || item === 'clausulaMinuta' || item === 'representantes'
-          ? 'md'
-          : 'sm'
-      }
-    >
+    <Dialog open fullWidth onClose={closeModal} maxWidth={item === 'grupos' || hasTabs ? 'md' : 'sm'}>
       <DialogTitleAlt title="Detalhes" onClose={closeModal} />
       <DialogContent>
         {(opcao && <DetalhesTab item={item} dados={clausulaOpcional} />) ||
           (item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
-          ((item === 'clausulas' || item === 'clausulaMinuta' || item === 'funcoes' || item === 'representantes') && (
-            <DetalhesTab item={item} dados={selectedItem} />
-          )) || <DetalhesContent dados={selectedItem} item={item} />}
+          ((hasTabs || item === 'funcoes') && <DetalhesTab item={item} dados={selectedItem} />) || (
+            <DetalhesContent dados={selectedItem} item={item} />
+          )}
       </DialogContent>
     </Dialog>
   );
@@ -71,6 +64,9 @@ function DetalhesTab({ item, dados }) {
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
     ...((item === 'clausulas' && [{ value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
+      (item === 'tiposGarantias' && [
+        { value: 'Subtipos', component: <SubtiposGarantias id={dados?.id} dados={dados?.subtipos} /> },
+      ]) ||
       (item === 'representantes' && [
         { value: 'Balcões', component: <BalcoesRepresentante id={dados?.id} dados={dados?.balcoes} /> },
       ]) ||
@@ -93,7 +89,7 @@ function DetalhesTab({ item, dados }) {
         sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
         changeTab={(_, newValue) => setCurrentTab(newValue)}
       />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -238,22 +234,16 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title={item === 'clausulas' ? 'Epígrafe:' : 'Título:'} text={dados?.titulo} />
                     <TableRowItem title="Subtítulo:" text={dados?.subtitulo} />
                     <TableRowItem title="Representante:" text={dados?.representante} />
-                    {dados?.data_entrega && (
-                      <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
-                    )}
-                    {dados?.data_recebido && (
-                      <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
-                    )}
+                    <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
+                    <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
                     <TableRowItem title="Tipo titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
                     <TableRowItem title="Tipo garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
                     <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
                     <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
-                    {dados?.data_emissao && <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />}
-                    {dados?.valido_ate && <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />}
-                    {dados?.data_inicio && <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />}
-                    {dados?.data_termino && (
-                      <TableRowItem title="Data emissão:" text={ptDateTime(dados?.data_termino)} />
-                    )}
+                    <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
+                    <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />
+                    <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />
+                    <TableRowItem title="Data emissão:" text={ptDateTime(dados?.data_termino)} />
                     <TableRowItem title="NIF:" text={dados?.nif} />
                     <TableRowItem title="Freguesia:" text={dados?.freguesia} />
                     <TableRowItem title="Freguesia na banca:" text={dados?.freguesia_banca} />

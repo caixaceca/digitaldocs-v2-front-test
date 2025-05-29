@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 // components
 import Image from '../../components/Image';
+import GridItem from '../../components/GridItem';
 import Markdown from '../../components/Markdown';
 import Scrollbar from '../../components/Scrollbar';
 import { DialogTitleAlt } from '../../components/CustomDialog';
@@ -50,7 +51,7 @@ export default function AjudaDialog({ onClose }) {
       <DialogTitleAlt title="Ajuda" onClose={() => onClose()} />
       <DialogContent>
         <Grid container spacing={3} sx={{ pt: 3 }}>
-          <Grid item xs={12} sm={4}>
+          <GridItem sm={4}>
             <Card>
               <Button
                 color="inherit"
@@ -78,8 +79,8 @@ export default function AjudaDialog({ onClose }) {
                 </Button>
               )}
             </Stack>
-          </Grid>
-          <Grid item xs={12} sm={8}>
+          </GridItem>
+          <GridItem sm={8}>
             <CardHeader title="Perguntas frequentes" action="" sx={{ color: 'text.success', p: 0, mb: 1 }} />
             <Box sx={{ height: '460px' }}>
               <Scrollbar>
@@ -122,7 +123,7 @@ export default function AjudaDialog({ onClose }) {
                 )}
               </Scrollbar>
             </Box>
-          </Grid>
+          </GridItem>
         </Grid>
 
         {isOpenVideo && (

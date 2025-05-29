@@ -206,7 +206,7 @@ function ButtonInfoCaixa() {
           dispatch(getFromGaji9('infoCaixa'));
         }}
       />
-      {open && <InfoCaixa onCancel={() => onClose()} />}
+      {open && <InfoCaixa onClose={() => onClose()} />}
     </>
   );
 }

@@ -229,7 +229,7 @@ export default function TableCredito() {
         <MaisProcessos verMais={() => handleProcurar(infoPag?.proximo)} />
       )}
 
-      {modalGaji9 === 'form-proposta' && <PropostaForm onCancel={() => dispatch(setModal())} />}
+      {modalGaji9 === 'form-proposta' && <PropostaForm onClose={() => dispatch(setModal())} />}
     </Stack>
   );
 }

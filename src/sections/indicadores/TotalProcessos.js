@@ -11,6 +11,7 @@ import { formatDate, fYear, fMonthYear } from '../../utils/formatTime';
 // redux
 import { useSelector } from '../../redux/store';
 // components
+import GridItem from '../../components/GridItem';
 import Chart, { useChart } from '../../components/chart';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndicadores';
 //
@@ -89,7 +90,7 @@ export function Criacao({ vista, indicadores }) {
         children={
           <Grid container spacing={3}>
             {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={6} md={3}>
+              <GridItem key={row?.label} sm={6} md={3}>
                 <CardInfo
                   title={row?.label}
                   total={row?.valor}
@@ -100,15 +101,15 @@ export function Criacao({ vista, indicadores }) {
                     row?.desc
                   }
                 />
-              </Grid>
+              </GridItem>
             ))}
-            <Grid item xs={12}>
+            <GridItem>
               {view === 'Gráfico' ? (
                 <Chart type="area" series={series} options={chartOptions} height={400} />
               ) : (
                 <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
               )}
-            </Grid>
+            </GridItem>
           </Grid>
         }
       />
@@ -158,7 +159,7 @@ export function DevolvidosTipos({ dev, indicadores }) {
         children={
           <Grid container spacing={3}>
             {resumo?.map((row) => (
-              <Grid key={row?.label} item xs={12} sm={4}>
+              <GridItem key={row?.label} sm={4}>
                 <CardInfo
                   dev={dev}
                   label={row?.desc}
@@ -166,15 +167,15 @@ export function DevolvidosTipos({ dev, indicadores }) {
                   total={row?.valor}
                   percentagem={row?.percentagem}
                 />
-              </Grid>
+              </GridItem>
             ))}
-            <Grid item xs={12}>
+            <GridItem>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
               ) : (
                 <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
               )}
-            </Grid>
+            </GridItem>
           </Grid>
         }
       />
@@ -238,17 +239,17 @@ export function Origem({ top, indicadores }) {
         children={
           <Grid container spacing={3}>
             {resumo?.map(({ label, valor, desc, percentagem }) => (
-              <Grid key={label} item xs={12} sm={6} md={3}>
+              <GridItem key={label} sm={6} md={3}>
                 <CardInfo title={label} total={valor} label={desc} percentagem={percentagem} />
-              </Grid>
+              </GridItem>
             ))}
-            <Grid item xs={12}>
+            <GridItem>
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
               ) : (
                 <TableExport percentagem total={total} label={agrupamento} label1="Quantidade" dados={origemByItem} />
               )}
-            </Grid>
+            </GridItem>
           </Grid>
         }
       />

@@ -24,6 +24,8 @@ import { getListaProcessos } from '../../redux/slices/digitaldocs';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useToggle from '../../hooks/useToggle';
+// components
+import GridItem from '../../components/GridItem';
 
 // ----------------------------------------------------------------------
 
@@ -112,7 +114,7 @@ export default function ProcuraAvancada() {
             <Grid container spacing={2} sx={{ mt: 1 }}>
               {avancada ? (
                 <>
-                  <Grid item xs={12} md={6}>
+                  <GridItem md={6}>
                     <Autocomplete
                       fullWidth
                       options={uosList}
@@ -122,31 +124,31 @@ export default function ProcuraAvancada() {
                       renderInput={(params) => <TextField {...params} label="Unidade orgânica" />}
                       onChange={(event, newValue) => setItemValue(newValue, setUo, 'uoSearch', true)}
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
+                  </GridItem>
+                  <GridItem sm={3}>
                     <TextFieldNumb value={nentrada} setValue={setNentrada} label="Nº de entrada" localS="entrada" />
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
+                  </GridItem>
+                  <GridItem sm={3}>
                     <TextFieldNumb
                       value={noperacao}
                       localS="noperacao"
                       label="Nº de operação"
                       setValue={setNoperacao}
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
+                  </GridItem>
+                  <GridItem sm={4}>
                     <TextFieldNumb value={entidade} setValue={setEntidade} label="Nº de entidade" localS="entidade" />
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
+                  </GridItem>
+                  <GridItem sm={4}>
                     <TextFieldNumb value={cliente} setValue={setCliente} label="Nº de cliente" localS="cliente" />
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
+                  </GridItem>
+                  <GridItem sm={4}>
                     <TextFieldNumb value={conta} setValue={setConta} label="Nº de conta" localS="conta" />
-                  </Grid>
+                  </GridItem>
                 </>
               ) : (
                 <>
-                  <Grid item xs={12}>
+                  <GridItem>
                     <TextField
                       fullWidth
                       autoFocus
@@ -157,10 +159,10 @@ export default function ProcuraAvancada() {
                       placeholder="Introduza uma palavra/texto chave..."
                       onChange={(event) => setItemValue(event.target.value, setChave, 'chave', false)}
                     />
-                  </Grid>
+                  </GridItem>
                 </>
               )}
-              <Grid item xs={12}>
+              <GridItem>
                 <Stack direction="row" justifyContent="center">
                   <FormControlLabel
                     label="Procurar no arquivo"
@@ -175,7 +177,7 @@ export default function ProcuraAvancada() {
                     }
                   />
                 </Stack>
-              </Grid>
+              </GridItem>
             </Grid>
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center' }}>

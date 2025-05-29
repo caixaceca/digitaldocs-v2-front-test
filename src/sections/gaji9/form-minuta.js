@@ -25,9 +25,9 @@ const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-MinutaForm.propTypes = { onCancel: PropTypes.func, action: PropTypes.string, minuta: PropTypes.object };
+MinutaForm.propTypes = { onClose: PropTypes.func, action: PropTypes.string, minuta: PropTypes.object };
 
-export default function MinutaForm({ onCancel, action, minuta = null }) {
+export default function MinutaForm({ onClose, action, minuta = null }) {
   const dispatch = useDispatch();
   const { isSaving, tiposTitulares, componentes, tiposGarantias } = useSelector((state) => state.gaji9);
   const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
@@ -48,16 +48,16 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
       titulo: minuta?.titulo || '',
       subtitulo: minuta?.subtitulo || '',
       ativo: action === 'Adicionar' ? true : minuta?.ativo,
-      titular: titularesList?.find((row) => Number(row?.id) === Number(minuta?.tipo_titular_id)) || null,
-      componente: componentesList?.find((row) => Number(row?.id) === Number(minuta?.componente_id)) || null,
+      titular: titularesList?.find(({ id }) => Number(id) === Number(minuta?.tipo_titular_id)) || null,
+      componente: componentesList?.find(({ id }) => Number(id) === Number(minuta?.componente_id)) || null,
       garantias:
         action === 'Adicionar'
           ? [{ garantia: null }]
           : garantiasList
               ?.filter((tipo) =>
                 minuta?.tipos_garantias
-                  ?.filter((row) => row?.ativo)
-                  ?.map((item) => item?.id)
+                  ?.filter(({ ativo }) => ativo)
+                  ?.map(({ id }) => id)
                   ?.includes(tipo?.id)
               )
               ?.map((dados) => ({ garantia: dados })),
@@ -98,7 +98,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
 
   return (
     <Dialog open fullWidth maxWidth="sm">
-      <DialogTitleAlt title={`${action} minuta`} onClose={() => onCancel()} />
+      <DialogTitleAlt title={`${action} minuta`} onClose={onClose} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
@@ -133,7 +133,7 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
             <RHFTextField name="nota" label="Observação" multiline minRows={2} maxRows={5} />
             {action === 'editar' && <RHFSwitch name="ativo" label="Ativo" />}
           </Stack>
-          <DialogButons edit={action !== 'Adicionar'} isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit={action !== 'Adicionar'} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -142,9 +142,9 @@ export default function MinutaForm({ onCancel, action, minuta = null }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-GarantiasForm.propTypes = { onCancel: PropTypes.func };
+GarantiasForm.propTypes = { onClose: PropTypes.func };
 
-export function GarantiasForm({ onCancel }) {
+export function GarantiasForm({ onClose }) {
   const dispatch = useDispatch();
   const { isSaving, minuta, tiposGarantias } = useSelector((state) => state.gaji9);
   const garantiasExistentes = useMemo(
@@ -172,7 +172,7 @@ export function GarantiasForm({ onCancel }) {
   };
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={() => onCancel()}>
+    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitleAlt
         sx={{ mb: 2 }}
         title="Adicionar tipos de garantias"
@@ -196,7 +196,7 @@ export function GarantiasForm({ onCancel }) {
               </Stack>
             ))}
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -205,9 +205,9 @@ export function GarantiasForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ComponentesForm.propTypes = { onCancel: PropTypes.func };
+ComponentesForm.propTypes = { onClose: PropTypes.func };
 
-export function ComponentesForm({ onCancel }) {
+export function ComponentesForm({ onClose }) {
   const dispatch = useDispatch();
   const { isSaving, minuta, componentes } = useSelector((state) => state.gaji9);
 
@@ -227,7 +227,7 @@ export function ComponentesForm({ onCancel }) {
   };
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={() => onCancel()}>
+    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitleAlt
         sx={{ mb: 2 }}
         title="Adicionar componentes"
@@ -252,7 +252,7 @@ export function ComponentesForm({ onCancel }) {
               </Stack>
             ))}
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -261,9 +261,9 @@ export function ComponentesForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ComposicaoForm.propTypes = { onCancel: PropTypes.func, action: PropTypes.string };
+ComposicaoForm.propTypes = { onClose: PropTypes.func, action: PropTypes.string };
 
-export function ComposicaoForm({ onCancel, action }) {
+export function ComposicaoForm({ onClose, action }) {
   const dispatch = useDispatch();
   const { isSaving, clausulas, minuta } = useSelector((state) => state.gaji9);
   const clausulasList = useMemo(() => listaClausulas(clausulas), [clausulas]);
@@ -283,7 +283,7 @@ export function ComposicaoForm({ onCancel, action }) {
         action === 'compor'
           ? [{ clausula: null, numero: '' }]
           : minuta?.clausulas
-              ?.filter((item) => item?.ativo && item?.numero_ordem > 0)
+              ?.filter(({ ativo, numero_ordem: ordem }) => ativo && ordem > 0)
               ?.map((row) => ({
                 numero: row?.numero_ordem,
                 clausula: { id: row?.clausula_id, label: row?.titulo || 'Cláusula solta' },
@@ -300,12 +300,15 @@ export function ComposicaoForm({ onCancel, action }) {
     const formData =
       action === 'compor'
         ? {
-            clausulas: values?.clausulas?.map((row) => ({ numero_ordem: row?.numero, clausula_id: row?.clausula?.id })),
+            clausulas: values?.clausulas?.map(({ numero, clausula }) => ({
+              numero_ordem: numero,
+              clausula_id: clausula?.id,
+            })),
           }
-        : values?.clausulas?.map((row) => ({
+        : values?.clausulas?.map(({ numero, clausula }) => ({
             ativo: true,
-            numero_ordem: row?.numero,
-            clausula_id: row?.clausula?.id,
+            numero_ordem: numero,
+            clausula_id: clausula?.id,
           }));
     const params = {
       id: minuta?.id,
@@ -317,10 +320,7 @@ export function ComposicaoForm({ onCancel, action }) {
 
   return (
     <Dialog open fullWidth maxWidth="md">
-      <DialogTitleAlt
-        onClose={() => onCancel()}
-        title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'}
-      />
+      <DialogTitleAlt onClose={onClose} title={action === 'compor' ? 'Adicionar cláusulas' : 'Atualizar composição'} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
@@ -362,7 +362,7 @@ export function ComposicaoForm({ onCancel, action }) {
               </Stack>
             )}
           </Stack>
-          <DialogButons edit={action !== 'compor'} isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit={action !== 'compor'} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -422,9 +422,9 @@ export function PesquisarClausulas() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PublicarRevogarForm.propTypes = { onCancel: PropTypes.func, action: PropTypes.string };
+PublicarRevogarForm.propTypes = { onClose: PropTypes.func, action: PropTypes.string };
 
-export function PublicarRevogarForm({ onCancel, action }) {
+export function PublicarRevogarForm({ onClose, action }) {
   const dispatch = useDispatch();
   const { isSaving, minuta } = useSelector((state) => state.gaji9);
   const formSchema = Yup.object().shape({ nota: Yup.string().required().label('Observação') });
@@ -439,7 +439,7 @@ export function PublicarRevogarForm({ onCancel, action }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ mb: 2 }}>{action} minuta</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -448,8 +448,8 @@ export function PublicarRevogarForm({ onCancel, action }) {
           </Stack>
           <DialogButons
             label={action}
+            onClose={onClose}
             isSaving={isSaving}
-            onCancel={onCancel}
             color={action === 'Revogar' ? 'error' : 'primary'}
           />
         </FormProvider>
@@ -460,9 +460,9 @@ export function PublicarRevogarForm({ onCancel, action }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PreviewForm.propTypes = { id: PropTypes.number, onCancel: PropTypes.func };
+PreviewForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func };
 
-export function PreviewForm({ id = 0, onCancel }) {
+export function PreviewForm({ id = 0, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
   const defaultValues = useMemo(() => ({ taxa: '', prazo: '', montante: '', isento: false, representante: false }), []);
@@ -475,7 +475,7 @@ export function PreviewForm({ id = 0, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle sx={{ mb: 2 }}>Pré-visualizar minuta</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -490,7 +490,7 @@ export function PreviewForm({ id = 0, onCancel }) {
               <RHFSwitch name="representante" label="Com representante" />
             </Stack>
           </Stack>
-          <DialogButons label="Pré-visualizar" isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons label="Pré-visualizar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>

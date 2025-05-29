@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // form
@@ -12,7 +11,6 @@ import Divider from '@mui/material/Divider';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fillData } from '../../utils/formatTime';
 import { perfisAad, utilizadoresGaji9, removerPropriedades } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
@@ -23,7 +21,6 @@ import {
   FormProvider,
   RHFTextField,
   RHFDatePicker,
-  RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../components/hook-form';
@@ -32,262 +29,12 @@ import { SearchNotFoundSmall } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import { DefaultAction, DialogButons } from '../../components/Actions';
 // _mock_
-import { freguesiasConcelhos } from '../../_mock';
-
-const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ProdutoForm.propTypes = { onCancel: PropTypes.func };
+MarcadorForm.propTypes = { onClose: PropTypes.func };
 
-export function ProdutoForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({ codigo: !isEdit && Yup.string().required().label('Código') });
-  const defaultValues = useMemo(
-    () => ({
-      id: selectedItem?.id ?? '',
-      codigo: selectedItem?.codigo ?? '',
-      rotulo: selectedItem?.rotulo ?? '',
-      descritivo: selectedItem?.descritivo ?? '',
-      ativo: isEdit ? selectedItem?.ativo : true,
-    }),
-    [selectedItem, isEdit]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
-    const params = { values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, onClose: () => onCancel() };
-    if (isEdit) {
-      const formData = JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]);
-      dispatch(updateItem('componentes', formData, params));
-    } else {
-      dispatch(createItem('componentes', JSON.stringify({ codigo: values?.codigo }), params));
-    }
-  };
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitle>{isEdit ? 'Rotular componente' : 'Importar componente'}</DialogTitle>
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 3 }}>
-            {isEdit ? (
-              <>
-                <RHFTextField name="rotulo" label="Rótulo" />
-                <RHFSwitch name="ativo" label="Ativo" />
-              </>
-            ) : (
-              <RHFTextField name="codigo" label="Código" />
-            )}
-          </Stack>
-          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-TipoTitularForm.propTypes = { onCancel: PropTypes.func };
-
-export function TipoTitularForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({
-    codigo: Yup.string().required().label('Código'),
-    descritivo: Yup.string().required().label('Descritivo'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      codigo: selectedItem?.codigo ?? '',
-      consumidor: !!selectedItem?.consumidor,
-      descritivo: selectedItem?.descritivo ?? '',
-      ativo: isEdit ? selectedItem?.ativo : true,
-    }),
-    [selectedItem, isEdit]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitle>{isEdit ? 'Editar tipo de titular' : 'Adicionar tipo de titular'}</DialogTitle>
-      <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() =>
-            submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposTitulares', onCancel)
-          )}
-        >
-          <ItemComponent item={selectedItem} rows={1}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="codigo" label="Código" />
-              <RHFTextField name="descritivo" label="Descritivo" />
-              <Stack direction="row" spacing={3}>
-                <RHFSwitch name="consumidor" label="Consumidor" />
-                {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
-              </Stack>
-            </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-GarantiaForm.propTypes = { onCancel: PropTypes.func };
-
-export function GarantiaForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({
-    codigo: Yup.string().required().label('Código'),
-    designacao: Yup.string().required().label('Designação'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      codigo: selectedItem?.codigo ?? '',
-      designacao: selectedItem?.designacao ?? '',
-      descritivo: selectedItem?.descritivo ?? '',
-      ativo: isEdit ? selectedItem?.ativo : true,
-    }),
-    [selectedItem, isEdit]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar tipo de garantia' : 'Adicionar tipo de garantia'}</DialogTitle>
-      <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() =>
-            submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposGarantias', onCancel)
-          )}
-        >
-          <ItemComponent item={selectedItem} rows={2}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="codigo" label="Código" />
-              <RHFTextField name="designacao" label="Designação" />
-              <RHFTextField name="descritivo" label="Descritivo" />
-              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
-            </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-FreguesiaForm.propTypes = { onCancel: PropTypes.func };
-
-export function FreguesiaForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({
-    ilha: Yup.string().required().label('Ilha'),
-    sigla: Yup.string().required().label('Sigla'),
-    regiao: Yup.string().required().label('Região'),
-    concelho: Yup.string().required().label('Concelho'),
-    freguesia: Yup.string().required().label('Freguesia'),
-    freguesia_banca: Yup.string().required().label('Freguesia na banca'),
-    naturalidade_banca: Yup.string().required().label('Naturalidade na banca'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      ilha: selectedItem?.ilha ?? '',
-      sigla: selectedItem?.sigla ?? '',
-      regiao: selectedItem?.regiao ?? '',
-      concelho: selectedItem?.concelho ?? '',
-      freguesia: selectedItem?.freguesia ?? '',
-      ativo: isEdit ? selectedItem?.ativo : true,
-      freguesia_banca: selectedItem?.freguesia_banca ?? '',
-      naturalidade_banca: selectedItem?.naturalidade_banca ?? '',
-    }),
-    [selectedItem, isEdit]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Editar freguesia' : 'Adicionar freguesia'}</DialogTitle>
-      <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'freguesias', onCancel))}
-        >
-          <ItemComponent item={selectedItem} rows={5}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <Stack direction="row" spacing={3}>
-                <RHFTextField name="sigla" label="Sigla" />
-                <RHFTextField name="ilha" label="Ilha" />
-                <RHFTextField name="regiao" label="Região" />
-              </Stack>
-              <RHFTextField name="freguesia" label="Freguesia" />
-              <RHFTextField name="freguesia_banca" label="Freguesia na banca" />
-              <RHFTextField name="concelho" label="Concelho" />
-              <RHFTextField name="naturalidade_banca" label="Naturalidade na banca" />
-              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
-            </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-MarcadorForm.propTypes = { onCancel: PropTypes.func };
-
-export function MarcadorForm({ onCancel }) {
+export function MarcadorForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
@@ -315,12 +62,12 @@ export function MarcadorForm({ onCancel }) {
   }, [selectedItem]);
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Editar marcador' : 'Adicionar marcador'}</DialogTitle>
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'marcadores', onCancel))}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'marcadores', onClose))}
         >
           <ItemComponent item={selectedItem} rows={2}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -328,7 +75,7 @@ export function MarcadorForm({ onCancel }) {
               <RHFTextField name="sufixo" label="Sufixo" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -338,9 +85,9 @@ export function MarcadorForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-VariavelForm.propTypes = { onCancel: PropTypes.func };
+VariavelForm.propTypes = { onClose: PropTypes.func };
 
-export function VariavelForm({ onCancel }) {
+export function VariavelForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
@@ -364,13 +111,13 @@ export function VariavelForm({ onCancel }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
-    const params = { onClose: onCancel, msg: `Variável ´${isEdit ? 'atualizado' : 'adicionado'}` };
+    const params = { onClose, msg: `Variável ´${isEdit ? 'atualizado' : 'adicionado'}` };
     if (isEdit) dispatch(updateItem('variaveis', JSON.stringify([values?.variaveis?.[0]]), params));
     else dispatch(createItem('variaveis', JSON.stringify(values?.variaveis?.map((row) => row)), params));
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitleAlt
         title={isEdit ? 'Editar variável' : 'Adicionar variáveis'}
         action={
@@ -400,7 +147,7 @@ export function VariavelForm({ onCancel }) {
                 </Stack>
               ))}
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -410,9 +157,9 @@ export function VariavelForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-GrupoForm.propTypes = { onCancel: PropTypes.func };
+GrupoForm.propTypes = { onClose: PropTypes.func };
 
-export function GrupoForm({ onCancel }) {
+export function GrupoForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
@@ -440,12 +187,12 @@ export function GrupoForm({ onCancel }) {
   }, [selectedItem]);
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Atualizar grupo' : 'Adicionar grupo'}</DialogTitle>
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'grupos', onCancel))}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'grupos', onClose))}
         >
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -454,7 +201,7 @@ export function GrupoForm({ onCancel }) {
               <RHFTextField name="email" label="Email" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -464,9 +211,9 @@ export function GrupoForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-RecursoGrupoForm.propTypes = { onCancel: PropTypes.func, selectedItem: PropTypes.object, grupoId: PropTypes.string };
+RecursoGrupoForm.propTypes = { onClose: PropTypes.func, selectedItem: PropTypes.object, grupoId: PropTypes.string };
 
-export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
+export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
   const dispatch = useDispatch();
   const { isSaving, recursos } = useSelector((state) => state.gaji9);
   const recursosList = useMemo(() => recursos?.map((row) => ({ id: row?.id, label: row?.nome })), [recursos]);
@@ -516,12 +263,12 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
 
   const params = useMemo(
     () => ({
-      onClose: onCancel,
+      onClose,
       getItem: 'selectedItem',
       id: selectedItem?.action === 'add' ? grupoId : selectedItem?.id,
       msg: selectedItem?.action === 'add' ? 'Recurso atualizado' : 'Recursos adicionados',
     }),
-    [grupoId, onCancel, selectedItem?.action, selectedItem?.id]
+    [grupoId, onClose, selectedItem?.action, selectedItem?.id]
   );
 
   const onSubmit = async () => {
@@ -553,7 +300,7 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitleAlt
         title={selectedItem?.action === 'add' ? 'Adicionar recursos' : 'Atualizar recurso'}
         action={
@@ -591,7 +338,7 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
               </Stack>
             ))}
           </Stack>
-          <DialogButons edit={selectedItem?.action === 'edit'} isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit={selectedItem?.action === 'edit'} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -600,9 +347,9 @@ export function RecursoGrupoForm({ onCancel, selectedItem, grupoId }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-RecursoForm.propTypes = { onCancel: PropTypes.func };
+RecursoForm.propTypes = { onClose: PropTypes.func };
 
-export function RecursoForm({ onCancel }) {
+export function RecursoForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
@@ -630,12 +377,12 @@ export function RecursoForm({ onCancel }) {
   }, [selectedItem]);
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Atualizar recurso' : 'Adicionar recurso'}</DialogTitle>
       <DialogContent>
         <FormProvider
           methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'recursos', onCancel))}
+          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'recursos', onClose))}
         >
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
@@ -644,7 +391,7 @@ export function RecursoForm({ onCancel }) {
               <RHFTextField name="descricao" label="Descrição" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -654,9 +401,9 @@ export function RecursoForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-UtilizadorGrupoForm.propTypes = { grupoId: PropTypes.string, onCancel: PropTypes.func, selectedItem: PropTypes.object };
+UtilizadorGrupoForm.propTypes = { grupoId: PropTypes.string, onClose: PropTypes.func, selectedItem: PropTypes.object };
 
-export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
+export function UtilizadorGrupoForm({ grupoId, onClose, selectedItem }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, funcoes } = useSelector((state) => state.gaji9);
@@ -689,10 +436,10 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
 
   const onSubmit = async () => {
     const params = {
+      onClose,
       id: selectedItem?.id,
       item: 'utilizadores',
       item1: 'selectedItem',
-      onClose: onCancel,
       msg: `Utilizador ${selectedItem?.action === 'edit' ? 'atualizado' : 'adicionado'}`,
     };
     const formData = removerPropriedades(
@@ -705,7 +452,7 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{selectedItem?.action === 'edit' ? 'Atualizar colaborador' : 'Adicionar colaborador'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -718,7 +465,7 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
               </Stack>
               {selectedItem?.action === 'edit' && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
-            <DialogButons edit={selectedItem?.action === 'edit'} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={selectedItem?.action === 'edit'} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -728,9 +475,9 @@ export function UtilizadorGrupoForm({ grupoId, onCancel, selectedItem }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-FuncaoForm.propTypes = { onCancel: PropTypes.func };
+FuncaoForm.propTypes = { onClose: PropTypes.func };
 
-export function FuncaoForm({ onCancel }) {
+export function FuncaoForm({ onClose }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
@@ -770,14 +517,14 @@ export function FuncaoForm({ onCancel }) {
       },
       ['utilizador']
     );
-    const params = { msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, onClose: () => onCancel() };
+    const params = { msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, onClose };
     dispatch(
       (isEdit ? updateItem : createItem)('funcoes', JSON.stringify(formData), { id: selectedItem?.id, ...params })
     );
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Atualizar utilizador' : 'Adicionar utilizador'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -791,154 +538,7 @@ export function FuncaoForm({ onCancel }) {
               </Stack>
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
-          </ItemComponent>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-RepresentanteForm.propTypes = { onCancel: PropTypes.func };
-
-export function RepresentanteForm({ onCancel }) {
-  const dispatch = useDispatch();
-  const { colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, funcoes, selectedItem } = useSelector((state) => state.gaji9);
-  const colaboradoresList = useMemo(
-    () => utilizadoresGaji9(colaboradores, funcoes, 'representantes'),
-    [funcoes, colaboradores]
-  );
-
-  const formSchema = Yup.object().shape({
-    nif: Yup.string().required().label('NIF'),
-    funcao: Yup.string().required().label('Função'),
-    concelho: Yup.mixed().required().label('Concelho'),
-    freguesia: Yup.mixed().required().label('Fregusia'),
-    nome: Yup.string().required().label('Nome completo'),
-    atua_como: Yup.string().required().label('Atua como'),
-    utilizador: Yup.mixed().required().label('Colaborador'),
-    residencia: Yup.string().required().label('Residência'),
-    cni: Yup.string().required().label('Doc. identificação'),
-    balcao: Yup.number().positive().required().label('Balcão'),
-    local_emissao: Yup.string().required().label('Local emissão'),
-    data_emissao: Yup.date().typeError().required().label('Data de nacimento'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      bi: selectedItem?.bi ?? '',
-      nif: selectedItem?.nif ?? '',
-      cni: selectedItem?.cni ?? '',
-      nome: selectedItem?.nome ?? '',
-      funcao: selectedItem?.funcao ?? '',
-      balcao: selectedItem?.balcao ?? '',
-      atua_como: selectedItem?.atua_como ?? '',
-      concelho: selectedItem?.concelho || null,
-      freguesia: selectedItem?.freguesia || null,
-      residencia: selectedItem?.residencia ?? '',
-      observacao: selectedItem?.observacao ?? '',
-      ativo: isEdit ? selectedItem?.ativo : true,
-      local_emissao: selectedItem?.local_emissao || null,
-      data_emissao: fillData(selectedItem?.data_emissao, null),
-      utilizador: colaboradoresList?.find(({ id }) => id === selectedItem?.utilizador_id) || null,
-    }),
-    [colaboradoresList, isEdit, selectedItem]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, setValue, handleSubmit } = methods;
-  const values = watch();
-
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
-      <DialogTitle>{isEdit ? 'Atualizar representante' : 'Adicionar representante'}</DialogTitle>
-      <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() =>
-            submitDados(
-              selectedItem?.id,
-              removerPropriedades(
-                {
-                  ...values,
-                  sexo: values?.utilizador?.sexo,
-                  email: values?.utilizador?.email,
-                  utilizador_id: values?.utilizador?.id,
-                  estado_civil: values?.utilizador?.estado_civil,
-                  data_emissao: values?.data_emissao ? format(values.data_emissao, 'yyyy-MM-dd') : null,
-                },
-                ['utilizador']
-              ),
-              isEdit,
-              dispatch,
-              'representantes',
-              onCancel
-            )
-          )}
-        >
-          <ItemComponent item={selectedItem} rows={5}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                <Stack spacing={3} direction="row" sx={{ width: '100%' }}>
-                  <RHFAutocompleteObj
-                    name="utilizador"
-                    label="Colaborador"
-                    options={colaboradoresList}
-                    onChange={(event, newValue) => {
-                      setValue('utilizador', newValue, vsv);
-                      setValue('nome', newValue?.label ?? '', vsv);
-                      setValue('balcao', newValue?.balcao ?? '', vsv);
-                      setValue('funcao', newValue?.funcao ?? '', vsv);
-                      setValue('atua_como', newValue?.funcao ?? '', vsv);
-                      setValue('concelho', newValue?.concelho || null, vsv);
-                      setValue('residencia', newValue?.residencia ?? '', vsv);
-                    }}
-                  />
-                  <RHFNumberField label="Balcão" name="balcao" sx={{ maxWidth: 120 }} />
-                </Stack>
-                <RHFTextField name="nome" label="Nome completo" />
-              </Stack>
-              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
-                  <RHFTextField name="nif" label="NIF" />
-                  <RHFTextField name="cni" label="Doc. identificação" />
-                </Stack>
-                <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
-                  <RHFTextField name="local_emissao" label="Local de emissão" />
-                  <RHFDatePicker disableFuture name="data_emissao" label="Data de emissão" />
-                </Stack>
-              </Stack>
-              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                <RHFTextField name="funcao" label="Função" />
-                <RHFTextField name="atua_como" label="Atua como" />
-              </Stack>
-              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                <RHFAutocompleteSmp
-                  name="concelho"
-                  label="Concelho"
-                  options={[...new Set(freguesiasConcelhos?.map((row) => row?.concelho))]?.sort()}
-                />
-                <RHFAutocompleteSmp
-                  name="freguesia"
-                  label="Freguesia"
-                  options={freguesiasConcelhos
-                    ?.filter((item) => item?.concelho === values?.concelho)
-                    ?.map((row) => row?.freguesia)}
-                />
-              </Stack>
-              <RHFTextField name="residencia" label="Residência" />
-              <RHFTextField name="observacao" label="Observação" />
-              {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
-            </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -997,7 +597,7 @@ export function BalcaoForm({ id, item, onClose }) {
               <RHFDatePicker dateTime disablePast name="data_termino" label="Data de término" />
             </Stack>
           </Stack>
-          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onClose} />
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -1027,7 +627,7 @@ export function ItemComponent({ item, rows, children }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function submitDados(id, values, isEdit, dispatch, item, onCancel) {
-  const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose: onCancel || null };
+export function submitDados(id, values, isEdit, dispatch, item, onClose) {
+  const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
   dispatch((isEdit ? updateItem : createItem)(item, JSON.stringify(values), params));
 }

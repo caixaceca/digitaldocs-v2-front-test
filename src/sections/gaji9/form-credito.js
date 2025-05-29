@@ -35,9 +35,9 @@ import { listaTitrulares } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-CreditoForm.propTypes = { onCancel: PropTypes.func };
+CreditoForm.propTypes = { onClose: PropTypes.func };
 
-export default function CreditoForm({ onCancel }) {
+export default function CreditoForm({ onClose }) {
   const dispatch = useDispatch();
   const { credito, tiposTitulares, isSaving } = useSelector((state) => state.gaji9);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
@@ -103,7 +103,7 @@ export default function CreditoForm({ onCancel }) {
 
   return (
     <Dialog open fullWidth maxWidth="md">
-      <DialogTitleAlt title="Editar dados crédito" onClose={() => onCancel()} />
+      <DialogTitleAlt title="Editar dados crédito" onClose={onClose} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 3 }}>
@@ -153,7 +153,7 @@ export default function CreditoForm({ onCancel }) {
             </GridItem>
             <GridItem children={<RHFTextField label="Finalidade" name="finalidade" />} />
           </Grid>
-          <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -162,9 +162,9 @@ export default function CreditoForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-IntervenienteForm.propTypes = { id: PropTypes.number, dados: PropTypes.array, onCancel: PropTypes.func };
+IntervenienteForm.propTypes = { id: PropTypes.number, dados: PropTypes.array, onClose: PropTypes.func };
 
-export function IntervenienteForm({ id, dados, onCancel }) {
+export function IntervenienteForm({ id, dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
 
@@ -180,7 +180,7 @@ export function IntervenienteForm({ id, dados, onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', onClose: () => onCancel() };
+    const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', onClose };
     dispatch(
       createItem(
         'intervenientes',
@@ -201,7 +201,7 @@ export function IntervenienteForm({ id, dados, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitleAlt sx={{ mb: 2 }} title="Adicionar interveniente" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -222,7 +222,7 @@ export function IntervenienteForm({ id, dados, onCancel }) {
               />
             )}
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -231,9 +231,9 @@ export function IntervenienteForm({ id, dados, onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-DataContrato.propTypes = { creditoId: PropTypes.number, onCancel: PropTypes.func };
+DataContrato.propTypes = { creditoId: PropTypes.number, onClose: PropTypes.func };
 
-export function DataContrato({ creditoId, onCancel }) {
+export function DataContrato({ creditoId, onClose }) {
   const dispatch = useDispatch();
   const { selectedItem, isSaving } = useSelector((state) => state.gaji9);
 
@@ -258,7 +258,7 @@ export function DataContrato({ creditoId, onCancel }) {
       : null;
 
   const onSubmit = async () => {
-    const params = { msg: 'Datas atualizado', codigo: selectedItem?.codigo, onClose: () => onCancel() };
+    const params = { msg: 'Datas atualizado', codigo: selectedItem?.codigo, onClose };
     const datas = {
       data_entrega: values?.data_entrega ? preencheData(values?.data_entrega, selectedItem?.data_entrega) : null,
       data_recebido: values?.data_recebido ? preencheData(values?.data_recebido, selectedItem?.data_recebido) : null,
@@ -267,7 +267,7 @@ export function DataContrato({ creditoId, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitleAlt sx={{ mb: 2 }} title="Atualizar datas do contrato" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -282,7 +282,7 @@ export function DataContrato({ creditoId, onCancel }) {
               label="Data de receção do cliente"
             />
           </Stack>
-          <DialogButons edit isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -291,9 +291,9 @@ export function DataContrato({ creditoId, onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PropostaForm.propTypes = { onCancel: PropTypes.func };
+PropostaForm.propTypes = { onClose: PropTypes.func };
 
-export function PropostaForm({ onCancel }) {
+export function PropostaForm({ onClose }) {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.gaji9);
 
@@ -304,11 +304,11 @@ export function PropostaForm({ onCancel }) {
   const values = watch();
 
   const onSubmit = async () => {
-    dispatch(getFromGaji9('proposta', { ...values, msg: 'Proposta carregada', onClose: () => onCancel() }));
+    dispatch(getFromGaji9('proposta', { ...values, msg: 'Proposta carregada', onClose }));
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitleAlt sx={{ mb: 2 }} title="Carregar proposta" />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -318,7 +318,7 @@ export function PropostaForm({ onCancel }) {
               <RHFSwitch name="credibox" label="Credibox" />
             </Stack>
           </Stack>
-          <DialogButons isSaving={isLoading} onCancel={onCancel} label="Carregar" />
+          <DialogButons isSaving={isLoading} onClose={onClose} label="Carregar" />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -327,9 +327,9 @@ export function PropostaForm({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PreviewForm.propTypes = { item: PropTypes.string, onCancel: PropTypes.func };
+PreviewForm.propTypes = { item: PropTypes.string, onClose: PropTypes.func };
 
-export function PreviewForm({ item, onCancel }) {
+export function PreviewForm({ item, onClose }) {
   const dispatch = useDispatch();
   const { isLoadingDoc, credito, minutaContrato, representsBalcao } = useSelector((state) => state.gaji9);
   const { id, balcao_domicilio: balcao, cliente = '' } = credito;
@@ -371,7 +371,7 @@ export function PreviewForm({ item, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitleAlt sx={{ mb: 2 }} title={`${item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'} contrato`} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -405,7 +405,7 @@ export function PreviewForm({ item, onCancel }) {
             <RHFSwitch name="cache" label="Forçar atualização dos dados da banca" />
           </Stack>
           <DialogButons
-            onCancel={onCancel}
+            onClose={onClose}
             isSaving={isLoadingDoc}
             hideSubmit={!minutaContrato || !values?.representante?.id}
             label={item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'}

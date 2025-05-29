@@ -233,15 +233,15 @@ DialogButons.propTypes = {
   desc: PropTypes.string,
   label: PropTypes.string,
   color: PropTypes.string,
+  onClose: PropTypes.func,
   isSaving: PropTypes.bool,
-  onCancel: PropTypes.func,
   hideSubmit: PropTypes.bool,
   handleDelete: PropTypes.func,
 };
 
 export function DialogButons({
+  onClose,
   isSaving,
-  onCancel,
   desc = '',
   label = '',
   edit = false,
@@ -249,17 +249,17 @@ export function DialogButons({
   hideSubmit = false,
   handleDelete = null,
 }) {
-  const { toggle: open, onOpen, onClose } = useToggle();
+  const { toggle: open, onOpen, onClose: onClose1 } = useToggle();
   return (
     <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
       {desc && (
         <>
           <DefaultAction label="ELIMINAR" onClick={onOpen} />
-          {open && <DialogConfirmar desc={desc} onClose={onClose} isSaving={isSaving} handleOk={handleDelete} />}
+          {open && <DialogConfirmar desc={desc} onClose={onClose1} isSaving={isSaving} handleOk={handleDelete} />}
         </>
       )}
       <Box sx={{ flexGrow: 1 }} />
-      <Button variant="outlined" color="inherit" onClick={() => onCancel()}>
+      <Button variant="outlined" color="inherit" onClick={() => onClose()}>
         Cancelar
       </Button>
       {hideSubmit ? (
@@ -282,16 +282,16 @@ export function DialogButons({
 
 ButtonsStepper.propTypes = {
   label: PropTypes.string,
+  onClose: PropTypes.func,
   isSaving: PropTypes.bool,
-  onCancel: PropTypes.func,
   hideSubmit: PropTypes.bool,
   handleSubmit: PropTypes.func,
   labelCancel: PropTypes.string,
 };
 
 export function ButtonsStepper({
+  onClose,
   isSaving,
-  onCancel,
   label = 'Seguinte',
   hideSubmit = false,
   handleSubmit = null,
@@ -299,7 +299,7 @@ export function ButtonsStepper({
 }) {
   return (
     <Stack direction="row" justifyContent="right" spacing={1} sx={{ mt: 3, pt: 1, width: 1 }}>
-      <Button variant="outlined" color="inherit" onClick={() => onCancel()}>
+      <Button variant="outlined" color="inherit" onClick={() => onClose()}>
         {labelCancel}
       </Button>
       {hideSubmit ? (

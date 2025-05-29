@@ -16,20 +16,27 @@ import { formatDate } from '../../../../utils/formatTime';
 import { updateItem } from '../../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../../redux/store';
 // components
+import {
+  FormProvider,
+  RHFTextField,
+  RHFDataEntrada,
+  RHFNumberField,
+  RHFAutocompleteSmp,
+} from '../../../../components/hook-form';
 import { DialogButons } from '../../../../components/Actions';
 import { DialogConfirmar } from '../../../../components/CustomDialog';
-import { shapeMixed, shapeNumber } from '../../../../components/hook-form/yup-shape';
-import { FormProvider, RHFDataEntrada, RHFNumberField, RHFAutocompleteSmp } from '../../../../components/hook-form';
+import { shapeMixed, shapeNumber, shapeText } from '../../../../components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-FormSituacao.propTypes = { onCancel: PropTypes.func };
+FormSituacao.propTypes = { onClose: PropTypes.func };
 
-export function FormSituacao({ onCancel }) {
+export function FormSituacao({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const situacoes = (processo?.credito?.situacao_final_mes === 'Aprovado' && ['Contratado', 'Desistido']) || [
+  const { credito = null } = processo;
+  const situacoes = (credito?.situacao_final_mes === 'Aprovado' && ['Contratado', 'Desistido']) || [
     'Aprovado',
     'Indeferido',
     'Desistido',
@@ -37,14 +44,28 @@ export function FormSituacao({ onCancel }) {
 
   const formSchema = Yup.object().shape({
     situacao: Yup.mixed().required().label('Situação'),
+    garantia: shapeText('Garantias', 'Aprovado', '', 'situacao'),
     data_referencia: Yup.date().typeError().required().label('Data'),
     escalao_decisao: shapeMixed('Decisor', 'Aprovado', '', 'situacao'),
-    montante: shapeNumber('Data', 'Aprovado', 'Contratado', 'situacao'),
+    taxa_juro: shapeNumber('Taxa de juros', 'Aprovado', '', 'situacao'),
+    prazo_amortizacao: shapeNumber('Prazo', 'Aprovado', '', 'situacao'),
+    montante: shapeNumber('Montante', 'Aprovado', 'Contratado', 'situacao'),
   });
 
   const defaultValues = useMemo(
-    () => ({ situacao: null, montante: null, data_referencia: null, escalao_decisao: null }),
-    []
+    () => ({
+      situacao: null,
+      data_referencia: null,
+      escalao_decisao: null,
+      garantia: credito?.garantia,
+      taxa_juro: credito?.taxa_juro,
+      prazo_amortizacao: credito?.prazo_amortizacao,
+      montante:
+        (credito?.situacao_final_mes === 'Em análise' && credito?.montante_solicitado) ||
+        (credito?.situacao_final_mes === 'Aprovado' && credito?.montante_aprovado) ||
+        '',
+    }),
+    [credito]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -54,47 +75,60 @@ export function FormSituacao({ onCancel }) {
   const onSubmit = async () => {
     try {
       const formData = {
+        garantia: values?.garantia ?? null,
         montante: values?.montante ?? null,
+        taxa_juro: values?.taxa_juro ?? null,
         aprovar: values.situacao === 'Aprovado',
         desistir: values.situacao === 'Desistido',
         contratar: values.situacao === 'Contratado',
         indeferir: values.situacao === 'Indeferido',
         escalao_decisao: values?.escalao_decisao ?? null,
+        prazo_amortizacao: values?.prazo_amortizacao ?? null,
         data_referencia: formatDate(values?.data_referencia, 'yyyy-MM-dd'),
       };
-      const params = { id: processo?.id, creditoId: processo?.credito?.id, msg: 'Stiuação atualizada' };
-      dispatch(
-        updateItem('situacaoCredito', JSON.stringify(formData), {
-          ...params,
-          fillCredito: true,
-          onClose: () => onCancel(),
-        })
-      );
+      const params = { id: processo?.id, creditoId: credito?.id, msg: 'Stiuação atualizada' };
+      dispatch(updateItem('situacaoCredito', JSON.stringify(formData), { ...params, onClose, fillCredito: true }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitle>Atualizar situação do crédito</DialogTitle>
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle>Situação do pedido de crédito</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
             <RHFAutocompleteSmp name="situacao" label="Situação" options={situacoes} />
             {values?.situacao === 'Aprovado' && (
-              <RHFAutocompleteSmp
-                label="Decisor"
-                name="escalao_decisao"
-                options={['1º Comitê', '2º Comitê', '3º Comitê']}
-              />
+              <>
+                <RHFAutocompleteSmp
+                  label="Decisor"
+                  name="escalao_decisao"
+                  options={['1º Comitê', '2º Comitê', '3º Comitê']}
+                />
+                <Stack direction="row" spacing={3}>
+                  <RHFDataEntrada name="data_referencia" label="Data" disableFuture />
+                  <RHFNumberField name="montante" label="Montante" tipo="CVE" />
+                </Stack>
+                <Stack direction="row" spacing={3}>
+                  <RHFNumberField name="taxa_juro" label="Taxa de juros" tipo="%" />
+                  <RHFNumberField name="prazo_amortizacao" label="Prazo" tipo="meses" />
+                </Stack>
+                <RHFTextField name="garantia" label="Garantia" />
+              </>
             )}
-            <RHFDataEntrada name="data_referencia" label="Data" disableFuture />
-            {(values?.situacao === 'Aprovado' || values?.situacao === 'Contratado') && (
-              <RHFNumberField name="montante" label="Montante" tipo="CVE" />
+            {values?.situacao === 'Contratado' && (
+              <Stack direction="row" spacing={3}>
+                <RHFDataEntrada name="data_referencia" label="Data" disableFuture />
+                <RHFNumberField name="montante" label="Montante" tipo="CVE" />
+              </Stack>
+            )}
+            {(values?.situacao === 'Desistido' || values?.situacao === 'Indeferido') && (
+              <RHFDataEntrada name="data_referencia" label="Data" disableFuture />
             )}
           </Stack>
-          <DialogButons isSaving={isSaving} onCancel={onCancel} label="Guardar" />
+          <DialogButons isSaving={isSaving} onClose={onClose} label="Guardar" />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -103,17 +137,18 @@ export function FormSituacao({ onCancel }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-EliminarDadosSituacao.propTypes = { onCancel: PropTypes.func };
+EliminarDadosSituacao.propTypes = { onClose: PropTypes.func };
 
-export function EliminarDadosSituacao({ onCancel }) {
+export function EliminarDadosSituacao({ onClose }) {
   const dispatch = useDispatch();
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const situacao = processo?.credito?.situacao_final_mes;
-  const params = { id: processo?.id, creditoId: processo?.credito?.id, msg: 'Stiuação eliminada' };
+  const { credito = null } = processo;
+  const situacao = credito?.situacao_final_mes;
+  const params = { id: processo?.id, creditoId: credito?.id, msg: 'Stiuação eliminada' };
 
   return (
     <DialogConfirmar
-      onClose={onCancel}
+      onClose={onClose}
       isSaving={isSaving}
       desc={`eliminar os dados ${situacao} deste processo`}
       handleOk={() =>
@@ -129,7 +164,7 @@ export function EliminarDadosSituacao({ onCancel }) {
               contratar: situacao === 'Contratado',
               indeferir: situacao === 'Indeferido',
             }),
-            { ...params, fillCredito: true, onClose: () => onCancel() }
+            { ...params, fillCredito: true, onClose }
           )
         )
       }

@@ -328,9 +328,7 @@ function Notificacoes({ destinatarios, id }) {
         </TableBody>
       </Table>
       {!destinatarios?.length && <SearchNotFoundSmall message="Nenhum destinatário adicionado..." />}
-      {!!destinatario && (
-        <DestinatarioForm id={id} selectedItem={destinatario} onCancel={() => setDestinatario(null)} />
-      )}
+      {!!destinatario && <DestinatarioForm id={id} selectedItem={destinatario} onClose={() => setDestinatario(null)} />}
     </>
   );
 }

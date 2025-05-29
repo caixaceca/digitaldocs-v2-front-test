@@ -34,6 +34,7 @@ import {
   RHFAutocompleteObj,
 } from '../../../../components/hook-form';
 import Steps from '../../../../components/Steps';
+import GridItem from '../../../../components/GridItem';
 import { DefaultAction, ButtonsStepper, Fechar } from '../../../../components/Actions';
 //
 import Anexos from '../anexos';
@@ -173,39 +174,39 @@ export function EncaminharEmSerie({ dados }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={(parecer && numOperacao && 6) || ((parecer || numOperacao) && 8) || 12}>
+        <GridItem md={(parecer && numOperacao && 6) || ((parecer || numOperacao) && 8) || 12}>
           <RHFAutocompleteObj dc name="estado" label="Estado" options={destinos} />
-        </Grid>
+        </GridItem>
         {aberturaSemEntGer ? (
-          <Grid item xs={12}>
+          <GridItem>
             <Typography>
               Processo de <b>Abertura de Conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
             </Typography>
             <Typography>
               Por favor edita o processo, adicionando a(s) entidade(s) e depois prossiga com o devido encaminhamento.
             </Typography>
-          </Grid>
+          </GridItem>
         ) : (
           <>
             {parecer && (
-              <Grid item xs={numOperacao ? 6 : 12} md={numOperacao ? 3 : 4}>
+              <GridItem xs={numOperacao ? 6 : 12} md={numOperacao ? 3 : 4}>
                 <RHFAutocompleteSmp label="Parecer" name="parecer" options={['Favorável', 'Não favorável']} />
-              </Grid>
+              </GridItem>
             )}
             {numOperacao && (
-              <Grid item xs={parecer ? 6 : 12} md={parecer ? 3 : 4}>
+              <GridItem xs={parecer ? 6 : 12} md={parecer ? 3 : 4}>
                 <RHFNumberField noFormat name="noperacao" label="Nº de operação" />
-              </Grid>
+              </GridItem>
             )}
             {acao === 'DEVOLVER' && (
-              <Grid item xs={12}>
+              <GridItem>
                 <RHFAutocompleteObj name="motivo_devolucao" label="Motivo da devolução" options={motivosTransicao} />
-              </Grid>
+              </GridItem>
             )}
-            <Grid item xs={12}>
+            <GridItem>
               <RHFTextField multiline rows={6} name="observacao" label="Observação" />
-            </Grid>
-            {/* <Grid item xs={12}>
+            </GridItem>
+            {/* <GridItem>
               <Accordion
                 expanded={values?.confidencial}
                 onChange={() => setValue('confidencial', !values?.confidencial)}
@@ -220,11 +221,11 @@ export function EncaminharEmSerie({ dados }) {
                   />
                 </AccordionDetails>
               </Accordion>
-            </Grid> */}
+            </GridItem> */}
           </>
         )}
       </Grid>
-      <ButtonsStepper onCancel={onClose} isSaving={isSaving} labelCancel="Cancelar" hideSubmit={aberturaSemEntGer} />
+      <ButtonsStepper onClose={onClose} isSaving={isSaving} labelCancel="Cancelar" hideSubmit={aberturaSemEntGer} />
     </FormProvider>
   );
 }
@@ -317,7 +318,7 @@ export function OutrosEmSerie({ acao }) {
         label="Enviar"
         isSaving={isSaving}
         labelCancel="Voltar"
-        onCancel={() => {
+        onClose={() => {
           dispatch(backStep());
           dispatch(updateDados({ dados: values }));
         }}
@@ -373,7 +374,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
             <Stack direction="row" spacing={2} alignItems="center">
               <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={8}>
+                  <GridItem sm={8}>
                     <RHFAutocompleteObj
                       dc
                       label="Estado"
@@ -381,14 +382,14 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
                       name={`destinos[${index}].estado`}
                       getOptionDisabled={(option) => values.destinos.some(({ estado }) => estado?.id === option.id)}
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
+                  </GridItem>
+                  <GridItem sm={4}>
                     <RHFDatePicker dateTime disablePast name={`destinos[${index}].data`} label="Data limite parecer" />
-                  </Grid>
-                  <Grid item xs={12}>
+                  </GridItem>
+                  <GridItem>
                     <RHFTextField multiline rows={2} label="Observação" name={`destinos[${index}].observacao`} />
-                  </Grid>
-                  {/* <Grid item xs={12}>
+                  </GridItem>
+                  {/* <GridItem>
                     <RHFSwitch
                       otherSx={{ mt: 0 }}
                       label="Confidencialidade"
@@ -402,7 +403,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
                         estadosExcluidos={`destinos[${index}].estados_excluidos`}
                       />
                     )}
-                  </Grid> */}
+                  </GridItem> */}
                 </Grid>
               </Box>
               {fields?.length > 2 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
@@ -413,7 +414,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
       <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mt: 2 }}>
         <DefaultAction small button label="Adicionar" onClick={() => append(destinoItem)} />
       </Stack>
-      <ButtonsStepper label="Enviar" onCancel={onClose} isSaving={isSaving} labelCancel="Cancelar" />
+      <ButtonsStepper label="Enviar" onClose={onClose} isSaving={isSaving} labelCancel="Cancelar" />
     </FormProvider>
   );
 }

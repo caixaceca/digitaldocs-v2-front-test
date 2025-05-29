@@ -12,6 +12,7 @@ import { fNumber, fPercent, fData } from '../../utils/formatNumber';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
 // components
+import GridItem from '../../components/GridItem';
 import Chart, { useChart } from '../../components/chart';
 //
 import { IndicadorItem } from './Indicadores';
@@ -82,15 +83,15 @@ export function DiscoFicheiros() {
         isNotFound={!fileSystem.length}
         children={
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} sm={6}>
+            <GridItem sm={6}>
               <Chart
                 height={500}
                 type="radialBar"
                 options={chartOptions}
                 series={[total?.tamanho > 0 ? ((total?.tamanho * 100) / tamanho).toFixed(2) : 0]}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            </GridItem>
+            <GridItem sm={6}>
               <Stack spacing={2}>
                 {[total, pdf, imagem, excel, word, outros].map(
                   (folder) =>
@@ -135,7 +136,7 @@ export function DiscoFicheiros() {
                     )
                 )}
               </Stack>
-            </Grid>
+            </GridItem>
           </Grid>
         }
       />

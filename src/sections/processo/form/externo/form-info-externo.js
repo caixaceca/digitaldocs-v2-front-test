@@ -145,7 +145,7 @@ export default function FormInfoExterno({ dados }) {
         </Card>
       </Box>
 
-      <ButtonsStepper isSaving={isSaving} onCancel={onClose} labelCancel="Cancelar" label={isEdit ? 'Guardar' : ''} />
+      <ButtonsStepper isSaving={isSaving} onClose={onClose} labelCancel="Cancelar" label={isEdit ? 'Guardar' : ''} />
     </FormProvider>
   );
 }

@@ -56,7 +56,7 @@ export default function PageMinutaDetalhes() {
   };
 
   const tabsList = [
-    { value: 'Dados', component: <InfoMinuta onCancel={handleClose} /> },
+    { value: 'Dados', component: <InfoMinuta onClose={handleClose} /> },
     {
       value: 'Cláusulas',
       component: (
@@ -149,15 +149,15 @@ export default function PageMinutaDetalhes() {
               {isOpenModal && (
                 <>
                   {(action === 'Atualizar' || action === 'Clonar' || action === 'Versionar') && (
-                    <MinutaForm action={action} onCancel={() => handleClose()} minuta={minuta} />
+                    <MinutaForm action={action} onClose={() => handleClose()} minuta={minuta} />
                   )}
                   {currentTab === 'Cláusulas' && (action === 'compor' || action === 'composicao') && (
-                    <ComposicaoForm action={action} onCancel={() => handleClose()} />
+                    <ComposicaoForm action={action} onClose={() => handleClose()} />
                   )}
                   {(action === 'Publicar' || action === 'Revogar') && (
-                    <PublicarRevogarForm onCancel={() => handleClose()} action={action} />
+                    <PublicarRevogarForm onClose={() => handleClose()} action={action} />
                   )}
-                  {action === 'preview' && <PreviewForm onCancel={() => handleClose()} id={id} />}
+                  {action === 'preview' && <PreviewForm onClose={() => handleClose()} id={id} />}
                 </>
               )}
             </>

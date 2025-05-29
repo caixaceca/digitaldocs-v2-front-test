@@ -9,6 +9,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // components
 import AnexosExistente from './anexos-existente';
+import GridItem from '../../../../components/GridItem';
 import { DefaultAction } from '../../../../components/Actions';
 import { RHFDatePicker, RHFNumberField, RHFUploadFileSimple } from '../../../../components/hook-form';
 
@@ -53,14 +54,14 @@ export default function FormDocumentosChecklist({ dados }) {
             <Stack key={item.id} spacing={1} direction="row" alignItems="center" justifyContent="center">
               <Box sx={{ width: 1 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={(row?.obriga_prazo_validade && 6) || (row?.identificador && 3) || 12}>
+                  <GridItem md={(row?.obriga_prazo_validade && 6) || (row?.identificador && 3) || 12}>
                     <RHFUploadFileSimple
                       name={`checklist.${docIndex}.anexos.${index}.file`}
                       onDrop={(file) => handleDrop(`checklist.${docIndex}.anexos.${index}.file`, file)}
                     />
-                  </Grid>
+                  </GridItem>
                   {(row?.identificador || row?.obriga_prazo_validade) && (
-                    <Grid item xs={12} md={row?.obriga_prazo_validade ? 6 : 3}>
+                    <GridItem md={row?.obriga_prazo_validade ? 6 : 3}>
                       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                         {row?.identificador && (
                           <RHFNumberField
@@ -84,7 +85,7 @@ export default function FormDocumentosChecklist({ dados }) {
                           </>
                         )}
                       </Stack>
-                    </Grid>
+                    </GridItem>
                   )}
                 </Grid>
               </Box>

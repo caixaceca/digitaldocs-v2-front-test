@@ -40,9 +40,9 @@ import { codacessos, objetos, _concelhos } from '../../_mock';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-AcessoForm.propTypes = { onCancel: PropTypes.func, perfilIdA: PropTypes.string };
+AcessoForm.propTypes = { onClose: PropTypes.func, perfilIdA: PropTypes.string };
 
-export function AcessoForm({ perfilIdA, onCancel }) {
+export function AcessoForm({ perfilIdA, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -84,7 +84,7 @@ export function AcessoForm({ perfilIdA, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{selectedItem ? 'Editar acesso' : 'Adicionar acesso'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -93,7 +93,7 @@ export function AcessoForm({ perfilIdA, onCancel }) {
             <RHFAutocompleteObj name="acesso" label="Acesso" options={codacessos} />
             <RHFDatePicker dateTime name="datalimite" label="Data de término" />
           </Stack>
-          <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -102,9 +102,9 @@ export function AcessoForm({ perfilIdA, onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-MotivoPendenciaForm.propTypes = { onCancel: PropTypes.func };
+MotivoPendenciaForm.propTypes = { onClose: PropTypes.func };
 
-export function MotivoPendenciaForm({ onCancel }) {
+export function MotivoPendenciaForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
@@ -133,7 +133,7 @@ export function MotivoPendenciaForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -144,7 +144,7 @@ export function MotivoPendenciaForm({ onCancel }) {
           <DialogButons
             edit={isEdit}
             isSaving={isSaving}
-            onCancel={onCancel}
+            onClose={onClose}
             desc={isEdit ? 'eliminar este motivo' : ''}
             handleDelete={() =>
               dispatch(deleteItem('motivosPendencia', { id: selectedItem?.id, msg: 'Motivo eliminado' }))
@@ -158,20 +158,20 @@ export function MotivoPendenciaForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-MotivoTransicaoForm.propTypes = { onCancel: PropTypes.func };
+MotivoTransicaoForm.propTypes = { onClose: PropTypes.func };
 
-export function MotivoTransicaoForm({ onCancel }) {
+export function MotivoTransicaoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [fluxosAtribuidos, setFluxosAtribuidos] = useState([]);
   const { isEdit, isSaving, selectedItem, fluxos } = useSelector((state) => state.parametrizacao);
 
   const fluxosList = useMemo(
-    () => fluxos?.filter((item) => item?.is_ativo)?.map((row) => ({ id: row?.id, label: row?.assunto })) || [],
+    () => fluxos?.filter((item) => item?.is_ativo)?.map(({ id, assunto }) => ({ id, label: assunto })) || [],
     [fluxos]
   );
   const fluxosExistentes = useMemo(
-    () => selectedItem?.fluxos?.map((row) => ({ id: row?.id, label: row?.fluxo })) || [],
+    () => selectedItem?.fluxos?.map(({ id, fluxo }) => ({ id, label: fluxo })) || [],
     [selectedItem?.fluxos]
   );
   const fluxosDisponiveis = useMemo(
@@ -180,7 +180,7 @@ export function MotivoTransicaoForm({ onCancel }) {
   );
 
   useEffect(() => {
-    setFluxosAtribuidos(selectedItem?.fluxos?.map((row) => ({ id: row?.id, label: row?.fluxo })) || []);
+    setFluxosAtribuidos(selectedItem?.fluxos?.map(({ id, fluxo }) => ({ id, label: fluxo })) || []);
   }, [selectedItem?.fluxos]);
 
   const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
@@ -213,7 +213,7 @@ export function MotivoTransicaoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>{isEdit ? 'Editar motivo' : 'Adicionar motivo'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -233,7 +233,7 @@ export function MotivoTransicaoForm({ onCancel }) {
                 changeItems={(items) => setFluxosAtribuidos(items)}
               />
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -243,9 +243,9 @@ export function MotivoTransicaoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-OrigemForm.propTypes = { onCancel: PropTypes.func };
+OrigemForm.propTypes = { onClose: PropTypes.func };
 
-export function OrigemForm({ onCancel }) {
+export function OrigemForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -293,7 +293,7 @@ export function OrigemForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar origem' : 'Adicionar origem'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -331,7 +331,7 @@ export function OrigemForm({ onCancel }) {
             <DialogButons
               edit={isEdit}
               isSaving={isSaving}
-              onCancel={onCancel}
+              onClose={onClose}
               desc={isEdit ? 'eliminar esta origem' : ''}
               handleDelete={() => dispatch(deleteItem('origens', { id: selectedItem?.id, msg: 'Origem eliminada' }))}
             />
@@ -344,9 +344,9 @@ export function OrigemForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-LinhaForm.propTypes = { onCancel: PropTypes.func };
+LinhaForm.propTypes = { onClose: PropTypes.func };
 
-export function LinhaForm({ onCancel }) {
+export function LinhaForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
@@ -381,7 +381,7 @@ export function LinhaForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar linha de crédito' : 'Adicionar linha de crédito'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -397,7 +397,7 @@ export function LinhaForm({ onCancel }) {
           <DialogButons
             edit={isEdit}
             isSaving={isSaving}
-            onCancel={onCancel}
+            onClose={onClose}
             handleDelete={handleDelete}
             desc={isEdit ? 'eliminar esta linha de crédito' : ''}
           />
@@ -409,9 +409,9 @@ export function LinhaForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DespesaForm.propTypes = { onCancel: PropTypes.func };
+DespesaForm.propTypes = { onClose: PropTypes.func };
 
-export function DespesaForm({ onCancel }) {
+export function DespesaForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
@@ -444,7 +444,7 @@ export function DespesaForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar despesa' : 'Adicionar despesa'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -454,7 +454,7 @@ export function DespesaForm({ onCancel }) {
               <RHFTextField name="descricao" label="Descrição" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -464,9 +464,9 @@ export function DespesaForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-DocumentoForm.propTypes = { onCancel: PropTypes.func };
+DocumentoForm.propTypes = { onClose: PropTypes.func };
 
-export function DocumentoForm({ onCancel }) {
+export function DocumentoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
@@ -524,7 +524,7 @@ export function DocumentoForm({ onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar documento' : 'Adicionar documento'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -557,7 +557,7 @@ export function DocumentoForm({ onCancel }) {
                 )}
                 {isEdit && <GridItem xs={4} children={<RHFSwitch name="ativo" label="Ativo" />} />}
               </Grid>
-              <DialogButons edit={isEdit} isSaving={isSaving} onCancel={onCancel} />
+              <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
             </ItemComponent>
           )}
         </FormProvider>
@@ -568,9 +568,9 @@ export function DocumentoForm({ onCancel }) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-EstadosPerfilForm.propTypes = { onCancel: PropTypes.func, perfilIdE: PropTypes.string };
+EstadosPerfilForm.propTypes = { onClose: PropTypes.func, perfilIdE: PropTypes.string };
 
-export function EstadosPerfilForm({ perfilIdE, onCancel }) {
+export function EstadosPerfilForm({ perfilIdE, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { perfilId } = useSelector((state) => state.intranet);
@@ -612,7 +612,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -635,7 +635,7 @@ export function EstadosPerfilForm({ perfilIdE, onCancel }) {
                 </GridItem>
               )}
             </Grid>
-            <DialogButons isSaving={isSaving} onCancel={onCancel} edit={isEdit} />
+            <DialogButons isSaving={isSaving} onClose={onClose} edit={isEdit} />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
