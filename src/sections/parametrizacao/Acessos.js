@@ -140,10 +140,11 @@ function applySortFilter({ colaboradores, comparator, filter, uo }) {
   colaboradores = applySort(colaboradores, comparator);
   if (uo) colaboradores = colaboradores.filter(({ uo }) => uo?.label === uo);
   if (filter && filter !== null) {
+    const normalizedFilter = normalizeText(filter);
     colaboradores = colaboradores.filter(
       ({ nome, nomeacao }) =>
-        (nome && normalizeText(nome).indexOf(normalizeText(filter)) !== -1) ||
-        (nomeacao && normalizeText(nomeacao).indexOf(normalizeText(filter)) !== -1)
+        (nome && normalizeText(nome).indexOf(normalizedFilter) !== -1) ||
+        (nomeacao && normalizeText(nomeacao).indexOf(normalizedFilter) !== -1)
     );
   }
   return colaboradores;

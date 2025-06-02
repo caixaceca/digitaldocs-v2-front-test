@@ -12,10 +12,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fillData } from '../../utils/formatTime';
-import { utilizadoresGaji9, removerPropriedades } from '../../utils/formatObject';
+import { utilizadoresGaji9, removerPropriedades, vdt } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem } from '../../redux/slices/gaji9';
+import { createItem, updateItem, deleteItem } from '../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -28,11 +28,8 @@ import {
 } from '../../components/hook-form';
 import { DialogButons } from '../../components/Actions';
 //
-import { ItemComponent, submitDados } from './form-gaji9';
-// _mock_
+import { ItemComponent } from './form-gaji9';
 import { freguesiasConcelhos } from '../../_mock';
-
-const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -68,9 +65,7 @@ export function ProdutoForm({ onClose }) {
     if (isEdit) {
       const formData = JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]);
       dispatch(updateItem('componentes', formData, params));
-    } else {
-      dispatch(createItem('componentes', JSON.stringify({ codigo: values?.codigo }), params));
-    }
+    } else dispatch(createItem('componentes', JSON.stringify({ codigo: values?.codigo }), params));
   };
 
   return (
@@ -127,16 +122,16 @@ export function TipoTitularForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Tipo de titular ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('tiposTitulares', JSON.stringify(values), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Editar tipo de titular' : 'Adicionar tipo de titular'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() =>
-            submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposTitulares', onClose)
-          )}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFTextField name="codigo" label="Código" />
@@ -186,16 +181,16 @@ export function GarantiaForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Tipo de garantia ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('tiposGarantias', JSON.stringify(values), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar tipo de garantia' : 'Adicionar tipo de garantia'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() =>
-            submitDados(selectedItem?.id, values, isEdit, dispatch, 'tiposGarantias', onClose)
-          )}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFTextField name="codigo" label="Código" />
@@ -204,6 +199,60 @@ export function GarantiaForm({ onClose }) {
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+SeguroForm.propTypes = { onClose: PropTypes.func };
+
+export function SeguroForm({ onClose }) {
+  const dispatch = useDispatch();
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
+  const defaultValues = useMemo(
+    () => ({ designacao: selectedItem?.designacao ?? '', descritivo: selectedItem?.descritivo ?? '' }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Tipo de seguro ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('tiposSeguros', JSON.stringify(values), params));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar tipo de seguro' : 'Adicionar tipo de seguro'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={2}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="designacao" label="Designação" />
+              <RHFTextField name="descritivo" label="Descritivo" />
+            </Stack>
+            <DialogButons
+              edit={isEdit}
+              onClose={onClose}
+              isSaving={isSaving}
+              desc={isEdit ? 'eliminar este tipo de seguro' : ''}
+              handleDelete={() =>
+                dispatch(deleteItem('tiposSeguros', { id: selectedItem?.id, msg: 'Tipo de seguro eliminado', onClose }))
+              }
+            />
           </ItemComponent>
         </FormProvider>
       </DialogContent>
@@ -318,33 +367,27 @@ export function RepresentanteForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const formData = removerPropriedades(
+      {
+        ...values,
+        sexo: values?.utilizador?.sexo,
+        email: values?.utilizador?.email,
+        utilizador_id: values?.utilizador?.id,
+        estado_civil: values?.utilizador?.estado_civil,
+        data_emissao: values?.data_emissao ? format(values.data_emissao, 'yyyy-MM-dd') : null,
+      },
+      ['utilizador']
+    );
+    const params = { id: selectedItem?.id, msg: `Representante ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('representantes', JSON.stringify(formData), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>{isEdit ? 'Atualizar representante' : 'Adicionar representante'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() =>
-            submitDados(
-              selectedItem?.id,
-              removerPropriedades(
-                {
-                  ...values,
-                  sexo: values?.utilizador?.sexo,
-                  email: values?.utilizador?.email,
-                  utilizador_id: values?.utilizador?.id,
-                  estado_civil: values?.utilizador?.estado_civil,
-                  data_emissao: values?.data_emissao ? format(values.data_emissao, 'yyyy-MM-dd') : null,
-                },
-                ['utilizador']
-              ),
-              isEdit,
-              dispatch,
-              'representantes',
-              onClose
-            )
-          )}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={5}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
@@ -354,13 +397,13 @@ export function RepresentanteForm({ onClose }) {
                     label="Colaborador"
                     options={colaboradoresList}
                     onChange={(event, newValue) => {
-                      setValue('utilizador', newValue, vsv);
-                      setValue('nome', newValue?.label ?? '', vsv);
-                      setValue('balcao', newValue?.balcao ?? '', vsv);
-                      setValue('funcao', newValue?.funcao ?? '', vsv);
-                      setValue('atua_como', newValue?.funcao ?? '', vsv);
-                      setValue('concelho', newValue?.concelho || null, vsv);
-                      setValue('residencia', newValue?.residencia ?? '', vsv);
+                      setValue('utilizador', newValue, vdt);
+                      setValue('nome', newValue?.label ?? '', vdt);
+                      setValue('balcao', newValue?.balcao ?? '', vdt);
+                      setValue('funcao', newValue?.funcao ?? '', vdt);
+                      setValue('atua_como', newValue?.funcao ?? '', vdt);
+                      setValue('concelho', newValue?.concelho || null, vdt);
+                      setValue('residencia', newValue?.residencia ?? '', vdt);
                     }}
                   />
                   <RHFNumberField label="Balcão" name="balcao" sx={{ maxWidth: 120 }} />
@@ -448,14 +491,16 @@ export function FreguesiaForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Freguesia ${isEdit ? 'atualizada' : 'adicionada'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('freguesias', JSON.stringify(values), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? 'Editar freguesia' : 'Adicionar freguesia'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'freguesias', onClose))}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={5}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <Stack direction="row" spacing={3}>

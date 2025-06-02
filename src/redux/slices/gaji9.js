@@ -35,6 +35,7 @@ const initialState = {
   infoCaixa: null,
   utilizador: null,
   previewFile: null,
+  tipoGarantia: null,
   selectedItem: null,
   minutaContrato: null,
   clausulaOpcional: null,
@@ -49,6 +50,7 @@ const initialState = {
   freguesias: [],
   marcadores: [],
   componentes: [],
+  tiposSeguros: [],
   tiposGarantias: [],
   tiposTitulares: [],
   representantes: [],
@@ -131,6 +133,7 @@ export function getFromGaji9(item, params) {
         (item === 'freguesia' && `/v1/divisoes/detail?id=${params?.id}`) ||
         (item === 'marcador' && `/v1/marcadores/detail?id=${params?.id}`) ||
         (item === 'recurso' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
+        (item === 'tipoSeguro' && `/v1/tipos_seguros/detail?id=${params?.id}`) ||
         (item === 'tipoTitular' && `/v1/tipos_titulares/detail?id=${params?.id}`) ||
         (item === 'tipoGarantia' && `/v1/tipos_garantias/detail?id=${params?.id}`) ||
         (item === 'representante' && `/v1/acs/representantes/detail?id=${params?.id}`) ||
@@ -151,6 +154,7 @@ export function getFromGaji9(item, params) {
         (item === 'variaveis' && `/v1/variaveis/lista?ativo=${!params?.inativos}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.id}`) ||
         (item === 'componentes' && `/v1/produtos/lista?ativo=${!params?.inativos}`) ||
+        (item === 'tiposSeguros' && `/v1/tipos_seguros?ativo=${!params?.inativos}`) ||
         (item === 'marcadores' && `/v1/marcadores/lista?ativo=${!params?.inativos}`) ||
         (item === 'recursos' && `/v1/acs/recursos/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares/lista?ativo=${!params?.inativos}`) ||
@@ -161,7 +165,7 @@ export function getFromGaji9(item, params) {
         (item === 'creditos' &&
           `/v1/suportes/creditos/localizar?cursor=${params?.cursor || 0}${params?.balcao ? `&balcao=${params?.balcao}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.codigo ? `&codigo=${params?.codigo}` : ''}${params?.proposta ? `&numero_proposta=${params?.proposta}` : ''}`) ||
         (item === 'clausulas' &&
-          `/v1/clausulas/lista?ativo=${!params?.inativos}${params?.solta ? `&solta=true` : ''}${params?.condicional ? `&condicional=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.componenteId ? `&componente_id=${params?.componenteId}` : ''}`) ||
+          `/v1/clausulas/lista?ativo=${!params?.inativos}&situacao=${params?.situacao}${params?.solta ? `&solta=true` : ''}${params?.condicional ? `&condicional=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.componenteId ? `&componente_id=${params?.componenteId}` : ''}`) ||
         '';
       if (apiUrl) {
         if (params?.reset)
@@ -271,6 +275,7 @@ export function createItem(item, dados, params) {
         (item === 'freguesias' && `/v1/divisoes`) ||
         (item === 'marcadores' && `/v1/marcadores`) ||
         (item === 'recursos' && `/v1/acs/recursos`) ||
+        (item === 'tiposSeguros' && `/v1/tipos_seguros`) ||
         (item === 'infoCaixa' && `/v1/suportes/instituicao`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias`) ||
@@ -341,6 +346,7 @@ export function updateItem(item, dados, params) {
         (item === 'grupos' && `/v1/acs/grupos?grupo_id=${params?.id}`) ||
         (item === 'Revogar' && `/v1/minutas/revogar?id=${params?.id}`) ||
         (item === 'Publicar' && `/v1/minutas/publicar?id=${params?.id}`) ||
+        (item === 'tiposSeguros' && `/v1/tipos_seguros?id=${params?.id}`) ||
         (item === 'recursos' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares?id=${params?.id}`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias?id=${params?.id}`) ||
@@ -418,6 +424,7 @@ export function deleteItem(item, params) {
       const apiUrl =
         (item === 'clausulas' && `/v1/clausulas?id=${params?.id}`) ||
         (item === 'grupos' && `/v1/acs/grupos?grupo_id=${params?.id}`) ||
+        (item === 'tiposSeguros' && `/v1/tipos_seguros?id=${params?.id}`) ||
         (item === 'recursos' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
         (item === 'clausulaMinuta' && `/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||

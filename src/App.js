@@ -1,42 +1,33 @@
 import { Worker } from '@react-pdf-viewer/core';
-// authentication
 import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
 // config
 import { msalInstance } from './config';
-// routes
+//
 import Router from './routes';
-// theme
-import ThemeProvider from './theme';
+import LoginPage from './pages/login';
 // components
-import PageLogin from './pages/page-login';
 import { StyledChart } from './components/chart';
-import ThemeSettings from './components/settings';
 import ScrollToTop from './components/ScrollToTop';
-import NotistackProvider from './components/NotistackProvider';
 import MotionLazyContainer from './components/animate/MotionLazyContainer';
 
-// ----------------------------------------------------------------------
+import UIProvider from './providers/ui-provider';
 
 export default function App() {
   return (
     <MsalProvider instance={msalInstance}>
       <MotionLazyContainer>
-        <ThemeProvider>
-          <ThemeSettings>
-            <NotistackProvider>
-              <AuthenticatedTemplate>
-                <StyledChart />
-                <ScrollToTop />
-                <Worker workerUrl="/assets/pdf.worker.min.js">
-                  <Router />
-                </Worker>
-              </AuthenticatedTemplate>
-              <UnauthenticatedTemplate>
-                <PageLogin />
-              </UnauthenticatedTemplate>
-            </NotistackProvider>
-          </ThemeSettings>
-        </ThemeProvider>
+        <UIProvider>
+          <ScrollToTop />
+          <AuthenticatedTemplate>
+            <StyledChart />
+            <Worker workerUrl="/assets/pdf.worker.min.js">
+              <Router />
+            </Worker>
+          </AuthenticatedTemplate>
+          <UnauthenticatedTemplate>
+            <LoginPage />
+          </UnauthenticatedTemplate>
+        </UIProvider>
       </MotionLazyContainer>
     </MsalProvider>
   );

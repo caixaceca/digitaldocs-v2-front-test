@@ -53,17 +53,17 @@ export default function FormInfoExterno({ dados }) {
     referencia: Yup.string().required().label('Referência'),
     data_entrada: Yup.date().typeError().required().label('Data entrada'),
     operacao: estado?.nome?.includes('DOP') && Yup.string().required().label('Operação'),
-    entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
+    entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().required().label('Nº de entidade') })),
     valor: Yup.string().when('operacao', { is: 'Cativo/Penhora', then: (schema) => schema.required().label('Valor') }),
   });
 
   const defaultValues = useMemo(
     () => ({
       fluxo_id: fluxo?.id,
-      conta: dadosStepper?.conta || processo?.conta || '',
       valor: dadosStepper?.valor || processo?.valor || '',
       obs: dadosStepper?.obs || processo?.observacao || '',
       canal: dadosStepper?.canal || processo?.canal || null,
+      conta: dadosStepper?.conta || processo?.conta || null,
       docidp: dadosStepper?.docidp || processo?.doc_idp || '',
       docids: dadosStepper?.docids || processo?.doc_ids || '',
       titular: dadosStepper?.titular || processo?.titular || '',

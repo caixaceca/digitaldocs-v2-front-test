@@ -11,6 +11,7 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 // utils
+import { vdt } from '../../../../utils/formatObject';
 import { fillData } from '../../../../utils/formatTime';
 // hooks
 import { getComparator, applySort } from '../../../../hooks/useTable';
@@ -30,8 +31,6 @@ import { ButtonsStepper } from '../../../../components/Actions';
 import { listaTitrulares, listaProdutos } from '../../../gaji9/applySortFilter';
 //
 import { submitDados } from '../utils-form-processo';
-
-const vdt = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // ----------------------------------------------------------------------
 

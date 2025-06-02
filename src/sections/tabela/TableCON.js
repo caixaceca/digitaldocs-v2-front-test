@@ -213,17 +213,18 @@ export default function TableCON({ item = 'con' }) {
 function applySortFilter({ dados, comparator, filter }) {
   dados = applySort(dados, comparator);
   if (filter) {
+    const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
       (row) =>
-        (row?.conta_processo && normalizeText(row?.conta_processo).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.nome_cliente && normalizeText(row?.nome_cliente).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.cdg_operacao && normalizeText(row?.cdg_operacao).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.ordenador && normalizeText(row?.ordenador).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.operacao && normalizeText(row?.operacao).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.origem && normalizeText(row?.origem).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.docid && normalizeText(row?.docid).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.nif && normalizeText(row?.nif).indexOf(normalizeText(filter)) !== -1)
+        (row?.conta_processo && normalizeText(row?.conta_processo).indexOf(normalizedFilter) !== -1) ||
+        (row?.nome_cliente && normalizeText(row?.nome_cliente).indexOf(normalizedFilter) !== -1) ||
+        (row?.cdg_operacao && normalizeText(row?.cdg_operacao).indexOf(normalizedFilter) !== -1) ||
+        (row?.ordenador && normalizeText(row?.ordenador).indexOf(normalizedFilter) !== -1) ||
+        (row?.operacao && normalizeText(row?.operacao).indexOf(normalizedFilter) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizedFilter) !== -1) ||
+        (row?.origem && normalizeText(row?.origem).indexOf(normalizedFilter) !== -1) ||
+        (row?.docid && normalizeText(row?.docid).indexOf(normalizedFilter) !== -1) ||
+        (row?.nif && normalizeText(row?.nif).indexOf(normalizedFilter) !== -1)
     );
   }
   return dados;

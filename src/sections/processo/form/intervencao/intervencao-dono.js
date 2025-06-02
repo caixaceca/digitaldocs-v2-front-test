@@ -10,6 +10,8 @@ import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+// utils
+import { vdt } from '../../../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../../../redux/store';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
@@ -20,8 +22,6 @@ import { getComparator, applySort } from '../../../../hooks/useTable';
 import { DialogButons } from '../../../../components/Actions';
 import { DialogConfirmar } from '../../../../components/CustomDialog';
 import { FormProvider, RHFTextField, RHFAutocompleteObj } from '../../../../components/hook-form';
-
-const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // --- RESGATAR PROCESSO -----------------------------------------------------------------------------------------------
 
@@ -220,8 +220,8 @@ export function DomiciliarForm({ ids, onClose }) {
               label="Unidade orgânica"
               options={uos?.map(({ id, label }) => ({ id, label }))}
               onChange={(event, newValue) => {
-                setValue('estado', null, vsv);
-                setValue('uo', newValue, vsv);
+                setValue('estado', null, vdt);
+                setValue('uo', newValue, vdt);
               }}
             />
             {values?.uo?.id && (
@@ -231,7 +231,7 @@ export function DomiciliarForm({ ids, onClose }) {
                 options={estados
                   ?.filter(({ uo_id: uoId }) => uoId === values?.uo?.id)
                   ?.map(({ id, nome }) => ({ id, label: nome }))}
-                onChange={(event, newValue) => setValue('estado', newValue, vsv)}
+                onChange={(event, newValue) => setValue('estado', newValue, vdt)}
               />
             )}
             <RHFTextField name="observacao" multiline rows={3} label="Observação" />

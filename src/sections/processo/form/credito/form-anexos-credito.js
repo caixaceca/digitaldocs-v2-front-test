@@ -47,6 +47,7 @@ export default function FormAnexosCredito({ dados }) {
       formData.append('uo_origem_id', estado?.uo_id);
       formData.append('estado_atual_id', estado?.id);
       formData.append('balcao', dadosStepper?.balcao);
+      formData.append('garantia', dadosStepper.garantia);
       formData.append('fluxo_id', dadosStepper?.fluxo_id);
       formData.append('situacao_final_mes', 'Em análise');
       formData.append('taxa_juro', dadosStepper.taxa_juro);

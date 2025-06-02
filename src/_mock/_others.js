@@ -37,19 +37,7 @@ export const dis = [
   { id: '999', label: 'Certidão de Nascimento' },
   { id: '500', label: 'NIF - Particular' },
   { id: '501', label: 'NIF - Empresa' },
-];
-
-export const tiposDoc = [
-  'BI - Nacional',
-  'BI - Militar CV',
-  'BI - POP CV',
-  'BI - Cidadão Estrangeiro',
-  'Cédula Pessoal',
-  'Certidão de Nascimento',
-  'CNI',
-  'NIF',
-  'Passaporte - Estrangeiro',
-  'Passaporte - Nacional',
+  { id: 'EMI', label: 'Prova de emigrante' },
 ];
 
 export const estadosCivis = [
@@ -60,9 +48,7 @@ export const estadosCivis = [
   { id: 'U', label: 'União de facto' },
 ];
 
-export const estadosCivil = ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Separado(a)', 'Viúvo(a)', 'União de facto'];
-
-export const _concelhos = [
+export const listaConcelhos = [
   { regiao: 'Norte', ilha: 'Santo Antão', concelho: 'Ribeira Grande' },
   { regiao: 'Norte', ilha: 'Santo Antão', concelho: 'Paul' },
   { regiao: 'Norte', ilha: 'Santo Antão', concelho: 'Porto Novo' },
@@ -86,10 +72,6 @@ export const _concelhos = [
   { regiao: 'Sul', ilha: 'Fogo', concelho: 'São Filipe' },
   { regiao: 'Sul', ilha: 'Brava', concelho: 'Brava' },
 ];
-
-export const segmentos = ['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública'];
-
-export const escaloes = ['1º Comitê', '2º Comitê', '3º Comitê'];
 
 export const situacoes = ['Em análise', 'Aprovado', 'Contratado', 'Indeferido', 'Desistido'];
 
@@ -156,4 +138,11 @@ export const freguesiasConcelhos = [
   { concelho: 'Mosteiros', freguesia: 'Nossa Senhora da Ajuda' },
   { concelho: 'Brava', freguesia: 'São João Baptista' },
   { concelho: 'Brava', freguesia: 'Nossa Senhora do Monte' },
+];
+
+export const sitClausulas = [
+  { id: 'RASCUNHO', label: 'RASCUNHO' },
+  { id: 'EM REVISÃO', label: 'EM REVISÃO' },
+  { id: 'APROVADO', label: 'APROVADO' },
+  { id: 'REVOGADO', label: 'REVOGADO' },
 ];

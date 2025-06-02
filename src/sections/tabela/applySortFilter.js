@@ -19,15 +19,16 @@ export default function applySortFilter({ from, dados, comparator, filter, colab
   else if (estado) dados = dados.filter(({ nome }) => nome === estado);
 
   if (filter) {
+    const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
       (row) =>
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizeText(filter)) !== -1) ||
-        (row?.observacao && normalizeText(row?.observacao).indexOf(normalizeText(filter)) !== -1)
+        (row?.conta && normalizeText(row?.conta).indexOf(normalizedFilter) !== -1) ||
+        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizedFilter) !== -1) ||
+        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizedFilter) !== -1) ||
+        (row?.titular && normalizeText(row?.titular).indexOf(normalizedFilter) !== -1) ||
+        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizedFilter) !== -1) ||
+        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizedFilter) !== -1) ||
+        (row?.observacao && normalizeText(row?.observacao).indexOf(normalizedFilter) !== -1)
     );
   }
 

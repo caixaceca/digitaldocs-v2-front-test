@@ -1,4 +1,4 @@
-import { sumBy } from 'lodash';
+import sumBy from 'lodash/sumBy';
 import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -192,7 +192,7 @@ export default function EstatisticaCredito() {
         }
       />
       <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -201,7 +201,7 @@ export default function EstatisticaCredito() {
 
 export function Totais() {
   const { isLoading, resumoEstCredito } = useSelector((state) => state.indicadores);
-  const totais = dadosResumo(resumoEstCredito, '', '');
+  const { qtdEnt, qtdAp, qtdCont, qtdId, valEnt, valorAp, valCont, valId } = dadosResumo(resumoEstCredito, '', '');
 
   return (
     <Grid container spacing={3}>
@@ -213,10 +213,10 @@ export function Totais() {
         </GridItem>
       ) : (
         <>
-          <CardResumo label="Entrada" qtd={totais.qtdEnt} total={totais.valorEnt} />
-          <CardResumo label="Aprovado" qtd={totais.qtdAp} total={totais.valorAp} />
-          <CardResumo label="Contratado" qtd={totais.qtdCont} total={totais.valorCont} />
-          <CardResumo label="Indeferido/Desistido" qtd={totais.qtdId} total={totais.valorId} />
+          <CardResumo label="Entrada" qtd={qtdEnt} total={valEnt} />
+          <CardResumo label="Aprovado" qtd={qtdAp} total={valorAp} />
+          <CardResumo label="Contratado" qtd={qtdCont} total={valCont} />
+          <CardResumo label="Indeferido/Desistido" qtd={qtdId} total={valId} />
           <GridItem>
             <Card sx={{ p: 1 }}>
               <TableContainer>
@@ -298,6 +298,7 @@ TableEstatistica.propTypes = { from: PropTypes.string };
 export function TableEstatistica({ from }) {
   const [filter, setFilter] = useState('');
   const { isLoading, estCredito } = useSelector((state) => state.indicadores);
+  const { entrada, aprovado, desistido, contratado, indeferido } = estCredito || {};
 
   const total = useMemo(
     () =>
@@ -308,15 +309,27 @@ export function TableEstatistica({ from }) {
   );
   const dadosFrom = useMemo(
     () =>
-      (from === 'entrada' && estCredito?.entrada) ||
-      (from === 'aprovado' && estCredito?.aprovado) ||
-      (from === 'desistido' && estCredito?.desistido) ||
-      (from === 'contratado' && estCredito?.contratado) ||
-      (from === 'indeferido' && estCredito?.indeferido) ||
+      (from === 'entrada' && entrada) ||
+      (from === 'aprovado' && aprovado) ||
+      (from === 'desistido' && desistido) ||
+      (from === 'contratado' && contratado) ||
+      (from === 'indeferido' && indeferido) ||
       [],
-    [estCredito, from]
+    [aprovado, contratado, desistido, entrada, from, indeferido]
   );
-  const dados = filterDados(dadosFrom, filter);
+  const {
+    piTesouraria,
+    piInvestimento,
+    piMicrocredito,
+    particularOutros,
+    garantiaBancaria,
+    entidadesPublicas,
+    empresaConstrucao,
+    empresaTesouraria,
+    empresaInvestimento,
+    particularHabitacao,
+    particularCrediCaixa,
+  } = filterDados(dadosFrom, filter);
 
   return (
     <Card sx={{ p: 1 }}>
@@ -385,9 +398,9 @@ export function TableEstatistica({ from }) {
                   linha2="Tesouraria"
                   linha3="Investimento"
                   segmento="Empresas"
-                  linha1Dados={dados?.empresaConstrucao}
-                  linha2Dados={dados?.empresaTesouraria}
-                  linha3Dados={dados?.empresaInvestimento}
+                  linha1Dados={empresaConstrucao}
+                  linha2Dados={empresaTesouraria}
+                  linha3Dados={empresaInvestimento}
                 />
                 <EmptyRow />
                 {/* PARTICULARES */}
@@ -397,9 +410,9 @@ export function TableEstatistica({ from }) {
                   linha2="CrediCaixa"
                   linha3="Outros"
                   segmento="Particular"
-                  linha1Dados={dados?.particularHabitacao}
-                  linha2Dados={dados?.particularCrediCaixa}
-                  linha3Dados={dados?.particularOutros}
+                  linha1Dados={particularHabitacao}
+                  linha2Dados={particularCrediCaixa}
+                  linha3Dados={particularOutros}
                 />
                 <EmptyRow />
                 {/* PRODUTOR INDIVIDUAL */}
@@ -409,16 +422,16 @@ export function TableEstatistica({ from }) {
                   linha2="Investimento"
                   linha3="Micro-Crédito"
                   segmento="Produtor Individual"
-                  linha1Dados={dados?.piTesouraria}
-                  linha2Dados={dados?.piInvestimento}
-                  linha3Dados={dados?.piMicrocredito}
+                  linha1Dados={piTesouraria}
+                  linha2Dados={piInvestimento}
+                  linha3Dados={piMicrocredito}
                 />
                 <EmptyRow />
                 {/* ENTIDADES PÚBLICAS */}
-                <SegmentoStd from={from} dados={dados?.entidadesPublicas} segmento="Entidades Públicas" />
+                <SegmentoStd from={from} dados={entidadesPublicas} segmento="Entidades Públicas" />
                 <EmptyRow />
                 {/* GARANTIAS BANCÁRIAS */}
-                <SegmentoStd from={from} dados={dados?.garantiaBancaria} segmento="Garantias Bancárias" />
+                <SegmentoStd from={from} dados={garantiaBancaria} segmento="Garantias Bancárias" />
                 <EmptyRow />
               </>
             )}
@@ -707,44 +720,38 @@ function DadosCell({ dados, from, index = 1, total }) {
       </TableCell>
       <TableCell>{dados?.titular}</TableCell>
       {(from === 'entrada' || from === 'desistido' || from === 'indeferido') && (
-        <TableCell>{dados?.data_entrada && ptDate(dados?.data_entrada)}</TableCell>
+        <TableCell>{ptDate(dados?.data_entrada)}</TableCell>
       )}
-      {from === 'aprovado' && <TableCell>{dados?.data_aprovacao && ptDate(dados?.data_aprovacao)}</TableCell>}
-      {from === 'contratado' && <TableCell>{dados?.data_contratacao && ptDate(dados?.data_contratacao)}</TableCell>}
+      {from === 'aprovado' && <TableCell>{ptDate(dados?.data_aprovacao)}</TableCell>}
+      {from === 'contratado' && <TableCell>{ptDate(dados?.data_contratacao)}</TableCell>}
       <TableCell>{dados?.setor_atividade}</TableCell>
       {from !== 'aprovado' && <TableCell>{dados?.finalidade}</TableCell>}
       {(from === 'entrada' || from === 'aprovado') && <TableCell>{dados?.situacao_final_mes}</TableCell>}
       {from === 'entrada' && <TableCell>{dados?.nproposta}</TableCell>}
       {from === 'contratado' && (
         <>
-          <TableCell>{dados?.prazo_amortizacao}</TableCell>
+          <TableCell>{`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}</TableCell>
           <TableCell>{dados?.taxa_juro && fPercent(dados?.taxa_juro)}</TableCell>
           <TableCell>{dados?.garantia}</TableCell>
           <TableCell>{dados?.escalao_decisao}</TableCell>
           <TableCell>{dados?.cliente}</TableCell>
         </>
       )}
-      {from === 'indeferido' && <TableCell>{dados?.data_indeferido && ptDate(dados?.data_indeferido)}</TableCell>}
-      {from === 'desistido' && <TableCell>{dados?.data_desistido && ptDate(dados?.data_desistido)}</TableCell>}
+      {from === 'indeferido' && <TableCell>{ptDate(dados?.data_indeferido)}</TableCell>}
+      {from === 'desistido' && <TableCell>{ptDate(dados?.data_desistido)}</TableCell>}
       {from !== 'contratado' && (
-        <TableCell align="right">
-          <Typography variant="body2" noWrap>
-            {dados?.montantes && fNumber(dados?.montantes)}
-          </Typography>
+        <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {fNumber(dados?.montantes)}
         </TableCell>
       )}
       {(from === 'aprovado' || from === 'contratado') && (
-        <TableCell align="right">
-          <Typography variant="body2" noWrap>
-            {dados?.montante_aprovado && fNumber(dados?.montante_aprovado)}
-          </Typography>
+        <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {fNumber(dados?.montante_aprovado)}
         </TableCell>
       )}
       {from === 'contratado' && (
-        <TableCell align="right">
-          <Typography variant="body2" noWrap>
-            {dados?.montante_contratado && fNumber(dados?.montante_contratado)}
-          </Typography>
+        <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {fNumber(dados?.montante_contratado)}
         </TableCell>
       )}
     </>
@@ -855,7 +862,7 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
 TableRowTotais.propTypes = { dados: PropTypes.object };
 
 function TableRowTotais({ dados }) {
-  return ['qtdEnt', 'valorEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valorCont', 'qtdId', 'valorId']?.map((row) => (
+  return ['qtdEnt', 'valEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valCont', 'qtdId', 'valId']?.map((row) => (
     <TableCell key={row} align="right">
       {fNumber(dados[row])}
     </TableCell>
@@ -881,10 +888,11 @@ function EmptyRow({ segmento }) {
 
 function filterDados(dados, filter) {
   if (filter) {
+    const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
       ({ titular, cliente }) =>
-        (titular && normalizeText(titular).indexOf(normalizeText(filter)) !== -1) ||
-        (cliente && normalizeText(cliente).indexOf(normalizeText(filter)) !== -1)
+        (titular && normalizeText(titular).indexOf(normalizedFilter) !== -1) ||
+        (cliente && normalizeText(cliente).indexOf(normalizedFilter) !== -1)
     );
   }
 
@@ -918,21 +926,21 @@ function dadosResumo(dados, segmento, linha) {
 
   return {
     qtdEnt: sumBy(entradas, 'total'),
-    valorEnt: sumBy(entradas, 'montantes'),
+    valEnt: sumBy(entradas, 'montantes'),
     qtdAp: sumBy(aprovados, 'total'),
     valorAp: sumBy(aprovados, 'montante_aprovado'),
     qtdCont: sumBy(contratados, 'total'),
-    valorCont: sumBy(contratados, 'montante_contratado'),
+    valCont: sumBy(contratados, 'montante_contratado'),
     qtdId: sumBy(indeferidos, 'total') + sumBy(desistidos, 'total'),
-    valorId: sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'),
+    valId: sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'),
   };
 }
 
 function dadosPorItem(dados, segmento, linha) {
   return (
-    (segmento && linha && dados?.filter((row) => row?.segmento === segmento && row?.linha === linha)) ||
-    (segmento && dados?.filter((row) => row?.segmento === segmento && row?.linha !== 'Garantia Bancária')) ||
-    (linha && dados?.filter((row) => row?.linha === linha && row?.segmento !== 'Entidade Pública')) ||
+    (segmento && linha && dados?.filter(({ segmento: seg, linha: lin }) => seg === segmento && lin === linha)) ||
+    (segmento && dados?.filter(({ segmento: seg, linha: lin }) => seg === segmento && lin !== 'Garantia Bancária')) ||
+    (linha && dados?.filter(({ segmento: seg, linha: lin }) => linha === lin && seg !== 'Entidade Pública')) ||
     dados
   );
 }

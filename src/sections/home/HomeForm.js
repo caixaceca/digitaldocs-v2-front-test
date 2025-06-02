@@ -75,9 +75,7 @@ export function FormSugestao({ onClose }) {
   const handleDropSingle = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
-      if (file) {
-        setValue('imagem', Object.assign(file, { preview: URL.createObjectURL(file) }));
-      }
+      if (file) setValue('imagem', Object.assign(file, { preview: URL.createObjectURL(file) }));
     },
     [setValue]
   );

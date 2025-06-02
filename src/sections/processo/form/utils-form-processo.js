@@ -12,7 +12,7 @@ export function submitDados(values, isEdit, id, assunto, dispatch, enqueueSnackb
         ? `${assunto} (${format(values.data_entrada ?? new Date(), 'dd/MM/yyyy')})`
         : values?.titular;
 
-    const entidadesList = values?.entidades?.length ? values?.entidades?.map((row) => row?.numero) : null;
+    const entidadesList = values?.entidades?.length ? values?.entidades?.map(({ numero }) => numero) : null;
 
     if (isEdit) {
       const formData = bodyEditar({ ...values, titular, entidades: entidadesList });

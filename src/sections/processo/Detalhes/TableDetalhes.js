@@ -303,12 +303,13 @@ export function ItemsCriterios({ label, estados = [], colaboradores = [] }) {
 function applySortFilter({ dados, comparator, filter }) {
   dados = applySort(dados, comparator);
   if (filter) {
+    const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
       ({ nome, estado, motivo, observacao }) =>
-        (nome && normalizeText(nome).indexOf(normalizeText(filter)) !== -1) ||
-        (estado && normalizeText(estado).indexOf(normalizeText(filter)) !== -1) ||
-        (motivo && normalizeText(motivo).indexOf(normalizeText(filter)) !== -1) ||
-        (observacao && normalizeText(observacao).indexOf(normalizeText(filter)) !== -1)
+        (nome && normalizeText(nome).indexOf(normalizedFilter) !== -1) ||
+        (estado && normalizeText(estado).indexOf(normalizedFilter) !== -1) ||
+        (motivo && normalizeText(motivo).indexOf(normalizedFilter) !== -1) ||
+        (observacao && normalizeText(observacao).indexOf(normalizedFilter) !== -1)
     );
   }
   return dados;

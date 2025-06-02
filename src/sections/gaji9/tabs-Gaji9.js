@@ -68,7 +68,7 @@ function Parametrizacao({ inativos, setInativos }) {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) {
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Parametrizacao', false);
     }
   }, [tabsList, currentTab]);
@@ -85,7 +85,7 @@ function Parametrizacao({ inativos, setInativos }) {
         currentTab={currentTab}
         changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'gaji9Parametrizacao', false)}
       />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -114,6 +114,9 @@ function Identificadores({ inativos, setInativos }) {
             },
           ]
         : []),
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
+        ? [{ value: 'Tipos de seguro', component: <TableIdentificadores item="tiposSeguros" inativos={inativos} /> }]
+        : []),
       ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_REPRESENTANTE'])
         ? [{ value: 'Representantes', component: <TableIdentificadores item="representantes" inativos={inativos} /> }]
         : []),
@@ -125,9 +128,8 @@ function Identificadores({ inativos, setInativos }) {
   );
 
   useEffect(() => {
-    if (!currentTab || !tabsList?.map((row) => row?.value)?.includes(currentTab)) {
+    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Identificadores', false);
-    }
   }, [tabsList, currentTab]);
 
   return (
@@ -142,7 +144,7 @@ function Identificadores({ inativos, setInativos }) {
         currentTab={currentTab}
         changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'gaji9Identificadores', false)}
       />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </>
   );
 }
@@ -176,8 +178,9 @@ function Actions({ inativos, setInativos, label = '' }) {
           (label === 'Produtos' && acessoGaji9(utilizador?.acessos, ['CREATE_PRODUTO/COMPONENTE'])) ||
           (label === 'Representantes' && acessoGaji9(utilizador?.acessos, ['CREATE_REPRESENTANTE'])) ||
           (label === 'Tipos de titular' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO TITULAR'])) ||
-          (label === 'Tipos de garantia' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO GARANTIA'])) ||
-          (label === 'Freguesias' && acessoGaji9(utilizador?.acessos, ['CREATE_DIVISAO ADMINISTRATIVA']))) && (
+          (label === 'Freguesias' && acessoGaji9(utilizador?.acessos, ['CREATE_DIVISAO ADMINISTRATIVA'])) ||
+          ((label === 'Tipos de garantia' || label === 'Tipos de seguro') &&
+            acessoGaji9(utilizador?.acessos, ['CREATE_TIPO GARANTIA']))) && (
           <DefaultAction button label="Adicionar" onClick={() => dispatch(openModal('add'))} />
         )}
       {label === 'Cláusulas' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) && (

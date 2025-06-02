@@ -86,13 +86,13 @@ export default function Anexos({ anexos }) {
         </>
       )}
       <Stack id="anexos" sx={{ mt: 1 }}>
-        {anexosPorData(anexosList)?.map((row) => (
-          <Stack key={row?.data} sx={{ pb: 1 }}>
+        {anexosPorData(anexosList)?.map(({ data, anexos }) => (
+          <Stack key={data} sx={{ pb: 1 }}>
             <Divider textAlign="left" sx={{ py: 0.5, my: 1, typography: 'overline' }}>
-              {row?.data}
+              {data}
             </Divider>
             <Stack spacing={1} direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>
-              {row?.anexos?.map((row) => (
+              {anexos?.map((row) => (
                 <AnexoItem anexo={row} key={row?.anexo} viewAnexo={viewAnexo} />
               ))}
             </Stack>

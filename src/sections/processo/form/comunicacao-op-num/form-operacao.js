@@ -30,20 +30,20 @@ export default function FormOperacao({ dados }) {
 
   const formSchema = Yup.object().shape({
     valor: Yup.number().positive().required().label('Valor'),
-    conta: Yup.number().positive().integer().label('Nº de conta'),
     origem_fundo: Yup.string().required().label('Origem do fundo'),
     finalidade_fundo: Yup.string().required().label('Finalidade do fundo'),
     data_entrada: Yup.date().typeError().required().label('Data de entrada'),
+    conta: Yup.number().positive().integer().required().label('Nº de conta'),
   });
 
   const defaultValues = useMemo(
     () => ({
       fluxo_id: fluxo?.id,
-      valor: dadosStepper?.valor || processo?.valor || '',
-      conta: dadosStepper?.conta || processo?.conta || '',
       email: dadosStepper?.email || processo?.email || '',
       obs: dadosStepper?.obs || processo?.observacao || '',
-      noperacao: dadosStepper?.noperacao || processo?.numero_operacao || '',
+      valor: dadosStepper?.valor || processo?.valor || null,
+      conta: dadosStepper?.conta || processo?.conta || null,
+      noperacao: dadosStepper?.noperacao || processo?.numero_operacao || null,
       origem_fundo: dadosStepper?.origem_fundo || processo?.con?.origem_fundo || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       finalidade_fundo: dadosStepper?.finalidade_fundo || processo?.con?.finalidade || '',

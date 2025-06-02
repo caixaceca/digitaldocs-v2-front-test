@@ -8,8 +8,8 @@
 /// ---------------------------- TESTE ----------------------------
 
 export const BASEURL = 'https://intraneteste.caixa.cv:5000';
-export const BASEURLDD = 'https://ddocsteste.caixa.cv/forminga';
 export const BASEURLSLIM = 'https://intraneteste.caixa.cv:8090';
+export const BASEURLDD = 'https://ddocsteste.caixa.cv/forminga';
 export const BASEURLGAJI9 = 'https://gaji9teste.caixa.cv/gaji9/api';
 
 /// --------------------------- PRODUÇÃo --------------------------

@@ -36,7 +36,7 @@ import { DialogButons } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
 import { shapeDate } from '../../components/hook-form/yup-shape';
 // _mock
-import { codacessos, objetos, _concelhos } from '../../_mock';
+import { codacessos, objetos, listaConcelhos } from '../../_mock';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -314,14 +314,14 @@ export function OrigemForm({ onClose }) {
                     setValue('ilha', value);
                     setValue('cidade', null);
                   }}
-                  options={[...new Set(_concelhos.map(({ ilha }) => ilha))]}
+                  options={[...new Set(listaConcelhos.map(({ ilha }) => ilha))]}
                 />
               </GridItem>
               <GridItem sm={6}>
                 <RHFAutocompleteSmp
                   name="cidade"
                   label="Concelho"
-                  options={_concelhos?.filter(({ ilha }) => ilha === values?.ilha)?.map(({ concelho }) => concelho)}
+                  options={listaConcelhos?.filter(({ ilha }) => ilha === values?.ilha)?.map(({ concelho }) => concelho)}
                 />
               </GridItem>
               <GridItem sm={6} children={<RHFTextField name="email" label="Email" />} />

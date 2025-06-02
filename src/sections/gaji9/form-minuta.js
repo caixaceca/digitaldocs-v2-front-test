@@ -11,6 +11,8 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+// utils
+import { vdt } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { getFromGaji9, getDocumento, createItem, updateItem } from '../../redux/slices/gaji9';
@@ -20,8 +22,6 @@ import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 import { RHFSwitch, FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
 //
 import { listaTitrulares, listaProdutos, listaGarantias, listaClausulas } from './applySortFilter';
-
-const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -341,8 +341,8 @@ export function ComposicaoForm({ onClose, action }) {
                         values.clausulas.some(({ clausula }) => clausula?.id === option.id)
                       }
                       onChange={(event, newValue) => {
-                        setValue(`clausulas[${index}].clausula`, newValue, vsv);
-                        setValue(`clausulas[${index}].numero`, newValue?.numero_ordem, vsv);
+                        setValue(`clausulas[${index}].clausula`, newValue, vdt);
+                        setValue(`clausulas[${index}].numero`, newValue?.numero_ordem, vdt);
                       }}
                     />
                   </Stack>

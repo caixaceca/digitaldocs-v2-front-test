@@ -45,14 +45,16 @@ export default function FormInfoInterno({ dados }) {
 
   const formSchema = Yup.object().shape({
     titular: fluxosGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
-    noperacao: processo?.numero_operacao && Yup.number().positive().label('Nº de operação'),
+    noperacao: processo?.numero_operacao && Yup.number().positive().required().label('Nº de operação'),
     entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
     data_entrada: fluxo?.modelo !== 'Paralelo' && Yup.date().typeError().required().label('Data de entrada'),
     email:
       (fluxo?.assunto === 'Formulário' && Yup.string().required().label('Codificação/Nome')) ||
       (bancaDigital(fluxo?.assunto) && Yup.string().email().required().label('Email')),
     conta:
-      !fluxo?.limpo && fluxo?.assunto !== 'Abertura de Conta' && Yup.number().positive().integer().label('Nº de conta'),
+      !fluxo?.limpo &&
+      fluxo?.assunto !== 'Abertura de Conta' &&
+      Yup.number().positive().integer().required().label('Nº de conta'),
     // agendamento
     diadomes: shapeNumber('Dia do mês', true, '', 'agendado'),
     data_inicio: shapeDate('Data de início', true, '', 'agendado'),
@@ -63,14 +65,14 @@ export default function FormInfoInterno({ dados }) {
   const defaultValues = useMemo(
     () => ({
       fluxo_id: fluxo?.id,
-      conta: dadosStepper?.conta || processo?.conta || '',
       email: dadosStepper?.email || processo?.email || '',
       obs: dadosStepper?.obs || processo?.observacao || '',
+      conta: dadosStepper?.conta || processo?.conta || null,
       titular: dadosStepper?.titular || processo?.titular || '',
       cliente: dadosStepper?.cliente || processo?.cliente || '',
       diadomes: dadosStepper?.diadomes || processo?.dia_mes || '',
       agendado: dadosStepper?.agendado || processo?.agendado || false,
-      noperacao: dadosStepper?.noperacao || processo?.numero_operacao || '',
+      noperacao: dadosStepper?.noperacao || processo?.numero_operacao || null,
       periodicidade: dadosStepper?.periodicidade || processo?.periodicidade || null,
       data_inicio: dadosStepper?.data_inicio || fillData(processo?.data_inicio, null),
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),

@@ -25,9 +25,16 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
+import {
+  SeguroForm,
+  ProdutoForm,
+  GarantiaForm,
+  FreguesiaForm,
+  TipoTitularForm,
+  RepresentanteForm,
+} from './form-identificadores';
 import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter } from './applySortFilter';
-import { ProdutoForm, GarantiaForm, TipoTitularForm, RepresentanteForm, FreguesiaForm } from './form-identificadores';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -60,6 +67,7 @@ export default function TableIdentificadores({ item, inativos }) {
     freguesias,
     isOpenModal,
     componentes,
+    tiposSeguros,
     tiposTitulares,
     tiposGarantias,
     representantes,
@@ -85,6 +93,7 @@ export default function TableIdentificadores({ item, inativos }) {
     dados:
       (item === 'freguesias' && freguesias) ||
       (item === 'componentes' && componentes) ||
+      (item === 'tiposSeguros' && tiposSeguros) ||
       (item === 'tiposTitulares' && tiposTitulares) ||
       (item === 'tiposGarantias' && tiposGarantias) ||
       (item === 'representantes' &&
@@ -105,6 +114,7 @@ export default function TableIdentificadores({ item, inativos }) {
     const itemSingle =
       (item === 'freguesias' && 'freguesia') ||
       (item === 'componentes' && 'componente') ||
+      (item === 'tiposSeguros' && 'tipoSeguro') ||
       (item === 'tiposTitulares' && 'tipoTitular') ||
       (item === 'tiposGarantias' && 'tipoGarantia') ||
       (item === 'representantes' && 'representante');
@@ -126,9 +136,9 @@ export default function TableIdentificadores({ item, inativos }) {
                   <SkeletonTable
                     row={10}
                     column={
-                      ((item === 'tiposTitulares' || item === 'representantes') && 4) ||
-                      (item === 'componentes' && 5) ||
                       (item === 'freguesias' && 6) ||
+                      (item === 'componentes' && 5) ||
+                      ((item === 'tiposTitulares' || item === 'representantes') && 4) ||
                       3
                     }
                   />
@@ -149,7 +159,7 @@ export default function TableIdentificadores({ item, inativos }) {
                         ) : (
                           <>
                             {(item === 'componentes' && row?.codigo) ||
-                              (item === 'tiposGarantias' && row?.designacao) ||
+                              ((item === 'tiposGarantias' || item === 'tiposSeguros') && row?.designacao) ||
                               row?.nome ||
                               row?.freguesia ||
                               row?.descritivo ||
@@ -180,6 +190,7 @@ export default function TableIdentificadores({ item, inativos }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {(adminGaji9 ||
+                            (item === 'tiposSeguros' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
                             (item === 'tipoTitulares' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR'])) ||
                             (item === 'tiposGarantias' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
                             (item === 'representantes' && acessoGaji9(utilizador?.acessos, ['UPDATE_REPRESENTANTE'])) ||
@@ -221,6 +232,7 @@ export default function TableIdentificadores({ item, inativos }) {
 
       {isOpenModal && (
         <>
+          {item === 'tiposSeguros' && <SeguroForm onClose={handleCloseModal} />}
           {item === 'componentes' && <ProdutoForm onClose={handleCloseModal} />}
           {item === 'freguesias' && <FreguesiaForm onClose={handleCloseModal} />}
           {item === 'tiposGarantias' && <GarantiaForm onClose={handleCloseModal} />}
@@ -237,7 +249,7 @@ export default function TableIdentificadores({ item, inativos }) {
 function headerTable(item) {
   return [
     ...((item === 'tiposTitulares' && [{ id: 'descritivo', label: 'Descritivo' }]) ||
-      (item === 'tiposGarantias' && [{ id: 'designacao', label: 'Designação' }]) ||
+      ((item === 'tiposGarantias' || item === 'tiposSeguros') && [{ id: 'designacao', label: 'Designação' }]) ||
       (item === 'representantes' && [{ id: 'nome', label: 'Nome' }]) ||
       []),
     ...(item === 'representantes' ? [{ id: 'uo', label: 'U.O' }] : []),

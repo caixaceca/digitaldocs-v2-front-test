@@ -1,4 +1,4 @@
-import { sumBy } from 'lodash';
+import sumBy from 'lodash/sumBy';
 import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui

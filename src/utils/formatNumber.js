@@ -1,5 +1,5 @@
-import { replace } from 'lodash';
 import numeral from 'numeral';
+import replace from 'lodash/replace';
 
 numeral.register('locale', 'cv-cv', {
   delimiters: { thousands: ' ', decimal: ',' },
@@ -9,67 +9,47 @@ numeral.register('locale', 'cv-cv', {
   },
   currency: { symbol: ' CVE' },
 });
+numeral.locale('cv-cv' || '');
 
 // ----------------------------------------------------------------------
 
 export function fCurrency(number) {
-  numeral.locale('cv-cv' || '');
-  return numeral(number).format('0,0.00$');
+  return numeral(number || 0).format('0,0.00$');
 }
 
 export function fPercent(number) {
   return numeral(number / 100).format('0.00%');
 }
 
-export function fPercent3(number) {
-  return numeral(number / 100).format('0.000%');
-}
-
 export function fNumber(number) {
-  numeral.locale('cv-cv' || '');
-  return numeral(number).format();
+  return numeral(number || 0).format();
 }
 
 export function fNumber2(number) {
-  numeral.locale('cv-cv' || '');
-  return replace(numeral(number).format('0.00'), '.00', '');
-}
-
-export function fShortenNumber(number) {
-  numeral.locale('cv-cv' || '');
-  return replace(numeral(number).format('0.0a'), '.0', '');
+  return replace(numeral(number || 0).format('0.00'), '.00', '');
 }
 
 export function fData(number) {
-  return numeral(number).format('0.0 b');
+  return numeral(number || '').format('0.0 b');
 }
 
 // ----------------------------------------------------------------------
 
 export function converterSegundos(number) {
   let valor = '';
-  if (number < 60) {
-    valor = `${Math.round(number)} ${number === 1 ? 'segundo' : 'segundos'}`;
-  } else if (number < 3600) {
-    valor = `${Math.round(number / 60)} ${Math.round(number / 60) === 1 ? 'minuto' : 'minutos'}`;
-  } else if (number < 86400) {
-    valor = `${Math.round(number / 3600)} ${Math.round(number / 3600) === 1 ? 'hora' : 'horas'}`;
-  } else {
-    valor = `${Math.round(number / 86400)} ${Math.round(number / 86400) === 1 ? 'dia' : 'dias'}`;
-  }
+  if (number < 60) valor = `${Math.round(number)} ${number === 1 ? 'segundo' : 'segundos'}`;
+  else if (number < 3600) valor = `${Math.round(number / 60)} ${Math.round(number / 60) === 1 ? 'minuto' : 'minutos'}`;
+  else if (number < 86400) valor = `${Math.round(number / 3600)} ${Math.round(number / 3600) === 1 ? 'hora' : 'horas'}`;
+  else valor = `${Math.round(number / 86400)} ${Math.round(number / 86400) === 1 ? 'dia' : 'dias'}`;
+
   return valor;
 }
 
 export function converterParaOrdinal(numero, f) {
-  if (!Number.isInteger(numero)) {
-    throw new Error('Introduza um número inteiro.');
-  }
-  if (numero > 999) {
-    throw new Error('Introduza um número número menor que 1000.');
-  }
-  if (numero < 1) {
-    throw new Error('Introduza um número inteiro positivo.');
-  }
+  if (!Number.isInteger(numero)) throw new Error('Introduza um número inteiro.');
+  if (numero > 999) throw new Error('Introduza um número número menor que 1000.');
+  if (numero < 1) throw new Error('Introduza um número inteiro positivo.');
+
   const g = f ? 'a' : 'o';
   let txt = '';
   if (numero < 1000 && numero > 99) {

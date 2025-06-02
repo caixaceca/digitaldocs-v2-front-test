@@ -1,5 +1,8 @@
+import { useSnackbar } from 'notistack';
 import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
+// config
+import { localVersion } from '../config';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
 import { geParamsUtil } from '../redux/slices/parametrizacao';
@@ -19,7 +22,20 @@ const Loadable = (Component) => (props) => (
 
 export default function Router() {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const { cc, perfil, perfilId } = useSelector((state) => state.intranet);
+
+  useEffect(() => {
+    fetch('/meta.json', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((meta) => {
+        if (meta.version && meta.version !== localVersion) {
+          enqueueSnackbar('Aplicação atualizada', { variant: 'success' });
+          window.location.reload();
+        }
+      })
+      .catch((err) => console.warn('Erro ao verificar versão da aplicação:', err));
+  }, [enqueueSnackbar]);
 
   useEffect(() => {
     dispatch(authenticateColaborador());

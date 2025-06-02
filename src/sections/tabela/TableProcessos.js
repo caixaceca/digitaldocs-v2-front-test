@@ -239,17 +239,19 @@ function applySortFilter({ dados, comparator, filter, colaborador, from }) {
   if ((from === 'Retidos' || from === 'Atribuídos') && colaborador?.id)
     dados = dados.filter(({ perfil_id: pid }) => pid === colaborador?.id);
 
-  if (filter)
+  if (filter) {
+    const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
       ({ conta, motivo, entrada, assunto, cliente, titular, entidades }) =>
-        (conta && normalizeText(conta).indexOf(normalizeText(filter)) !== -1) ||
-        (motivo && normalizeText(motivo).indexOf(normalizeText(filter)) !== -1) ||
-        (entrada && normalizeText(entrada).indexOf(normalizeText(filter)) !== -1) ||
-        (assunto && normalizeText(assunto).indexOf(normalizeText(filter)) !== -1) ||
-        (cliente && normalizeText(cliente).indexOf(normalizeText(filter)) !== -1) ||
-        (titular && normalizeText(titular).indexOf(normalizeText(filter)) !== -1) ||
-        (entidades && normalizeText(entidades).indexOf(normalizeText(filter)) !== -1)
+        (conta && normalizeText(conta).indexOf(normalizedFilter) !== -1) ||
+        (motivo && normalizeText(motivo).indexOf(normalizedFilter) !== -1) ||
+        (entrada && normalizeText(entrada).indexOf(normalizedFilter) !== -1) ||
+        (assunto && normalizeText(assunto).indexOf(normalizedFilter) !== -1) ||
+        (cliente && normalizeText(cliente).indexOf(normalizedFilter) !== -1) ||
+        (titular && normalizeText(titular).indexOf(normalizedFilter) !== -1) ||
+        (entidades && normalizeText(entidades).indexOf(normalizedFilter) !== -1)
     );
+  }
 
   return dados;
 }

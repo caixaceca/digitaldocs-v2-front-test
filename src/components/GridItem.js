@@ -14,9 +14,5 @@ GridItem.propTypes = {
 };
 
 export default function GridItem({ xs = 12, sm = xs, md = sm, lg = md, xl = lg, children }) {
-  return (
-    <Grid item xs={xs} sm={sm} md={md} lg={lg} xl={xl}>
-      {children}
-    </Grid>
-  );
+  return <Grid size={{ xs, sm, md, lg, xl }}>{children}</Grid>;
 }

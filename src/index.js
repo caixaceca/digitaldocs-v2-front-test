@@ -1,24 +1,15 @@
-/* eslint-disable no-template-curly-in-string */
-// highlight
-import './utils/highlight';
-
-// scroll bar
-import 'simplebar-react/dist/simplebar.min.css';
-
-// lightbox
-import 'react-18-image-lightbox/style.css';
-
-// editor
+// Global styles
 import 'react-quill/dist/quill.snow.css';
-
-// pdf-viewer
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
-
-// lazy image
+import 'react-18-image-lightbox/style.css';
+import 'simplebar-react/dist/simplebar.min.css';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 import 'react-lazy-load-image-component/src/effects/black-and-white.css';
+// pdf-viewer
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+// Highlight
+import './utils/highlight';
 
 import { setLocale } from 'yup';
 import pt from 'date-fns/locale/pt';
@@ -27,19 +18,16 @@ import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Provider as ReduxProvider } from 'react-redux';
 // @mui
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 // redux
 import { store } from './redux/store';
-// contexts
-import { SettingsProvider } from './contexts/SettingsContext';
-import { CollapseDrawerProvider } from './contexts/CollapseDrawerContext';
-
 //
 import App from './App';
 
 // ----------------------------------------------------------------------
 
+/* eslint-disable no-template-curly-in-string */
 setLocale({
   mixed: {
     default: 'Valor inválido para ${label}',
@@ -78,21 +66,19 @@ setLocale({
   },
 });
 
+// ----------------------------------------------------------------------
+
 const domNode = document.getElementById('root');
 const root = createRoot(domNode);
 
 root.render(
-  <HelmetProvider>
-    <ReduxProvider store={store}>
+  <ReduxProvider store={store}>
+    <BrowserRouter>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={pt}>
-        <SettingsProvider>
-          <CollapseDrawerProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </CollapseDrawerProvider>
-        </SettingsProvider>
+        <HelmetProvider>
+          <App />
+        </HelmetProvider>
       </LocalizationProvider>
-    </ReduxProvider>
-  </HelmetProvider>
+    </BrowserRouter>
+  </ReduxProvider>
 );

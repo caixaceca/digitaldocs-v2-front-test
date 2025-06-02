@@ -10,10 +10,6 @@ export function findColaborador(mail, colaboradores) {
     : mail;
 }
 
-export function colaboradorByPerfilId(id, colaboradores) {
-  return colaboradores?.find(({ perfil }) => Number(perfil?.id) === Number(id))?.perfil?.displayName || `Perfil: ${id}`;
-}
-
 // ----------------------------------------------------------------------
 
 export function setItemValue(newValue, setItem, localS, id) {
@@ -156,3 +152,7 @@ export const getProximoAnterior = (processos, selectedId) => {
     proximo: index < processos.length - 1 ? processos[index + 1]?.id : '',
   };
 };
+
+// ----------------------------------------------------------------------
+
+export const vdt = { shouldValidate: true, shouldDirty: true, shouldTouch: true };

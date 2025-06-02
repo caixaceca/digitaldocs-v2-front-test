@@ -13,10 +13,10 @@ export function Cabecalho({ title, codificacao = '' }) {
   return (
     <View style={[styles.gridContainer, styles.header]} fixed>
       <View>
-        <Text
-          style={[styles.headerCaption1]}
-          render={({ pageNumber, totalPages }) => `${codificacao || ptDate(new Date())} | ${pageNumber}/${totalPages}`}
-        />
+        <View style={{ flexDirection: 'row', fontSize: 7, paddingTop: '10mm' }}>
+          <Text>{codificacao || ptDate(new Date())}</Text>
+          <Text render={({ pageNumber, totalPages }) => ` | ${pageNumber}/${totalPages}`} />
+        </View>
         <Text style={[styles.headerTitle]}>{title}</Text>
         <Text style={[styles.headerCaption2]}>Caixa Económica de Cabo Verde</Text>
       </View>
@@ -43,6 +43,10 @@ export function CabecalhoAlt({ cabecalho = false, codificacao = '' }) {
                 `${codificacao ? `${codificacao} | ` : ''} ${pageNumber}/${totalPages}`
               }
             />
+            <View style={{ flexDirection: 'row', fontSize: 7, paddingTop: '10mm' }}>
+              <Text>{codificacao ? `${codificacao} | ` : ''}</Text>
+              <Text render={({ pageNumber, totalPages }) => `${pageNumber}/${totalPages}`} />
+            </View>
             <View style={[styles.headerLogo]}>
               <Image
                 src="/assets/Caixa_Logo_Branco_Transparente.png"

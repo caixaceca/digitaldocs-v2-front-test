@@ -83,11 +83,8 @@ LightboxModal.propTypes = {
 
 export default function LightboxModal({ images, photoIndex, setPhotoIndex, isOpen, ...other }) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
   }, [isOpen]);
 
   const showIndex = images.length > 1 && (

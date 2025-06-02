@@ -78,12 +78,6 @@ function DadosCredito({ dados }) {
         </ListItem>
         <TextItem title="Nº de proposta:" text={dados?.numero_proposta || 'Não definido'} />
         <TextItem title="Montante solicitado:" text={fCurrency(dados?.montante_solicitado)} />
-        {situacao === 'Em análise' && (
-          <>
-            <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
-            {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
-          </>
-        )}
         <TextItem title="Finalidade:" text={dados?.finalidade} />
         <TextItem title="Componente:" text={dados?.componente || 'Não definido'} />
         <TextItem title="Linha de crédito:" text={dados?.linha} />
@@ -130,7 +124,10 @@ function DadosCredito({ dados }) {
         {dados?.montante_aprovado && <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />}
         <TextItem title="Decisor:" text={dados?.escalao_decisao} />
         {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
-        <TextItem title="Prazo de amortização:" text={`${dados?.prazo_amortizacao} meses`} />
+        <TextItem
+          title="Prazo de amortização:"
+          text={`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}
+        />
         <TextItem title="Garantia:" text={dados?.garantia} />
         {dados?.data_desistido && <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />}
         {dados?.data_indeferido && <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />}
@@ -278,7 +275,7 @@ export function InfoCon({ dados }) {
         {dados?.origem_fundo && <TextItem title="Origem do fundo:" text={newLineText(dados?.origem_fundo)} />}
         {dados?.finalidade && <TextItem title="Finalidade do fundo:" text={newLineText(dados?.finalidade)} />}
         <TextItem title="Depositante é o próprio titular:" text={dados?.titular_ordenador ? 'SIM' : 'NÃO'} />
-        <TextItem title="Beneficiária residente:" text={dados?.residente ? 'SIM' : 'NÃO'} />
+        <TextItem title="Beneficiário residente:" text={dados?.residente ? 'SIM' : 'NÃO'} />
       </List>
       <List sx={{ width: 1, pt: 0 }}>
         <ListItem disableGutters divider sx={{ pb: 0.5, pt: 0, mb: 0.5 }}>

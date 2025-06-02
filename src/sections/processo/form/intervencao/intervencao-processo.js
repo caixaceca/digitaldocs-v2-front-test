@@ -19,6 +19,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
+import { vdt } from '../../../../utils/formatObject';
 import { paraLevantamento } from '../../../../utils/validarAcesso';
 import { shapeAnexos, appendAnexos } from '../anexos/utils-anexos';
 import { fNumber, fCurrency } from '../../../../utils/formatNumber';
@@ -33,8 +34,6 @@ import { RHFSwitch, FormProvider, RHFTextField, RHFAutocompleteObj } from '../..
 //
 import Anexos from '../anexos';
 import { Confidencialidade, confidenciaIds } from './encaminhar';
-
-const vsv = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
 // --- CONFIDENCILAIDADES ----------------------------------------------------------------------------------------------
 
@@ -171,9 +170,9 @@ export function ColocarPendenteForm({ onClose }) {
                   name="pendenteLevantamento"
                   label="Pendente de levantamento"
                   onChange={(event, newVal) => {
-                    setValue('pendenteLevantamento', newVal, vsv);
-                    setValue('mobs', newVal ? 'Para levantamento do pedido' : '', vsv);
-                    setValue('motivo', newVal ? motivosPendencia?.find(({ label }) => label === 'Cliente') : null, vsv);
+                    setValue('pendenteLevantamento', newVal, vdt);
+                    setValue('mobs', newVal ? 'Para levantamento do pedido' : '', vdt);
+                    setValue('motivo', newVal ? motivosPendencia?.find(({ label }) => label === 'Cliente') : null, vdt);
                   }}
                 />
               )}
@@ -182,7 +181,7 @@ export function ColocarPendenteForm({ onClose }) {
                 label="Motivo"
                 options={motivosPendencia}
                 disabled={values?.pendenteLevantamento}
-                onChange={(event, newVal) => setValue('motivo', newVal, vsv)}
+                onChange={(event, newVal) => setValue('motivo', newVal, vdt)}
               />
               <RHFTextField name="mobs" label="Observação" disabled={values?.pendenteLevantamento} />
             </Stack>

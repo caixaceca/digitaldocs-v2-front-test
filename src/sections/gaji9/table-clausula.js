@@ -30,6 +30,7 @@ import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
+import { sitClausulas } from '../../_mock';
 import ClausulaForm from './form-clausula';
 import DetalhesGaji9 from './DetalhesGaji9';
 import { applySortFilter, listaTitrulares, listaGarantias, listaProdutos } from './applySortFilter';
@@ -120,7 +121,10 @@ export default function TableClausula({ inativos }) {
                         {row?.tipo_titular || noDados()}
                         {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
                       </TableCell>
-                      <TableCell>{row?.tipo_garantia || noDados()}</TableCell>
+                      <TableCell>
+                        {row?.tipo_garantia || noDados()}
+                        {row?.subtipo_garantia ? ` - ${row?.subtipo_garantia}` : ''}
+                      </TableCell>
                       <TableCell>{row?.componente || noDados()}</TableCell>
                       <TableCell width={10}>
                         <Criado caption tipo="data" value={ptDateTime(row?.ultima_modificacao || row?.modificado_em)} />
@@ -192,13 +196,16 @@ function FiltrarClausulas({ inativos }) {
   ];
 
   const getStoredValue = (key, list) =>
-    list?.find((row) => Number(row?.id) === Number(localStorage.getItem(key))) || null;
+    list?.find(({ id }) => Number(id) === Number(localStorage.getItem(key))) || null;
 
   const [condicional, setCondicional] = useState(() => getStoredValue(false));
-  const [seccao, setSeccao] = useState(() => getStoredValue('clSeccao', seccoesList));
+  const [seccao, setSeccao] = useState(() => getStoredValue('seccaoCl', seccoesList));
   const [titular, setTitular] = useState(() => getStoredValue('titularCl', titularesList));
   const [garantia, setGarantia] = useState(() => getStoredValue('garantiaCl', garantiasList));
   const [componente, setComponente] = useState(() => getStoredValue('componenteCl', componentesList));
+  const [situacao, setSituacao] = useState(
+    () => sitClausulas?.find(({ id }) => id === localStorage.getItem('sitCl')) ?? { id: 'APROVADO', label: 'APROVADO' }
+  );
 
   useEffect(() => {
     dispatch(
@@ -208,29 +215,33 @@ function FiltrarClausulas({ inativos }) {
         titularId: titular?.id || null,
         solta: seccao?.label === 'Solta',
         garantiaId: garantia?.id || null,
+        situacao: situacao?.id || 'APROVADO',
         componenteId: componente?.id || null,
         caixa: seccao?.label === 'Secção de identificação',
         identificacao: seccao?.label === 'Secção de identificação Caixa',
       })
     );
-  }, [componente?.id, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
+  }, [componente?.id, situacao, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
 
   return (
-    <Card sx={{ p: 1, mb: 3 }}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
+    <Card sx={{ p: 1.5, mb: 3 }}>
+      <Stack spacing={1.5}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} sx={{ width: 1 }}>
+          <SelectItem label="Situação" value={situacao} setItem={setSituacao} options={sitClausulas} />
           <SelectItem label="Secção" value={seccao} setItem={setSeccao} options={seccoesList} />
-          <SelectItem label="Tipo de titular" value={titular} setItem={setTitular} options={titularesList} />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
-          <SelectItem label="Componente" value={componente} setItem={setComponente} options={componentesList} />
-          <SelectItem label="Tipo de garantia" value={garantia} setItem={setGarantia} options={garantiasList} />
-        </Stack>
-        <Stack sx={{ pl: 0.5 }}>
+
           <FormControlLabel
             label="Condicional"
+            sx={{ ml: 0, px: { md: 5 } }}
             control={<Switch checked={condicional} onChange={(event) => setCondicional(event.target.checked)} />}
           />
+        </Stack>
+        <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
+            <SelectItem label="Tipo de titular" value={titular} setItem={setTitular} options={titularesList} />
+            <SelectItem label="Componente" value={componente} setItem={setComponente} options={componentesList} />
+            <SelectItem label="Tipo de garantia" value={garantia} setItem={setGarantia} options={garantiasList} />
+          </Stack>
         </Stack>
       </Stack>
     </Card>
@@ -248,7 +259,8 @@ SelectItem.propTypes = {
 
 function SelectItem({ label, value, setItem, options }) {
   const item =
-    (label === 'Secção' && 'clSeccao') ||
+    (label === 'Situação' && 'sitCl') ||
+    (label === 'Secção' && 'seccaoCl') ||
     (label === 'Componente' && 'componenteCl') ||
     (label === 'Tipo de titular' && 'titularCl') ||
     (label === 'Tipo de garantia' && 'garantiaCl') ||
@@ -256,8 +268,10 @@ function SelectItem({ label, value, setItem, options }) {
   return (
     <Autocomplete
       fullWidth
+      size="small"
       value={value}
       options={options}
+      disableClearable={label === 'Situação'}
       getOptionLabel={(option) => option?.label}
       isOptionEqualToValue={(option, val) => option?.id === val?.id}
       onChange={(_, newValue) => {

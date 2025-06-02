@@ -28,7 +28,6 @@ export function newLineText(text) {
 
 export function baralharString(str) {
   if (!str || ambiente === 'producao') return str;
-
   return str;
 
   // if (foto) {
@@ -78,15 +77,6 @@ export const errorMsg = (error) => {
     paths.map((path) => get(error, path)).find((msg) => typeof msg === 'string' && msg.trim()) || 'Ocorreu um erro...'
   );
 };
-
-// ----------------------------------------------------------------------
-
-export function substituirTexto(string, parametros, valores) {
-  parametros?.forEach((row) => {
-    string = string?.replace(`«${row}»`, valores?.[row] || 'NÃO DEFINIDO');
-  });
-  return string;
-}
 
 // ----------------------------------------------------------------------
 

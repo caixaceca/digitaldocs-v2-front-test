@@ -5,22 +5,19 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { newLineText } from '../../utils/formatText';
 import { colorLabel } from '../../utils/getColorPresets';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { sortPermissoes } from '../../utils/formatObject';
 // redux
-import { updateItem } from '../../redux/slices/gaji9';
-import { useSelector, useDispatch } from '../../redux/store';
+import { useSelector } from '../../redux/store';
 // components
 import Label from '../../components/Label';
 import { SearchNotFoundSmall } from '../../components/table';
@@ -152,15 +149,9 @@ function AlineasClausula({ dados = [] }) {
 DetalhesContent.propTypes = { dados: PropTypes.object, item: PropTypes.string };
 
 export function DetalhesContent({ dados = null, item = '' }) {
-  const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.gaji9);
   const cor = (dados?.revogado && 'error') || (dados?.em_vigor && 'success') || (dados?.em_analise && 'warning');
   const est = (dados?.em_vigor && 'Em vigor') || (dados?.revogado && 'Revogado') || (dados?.em_analise && 'Em análise');
-
-  const ativarDesativado = () => {
-    const params = { msg: `Cláusula ${dados?.ativo ? 'desativado' : 'ativado'}`, getItem: 'clausula' };
-    dispatch(updateItem('ativar clausula', null, params));
-  };
 
   return (
     <>
@@ -183,6 +174,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="ID:" text={dados?.id} />
                     <TableRowItem title="Utilizador ID:" text={dados?.utilizador_id} />
                     <TableRowItem title="Versão:" text={dados?.versao} />
+                    <TableRowItem title="Situação:" text={dados?.situacao} />
                     {item === 'Minuta' && (
                       <TableRowItem
                         title="Estado:"
@@ -236,8 +228,13 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="Representante:" text={dados?.representante} />
                     <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
                     <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
-                    <TableRowItem title="Tipo titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
-                    <TableRowItem title="Tipo garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
+                    <TableRowItem title="Tipo de titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
+                    <TableRowItem title="Tipo de garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
+                    <TableRowItem
+                      title="Subtipo da garantia:"
+                      text={dados?.subtipo_garantia}
+                      id={dados?.subtipo_garantia_id}
+                    />
                     <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
                     <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
                     <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
@@ -272,23 +269,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                     <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
                     {dados?.nota && <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />}
-                    {'ativo' in dados && (
-                      <TableRowItem
-                        title="Ativo:"
-                        item={
-                          item === 'clausulas' ? (
-                            <FormControlLabel
-                              label={dados?.ativo ? 'Sim' : 'Não'}
-                              control={
-                                <Switch checked={dados?.ativo} onClick={() => ativarDesativado()} size="small" />
-                              }
-                            />
-                          ) : (
-                            <LabelSN item={dados?.ativo} />
-                          )
-                        }
-                      />
-                    )}
+                    {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
                     <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                   </TableBody>
                 </Table>

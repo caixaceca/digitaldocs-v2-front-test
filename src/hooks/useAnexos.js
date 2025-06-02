@@ -6,9 +6,7 @@ export default function useAnexos(item1, item2, setValue, anexos) {
   const dropSingle = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
-      if (file) {
-        setValue(item1, Object.assign(file, { preview: URL.createObjectURL(file) }));
-      }
+      if (file) setValue(item1, Object.assign(file, { preview: URL.createObjectURL(file) }));
     },
     [item1, setValue]
   );
@@ -26,9 +24,7 @@ export default function useAnexos(item1, item2, setValue, anexos) {
     setValue(item2, filteredItems);
   };
 
-  const removeAll = () => {
-    setValue(item2, []);
-  };
+  const removeAll = () => setValue(item2, []);
 
   return { dropSingle, dropMultiple, removeOne, removeAll };
 }

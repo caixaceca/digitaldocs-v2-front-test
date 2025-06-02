@@ -61,14 +61,16 @@ export function MarcadorForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Marcador ${isEdit ? 'atualizado' : 'adicionad'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('marcadores', JSON.stringify(values), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Editar marcador' : 'Adicionar marcador'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'marcadores', onClose))}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFTextField name="prefixo" label="Prefixo" />
@@ -186,14 +188,16 @@ export function GrupoForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Grupo ${isEdit ? 'atualizado' : 'adicionad'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('grupos', JSON.stringify(values), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Atualizar grupo' : 'Adicionar grupo'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'grupos', onClose))}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFTextField name="designacao" label="Designação" />
@@ -216,7 +220,7 @@ RecursoGrupoForm.propTypes = { onClose: PropTypes.func, selectedItem: PropTypes.
 export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
   const dispatch = useDispatch();
   const { isSaving, recursos } = useSelector((state) => state.gaji9);
-  const recursosList = useMemo(() => recursos?.map((row) => ({ id: row?.id, label: row?.nome })), [recursos]);
+  const recursosList = useMemo(() => recursos?.map(({ id, nome }) => ({ id, label: nome })), [recursos]);
 
   useEffect(() => {
     dispatch(getFromGaji9('recursos'));
@@ -245,9 +249,7 @@ export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
               },
             ],
           }
-        : {
-            recursos: [{ recurso: null, permissao: [], data_inicio: null, data_termino: null }],
-          },
+        : { recursos: [{ recurso: null, permissao: [], data_inicio: null, data_termino: null }] },
     [selectedItem, recursosList]
   );
 
@@ -376,14 +378,16 @@ export function RecursoForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Recurso ${isEdit ? 'atualizado' : 'adicionad'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('recursos', JSON.stringify(values), params));
+  };
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{isEdit ? 'Atualizar recurso' : 'Adicionar recurso'}</DialogTitle>
       <DialogContent>
-        <FormProvider
-          methods={methods}
-          onSubmit={handleSubmit(() => submitDados(selectedItem?.id, values, isEdit, dispatch, 'recursos', onClose))}
-        >
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFTextField name="nome" label="Nome" />
@@ -517,10 +521,8 @@ export function FuncaoForm({ onClose }) {
       },
       ['utilizador']
     );
-    const params = { msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, onClose };
-    dispatch(
-      (isEdit ? updateItem : createItem)('funcoes', JSON.stringify(formData), { id: selectedItem?.id, ...params })
-    );
+    const params = { id: selectedItem?.id, msg: `Utilizador ${isEdit ? 'atualizada' : 'adicionada'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('funcoes', JSON.stringify(formData), { ...params }));
   };
 
   return (
@@ -623,11 +625,4 @@ export function ItemComponent({ item, rows, children }) {
       )}
     </>
   );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function submitDados(id, values, isEdit, dispatch, item, onClose) {
-  const params = { id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
-  dispatch((isEdit ? updateItem : createItem)(item, JSON.stringify(values), params));
 }

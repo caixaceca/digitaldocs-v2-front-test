@@ -47,16 +47,40 @@ export default function SettingFullscreen() {
         fullWidth
         size="large"
         color={'inherit'}
+        sx={{ fontSize: 14 }}
         startIcon={<RestartAltOutlinedIcon />}
         onClick={() => {
           onResetSetting();
-          localStorage.clear();
-          window.location.reload();
+          clearCacheAndReload();
         }}
-        sx={{ fontSize: 14 }}
       >
         Limpar dados
       </Button>
     </>
   );
+}
+
+async function clearCacheAndReload() {
+  // Limpar os cookies do navegador
+  document.cookie.split(';').forEach((cookie) => {
+    const name = cookie.split('=')[0].trim();
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  });
+
+  // Limpar o cache do navegador
+  if ('caches' in window) {
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+    } catch (error) {
+      console.error('Erro ao limpar o cache:', error);
+    }
+  } else {
+    console.warn('Cache API não suportada neste navegador.');
+  }
+
+  // Limpar o localStorage e sessionStorage e recarregar a página
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = `${window.location.origin + window.location.pathname}?cache_buster=${new Date().getTime()}`;
 }

@@ -21,11 +21,12 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 // utils
+import { vdt } from '../../utils/formatObject';
 import { newLineText } from '../../utils/formatText';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
 import { updateDados, resetDados, backStep, gotoStep } from '../../redux/slices/stepper';
+import { getSuccess, getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -40,9 +41,10 @@ import { SemDados } from '../../components/Panel';
 import { DialogTitleAlt, DialogConfirmar } from '../../components/CustomDialog';
 import { AddItem, DefaultAction, ButtonsStepper } from '../../components/Actions';
 //
+import { sitClausulas } from '../../_mock';
 import { ItemComponent } from './form-gaji9';
 import { LabelSN } from '../parametrizacao/Detalhes';
-import { listaTitrulares, listaGarantias, listaProdutos } from './applySortFilter';
+import { listaTitrulares, listaGarantias, listaProdutos, subTiposGarantia } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -118,29 +120,34 @@ Identificacao.propTypes = { onClose: PropTypes.func };
 function Identificacao({ onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { tiposTitulares, tiposGarantias, componentes, selectedItem } = useSelector((state) => state.gaji9);
+  const { isEdit, tiposTitulares, tiposGarantias, componentes, tipoGarantia, selectedItem } = useSelector(
+    (state) => state.gaji9
+  );
 
+  const titularCl = localStorage.getItem('titularCl');
+  const garantiaCl = localStorage.getItem('garantiaCl');
+  const componenteCl = localStorage.getItem('componenteCl');
   const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
+  const subTiposGarant = useMemo(() => subTiposGarantia(tipoGarantia?.subtipos || []), [tipoGarantia?.subtipos]);
+
+  const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) => Number(id) === Number(val))) || null;
 
   const defaultValues = useMemo(
     () => ({
-      condicional: dadosStepper?.condicional || !!selectedItem?.condicional,
-      titular:
-        dadosStepper?.titular ||
-        titularesList?.find(({ id }) => Number(id) === Number(selectedItem?.tipo_titular_id)) ||
-        titularesList?.find(({ id }) => Number(id) === Number(localStorage.getItem('titularCl'))) ||
-        null,
-      garantia:
-        dadosStepper?.garantia ||
-        garantiasList?.find(({ id }) => Number(id) === Number(selectedItem?.tipo_garantia_id)) ||
-        garantiasList?.find(({ id }) => Number(id) === Number(localStorage.getItem('garantiaCl'))) ||
-        null,
-      componente:
-        dadosStepper?.componente ||
-        componentesList?.find(({ id }) => Number(id) === Number(selectedItem?.componente_id)) ||
-        componentesList?.find(({ id }) => Number(id) === Number(localStorage.getItem('componenteCl'))) ||
+      condicional: dadosStepper?.condicional ?? !!selectedItem?.condicional,
+      situacao: dadosStepper?.situacao ?? sitClausulas?.find(({ id }) => id === selectedItem?.situacao),
+      garantia: dadosStepper?.garantia || getItem(garantiasList, selectedItem?.tipo_garantia_id, garantiaCl),
+      titular: dadosStepper?.tipo_titular || getItem(titularesList, selectedItem?.tipo_titular_id, titularCl),
+      componente: dadosStepper?.componente || getItem(componentesList, selectedItem?.componente_id, componenteCl),
+
+      subtipoGarantia:
+        dadosStepper?.subtipoGarantia ||
+        (selectedItem?.subtipo_garantia_id && {
+          id: selectedItem?.subtipo_garantia_id,
+          label: selectedItem?.subtipo_garantia,
+        }) ||
         null,
       seccao:
         dadosStepper?.seccao ||
@@ -149,17 +156,27 @@ function Identificacao({ onClose }) {
         (selectedItem?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
         null,
     }),
-    [dadosStepper, selectedItem, titularesList, garantiasList, componentesList]
+    [dadosStepper, selectedItem, titularesList, garantiasList, componentesList, titularCl, garantiaCl, componenteCl]
   );
 
   const methods = useForm({ defaultValues });
-  const { reset, watch, handleSubmit } = methods;
+  const { reset, watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
+
+  useEffect(() => {
+    getSuccess({ item: 'tipoGarantia', dados: null });
+    if (values?.garantia?.id) dispatch(getFromGaji9('tipoGarantia', { id: values?.garantia?.id, notLoading: true }));
+  }, [dispatch, values?.garantia?.id]);
+
+  const changeGarantia = (val) => {
+    setValue('garantia', val, vdt);
+    setValue('subtipoGarantia', null, vdt);
+  };
 
   return (
     <>
@@ -170,17 +187,30 @@ function Identificacao({ onClose }) {
         <Stack spacing={3} sx={{ pt: 1 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={{ xs: 1, sm: 3 }}>
             <Stack direction="row" spacing={3} sx={{ flexGrow: 1 }}>
+              {isEdit && <RHFAutocompleteSmp name="situacao" label="Situação" options={sitClausulas} />}
               <RHFAutocompleteSmp
                 name="seccao"
                 label="Secção"
                 options={['Solta', 'Secção de identificação', 'Secção de identificação Caixa']}
               />
-              <RHFSwitch name="condicional" label="Condicional" />
+              <Stack sx={{ px: isEdit ? 2 : 5 }}>
+                <RHFSwitch name="condicional" label="Condicional" />
+              </Stack>
             </Stack>
           </Stack>
           <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
           <RHFAutocompleteObj name="componente" label="Componente" options={componentesList} />
-          <RHFAutocompleteObj name="garantia" label="Tipo de garantia" options={garantiasList} />
+          <Stack direction="row" spacing={3}>
+            <RHFAutocompleteObj
+              name="garantia"
+              label="Tipo de garantia"
+              options={garantiasList}
+              onChange={(_, val) => changeGarantia(val)}
+            />
+            {values?.garantia?.id && subTiposGarant?.length > 0 && (
+              <RHFAutocompleteObj name="subtipoGarantia" label="Subtipo da garantia" options={subTiposGarant} />
+            )}
+          </Stack>
         </Stack>
 
         <ButtonsStepper onClose={onClose} labelCancel="Cancelar" />
@@ -387,26 +417,28 @@ function Resumo({ minutaId, onClose }) {
       ativo: true,
       titulo: dadosStepper?.titulo,
       conteudo: dadosStepper?.conteudo,
+      situacao: dadosStepper?.situacao?.id,
       condicional: dadosStepper?.condicional,
       solta: dadosStepper?.seccao === 'Solta',
       tipo_titular_id: dadosStepper?.titular?.id,
       componente_id: dadosStepper?.componente?.id,
       tipo_garantia_id: dadosStepper?.garantia?.id,
+      subtipo_garantia_id: dadosStepper?.subtipoGarantia?.id,
       seccao_identificacao: dadosStepper?.seccao === 'Secção de identificação',
       seccao_identificacao_caixa: dadosStepper?.seccao === 'Secção de identificação Caixa',
       numero_ordem: dadosStepper?.seccao && dadosStepper?.seccao !== 'Condicional' ? 0 : dadosStepper?.numero_ordem,
       ...(dadosStepper?.alineas?.length > 0
         ? {
-            alineas: dadosStepper?.alineas?.map((row) => ({
-              ativo: row?.ativo,
-              conteudo: row?.conteudo,
-              numero_ordem: row?.numero_ordem,
-              ...(row?.sub_alineas?.length > 0
+            alineas: dadosStepper?.alineas?.map(({ ativo, conteudo, numero_ordem: num, sub_alineas: alineas }) => ({
+              ativo,
+              conteudo,
+              numero_ordem: num,
+              ...(alineas?.length > 0
                 ? {
-                    sub_alineas: row?.sub_alineas?.map((item) => ({
-                      ativo: item?.ativo,
-                      conteudo: item?.conteudo,
-                      numero_ordem: item?.numero_ordem,
+                    sub_alineas: alineas?.map(({ ativo, conteudo, numero_ordem: num }) => ({
+                      ativo,
+                      conteudo,
+                      numero_ordem: num,
                     })),
                   }
                 : null),
@@ -424,10 +456,12 @@ function Resumo({ minutaId, onClose }) {
       <TitleResumo title="Identificação" action={() => dispatch(gotoStep(0))} />
       <Table size="small">
         <TableBody>
+          <TableRowItem title="Situação :" text={dadosStepper?.situacao?.label} />
           <TableRowItem title="Secção :" text={dadosStepper?.seccao || 'Sem secção'} />
           <TableRowItem title="Condicional:" item={<LabelSN item={dadosStepper?.condicional} />} />
-          <TableRowItem title="Titular:" text={dadosStepper?.titular?.label} />
-          <TableRowItem title="Garantia:" text={dadosStepper?.garantia?.label} />
+          <TableRowItem title="Tipo de titular:" text={dadosStepper?.titular?.label} />
+          <TableRowItem title="Tipo de garantia:" text={dadosStepper?.garantia?.label} />
+          <TableRowItem title="Subtipo da garantia:" text={dadosStepper?.subtipoGarantia?.label} />
           <TableRowItem title="Componente:" text={dadosStepper?.componente?.label} />
         </TableBody>
       </Table>
@@ -441,18 +475,18 @@ function Resumo({ minutaId, onClose }) {
       </Table>
       <TitleResumo title="Números" action={() => dispatch(gotoStep(2))} />
       {dadosStepper?.alineas?.length > 0 ? (
-        dadosStepper?.alineas?.map((row, index) => (
+        dadosStepper?.alineas?.map(({ numero_ordem: num, conteudo, sub_alineas: alineas }, index) => (
           <Stack direction="row" key={`res_alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
-            <Typography variant="subtitle2">{row?.numero_ordem}.</Typography>
+            <Typography variant="subtitle2">{num}.</Typography>
             <Stack>
               <Typography variant="body2" sx={{ textAlign: 'justify' }}>
-                {row?.conteudo ? newLineText(row?.conteudo) : ''}
+                {conteudo ? newLineText(conteudo) : ''}
               </Typography>
-              {row?.sub_alineas?.map((item, index1) => (
+              {alineas?.map(({ conteudo, numero_ordem: num }, index1) => (
                 <Stack direction="row" key={`res_alinea_${index}_sub_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                  <Typography variant="subtitle2">{item?.numero_ordem}.</Typography>
+                  <Typography variant="subtitle2">{num}.</Typography>
                   <Typography variant="body2" sx={{ textAlign: 'justify' }}>
-                    {item?.conteudo ? newLineText(item?.conteudo) : ''}
+                    {conteudo ? newLineText(conteudo) : ''}
                   </Typography>
                 </Stack>
               ))}

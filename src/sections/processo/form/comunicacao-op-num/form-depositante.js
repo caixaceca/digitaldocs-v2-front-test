@@ -61,10 +61,10 @@ export default function FormDepositante({ dados }) {
   const defaultValues = useMemo(
     () => ({
       is_cliente: dadosStepper?.is_cliente || true,
-      entidade_con: dadosStepper?.entidade_con || '',
-      nif: dadosStepper?.nif || processo?.con?.nif || '',
+      entidade_con: dadosStepper?.entidade_con || null,
       pai: dadosStepper?.pai || processo?.con?.pai || '',
       mae: dadosStepper?.mae || processo?.con?.mae || '',
+      nif: dadosStepper?.nif || processo?.con?.nif || null,
       docid: dadosStepper?.docid || processo?.con?.docid || '',
       morada: dadosStepper?.morada || processo?.con?.morada || '',
       emails: dadosStepper?.emails || processo?.con?.emails || '',
@@ -116,7 +116,7 @@ export default function FormDepositante({ dados }) {
             <GridItem sm={4} children={<RHFSwitch name="is_cliente" label="Cliente da Caixa" />} />
           )}
           <GridItem sm={values?.titular_ordenador ? 6 : 4}>
-            <RHFSwitch name="residente" label="Beneficiária residente" />
+            <RHFSwitch name="residente" label="Beneficiário residente" />
           </GridItem>
           {values?.is_cliente && (
             <GridItem>

@@ -85,20 +85,14 @@ export function getDataLS(label, data) {
 
 export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, valueF) {
   setData(newValue);
-  if (localSI) {
-    localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
-  }
+  if (localSI) localStorage.setItem(localSI, dataValido(newValue) ? format(newValue, 'yyyy-MM-dd') : '');
   if (resetDate) {
     if (newValue && dataValido(newValue) && newValue > valueF) {
       resetDate(new Date());
-      if (localSIF) {
-        localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
-      }
+      if (localSIF) localStorage.setItem(localSIF, format(new Date(), 'yyyy-MM-dd'));
     } else if (!newValue) {
       resetDate(null);
-      if (localSIF) {
-        localStorage.setItem(localSIF, '');
-      }
+      if (localSIF) localStorage.setItem(localSIF, '');
     }
   }
 }
