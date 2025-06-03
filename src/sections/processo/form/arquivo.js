@@ -137,7 +137,6 @@ export function ArquivarForm({ naoFinal, onClose }) {
             <GridItem children={<RHFTextField name="observacao" multiline rows={4} label="Observação" />} />
             {!!cheklistOutros && (
               <GridItem xs={12}>
-                {' '}
                 <RHFUploadMultiFile small name="anexos" onDrop={dropMultiple} onRemove={removeOne} />
               </GridItem>
             )}
