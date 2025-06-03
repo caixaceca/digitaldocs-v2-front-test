@@ -26,7 +26,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import ClausulaForm from './form-clausula';
 import { applySortFilter } from './applySortFilter';
 import { GarantiasForm, ComponentesForm } from './form-minuta';
-import DetalhesGaji9, { DetalhesContent } from './DetalhesGaji9';
+import DetalhesGaji9, { DetalhesContent } from './detalhes-gaji9';
 
 // ----------------------------------------------------------------------
 

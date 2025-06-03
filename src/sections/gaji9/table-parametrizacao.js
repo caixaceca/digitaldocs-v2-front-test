@@ -24,7 +24,7 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { CellChecked, ColaboradorInfo } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import DetalhesGaji9 from './DetalhesGaji9';
+import DetalhesGaji9 from './detalhes-gaji9';
 import { applySortFilter } from './applySortFilter';
 import { GrupoForm, FuncaoForm, RecursoForm, MarcadorForm, VariavelForm } from './form-gaji9';
 

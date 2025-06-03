@@ -12,7 +12,7 @@ import useToggle from '../../hooks/useToggle';
 // components
 import { DefaultAction } from '../../components/Actions';
 //
-import { ArquivarForm } from './form/arquivo';
+import { ArquivarForm } from './form/form-arquivo';
 import { EncaminharStepper } from './form/intervencao';
 
 // ----------------------------------------------------------------------

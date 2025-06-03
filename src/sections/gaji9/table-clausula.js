@@ -32,7 +32,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 import { sitClausulas } from '../../_mock';
 import ClausulaForm from './form-clausula';
-import DetalhesGaji9 from './DetalhesGaji9';
+import DetalhesGaji9 from './detalhes-gaji9';
 import { applySortFilter, listaTitrulares, listaGarantias, listaProdutos } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------

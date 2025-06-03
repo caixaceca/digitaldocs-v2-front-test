@@ -18,7 +18,7 @@ import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
-import TabGaji9 from '../../sections/gaji9/tabs-gaji9';
+import TabGaji9 from '../../sections/gaji9/items';
 
 // ----------------------------------------------------------------------
 

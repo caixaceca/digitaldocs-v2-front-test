@@ -29,7 +29,7 @@ import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import { DialogConfirmar, DialogTitleAlt } from '../../components/CustomDialog';
 import { ColaboradorInfo, DataLabel, CellChecked } from '../../components/Panel';
 //
-import { DetalhesContent } from './DetalhesGaji9';
+import { DetalhesContent } from './detalhes-gaji9';
 import { SubtiposForm } from './form-identificadores';
 import { BalcaoForm, RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
 

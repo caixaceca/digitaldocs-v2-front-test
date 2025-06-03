@@ -35,7 +35,7 @@ import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import DetalhesGaji9 from './DetalhesGaji9';
+import DetalhesGaji9 from './detalhes-gaji9';
 import { applySortFilter } from './applySortFilter';
 import { Resgisto } from '../parametrizacao/Detalhes';
 import { IntervenienteForm, DataContrato } from './form-credito';

@@ -22,7 +22,7 @@ import { fNumber } from '../../utils/formatNumber';
 import { useSelector, useDispatch } from '../../redux/store';
 import { getFromGaji9, createItem, deleteItem } from '../../redux/slices/gaji9';
 // components
-import DetalhesGaji9 from './DetalhesGaji9';
+import DetalhesGaji9 from './detalhes-gaji9';
 import GridItem from '../../components/GridItem';
 import { CellChecked } from '../../components/Panel';
 import { TableSearchNotFound } from '../../components/table';

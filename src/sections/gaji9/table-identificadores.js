@@ -33,7 +33,7 @@ import {
   TipoTitularForm,
   RepresentanteForm,
 } from './form-identificadores';
-import DetalhesGaji9 from './DetalhesGaji9';
+import DetalhesGaji9 from './detalhes-gaji9';
 import { applySortFilter } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------

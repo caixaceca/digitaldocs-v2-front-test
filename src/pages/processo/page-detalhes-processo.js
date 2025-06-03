@@ -52,7 +52,7 @@ import {
 } from '../../sections/processo/form/intervencao';
 import Intervencao from '../../sections/processo/Intervencao';
 import ProcessoForm from '../../sections/processo/form/form-processo';
-import { DesarquivarForm } from '../../sections/processo/form/arquivo';
+import { DesarquivarForm } from '../../sections/processo/form/form-arquivo';
 
 // ----------------------------------------------------------------------
 

@@ -22,7 +22,7 @@ import { DialogTitleAlt } from '../../components/CustomDialog';
 import { DefaultAction, DialogButons, Fechar } from '../../components/Actions';
 import { FormProvider, RHFTextField, RHFNumberField } from '../../components/hook-form';
 //
-import { DetalhesContent } from './DetalhesGaji9';
+import { DetalhesContent } from './detalhes-gaji9';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
