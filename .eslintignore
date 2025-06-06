@@ -1,16 +1,8 @@
 // .eslintignore
 build/*
-dist/*
 public/*
-**/out/*
-**/node_modules/*
-
-**/.next/*
-next.config.js
-
 src/service-worker.js
+src/serviceWorkerRegistration.js
 src/setupTests.js
-
-src/service-worker.ts
-src/setupTests.ts
+src/reportWebVitals.js
 

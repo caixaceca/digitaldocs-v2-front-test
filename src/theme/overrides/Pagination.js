@@ -21,7 +21,7 @@ export default function Pagination(theme) {
           },
         },
         outlined: {
-          border: `1px solid ${theme.palette.grey[500_32]}`,
+          border: `1px solid ${theme.palette.grey['500_32']}`,
         },
         outlinedPrimary: {
           '&.Mui-selected': {

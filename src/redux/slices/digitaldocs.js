@@ -568,13 +568,9 @@ function processarProcesso(processo, perfilId, dispatch, aceitar, ht) {
   const preso = estados?.find(({ preso, perfil_id: pid }) => preso && pid === perfilId)?.estado_id || '';
 
   if (status === 'A') processo.estado = { estado: 'Arquivo', duplicado, dataDup, ccDup };
-  else if (donoId && donoLabel) processo.estado = { estado: donoLabel, estado_id: donoId, duplicado, dataDup, ccDup };
+  else if (donoId && donoLabel) processo.estado = { estado: donoLabel, estado_id: donoId };
   else if (estados.length === 1) {
-    processo.estado = {
-      ...(estados?.[0] ?? null),
-      ...{ duplicado, dataDup, ccDup },
-      atribuidoAMim: estados?.[0]?.perfil_id === perfilId,
-    };
+    processo.estado = { ...(estados?.[0] ?? null), atribuidoAMim: estados?.[0]?.perfil_id === perfilId };
     processo.pareceres_estado = estados[0]?.pareceres?.length ? estados[0].pareceres : [];
     processo.estados = [];
   }

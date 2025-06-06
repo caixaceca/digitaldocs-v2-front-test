@@ -1,10 +1,8 @@
 import get from 'lodash/get';
-// @mui
-import Typography from '@mui/material/Typography';
+import extenso from 'extenso';
 // config
 import { ambiente } from '../config';
-
-const numero = require('numero-por-extenso');
+import { noDados } from '../components/Panel';
 
 // ----------------------------------------------------------------------
 
@@ -14,14 +12,6 @@ export function normalizeText(text) {
     ?.toLowerCase()
     ?.normalize('NFD')
     ?.replace(/[\u0300-\u036f]/g, '');
-}
-
-// ----------------------------------------------------------------------
-
-export function newLineText(text) {
-  if (!text) return '';
-  const newText = text.split('\n').map((str) => <p key={str}>{str}</p>);
-  return newText;
 }
 
 // ----------------------------------------------------------------------
@@ -80,27 +70,8 @@ export const errorMsg = (error) => {
 
 // ----------------------------------------------------------------------
 
-export function valorPorExtenso(valor) {
-  let _valor = '';
-  if (valor > 1999 || valor < 1000) _valor = numero.porExtenso(valor, numero.estilo.monetario);
-  else if (valor === 1000) _valor = 'mil escudos';
-  else if (
-    (valor > 1000 && valor < 1101) ||
-    valor === 1100 ||
-    valor === 1200 ||
-    valor === 1300 ||
-    valor === 1400 ||
-    valor === 1500 ||
-    valor === 1600 ||
-    valor === 1700 ||
-    valor === 1800 ||
-    valor === 1900
-  ) {
-    _valor = `mil e ${numero.porExtenso(valor - 1000, numero.estilo.monetario)}`;
-  } else {
-    _valor = `mil ${numero.porExtenso(valor - 1000, numero.estilo.monetario)}`;
-  }
-  return _valor?.replace('real', 'escudo')?.replace('reais', 'escudos');
+export function valorPorExtenso(valor = 0) {
+  return extenso(valor, { mode: 'currency', currency: { type: 'CVE' } });
 }
 
 // ----------------------------------------------------------------------
@@ -124,16 +95,6 @@ export function nomeacaoBySexo(nomeacao, sexo) {
   else if (nomeacao === 'Assessor' && sexo === 'Feminino') nomeacao = 'Assessora';
   else if (nomeacao === 'Coordenador Gabinete') nomeacao = 'Coordenador de Gabinete';
   return nomeacao;
-}
-
-// ----------------------------------------------------------------------
-
-export function noDados(text) {
-  return (
-    <Typography variant="caption" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
-      {text || '(Não identificado)'}
-    </Typography>
-  );
 }
 
 // ----------------------------------------------------------------------

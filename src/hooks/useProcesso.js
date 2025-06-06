@@ -23,7 +23,7 @@ export function useProcesso({ id, perfilId }) {
 export function useIdentificacao({ id }) {
   const { uos } = useSelector((state) => state.intranet);
   const processo = useSelector((state) => state.digitaldocs.processo);
-  const uoOrigem = useMemo(() => uos?.find((row) => row?.id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
+  const uoOrigem = useMemo(() => uos?.find(({ id }) => id === processo?.uo_origem_id), [processo?.uo_origem_id, uos]);
 
   if (!processo) return `Info. do processo: ${id}`;
 

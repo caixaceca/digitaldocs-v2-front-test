@@ -1,7 +1,5 @@
-// @mui
-import Box from '@mui/material/Box';
 // components
-import Image from '../components/Image';
+import { getIcon } from '../components/Image';
 
 // ----------------------------------------------------------------------
 
@@ -92,13 +90,6 @@ export function getFileThumb(thumbp, sx, fileUrl = '') {
   return thumb;
 }
 
-const getIcon = (name, thumbp, sx) =>
-  thumbp ? (
-    <Box component="img" src={`/assets/icons/file_format/${name}.svg`} sx={{ flexShrink: 0, ...sx }} />
-  ) : (
-    <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24 }} {...sx} />
-  );
-
 // ----------------------------------------------------------------------
 
 export function canPreview(anexo) {
@@ -109,7 +100,6 @@ export function canPreview(anexo) {
 
 export function getFileData(file, index) {
   if (typeof file === 'string') return { key: index ? `${file}-${index}` : file, preview: file };
-  
 
   return {
     name: file.name,

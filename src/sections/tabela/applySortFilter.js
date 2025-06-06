@@ -20,15 +20,9 @@ export default function applySortFilter({ from, dados, comparator, filter, colab
 
   if (filter) {
     const normalizedFilter = normalizeText(filter);
-    dados = dados.filter(
-      (row) =>
-        (row?.conta && normalizeText(row?.conta).indexOf(normalizedFilter) !== -1) ||
-        (row?.motivo && normalizeText(row?.motivo).indexOf(normalizedFilter) !== -1) ||
-        (row?.cliente && normalizeText(row?.cliente).indexOf(normalizedFilter) !== -1) ||
-        (row?.titular && normalizeText(row?.titular).indexOf(normalizedFilter) !== -1) ||
-        (row?.nentrada && normalizeText(row?.nentrada).indexOf(normalizedFilter) !== -1) ||
-        (row?.entidades && normalizeText(row?.entidades).indexOf(normalizedFilter) !== -1) ||
-        (row?.observacao && normalizeText(row?.observacao).indexOf(normalizedFilter) !== -1)
+    const campos = ['conta', 'motivo', 'cliente', 'titular', 'nentrada', 'entidades', 'observacao'];
+    dados = dados.filter((row) =>
+      campos.some((campo) => row?.[campo] && normalizeText(row[campo]).includes(normalizedFilter))
     );
   }
 

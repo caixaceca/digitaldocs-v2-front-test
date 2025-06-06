@@ -1,6 +1,6 @@
 {
-  "name": "Intranet da Caixa Económica de Cabo Verde",
-  "short_name": "Intranet",
+  "name": "Imóveis da Caixa Económica de Cabo Verde",
+  "short_name": "Imóveis Caixa",
   "display": "standalone",
   "start_url": "/",
   "theme_color": "#5AAA28",

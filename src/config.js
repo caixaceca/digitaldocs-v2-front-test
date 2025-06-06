@@ -12,10 +12,10 @@ export const ambiente =
 
 export const msalConfig = {
   auth: {
-    clientId: process.env.REACT_APP_CLIENTE_ID_AAD,
-    authority: process.env.REACT_APP_AUTHORITY_AAD,
-    // redirectUri: 'http://localhost:3000',
-    redirectUri: 'https://ddocsteste.caixa.cv/fila-trabalho/lista',
+    clientId: import.meta.env.VITE_CLIENTE_ID_AAD,
+    authority: import.meta.env.VITE_AUTHORITY_AAD,
+    redirectUri: 'http://localhost:3000',
+    // redirectUri: 'https://ddocsteste.caixa.cv/fila-trabalho/lista',
     // redirectUri: 'https://digitaldocs.caixa.cv/fila-trabalho/lista',
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },
@@ -25,7 +25,7 @@ export const msalConfig = {
 export const msalInstance = new PublicClientApplication(msalConfig);
 
 export const loginRequest = {
-  authority: process.env.REACT_APP_AUTHORITY_AAD,
+  authority: import.meta.env.VITE_AUTHORITY_AAD,
   scopes: ['User.Read', 'Presence.Read.All', 'openid', 'profile'],
 };
 
