@@ -30,7 +30,7 @@ import { DefaultAction } from '../../../components/Actions';
 import { DialogTitleAlt } from '../../../components/CustomDialog';
 import { Checked, CellChecked, Criado, newLineText } from '../../../components/Panel';
 //
-import { colorProcesso } from '../../tabela/TableProcessos';
+import { colorProcesso } from '../../tabela/table-processos';
 // _mock
 import { dis } from '../../../_mock';
 

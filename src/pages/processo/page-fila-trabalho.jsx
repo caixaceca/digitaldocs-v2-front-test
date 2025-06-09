@@ -33,7 +33,7 @@ import { TabsWrapperStyle } from '../../components/Panel';
 import { DefaultAction } from '../../components/Actions';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 // sections
-import { TableProcessos } from '../../sections/tabela';
+import TableProcessos from '../../sections/tabela/table-processos';
 import ProcessoForm from '../../sections/processo/form/form-processo';
 
 // ----------------------------------------------------------------------

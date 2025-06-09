@@ -12,9 +12,9 @@ import { getComparator, applySort } from '../../../hooks/useTable';
 import { SearchNotFound404 } from '../../../components/table';
 import { SkeletonProcesso } from '../../../components/skeleton';
 //
-import Anexos from './Anexos';
-import NotaProcesso from './NotaProcesso';
-import DetalhesProcesso from './DetalhesProcesso';
+import NotaProcesso from './nota';
+import DetalhesProcesso from './detalhes';
+import Anexos from './anexos-dados-gerais';
 import GridItem from '../../../components/GridItem';
 
 // ----------------------------------------------------------------------

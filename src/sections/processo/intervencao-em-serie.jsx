@@ -50,11 +50,9 @@ export default function Intervencao() {
       )}
 
       {processoEstadoInicial(meusAmbientes, estado?.estado_id) && (
-        <>
-          <DefaultAction label="DOMICILIAR" onClick={() => openModal('domiciliar', null)} />
-          <DefaultAction label="ADICIONAR ANEXO" onClick={() => openModal('adicionar-anexo', null)} />
-        </>
+        <DefaultAction label="DOMICILIAR" onClick={() => openModal('domiciliar', null)} />
       )}
+      <DefaultAction label="ADICIONAR ANEXO" onClick={() => openModal('adicionar-anexo', null)} />
 
       {agendado &&
         status !== 'X' &&

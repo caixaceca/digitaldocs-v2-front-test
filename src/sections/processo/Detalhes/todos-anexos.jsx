@@ -12,7 +12,7 @@ import { eliminarAnexo } from '../../../utils/validarAcesso';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getAnexo, setModal } from '../../../redux/slices/digitaldocs';
 //
-import { AnexoItem } from './Anexos';
+import { AnexoItem } from './anexos-dados-gerais';
 import { SearchNotFound } from '../../../components/table';
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 

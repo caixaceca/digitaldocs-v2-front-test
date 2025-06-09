@@ -17,8 +17,8 @@ import Label from '../../../components/Label';
 import { DefaultAction } from '../../../components/Actions';
 import { ColaboradorInfo } from '../../../components/Panel';
 //
-import { Info, InfoCriador } from './Estados';
-import ParecerExport, { DownloadPdf } from './MinutaParecer';
+import { Info, InfoCriador } from './estados-processo';
+import ParecerExport, { DownloadPdf } from './minuta-parecer';
 
 // ----------------------------------------------------------------------
 

@@ -49,9 +49,7 @@ export function UoData({
         disableClearable={!cartoes}
         isOptionEqualToValue={(option, value) => option?.id === value?.id}
         onChange={(event, newValue) => {
-          if (cartoes) {
-            setSelected([]);
-          }
+          if (cartoes) setSelected([]);
           setItemValue(newValue, setUo, cartoes ? 'uoCartao' : 'uoC', true);
         }}
         renderInput={(params) => (
@@ -66,9 +64,7 @@ export function UoData({
             maxDate={new Date()}
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 155 } } }}
             onChange={(newValue) => {
-              if (cartoes) {
-                setSelected([]);
-              }
+              if (cartoes) setSelected([]);
               setDataUtil(newValue, setDatai, cartoes ? '' : 'dataIC', setDataf, cartoes ? '' : 'dataFC', dataf);
             }}
           />
@@ -80,9 +76,7 @@ export function UoData({
             maxDate={new Date()}
             slotProps={{ textField: { fullWidth: true, size: 'small', sx: { width: 155 } } }}
             onChange={(newValue) => {
-              if (cartoes) {
-                setSelected([]);
-              }
+              if (cartoes) setSelected([]);
               setDataUtil(newValue, setDataf, cartoes ? '' : 'dataFC', '', '', '');
             }}
           />

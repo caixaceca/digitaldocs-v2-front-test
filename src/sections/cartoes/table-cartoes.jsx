@@ -30,8 +30,8 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarCartoes } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { UoData } from '../tabela/Dados';
 import { Detalhes } from './detalhes-cartao';
+import { UoData } from '../tabela/uo-data-filter';
 import { dadosList, tiposCartoes, datas, applySortFilter } from './utils-cartoes';
 import { ValidarMultiploForm, BalcaoEntregaForm, ConfirmarPorDataForm, AnularForm } from './form-cartoes';
 

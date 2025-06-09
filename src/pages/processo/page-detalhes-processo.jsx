@@ -26,19 +26,6 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import DialogPreviewDoc, { DialogConfirmar } from '../../components/CustomDialog';
 // sections
 import {
-  Views,
-  Estados,
-  Versoes,
-  InfoCon,
-  Pareceres,
-  Transicoes,
-  DadosGerais,
-  InfoCredito,
-  TodosAnexos,
-  TableDetalhes,
-  PareceresEstado,
-} from '../../sections/processo/Detalhes';
-import {
   AnexosForm,
   AtribuirForm,
   LibertarForm,
@@ -50,9 +37,11 @@ import {
   EliminarReativar,
   ColocarPendenteForm,
 } from '../../sections/processo/form/intervencao';
-import Intervencao from '../../sections/processo/Intervencao';
 import ProcessoForm from '../../sections/processo/form/form-processo';
+import Intervencao from '../../sections/processo/intervencao-em-serie';
 import { DesarquivarForm } from '../../sections/processo/form/form-arquivo';
+
+import useMenuProcesso from '../../sections/processo/Detalhes/menu';
 
 // ----------------------------------------------------------------------
 
@@ -65,16 +54,14 @@ export default function PageProcesso() {
   const [currentTab, setCurrentTab] = useState('Dados gerais');
 
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { meusAmbientes, isAdmin, isAuditoria, colaboradoresEstado: ce } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes, isAdmin, colaboradoresEstado: ce } = useSelector((state) => state.parametrizacao);
   const { processos, done, pdfPreview, selectedItem, isOpenModal, isSaving, isLoadingFile } = useSelector(
     (state) => state.digitaldocs
   );
 
   const identificador = useIdentificacao({ id });
   const processo = useProcesso({ id, perfilId });
-  const { estado = null, credito = null, con = null, status = '' } = processo || {};
-  const { estados = [], htransicoes = [], pareceres_estado: pareceres = [] } = processo || {};
-  const { fluxo_id: fluxoId = '', valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
+  const { estado = null, status = '', fluxo_id: fluxoId = '', estados = [], htransicoes = [] } = processo || {};
 
   const proxAnt = getProximoAnterior(processos, id);
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
@@ -95,86 +82,7 @@ export default function PageProcesso() {
     [dispatch, id]
   );
 
-  const tabsList = useMemo(() => {
-    const tabs = [];
-    tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
-
-    if (credito)
-      tabs.push({
-        value: 'Info. crédito',
-        component: (
-          <InfoCredito dados={{ ...credito, processoId: id, modificar: estado?.preso && estado?.atribuidoAMim }} />
-        ),
-      });
-
-    if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
-
-    if (estados?.length > 0) tabs.push({ value: 'Pareceres', component: <Estados handleAceitar={handleAceitar} /> });
-
-    if (estado?.pareceres && estado.pareceres?.length > 0) {
-      tabs.push({
-        value: 'Pareceres',
-        component: (
-          <Pareceres
-            id={id}
-            estado={estado?.estado}
-            pareceres={estado.pareceres}
-            estadoId={estado?.estado_id}
-            assunto={`${fluxo ?? ''} - ${titular ?? ''}`}
-          />
-        ),
-      });
-    }
-
-    if (pareceres?.length > 0) {
-      tabs.push({
-        value: 'Pareceres',
-        component: <PareceresEstado pareceres={pareceres} assunto={`${fluxo ?? ''} - ${titular ?? ''}`} />,
-      });
-    }
-
-    if (htransicoes?.length > 0) {
-      tabs.push({
-        value: 'Encaminhamentos',
-        component: <Transicoes transicoes={htransicoes} assunto={`${fluxo ?? ''} - ${titular ?? ''}`} />,
-      });
-    }
-
-    if (processo) {
-      tabs.push(
-        { value: 'Anexos', component: <TodosAnexos /> },
-        { value: 'Retenções', component: <TableDetalhes id={id} item="hretencoes" /> },
-        { value: 'Pendências', component: <TableDetalhes id={id} item="hpendencias" /> },
-        { value: 'Atribuições', component: <TableDetalhes id={id} item="hatribuicoes" /> }
-      );
-    }
-
-    // if (htransicoes?.length > 0) {
-    //   tabs.push({ value: 'Confidencialidades', component: <TableDetalhes id={id} item="confidencialidades" /> });
-    // }
-
-    if (processo && (isAdmin || isAuditoria)) {
-      tabs.push({ value: 'Versões', component: <Versoes id={id} /> }, { value: 'Visualizações', component: <Views /> });
-    }
-
-    return tabs;
-  }, [
-    id,
-    con,
-    fluxo,
-    valor,
-    estado,
-    numero,
-    titular,
-    credito,
-    isAdmin,
-    processo,
-    pareceres,
-    htransicoes,
-    isAuditoria,
-    handleAceitar,
-    estados?.length,
-  ]);
+  const tabsList = useMenuProcesso({ id, processo, handleAceitar });
 
   useEffect(() => {
     if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);

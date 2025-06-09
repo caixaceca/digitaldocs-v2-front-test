@@ -21,8 +21,8 @@ import { DefaultAction } from '../../../components/Actions';
 import { Criado, newLineText } from '../../../components/Panel';
 import MyAvatar, { AvatarBedge } from '../../../components/MyAvatar';
 //
-import Pareceres from './Pareceres';
-import { Encaminhar, destinosProcesso } from '../Intervencao';
+import Pareceres from './historico-pareceres';
+import { Encaminhar, destinosProcesso } from '../intervencao-em-serie';
 
 // ----------------------------------------------------------------------
 

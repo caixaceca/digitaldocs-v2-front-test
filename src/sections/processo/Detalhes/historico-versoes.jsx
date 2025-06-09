@@ -18,7 +18,7 @@ import { SkeletonBar } from '../../../components/skeleton';
 import { SearchNotFound } from '../../../components/table';
 import { ColaboradorInfo } from '../../../components/Panel';
 //
-import DetalhesProcesso from './DetalhesProcesso';
+import DetalhesProcesso from './detalhes';
 
 // ----------------------------------------------------------------------
 

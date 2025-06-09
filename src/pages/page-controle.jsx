@@ -13,8 +13,9 @@ import { useSelector } from '../redux/store';
 import Page from '../components/Page';
 import TabsWrapper from '../components/TabsWrapper';
 // sections
+import TableCON from '../sections/tabela/table-con';
+import TableControle from '../sections/tabela/table-controle';
 import TableCartoes from '../sections/cartoes/table-cartoes';
-import { TableCON, TableControle } from '../sections/tabela';
 
 // ----------------------------------------------------------------------
 

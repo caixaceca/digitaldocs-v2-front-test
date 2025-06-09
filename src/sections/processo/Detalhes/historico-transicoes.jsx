@@ -16,7 +16,7 @@ import { useSelector } from '../../../redux/store';
 import Label from '../../../components/Label';
 import { Criado } from '../../../components/Panel';
 //
-import { Info, InfoCriador } from './Estados';
+import { Info, InfoCriador } from './estados-processo';
 
 // ----------------------------------------------------------------------
 

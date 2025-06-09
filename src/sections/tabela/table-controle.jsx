@@ -34,7 +34,7 @@ import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { UoData } from './Dados';
+import { UoData } from './uo-data-filter';
 import applySortFilter, { dadosList } from './applySortFilter';
 
 // ----------------------------------------------------------------------

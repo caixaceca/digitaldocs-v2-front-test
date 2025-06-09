@@ -22,8 +22,8 @@ import { fNumber, fCurrency, fPercent } from '../../../utils/formatNumber';
 import { deleteItem } from '../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../redux/store';
 // components
+import { TextItem } from './detalhes';
 import Label from '../../../components/Label';
-import { TextItem } from './DetalhesProcesso';
 import { DefaultAction } from '../../../components/Actions';
 import { SearchNotFoundSmall } from '../../../components/table';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';

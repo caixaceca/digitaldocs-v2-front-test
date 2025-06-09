@@ -24,8 +24,8 @@ import { SearchNotFound } from '../../../components/table';
 import { Loading } from '../../../components/LoadingScreen';
 import { DefaultAction } from '../../../components/Actions';
 //
-import ModelosRespostas from './ModelosRespostas';
-import { PdfPreview, ImagemPreview } from './FilePreview';
+import ModelosRespostas from './modelos-resposta';
+import { PdfPreview, ImagemPreview } from './preview-anexo';
 
 // ----------------------------------------------------------------------
 

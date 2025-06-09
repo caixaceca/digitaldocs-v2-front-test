@@ -8,11 +8,8 @@ export default function useOffSetTop(top) {
 
   useEffect(() => {
     window.onscroll = () => {
-      if (window.pageYOffset > isTop) {
-        setOffSetTop(true);
-      } else {
-        setOffSetTop(false);
-      }
+      if (window.pageYOffset > isTop) setOffSetTop(true);
+      else setOffSetTop(false);
     };
     return () => {
       window.onscroll = null;
