@@ -117,7 +117,7 @@ export default function PageDetalhesEstado() {
           {!isLoading && !estado ? (
             <SearchNotFound404 message="Estado não encontrado..." />
           ) : (
-            <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+            <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
           )}
 
           {modalParams === 'form-estado' && <EstadoForm onClose={() => closeModal()} />}

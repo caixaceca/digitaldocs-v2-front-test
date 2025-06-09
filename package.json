@@ -15,18 +15,6 @@
     "re-start": "rm -rf dist node_modules && yarn install && yarn dev",
     "re-build": "rm -rf dist node_modules && yarn install && yarn build"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "dependencies": {
     "@azure/msal-browser": "^3.28.0",
     "@azure/msal-react": "^3.0.5",

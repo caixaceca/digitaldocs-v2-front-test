@@ -155,7 +155,7 @@ export default function PageDetalhesFluxo() {
           {!isLoading && !fluxo ? (
             <SearchNotFound404 message="Fluxo não encontrado..." />
           ) : (
-            <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+            <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
           )}
 
           {modalParams === 'form-fluxo' && <FluxoForm onClose={() => closeModal()} />}

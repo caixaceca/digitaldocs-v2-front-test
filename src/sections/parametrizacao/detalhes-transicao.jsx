@@ -41,7 +41,7 @@ export default function DetalhesTransicao({ dados }) {
         sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
         changeTab={(_, newValue) => setCurrentTab(newValue)}
       />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </>
   );
 }

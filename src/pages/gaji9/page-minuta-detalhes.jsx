@@ -144,7 +144,7 @@ export default function PageMinutaDetalhes() {
             <SearchNotFound404 message="Minuta não encontrada..." />
           ) : (
             <>
-              <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+              <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
 
               {isOpenModal && (
                 <>

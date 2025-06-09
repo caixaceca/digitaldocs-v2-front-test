@@ -55,7 +55,7 @@ export function InfoCredito({ dados }) {
         currentTab={currentTab}
         changeTab={(_, newValue) => setCurrentTab(newValue)}
       />
-      <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
     </Stack>
   );
 }

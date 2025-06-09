@@ -67,7 +67,7 @@ export default function Controle() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+        <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
       </Container>
     </Page>
   );

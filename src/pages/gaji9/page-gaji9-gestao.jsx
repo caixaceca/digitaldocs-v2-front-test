@@ -79,7 +79,7 @@ export default function PageGaji9Gestao() {
           changeTab={setCurrentTab}
         />
         <AcessoGaji9 item="gestao">
-          <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+          <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
         </AcessoGaji9>
       </Container>
     </Page>

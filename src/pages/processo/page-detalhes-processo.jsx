@@ -210,7 +210,7 @@ export default function PageProcesso() {
         />
         <Card>
           <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
-          <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+          <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
         </Card>
 
         {(proxAnt?.anterior || proxAnt?.proximo) && (

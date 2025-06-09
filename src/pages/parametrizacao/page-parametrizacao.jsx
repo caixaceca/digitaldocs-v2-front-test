@@ -67,7 +67,7 @@ export default function PageParametrizacao() {
           currentTab={currentTab}
           changeTab={setCurrentTab}
         />
-        <Box>{tabsList?.find((tab) => tab?.value === currentTab)?.component}</Box>
+        <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
         {tabsList?.length === 0 && <RoleBasedGuard hasContent roles={['XXXXXX']} />}
       </Container>
     </Page>
