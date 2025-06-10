@@ -1,38 +1,34 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Switch from '@mui/material/Switch';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { ptDateTime } from '../../utils/formatTime';
-import { acessoGaji9 } from '../../utils/validarAcesso';
+import { ptDateTime } from '../../../utils/formatTime';
+import { acessoGaji9 } from '../../../utils/validarAcesso';
 // hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { getComparator } from '../../../hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, setModal, closeModal, deleteItem } from '../../redux/slices/gaji9';
+import { useDispatch, useSelector } from '../../../redux/store';
+import { getFromGaji9, setModal, closeModal, deleteItem } from '../../../redux/slices/gaji9';
 // Components
-import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
-import { Criado, noDados } from '../../components/Panel';
-import { SkeletonTable } from '../../components/skeleton';
-import { DialogConfirmar } from '../../components/CustomDialog';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Scrollbar from '../../../components/Scrollbar';
+import { DefaultAction } from '../../../components/Actions';
+import { Criado, noDados } from '../../../components/Panel';
+import { SkeletonTable } from '../../../components/skeleton';
+import { DialogConfirmar } from '../../../components/CustomDialog';
+import { SearchToolbarSimple } from '../../../components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
-import { sitClausulas } from '../../_mock';
 import ClausulaForm from './form-clausula';
-import DetalhesGaji9 from './detalhes-gaji9';
-import { applySortFilter, listaTitrulares, listaGarantias, listaProdutos } from './applySortFilter';
+import DetalhesGaji9 from '../detalhes-gaji9';
+import FiltrarClausulas from './filtrar-clausulas';
+import { applySortFilter, labelTitular } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -116,10 +112,7 @@ export default function TableClausula({ inativos }) {
                           row?.numero_ordem}
                       </TableCell>
                       <TableCell>{row?.titulo || noDados()}</TableCell>
-                      <TableCell>
-                        {row?.tipo_titular || noDados()}
-                        {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
-                      </TableCell>
+                      <TableCell>{labelTitular(row?.tipo_titular, row?.consumidor) || noDados()}</TableCell>
                       <TableCell>
                         {row?.tipo_garantia || noDados()}
                         {row?.subtipo_garantia ? ` - ${row?.subtipo_garantia}` : ''}
@@ -174,110 +167,5 @@ export default function TableClausula({ inativos }) {
         />
       )}
     </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-FiltrarClausulas.propTypes = { inativos: PropTypes.bool };
-
-function FiltrarClausulas({ inativos }) {
-  const dispatch = useDispatch();
-  const { componentes, tiposTitulares, tiposGarantias } = useSelector((state) => state.gaji9);
-
-  const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
-  const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
-  const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
-  const seccoesList = [
-    { id: 'solta', label: 'Solta' },
-    { id: 'identificacao', label: 'Secção de identificação' },
-    { id: 'caixa', label: 'Secção de identificação Caixa' },
-  ];
-
-  const getStoredValue = (key, list) =>
-    list?.find(({ id }) => Number(id) === Number(localStorage.getItem(key))) || null;
-
-  const [condicional, setCondicional] = useState(() => getStoredValue(false));
-  const [seccao, setSeccao] = useState(() => getStoredValue('seccaoCl', seccoesList));
-  const [titular, setTitular] = useState(() => getStoredValue('titularCl', titularesList));
-  const [garantia, setGarantia] = useState(() => getStoredValue('garantiaCl', garantiasList));
-  const [componente, setComponente] = useState(() => getStoredValue('componenteCl', componentesList));
-  const [situacao, setSituacao] = useState(
-    () => sitClausulas?.find(({ id }) => id === localStorage.getItem('sitCl')) ?? { id: 'APROVADO', label: 'APROVADO' }
-  );
-
-  useEffect(() => {
-    dispatch(
-      getFromGaji9('clausulas', {
-        inativos,
-        condicional,
-        titularId: titular?.id || null,
-        solta: seccao?.label === 'Solta',
-        garantiaId: garantia?.id || null,
-        situacao: situacao?.id || 'APROVADO',
-        componenteId: componente?.id || null,
-        caixa: seccao?.label === 'Secção de identificação',
-        identificacao: seccao?.label === 'Secção de identificação Caixa',
-      })
-    );
-  }, [componente?.id, situacao, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
-
-  return (
-    <Card sx={{ p: 1.5, mb: 3 }}>
-      <Stack spacing={1.5}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} sx={{ width: 1 }}>
-          <SelectItem label="Situação" value={situacao} setItem={setSituacao} options={sitClausulas} />
-          <SelectItem label="Secção" value={seccao} setItem={setSeccao} options={seccoesList} />
-
-          <FormControlLabel
-            label="Condicional"
-            sx={{ ml: 0, px: { md: 5 } }}
-            control={<Switch checked={condicional} onChange={(event) => setCondicional(event.target.checked)} />}
-          />
-        </Stack>
-        <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
-            <SelectItem label="Tipo de titular" value={titular} setItem={setTitular} options={titularesList} />
-            <SelectItem label="Componente" value={componente} setItem={setComponente} options={componentesList} />
-            <SelectItem label="Tipo de garantia" value={garantia} setItem={setGarantia} options={garantiasList} />
-          </Stack>
-        </Stack>
-      </Stack>
-    </Card>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-SelectItem.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.object,
-  setItem: PropTypes.func,
-  options: PropTypes.array,
-};
-
-function SelectItem({ label, value, setItem, options }) {
-  const item =
-    (label === 'Situação' && 'sitCl') ||
-    (label === 'Secção' && 'seccaoCl') ||
-    (label === 'Componente' && 'componenteCl') ||
-    (label === 'Tipo de titular' && 'titularCl') ||
-    (label === 'Tipo de garantia' && 'garantiaCl') ||
-    '';
-  return (
-    <Autocomplete
-      fullWidth
-      size="small"
-      value={value}
-      options={options}
-      disableClearable={label === 'Situação'}
-      getOptionLabel={(option) => option?.label}
-      isOptionEqualToValue={(option, val) => option?.id === val?.id}
-      onChange={(_, newValue) => {
-        setItem(newValue);
-        if (item) localStorage.setItem(item, newValue?.id || '');
-      }}
-      renderInput={(params) => <TextField {...params} label={label} />}
-    />
   );
 }

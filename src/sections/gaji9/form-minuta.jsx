@@ -231,7 +231,7 @@ export function ComponentesForm({ onClose }) {
       <DialogTitleAlt
         sx={{ mb: 2 }}
         title="Adicionar componentes"
-        action={<AddItem dados={{ small: true }} onClick={() => append({ garantia: null })} />}
+        action={<AddItem dados={{ small: true }} onClick={() => append({ componente: null })} />}
       />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>

@@ -23,8 +23,8 @@ import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import ClausulaForm from './form-clausula';
 import { applySortFilter } from './applySortFilter';
+import ClausulaForm from './clausulas/form-clausula';
 import { GarantiasForm, ComponentesForm } from './form-minuta';
 import DetalhesGaji9, { DetalhesContent } from './detalhes-gaji9';
 

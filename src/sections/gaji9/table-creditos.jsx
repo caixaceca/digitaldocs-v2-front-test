@@ -31,7 +31,7 @@ import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { PropostaForm } from './form-credito';
-import { applySortFilter } from './applySortFilter';
+import { applySortFilter, labelTitular } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -182,10 +182,7 @@ export default function TableCredito() {
                       <TableCell>
                         {row?.cliente} - {row?.titular}
                       </TableCell>
-                      <TableCell>
-                        {row?.tipo_titular}
-                        {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
-                      </TableCell>
+                      <TableCell>{labelTitular(row?.tipo_titular, row?.consumidor)}</TableCell>
                       <TableCell>{row?.rotulo || row?.componente}</TableCell>
                       <TableCell>{row?.finalidade || noDados('Não definido')}</TableCell>
                       <TableCell align="right">

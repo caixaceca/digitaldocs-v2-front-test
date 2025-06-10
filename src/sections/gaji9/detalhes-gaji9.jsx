@@ -24,9 +24,9 @@ import { SearchNotFoundSmall } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
-import OpcoesClausula from './opcoes-clausulas';
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 import { GrupoDetail, BalcoesRepresentante, SubtiposGarantias } from './sub-items';
+import { OpcoesClausula, AlineasClausula, Relacionados } from './clausulas/opcoes-clausulas';
 
 // ----------------------------------------------------------------------
 
@@ -60,7 +60,11 @@ function DetalhesTab({ item, dados }) {
 
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
-    ...((item === 'clausulas' && [{ value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> }]) ||
+    ...((item === 'clausulas' && [
+      { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
+      { value: 'Tipos de titulares', component: <Relacionados id={dados?.id} dados={dados?.tipos_titulares} /> },
+      { value: 'Componentes', component: <Relacionados componente id={dados?.id} dados={dados?.componentes} /> },
+    ]) ||
       (item === 'tiposGarantias' && [
         { value: 'Subtipos', component: <SubtiposGarantias id={dados?.id} dados={dados?.subtipos} /> },
       ]) ||
@@ -108,37 +112,6 @@ function UtilizadorInfo({ dados = [] }) {
             </Label>
           ))}
         </Stack>
-      )}
-    </Stack>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-AlineasClausula.propTypes = { dados: PropTypes.array };
-
-function AlineasClausula({ dados = [] }) {
-  return (
-    <Stack sx={{ px: 0.5, mt: 3 }}>
-      {dados?.length === 0 ? (
-        <SearchNotFoundSmall message="Nenhum número adicionado..." />
-      ) : (
-        <>
-          {dados?.map(({ numero_ordem: numero, conteudo, sub_alineas: alineas }, index) => (
-            <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
-              <Typography variant="subtitle2">{numero}.</Typography>
-              <Stack>
-                <Typography variant="body2">{newLineText(conteudo)}</Typography>
-                {alineas?.map(({ numero_ordem: numero, conteudo }, index1) => (
-                  <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                    <Typography variant="subtitle2">{numero}.</Typography>
-                    <Typography variant="body2">{newLineText(conteudo)}</Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            </Stack>
-          ))}
-        </>
       )}
     </Stack>
   );

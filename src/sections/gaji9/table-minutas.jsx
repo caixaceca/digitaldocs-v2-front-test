@@ -25,7 +25,7 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import MinutaForm from './form-minuta';
-import { applySortFilter } from './applySortFilter';
+import { applySortFilter, labelTitular } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -104,10 +104,7 @@ export default function TableMinutas({ item, inativos }) {
                     <TableRow hover key={`${item}_${index}`}>
                       <TableCell>{row?.titulo || noDados()}</TableCell>
                       <TableCell>{row?.subtitulo}</TableCell>
-                      <TableCell>
-                        {row?.tipo_titular}
-                        {row?.tipo_titular === 'Particular' && !row?.consumidor ? ' (Não consumidor)' : ''}
-                      </TableCell>
+                      <TableCell>{labelTitular(row?.tipo_titular, row?.consumidor)}</TableCell>
                       <TableCell>{row?.componente}</TableCell>
                       <TableCell align="center">{row?.versao}</TableCell>
                       <TableCell align="center" width={10}>

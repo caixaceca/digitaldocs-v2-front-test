@@ -35,9 +35,9 @@ import { CellChecked, Criado, noDados } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import DetalhesGaji9 from './detalhes-gaji9';
-import { applySortFilter } from './applySortFilter';
 import { Resgisto } from '../parametrizacao/Detalhes';
 import { IntervenienteForm, DataContrato } from './form-credito';
+import { applySortFilter, labelTitular } from './applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ export default function InfoCredito() {
         { label: 'Conta DO débito', value: credito?.conta_do_renda },
         {
           label: 'Tipo de titular',
-          value: `${credito?.tipo_titular}${credito?.tipo_titular === 'Particular' && !credito?.consumidor ? ' (Não consumidor)' : ''}`,
+          value: labelTitular(credito?.tipo_titular, credito?.consumidor),
         },
         { label: 'Email', value: credito?.morada_eletronico_cliente },
         { label: 'Morada', value: credito?.morada_cliente },

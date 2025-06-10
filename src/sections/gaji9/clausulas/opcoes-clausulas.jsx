@@ -1,37 +1,62 @@
-import * as Yup from 'yup';
 import PropTypes from 'prop-types';
-import { useEffect, useState, useMemo } from 'react';
-// form
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { useEffect, useState } from 'react';
 // @mui
-import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
-import Dialog from '@mui/material/Dialog';
 import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
-import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fNumber } from '../../utils/formatNumber';
+import { fNumber } from '../../../utils/formatNumber';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { getFromGaji9, createItem, deleteItem } from '../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '../../../redux/store';
+import { getFromGaji9, deleteItem } from '../../../redux/slices/gaji9';
 // components
-import DetalhesGaji9 from './detalhes-gaji9';
-import GridItem from '../../components/GridItem';
-import { TableSearchNotFound } from '../../components/table';
-import { CellChecked, noDados } from '../../components/Panel';
-import { DefaultAction, DialogButons } from '../../components/Actions';
-import { DialogTitleAlt, DialogConfirmar } from '../../components/CustomDialog';
-import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
+import DetalhesGaji9 from '../detalhes-gaji9';
+import { labelTitular } from '../applySortFilter';
+import { DefaultAction } from '../../../components/Actions';
+import { TableSearchNotFound } from '../../../components/table';
+import { DialogConfirmar } from '../../../components/CustomDialog';
+import { CellChecked, newLineText, noDados } from '../../../components/Panel';
+import { RegraForm, TiposTitularesForm, ComponetesForm } from './form-opcoes';
+import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function OpcoesClausula() {
+AlineasClausula.propTypes = { dados: PropTypes.array };
+
+export function AlineasClausula({ dados = [] }) {
+  return (
+    <Stack sx={{ px: 0.5, mt: 3 }}>
+      {dados?.length === 0 ? (
+        <SearchNotFoundSmall message="Nenhum número adicionado..." />
+      ) : (
+        <>
+          {dados?.map(({ numero_ordem: numero, conteudo, sub_alineas: alineas }, index) => (
+            <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
+              <Typography variant="subtitle2">{numero}.</Typography>
+              <Stack>
+                <Typography variant="body2">{newLineText(conteudo)}</Typography>
+                {alineas?.map(({ numero_ordem: numero, conteudo }, index1) => (
+                  <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
+                    <Typography variant="subtitle2">{numero}.</Typography>
+                    <Typography variant="body2">{newLineText(conteudo)}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+          ))}
+        </>
+      )}
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function OpcoesClausula() {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
   const { isSaving, selectedItem, minuta } = useSelector((state) => state.gaji9);
@@ -67,7 +92,7 @@ export default function OpcoesClausula() {
             <TableCell size="small">Taxa negociada</TableCell>
             <TableCell size="small">2ª habitação</TableCell>
             <TableCell size="small">Isenção comissão</TableCell>
-            <TableCell size="small" align="rigth" width={10}>
+            <TableCell size="small" align="right" width={10}>
               <Stack direction="row" justifyContent="right">
                 <DefaultAction small label="Adicionar" onClick={() => openModal('create', '')} />
               </Stack>
@@ -122,68 +147,63 @@ export default function OpcoesClausula() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-RegraForm.propTypes = { dados: PropTypes.object, minutaId: PropTypes.number, onClose: PropTypes.func };
+Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, componente: PropTypes.bool };
 
-function RegraForm({ dados, minutaId, onClose }) {
+export function Relacionados({ id, dados = [], componente = false }) {
   const dispatch = useDispatch();
-  const { isSaving, clausulas } = useSelector((state) => state.gaji9);
+  const [modal, setModal] = useState('');
+  const { isSaving } = useSelector((state) => state.gaji9);
 
-  const formSchema = Yup.object().shape({ clausula_id: Yup.mixed().required().label('Cláusula') });
-  const defaultValues = useMemo(
-    () => ({
-      clausula_id: null,
-      prazo_maior_que: null,
-      prazo_menor_que: null,
-      montante_maior_que: null,
-      montante_menor_que: null,
-      representante: false,
-      isencao_comissao: false,
-      segunda_habitacao: false,
-      taxa_juros_negociado: false,
-    }),
-    []
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
-
-  const onSubmit = async () => {
-    const params = { minutaId, msg: 'Regra adicionada', onClose, clausulaId: dados?.id };
-    dispatch(
-      createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), params)
-    );
+  const eliminarItem = () => {
+    const params = { clausulaId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
+    dispatch(deleteItem(componente ? 'componenteCl' : 'tipoTitularCl', { ...params, onClose: () => setModal('') }));
   };
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitleAlt title="Adicionar regras" />
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ pt: 3 }}>
-            <GridItem
-              children={
-                <RHFAutocompleteObj
-                  label="Cláusula"
-                  name="clausula_id"
-                  options={clausulas
-                    ?.filter(({ titulo }) => titulo === dados?.titulo)
-                    ?.map(({ id, titulo }) => ({ id, label: `${titulo} (ID: ${id})` }))}
-                />
-              }
-            />
-            <GridItem xs={6} children={<RHFNumberField label="Montante maior que" name="montante_maior_que" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Montante menor que" name="montante_menor_que" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Prazo maior que" name="prazo_maior_que" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Prazo menor que" name="prazo_menor_que" />} />
-            <GridItem xs={6} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" />} />
-            <GridItem xs={6} children={<RHFSwitch name="segunda_habitacao" label="Segunda habitação" />} />
-            <GridItem xs={6} children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" />} />
-            <GridItem xs={6} children={<RHFSwitch name="representante" label="Representante" />} />
-          </Grid>
-          <DialogButons isSaving={isSaving} onClose={onClose} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Table sx={{ mt: 2 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small">{componente ? 'Componente' : 'Tipo de titular'}</TableCell>
+            <TableCell size="small" align="center">
+              Ativo
+            </TableCell>
+            <TableCell size="small" align="right" width={10}>
+              <Stack direction="row" justifyContent="right">
+                <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
+              </Stack>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        {dados?.length === 0 ? (
+          <TableSearchNotFound height={150} message="Nenhum item relacionado..." />
+        ) : (
+          <TableBody>
+            {dados?.map((row, index) => (
+              <TableRow haver key={`relacionado_${index}`}>
+                <TableCell>
+                  {row?.componente || labelTitular(row?.tipo_titular, row?.consumidor) || noDados()}
+                </TableCell>
+                <CellChecked check={row?.ativo} />
+                <TableCell>
+                  <DefaultAction small label="ELIMINAR" onClick={() => setModal(row?.id)} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        )}
+      </Table>
+
+      {modal === 'create' && componente && <ComponetesForm onClose={() => setModal('')} id={id} />}
+      {modal === 'create' && !componente && <TiposTitularesForm onClose={() => setModal('')} id={id} />}
+      {!!modal && modal !== 'create' && (
+        <DialogConfirmar
+          isSaving={isSaving}
+          onClose={() => setModal('')}
+          handleOk={() => eliminarItem()}
+          desc={`eliminar este ${componente ? 'componente' : 'tipo de titular'}`}
+        />
+      )}
+    </>
   );
 }

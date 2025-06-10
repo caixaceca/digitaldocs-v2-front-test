@@ -41,10 +41,7 @@ export function applySortFilter({ dados, filter, comparator }) {
 // ----------------------------------------------------------------------
 
 export function listaTitrulares(tiposTitulares) {
-  return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({
-    id,
-    label: descritivo === 'Particular' && !consumidor ? `${descritivo} (Não consumidor)` : descritivo,
-  }));
+  return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({ id, label: labelTitular(descritivo, consumidor) }));
 }
 
 export function listaProdutos(componentes) {
@@ -80,4 +77,8 @@ export function dadosComColaborador(dados, colaboradores) {
     ...row,
     nome: colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id)?.nome || row?.perfil_id,
   }));
+}
+
+export function labelTitular(titular, consumidor) {
+  return titular === 'Particular' && !consumidor ? `${titular} (Não consumidor)` : titular;
 }

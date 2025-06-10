@@ -21,11 +21,11 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 // utils
-import { vdt } from '../../utils/formatObject';
+import { vdt } from '../../../utils/formatObject';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { updateDados, resetDados, backStep, gotoStep } from '../../redux/slices/stepper';
-import { getSuccess, getFromGaji9, createItem, updateItem } from '../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '../../../redux/store';
+import { updateDados, resetDados, backStep, gotoStep } from '../../../redux/slices/stepper';
+import { getSuccess, getFromGaji9, createItem, updateItem } from '../../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -34,16 +34,16 @@ import {
   RHFNumberField,
   RHFAutocompleteObj,
   RHFAutocompleteSmp,
-} from '../../components/hook-form';
-import Steps from '../../components/Steps';
-import { SemDados, newLineText } from '../../components/Panel';
-import { DialogTitleAlt, DialogConfirmar } from '../../components/CustomDialog';
-import { AddItem, DefaultAction, ButtonsStepper } from '../../components/Actions';
+} from '../../../components/hook-form';
+import Steps from '../../../components/Steps';
+import { SemDados, newLineText } from '../../../components/Panel';
+import { DialogTitleAlt, DialogConfirmar } from '../../../components/CustomDialog';
+import { AddItem, DefaultAction, ButtonsStepper } from '../../../components/Actions';
 //
-import { sitClausulas } from '../../_mock';
-import { ItemComponent } from './form-gaji9';
-import { LabelSN } from '../parametrizacao/Detalhes';
-import { listaTitrulares, listaGarantias, listaProdutos, subTiposGarantia } from './applySortFilter';
+import { sitClausulas } from '../../../_mock';
+import { ItemComponent } from '../form-gaji9';
+import { LabelSN } from '../../parametrizacao/Detalhes';
+import { listaTitrulares, listaGarantias, listaProdutos, subTiposGarantia } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

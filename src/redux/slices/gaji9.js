@@ -283,9 +283,11 @@ export function createItem(item, dados, params) {
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `/v1/acs/representantes/definir`) ||
         (item === 'clonarMinuta' && `/v1/minutas/com/base?minuta_base_id=${params?.id}`) ||
+        (item === 'componentesCl' && `/v1/clausulas/componentes?clausula_id=${params?.id}`) ||
         (item === 'subtipos' && `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}`) ||
         (item === 'componentesMinuta' && `/v1/minutas/${params?.id}/componentes_compativeis`) ||
         (item === 'recursosGrupo' && `/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
+        (item === 'tiposTitularesCl' && `/v1/clausulas/tipo_titulares?clausula_id=${params?.id}`) ||
         (item === 'intervenientes' && `/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
         (item === 'balcoes' && `/v1/acs/representantes/acumular/balcao?representante_id=${params?.repId}`) ||
         (item === 'coposicaoMinuta' &&
@@ -300,7 +302,8 @@ export function createItem(item, dados, params) {
           const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
           dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
-        } else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
+        } else if (params?.getItem)
+          dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));
         else if (params?.getList) dispatch(getFromGaji9(item, { id: params?.id }));
         else if (item === 'clonarMinuta' || item === 'Versionar' || item === 'minutas')
           dispatch(getSuccess({ item: 'minutaId', dados: response.data?.objeto?.id }));
@@ -428,7 +431,9 @@ export function deleteItem(item, params) {
         (item === 'recursos' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
         (item === 'clausulaMinuta' && `/v1/minutas/${params?.id}/clausulas/${params?.clausulaId}`) ||
+        (item === 'componenteCl' && `/v1/clausulas/componentes/${params?.id}?clausula_id=${params?.clausulaId}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.creditoId}&contrato_id=${params?.id}`) ||
+        (item === 'tipoTitularCl' && `/v1/clausulas/tipo_titulares/${params?.id}?clausula_id=${params?.clausulaId}`) ||
         (item === 'componentesMinuta' && `/v1/minutas/${params?.id}/componentes_compativeis/${params?.componenteId}`) ||
         (item === 'subtipos' &&
           `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}&subtipo_id=${params?.id}`) ||
@@ -448,7 +453,8 @@ export function deleteItem(item, params) {
           const info = response.data?.objeto?.clausulas?.find(({ clausula_id: cid }) => cid === params?.clausulaId);
           dispatch(getSuccess({ item: 'infoCaixa', dados: info || null }));
           dispatch(getSuccess({ item: 'minuta', dados: response.data?.objeto || null }));
-        } else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
+        } else if (params?.getItem)
+          dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));
         else {
           const desativar = item === 'balcoes';
           dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id, desativar }));
