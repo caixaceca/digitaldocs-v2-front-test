@@ -1,34 +1,43 @@
 import { Worker } from '@react-pdf-viewer/core';
-import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
-// config
-import { msalInstance } from './config';
-//
+import { MsalProvider } from '@azure/msal-react';
+
 import Router from './routes';
+import { msalInstance } from './config';
+import { useAuth } from './hooks/useAuth';
+
 import LoginPage from './pages/login';
-// components
 import { StyledChart } from './components/chart';
+import UIProvider from './providers/ui-provider';
 import ScrollToTop from './components/ScrollToTop';
+import LoadingScreen from './components/LoadingScreen';
+import { AuthProvider } from './providers/auth-provider';
 import MotionLazyContainer from './components/animate/MotionLazyContainer';
 
-import UIProvider from './providers/ui-provider';
+function AuthenticatedApp() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return <LoadingScreen />;
+  if (!isAuthenticated) return <LoginPage />;
+
+  return (
+    <Worker workerUrl="/assets/pdf.worker.min.js">
+      <Router />
+    </Worker>
+  );
+}
 
 export default function App() {
   return (
     <MsalProvider instance={msalInstance}>
-      <MotionLazyContainer>
-        <UIProvider>
-          <ScrollToTop />
-          <AuthenticatedTemplate>
+      <AuthProvider>
+        <MotionLazyContainer>
+          <UIProvider>
             <StyledChart />
-            <Worker workerUrl="/assets/pdf.worker.min.js">
-              <Router />
-            </Worker>
-          </AuthenticatedTemplate>
-          <UnauthenticatedTemplate>
-            <LoginPage />
-          </UnauthenticatedTemplate>
-        </UIProvider>
-      </MotionLazyContainer>
+            <ScrollToTop />
+            <AuthenticatedApp />
+          </UIProvider>
+        </MotionLazyContainer>
+      </AuthProvider>
     </MsalProvider>
   );
 }

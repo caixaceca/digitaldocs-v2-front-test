@@ -57,14 +57,14 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   }, [dispatch]);
 
   useEffect(() => {
+    setFluxo(null);
+  }, [dispatch, estado]);
+
+  useEffect(() => {
     const estado =
       meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null;
     if (estado) setEstado(estado);
   }, [ambientId, meusAmbientes]);
-
-  useEffect(() => {
-    if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
-  }, [dispatch, isEdit, fluxo?.id]);
 
   useEffect(() => {
     const fluxoProcesso = fluxosList?.find(({ id }) => id === processo?.fluxo_id) || null;

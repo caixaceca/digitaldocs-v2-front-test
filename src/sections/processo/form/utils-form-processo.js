@@ -8,10 +8,7 @@ import { updateItem } from '../../../redux/slices/digitaldocs';
 export function submitDados(values, isEdit, id, assunto, dispatch, enqueueSnackbar, onClose) {
   try {
     const titular =
-      assunto === 'Diário'
-        ? `${assunto} (${format(values.data_entrada ?? new Date(), 'dd/MM/yyyy')})`
-        : values?.titular;
-
+      assunto === 'Diário' ? `Diário (${format(values.data_entrada ?? new Date(), 'dd/MM/yyyy')})` : values?.titular;
     const entidadesList = values?.entidades?.length ? values?.entidades?.map(({ numero }) => numero) : null;
 
     if (isEdit) {

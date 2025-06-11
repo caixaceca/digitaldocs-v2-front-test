@@ -82,6 +82,7 @@ export default function FormInfoExterno({ dados }) {
   const { reset, watch, control, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades' });
+  const cativo = values.operacao === 'Cativo/Penhora';
 
   useEffect(() => {
     reset(defaultValues);
@@ -106,10 +107,7 @@ export default function FormInfoExterno({ dados }) {
             <GridItem sm={4} lg={2} children={<RHFTextField name="referencia" label="Referência" />} />
             <GridItem lg={6} children={<RHFTextField name="titular" label="Titular" />} />
             <GridItem md={6} children={<RHFAutocompleteObj label="Origem" name="origem_id" options={origensList} />} />
-            <GridItem
-              sm={values.operacao === 'Cativo/Penhora' ? 6 : 12}
-              md={values.operacao === 'Cativo/Penhora' ? 3 : 6}
-            >
+            <GridItem sm={cativo ? 6 : 12} md={cativo ? 3 : 6}>
               <RHFAutocompleteSmp
                 name="operacao"
                 label="Operação"
@@ -122,9 +120,7 @@ export default function FormInfoExterno({ dados }) {
                 ]}
               />
             </GridItem>
-            {values.operacao === 'Cativo/Penhora' && (
-              <GridItem sm={6} md={3} children={<RHFNumberField name="valor" tipo="CVE" label="Valor" />} />
-            )}
+            {cativo && <GridItem sm={6} md={3} children={<RHFNumberField name="valor" tipo="CVE" label="Valor" />} />}
           </Grid>
         </Card>
 

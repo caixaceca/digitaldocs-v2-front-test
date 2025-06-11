@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { useSnackbar } from 'notistack';
+import React, { createRef } from 'react';
 import { useMsal } from '@azure/msal-react';
-import React, { createRef, useEffect } from 'react';
 import { InteractionStatus } from '@azure/msal-browser';
 // @mui
 import Card from '@mui/material/Card';
@@ -16,8 +16,6 @@ import Typography from '@mui/material/Typography';
 import { loginRequest, msalInstance } from '../config';
 // components
 import Page from '../components/Page';
-
-// ----------------------------------------------------------------------
 
 const RootStyle = styled(Page)(() => ({
   display: 'flex',
@@ -35,16 +33,10 @@ const ContentStyle = styled('div')(() => ({
   justifyContent: 'center',
 }));
 
-// ----------------------------------------------------------------------
-
-export default function PageLoogin() {
+export default function PageLogin() {
   const referencia = createRef();
   const { enqueueSnackbar } = useSnackbar();
   const { instance, inProgress } = useMsal();
-
-  useEffect(() => {
-    referencia.current.click();
-  }, [referencia]);
 
   const handleLogin = async () => {
     try {
@@ -54,7 +46,7 @@ export default function PageLoogin() {
         enqueueSnackbar('Login efetuado com sucesso', { variant: 'success' });
       }
     } catch (error) {
-      enqueueSnackbar(error, { variant: 'error' });
+      enqueueSnackbar(error.message || 'Erro no login', { variant: 'error' });
     }
   };
 
@@ -70,7 +62,7 @@ export default function PageLoogin() {
             <Alert severity="success" sx={{ mb: 3 }}>
               Para aceder faça login com a sua conta <strong>Microsoft</strong>
             </Alert>
-            <Button fullWidth size="large" ref={referencia} variant="contained" onClick={() => handleLogin()}>
+            <Button fullWidth size="large" ref={referencia} variant="contained" onClick={handleLogin}>
               Login
             </Button>
           </Card>

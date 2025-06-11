@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { useMsal } from '@azure/msal-react';
 // @mui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -8,14 +7,12 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
-// utils
+//
 import { getFile } from '../../utils/getFile';
-// redux
+import { useAuth } from '../../hooks/useAuth';
 import { useSelector } from '../../redux/store';
 // components
 import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
-
-// ----------------------------------------------------------------------
 
 const RootStyle = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -28,12 +25,10 @@ const RootStyle = styled('div')(({ theme }) => ({
   '&:hover': { backgroundColor: theme.palette.grey['500_32'] },
 }));
 
-// ----------------------------------------------------------------------
+NavbarAccount.propTypes = { isCollapse: PropTypes.bool };
 
-NavbarAcount.propTypes = { isCollapse: PropTypes.bool };
-
-export default function NavbarAcount({ isCollapse }) {
-  const { instance, accounts } = useMsal();
+export default function NavbarAccount({ isCollapse }) {
+  const { account, logout } = useAuth();
   const { cc } = useSelector((state) => state.intranet);
 
   return (
@@ -41,7 +36,7 @@ export default function NavbarAcount({ isCollapse }) {
       {!isCollapse && (
         <Box sx={{ position: 'absolute', right: 12, marginTop: 0.1 }}>
           <Tooltip title="Sair" arrow>
-            <IconButton onClick={() => instance.logout()} sx={{ width: 25, height: 25 }}>
+            <IconButton onClick={logout} sx={{ width: 25, height: 25 }}>
               <LogoutIcon sx={{ width: 16, opacity: 0.75 }} />
             </IconButton>
           </Tooltip>
@@ -49,18 +44,14 @@ export default function NavbarAcount({ isCollapse }) {
       )}
       <RootStyle sx={{ ...(isCollapse && { p: 1 }) }}>
         <AvatarBedge id={cc?.id}>
-          <MyAvatar
-            name={accounts[0]?.name}
-            sx={{ height: 44, width: 44 }}
-            src={getFile('colaborador', cc?.foto_disk)}
-          />
+          <MyAvatar name={account?.name} sx={{ height: 44, width: 44 }} src={getFile('colaborador', cc?.foto_disk)} />
         </AvatarBedge>
         <Box sx={{ ml: 2, ...(isCollapse && { ml: 0, width: 0 }) }}>
           <Typography variant="subtitle2" noWrap sx={{ maxWidth: 170 }}>
-            {accounts[0]?.name}
+            {account?.name}
           </Typography>
           <Typography noWrap sx={{ color: 'text.secondary', maxWidth: 180, lineHeight: 1 }}>
-            <Typography variant="caption">{accounts[0]?.username}</Typography>
+            <Typography variant="caption">{account?.username}</Typography>
           </Typography>
         </Box>
       </RootStyle>

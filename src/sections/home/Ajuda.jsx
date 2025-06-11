@@ -17,7 +17,6 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 // utils
 import { BASEURL } from '../../utils/apisUrl';
-import { getFileThumb } from '../../utils/formatFile';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
@@ -36,7 +35,6 @@ AjudaDialog.propTypes = { onClose: PropTypes.func };
 export default function AjudaDialog({ onClose }) {
   const dispatch = useDispatch();
   const [controlled, setControlled] = useState(false);
-  const [isOpenVideo, setIsOpenVideo] = useState(false);
   const { mail, perguntas, ajuda, isLoading } = useSelector((state) => state.intranet);
 
   useEffect(() => {
@@ -67,18 +65,6 @@ export default function AjudaDialog({ onClose }) {
                 />
               </Button>
             </Card>
-            <Stack direction="row" justifyContent="center" spacing={2} sx={{ mt: 2 }}>
-              {ajuda?.video_disco && (
-                <Button
-                  size="medium"
-                  color="inherit"
-                  onClick={() => setIsOpenVideo(true)}
-                  startIcon={getFileThumb(false, null, ajuda?.video_disco)}
-                >
-                  Video manual
-                </Button>
-              )}
-            </Stack>
           </GridItem>
           <GridItem sm={8}>
             <CardHeader title="Perguntas frequentes" action="" sx={{ color: 'text.success', p: 0, mb: 1 }} />
@@ -125,15 +111,6 @@ export default function AjudaDialog({ onClose }) {
             </Box>
           </GridItem>
         </Grid>
-
-        {isOpenVideo && (
-          <Dialog open onClose={() => setIsOpenVideo(false)} fullWidth maxWidth="lg">
-            <video width="100%" controls="controls" loop autoPlay="autoplay">
-              <source src={`${BASEURL}/help/ficheiro/${ajuda?.video_disco}`} type="video/mp4" />O seu navegador não
-              suporta a tag vídeo
-            </video>
-          </Dialog>
-        )}
       </DialogContent>
     </Dialog>
   );
