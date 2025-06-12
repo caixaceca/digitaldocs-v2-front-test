@@ -43,17 +43,16 @@ import { AddItem, DefaultAction, ButtonsStepper } from '../../../components/Acti
 import { sitClausulas } from '../../../_mock';
 import { ItemComponent } from '../form-gaji9';
 import { LabelSN } from '../../parametrizacao/Detalhes';
-import { listaTitrulares, listaGarantias, listaProdutos, subTiposGarantia } from '../applySortFilter';
+import { listaTitrulares, listaGarantias, subTiposGarantia } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ClausulaForm.propTypes = { onClose: PropTypes.func, minutaId: PropTypes.number };
+ClausulaForm.propTypes = { onClose: PropTypes.func };
 
-export default function ClausulaForm({ onClose, minutaId = 0 }) {
+export default function ClausulaForm({ onClose }) {
   const dispatch = useDispatch();
-  const [variavel, setVariavel] = useState(null);
   const { activeStep } = useSelector((state) => state.stepper);
-  const { isEdit, variaveis, selectedItem } = useSelector((state) => state.gaji9);
+  const { isEdit, selectedItem } = useSelector((state) => state.gaji9);
 
   const onClose1 = useCallback(() => {
     onClose();
@@ -72,33 +71,7 @@ export default function ClausulaForm({ onClose, minutaId = 0 }) {
         stepper={
           <>
             <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Números', 'Resumo']} sx={{ mt: 3 }} />
-            {(activeStep === 1 || activeStep === 2) && (
-              <Stack sx={{ mb: 2 }}>
-                <Autocomplete
-                  fullWidth
-                  value={variavel}
-                  onChange={(event, newValue) => setVariavel(newValue)}
-                  sx={{ borderRadius: 1, bgcolor: 'background.neutral' }}
-                  options={variaveis
-                    ?.map(({ nome, descritivo }) => `${nome}${descritivo ? ` - ${descritivo}` : ''}`)
-                    ?.sort()}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="Procurar varáveis..."
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Stack>
-            )}
+            {(activeStep === 1 || activeStep === 2) && <SearchVariavel />}
           </>
         }
       />
@@ -107,7 +80,7 @@ export default function ClausulaForm({ onClose, minutaId = 0 }) {
           {activeStep === 0 && <Identificacao onClose={onClose1} />}
           {activeStep === 1 && <Conteudo />}
           {activeStep === 2 && <Numeros />}
-          {activeStep === 3 && <Resumo minutaId={minutaId} onClose={onClose1} />}
+          {activeStep === 3 && <Resumo onClose={onClose1} />}
         </ItemComponent>
       </DialogContent>
     </Dialog>
@@ -119,17 +92,17 @@ Identificacao.propTypes = { onClose: PropTypes.func };
 function Identificacao({ onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { isEdit, tiposTitulares, tiposGarantias, componentes, tipoGarantia, selectedItem } = useSelector(
+  const { isEdit, tiposTitulares, tiposGarantias, segmentos, tipoGarantia, selectedItem } = useSelector(
     (state) => state.gaji9
   );
 
   const titularCl = localStorage.getItem('titularCl');
   const garantiaCl = localStorage.getItem('garantiaCl');
-  const componenteCl = localStorage.getItem('componenteCl');
-  const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
+  const segmentoCl = localStorage.getItem('segmentoCl');
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
   const subTiposGarant = useMemo(() => subTiposGarantia(tipoGarantia?.subtipos || []), [tipoGarantia?.subtipos]);
+  const segmentosList = useMemo(() => segmentos?.map(({ id, designacao }) => ({ id, label: designacao })), [segmentos]);
 
   const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) => Number(id) === Number(val))) || null;
 
@@ -137,10 +110,9 @@ function Identificacao({ onClose }) {
     () => ({
       condicional: dadosStepper?.condicional ?? !!selectedItem?.condicional,
       situacao: dadosStepper?.situacao ?? sitClausulas?.find(({ id }) => id === selectedItem?.situacao),
+      segmento: dadosStepper?.segmento || getItem(segmentosList, selectedItem?.segmento_id, segmentoCl),
+      titular: dadosStepper?.titular || getItem(titularesList, selectedItem?.tipo_titular_id, titularCl),
       garantia: dadosStepper?.garantia || getItem(garantiasList, selectedItem?.tipo_garantia_id, garantiaCl),
-      titular: dadosStepper?.tipo_titular || getItem(titularesList, selectedItem?.tipo_titular_id, titularCl),
-      componente: dadosStepper?.componente || getItem(componentesList, selectedItem?.componente_id, componenteCl),
-
       subtipoGarantia:
         dadosStepper?.subtipoGarantia ||
         (selectedItem?.subtipo_garantia_id && {
@@ -155,7 +127,7 @@ function Identificacao({ onClose }) {
         (selectedItem?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
         null,
     }),
-    [dadosStepper, selectedItem, titularesList, garantiasList, componentesList, titularCl, garantiaCl, componenteCl]
+    [dadosStepper, selectedItem, titularesList, garantiasList, segmentosList, titularCl, garantiaCl, segmentoCl]
   );
 
   const methods = useForm({ defaultValues });
@@ -186,7 +158,7 @@ function Identificacao({ onClose }) {
         <Stack spacing={3} sx={{ pt: 1 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={{ xs: 1, sm: 3 }}>
             <Stack direction="row" spacing={3} sx={{ flexGrow: 1 }}>
-              {isEdit && <RHFAutocompleteSmp name="situacao" label="Situação" options={sitClausulas} />}
+              {isEdit && <RHFAutocompleteObj name="situacao" label="Situação" options={sitClausulas} />}
               <RHFAutocompleteSmp
                 name="seccao"
                 label="Secção"
@@ -198,7 +170,7 @@ function Identificacao({ onClose }) {
             </Stack>
           </Stack>
           <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
-          <RHFAutocompleteObj name="componente" label="Componente" options={componentesList} />
+          <RHFAutocompleteObj name="segmento" label="Segmento" options={segmentosList} />
           <Stack direction="row" spacing={3}>
             <RHFAutocompleteObj
               name="garantia"
@@ -217,6 +189,8 @@ function Identificacao({ onClose }) {
     </>
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Conteudo() {
   const dispatch = useDispatch();
@@ -397,9 +371,9 @@ export function Alineas({ numeroIndex }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-Resumo.propTypes = { minutaId: PropTypes.number, onClose: PropTypes.func };
+Resumo.propTypes = { onClose: PropTypes.func };
 
-function Resumo({ minutaId, onClose }) {
+function Resumo({ onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isEdit, selectedItem, isSaving } = useSelector((state) => state.gaji9);
@@ -407,9 +381,7 @@ function Resumo({ minutaId, onClose }) {
   const handleSubmit = async () => {
     const params = {
       onClose,
-      minutaId,
       id: selectedItem?.id,
-      getItem: minutaId > 0 ? 'minuta' : '',
       msg: `Cláusula ${isEdit ? 'atualizada' : 'adicionada'}`,
     };
     const formData = {
@@ -419,8 +391,8 @@ function Resumo({ minutaId, onClose }) {
       situacao: dadosStepper?.situacao?.id,
       condicional: dadosStepper?.condicional,
       solta: dadosStepper?.seccao === 'Solta',
+      segmento_id: dadosStepper?.segmento?.id,
       tipo_titular_id: dadosStepper?.titular?.id,
-      componente_id: dadosStepper?.componente?.id,
       tipo_garantia_id: dadosStepper?.garantia?.id,
       subtipo_garantia_id: dadosStepper?.subtipoGarantia?.id,
       seccao_identificacao: dadosStepper?.seccao === 'Secção de identificação',
@@ -446,7 +418,7 @@ function Resumo({ minutaId, onClose }) {
         : null),
     };
 
-    if (isEdit) dispatch(updateItem(minutaId > 0 ? 'clausulaMinuta' : 'clausulas', JSON.stringify(formData), params));
+    if (isEdit) dispatch(updateItem('clausulas', JSON.stringify(formData), params));
     else dispatch(createItem('clausulas', JSON.stringify(formData), params));
   };
 
@@ -461,7 +433,7 @@ function Resumo({ minutaId, onClose }) {
           <TableRowItem title="Tipo de titular:" text={dadosStepper?.titular?.label} />
           <TableRowItem title="Tipo de garantia:" text={dadosStepper?.garantia?.label} />
           <TableRowItem title="Subtipo da garantia:" text={dadosStepper?.subtipoGarantia?.label} />
-          <TableRowItem title="Componente:" text={dadosStepper?.componente?.label} />
+          <TableRowItem title="Segmento:" text={dadosStepper?.segmento?.label} />
         </TableBody>
       </Table>
       <TitleResumo title="Conteúdo" action={() => dispatch(gotoStep(1))} />
@@ -534,5 +506,37 @@ function TableRowItem({ title, text = '', item = null }) {
     </TableRow>
   ) : (
     ''
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function SearchVariavel() {
+  const [variavel, setVariavel] = useState(null);
+  const { variaveis } = useSelector((state) => state.gaji9);
+  return (
+    <Stack sx={{ mb: 2 }}>
+      <Autocomplete
+        fullWidth
+        value={variavel}
+        onChange={(event, newValue) => setVariavel(newValue)}
+        sx={{ borderRadius: 1, bgcolor: 'background.neutral' }}
+        options={variaveis?.map(({ nome, descritivo }) => `${nome}${descritivo ? ` - ${descritivo}` : ''}`)?.sort()}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Procurar varáveis..."
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        )}
+      />
+    </Stack>
   );
 }

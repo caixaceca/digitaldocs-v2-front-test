@@ -93,7 +93,7 @@ export default function TableClausula({ inativos }) {
                   { id: 'titulo', label: 'Epígrafe' },
                   { id: 'tipo_titular', label: 'Tipo titular' },
                   { id: 'tipo_garantia', label: 'Tipo garantia' },
-                  { id: 'componente', label: 'Componente' },
+                  { id: 'segmento', label: 'Segmento' },
                   { id: 'ultima_modificacao', label: 'Modificado', width: 10 },
                   { id: '', width: 10 },
                 ]}
@@ -108,6 +108,7 @@ export default function TableClausula({ inativos }) {
                         {(row?.solta && 'SOLTA') ||
                           (row?.seccao_identificacao && 'IDENTIFICAÇÃO') ||
                           (row?.seccao_identificacao_caixa && 'IDENTIFICAÇÃO CAIXA') ||
+                          row?.descritivo_numero_ordem ||
                           row?.descritivo ||
                           row?.numero_ordem}
                       </TableCell>
@@ -117,10 +118,19 @@ export default function TableClausula({ inativos }) {
                         {row?.tipo_garantia || noDados()}
                         {row?.subtipo_garantia ? ` - ${row?.subtipo_garantia}` : ''}
                       </TableCell>
-                      <TableCell>{row?.componente || noDados()}</TableCell>
+                      <TableCell>{row?.segmento || noDados()}</TableCell>
                       <TableCell width={10}>
-                        <Criado caption tipo="data" value={ptDateTime(row?.ultima_modificacao || row?.modificado_em)} />
-                        <Criado tipo="user" value={row?.feito_por || row?.modificador} baralhar caption />
+                        <Criado
+                          caption
+                          tipo="data"
+                          value={ptDateTime(row?.ultima_modificacao || row?.modificado_em || row?.criado_em)}
+                        />
+                        <Criado
+                          caption
+                          baralhar
+                          tipo="user"
+                          value={row?.feito_por || row?.modificador || row?.criador}
+                        />
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">

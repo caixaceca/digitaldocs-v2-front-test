@@ -25,7 +25,7 @@ import TabGaji9 from '../../sections/gaji9/items';
 export default function PageGaji9Gestao() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
-  const { done, minutaId, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+  const { done, propostaId, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabGaji9') || 'Parametrização');
 
   const tabsList = useMemo(
@@ -62,8 +62,7 @@ export default function PageGaji9Gestao() {
   }, [tabsList, currentTab]);
 
   const navigateTo = () => {
-    if (done === 'Minuta adicionada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/minuta/${minutaId}`);
-    if (done === 'Proposta carregada' && minutaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${minutaId}`);
+    if (done === 'Proposta carregada' && propostaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${propostaId}`);
   };
 
   useNotificacao({ done, onClose: () => navigateTo() });

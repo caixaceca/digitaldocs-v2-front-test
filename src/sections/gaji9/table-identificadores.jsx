@@ -27,6 +27,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import {
   SeguroForm,
   ProdutoForm,
+  SegmentoForm,
   GarantiaForm,
   FreguesiaForm,
   TipoTitularForm,
@@ -60,6 +61,7 @@ export default function TableIdentificadores({ item, inativos }) {
 
   const {
     isLoading,
+    segmentos,
     adminGaji9,
     isOpenView,
     utilizador,
@@ -90,6 +92,7 @@ export default function TableIdentificadores({ item, inativos }) {
     filter,
     comparator: getComparator(order, orderBy),
     dados:
+      (item === 'segmentos' && segmentos) ||
       (item === 'freguesias' && freguesias) ||
       (item === 'componentes' && componentes) ||
       (item === 'tiposSeguros' && tiposSeguros) ||
@@ -111,6 +114,7 @@ export default function TableIdentificadores({ item, inativos }) {
 
   const viewItem = (modal, dados) => {
     const itemSingle =
+      (item === 'segmentos' && 'segmento') ||
       (item === 'freguesias' && 'freguesia') ||
       (item === 'componentes' && 'componente') ||
       (item === 'tiposSeguros' && 'tipoSeguro') ||
@@ -158,7 +162,8 @@ export default function TableIdentificadores({ item, inativos }) {
                         ) : (
                           <>
                             {(item === 'componentes' && row?.codigo) ||
-                              ((item === 'tiposGarantias' || item === 'tiposSeguros') && row?.designacao) ||
+                              ((item === 'tiposGarantias' || item === 'tiposSeguros' || item === 'segmentos') &&
+                                row?.designacao) ||
                               row?.nome ||
                               row?.freguesia ||
                               row?.descritivo ||
@@ -189,6 +194,7 @@ export default function TableIdentificadores({ item, inativos }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {(adminGaji9 ||
+                            (item === 'segmentos' && acessoGaji9(utilizador?.acessos, ['UPDATE_SEGMENTO'])) ||
                             (item === 'tiposSeguros' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
                             (item === 'tipoTitulares' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR'])) ||
                             (item === 'tiposGarantias' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
@@ -231,6 +237,7 @@ export default function TableIdentificadores({ item, inativos }) {
 
       {isOpenModal && (
         <>
+          {item === 'segmentos' && <SegmentoForm onClose={handleCloseModal} />}
           {item === 'tiposSeguros' && <SeguroForm onClose={handleCloseModal} />}
           {item === 'componentes' && <ProdutoForm onClose={handleCloseModal} />}
           {item === 'freguesias' && <FreguesiaForm onClose={handleCloseModal} />}
@@ -248,7 +255,9 @@ export default function TableIdentificadores({ item, inativos }) {
 function headerTable(item) {
   return [
     ...((item === 'tiposTitulares' && [{ id: 'descritivo', label: 'Descritivo' }]) ||
-      ((item === 'tiposGarantias' || item === 'tiposSeguros') && [{ id: 'designacao', label: 'Designação' }]) ||
+      ((item === 'tiposGarantias' || item === 'tiposSeguros' || item === 'segmentos') && [
+        { id: 'designacao', label: 'Designação' },
+      ]) ||
       (item === 'representantes' && [{ id: 'nome', label: 'Nome' }]) ||
       []),
     ...(item === 'representantes' ? [{ id: 'uo', label: 'U.O' }] : []),

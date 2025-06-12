@@ -11,11 +11,10 @@ import TableContainer from '@mui/material/TableContainer';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
-import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
+import { getFromGaji9 } from '../../redux/slices/gaji9';
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, closeModal } from '../../redux/slices/gaji9';
 // Components
 import { noDados } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
@@ -24,7 +23,6 @@ import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import MinutaForm from './form-minuta';
 import { applySortFilter, labelTitular } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -34,7 +32,6 @@ TableMinutas.propTypes = { item: PropTypes.string, inativos: PropTypes.bool };
 export default function TableMinutas({ item, inativos }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
 
   const {
@@ -51,7 +48,7 @@ export default function TableMinutas({ item, inativos }) {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
 
-  const { minutas, isLoading, isOpenModal, estadoMinutas } = useSelector((state) => state.gaji9);
+  const { minutas, isLoading, estadoMinutas } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     setPage(0);
@@ -137,7 +134,6 @@ export default function TableMinutas({ item, inativos }) {
           />
         )}
       </Card>
-      {isOpenModal && item === 'minutas' && <MinutaForm onClose={handleCloseModal} action="Adicionar" />}
     </>
   );
 }

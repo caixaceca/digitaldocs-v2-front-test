@@ -103,6 +103,9 @@ function Identificadores({ inativos, setInativos }) {
       ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_PRODUTO/COMPONENTE'])
         ? [{ value: 'Produtos', component: <TableIdentificadores item="componentes" inativos={inativos} /> }]
         : []),
+      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_SEGMENTO'])
+        ? [{ value: 'Segmentos', component: <TableIdentificadores item="segmentos" inativos={inativos} /> }]
+        : []),
       ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO TITULAR'])
         ? [{ value: 'Tipos de titular', component: <TableIdentificadores item="tiposTitulares" inativos={inativos} /> }]
         : []),

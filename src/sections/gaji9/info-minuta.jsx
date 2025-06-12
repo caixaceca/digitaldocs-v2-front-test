@@ -14,18 +14,15 @@ import { ptDateTime } from '../../utils/formatTime';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, getFromGaji9, setModal, updateItem, deleteItem } from '../../redux/slices/gaji9';
+import { getFromGaji9, setModal } from '../../redux/slices/gaji9';
 // Components
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { Criado, CellChecked } from '../../components/Panel';
-import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from './applySortFilter';
-import ClausulaForm from './clausulas/form-clausula';
-import { GarantiasForm, ComponentesForm } from './form-minuta';
 import DetalhesGaji9, { DetalhesContent } from './detalhes-gaji9';
 
 // ----------------------------------------------------------------------
@@ -43,7 +40,7 @@ export default function InfoMinuta({ onClose }) {
         </Card>
       </Stack>
       <Stack sx={{ width: 1 }} spacing={3}>
-        <GarantiaComponente onClose={onClose} garantia hideAdd={!minuta?.em_analise} />
+        <GarantiaComponente onClose={onClose} garantia />
         {minuta?.em_vigor && <GarantiaComponente onClose={onClose} />}
       </Stack>
     </Stack>
@@ -70,7 +67,7 @@ export function TableInfoMinuta({ item, onClose }) {
   } = useTable({});
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
-  const { minuta, modalGaji9, isSaving, selectedItem, isLoading } = useSelector((state) => state.gaji9);
+  const { minuta, modalGaji9, isLoading } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     setPage(0);
@@ -87,24 +84,6 @@ export function TableInfoMinuta({ item, onClose }) {
       [],
   });
   const isNotFound = !dataFiltered.length;
-
-  const eliminarItem = () => {
-    const params = {
-      patch: true,
-      id: minuta?.id,
-      getItem: 'minuta',
-      onClose: () => dispatch(getSuccess({ item: 'selectedItem', dados: null })),
-    };
-    const msg = `${
-      (item === 'tiposGarantias' && 'Tipo de garantia') || (item === 'componentesMinuta' && 'Componente') || 'Cláusula'
-    } eliminado`;
-
-    if (item === 'tiposGarantias')
-      dispatch(updateItem('removeGarant', JSON.stringify({ tipos_garantias: [selectedItem?.id] }), { ...params, msg }));
-    else if (item === 'componentesMinuta')
-      dispatch(deleteItem('componentesMinuta', { ...params, msg, componenteId: selectedItem?.componente_id }));
-    else dispatch(deleteItem('clausulaMinuta', { ...params, msg, clausulaId: selectedItem?.clausula_id }));
-  };
 
   const openModal = (modal, dados) => {
     const getClausula = item === 'clausulaMinuta' && modal !== 'eliminar-item';
@@ -146,14 +125,6 @@ export function TableInfoMinuta({ item, onClose }) {
                 )}
                 <TableCell align="center" width={50}>
                   <Stack direction="row" spacing={0.5} justifyContent="right">
-                    {minuta?.ativo && (minuta?.em_analise || item === 'componentesMinuta') && (
-                      <>
-                        <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-item', row)} />
-                        {item === 'clausulaMinuta' && (
-                          <DefaultAction small label="EDITAR" onClick={() => openModal('form-clausula', row)} />
-                        )}
-                      </>
-                    )}
                     {item === 'clausulaMinuta' && (
                       <DefaultAction small label="DETALHES" onClick={() => openModal('view-clausula', row)} />
                     )}
@@ -180,46 +151,20 @@ export function TableInfoMinuta({ item, onClose }) {
         />
       )}
 
-      {modalGaji9 === 'form-garantia' && <GarantiasForm onClose={onClose} />}
-      {modalGaji9 === 'form-componente' && <ComponentesForm onClose={onClose} />}
       {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={onClose} item={item} />}
-      {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={onClose} minutaId={minuta?.id} />}
-
-      {modalGaji9 === 'eliminar-item' && (
-        <DialogConfirmar
-          isSaving={isSaving}
-          handleOk={() => eliminarItem()}
-          desc={
-            (item === 'tiposGarantias' && 'eliminar este tipo de garantia associada a minuta') ||
-            (item === 'componentesMinuta' && 'eliminar este componete da minuta') ||
-            'eliminar esta cláusula da minuta'
-          }
-          onClose={() => dispatch(setModal({ item: '', dados: null }))}
-        />
-      )}
     </>
   );
 }
 
 // ----------------------------------------------------------------------
 
-GarantiaComponente.propTypes = { onClose: PropTypes.func, garantia: PropTypes.bool, hideAdd: PropTypes.bool };
+GarantiaComponente.propTypes = { onClose: PropTypes.func, garantia: PropTypes.bool };
 
-function GarantiaComponente({ onClose, garantia = false, hideAdd = false }) {
-  const dispatch = useDispatch();
-
+function GarantiaComponente({ onClose, garantia = false }) {
   return (
     <Card sx={{ p: 2 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="subtitle1">{garantia ? 'Tipos de garantias' : 'Componentes'}</Typography>
-        {!hideAdd && (
-          <DefaultAction
-            small
-            button
-            label="Adicionar"
-            onClick={() => dispatch(setModal({ item: garantia ? 'form-garantia' : 'form-componente', dados: null }))}
-          />
-        )}
       </Stack>
       <TableInfoMinuta item={garantia ? 'tiposGarantias' : 'componentesMinuta'} onClose={onClose} />
     </Card>

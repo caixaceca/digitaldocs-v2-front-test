@@ -19,14 +19,10 @@ import LockPersonIcon from '@mui/icons-material/LockPerson';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import PublishOutlinedIcon from '@mui/icons-material/PublishOutlined';
 import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
-import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import DifferenceOutlinedIcon from '@mui/icons-material/DifferenceOutlined';
 import AddHomeWorkOutlinedIcon from '@mui/icons-material/AddHomeWorkOutlined';
-import UnpublishedOutlinedIcon from '@mui/icons-material/UnpublishedOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
 import { getFileThumb } from '../utils/formatFile';
@@ -87,17 +83,11 @@ export function DefaultAction({
       label === 'REATIVAR' ||
       label === 'RESGATAR' ||
       label === 'LIBERTAR' ||
-      label === 'Composição' ||
       label === 'DOMICILIAR' ||
       label === 'FOCAL POINT') &&
       'warning') ||
-    ((label === 'REVOGAR' ||
-      label === 'ELIMINAR' ||
-      label === 'Eliminar' ||
-      label === 'ARQUIVAR' ||
-      label === 'DESARQUIVAR') &&
-      'error') ||
-    ((label === 'VERSIONAR' || label === 'ATRIBUIR') && 'info') ||
+    ((label === 'ELIMINAR' || label === 'Eliminar' || label === 'ARQUIVAR' || label === 'DESARQUIVAR') && 'error') ||
+    (label === 'ATRIBUIR' && 'info') ||
     ((label === 'Próximo' || label === 'Anterior' || label === 'PENDENTE' || label === 'Gerar contrato') &&
       'inherit') ||
     color;
@@ -107,12 +97,9 @@ export function DefaultAction({
     (label === 'ANULAR CONFIRMAÇÂO' && <ClearIcon />) ||
     (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
     (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
-    (label === 'PUBLICAR' && <PublishOutlinedIcon sx={{ width: 20 }} />) ||
     (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
     (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
     (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
-    (label === 'REVOGAR' && <UnpublishedOutlinedIcon sx={{ width: 20 }} />) ||
-    (label === 'VERSIONAR' && <DifferenceOutlinedIcon sx={{ width: 20 }} />) ||
     (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
     (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
     (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -120,7 +107,6 @@ export function DefaultAction({
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
-    ((label === 'Clonar' || label === 'CLONAR') && <FileCopyOutlinedIcon sx={{ width: 18 }} />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
     ((label === 'RESGATAR' || label === 'REATIVAR') && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
@@ -129,7 +115,7 @@ export function DefaultAction({
     ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
-    ((label === 'Editar' || label === 'EDITAR' || label === 'Composição' || label === 'FOCAL POINT') && (
+    ((label === 'Editar' || label === 'EDITAR' || label === 'FOCAL POINT') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
     ((icon === 'adicionar' ||

@@ -22,9 +22,9 @@ import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-TiposTitularesForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func };
+TiposTitularesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
 
-export function TiposTitularesForm({ id, onClose }) {
+export function TiposTitularesForm({ id, ids, onClose }) {
   const dispatch = useDispatch();
   const { isSaving, tiposTitulares } = useSelector((state) => state.gaji9);
 
@@ -42,6 +42,8 @@ export function TiposTitularesForm({ id, onClose }) {
     dispatch(createItem('tiposTitularesCl', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
   };
 
+  console.log(listaTitrulares(tiposTitulares)?.filter(({ id }) => !ids?.includes(id)));
+
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitleAlt
@@ -57,7 +59,7 @@ export function TiposTitularesForm({ id, onClose }) {
                 <RHFAutocompleteObj
                   label="Tipo de titular"
                   name={`items[${index}].item`}
-                  options={listaTitrulares(tiposTitulares)}
+                  options={listaTitrulares(tiposTitulares)?.filter(({ id }) => !ids?.includes(id))}
                   getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
                 />
                 {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
@@ -73,9 +75,9 @@ export function TiposTitularesForm({ id, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ComponetesForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func };
+ComponetesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
 
-export function ComponetesForm({ id, onClose }) {
+export function ComponetesForm({ id, ids, onClose }) {
   const dispatch = useDispatch();
   const { isSaving, componentes } = useSelector((state) => state.gaji9);
 
@@ -90,7 +92,7 @@ export function ComponetesForm({ id, onClose }) {
 
   const onSubmit = async () => {
     const params = { patch: true, getItem: 'selectedItem', id, msg: 'Componentes adicionados', onClose };
-    dispatch(createItem('componentesCl', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
+    dispatch(createItem('componentesSeg', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
   };
 
   return (
@@ -108,7 +110,7 @@ export function ComponetesForm({ id, onClose }) {
                 <RHFAutocompleteObj
                   label="Componente"
                   name={`items[${index}].item`}
-                  options={listaProdutos(componentes)}
+                  options={listaProdutos(componentes)?.filter(({ id }) => !ids?.includes(id))}
                   getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
                 />
                 {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
@@ -124,9 +126,9 @@ export function ComponetesForm({ id, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-RegraForm.propTypes = { dados: PropTypes.object, minutaId: PropTypes.number, onClose: PropTypes.func };
+RegraForm.propTypes = { dados: PropTypes.object, onClose: PropTypes.func };
 
-export function RegraForm({ dados, minutaId, onClose }) {
+export function RegraForm({ dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving, clausulas } = useSelector((state) => state.gaji9);
 
@@ -151,7 +153,7 @@ export function RegraForm({ dados, minutaId, onClose }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { minutaId, msg: 'Regra adicionada', onClose, clausulaId: dados?.id };
+    const params = { msg: 'Regra adicionada', onClose, clausulaId: dados?.id };
     dispatch(
       createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), params)
     );

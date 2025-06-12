@@ -12,7 +12,7 @@ import { getFromGaji9 } from '../../../redux/slices/gaji9';
 import { useDispatch, useSelector } from '../../../redux/store';
 //
 import { sitClausulas } from '../../../_mock';
-import { listaTitrulares, listaGarantias, listaProdutos } from '../applySortFilter';
+import { listaTitrulares, listaGarantias } from '../applySortFilter';
 
 // ----------------------------------------------------------------------
 
@@ -20,11 +20,11 @@ FiltrarClausulas.propTypes = { inativos: PropTypes.bool };
 
 export default function FiltrarClausulas({ inativos }) {
   const dispatch = useDispatch();
-  const { componentes, tiposTitulares, tiposGarantias } = useSelector((state) => state.gaji9);
+  const { segmentos, tiposTitulares, tiposGarantias } = useSelector((state) => state.gaji9);
 
-  const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
+  const segmentosList = useMemo(() => segmentos?.map(({ id, designacao }) => ({ id, label: designacao })), [segmentos]);
   const seccoesList = [
     { id: 'solta', label: 'Solta' },
     { id: 'identificacao', label: 'Secção de identificação' },
@@ -38,7 +38,7 @@ export default function FiltrarClausulas({ inativos }) {
   const [seccao, setSeccao] = useState(() => getStoredValue('seccaoCl', seccoesList));
   const [titular, setTitular] = useState(() => getStoredValue('titularCl', titularesList));
   const [garantia, setGarantia] = useState(() => getStoredValue('garantiaCl', garantiasList));
-  const [componente, setComponente] = useState(() => getStoredValue('componenteCl', componentesList));
+  const [segmento, setSegmento] = useState(() => getStoredValue('segmentoCl', segmentosList));
   const [situacao, setSituacao] = useState(
     () => sitClausulas?.find(({ id }) => id === localStorage.getItem('sitCl')) ?? { id: 'APROVADO', label: 'APROVADO' }
   );
@@ -51,13 +51,13 @@ export default function FiltrarClausulas({ inativos }) {
         titularId: titular?.id || null,
         solta: seccao?.label === 'Solta',
         garantiaId: garantia?.id || null,
+        segmentoId: segmento?.id || null,
         situacao: situacao?.id || 'APROVADO',
-        componenteId: componente?.id || null,
         caixa: seccao?.label === 'Secção de identificação',
         identificacao: seccao?.label === 'Secção de identificação Caixa',
       })
     );
-  }, [componente?.id, situacao, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
+  }, [segmento?.id, situacao, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
 
   return (
     <Card sx={{ p: 1.5, mb: 3 }}>
@@ -75,7 +75,7 @@ export default function FiltrarClausulas({ inativos }) {
         <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
           <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>
             <SelectItem label="Tipo de titular" value={titular} setItem={setTitular} options={titularesList} />
-            <SelectItem label="Componente" value={componente} setItem={setComponente} options={componentesList} />
+            <SelectItem label="Segmento" value={segmento} setItem={setSegmento} options={segmentosList} />
             <SelectItem label="Tipo de garantia" value={garantia} setItem={setGarantia} options={garantiasList} />
           </Stack>
         </Stack>
@@ -97,7 +97,7 @@ function SelectItem({ label, value, setItem, options }) {
   const item =
     (label === 'Situação' && 'sitCl') ||
     (label === 'Secção' && 'seccaoCl') ||
-    (label === 'Componente' && 'componenteCl') ||
+    (label === 'Segmento' && 'segmentoCl') ||
     (label === 'Tipo de titular' && 'titularCl') ||
     (label === 'Tipo de garantia' && 'garantiaCl') ||
     '';

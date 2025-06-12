@@ -59,14 +59,14 @@ export default function Router() {
       element: <IntranetLayout />,
       children: [
         { element: <Navigate to="fila-trabalho" replace />, index: true },
-        { path: 'indicadores', element: <PageIndicadores /> },
+        { path: 'indicadores', element: <Indicadores /> },
         {
           path: 'fila-trabalho',
           children: [
             { element: <Navigate to="/fila-trabalho/lista" replace />, index: true },
-            { path: ':id', element: <PageProcesso /> },
-            { path: 'lista', element: <PageFilaTrabalho /> },
-            { path: 'procurar', element: <PageProcura /> },
+            { path: ':id', element: <Processo /> },
+            { path: 'lista', element: <FilaTrabalho /> },
+            { path: 'procurar', element: <Procura /> },
           ],
         },
         {
@@ -74,40 +74,40 @@ export default function Router() {
           children: [
             { element: <Navigate to="/controle/lista" replace />, index: true },
             { path: 'lista', element: <Controle /> },
-            { path: ':id', element: <PageProcesso /> },
+            { path: ':id', element: <Processo /> },
           ],
         },
         {
           path: 'arquivo',
           children: [
             { element: <Navigate to="/arquivo/lista" replace />, index: true },
-            { path: 'lista', element: <PageArquivo /> },
-            { path: ':id', element: <PageProcesso /> },
+            { path: 'lista', element: <Arquivo /> },
+            { path: ':id', element: <Processo /> },
           ],
         },
         {
           path: 'parametrizacao',
           children: [
             { element: <Navigate to="/parametrizacao/gestao" replace />, index: true },
-            { path: 'gestao', element: <PageParametrizacao /> },
-            { path: 'fluxo/:id', element: <PageDetalhesFluxo /> },
-            { path: 'estado/:id', element: <PageDetalhesEstado /> },
-            { path: 'acesso/:id', element: <PageAcessosPerfil /> },
+            { path: 'gestao', element: <Parametrizacao /> },
+            { path: 'fluxo/:id', element: <DetalhesFluxo /> },
+            { path: 'estado/:id', element: <DetalhesEstado /> },
+            { path: 'acesso/:id', element: <AcessosPerfil /> },
           ],
         },
         {
           path: 'gaji9',
           children: [
             { element: <Navigate to="/gaji9/gestao" replace />, index: true },
-            { path: 'gestao', element: <PageGaji9Gestao /> },
-            { path: 'minuta/:id', element: <PageMinutaDetalhes /> },
-            { path: 'credito/:id', element: <PageCreditoDetalhes /> },
+            { path: 'gestao', element: <Gaji9Gestao /> },
+            { path: 'minuta/:id', element: <MinutaDetalhes /> },
+            { path: 'credito/:id', element: <CreditoDetalhes /> },
           ],
         },
       ],
     },
 
-    { path: '404', element: <PageNotFound /> },
+    { path: '404', element: <NotFound /> },
     { path: '*', element: <Navigate to="/404" replace /> },
   ]);
 }
@@ -115,25 +115,25 @@ export default function Router() {
 // ------------------------------------------------------- PAGES -------------------------------------------------------
 
 const Controle = Loadable(lazy(() => import('../pages/page-controle')));
-const PageNotFound = Loadable(lazy(() => import('../pages/page-not-found')));
+const NotFound = Loadable(lazy(() => import('../pages/page-not-found')));
 
 // ------------------------------------------------------ PROCESSO -----------------------------------------------------
 
-const PageArquivo = Loadable(lazy(() => import('../pages/processo/page-arquivo')));
-const PageProcura = Loadable(lazy(() => import('../pages/processo/page-procura')));
-const PageIndicadores = Loadable(lazy(() => import('../pages/processo/page-indicadores')));
-const PageFilaTrabalho = Loadable(lazy(() => import('../pages/processo/page-fila-trabalho')));
-const PageProcesso = Loadable(lazy(() => import('../pages/processo/page-detalhes-processo')));
+const Arquivo = Loadable(lazy(() => import('../pages/processo/page-arquivo')));
+const Procura = Loadable(lazy(() => import('../pages/processo/page-procura')));
+const Indicadores = Loadable(lazy(() => import('../pages/processo/page-indicadores')));
+const FilaTrabalho = Loadable(lazy(() => import('../pages/processo/page-fila-trabalho')));
+const Processo = Loadable(lazy(() => import('../pages/processo/page-detalhes-processo')));
 
 // --------------------------------------------------- PARAMETRIZAÇÃO --------------------------------------------------
 
-const PageAcessosPerfil = Loadable(lazy(() => import('../pages/parametrizacao/page-perfil-acessos')));
-const PageDetalhesFluxo = Loadable(lazy(() => import('../pages/parametrizacao/page-detalhes-fluxo')));
-const PageParametrizacao = Loadable(lazy(() => import('../pages/parametrizacao/page-parametrizacao')));
-const PageDetalhesEstado = Loadable(lazy(() => import('../pages/parametrizacao/page-detalhes-estado')));
+const AcessosPerfil = Loadable(lazy(() => import('../pages/parametrizacao/page-perfil-acessos')));
+const DetalhesFluxo = Loadable(lazy(() => import('../pages/parametrizacao/page-detalhes-fluxo')));
+const Parametrizacao = Loadable(lazy(() => import('../pages/parametrizacao/page-parametrizacao')));
+const DetalhesEstado = Loadable(lazy(() => import('../pages/parametrizacao/page-detalhes-estado')));
 
 // ------------------------------------------------------- GAJ-i9 ------------------------------------------------------
 
-const PageGaji9Gestao = Loadable(lazy(() => import('../pages/gaji9/page-gaji9-gestao')));
-const PageMinutaDetalhes = Loadable(lazy(() => import('../pages/gaji9/page-minuta-detalhes')));
-const PageCreditoDetalhes = Loadable(lazy(() => import('../pages/gaji9/page-credito-detalhes')));
+const Gaji9Gestao = Loadable(lazy(() => import('../pages/gaji9/page-gaji9-gestao')));
+const MinutaDetalhes = Loadable(lazy(() => import('../pages/gaji9/page-minuta-detalhes')));
+const CreditoDetalhes = Loadable(lazy(() => import('../pages/gaji9/page-credito-detalhes')));

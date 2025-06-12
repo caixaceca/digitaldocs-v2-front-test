@@ -13,8 +13,8 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { colorLabel } from '../../utils/getColorPresets';
-import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { sortPermissoes } from '../../utils/formatObject';
+import { ptDate, ptDateTime } from '../../utils/formatTime';
 // redux
 import { useSelector } from '../../redux/store';
 // components
@@ -43,9 +43,9 @@ export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
       <DialogContent>
         {(opcao && <DetalhesTab item={item} dados={clausulaOpcional} />) ||
           (item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
-          ((hasTabs || item === 'funcoes') && <DetalhesTab item={item} dados={selectedItem} />) || (
-            <DetalhesContent dados={selectedItem} item={item} />
-          )}
+          ((hasTabs || item === 'funcoes' || item === 'segmentos') && (
+            <DetalhesTab item={item} dados={selectedItem} />
+          )) || <DetalhesContent dados={selectedItem} item={item} />}
       </DialogContent>
     </Dialog>
   );
@@ -63,8 +63,11 @@ function DetalhesTab({ item, dados }) {
     ...((item === 'clausulas' && [
       { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
       { value: 'Tipos de titulares', component: <Relacionados id={dados?.id} dados={dados?.tipos_titulares} /> },
-      { value: 'Componentes', component: <Relacionados componente id={dados?.id} dados={dados?.componentes} /> },
+      // { value: 'Componentes', component: <Relacionados componente id={dados?.id} dados={dados?.componentes} /> },
     ]) ||
+      (item === 'segmentos' && [
+        { value: 'Componentes', component: <Relacionados componente id={dados?.id} dados={dados?.componentes} /> },
+      ]) ||
       (item === 'tiposGarantias' && [
         { value: 'Subtipos', component: <SubtiposGarantias id={dados?.id} dados={dados?.subtipos} /> },
       ]) ||
@@ -208,8 +211,9 @@ export function DetalhesContent({ dados = null, item = '' }) {
                       text={dados?.subtipo_garantia}
                       id={dados?.subtipo_garantia_id}
                     />
+                    <TableRowItem title="Segmento:" text={dados?.segmento} id={dados?.segmento_id} />
                     <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
-                    <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
+                    <TableRowItem title="Conteúdo:" text={dados?.conteudo ? newLineText(dados?.conteudo) : ''} />
                     <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
                     <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />
                     <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />

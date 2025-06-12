@@ -3,14 +3,17 @@ import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // form
-import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { listaProdutos } from './applySortFilter';
 import { fillData } from '../../utils/formatTime';
 import { utilizadoresGaji9, removerPropriedades, vdt } from '../../utils/formatObject';
 // redux
@@ -26,7 +29,7 @@ import {
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../components/hook-form';
-import { DialogButons } from '../../components/Actions';
+import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 //
 import { ItemComponent } from './form-gaji9';
 import { freguesiasConcelhos } from '../../_mock';
@@ -84,6 +87,90 @@ export function ProdutoForm({ onClose }) {
             )}
           </Stack>
           <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+SegmentoForm.propTypes = { onClose: PropTypes.func };
+
+export function SegmentoForm({ onClose }) {
+  const dispatch = useDispatch();
+  const { isEdit, isSaving, selectedItem, componentes } = useSelector((state) => state.gaji9);
+  const componentesList = useMemo(() => listaProdutos(componentes), [componentes]);
+
+  const formSchema = Yup.object().shape({
+    designacao: Yup.string().required().label('Designação'),
+    componentes: Yup.array(Yup.object({ componente: Yup.mixed().required().label('Componente') })),
+  });
+  const defaultValues = useMemo(
+    () => ({ componentes: [], designacao: selectedItem?.designacao ?? '', descritivo: selectedItem?.descritivo ?? '' }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'componentes' });
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    const formaData = { ...values, componentes: values?.componentes?.map(({ componente }) => componente?.id) || null };
+    const params = { id: selectedItem?.id, msg: `Segmento ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('segmentos', JSON.stringify(formaData), params));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar segmento' : 'Adicionar segmento'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={2}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="designacao" label="Designação" />
+              <RHFTextField name="descritivo" label="Descritivo" />
+              {!isEdit && (
+                <Stack spacing={1.5}>
+                  <Stack direction="row" alignItems="end" justifyContent="space-between" spacing={2}>
+                    <Typography variant="subtitle2">Componentes</Typography>
+                    <AddItem dados={{ small: true }} onClick={() => append({ garantia: null })} />
+                  </Stack>
+                  <Divider sx={{ mt: 0.5 }} />
+                  {fields.map((item, index) => (
+                    <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+                      <RHFAutocompleteObj
+                        label="Componente"
+                        options={componentesList}
+                        name={`componentes[${index}].componente`}
+                        getOptionDisabled={(option) =>
+                          values.componentes.some(({ componente }) => componente?.id === option.id)
+                        }
+                      />
+                      {values.componentes.length > 1 && (
+                        <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
+                      )}
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+            </Stack>
+            <DialogButons
+              edit={isEdit}
+              onClose={onClose}
+              isSaving={isSaving}
+              desc={isEdit ? 'eliminar este segmento' : ''}
+              handleDelete={() =>
+                dispatch(deleteItem('segmentos', { id: selectedItem?.id, msg: 'Segmento eliminado', onClose }))
+              }
+            />
+          </ItemComponent>
         </FormProvider>
       </DialogContent>
     </Dialog>

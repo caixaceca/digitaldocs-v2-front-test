@@ -75,7 +75,7 @@ TabsWrapperSimple.propTypes = {
 
 export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
   return (
-    <Card sx={{ height: 45, mb: 3, ...sx, bgcolor: sx?.boxShadow === 'none' && 'background.neutral' }}>
+    <Card sx={{ height: 45, mb: 3, ...sx, borderRadius: 1, bgcolor: sx?.boxShadow === 'none' && 'background.neutral' }}>
       <TabsWrapperStyleSimple sx={{ bgcolor: 'transparent' }}>
         <Tabs value={currentTab} onChange={changeTab} allowScrollButtonsMobile>
           {tabsList.map(({ value, label }) => (

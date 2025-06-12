@@ -59,8 +59,8 @@ export function AlineasClausula({ dados = [] }) {
 export function OpcoesClausula() {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
-  const { isSaving, selectedItem, minuta } = useSelector((state) => state.gaji9);
-  const clausula = minuta?.clausulas?.find(({ clausula_id: cid }) => cid === selectedItem?.id);
+  const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
+  const clausula = [];
   const opcoes = clausula?.opcoes || [];
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function OpcoesClausula() {
   };
 
   const eliminarRegra = () => {
-    const params = { minutaId: minuta?.id, condicionalId: modal, clausulaId: clausula?.clausula_id };
+    const params = { condicionalId: modal, clausulaId: clausula?.clausula_id };
     dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', onClose: () => setModal('') }));
   };
 
@@ -132,7 +132,7 @@ export function OpcoesClausula() {
       </Table>
 
       {modal === 'detalhes' && <DetalhesGaji9 closeModal={() => setModal('')} item="clausulas" opcao />}
-      {modal === 'create' && <RegraForm onClose={() => setModal('')} dados={selectedItem} minutaId={minuta?.id} />}
+      {modal === 'create' && <RegraForm onClose={() => setModal('')} dados={selectedItem} />}
       {!!modal && modal !== 'create' && modal !== 'detalhes' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -152,11 +152,11 @@ Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, compone
 export function Relacionados({ id, dados = [], componente = false }) {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
-  const { isSaving } = useSelector((state) => state.gaji9);
+  const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
   const eliminarItem = () => {
-    const params = { clausulaId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
-    dispatch(deleteItem(componente ? 'componenteCl' : 'tipoTitularCl', { ...params, onClose: () => setModal('') }));
+    const params = { itemId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
+    dispatch(deleteItem(componente ? 'componenteSeg' : 'tipoTitularCl', { ...params, onClose: () => setModal('') }));
   };
 
   return (
@@ -169,9 +169,7 @@ export function Relacionados({ id, dados = [], componente = false }) {
               Ativo
             </TableCell>
             <TableCell size="small" align="right" width={10}>
-              <Stack direction="row" justifyContent="right">
-                <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
-              </Stack>
+              <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
             </TableCell>
           </TableRow>
         </TableHead>
@@ -194,8 +192,12 @@ export function Relacionados({ id, dados = [], componente = false }) {
         )}
       </Table>
 
-      {modal === 'create' && componente && <ComponetesForm onClose={() => setModal('')} id={id} />}
-      {modal === 'create' && !componente && <TiposTitularesForm onClose={() => setModal('')} id={id} />}
+      {modal === 'create' && componente && (
+        <ComponetesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'componentes')} />
+      )}
+      {modal === 'create' && !componente && (
+        <TiposTitularesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'tipos_titulares')} />
+      )}
       {!!modal && modal !== 'create' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -206,4 +208,17 @@ export function Relacionados({ id, dados = [], componente = false }) {
       )}
     </>
   );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function extrairIds(dados, item) {
+  const ids = [];
+  if (dados?.tipo_titular_id != null) ids.push(dados.tipo_titular_id);
+  if (Array.isArray(dados[item])) {
+    dados[item].forEach((t) => {
+      if (t?.id != null) ids.push(t.id);
+    });
+  }
+  return ids;
 }
