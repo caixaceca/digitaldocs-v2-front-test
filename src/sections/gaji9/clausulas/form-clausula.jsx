@@ -504,9 +504,7 @@ function TableRowItem({ title, text = '', item = null }) {
       </TableCell>
       <TableCell sx={{ minWidth: '100% !important' }}>{(text && newLineText(text)) || item}</TableCell>
     </TableRow>
-  ) : (
-    ''
-  );
+  ) : null;
 }
 
 // ----------------------------------------------------------------------

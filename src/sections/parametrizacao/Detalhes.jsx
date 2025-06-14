@@ -346,9 +346,7 @@ export function Resgisto({ label, por = '', em = '' }) {
       {!!por && <Criado tipo="user" value={por} baralhar caption />}
       {!!em && <Criado tipo="data" value={ptDateTime(em)} baralhar caption />}
     </Stack>
-  ) : (
-    ''
-  );
+  ) : null;
 }
 
 // ----------------------------------------------------------------------
@@ -370,9 +368,7 @@ export function TableRowItem({ title, id = 0, text = '', item = null }) {
         {(!!text && !!id && `${text} (ID: ${id})`) || (text && text) || (item && item)}
       </TableCell>
     </TableRow>
-  ) : (
-    ''
-  );
+  ) : null;
 }
 
 LabelSN.propTypes = { item: PropTypes.bool };

@@ -151,7 +151,5 @@ export function TextItem({ title, text = '', text1 = null, label = null }) {
         {text1}
       </Stack>
     </Stack>
-  ) : (
-    ''
-  );
+  ) : null;
 }

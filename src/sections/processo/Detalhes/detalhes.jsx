@@ -283,9 +283,7 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
       {situacao ? <Box>{situacao}</Box> : ''}
       {label ? <Box sx={{ flexGrow: 1 }}>{label}</Box> : ''}
     </Stack>
-  ) : (
-    ''
-  );
+  ) : null;
 }
 
 // ----------------------------------------------------------------------
@@ -320,9 +318,7 @@ export function SubItem({ value, label }) {
       </Typography>
       &nbsp;{value}
     </Typography>
-  ) : (
-    ''
-  );
+  ) : null;
 }
 
 // ----------------------------------------------------------------------

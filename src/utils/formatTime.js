@@ -104,3 +104,8 @@ export function dataValido(data) {
 export function fillData(data, defaultDate) {
   return data ? add(new Date(data), { hours: 2 }) : defaultDate;
 }
+
+export function diferencaAnos(data) {
+  const anos = formatDate(new Date(), 'yyyy') - formatDate(data, 'yyyy');
+  return `${anos} ano${anos > 1 ? 's' : ''}`;
+}

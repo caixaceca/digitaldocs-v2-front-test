@@ -24,6 +24,7 @@ const initialState = {
   ajuda: null,
   perfil: null,
   dateUpdate: null,
+  documentoPdex: null,
   docIdentificacao: null,
   uos: [],
   links: [],
@@ -160,6 +161,7 @@ export function getFromIntranet(item, params) {
           (item === 'cc' && `${BASEURL}/colaborador/${params?.id}`) ||
           (item === 'perguntas' && `${BASEURL}/help/perguntas_frequentes`) ||
           (item === 'minhasAplicacoes' && `${BASEURL}/aplicacao/aplicacoes/me`) ||
+          (item === 'documentosAjuda' && `${BASEURL}/atc?categoria=documentosAjuda`) ||
           (item === 'disposicao' && `${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`) ||
           (item === 'docIdentificacao' &&
             `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`) ||

@@ -24,7 +24,5 @@ export default function NotaProcesso({ nota = '', segmento = '' }) {
           </Alert>
         ))}
     </Stack>
-  ) : (
-    ''
-  );
+  ) : null;
 }

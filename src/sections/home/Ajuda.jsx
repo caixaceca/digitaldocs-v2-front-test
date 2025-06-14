@@ -1,10 +1,6 @@
-/* eslint-disable jsx-a11y/media-has-caption */
 import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -15,18 +11,14 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-// utils
+//
 import { BASEURL } from '../../utils/apisUrl';
-// redux
+import { getFileThumb } from '../../utils/formatFile';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 // components
-import Image from '../../components/Image';
-import GridItem from '../../components/GridItem';
 import Markdown from '../../components/Markdown';
-import Scrollbar from '../../components/Scrollbar';
 import { DialogTitleAlt } from '../../components/CustomDialog';
-import SearchNotFound from '../../components/table/SearchNotFound';
 
 // ----------------------------------------------------------------------
 
@@ -34,84 +26,111 @@ AjudaDialog.propTypes = { onClose: PropTypes.func };
 
 export default function AjudaDialog({ onClose }) {
   const dispatch = useDispatch();
-  const [controlled, setControlled] = useState(false);
-  const { mail, perguntas, ajuda, isLoading } = useSelector((state) => state.intranet);
+  const { mail } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    if (mail) dispatch(getFromIntranet('ajuda'));
     if (mail) dispatch(getFromIntranet('perguntas'));
+    if (mail) dispatch(getFromIntranet('documentosAjuda'));
   }, [dispatch, mail]);
 
-  const isNotFound = !perguntas.length;
-
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="lg">
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt title="Ajuda" onClose={() => onClose()} />
       <DialogContent>
-        <Grid container spacing={3} sx={{ pt: 3 }}>
-          <GridItem sm={4}>
-            <Card>
-              <Button
-                color="inherit"
-                size="medium"
-                href={`${BASEURL}/help/ficheiro/${ajuda?.manual_disco}`}
-                target="_blank"
-                rel="noopener"
-                sx={{ p: 0.5 }}
-              >
-                <Image
-                  sx={{ borderRadius: 1 }}
-                  src="https://intranet.caixa.cv:5000/sobre/file/sobre_caixa/2f926dcfa9314540bc31c9e52fb327c1.png"
-                />
-              </Button>
-            </Card>
-          </GridItem>
-          <GridItem sm={8}>
-            <CardHeader title="Perguntas frequentes" action="" sx={{ color: 'text.success', p: 0, mb: 1 }} />
-            <Box sx={{ height: '460px' }}>
-              <Scrollbar>
-                {isLoading && isNotFound ? (
-                  <Stack>
-                    {[...Array(6)].map((row, index) => (
-                      <Skeleton animation="wave" height={70} key={`index_${index}`} />
-                    ))}
-                  </Stack>
-                ) : (
-                  <>
-                    {!isLoading && isNotFound ? (
-                      <SearchNotFound message="Não foi encontrada nenhuma pergunta frequente disponível..." />
-                    ) : (
-                      <Stack spacing={1}>
-                        {perguntas.map((item) => (
-                          <Accordion
-                            key={item.pergunta}
-                            expanded={controlled === item.pergunta}
-                            sx={{ '&.Mui-expanded': { boxShadow: (theme) => theme.customShadows.z1 } }}
-                            onChange={(event, isExpanded) => {
-                              setControlled(isExpanded ? item.pergunta : false);
-                            }}
-                          >
-                            <AccordionSummary>
-                              <Stack direction="row">
-                                <Typography variant="subtitle2" sx={{ py: 0.5, color: 'text.secondary' }}>
-                                  {item.pergunta}
-                                </Typography>
-                              </Stack>
-                            </AccordionSummary>
-                            <AccordionDetails sx={{ typography: 'body2' }}>
-                              <Markdown own children={item.resposta} />
-                            </AccordionDetails>
-                          </Accordion>
-                        ))}
-                      </Stack>
-                    )}
-                  </>
-                )}
-              </Scrollbar>
-            </Box>
-          </GridItem>
-        </Grid>
+        <Documentos />
+        <Perguntas />
       </DialogContent>
     </Dialog>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function Documentos() {
+  const { documentosAjuda, isLoading } = useSelector((state) => state.intranet);
+  const docs = documentosAjuda?.[0]?.anexos || [];
+
+  return (
+    <>
+      <CardHeader title="Documentos de suporte" sx={{ color: 'text.success', px: 0, mb: 1 }} />
+      {isLoading && docs.length === 0 ? (
+        <Stack spacing={1}>
+          {[...Array(2)].map((row, index) => (
+            <Skeleton animation="wave" height={40} key={`index_${index}`} sx={{ transform: 'scale(1)' }} />
+          ))}
+        </Stack>
+      ) : (
+        <>
+          {docs.length === 0 ? (
+            <Typography variant="caption" sx={{ p: 1, pt: 0, color: 'text.secondary', fontStyle: 'italic' }}>
+              Não foi encontrado nenhum documento disponível...
+            </Typography>
+          ) : (
+            <Stack spacing={1}>
+              {docs?.map(({ anexo, nome }) => (
+                <Button
+                  fullWidth
+                  variant="soft"
+                  rel="noopener"
+                  target="_blank"
+                  color="inherit"
+                  key={`doc_${anexo}`}
+                  startIcon={getFileThumb(false, null, nome)}
+                  href={`${BASEURL}sobre/file/sobre_caixa/${anexo}`}
+                  sx={{ textAlign: 'left', boxShadow: 'none', justifyContent: 'left' }}
+                >
+                  {nome}
+                </Button>
+              ))}
+            </Stack>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function Perguntas() {
+  const [controlled, setControlled] = useState(false);
+  const { perguntas, isLoading } = useSelector((state) => state.intranet);
+
+  return (
+    <>
+      <CardHeader title="Perguntas frequentes" sx={{ color: 'text.success', px: 0, mb: 1 }} />
+      {isLoading && perguntas.length === 0 ? (
+        <Stack spacing={1}>
+          {[...Array(4)].map((row, index) => (
+            <Skeleton animation="wave" height={45} key={`index_${index}`} sx={{ transform: 'scale(1)' }} />
+          ))}
+        </Stack>
+      ) : (
+        <>
+          {perguntas.length === 0 ? (
+            <Typography variant="caption" sx={{ p: 1, pt: 0, color: 'text.secondary', fontStyle: 'italic' }}>
+              Não foi encontrada nenhuma pergunta disponível...
+            </Typography>
+          ) : (
+            <Stack spacing={1}>
+              {perguntas.map((item) => (
+                <Accordion
+                  key={item.pergunta}
+                  expanded={controlled === item.pergunta}
+                  onChange={(event, isExpanded) => setControlled(isExpanded ? item.pergunta : false)}
+                >
+                  <AccordionSummary>
+                    <Typography variant="subtitle2">{item.pergunta}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ typography: 'body2' }}>
+                    <Markdown children={item.resposta} />
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </Stack>
+          )}
+        </>
+      )}
+    </>
   );
 }

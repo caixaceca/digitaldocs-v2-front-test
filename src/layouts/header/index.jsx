@@ -1,35 +1,44 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { m } from 'framer-motion';
 import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
+import Badge from '@mui/material/Badge';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
-import { styled } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
+import { styled, alpha } from '@mui/material/styles';
 // utils
 import cssStyles from '../../utils/cssStyles';
+import { formatDate } from '../../utils/formatTime';
+// redux
+import { useSelector } from '../../redux/store';
 // hooks
+import useToggle from '../../hooks/useToggle';
 import useOffSetTop from '../../hooks/useOffSetTop';
 import useResponsive from '../../hooks/useResponsive';
 // config
 import { HEADER, NAVBAR } from '../../config';
 // components
 import Logo from '../../components/Logo';
+import Image from '../../components/Image';
+import { Felicitacoes } from '../../components/Panel';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
-// sections
-import { FormSugestao } from '../../sections/home/HomeForm';
+import { Id, AjudaIcon, DenunciaIcon, LinksIcon, DefinicoesIcon, NotificacoesIcon } from '../../assets';
 //
-import Parabens from './Parabens';
 import Definicoes from './Definicoes';
+import LinksUteis from './LinksUteis';
 import Notificacoes from './Notificacoes';
 import ProcuraAvancada from './ProcuraAvancada';
-import { ValidarDocumento, Ajuda, Denuncia, LinksUteis } from './Items';
+import AjudaDialog from '../../sections/home/Ajuda';
+import ConsultarDocumento from './ConsultarDocumento';
+import { FormSugestao, DenunciaForm } from '../../sections/home/HomeForm';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
@@ -75,8 +84,8 @@ DashboardHeader.propTypes = {
 };
 
 export default function DashboardHeader({ onOpenSidebar, isCollapse = false, verticalLayout = false }) {
+  const [modal, setModal] = useState('');
   const isDesktop = useResponsive('up', 'lg');
-  const [openModal, setOpenModal] = useState('');
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
 
   return (
@@ -98,24 +107,31 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.25, sm: 0.75 }}>
-            <RoleBasedGuard roles={['Todo-111', 'Admin', 'pdex']}>
-              <ValidarDocumento />
+            <RoleBasedGuard roles={['Admin', 'pdex']}>
+              <IconButtonHeader
+                title="Consultar documento"
+                open={modal === 'documento'}
+                setOpen={() => setModal('documento')}
+              />
             </RoleBasedGuard>
             <LinksUteis />
             <Notificacoes />
-            <Denuncia />
+            <IconButtonHeader title="Denúncia" open={modal === 'denuncia'} setOpen={() => setModal('denuncia')} />
             <Definicoes />
-            <Ajuda />
+            <IconButtonHeader title="Ajuda" open={modal === 'ajuda'} setOpen={() => setModal('ajuda')} />
             <Parabens />
           </Stack>
         </Toolbar>
       </RootStyle>
 
       <Box sx={{ top: 12, bottom: 12, right: 0, position: 'fixed', zIndex: 2001 }}>
-        <HelpButton title="Sugestão" action={() => setOpenModal('sugestao')} />
+        <HelpButton title="Sugestão" action={() => setModal('sugestao')} />
       </Box>
 
-      {openModal === 'sugestao' && <FormSugestao onClose={() => setOpenModal('')} />}
+      {modal === 'ajuda' && <AjudaDialog onClose={() => setModal('')} />}
+      {modal === 'sugestao' && <FormSugestao onClose={() => setModal('')} />}
+      {modal === 'denuncia' && <DenunciaForm onClose={() => setModal('')} />}
+      {modal === 'documento' && <ConsultarDocumento onClose={() => setModal('')} />}
     </>
   );
 }
@@ -144,5 +160,74 @@ function HelpButton({ title, action }) {
         </Fab>
       </Tooltip>
     </Box>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function Parabens() {
+  const { toggle: open, onOpen, onClose } = useToggle();
+  const { cc } = useSelector((state) => state.intranet);
+  const aniversarianteHoje =
+    cc?.data_cel_aniv && formatDate(cc?.data_cel_aniv, 'dd-MM') === formatDate(new Date(), 'dd-MM');
+  const tempoServicoHoje =
+    cc?.data_admissao &&
+    formatDate(cc?.data_admissao, 'yyyy') !== formatDate(new Date(), 'yyyy') &&
+    formatDate(cc?.data_admissao, 'dd-MM') === formatDate(new Date(), 'dd-MM');
+
+  return aniversarianteHoje || tempoServicoHoje ? (
+    <>
+      <Tooltip arrow title="Parabéns">
+        <IconButtonAnimate size="small" onClick={onOpen}>
+          <m.div animate={{ rotate: [0, -20, 0, 20, 0] }} transition={{ duration: 1, repeat: Infinity }}>
+            <Image src="/assets/icons/gift.svg" sx={{ width: 36, height: 36 }} />
+          </m.div>
+        </IconButtonAnimate>
+      </Tooltip>
+      {open && (
+        <Felicitacoes onClose={() => onClose()} colaborador={cc} niver={aniversarianteHoje} tempo={tempoServicoHoje} />
+      )}
+    </>
+  ) : null;
+}
+
+// ----------------------------------------------------------------------
+
+IconButtonHeader.propTypes = {
+  open: PropTypes.bool,
+  setOpen: PropTypes.func,
+  total: PropTypes.number,
+  title: PropTypes.string,
+};
+
+export function IconButtonHeader({ title, open, setOpen, total }) {
+  return (
+    <Tooltip arrow title={title}>
+      <IconButtonAnimate
+        color={open ? 'primary' : 'default'}
+        onClick={(event) => setOpen(event.currentTarget)}
+        sx={{
+          padding: 0,
+          color: '#fff',
+          width: { xs: 28, sm: 40 },
+          height: { xs: 28, sm: 40 },
+          ...(open && { bgcolor: (theme) => alpha(theme.palette.grey[100], theme.palette.action.focusOpacity) }),
+        }}
+      >
+        {title === 'Notificações' ? (
+          <Badge badgeContent={total} color="error">
+            <NotificacoesIcon sx={{ width: { xs: 20, sm: 28 }, height: { xs: 20, sm: 28 } }} />
+          </Badge>
+        ) : (
+          <Box sx={{ width: { xs: 20, sm: 28 }, height: { xs: 20, sm: 28 } }}>
+            {title === 'Ajuda' && <AjudaIcon />}
+            {title === 'Links úteis' && <LinksIcon />}
+            {title === 'Denúncia' && <DenunciaIcon />}
+            {title === 'Definições' && <DefinicoesIcon />}
+            {title === 'Consultar documento' && <Id />}
+          </Box>
+        )}
+      </IconButtonAnimate>
+    </Tooltip>
   );
 }

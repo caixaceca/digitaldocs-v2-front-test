@@ -16,7 +16,7 @@ import SettingStretch from '../../components/settings/drawer/SettingStretch';
 import SettingContrast from '../../components/settings/drawer/SettingContrast';
 import SettingFullscreen from '../../components/settings/drawer/SettingFullscreen';
 //
-import { IconButtonHeader } from './Items';
+import { IconButtonHeader } from '.';
 
 // ----------------------------------------------------------------------
 
