@@ -1,5 +1,5 @@
-import { add } from 'date-fns';
 import PropTypes from 'prop-types';
+import { add, sub } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
@@ -23,9 +23,9 @@ import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { getFromIntranet } from '../../redux/slices/intranet';
 import { getIndicadores } from '../../redux/slices/indicadores';
 import { geParamsUtil } from '../../redux/slices/parametrizacao';
+import { getFromIntranet, getSuccess } from '../../redux/slices/intranet';
 // components
 import Page from '../../components/Page';
 import Label from '../../components/Label';
@@ -48,10 +48,8 @@ export default function PageFilaTrabalho() {
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 2 }) < new Date())
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 10 }) < new Date()) {
       dispatch(getFromIntranet('cc', { id: cc?.id }));
-
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 5 }) < new Date()) {
       dispatch(getFromIntranet('colaboradores'));
       dispatch(geParamsUtil());
     }
@@ -91,6 +89,10 @@ export default function PageFilaTrabalho() {
     if (!tabs.map((tab) => tab.value).includes(currentTab)) setItemValue(tabs[0]?.value, setCurrentTab, 'tabProcessos');
   }, [tabs, currentTab]);
 
+  const refreshDados = () => {
+    dispatch(getSuccess({ item: 'dateUpdate', dados: sub(new Date(), { minutes: 10 }) }));
+  };
+
   return (
     <Page title="Fila de trabalho | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -99,12 +101,16 @@ export default function PageFilaTrabalho() {
             spacing={0.5}
             direction="row"
             alignItems="center"
+            justifyContent="space-between"
             sx={{ px: 2, py: 0.88, color: 'common.white', bgcolor: 'primary.main' }}
           >
-            <Typography variant="h5">Fila de trabalho</Typography>
-            {meusAmbientes?.length > 0 && (
-              <DefaultAction small color="inherit" variant="outlined" label="Nº PROCESSOS" onClick={onOpen} />
-            )}
+            <Stack spacing={0.5} direction="row" alignItems="center">
+              <Typography variant="h5">Fila de trabalho</Typography>
+              {meusAmbientes?.length > 0 && (
+                <DefaultAction small color="inherit" variant="outlined" label="Nº PROCESSOS" onClick={onOpen} />
+              )}
+            </Stack>
+            <DefaultAction small color="inherit" variant="outlined" label="ATAULIZAR DADOS" onClick={refreshDados} />
           </Stack>
 
           <TabsWrapperStyle>

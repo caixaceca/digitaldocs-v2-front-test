@@ -287,6 +287,7 @@ export function createItem(item, dados, params) {
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `/v1/acs/representantes/definir`) ||
         (item === 'componentesSeg' && `/v1/clausulas/segmentos/${params?.id}/componentes`) ||
+        (item === 'segmentosCl' && `/v1/clausulas/assoc/segmentos?clausula_id=${params?.id}`) ||
         (item === 'subtipos' && `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}`) ||
         (item === 'recursosGrupo' && `/v1/acs/grupos/adicionar/recursos?grupo_id=${params?.id}`) ||
         (item === 'tiposTitularesCl' && `/v1/clausulas/tipo_titulares?clausula_id=${params?.id}`) ||
@@ -415,6 +416,7 @@ export function deleteItem(item, params) {
         (item === 'recursos' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
         (item === 'componenteSeg' && `/v1/clausulas/segmentos/${params?.itemId}/componentes/${params?.id}`) ||
+        (item === 'segmentoCl' && `/v1/clausulas/assoc/segmentos/${params?.id}?clausula_id=${params?.itemId}`) ||
         (item === 'tipoTitularCl' && `/v1/clausulas/tipo_titulares/${params?.id}?clausula_id=${params?.itemId}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.creditoId}&contrato_id=${params?.id}`) ||
         (item === 'subtipos' &&

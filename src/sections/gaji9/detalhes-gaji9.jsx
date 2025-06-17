@@ -63,10 +63,13 @@ function DetalhesTab({ item, dados }) {
     ...((item === 'clausulas' && [
       { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
       { value: 'Tipos de titulares', component: <Relacionados id={dados?.id} dados={dados?.tipos_titulares} /> },
-      // { value: 'Componentes', component: <Relacionados componente id={dados?.id} dados={dados?.componentes} /> },
+      { value: 'Segmentos', component: <Relacionados item="segmento" id={dados?.id} dados={dados?.segmentos} /> },
     ]) ||
       (item === 'segmentos' && [
-        { value: 'Componentes', component: <Relacionados componente id={dados?.id} dados={dados?.componentes} /> },
+        {
+          value: 'Componentes',
+          component: <Relacionados item="componente" id={dados?.id} dados={dados?.componentes} />,
+        },
       ]) ||
       (item === 'tiposGarantias' && [
         { value: 'Subtipos', component: <SubtiposGarantias id={dados?.id} dados={dados?.subtipos} /> },

@@ -5,18 +5,16 @@ import { updateItem } from '../../../redux/slices/digitaldocs';
 
 // ----------------------------------------------------------------------
 
-export function submitDados(values, isEdit, id, assunto, dispatch, enqueueSnackbar, onClose) {
+export function submitDados(values, isEdit, id, dispatch, enqueueSnackbar, onClose) {
   try {
-    const titular =
-      assunto === 'Diário' ? `Diário (${format(values.data_entrada ?? new Date(), 'dd/MM/yyyy')})` : values?.titular;
     const entidadesList = values?.entidades?.length ? values?.entidades?.map(({ numero }) => numero) : null;
 
     if (isEdit) {
-      const formData = bodyEditar({ ...values, titular, entidades: entidadesList });
+      const formData = bodyEditar({ ...values, entidades: entidadesList });
       const params = { id, msg: 'Processo atualizado', onClose };
       dispatch(updateItem('processo', JSON.stringify(formData), params));
     } else {
-      dispatch(updateDados({ forward: true, dados: { ...values, titular, entidadesList } }));
+      dispatch(updateDados({ forward: true, dados: { ...values, entidadesList } }));
     }
   } catch (error) {
     enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

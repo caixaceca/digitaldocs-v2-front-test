@@ -11,6 +11,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import RemoveIcon from '@mui/icons-material/Remove';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -104,6 +105,7 @@ export function DefaultAction({
     (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
     (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'ADICIONAR ANEXO' && <AddAnexo sx={{ width: small ? 18 : 22 }} />) ||
+    (label === 'ATAULIZAR DADOS' && <RefreshIcon sx={{ width: 22, height: 22 }} />) ||
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||

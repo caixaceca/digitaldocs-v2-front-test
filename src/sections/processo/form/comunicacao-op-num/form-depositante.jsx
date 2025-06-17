@@ -37,7 +37,7 @@ FormDepositante.propTypes = { dados: PropTypes.object };
 export default function FormDepositante({ dados }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { isEdit, processo, fluxo, onClose } = dados;
+  const { isEdit, processo, onClose } = dados;
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
@@ -95,7 +95,7 @@ export default function FormDepositante({ dados }) {
 
   const onSubmit = async () => {
     const dados = { ...dadosStepper, ...values };
-    submitDados(dados, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+    submitDados(dados, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);
   };
 
   return (

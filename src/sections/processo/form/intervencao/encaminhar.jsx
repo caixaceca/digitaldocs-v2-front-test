@@ -286,9 +286,9 @@ export function OutrosEmSerie({ acao }) {
       formData.append('transicao_id', dadosStepper?.estado?.id);
       if (dadosStepper?.noperacao) formData.append('noperacao', dadosStepper.noperacao);
       if (dadosStepper?.observacao) formData.append('observacao', dadosStepper.observacao);
+      if (dadosStepper?.motivo?.id) formData.append('motivo_id', dadosStepper?.motivo?.id);
       if (values?.colaborador?.id) formData.append('perfil_afeto_id', values.colaborador.id);
       else if (criador?.id) formData.append('perfil_afeto_id', criador.id);
-      if (dadosStepper?.motivo?.id) formData.append('motivo_id', dadosStepper.v?.id);
 
       if (dadosStepper?.parecer === 'Favorável') formData.append('parecer_favoravel', true);
       else if (dadosStepper?.parecer === 'Não favorável') formData.append('parecer_favoravel', false);

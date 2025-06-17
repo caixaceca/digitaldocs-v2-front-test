@@ -20,8 +20,8 @@ import { DefaultAction } from '../../../components/Actions';
 import { TableSearchNotFound } from '../../../components/table';
 import { DialogConfirmar } from '../../../components/CustomDialog';
 import { CellChecked, newLineText, noDados } from '../../../components/Panel';
-import { RegraForm, TiposTitularesForm, ComponetesForm } from './form-opcoes';
 import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
+import { RegraForm, TiposTitularesForm, ComponetesForm, SegmentosForm } from './form-opcoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -147,16 +147,18 @@ export function OpcoesClausula() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, componente: PropTypes.bool };
+Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, item: PropTypes.string };
 
-export function Relacionados({ id, dados = [], componente = false }) {
+export function Relacionados({ id, dados = [], item = 'tipo de titular' }) {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
   const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
   const eliminarItem = () => {
     const params = { itemId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
-    dispatch(deleteItem(componente ? 'componenteSeg' : 'tipoTitularCl', { ...params, onClose: () => setModal('') }));
+    const itemDel =
+      (item === 'componente' && 'componenteSeg') || (item === 'segmento' && 'segmentoCl') || 'tipoTitularCl';
+    dispatch(deleteItem(itemDel, { ...params, onClose: () => setModal('') }));
   };
 
   return (
@@ -164,7 +166,9 @@ export function Relacionados({ id, dados = [], componente = false }) {
       <Table sx={{ mt: 2 }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small">{componente ? 'Componente' : 'Tipo de titular'}</TableCell>
+            <TableCell size="small">
+              {(item === 'componente' && 'Componente') || (item === 'segmento' && 'Segmento') || 'Tipo de titular'}
+            </TableCell>
             <TableCell size="small" align="center">
               Ativo
             </TableCell>
@@ -180,7 +184,7 @@ export function Relacionados({ id, dados = [], componente = false }) {
             {dados?.map((row, index) => (
               <TableRow haver key={`relacionado_${index}`}>
                 <TableCell>
-                  {row?.componente || labelTitular(row?.tipo_titular, row?.consumidor) || noDados()}
+                  {row?.componente || row?.segmento || labelTitular(row?.tipo_titular, row?.consumidor) || noDados()}
                 </TableCell>
                 <CellChecked check={row?.ativo} />
                 <TableCell>
@@ -192,18 +196,21 @@ export function Relacionados({ id, dados = [], componente = false }) {
         )}
       </Table>
 
-      {modal === 'create' && componente && (
+      {modal === 'create' && item === 'componente' && (
         <ComponetesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'componentes')} />
       )}
-      {modal === 'create' && !componente && (
+      {modal === 'create' && item === 'segmento' && (
+        <SegmentosForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'segmentos')} />
+      )}
+      {modal === 'create' && item === 'tipo de titular' && (
         <TiposTitularesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'tipos_titulares')} />
       )}
       {!!modal && modal !== 'create' && (
         <DialogConfirmar
           isSaving={isSaving}
           onClose={() => setModal('')}
+          desc={`eliminar este ${item}`}
           handleOk={() => eliminarItem()}
-          desc={`eliminar este ${componente ? 'componente' : 'tipo de titular'}`}
         />
       )}
     </>
@@ -214,7 +221,9 @@ export function Relacionados({ id, dados = [], componente = false }) {
 
 function extrairIds(dados, item) {
   const ids = [];
-  if (dados?.tipo_titular_id != null) ids.push(dados.tipo_titular_id);
+  if (item === 'segmentos' && dados?.segmento_id != null) ids.push(dados.segmento_id);
+  if (item === 'componentes' && dados?.componente_id != null) ids.push(dados.componente_id);
+  if (item === 'tipos_titulares' && dados?.tipo_titular_id != null) ids.push(dados.tipo_titular_id);
   if (Array.isArray(dados[item])) {
     dados[item].forEach((t) => {
       if (t?.id != null) ids.push(t.id);

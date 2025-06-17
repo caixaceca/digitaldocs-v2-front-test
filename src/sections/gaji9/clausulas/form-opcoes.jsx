@@ -42,8 +42,6 @@ export function TiposTitularesForm({ id, ids, onClose }) {
     dispatch(createItem('tiposTitularesCl', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
   };
 
-  console.log(listaTitrulares(tiposTitulares)?.filter(({ id }) => !ids?.includes(id)));
-
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitleAlt
@@ -60,6 +58,59 @@ export function TiposTitularesForm({ id, ids, onClose }) {
                   label="Tipo de titular"
                   name={`items[${index}].item`}
                   options={listaTitrulares(tiposTitulares)?.filter(({ id }) => !ids?.includes(id))}
+                  getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
+                />
+                {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
+              </Stack>
+            ))}
+          </Stack>
+          <DialogButons isSaving={isSaving} onClose={onClose} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+SegmentosForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
+
+export function SegmentosForm({ id, ids, onClose }) {
+  const dispatch = useDispatch();
+  const { isSaving, segmentos } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({
+    items: Yup.array(Yup.object({ item: Yup.mixed().required().label('Segmento') })),
+  });
+  const defaultValues = useMemo(() => ({ items: [{ item: null }] }), []);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'items' });
+
+  const onSubmit = async () => {
+    const params = { patch: true, getItem: 'selectedItem', id, msg: 'Segmentos adicionados', onClose };
+    dispatch(createItem('segmentosCl', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
+  };
+
+  return (
+    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+      <DialogTitleAlt
+        sx={{ mb: 2 }}
+        title="Adicionar segmentos"
+        action={<AddItem dados={{ small: true }} onClick={() => append({ item: null })} />}
+      />
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            {fields.map((item, index) => (
+              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+                <RHFAutocompleteObj
+                  label="Segmento"
+                  name={`items[${index}].item`}
+                  options={segmentos
+                    ?.filter(({ id }) => !ids?.includes(id))
+                    ?.map(({ id, designacao }) => ({ id, label: designacao }))}
                   getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
                 />
                 {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}

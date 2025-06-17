@@ -97,8 +97,9 @@ export function setDataUtil(newValue, setData, localSI, resetDate, localSIF, val
   }
 }
 
-export function dataValido(data) {
-  return !!(data && data?.toString() !== 'Invalid Date');
+export function dataValido(date) {
+  const d = new Date(date);
+  return d instanceof Date && !Number.isNaN(d.getTime());
 }
 
 export function fillData(data, defaultDate) {

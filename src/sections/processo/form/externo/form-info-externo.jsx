@@ -90,7 +90,7 @@ export default function FormInfoExterno({ dados }) {
   }, [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo?.balcao]);
 
   const onSubmit = async () => {
-    submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+    submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);
   };
 
   return (

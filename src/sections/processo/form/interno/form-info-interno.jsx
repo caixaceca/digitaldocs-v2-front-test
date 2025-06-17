@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useMemo, useEffect } from 'react';
@@ -44,10 +45,10 @@ export default function FormInfoInterno({ dados }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
-    titular: fluxosGmkt(fluxo?.assunto) && Yup.string().required().label('Descriçãao'),
     noperacao: processo?.numero_operacao && Yup.number().positive().required().label('Nº de operação'),
     entidades: Yup.array(Yup.object({ numero: Yup.number().positive().integer().label('Nº de entidade') })),
     data_entrada: fluxo?.modelo !== 'Paralelo' && Yup.date().typeError().required().label('Data de entrada'),
+    titular: (fluxosGmkt(fluxo?.assunto) || fluxo?.assunto === 'Diário') && Yup.string().required().label('Descriçãao'),
     email:
       (fluxo?.assunto === 'Formulário' && Yup.string().required().label('Codificação/Nome')) ||
       (bancaDigital(fluxo?.assunto) && Yup.string().email().required().label('Email')),
@@ -68,7 +69,6 @@ export default function FormInfoInterno({ dados }) {
       email: dadosStepper?.email || processo?.email || '',
       obs: dadosStepper?.obs || processo?.observacao || '',
       conta: dadosStepper?.conta || processo?.conta || null,
-      titular: dadosStepper?.titular || processo?.titular || '',
       cliente: dadosStepper?.cliente || processo?.cliente || '',
       diadomes: dadosStepper?.diadomes || processo?.dia_mes || '',
       agendado: dadosStepper?.agendado || processo?.agendado || false,
@@ -79,6 +79,11 @@ export default function FormInfoInterno({ dados }) {
       entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
       balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
       data_arquivamento: dadosStepper?.data_arquivamento || fillData(processo?.data_arquivamento, null),
+      titular:
+        dadosStepper?.titular ||
+        processo?.titular ||
+        (fluxo?.assunto === 'Diário' && `Diário ${format(new Date(), 'dd/MM/yyyy')} - `) ||
+        '',
     }),
     [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo, estado?.uo_id]
   );
@@ -93,7 +98,7 @@ export default function FormInfoInterno({ dados }) {
   }, [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo, estado?.uo_id]);
 
   const onSubmit = async () => {
-    submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+    submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);
   };
 
   return (

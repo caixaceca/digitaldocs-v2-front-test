@@ -49,6 +49,12 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
           <RHFTextField name="titular" label="Titular" required={!values?.conta} />
         </GridItem>
       )}
+
+      {fluxo?.assunto === 'Diário' && (
+        <GridItem xl={6}>
+          <RHFTextField name="titular" label="Descrição" />
+        </GridItem>
+      )}
       {fluxosGmkt(fluxo?.assunto) && (
         <>
           <GridItem sm={fluxo?.assunto === 'Formulário' ? 6 : 12}>

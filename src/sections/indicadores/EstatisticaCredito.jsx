@@ -534,9 +534,9 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
         from={from}
         length={linha1Dados?.length + linha2Dados?.length + linha3Dados?.length}
         color={
-          (segmento === 'Empresa' && 'grey.50016') ||
-          (segmento === 'Particular' && 'grey.50024') ||
-          (segmento === 'Produtor Individual' && 'grey.50032') ||
+          (segmento === 'Empresa' && 'grey.500_16') ||
+          (segmento === 'Particular' && 'grey.500_24') ||
+          (segmento === 'Produtor Individual' && 'grey.500_32') ||
           'background.neutral'
         }
         total={
@@ -662,9 +662,9 @@ FirstRowSegmento.propTypes = {
 
 function FirstRowSegmento({ segmento, linha, dados, total = false, length, from, length1 }) {
   const color =
-    (segmento === 'Empresa' && 'grey.50016') ||
-    (segmento === 'Particular' && 'grey.50024') ||
-    (segmento === 'Produtor Individual' && 'grey.50032') ||
+    (segmento === 'Empresa' && 'grey.500_16') ||
+    (segmento === 'Particular' && 'grey.500_24') ||
+    (segmento === 'Produtor Individual' && 'grey.500_32') ||
     'background.neutral';
   return (
     <TableRow hover sx={{ borderColor: 'background.paper' }}>
@@ -833,10 +833,10 @@ TotaisLinha.propTypes = {
 
 function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
   const color =
-    (segmento === 'Empresa' && 'grey.50016') ||
-    (segmento === 'Particular' && 'grey.50024') ||
-    (segmento === 'Produtor Individual' && 'grey.50032') ||
-    'grey.50048';
+    (segmento === 'Empresa' && 'grey.500_16') ||
+    (segmento === 'Particular' && 'grey.500_24') ||
+    (segmento === 'Produtor Individual' && 'grey.500_32') ||
+    'grey.500_48';
   const subTotal =
     !linha && (segmento === 'Empresa' || segmento === 'Particular' || segmento === 'Produtor Individual');
   return (
@@ -849,7 +849,9 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
       {!segmento && (linha === 'Tesouraria' || linha === 'Investimento') && (
         <TableCell sx={{ border: 'none' }}> </TableCell>
       )}
-      <TableCell sx={{ fontWeight: 900, pl: '12px !important', bgcolor: first && !linha && !segmento && 'grey.50048' }}>
+      <TableCell
+        sx={{ fontWeight: 900, pl: '12px !important', bgcolor: first && !linha && !segmento && 'grey.500_48' }}
+      >
         {(segmento && linha) || (!segmento && (linha === 'Tesouraria' || linha === 'Investimento')) ? linha : ''}
       </TableCell>
       <TableRowTotais dados={dadosResumo(dados, segmento, linha)} />

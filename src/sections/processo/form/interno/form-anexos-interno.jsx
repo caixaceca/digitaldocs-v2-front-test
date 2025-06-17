@@ -30,7 +30,7 @@ export default function FormAnexosInterno({ dados }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { checklist } = useSelector((state) => state.parametrizacao);
 
-  const { estado, id, fluxo, onClose } = dados;
+  const { estado, id, onClose } = dados;
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
   const checkList = useMemo(() => checklist?.filter(({ designacao }) => designacao !== 'OUTROS'), [checklist]);
 
@@ -64,8 +64,6 @@ export default function FormAnexosInterno({ dados }) {
         formData.append('data_arquivamento', format(dadosStepper.data_arquivamento, 'yyyy-MM-dd'));
       }
       if (dadosStepper.titular) formData.append('titular', dadosStepper.titular);
-      else if (fluxo?.assunto === 'Diário')
-        formData.append('titular', `Diário - (${format(dadosStepper?.data_entrada || new Date(), 'dd/MM/yyyy')})`);
 
       appendAnexos(formData, values.anexos, outros, values.checklist);
       dispatch(createProcesso('processo', formData, { id, msg: 'Processo adicionado', onClose }));

@@ -59,6 +59,7 @@ export function authenticateColaborador() {
       const accessToken = await getAccessToken();
       const msalProfile = await callMsGraph(accessToken);
       dispatch(slice.actions.getSuccess({ item: 'mail', dados: msalProfile?.userPrincipalName }));
+      // const perfil = await axios.post(`${INTRANETHUBAPI}/v2/portal/perfis/msal`, msalProfile, {
       const perfil = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, {
         headers: { Authorization: accessToken },
         withCredentials: true,

@@ -98,7 +98,7 @@ export default function FormInfoCredito({ dados }) {
   }, [processo, dadosStepper, componentesList, tiposTitularList, uos, estado?.uo_id, cc?.uo?.balcao, fluxo?.id]);
 
   const onSubmit = async () => {
-    submitDados(values, isEdit, processo?.id, fluxo?.assunto, dispatch, enqueueSnackbar, onClose);
+    submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);
   };
 
   return (

@@ -39,7 +39,7 @@ export default function ItemAnalytic({ title, total, color = 'focus.main', perce
           value={100}
           thickness={4.55}
           variant="determinate"
-          sx={{ color: 'grey.50016', position: 'absolute', top: 0, left: 0 }}
+          sx={{ color: 'grey.500_16', position: 'absolute', top: 0, left: 0 }}
         />
       </Stack>
 
