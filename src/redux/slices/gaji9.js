@@ -52,6 +52,7 @@ const initialState = {
   marcadores: [],
   componentes: [],
   tiposSeguros: [],
+  tiposImoveis: [],
   tiposGarantias: [],
   tiposTitulares: [],
   representantes: [],
@@ -136,6 +137,7 @@ export function getFromGaji9(item, params) {
         (item === 'marcador' && `/v1/marcadores/detail?id=${params?.id}`) ||
         (item === 'recurso' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
         (item === 'tipoSeguro' && `/v1/tipos_seguros/detail?id=${params?.id}`) ||
+        (item === 'tipoImovel' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'segmento' && `/v1/clausulas/segmentos/${params?.id}/detail`) ||
         (item === 'tipoTitular' && `/v1/tipos_titulares/detail?id=${params?.id}`) ||
         (item === 'tipoGarantia' && `/v1/tipos_garantias/detail?id=${params?.id}`) ||
@@ -163,6 +165,7 @@ export function getFromGaji9(item, params) {
         (item === 'segmentos' && `/v1/clausulas/segmentos/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias/lista?ativo=${!params?.inativos}`) ||
+        (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel/lista?ativo=${!params?.inativos}`) ||
         (item === 'representantes' && `/v1/acs/representantes/lista?ativo=${!params?.inativos}`) ||
         (item === 'minutas' &&
           `/v1/minutas/lista?em_analise=${params?.emAnalise}&em_vigor=${params?.emVigor}&revogado=${params?.revogado}&ativo=${!params?.inativos}`) ||
@@ -283,6 +286,7 @@ export function createItem(item, dados, params) {
         (item === 'infoCaixa' && `/v1/suportes/instituicao`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias`) ||
+        (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel`) ||
         (item === 'componentes' && `/v1/produtos/importar/one`) ||
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `/v1/acs/representantes/definir`) ||
@@ -345,6 +349,7 @@ export function updateItem(item, dados, params) {
         (item === 'tiposTitulares' && `/v1/tipos_titulares?id=${params?.id}`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias?id=${params?.id}`) ||
         (item === 'infoCaixa' && `/v1/suportes/instituicao?id=${params?.id}`) ||
+        (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos?credito_id=${params?.id}`) ||
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo?id=${params?.id}`) ||
         (item === 'recursosGrupo' && `/v1/acs/grupos/update/recurso?id=${params?.id}`) ||
@@ -414,6 +419,7 @@ export function deleteItem(item, params) {
         (item === 'segmentos' && `/v1/clausulas/segmentos/${params?.id}`) ||
         (item === 'tiposSeguros' && `/v1/tipos_seguros?id=${params?.id}`) ||
         (item === 'recursos' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
+        (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
         (item === 'componenteSeg' && `/v1/clausulas/segmentos/${params?.itemId}/componentes/${params?.id}`) ||
         (item === 'segmentoCl' && `/v1/clausulas/assoc/segmentos/${params?.id}?clausula_id=${params?.itemId}`) ||

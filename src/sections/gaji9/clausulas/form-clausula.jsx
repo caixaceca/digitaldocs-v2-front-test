@@ -52,7 +52,7 @@ ClausulaForm.propTypes = { onClose: PropTypes.func };
 export default function ClausulaForm({ onClose }) {
   const dispatch = useDispatch();
   const { activeStep } = useSelector((state) => state.stepper);
-  const { isEdit, selectedItem } = useSelector((state) => state.gaji9);
+  const { isEdit, modalGaji9, selectedItem } = useSelector((state) => state.gaji9);
 
   const onClose1 = useCallback(() => {
     onClose();
@@ -67,7 +67,7 @@ export default function ClausulaForm({ onClose }) {
     <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
         onClose={() => onClose1()}
-        title={isEdit ? 'Editar cláusula' : 'Adicionar cláusula'}
+        title={`${(modalGaji9 === 'clonar-clausula' && 'Clonar') || (isEdit && 'Editar') || 'Adicionar'} cláusula`}
         stepper={
           <>
             <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Números', 'Resumo']} sx={{ mt: 3 }} />
@@ -376,14 +376,9 @@ Resumo.propTypes = { onClose: PropTypes.func };
 function Resumo({ onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { isEdit, selectedItem, isSaving } = useSelector((state) => state.gaji9);
+  const { isEdit, modalGaji9, selectedItem, isSaving } = useSelector((state) => state.gaji9);
 
   const handleSubmit = async () => {
-    const params = {
-      onClose,
-      id: selectedItem?.id,
-      msg: `Cláusula ${isEdit ? 'atualizada' : 'adicionada'}`,
-    };
     const formData = {
       ativo: true,
       titulo: dadosStepper?.titulo,
@@ -418,7 +413,9 @@ function Resumo({ onClose }) {
         : null),
     };
 
-    if (isEdit) dispatch(updateItem('clausulas', JSON.stringify(formData), params));
+    const msg = `Cláusula ${(modalGaji9 === 'clonar-clausula' && 'clonado') || (isEdit && 'atualizada') || 'adicionada'}`;
+    const params = { onClose, id: selectedItem?.id, msg };
+    if (isEdit && modalGaji9 !== 'clonar-clausula') dispatch(updateItem('clausulas', JSON.stringify(formData), params));
     else dispatch(createItem('clausulas', JSON.stringify(formData), params));
   };
 
@@ -451,13 +448,13 @@ function Resumo({ onClose }) {
             <Typography variant="subtitle2">{num}.</Typography>
             <Stack>
               <Typography variant="body2" sx={{ textAlign: 'justify' }}>
-                {conteudo ? newLineText(conteudo) : ''}
+                {newLineText(conteudo)}
               </Typography>
               {alineas?.map(({ conteudo, numero_ordem: num }, index1) => (
                 <Stack direction="row" key={`res_alinea_${index}_sub_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
                   <Typography variant="subtitle2">{num}.</Typography>
                   <Typography variant="body2" sx={{ textAlign: 'justify' }}>
-                    {conteudo ? newLineText(conteudo) : ''}
+                    {newLineText(conteudo)}
                   </Typography>
                 </Stack>
               ))}
@@ -469,7 +466,12 @@ function Resumo({ onClose }) {
           Não foi adicionado nenhum número...
         </Typography>
       )}
-      <ButtonsStepper onClose={() => dispatch(backStep())} handleSubmit={handleSubmit} isSaving={isSaving} />
+      <ButtonsStepper
+        label="Guardar"
+        isSaving={isSaving}
+        handleSubmit={handleSubmit}
+        onClose={() => dispatch(backStep())}
+      />
     </List>
   );
 }
@@ -502,7 +504,7 @@ function TableRowItem({ title, text = '', item = null }) {
           {title}
         </Typography>
       </TableCell>
-      <TableCell sx={{ minWidth: '100% !important' }}>{(text && newLineText(text)) || item}</TableCell>
+      <TableCell sx={{ minWidth: '100% !important' }}>{newLineText(text) || item}</TableCell>
     </TableRow>
   ) : null;
 }

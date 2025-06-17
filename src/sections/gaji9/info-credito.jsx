@@ -31,7 +31,7 @@ import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { DialogConfirmar } from '../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, Criado, noDados } from '../../components/Panel';
+import { CellChecked, Criado, newLineText, noDados } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import DetalhesGaji9 from './detalhes-gaji9';
@@ -75,7 +75,7 @@ export default function InfoCredito() {
         { label: 'Vencimento da 1ª prestação', value: ptDate(credito?.data_vencimento_prestacao1) },
         { label: 'Prazo contratual', value: credito?.prazo_contratual },
         { label: 'Meses vencimento', value: credito?.meses_vencimento },
-        { label: 'Finalidade', value: credito?.finalidade },
+        { label: 'Finalidade', value: newLineText(credito?.finalidade) },
       ],
     },
     {

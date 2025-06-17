@@ -263,6 +263,7 @@ export function noDados(text) {
 // ----------------------------------------------------------------------
 
 export function newLineText(text = '') {
+  if (!text) return '';
   const newText = text?.split('\n').map((str, index) => <p key={`${str}_${index}`}>{str}</p>);
   return newText;
 }

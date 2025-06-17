@@ -23,6 +23,7 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import AddHomeWorkOutlinedIcon from '@mui/icons-material/AddHomeWorkOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 // utils
@@ -87,10 +88,14 @@ export function DefaultAction({
       label === 'DOMICILIAR' ||
       label === 'FOCAL POINT') &&
       'warning') ||
-    ((label === 'ELIMINAR' || label === 'Eliminar' || label === 'ARQUIVAR' || label === 'DESARQUIVAR') && 'error') ||
-    (label === 'ATRIBUIR' && 'info') ||
-    ((label === 'Próximo' || label === 'Anterior' || label === 'PENDENTE' || label === 'Gerar contrato') &&
+    ((label === 'CLONAR' ||
+      label === 'Próximo' ||
+      label === 'Anterior' ||
+      label === 'PENDENTE' ||
+      label === 'Gerar contrato') &&
       'inherit') ||
+    (label === 'ATRIBUIR' && 'info') ||
+    ((label === 'ELIMINAR' || label === 'Eliminar' || label === 'ARQUIVAR' || label === 'DESARQUIVAR') && 'error') ||
     color;
 
   const iconAlt =
@@ -107,6 +112,7 @@ export function DefaultAction({
     (label === 'ADICIONAR ANEXO' && <AddAnexo sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'ATAULIZAR DADOS' && <RefreshIcon sx={{ width: 22, height: 22 }} />) ||
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
+    (label === 'CLONAR' && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||

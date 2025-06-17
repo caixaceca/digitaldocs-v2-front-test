@@ -107,7 +107,13 @@ function Identificadores({ inativos, setInativos }) {
         ? [{ value: 'Segmentos', component: <TableIdentificadores item="segmentos" inativos={inativos} /> }]
         : []),
       ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO TITULAR'])
-        ? [{ value: 'Tipos de titular', component: <TableIdentificadores item="tiposTitulares" inativos={inativos} /> }]
+        ? [
+            {
+              value: 'Tipos de titular',
+              component: <TableIdentificadores item="tiposTitulares" inativos={inativos} />,
+            },
+            { value: 'Tipos de imóvel', component: <TableIdentificadores item="tiposImoveis" inativos={inativos} /> },
+          ]
         : []),
       ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
         ? [

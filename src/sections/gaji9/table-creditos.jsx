@@ -23,9 +23,9 @@ import useTable, { getComparator } from '../../hooks/useTable';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getSuccess, setModal } from '../../redux/slices/gaji9';
 // Components
-import { noDados } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
 import { SkeletonTable } from '../../components/skeleton';
+import { noDados, newLineText } from '../../components/Panel';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -162,9 +162,8 @@ export default function TableCredito() {
                 orderBy={orderBy}
                 headLabel={[
                   { id: 'codigo', label: 'Código' },
-                  { id: 'numero_proposta', label: 'Proposta' },
+                  { id: 'titular', label: 'Titular' },
                   { id: 'cliente', label: 'Cliente' },
-                  { id: 'tipo_titular	', label: 'Tipo titular' },
                   { id: 'componente', label: 'Componente' },
                   { id: 'finalidade', label: 'Finalidade' },
                   { id: 'montante', label: 'Montante', align: 'right' },
@@ -173,18 +172,35 @@ export default function TableCredito() {
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={8} />
+                  <SkeletonTable row={10} column={7} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`credito_${index}`}>
-                      <TableCell>{row?.codigo || noDados('Não definido')}</TableCell>
-                      <TableCell>{row?.numero_proposta || noDados('Não definido')}</TableCell>
                       <TableCell>
-                        {row?.cliente} - {row?.titular}
+                        {row?.codigo || noDados('Não definido')}
+                        {row?.numero_proposta && (
+                          <Typography variant="body2" noWrap>
+                            <Typography variant="caption" component="span" sx={{ color: 'text.secondary' }}>
+                              Nº proposta:{' '}
+                            </Typography>
+                            {row?.numero_proposta}
+                          </Typography>
+                        )}
                       </TableCell>
-                      <TableCell>{labelTitular(row?.tipo_titular, row?.consumidor)}</TableCell>
+                      <TableCell>{row?.titular}</TableCell>
+                      <TableCell>
+                        {labelTitular(row?.tipo_titular, row?.consumidor)}
+                        {row?.cliente && (
+                          <Typography variant="body2" noWrap>
+                            <Typography variant="caption" component="span" sx={{ color: 'text.secondary' }}>
+                              Nº :{' '}
+                            </Typography>
+                            {row?.cliente}
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell>{row?.rotulo || row?.componente}</TableCell>
-                      <TableCell>{row?.finalidade || noDados('Não definido')}</TableCell>
+                      <TableCell>{newLineText(row?.finalidade) || noDados('Não definido')}</TableCell>
                       <TableCell align="right">
                         <Typography variant="body2" noWrap>
                           {row?.montante ? fCurrency(row?.montante) : noDados('Não definido')}

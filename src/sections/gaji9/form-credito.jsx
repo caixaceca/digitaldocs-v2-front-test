@@ -151,7 +151,7 @@ export default function CreditoForm({ onClose }) {
             <GridItem xs={6} md={3}>
               <RHFNumberField label="Taxa imposto de selo" name="taxa_imposto_selo" tipo="%" />
             </GridItem>
-            <GridItem children={<RHFTextField label="Finalidade" name="finalidade" />} />
+            <GridItem children={<RHFTextField label="Finalidade" name="finalidade" multiline rows={3} />} />
           </Grid>
           <DialogButons edit isSaving={isSaving} onClose={onClose} />
         </FormProvider>

@@ -216,7 +216,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     />
                     <TableRowItem title="Segmento:" text={dados?.segmento} id={dados?.segmento_id} />
                     <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
-                    <TableRowItem title="Conteúdo:" text={dados?.conteudo ? newLineText(dados?.conteudo) : ''} />
+                    <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
                     <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
                     <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />
                     <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />
@@ -248,7 +248,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     <TableRowItem title="Publicado por:" text={dados?.cc_vigor} />
                     <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                     <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
-                    {dados?.nota && <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />}
+                    <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
                     {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
                     <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                   </TableBody>

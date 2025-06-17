@@ -143,7 +143,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
               }
             />
           )}
-          {observacao && <TextItem title="Observação:" text={newLineText(observacao)} />}
+          <TextItem title="Observação:" text={newLineText(observacao)} />
           {(processo?.criado_em || processo?.criador) && (
             <TextItem
               title="Criado:"

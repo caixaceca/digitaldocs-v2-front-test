@@ -270,8 +270,8 @@ export function InfoCon({ dados }) {
         </ListItem>
         <TextItem title="Nº da operação:" text={dados?.numero} />
         {dados?.valor && <TextItem title="Valor:" text={fCurrency(dados?.valor)} />}
-        {dados?.origem_fundo && <TextItem title="Origem do fundo:" text={newLineText(dados?.origem_fundo)} />}
-        {dados?.finalidade && <TextItem title="Finalidade do fundo:" text={newLineText(dados?.finalidade)} />}
+        <TextItem title="Origem do fundo:" text={newLineText(dados?.origem_fundo)} />
+        <TextItem title="Finalidade do fundo:" text={newLineText(dados?.finalidade)} />
         <TextItem title="Depositante é o próprio titular:" text={dados?.titular_ordenador ? 'SIM' : 'NÃO'} />
         <TextItem title="Beneficiário residente:" text={dados?.residente ? 'SIM' : 'NÃO'} />
       </List>

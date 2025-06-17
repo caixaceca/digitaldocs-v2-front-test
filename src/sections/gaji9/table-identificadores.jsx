@@ -30,6 +30,7 @@ import {
   SegmentoForm,
   GarantiaForm,
   FreguesiaForm,
+  TipoImovelForm,
   TipoTitularForm,
   RepresentanteForm,
 } from './form-identificadores';
@@ -69,6 +70,7 @@ export default function TableIdentificadores({ item, inativos }) {
     isOpenModal,
     componentes,
     tiposSeguros,
+    tiposImoveis,
     tiposTitulares,
     tiposGarantias,
     representantes,
@@ -96,6 +98,7 @@ export default function TableIdentificadores({ item, inativos }) {
       (item === 'freguesias' && freguesias) ||
       (item === 'componentes' && componentes) ||
       (item === 'tiposSeguros' && tiposSeguros) ||
+      (item === 'tiposImoveis' && tiposImoveis) ||
       (item === 'tiposTitulares' && tiposTitulares) ||
       (item === 'tiposGarantias' && tiposGarantias) ||
       (item === 'representantes' &&
@@ -118,6 +121,7 @@ export default function TableIdentificadores({ item, inativos }) {
       (item === 'freguesias' && 'freguesia') ||
       (item === 'componentes' && 'componente') ||
       (item === 'tiposSeguros' && 'tipoSeguro') ||
+      (item === 'tiposImoveis' && 'tipoImovel') ||
       (item === 'tiposTitulares' && 'tipoTitular') ||
       (item === 'tiposGarantias' && 'tipoGarantia') ||
       (item === 'representantes' && 'representante');
@@ -165,6 +169,7 @@ export default function TableIdentificadores({ item, inativos }) {
                               ((item === 'tiposGarantias' || item === 'tiposSeguros' || item === 'segmentos') &&
                                 row?.designacao) ||
                               row?.nome ||
+                              row?.tipo ||
                               row?.freguesia ||
                               row?.descritivo ||
                               noDados()}
@@ -196,13 +201,14 @@ export default function TableIdentificadores({ item, inativos }) {
                           {(adminGaji9 ||
                             (item === 'segmentos' && acessoGaji9(utilizador?.acessos, ['UPDATE_SEGMENTO'])) ||
                             (item === 'tiposSeguros' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
-                            (item === 'tipoTitulares' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR'])) ||
                             (item === 'tiposGarantias' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
                             (item === 'representantes' && acessoGaji9(utilizador?.acessos, ['UPDATE_REPRESENTANTE'])) ||
                             (item === 'freguesias' &&
                               acessoGaji9(utilizador?.acessos, ['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
                             (item === 'componentes' &&
-                              acessoGaji9(utilizador?.acessos, ['UPDATE_PRODUTO/COMPONENTE']))) && (
+                              acessoGaji9(utilizador?.acessos, ['UPDATE_PRODUTO/COMPONENTE'])) ||
+                            ((item === 'tiposTitulares' || item === 'tiposImoveis') &&
+                              acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR']))) && (
                             <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
                           )}
                           <DefaultAction small label="DETALHES" onClick={() => viewItem('view', row)} />
@@ -242,6 +248,7 @@ export default function TableIdentificadores({ item, inativos }) {
           {item === 'componentes' && <ProdutoForm onClose={handleCloseModal} />}
           {item === 'freguesias' && <FreguesiaForm onClose={handleCloseModal} />}
           {item === 'tiposGarantias' && <GarantiaForm onClose={handleCloseModal} />}
+          {item === 'tiposImoveis' && <TipoImovelForm onClose={handleCloseModal} />}
           {item === 'tiposTitulares' && <TipoTitularForm onClose={handleCloseModal} />}
           {item === 'representantes' && <RepresentanteForm onClose={handleCloseModal} />}
         </>
@@ -261,6 +268,7 @@ function headerTable(item) {
       (item === 'representantes' && [{ id: 'nome', label: 'Nome' }]) ||
       []),
     ...(item === 'representantes' ? [{ id: 'uo', label: 'U.O' }] : []),
+    ...(item === 'tiposImoveis' ? [{ id: 'tipo', label: 'Tipo' }] : []),
     ...(item === 'componentes'
       ? [
           { id: 'codigo', label: 'Código' },

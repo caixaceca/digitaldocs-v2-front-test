@@ -238,6 +238,53 @@ export function TipoTitularForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+TipoImovelForm.propTypes = { onClose: PropTypes.func };
+
+export function TipoImovelForm({ onClose }) {
+  const dispatch = useDispatch();
+  const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
+
+  const defaultValues = useMemo(
+    () => ({ designacao: selectedItem?.designacao ?? '', descritivo: selectedItem?.descritivo ?? '' }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, watch, handleSubmit } = methods;
+  const values = watch();
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async () => {
+    const params = { id: selectedItem?.id, msg: `Tipo de imóvel ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)('tiposImoveis', JSON.stringify(values), params));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle>{isEdit ? 'Editar tipo de imóvel' : 'Adicionar tipo de imóvel'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={1}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="designacao" label="Designação" />
+              <RHFTextField name="descritivo" label="Descritivo" />
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 GarantiaForm.propTypes = { onClose: PropTypes.func };
 
 export function GarantiaForm({ onClose }) {

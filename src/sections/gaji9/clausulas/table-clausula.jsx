@@ -25,9 +25,9 @@ import { DialogConfirmar } from '../../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
+import FiltrarClausulas from './filtrar-clausulas';
 import ClausulaForm from './form-clausula';
 import DetalhesGaji9 from '../detalhes-gaji9';
-import FiltrarClausulas from './filtrar-clausulas';
 import { applySortFilter, labelTitular } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -66,7 +66,8 @@ export default function TableClausula({ inativos }) {
 
   const openModal = (modal, dados) => {
     const eliminar = modal === 'eliminar-clausula';
-    dispatch(setModal({ item: modal, dados: eliminar ? dados : null, isEdit: modal === 'form-clausula' }));
+    const isEdit = modal === 'form-clausula' || modal === 'clonar-clausula';
+    dispatch(setModal({ item: modal, dados: eliminar ? dados : null, isEdit }));
     if (!eliminar) dispatch(getFromGaji9('clausula', { id: dados?.id, item: 'selectedItem' }));
   };
 
@@ -125,15 +126,11 @@ export default function TableClausula({ inativos }) {
                           tipo="data"
                           value={ptDateTime(row?.ultima_modificacao || row?.modificado_em || row?.criado_em)}
                         />
-                        <Criado
-                          caption
-                          baralhar
-                          tipo="user"
-                          value={row?.feito_por || row?.modificador || row?.criador}
-                        />
+                        <Criado caption tipo="user" value={row?.feito_por || row?.modificador || row?.criador} />
                       </TableCell>
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
+                          <DefaultAction small label="CLONAR" onClick={() => openModal('clonar-clausula', row)} />
                           <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-clausula', row)} />
                           {row?.ativo && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_CLAUSULA'])) && (
                             <DefaultAction small label="EDITAR" onClick={() => openModal('form-clausula', row)} />
@@ -167,6 +164,7 @@ export default function TableClausula({ inativos }) {
       </Card>
 
       {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
+      {modalGaji9 === 'clonar-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
       {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={() => dispatch(closeModal())} item="clausulas" />}
       {modalGaji9 === 'eliminar-clausula' && (
         <DialogConfirmar
