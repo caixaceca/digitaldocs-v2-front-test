@@ -125,6 +125,10 @@ const slice = createSlice({
       actionCloseModal(state);
     },
 
+    addRole(state, action) {
+      if (!state.meusacessos.includes(action.payload)) state.meusacessos.push(action.payload);
+    },
+
     setModal(state, action) {
       state.isEdit = !!action?.payload?.isEdit;
       state.modalParams = action?.payload?.item || '';
@@ -143,7 +147,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { openModal, getSuccess, closeModal, setModal, changeMeuAmbiente } = slice.actions;
+export const { openModal, getSuccess, closeModal, setModal, changeMeuAmbiente, addRole } = slice.actions;
 
 // ----------------------------------------------------------------------
 

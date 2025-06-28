@@ -18,8 +18,8 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDate, ptDateTime } from '../../utils/formatTime';
 import { fCurrency, fPercent } from '../../utils/formatNumber';
-import { acessoGaji9, gestaoCredito } from '../../utils/validarAcesso';
 // hooks
+import { usePermissao } from '../../hooks/useAcesso';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
@@ -174,6 +174,10 @@ export default function InfoCredito() {
 TableInfoCredito.propTypes = { params: PropTypes.object, dados: PropTypes.array };
 
 export function TableInfoCredito({ params, dados = [] }) {
+  const dispatch = useDispatch();
+  const { temPermissao, isGerente } = usePermissao();
+  const [filter, setFilter] = useState(localStorage.getItem(`${tab}_form`) || '');
+
   const { contratado = false, id, tab } = params;
   const {
     page,
@@ -189,16 +193,12 @@ export function TableInfoCredito({ params, dados = [] }) {
     onChangeRowsPerPage,
   } = useTable({});
 
-  const dispatch = useDispatch();
-  const [filter, setFilter] = useState(localStorage.getItem(`${tab}_form`) || '');
-  const { adminGaji9, isSaving, isLoading, modalGaji9, selectedItem, utilizador, contratos } = useSelector(
-    (state) => state.gaji9
-  );
+  const { isSaving, isLoading, modalGaji9, selectedItem, contratos } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
-    if (tab === 'contratos' && gestaoCredito(utilizador, ['READ_CONTRATO']))
+    if (tab === 'contratos' && (isGerente || temPermissao(['READ_CONTRATO'])))
       dispatch(getFromGaji9('contratos', { id }));
-  }, [dispatch, utilizador, tab, id]);
+  }, [dispatch, tab, id, isGerente, temPermissao]);
 
   useEffect(() => {
     setPage(0);
@@ -257,14 +257,14 @@ export function TableInfoCredito({ params, dados = [] }) {
                           <TableCell align="center" width={10}>
                             <Stack direction="row" spacing={0.75}>
                               <DefaultAction small label="CONTRATO" onClick={() => downloadContrato(row?.codigo)} />
-                              {(adminGaji9 || acessoGaji9(utilizador?.acessos, ['DELETE_CONTRATO'])) && (
+                              {temPermissao(['DELETE_CONTRATO']) && (
                                 <DefaultAction
                                   small
                                   label="ELIMINAR"
                                   onClick={() => openModal('eliminar-contrato', row)}
                                 />
                               )}
-                              {gestaoCredito(utilizador, ['CREATE_CONTRATO']) && (
+                              {(isGerente || temPermissao(['CREATE_CONTRATO'])) && (
                                 <DefaultAction small label="EDITAR" onClick={() => openModal('data-contrato', row)} />
                               )}
                               <DefaultAction small label="DETALHES" onClick={() => openModal('view-contrato', row)} />
@@ -294,7 +294,7 @@ export function TableInfoCredito({ params, dados = [] }) {
                             {row?.entidade_representada_nome ? ` - ${row?.entidade_representada_nome}` : ''}
                           </TableCell>
                           <TableCell align="center" width={10}>
-                            {!contratado && !row.mutuario && gestaoCredito(utilizador, ['CREATE_CREDITO']) && (
+                            {!contratado && !row.mutuario && (isGerente || temPermissao(['CREATE_CREDITO'])) && (
                               <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-interv', row)} />
                             )}
                           </TableCell>

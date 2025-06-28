@@ -1,13 +1,15 @@
-// ----------------------------------------------------------------------
-
 export default function Table(theme) {
   return {
     MuiTableRow: {
       styleOverrides: {
         root: {
+          '&.MuiTableRow-head:first-of-type': {
+            borderBottom: `2px solid  ${theme.palette.background.paper}`,
+          },
           '&:last-child td, &:last-child th': { border: 0 },
           '&.Mui-selected': {
             backgroundColor: theme.palette.action.selected,
+            borderBottom: `1px solid  ${theme.palette.background.paper}`,
             '&:hover': { backgroundColor: theme.palette.action.hover },
           },
         },

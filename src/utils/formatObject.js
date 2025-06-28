@@ -156,3 +156,14 @@ export const getProximoAnterior = (processos, selectedId) => {
 // ----------------------------------------------------------------------
 
 export const vdt = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
+
+// ----------------------------------------------------------------------
+
+export function getLocalStorageArray(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch (error) {
+    return [];
+  }
+}

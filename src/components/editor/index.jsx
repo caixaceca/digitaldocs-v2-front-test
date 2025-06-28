@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import ReactQuill from 'react-quill';
+import ReactQuill from 'react-quill-new';
 // @mui
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
@@ -19,10 +19,7 @@ const RootStyle = styled(Box)(({ theme }) => ({
   '& .ql-editor': {
     minHeight: 150,
     maxHeight: 500,
-    '&.ql-blank::before': {
-      fontStyle: 'normal',
-      color: theme.palette.text.disabled,
-    },
+    '&.ql-blank::before': { fontStyle: 'normal', color: theme.palette.text.disabled },
     '& pre.ql-syntax': {
       ...theme.typography.body2,
       padding: theme.spacing(2),
@@ -35,35 +32,32 @@ const RootStyle = styled(Box)(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 Editor.propTypes = {
+  sx: PropTypes.object,
+  error: PropTypes.bool,
+  simple: PropTypes.bool,
+  helperText: PropTypes.node,
+  placeholder: PropTypes.string,
   id: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  error: PropTypes.bool,
-  helperText: PropTypes.node,
-  placeholder: PropTypes.string,
-  simple: PropTypes.bool,
-  sx: PropTypes.object,
 };
 
 export default function Editor({
-  id = 'intranet-quill',
+  sx,
   error,
   value,
   onChange,
-  simple = false,
   helperText,
+  simple = false,
+  id = 'intranet-quill',
   placeholder = 'Escreve uma mensagem...',
-  sx,
   ...other
 }) {
   const modules = {
-    toolbar: {
-      container: `#${id}`,
-      handlers: { undo: undoChange, redo: redoChange },
-    },
-    history: { delay: 500, maxStack: 100, userOnly: true },
     syntax: true,
     clipboard: { matchVisual: false },
+    history: { delay: 500, maxStack: 100, userOnly: true },
+    toolbar: { container: `#${id}`, handlers: { undo: undoChange, redo: redoChange } },
   };
 
   return (
@@ -72,9 +66,9 @@ export default function Editor({
         <EditorToolbar id={id} isSimple={simple} />
         <ReactQuill
           value={value}
-          onChange={onChange}
           modules={modules}
           formats={formats}
+          onChange={onChange}
           placeholder={placeholder}
           {...other}
         />

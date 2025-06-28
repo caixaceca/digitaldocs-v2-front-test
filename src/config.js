@@ -18,7 +18,8 @@ export const msalConfig = {
     redirectUri: 'https://ddocsteste.caixa.cv/fila-trabalho/lista',
     // redirectUri: 'https://digitaldocs.caixa.cv/fila-trabalho/lista',
   },
-  cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },
+  cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
+  system: { allowRedirectInIframe: false },
 };
 
 export const msalInstance = new PublicClientApplication(msalConfig);

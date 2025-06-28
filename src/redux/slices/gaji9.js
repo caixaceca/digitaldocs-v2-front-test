@@ -51,6 +51,7 @@ const initialState = {
   freguesias: [],
   marcadores: [],
   componentes: [],
+  finalidades: [],
   tiposSeguros: [],
   tiposImoveis: [],
   tiposGarantias: [],
@@ -136,6 +137,7 @@ export function getFromGaji9(item, params) {
         (item === 'freguesia' && `/v1/divisoes/detail?id=${params?.id}`) ||
         (item === 'marcador' && `/v1/marcadores/detail?id=${params?.id}`) ||
         (item === 'recurso' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
+        (item === 'finalidade' && `/v1/suportes/finalidade?id=${params?.id}`) ||
         (item === 'tipoSeguro' && `/v1/tipos_seguros/detail?id=${params?.id}`) ||
         (item === 'tipoImovel' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'segmento' && `/v1/clausulas/segmentos/${params?.id}/detail`) ||
@@ -165,6 +167,7 @@ export function getFromGaji9(item, params) {
         (item === 'segmentos' && `/v1/clausulas/segmentos/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias/lista?ativo=${!params?.inativos}`) ||
+        (item === 'finalidades' && `/v1/suportes/finalidade/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel/lista?ativo=${!params?.inativos}`) ||
         (item === 'representantes' && `/v1/acs/representantes/lista?ativo=${!params?.inativos}`) ||
         (item === 'minutas' &&
@@ -224,6 +227,7 @@ export function getDocumento(item, params) {
       const accessToken = await getAccessToken();
       const apiUrl =
         (item === 'contrato' && `/v1/contratos/download?codigo=${params?.codigo}`) ||
+        (item === 'minutav2' && `/v2/minutas/documento/preview?restrito=true`) ||
         (item === 'gerar-contrato' &&
           `/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
         (item === 'preview-contrato' &&
@@ -234,8 +238,8 @@ export function getDocumento(item, params) {
       if (apiUrl) {
         const headrs = { responseType: 'arraybuffer', headers: { Authorization: `Bearer ${accessToken}` } };
         const response =
-          item === 'gerar-contrato'
-            ? await axios.post(`${BASEURLGAJI9}${apiUrl}`, null, headrs)
+          item === 'gerar-contrato' || item === 'minutav2'
+            ? await axios.post(`${BASEURLGAJI9}${apiUrl}`, item === 'minutav2' ? JSON.stringify(params) : null, headrs)
             : await axios.get(`${BASEURLGAJI9}${apiUrl}`, headrs);
         const blob = new Blob([response.data], { type: params?.tipo_conteudo });
         const fileUrl = URL.createObjectURL(blob);
@@ -286,10 +290,12 @@ export function createItem(item, dados, params) {
         (item === 'infoCaixa' && `/v1/suportes/instituicao`) ||
         (item === 'tiposTitulares' && `/v1/tipos_titulares`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias`) ||
+        (item === 'finalidades' && `/v1/suportes/finalidade`) ||
         (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel`) ||
         (item === 'componentes' && `/v1/produtos/importar/one`) ||
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `/v1/acs/representantes/definir`) ||
+        (item === 'finalidadesSeg' && `/v1/clausulas/segmentos/${params?.id}/finalidades`) ||
         (item === 'componentesSeg' && `/v1/clausulas/segmentos/${params?.id}/componentes`) ||
         (item === 'segmentosCl' && `/v1/clausulas/assoc/segmentos?clausula_id=${params?.id}`) ||
         (item === 'subtipos' && `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}`) ||
@@ -349,6 +355,7 @@ export function updateItem(item, dados, params) {
         (item === 'tiposTitulares' && `/v1/tipos_titulares?id=${params?.id}`) ||
         (item === 'tiposGarantias' && `/v1/tipos_garantias?id=${params?.id}`) ||
         (item === 'infoCaixa' && `/v1/suportes/instituicao?id=${params?.id}`) ||
+        (item === 'finalidades' && `/v1/suportes/finalidade?id=${params?.id}`) ||
         (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos?credito_id=${params?.id}`) ||
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo?id=${params?.id}`) ||
@@ -419,8 +426,10 @@ export function deleteItem(item, params) {
         (item === 'segmentos' && `/v1/clausulas/segmentos/${params?.id}`) ||
         (item === 'tiposSeguros' && `/v1/tipos_seguros?id=${params?.id}`) ||
         (item === 'recursos' && `/v1/acs/recursos?recurso_id=${params?.id}`) ||
+        (item === 'finalidades' && `/v1/suportes/finalidade?id=${params?.id}`) ||
         (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
+        (item === 'finalidadeSeg' && `/v1/clausulas/segmentos/${params?.itemId}/finalidades/${params?.id}`) ||
         (item === 'componenteSeg' && `/v1/clausulas/segmentos/${params?.itemId}/componentes/${params?.id}`) ||
         (item === 'segmentoCl' && `/v1/clausulas/assoc/segmentos/${params?.id}?clausula_id=${params?.itemId}`) ||
         (item === 'tipoTitularCl' && `/v1/clausulas/tipo_titulares/${params?.id}?clausula_id=${params?.itemId}`) ||

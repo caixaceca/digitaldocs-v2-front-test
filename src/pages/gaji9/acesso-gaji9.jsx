@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
-// utils
-import { acessoGaji9, gestaoContrato } from '../../utils/validarAcesso';
+//
+import { usePermissao } from '../../hooks/useAcesso';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getInfoGaji } from '../../redux/slices/gaji9';
@@ -17,22 +17,24 @@ AcessoGaji9.propTypes = { item: PropTypes.string, children: PropTypes.node };
 
 export default function AcessoGaji9({ children, item }) {
   const dispatch = useDispatch();
+  const { temPermissao, isGerente } = usePermissao();
+
   const { cc } = useSelector((state) => state.intranet);
-  const { isLoading, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+  const { isLoading, utilizador } = useSelector((state) => state.gaji9);
   const temAcesso = useMemo(
     () =>
       (item === 'gestao' && utilizador) ||
-      (item === 'minuta' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA']))) ||
-      (item === 'credito' && (gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, ['READ_CREDITO']))),
-    [item, adminGaji9, utilizador]
+      (item === 'minuta' && temPermissao(['READ_MINUTA'])) ||
+      (item === 'credito' && (isGerente || temPermissao(['READ_CREDITO']))),
+    [item, temPermissao, isGerente, utilizador]
   );
 
   useEffect(() => {
-    if (!utilizador && cc?.perfil?.id_aad) dispatch(getFromGaji9('utilizador', { id: cc?.perfil?.id_aad }));
-  }, [dispatch, utilizador, cc?.perfil?.id_aad]);
+    if (!utilizador && cc?.perfil?.ad_id) dispatch(getFromGaji9('utilizador', { id: cc?.perfil?.ad_id }));
+  }, [dispatch, utilizador, cc?.perfil?.ad_id]);
 
   useEffect(() => {
-    if (temAcesso) dispatch(getInfoGaji(item));
+    if (temAcesso && item !== 'minuta') dispatch(getInfoGaji(item));
   }, [dispatch, item, temAcesso]);
 
   return isLoading && !utilizador ? (

@@ -4,17 +4,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-// utils
-import { gestaoCredito } from '../../utils/validarAcesso';
-// hooks
+//
+import useSettings from '../../hooks/useSettings';
+import { usePermissao } from '../../hooks/useAcesso';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, setModal, getSuccess, deleteItem } from '../../redux/slices/gaji9';
-// routes
-import useSettings from '../../hooks/useSettings';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
@@ -35,14 +32,17 @@ export default function PageCreditoDetalhes() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados');
-  const { credito, previewFile, utilizador, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving, done } =
-    useSelector((state) => state.gaji9);
+  const { temPermissao, isGerente } = usePermissao();
+
+  const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving, done } = useSelector(
+    (state) => state.gaji9
+  );
   const contratado = useMemo(() => !!credito?.contratado, [credito?.contratado]);
 
   useEffect(() => {
     dispatch(getSuccess({ item: 'credito', dados: null }));
-    if (id && gestaoCredito(utilizador, ['READ_CREDITO'])) dispatch(getFromGaji9('credito', { id }));
-  }, [dispatch, id, utilizador]);
+    if (id && (isGerente || temPermissao(['READ_CREDITO']))) dispatch(getFromGaji9('credito', { id }));
+  }, [dispatch, id, isGerente, temPermissao]);
 
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
@@ -85,21 +85,21 @@ export default function PageCreditoDetalhes() {
           action={
             credito?.ativo &&
             !credito?.contratado &&
-            gestaoCredito(utilizador, ['READ_CREDITO']) && (
+            (isGerente || temPermissao(['READ_CREDITO'])) && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {currentTab === 'Dados' && gestaoCredito(utilizador, ['UPDATE_CREDITO']) && (
+                {currentTab === 'Dados' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
                   <>
                     <DefaultAction small button label="Editar" onClick={() => openForm('form-credito')} />
                     <DefaultAction small button label="Eliminar" onClick={() => openForm('eliminar-credito')} />
                   </>
                 )}
-                {currentTab === 'Intervenientes' && gestaoCredito(utilizador, ['CREATE_CREDITO']) && (
+                {currentTab === 'Intervenientes' && (isGerente || temPermissao(['CREATE_CREDITO'])) && (
                   <DefaultAction small button label="Adicionar" onClick={() => openForm('form-interveniente')} />
                 )}
-                {currentTab === 'Contratos' && gestaoCredito(utilizador, ['READ_CONTRATO']) && (
+                {currentTab === 'Contratos' && (isGerente || temPermissao(['READ_CONTRATO'])) && (
                   <DefaultAction small button label="Pré-visualizar" onClick={() => openForm('preview-contrato')} />
                 )}
-                {currentTab === 'Contratos' && gestaoCredito(utilizador, ['CREATE_CONTRATO']) && (
+                {currentTab === 'Contratos' && (isGerente || temPermissao(['CREATE_CONTRATO'])) && (
                   <DefaultAction small button label="Gerar contrato" onClick={() => openForm('gerar-contrato')} />
                 )}
               </Stack>

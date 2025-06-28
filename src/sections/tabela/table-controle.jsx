@@ -123,9 +123,9 @@ export default function TableControle({ from }) {
   const isNotFound = !dataFiltered.length;
 
   useEffect(() => {
-    if (colaboradoresList?.length === 1 && cc?.perfil?.displayName === colaboradoresList[0])
+    if (colaboradoresList?.length === 1 && cc?.perfil?.nome === colaboradoresList[0])
       setColaborador(colaboradoresList[0]);
-  }, [cc?.perfil?.displayName, colaboradoresList]);
+  }, [cc?.perfil?.nome, colaboradoresList]);
 
   useEffect(() => {
     setPage(0);

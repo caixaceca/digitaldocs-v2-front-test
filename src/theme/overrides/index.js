@@ -28,7 +28,6 @@ import Skeleton from './Skeleton';
 import Backdrop from './Backdrop';
 import Progress from './Progress';
 import Timeline from './Timeline';
-import TreeView from './TreeView';
 import Checkbox from './Checkbox';
 import Accordion from './Accordion';
 import Typography from './Typography';
@@ -74,7 +73,6 @@ export default function ComponentsOverrides(theme) {
     DataGrid(theme),
     Skeleton(theme),
     Timeline(theme),
-    TreeView(theme),
     Backdrop(theme),
     Progress(theme),
     Accordion(theme),

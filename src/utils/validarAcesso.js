@@ -9,19 +9,6 @@ export function temAcesso(acessos, acessosList) {
 
 // ----------------------------------------------------------------------
 
-export function acessoGaji9(acessos, acessosList) {
-  if (!acessos || acessos?.length === 0) return false;
-  return !!acessosList?.find((row) => acessos?.includes(row));
-}
-
-export function gestaoContrato(funcao) {
-  return funcao === 'ADMIN' || funcao === 'GERENTE';
-}
-
-export function gestaoCredito(utilizador, permissoes) {
-  return gestaoContrato(utilizador?._role) || acessoGaji9(utilizador?.acessos, permissoes);
-}
-
 export function temNomeacao(colaborador) {
   let nomeacao = '';
   if (

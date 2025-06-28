@@ -47,6 +47,10 @@ import { listaTitrulares, listaGarantias, subTiposGarantia } from '../applySortF
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) => Number(id) === Number(val))) || null;
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 ClausulaForm.propTypes = { onClose: PropTypes.func };
 
 export default function ClausulaForm({ onClose }) {
@@ -103,8 +107,6 @@ function Identificacao({ onClose }) {
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
   const subTiposGarant = useMemo(() => subTiposGarantia(tipoGarantia?.subtipos || []), [tipoGarantia?.subtipos]);
   const segmentosList = useMemo(() => segmentos?.map(({ id, designacao }) => ({ id, label: designacao })), [segmentos]);
-
-  const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) => Number(id) === Number(val))) || null;
 
   const defaultValues = useMemo(
     () => ({

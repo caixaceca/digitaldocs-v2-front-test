@@ -246,7 +246,7 @@ export default function TableCartoes() {
                 onSelectAllRows={(checked) =>
                   onSelectAllRows(
                     checked,
-                    dataFiltered.map((row) => row.id)
+                    dataFiltered.map(({ id }) => id)
                   )
                 }
               />
@@ -258,9 +258,14 @@ export default function TableCartoes() {
                     const validado =
                       (fase === 'Emissão' && row?.emissao_validado) || (fase === 'Receção' && row?.rececao_validado);
                     return (
-                      <TableRow key={`${row.id}_${index}`} hover>
-                        <TableCell padding="checkbox" sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}>
+                      <TableRow key={`${row?.id}_${index}`} hover selected={selected?.includes(row?.id)}>
+                        <TableCell
+                          align="center"
+                          padding="checkbox"
+                          sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}
+                        >
                           <Checkbox
+                            size="small"
                             disabled={validado}
                             onClick={() => onSelectRow(row.id)}
                             checked={selected.includes(row.id) || validado}

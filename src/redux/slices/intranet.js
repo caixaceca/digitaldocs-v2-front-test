@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
+import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '../../graph';
+import { addRole } from './parametrizacao';
 import { loginRequest, msalInstance } from '../../config';
 // utils
-import { BASEURL, BASEURLSLIM } from '../../utils/apisUrl';
+import { BASEURL, BASEURLSLIM, INTRANETHUBAPI } from '../../utils/apisUrl';
 // hooks
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
@@ -59,12 +61,13 @@ export function authenticateColaborador() {
       const accessToken = await getAccessToken();
       const msalProfile = await callMsGraph(accessToken);
       dispatch(slice.actions.getSuccess({ item: 'mail', dados: msalProfile?.userPrincipalName }));
-      // const perfil = await axios.post(`${INTRANETHUBAPI}/v2/portal/perfis/msal`, msalProfile, {
-      const perfil = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, {
-        headers: { Authorization: accessToken },
+      // const perfil = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, {
+      const perfil = await axios.post(`${INTRANETHUBAPI}/v2/portal/perfis/msal`, msalProfile, {
+        headers: { Authorization: `Bearer ${accessToken}` },
         withCredentials: true,
       });
-      dispatch(slice.actions.getSuccess({ item: 'perfil', dados: perfil.data }));
+      dispatch(slice.actions.getSuccess({ item: 'perfil', dados: perfil.data?.objeto }));
+      perfil.data?.objeto?.grupos?.forEach(({ grupo }) => dispatch(addRole(grupo)));
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     }
@@ -72,21 +75,35 @@ export function authenticateColaborador() {
 }
 
 export async function getAccessToken() {
-  const accounts = msalInstance.getAllAccounts();
+  const activeAccount = msalInstance.getActiveAccount();
 
-  if (accounts.length === 0) {
-    await msalInstance.loginRedirect(loginRequest);
-    throw new Error('Utilizador não está logado.');
+  if (!activeAccount) {
+    msalInstance.loginRedirect(loginRequest);
+    return null;
   }
 
-  const tokenRequest = { ...loginRequest, account: accounts[0] };
+  const tokenRequest = { ...loginRequest, account: activeAccount };
 
   try {
     const response = await msalInstance.acquireTokenSilent(tokenRequest);
     return response.accessToken;
   } catch (error) {
-    await msalInstance.acquireTokenRedirect(tokenRequest);
-    throw new Error('Redirecionado para login.');
+    if (error instanceof InteractionRequiredAuthError) {
+      try {
+        const response = await msalInstance.acquireTokenPopup(tokenRequest);
+        return response.accessToken;
+      } catch (popupError) {
+        if (
+          popupError instanceof BrowserAuthError &&
+          (popupError.errorCode === 'popup_window_error' || popupError.errorCode === 'popup_blocked')
+        ) {
+          msalInstance.acquireTokenRedirect(tokenRequest);
+          return null;
+        }
+        throw popupError;
+      }
+    }
+    throw error;
   }
 }
 
@@ -114,6 +131,7 @@ export function getInfoIntranet(id) {
 export function getFromIntranet(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    if (params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params?.reset?.dados }));
 
     try {
       const accessToken = await getAccessToken();
@@ -152,6 +170,14 @@ export function getFromIntranet(item, params) {
             })
           );
         }
+      } else if (item === 'documentoPdex') {
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } };
+        const apiUrl =
+          (params?.tipoSearch === 'NIF' && '/v1/pdex/nif?nif=') ||
+          (params?.tipoSearch === 'REGISTO COMERCIAL' && '/v1/pdex/registo_comercial?num_doc=') ||
+          '/v1/pdex/dados_bb?num_doc=';
+        const response = await axios.get(`${INTRANETHUBAPI}${apiUrl}${params?.numeroSearch}`, options);
+        dispatch(slice.actions.getSuccess({ item, dados: { ...params, ...response.data?.objeto } }));
       } else {
         const apiUrl =
           (item === 'ajuda' && `${BASEURL}/help/ajuda`) ||

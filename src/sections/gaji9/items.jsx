@@ -9,9 +9,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { setItemValue } from '../../utils/formatObject';
-import { acessoGaji9 } from '../../utils/validarAcesso';
 // hooks
 import useToggle from '../../hooks/useToggle';
+import { usePermissao } from '../../hooks/useAcesso';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { openModal, setModal, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9';
@@ -95,45 +95,38 @@ function Parametrizacao({ inativos, setInativos }) {
 Identificadores.propTypes = { inativos: PropTypes.bool, setInativos: PropTypes.func };
 
 function Identificadores({ inativos, setInativos }) {
-  const { adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+  const { temPermissao } = usePermissao();
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('gaji9Identificadores') || 'Produtos');
 
   const tabsList = useMemo(
     () => [
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_PRODUTO/COMPONENTE'])
+      ...(temPermissao(['READ_PRODUTO/COMPONENTE'])
         ? [{ value: 'Produtos', component: <TableIdentificadores item="componentes" inativos={inativos} /> }]
         : []),
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_SEGMENTO'])
+      ...(temPermissao(['READ_SEGMENTO'])
         ? [{ value: 'Segmentos', component: <TableIdentificadores item="segmentos" inativos={inativos} /> }]
         : []),
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO TITULAR'])
+      ...(temPermissao(['READ_TIPO TITULAR'])
         ? [
-            {
-              value: 'Tipos de titular',
-              component: <TableIdentificadores item="tiposTitulares" inativos={inativos} />,
-            },
-            { value: 'Tipos de imóvel', component: <TableIdentificadores item="tiposImoveis" inativos={inativos} /> },
+            { value: 'Titulares', component: <TableIdentificadores item="tiposTitulares" inativos={inativos} /> },
+            { value: 'Imóveis', component: <TableIdentificadores item="tiposImoveis" inativos={inativos} /> },
+            { value: 'Finalidades', component: <TableIdentificadores item="finalidades" inativos={inativos} /> },
           ]
         : []),
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
-        ? [
-            {
-              value: 'Tipos de garantia',
-              component: <TableIdentificadores item="tiposGarantias" inativos={inativos} />,
-            },
-          ]
+      ...(temPermissao(['READ_TIPO GARANTIA'])
+        ? [{ value: 'Garantias', component: <TableIdentificadores item="tiposGarantias" inativos={inativos} /> }]
         : []),
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_TIPO GARANTIA'])
-        ? [{ value: 'Tipos de seguro', component: <TableIdentificadores item="tiposSeguros" inativos={inativos} /> }]
+      ...(temPermissao(['READ_TIPO GARANTIA'])
+        ? [{ value: 'Seguros', component: <TableIdentificadores item="tiposSeguros" inativos={inativos} /> }]
         : []),
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_REPRESENTANTE'])
+      ...(temPermissao(['READ_REPRESENTANTE'])
         ? [{ value: 'Representantes', component: <TableIdentificadores item="representantes" inativos={inativos} /> }]
         : []),
-      ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_DIVISAO ADMINISTRATIVA'])
+      ...(temPermissao(['READ_DIVISAO ADMINISTRATIVA'])
         ? [{ value: 'Freguesias', component: <TableIdentificadores item="freguesias" inativos={inativos} /> }]
         : []),
     ],
-    [inativos, adminGaji9, utilizador?.acessos]
+    [inativos, temPermissao]
   );
 
   useEffect(() => {
@@ -164,7 +157,7 @@ Actions.propTypes = { label: PropTypes.string, inativos: PropTypes.bool, setInat
 
 function Actions({ inativos, setInativos, label = '' }) {
   const dispatch = useDispatch();
-  const { adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+  const { temPermissao, isAdmin } = usePermissao();
 
   return (
     <Stack direction="row" alignItems="center" spacing={1}>
@@ -182,21 +175,23 @@ function Actions({ inativos, setInativos, label = '' }) {
       {label !== 'Créditos' &&
         label !== 'Cláusulas' &&
         label !== 'Minutas públicas' &&
-        (adminGaji9 ||
-          (label === 'Minutas' && acessoGaji9(utilizador?.acessos, ['CREATE_MINUTA'])) ||
-          (label === 'Produtos' && acessoGaji9(utilizador?.acessos, ['CREATE_PRODUTO/COMPONENTE'])) ||
-          (label === 'Representantes' && acessoGaji9(utilizador?.acessos, ['CREATE_REPRESENTANTE'])) ||
-          (label === 'Tipos de titular' && acessoGaji9(utilizador?.acessos, ['CREATE_TIPO TITULAR'])) ||
-          (label === 'Freguesias' && acessoGaji9(utilizador?.acessos, ['CREATE_DIVISAO ADMINISTRATIVA'])) ||
-          ((label === 'Tipos de garantia' || label === 'Tipos de seguro') &&
-            acessoGaji9(utilizador?.acessos, ['CREATE_TIPO GARANTIA']))) && (
+        (isAdmin ||
+          (label === 'Minutas' && temPermissao(['CREATE_MINUTA'])) ||
+          (label === 'Produtos' && temPermissao(['CREATE_PRODUTO/COMPONENTE'])) ||
+          (label === 'Representantes' && temPermissao(['CREATE_REPRESENTANTE'])) ||
+          (label === 'Freguesias' && temPermissao(['CREATE_DIVISAO ADMINISTRATIVA'])) ||
+          ((label === 'Titulares' || label === 'Imóveis' || label === 'Finalidades') &&
+            temPermissao(['CREATE_TIPO TITULAR'])) ||
+          ((label === 'Garantias' || label === 'Seguros') && temPermissao(['CREATE_TIPO GARANTIA']))) && (
           <DefaultAction button label="Adicionar" onClick={() => dispatch(openModal('add'))} />
         )}
-      {label === 'Cláusulas' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_CLAUSULA'])) && (
+      {label === 'Cláusulas' && temPermissao(['CREATE_CLAUSULA']) && (
         <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: 'form-clausula' }))} />
       )}
-      {label === 'Representantes' && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_INSTITUICAO'])) && (
-        <ButtonInfoCaixa />
+      {label === 'Representantes' && temPermissao(['READ_INSTITUICAO']) && <ButtonInfoCaixa />}
+
+      {label === 'Cláusulas' && (
+        <DefaultAction button label="Pré-visualizar" onClick={() => dispatch(setModal({ item: 'preview-minuta' }))} />
       )}
     </Stack>
   );

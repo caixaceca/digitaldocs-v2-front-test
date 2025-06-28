@@ -5,7 +5,7 @@ import { add, format, isSameYear, isSameMonth, formatDistance, formatDistanceToN
 
 export function formatDate(date, newFormat) {
   if (!date) return '';
-  const fm = newFormat || 'dd MMM yyyy';
+  const fm = newFormat || 'dd-MMM-yyyy';
   return date ? format(add(new Date(date), { hours: 2 }), fm, { locale: pt }) : '';
 }
 

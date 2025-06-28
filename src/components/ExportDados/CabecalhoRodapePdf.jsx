@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { View, Text, Image } from '@react-pdf/renderer';
 // utils
-import { ptDate } from '../../utils/formatTime';
+import { formatDate, ptDate } from '../../utils/formatTime';
 // components
 import styles from './ExportStylePdf';
 
@@ -40,7 +40,7 @@ export function CabecalhoAlt({ cabecalho = false, codificacao = '' }) {
             <Text
               style={[styles.bodyHeader]}
               render={({ pageNumber, totalPages }) =>
-                `${codificacao ? `${codificacao} | ` : ''} ${pageNumber}/${totalPages}`
+                `${codificacao ?? formatDate(new Date())} | ${pageNumber}/${totalPages}`
               }
             />
             <View style={[styles.headerLogo]}>

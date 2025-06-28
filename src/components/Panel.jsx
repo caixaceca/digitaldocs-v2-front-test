@@ -311,7 +311,7 @@ export function Felicitacoes({ onClose, colaborador = null, niver = false, tempo
             <Typography variant="h6">
               Bem-vind{colaborador?.sexo === 'Masculino' ? 'o' : 'a'} a família CAIXA
             </Typography>
-            <Typography variant="h4">{colaborador?.perfil?.displayName}</Typography>
+            <Typography variant="h4">{colaborador?.nome}</Typography>
             <Typography sx={{ pt: 2 }}>É com muito prazer que lhe damos as boas-vindas à nossa família!</Typography>
             <Typography>
               Estamos felizes por tê-lo connosco e confiantes de que a sua experiência e dedicação serão valiosas para o
@@ -325,7 +325,7 @@ export function Felicitacoes({ onClose, colaborador = null, niver = false, tempo
           <Stack spacing={1} sx={{ fontWeight: 'normal', color: 'success.main', pt: (niver && tempo && 1) || 7 }}>
             <Stack>
               <Typography variant="h6">Parabéns:</Typography>
-              <Typography variant="h4">{colaborador?.perfil?.displayName}</Typography>
+              <Typography variant="h4">{colaborador?.nome}</Typography>
               {niver ? (
                 <Typography variant="h6" sx={{ mt: 3 }}>
                   Feliz Aniversário!

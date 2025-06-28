@@ -5,15 +5,13 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-// utils
-import { acessoGaji9 } from '../../utils/validarAcesso';
+//
+import useSettings from '../../hooks/useSettings';
+import { usePermissao } from '../../hooks/useAcesso';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/slices/gaji9';
-// hooks
-import useSettings from '../../hooks/useSettings';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
@@ -32,16 +30,17 @@ export default function PageMinutaDetalhes() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
+  const { temPermissao } = usePermissao();
   const [action, setAction] = useState('');
+  const permissao = temPermissao(['READ_MINUTA']);
   const [currentTab, setCurrentTab] = useState('Dados');
-  const { minuta, isLoading, isLoadingDoc, isOpenModal, previewFile, adminGaji9, utilizador } = useSelector(
-    (state) => state.gaji9
-  );
+
+  const { minuta, isLoading, isLoadingDoc, isOpenModal, previewFile } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     dispatch(getSuccess({ item: 'minuta', dados: null }));
-    if (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])) dispatch(getFromGaji9('minuta', { id }));
-  }, [dispatch, adminGaji9, utilizador, id]);
+    if (permissao) dispatch(getFromGaji9('minuta', { id }));
+  }, [dispatch, id, permissao]);
 
   const handleClose = () => {
     setAction('');
@@ -86,7 +85,7 @@ export default function PageMinutaDetalhes() {
           ]}
           action={
             !!minuta &&
-            (adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])) && (
+            temPermissao(['READ_MINUTA']) && (
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {minuta?.clausulas?.length > 0 && currentTab !== 'Tipos de garantia' && (
                   <DefaultAction button label="Pré-visualizar" onClick={() => handleAction('preview')} />

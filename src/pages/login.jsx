@@ -1,10 +1,9 @@
+import React from 'react';
 import { format } from 'date-fns';
-import { useSnackbar } from 'notistack';
-import React, { createRef } from 'react';
-import { useMsal } from '@azure/msal-react';
-import { InteractionStatus } from '@azure/msal-browser';
 // @mui
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Grow from '@mui/material/Grow';
 import Alert from '@mui/material/Alert';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -12,63 +11,64 @@ import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-// config
-import { loginRequest, msalInstance } from '../config';
+import CircularProgress from '@mui/material/CircularProgress';
+// context
+import { useAuthContext } from '../providers/auth-provider';
 // components
 import Page from '../components/Page';
+import Logo from '../components/Logo';
 
 const RootStyle = styled(Page)(() => ({
   display: 'flex',
+  minHeight: '100vh',
+  flexDirection: 'column',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
   backgroundImage: 'url(/assets/Shape.svg)',
 }));
 
-const ContentStyle = styled('div')(() => ({
-  margin: 'auto',
-  display: 'flex',
-  minHeight: '100vh',
-  flexDirection: 'column',
-  justifyContent: 'center',
-}));
-
 export default function PageLogin() {
-  const referencia = createRef();
-  const { enqueueSnackbar } = useSnackbar();
-  const { instance, inProgress } = useMsal();
-
-  const handleLogin = async () => {
-    try {
-      await msalInstance.initialize();
-      if (inProgress === InteractionStatus.None) {
-        await instance.loginRedirect({ ...loginRequest });
-        enqueueSnackbar('Login efetuado com sucesso', { variant: 'success' });
-      }
-    } catch (error) {
-      enqueueSnackbar(error.message || 'Erro no login', { variant: 'error' });
-    }
-  };
+  const { login, loginLoading } = useAuthContext();
 
   return (
     <RootStyle title="Login">
-      <Container maxWidth="sm">
-        <ContentStyle>
-          <Card sx={{ p: 7, mb: 5 }}>
-            <Stack direction="column" sx={{ mb: 5 }} spacing={2}>
-              <Typography variant="h3">Olá, bem-vindo(a)</Typography>
-              <Typography variant="h5">Intranet da Caixa Económica de Cabo Verde</Typography>
-            </Stack>
-            <Alert severity="success" sx={{ mb: 3 }}>
-              Para aceder faça login com a sua conta <strong>Microsoft</strong>
-            </Alert>
-            <Button fullWidth size="large" ref={referencia} variant="contained" onClick={handleLogin}>
-              Login
-            </Button>
-          </Card>
-        </ContentStyle>
+      <Container maxWidth="sm" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+        <Grid container justifyContent="center" alignItems="center" style={{ width: '100%' }}>
+          <Grid size={12}>
+            <Grow in>
+              <Card sx={{ mt: 1, p: { xs: 4, sm: 7 }, mb: 5 }}>
+                <Stack direction="column" sx={{ mb: 5 }} spacing={2} alignItems="center">
+                  <Logo sx={{ width: 50, height: 50, mb: 2 }} />
+                  <Typography variant="h4" textAlign="center">
+                    Olá, bem-vindo(a)
+                  </Typography>
+                  <Typography variant="h6" textAlign="center">
+                    Intranet da Caixa Económica de Cabo Verde
+                  </Typography>
+                </Stack>
+
+                <Alert severity="success" sx={{ mb: 3 }}>
+                  Para aceder faça login com a sua conta <strong>Microsoft</strong>
+                </Alert>
+
+                <Button
+                  fullWidth
+                  size="large"
+                  onClick={login}
+                  variant="contained"
+                  disabled={loginLoading}
+                  sx={{ fontSize: '1rem' }}
+                >
+                  {loginLoading ? <CircularProgress size={24} color="inherit" /> : 'Entrar'}
+                </Button>
+              </Card>
+            </Grow>
+          </Grid>
+        </Grid>
       </Container>
-      <Paper sx={{ position: 'absolute', bottom: 10, left: 10, right: 10, p: 1.5 }} elevation={3}>
+
+      <Paper elevation={3} sx={{ p: 2, mt: 'auto', mx: { xs: 2, sm: 5 }, mb: 2 }}>
         <Stack alignItems="center" spacing={{ xs: 1, sm: 2 }} justifyContent="space-between" direction="row">
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             © {format(new Date(), 'yyyy')} Caixa Económica de Cabo Verde

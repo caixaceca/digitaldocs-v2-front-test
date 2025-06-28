@@ -8,10 +8,9 @@ import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-// utils
-import { acessoGaji9 } from '../../utils/validarAcesso';
 // hooks
 import useModal from '../../hooks/useModal';
+import { usePermissao } from '../../hooks/useAcesso';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -25,12 +24,12 @@ import { CellChecked, ColaboradorInfo, noDados } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import {
+  TipoForm,
   SeguroForm,
   ProdutoForm,
   SegmentoForm,
   GarantiaForm,
   FreguesiaForm,
-  TipoImovelForm,
   TipoTitularForm,
   RepresentanteForm,
 } from './form-identificadores';
@@ -43,6 +42,7 @@ TableIdentificadores.propTypes = { item: PropTypes.string, inativos: PropTypes.b
 
 export default function TableIdentificadores({ item, inativos }) {
   const dispatch = useDispatch();
+  const { temPermissao } = usePermissao();
   const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
 
@@ -63,11 +63,10 @@ export default function TableIdentificadores({ item, inativos }) {
   const {
     isLoading,
     segmentos,
-    adminGaji9,
     isOpenView,
-    utilizador,
     freguesias,
     isOpenModal,
+    finalidades,
     componentes,
     tiposSeguros,
     tiposImoveis,
@@ -97,6 +96,7 @@ export default function TableIdentificadores({ item, inativos }) {
       (item === 'segmentos' && segmentos) ||
       (item === 'freguesias' && freguesias) ||
       (item === 'componentes' && componentes) ||
+      (item === 'finalidades' && finalidades) ||
       (item === 'tiposSeguros' && tiposSeguros) ||
       (item === 'tiposImoveis' && tiposImoveis) ||
       (item === 'tiposTitulares' && tiposTitulares) ||
@@ -119,6 +119,7 @@ export default function TableIdentificadores({ item, inativos }) {
     const itemSingle =
       (item === 'segmentos' && 'segmento') ||
       (item === 'freguesias' && 'freguesia') ||
+      (item === 'finalidades' && 'finalidade') ||
       (item === 'componentes' && 'componente') ||
       (item === 'tiposSeguros' && 'tipoSeguro') ||
       (item === 'tiposImoveis' && 'tipoImovel') ||
@@ -166,6 +167,7 @@ export default function TableIdentificadores({ item, inativos }) {
                         ) : (
                           <>
                             {(item === 'componentes' && row?.codigo) ||
+                              ((item === 'tiposImoveis' || item === 'finalidades') && (row?.tipo || row?.designacao)) ||
                               ((item === 'tiposGarantias' || item === 'tiposSeguros' || item === 'segmentos') &&
                                 row?.designacao) ||
                               row?.nome ||
@@ -179,7 +181,7 @@ export default function TableIdentificadores({ item, inativos }) {
                       {(item === 'componentes' && (
                         <>
                           <TableCell>{row?.descritivo}</TableCell>
-                          <TableCell>{row?.rotulo || noDados('Não definido')}</TableCell>
+                          <TableCell>{row?.rotulo || noDados('(Não definido)')}</TableCell>
                         </>
                       )) ||
                         (item === 'freguesias' && (
@@ -198,17 +200,14 @@ export default function TableIdentificadores({ item, inativos }) {
                       <CellChecked check={row.ativo} />
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(adminGaji9 ||
-                            (item === 'segmentos' && acessoGaji9(utilizador?.acessos, ['UPDATE_SEGMENTO'])) ||
-                            (item === 'tiposSeguros' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
-                            (item === 'tiposGarantias' && acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO GARANTIA'])) ||
-                            (item === 'representantes' && acessoGaji9(utilizador?.acessos, ['UPDATE_REPRESENTANTE'])) ||
-                            (item === 'freguesias' &&
-                              acessoGaji9(utilizador?.acessos, ['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
-                            (item === 'componentes' &&
-                              acessoGaji9(utilizador?.acessos, ['UPDATE_PRODUTO/COMPONENTE'])) ||
-                            ((item === 'tiposTitulares' || item === 'tiposImoveis') &&
-                              acessoGaji9(utilizador?.acessos, ['UPDATE_TIPO TITULAR']))) && (
+                          {((item === 'segmentos' && temPermissao(['UPDATE_SEGMENTO'])) ||
+                            (item === 'representantes' && temPermissao(['UPDATE_REPRESENTANTE'])) ||
+                            (item === 'freguesias' && temPermissao(['UPDATE_DIVISAO ADMINISTRATIVA'])) ||
+                            ((item === 'tiposSeguros' || item === 'tiposGarantias') &&
+                              temPermissao(['UPDATE_TIPO GARANTIA'])) ||
+                            (item === 'componentes' && temPermissao(['UPDATE_PRODUTO/COMPONENTE'])) ||
+                            ((item === 'tiposTitulares' || item === 'tiposImoveis' || item === 'finalidades') &&
+                              temPermissao(['UPDATE_TIPO TITULAR']))) && (
                             <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
                           )}
                           <DefaultAction small label="DETALHES" onClick={() => viewItem('view', row)} />
@@ -240,7 +239,6 @@ export default function TableIdentificadores({ item, inativos }) {
       </Card>
 
       {isOpenView && <DetalhesGaji9 closeModal={handleCloseModal} item={item} />}
-
       {isOpenModal && (
         <>
           {item === 'segmentos' && <SegmentoForm onClose={handleCloseModal} />}
@@ -248,9 +246,10 @@ export default function TableIdentificadores({ item, inativos }) {
           {item === 'componentes' && <ProdutoForm onClose={handleCloseModal} />}
           {item === 'freguesias' && <FreguesiaForm onClose={handleCloseModal} />}
           {item === 'tiposGarantias' && <GarantiaForm onClose={handleCloseModal} />}
-          {item === 'tiposImoveis' && <TipoImovelForm onClose={handleCloseModal} />}
           {item === 'tiposTitulares' && <TipoTitularForm onClose={handleCloseModal} />}
           {item === 'representantes' && <RepresentanteForm onClose={handleCloseModal} />}
+          {item === 'tiposImoveis' && <TipoForm onClose={handleCloseModal} item={item} label="imóvel" />}
+          {item === 'finalidades' && <TipoForm onClose={handleCloseModal} item={item} label="finalidade" />}
         </>
       )}
     </>
@@ -268,7 +267,7 @@ function headerTable(item) {
       (item === 'representantes' && [{ id: 'nome', label: 'Nome' }]) ||
       []),
     ...(item === 'representantes' ? [{ id: 'uo', label: 'U.O' }] : []),
-    ...(item === 'tiposImoveis' ? [{ id: 'tipo', label: 'Tipo' }] : []),
+    ...(item === 'tiposImoveis' || item === 'finalidades' ? [{ id: 'tipo', label: 'Tipo' }] : []),
     ...(item === 'componentes'
       ? [
           { id: 'codigo', label: 'Código' },

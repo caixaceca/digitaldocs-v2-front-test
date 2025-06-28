@@ -67,7 +67,7 @@ export default function ParecerExport({ dados }) {
         <CabecalhoAlt cabecalho />
         <View style={[styles.bodyAlt]}>
           <Text style={[styles.title]}>Minuta do parecer</Text>
-          <InfoItem label="Nome" value={dados?.perfil?.displayName} />
+          <InfoItem label="Nome" value={dados?.perfil} />
           <InfoItem
             label="Parecer"
             value={dados?.parecer || (dados?.parecer_favoravel && 'Favorável') || 'Não favorável'}

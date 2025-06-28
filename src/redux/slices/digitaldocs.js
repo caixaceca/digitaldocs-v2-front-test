@@ -242,6 +242,7 @@ export function getProcesso(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.resetProcesso());
     dispatch(slice.actions.getSuccess({ item: 'isLoadingP', dados: true }));
+    dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: null }));
 
     try {
       const accessToken = await getAccessToken();

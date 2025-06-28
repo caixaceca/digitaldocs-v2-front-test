@@ -9,8 +9,8 @@ import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
 //
 import { getFile } from '../../utils/getFile';
-import { useAuth } from '../../hooks/useAuth';
 import { useSelector } from '../../redux/store';
+import { useAuthContext } from '../../providers/auth-provider';
 // components
 import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
 
@@ -28,7 +28,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 NavbarAccount.propTypes = { isCollapse: PropTypes.bool };
 
 export default function NavbarAccount({ isCollapse }) {
-  const { account, logout } = useAuth();
+  const { account, logout } = useAuthContext();
   const { cc } = useSelector((state) => state.intranet);
 
   return (

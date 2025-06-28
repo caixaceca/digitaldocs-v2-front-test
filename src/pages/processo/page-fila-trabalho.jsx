@@ -110,7 +110,9 @@ export default function PageFilaTrabalho() {
                 <DefaultAction small color="inherit" variant="outlined" label="Nº PROCESSOS" onClick={onOpen} />
               )}
             </Stack>
-            <DefaultAction small color="inherit" variant="outlined" label="ATAULIZAR DADOS" onClick={refreshDados} />
+            {cc && (
+              <DefaultAction small color="inherit" variant="outlined" label="ATAULIZAR DADOS" onClick={refreshDados} />
+            )}
           </Stack>
 
           <TabsWrapperStyle>

@@ -7,7 +7,9 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import LinkIcon from '@mui/icons-material/Link';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -34,7 +36,7 @@ export default function Documento({ onClose }) {
         <DialogTitle sx={{ pb: 3 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 2 }}>
             Consultar documento
-            {onClose && <Fechar handleClick={onClose} />}
+            <Fechar onClick={onClose} />
           </Stack>
           <ConsultarDocForm />
         </DialogTitle>
@@ -128,6 +130,77 @@ export default function Documento({ onClose }) {
                     <TextItem label="Morada" value={documentoPdex?.morada} />
                   </Secao>
                 )}
+                {documentoPdex?.tipoSearch === 'REGISTO COMERCIAL' && (
+                  <Stack>
+                    <Grid container spacing={2}>
+                      <GridItem md={6}>
+                        <Secao titulo="Identificação">
+                          <TextItem label="Nif" value={documentoPdex?.nif} />
+                          <TextItem label="Nome" value={documentoPdex?.nome_firma} />
+                          <TextItem label="Matricula" value={documentoPdex?.matricula} />
+                          <TextItem label="Data ínicio de negócio" value={documentoPdex?.data_inicio_negocio} />
+                          <TextItem label="Administração" value={documentoPdex?.administracao} />
+                          <TextItem label="Natureza jurídica" value={documentoPdex?.natureza_juridica} />
+                          <TextItem label="Forma de obrigar" value={documentoPdex?.forma_obrigar} />
+                          <TextItem label="Montante realizado" value={documentoPdex?.montante_realizado} />
+                          <TextItem label="Descrição da capital" value={documentoPdex?.descricao_capital} />
+                          <TextItem label="Outros" value={documentoPdex?.outros} />
+                          {documentoPdex?.link_certidao && (
+                            <Button
+                              rel="noopener"
+                              target="_blank"
+                              color="inherit"
+                              startIcon={<LinkIcon />}
+                              href={documentoPdex?.link_certidao}
+                              sx={{ my: 0.5, justifyContent: 'left' }}
+                            >
+                              Link da certidão
+                            </Button>
+                          )}
+                        </Secao>
+                      </GridItem>
+                      <GridItem md={6}>
+                        <Secao titulo="Localização">
+                          <TextItem label="Zona" value={documentoPdex?.zona} />
+                          <TextItem label="Localidade" value={documentoPdex?.localidade} />
+                          <TextItem label="Concelho" value={documentoPdex?.concelho} />
+                          <TextItem label="Freguesia" value={documentoPdex?.freguesia} />
+                          <TextItem label="Código postal" value={documentoPdex?.codigo_postal} />
+                          <TextItem label="Rua" value={documentoPdex?.rua} />
+                          <TextItem label="Andar" value={documentoPdex?.andar} />
+                          <TextItem label="Porta" value={documentoPdex?.numero_porta} />
+                        </Secao>
+                      </GridItem>
+                      <GridItem md={6}>
+                        <Secao titulo="Objeto social">
+                          <TextItem label="Actividade" value={documentoPdex?.objeto_social?.actividade} />
+                          <TextItem
+                            label="Descrição atividade"
+                            value={documentoPdex?.objeto_social?.descricao_atividade}
+                          />
+                          <TextItem label="Código CAE" value={documentoPdex?.objeto_social?.codigo_cae} />
+                          <TextItem label="Descrição" value={documentoPdex?.objeto_social?.descricao} />
+                        </Secao>
+                      </GridItem>
+                      <GridItem md={6}>
+                        <Secao titulo="Sócios">
+                          {documentoPdex?.socios && documentoPdex?.socios?.length > 0 ? (
+                            documentoPdex?.socios?.map((socio, index) => (
+                              <TextItem
+                                key={`socio_${index}`}
+                                value={`${socio?.nome}${socio?.nif ? ` - ${socio?.nif}` : ''}`}
+                              />
+                            ))
+                          ) : (
+                            <Typography variant="caption" sx={{ p: 1, color: 'text.secondary', fontStyle: 'italic' }}>
+                              Não foi encontrado nenhum sócio...
+                            </Typography>
+                          )}
+                        </Secao>
+                      </GridItem>
+                    </Grid>
+                  </Stack>
+                )}
               </Stack>
             )
           )}
@@ -209,9 +282,11 @@ TextItem.propTypes = { label: PropTypes.string, value: PropTypes.string };
 function TextItem({ label = '', value = '' }) {
   return value ? (
     <Stack direction="row" alignItems="center" spacing={0.5}>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-        {label}:
-      </Typography>
+      {label && (
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {label}:
+        </Typography>
+      )}
       <Typography variant="body2">{value}</Typography>
     </Stack>
   ) : null;

@@ -5,14 +5,12 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
 import { setItemValue } from '../../utils/formatObject';
-import { acessoGaji9 } from '../../utils/validarAcesso';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-// hooks
-import useSettings from '../../hooks/useSettings';
-import { useNotificacao } from '../../hooks/useNotificacao';
-// redux
+//
 import { useSelector } from '../../redux/store';
+import useSettings from '../../hooks/useSettings';
+import { usePermissao } from '../../hooks/useAcesso';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useNotificacao } from '../../hooks/useNotificacao';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
@@ -25,16 +23,18 @@ import TabGaji9 from '../../sections/gaji9/items';
 export default function PageGaji9Gestao() {
   const navigate = useNavigate();
   const { themeStretch } = useSettings();
-  const { done, propostaId, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+  const { temPermissao, isAdmin } = usePermissao();
+
+  const { done, propostaId, utilizador } = useSelector((state) => state.gaji9);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabGaji9') || 'Parametrização');
 
   const tabsList = useMemo(
     () =>
       utilizador
         ? [
-            ...(adminGaji9 ? [{ value: 'Parametrização', component: <TabGaji9 item="parametrizacao" /> }] : []),
-            ...(adminGaji9 ||
-            acessoGaji9(utilizador?.acessos, [
+            ...(isAdmin ? [{ value: 'Parametrização', component: <TabGaji9 item="parametrizacao" /> }] : []),
+            ...(temPermissao([
+              'READ_SEGMENTO',
               'READ_TIPO TITULAR',
               'READ_TIPO GARANTIA',
               'READ_REPRESENTANTE',
@@ -42,23 +42,23 @@ export default function PageGaji9Gestao() {
             ])
               ? [{ value: 'Identificadores', component: <TabGaji9 item="identificadores" /> }]
               : []),
-            ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_CLAUSULA'])
+            ...(temPermissao(['READ_CLAUSULA'])
               ? [{ value: 'Cláusulas', component: <TabGaji9 item="clausulas" label="Cláusulas" /> }]
               : []),
-            ...(adminGaji9 || acessoGaji9(utilizador?.acessos, ['READ_MINUTA'])
+            ...(temPermissao(['READ_MINUTA'])
               ? [{ value: 'Minutas', component: <TabGaji9 item="minutas" label="Minutas" /> }]
               : []),
-            ...(adminGaji9 || utilizador?._role === 'GERENTE' || acessoGaji9(utilizador?.acessos, ['READ_CREDITO'])
+            ...(utilizador?._role === 'GERENTE' || temPermissao(['READ_CREDITO'])
               ? [{ value: 'Créditos', component: <TabGaji9 item="creditos" label="Créditos" /> }]
               : []),
           ]
         : [],
-    [adminGaji9, utilizador]
+    [utilizador, isAdmin, temPermissao]
   );
 
   useEffect(() => {
     if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Identificadores', false);
+      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabGaji9', false);
   }, [tabsList, currentTab]);
 
   const navigateTo = () => {

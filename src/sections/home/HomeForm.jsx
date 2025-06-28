@@ -158,9 +158,12 @@ export function ConsultarDocForm() {
   const values = watch();
 
   return (
-    <FormProvider methods={methods} onSubmit={handleSubmit(() => dispatch(getFromIntranet('documentoPdex', values)))}>
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(getFromIntranet('documentoPdex', { ...values, reset: { dados: null } })))}
+    >
       <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
-        <RHFAutocompleteSmp name="tipoSearch" label="Tipo" options={['NIF', 'CNI/BI', 'EMPRESA']} />
+        <RHFAutocompleteSmp label="Tipo" name="tipoSearch" options={['NIF', 'CNI/BI', 'REGISTO COMERCIAL']} />
         <RHFTextField name="numeroSearch" label="Nº de identificação" />
         <Stack sx={{ pt: 0.5 }}>
           <Fab size="medium" type="submit" disabled={isLoading || !values.tipoSearch || !values?.numeroSearch}>

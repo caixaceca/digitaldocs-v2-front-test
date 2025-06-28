@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Checkbox from '@mui/material/Checkbox';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
-import { acessoGaji9 } from '../../../utils/validarAcesso';
+import { getLocalStorageArray } from '../../../utils/formatObject';
 // hooks
+import { usePermissao } from '../../../hooks/useAcesso';
 import useTable, { getComparator } from '../../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
@@ -25,9 +27,10 @@ import { DialogConfirmar } from '../../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
-import FiltrarClausulas from './filtrar-clausulas';
 import ClausulaForm from './form-clausula';
 import DetalhesGaji9 from '../detalhes-gaji9';
+import { PreviewMinutaForm } from '../form-minuta';
+import FiltrarClausulas from './filtrar-clausulas';
 import { applySortFilter, labelTitular } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -36,6 +39,7 @@ TableClausula.propTypes = { inativos: PropTypes.bool };
 
 export default function TableClausula({ inativos }) {
   const dispatch = useDispatch();
+  const { temPermissao } = usePermissao();
   const [filter, setFilter] = useState(localStorage.getItem('filterclausulas') || '');
 
   const {
@@ -46,15 +50,21 @@ export default function TableClausula({ inativos }) {
     setPage,
     rowsPerPage,
     //
+    selected,
+    onSelectRow,
+    onSelectAllRows,
+    //
     onSort,
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'numero_ordem', defaultOrder: 'asc' });
+  } = useTable({
+    defaultOrder: 'asc',
+    defaultOrderBy: 'numero_ordem',
+    defaultSelected: getLocalStorageArray('selectedClausulas'),
+  });
 
-  const { clausulas, isLoading, isSaving, selectedItem, modalGaji9, utilizador, adminGaji9 } = useSelector(
-    (state) => state.gaji9
-  );
+  const { clausulas, isLoading, isSaving, selectedItem, modalGaji9 } = useSelector((state) => state.gaji9);
 
   const dataFiltered = applySortFilter({ filter, comparator: getComparator(order, orderBy), dados: clausulas || [] });
   const isNotFound = !dataFiltered.length;
@@ -63,6 +73,10 @@ export default function TableClausula({ inativos }) {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, clausulas]);
+
+  useEffect(() => {
+    localStorage.setItem('selectedClausulas', JSON.stringify(selected));
+  }, [selected]);
 
   const openModal = (modal, dados) => {
     const eliminar = modal === 'eliminar-clausula';
@@ -89,6 +103,14 @@ export default function TableClausula({ inativos }) {
                 order={order}
                 onSort={onSort}
                 orderBy={orderBy}
+                numSelected={selected?.length}
+                rowCount={dataFiltered?.length}
+                onSelectAllRows={(checked) =>
+                  onSelectAllRows(
+                    checked,
+                    dataFiltered?.map(({ id }) => id)
+                  )
+                }
                 headLabel={[
                   { id: 'numero_ordem', label: 'Nº de cláusula' },
                   { id: 'titulo', label: 'Epígrafe' },
@@ -101,10 +123,21 @@ export default function TableClausula({ inativos }) {
               />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={7} />
+                  <SkeletonTable row={10} column={8} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                    <TableRow hover key={`clausula_${index}`}>
+                    <TableRow hover key={`clausula_${index}`} selected={selected?.includes(row?.id)}>
+                      <TableCell
+                        align="center"
+                        padding="checkbox"
+                        sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}
+                      >
+                        <Checkbox
+                          size="small"
+                          onClick={() => onSelectRow(row?.id)}
+                          checked={selected?.includes(row?.id)}
+                        />
+                      </TableCell>
                       <TableCell>
                         {(row?.solta && 'SOLTA') ||
                           (row?.seccao_identificacao && 'IDENTIFICAÇÃO') ||
@@ -132,10 +165,17 @@ export default function TableClausula({ inativos }) {
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           <DefaultAction small label="CLONAR" onClick={() => openModal('clonar-clausula', row)} />
                           <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-clausula', row)} />
-                          {row?.ativo && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_CLAUSULA'])) && (
+                          {row?.ativo && temPermissao(['UPDATE_CLAUSULA']) && (
                             <DefaultAction small label="EDITAR" onClick={() => openModal('form-clausula', row)} />
                           )}
-                          <DefaultAction small label="DETALHES" onClick={() => openModal('view-clausula', row)} />
+                          <DefaultAction
+                            small
+                            label="DETALHES"
+                            onClick={() => {
+                              if (!selected?.includes(row?.id)) onSelectRow(row?.id);
+                              openModal('view-clausula', row);
+                            }}
+                          />
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -165,6 +205,7 @@ export default function TableClausula({ inativos }) {
 
       {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
       {modalGaji9 === 'clonar-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
+      {modalGaji9 === 'preview-minuta' && <PreviewMinutaForm onClose={() => dispatch(closeModal())} />}
       {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={() => dispatch(closeModal())} item="clausulas" />}
       {modalGaji9 === 'eliminar-clausula' && (
         <DialogConfirmar

@@ -42,8 +42,8 @@ export default function Router() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (perfil?.colaborador?.id) dispatch(getFromIntranet('cc', { id: perfil?.colaborador?.id }));
-  }, [dispatch, perfil?.colaborador?.id]);
+    if (perfil?.colaborador_id) dispatch(getFromIntranet('cc', { id: perfil?.colaborador_id }));
+  }, [dispatch, perfil?.colaborador_id]);
 
   useEffect(() => {
     if (cc?.id) dispatch(getInfoIntranet(cc?.id));

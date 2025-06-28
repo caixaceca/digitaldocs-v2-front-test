@@ -3,18 +3,17 @@ import { MsalProvider } from '@azure/msal-react';
 
 import Router from './routes';
 import { msalInstance } from './config';
-import { useAuth } from './hooks/useAuth';
 
 import LoginPage from './pages/login';
 import { StyledChart } from './components/chart';
 import UIProvider from './providers/ui-provider';
 import ScrollToTop from './components/ScrollToTop';
 import LoadingScreen from './components/LoadingScreen';
-import { AuthProvider } from './providers/auth-provider';
+import { AuthProvider, useAuthContext } from './providers/auth-provider';
 import MotionLazyContainer from './components/animate/MotionLazyContainer';
 
 function AuthenticatedApp() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthContext();
 
   if (isLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <LoginPage />;

@@ -238,14 +238,13 @@ export function TipoTitularForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-TipoImovelForm.propTypes = { onClose: PropTypes.func };
+TipoForm.propTypes = { item: PropTypes.string, label: PropTypes.string, onClose: PropTypes.func };
 
-export function TipoImovelForm({ onClose }) {
+export function TipoForm({ item, label, onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({ designacao: Yup.string().required().label('Designação') });
-
   const defaultValues = useMemo(
     () => ({ designacao: selectedItem?.designacao ?? '', descritivo: selectedItem?.descritivo ?? '' }),
     [selectedItem]
@@ -261,13 +260,13 @@ export function TipoImovelForm({ onClose }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
-    const params = { id: selectedItem?.id, msg: `Tipo de imóvel ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
-    dispatch((isEdit ? updateItem : createItem)('tiposImoveis', JSON.stringify(values), params));
+    const params = { id: selectedItem?.id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
+    dispatch((isEdit ? updateItem : createItem)(item, JSON.stringify(values), params));
   };
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{isEdit ? 'Editar tipo de imóvel' : 'Adicionar tipo de imóvel'}</DialogTitle>
+      <DialogTitle>{`${isEdit ? 'Editar' : 'Adicionar'} ${label}`}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
@@ -275,7 +274,13 @@ export function TipoImovelForm({ onClose }) {
               <RHFTextField name="designacao" label="Designação" />
               <RHFTextField name="descritivo" label="Descritivo" />
             </Stack>
-            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+            <DialogButons
+              edit={isEdit}
+              onClose={onClose}
+              isSaving={isSaving}
+              desc={isEdit ? 'eliminar este item' : ''}
+              handleDelete={() => dispatch(deleteItem(item, { id: selectedItem?.id, msg: 'Item eliminado', onClose }))}
+            />
           </ItemComponent>
         </FormProvider>
       </DialogContent>

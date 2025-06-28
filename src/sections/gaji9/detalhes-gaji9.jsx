@@ -43,7 +43,7 @@ export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
       <DialogContent>
         {(opcao && <DetalhesTab item={item} dados={clausulaOpcional} />) ||
           (item === 'grupos' && <GrupoDetail dados={selectedItem} />) ||
-          ((hasTabs || item === 'funcoes' || item === 'segmentos') && (
+          ((hasTabs || item === 'funcoes' || item === 'segmentos' || item === 'finalidades') && (
             <DetalhesTab item={item} dados={selectedItem} />
           )) || <DetalhesContent dados={selectedItem} item={item} />}
       </DialogContent>
@@ -62,14 +62,21 @@ function DetalhesTab({ item, dados }) {
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
     ...((item === 'clausulas' && [
       { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
-      { value: 'Tipos de titulares', component: <Relacionados id={dados?.id} dados={dados?.tipos_titulares} /> },
-      { value: 'Segmentos', component: <Relacionados item="segmento" id={dados?.id} dados={dados?.segmentos} /> },
+      { value: 'Tipos de titular', component: <Relacionados id={dados?.id} dados={dados?.tipos_titulares} /> },
+      { value: 'Segmentos', component: <Relacionados item="Segmento" id={dados?.id} dados={dados?.segmentos} /> },
     ]) ||
       (item === 'segmentos' && [
         {
           value: 'Componentes',
-          component: <Relacionados item="componente" id={dados?.id} dados={dados?.componentes} />,
+          component: <Relacionados item="Componente" id={dados?.id} dados={dados?.componentes} />,
         },
+        {
+          value: 'Finalidades',
+          component: <Relacionados item="Finalidade" id={dados?.id} dados={dados?.finalidades} />,
+        },
+      ]) ||
+      (item === 'finalidades' && [
+        { value: 'Segmentos', component: <Relacionados item="Segmento" na id={dados?.id} dados={dados?.segmentos} /> },
       ]) ||
       (item === 'tiposGarantias' && [
         { value: 'Subtipos', component: <SubtiposGarantias id={dados?.id} dados={dados?.subtipos} /> },

@@ -9,10 +9,9 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
-// utils
-import { acessoGaji9 } from '../../utils/validarAcesso';
 // hooks
 import useToggle from '../../hooks/useToggle';
+import { usePermissao } from '../../hooks/useAcesso';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { createItem, updateItem } from '../../redux/slices/gaji9';
@@ -29,8 +28,9 @@ import { DetalhesContent } from './detalhes-gaji9';
 InfoCaixa.propTypes = { onClose: PropTypes.func, item: PropTypes.string };
 
 export default function InfoCaixa({ onClose, item }) {
+  const { temPermissao } = usePermissao();
   const { toggle: open, onOpen, onClose: onClose1 } = useToggle();
-  const { isLoading, infoCaixa, adminGaji9, utilizador } = useSelector((state) => state.gaji9);
+  const { isLoading, infoCaixa } = useSelector((state) => state.gaji9);
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
@@ -40,10 +40,10 @@ export default function InfoCaixa({ onClose, item }) {
           <Stack direction="row" spacing={1} alignItems="center">
             {!open && !isLoading && (
               <>
-                {!infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['CREATE_INSTITUICAO'])) && (
+                {!infoCaixa && temPermissao(['CREATE_INSTITUICAO']) && (
                   <DefaultAction label="ADICIONAR" onClick={onOpen} />
                 )}
-                {infoCaixa && (adminGaji9 || acessoGaji9(utilizador?.acessos, ['UPDATE_INSTITUICAO'])) && (
+                {infoCaixa && temPermissao(['UPDATE_INSTITUICAO']) && (
                   <DefaultAction button small color="warning" label="EDITAR" onClick={onOpen} />
                 )}
               </>

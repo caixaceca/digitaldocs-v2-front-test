@@ -25,49 +25,14 @@ import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../
 TiposTitularesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
 
 export function TiposTitularesForm({ id, ids, onClose }) {
-  const dispatch = useDispatch();
-  const { isSaving, tiposTitulares } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({
-    items: Yup.array(Yup.object({ item: Yup.mixed().required().label('Tipo de titular') })),
-  });
-  const defaultValues = useMemo(() => ({ items: [{ item: null }] }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
-  const { fields, append, remove } = useFieldArray({ control, name: 'items' });
-
-  const onSubmit = async () => {
-    const params = { patch: true, getItem: 'selectedItem', id, msg: 'Tipos de titulares adicionados', onClose };
-    dispatch(createItem('tiposTitularesCl', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
-  };
+  const { tiposTitulares } = useSelector((state) => state.gaji9);
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
-      <DialogTitleAlt
-        sx={{ mb: 2 }}
-        title="Adicionar tipos de titulares"
-        action={<AddItem dados={{ small: true }} onClick={() => append({ item: null })} />}
-      />
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 1 }}>
-            {fields.map((item, index) => (
-              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
-                <RHFAutocompleteObj
-                  label="Tipo de titular"
-                  name={`items[${index}].item`}
-                  options={listaTitrulares(tiposTitulares)?.filter(({ id }) => !ids?.includes(id))}
-                  getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
-                />
-                {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
-              </Stack>
-            ))}
-          </Stack>
-          <DialogButons isSaving={isSaving} onClose={onClose} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+    <OpcoesForm
+      onClose={onClose}
+      options={listaTitrulares(tiposTitulares)?.filter(({ id }) => !ids?.includes(id))}
+      dados={{ id, label: 'Tipos de titular', labelP: 'tipos de titular', item: 'tiposTitularesCl' }}
+    />
   );
 }
 
@@ -76,51 +41,16 @@ export function TiposTitularesForm({ id, ids, onClose }) {
 SegmentosForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
 
 export function SegmentosForm({ id, ids, onClose }) {
-  const dispatch = useDispatch();
-  const { isSaving, segmentos } = useSelector((state) => state.gaji9);
-
-  const formSchema = Yup.object().shape({
-    items: Yup.array(Yup.object({ item: Yup.mixed().required().label('Segmento') })),
-  });
-  const defaultValues = useMemo(() => ({ items: [{ item: null }] }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
-  const { fields, append, remove } = useFieldArray({ control, name: 'items' });
-
-  const onSubmit = async () => {
-    const params = { patch: true, getItem: 'selectedItem', id, msg: 'Segmentos adicionados', onClose };
-    dispatch(createItem('segmentosCl', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
-  };
+  const { segmentos } = useSelector((state) => state.gaji9);
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
-      <DialogTitleAlt
-        sx={{ mb: 2 }}
-        title="Adicionar segmentos"
-        action={<AddItem dados={{ small: true }} onClick={() => append({ item: null })} />}
-      />
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 1 }}>
-            {fields.map((item, index) => (
-              <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
-                <RHFAutocompleteObj
-                  label="Segmento"
-                  name={`items[${index}].item`}
-                  options={segmentos
-                    ?.filter(({ id }) => !ids?.includes(id))
-                    ?.map(({ id, designacao }) => ({ id, label: designacao }))}
-                  getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
-                />
-                {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
-              </Stack>
-            ))}
-          </Stack>
-          <DialogButons isSaving={isSaving} onClose={onClose} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+    <OpcoesForm
+      onClose={onClose}
+      dados={{ id, label: 'Segmento', labelP: 'segmentos', item: 'segmentosCl' }}
+      options={segmentos
+        ?.filter(({ id }) => !ids?.includes(id))
+        ?.map(({ id, designacao }) => ({ id, label: designacao }))}
+    />
   );
 }
 
@@ -129,11 +59,44 @@ export function SegmentosForm({ id, ids, onClose }) {
 ComponetesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
 
 export function ComponetesForm({ id, ids, onClose }) {
+  const { componentes } = useSelector((state) => state.gaji9);
+
+  return (
+    <OpcoesForm
+      onClose={onClose}
+      options={listaProdutos(componentes)?.filter(({ id }) => !ids?.includes(id))}
+      dados={{ id, label: 'Componente', labelP: 'componentes', item: 'componentesSeg' }}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+FinalidadesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
+
+export function FinalidadesForm({ id, ids, onClose }) {
+  const { finalidades } = useSelector((state) => state.gaji9);
+
+  return (
+    <OpcoesForm
+      onClose={onClose}
+      dados={{ id, label: 'Finalidade', labelP: 'finalidades', item: 'finalidadesSeg' }}
+      options={finalidades?.filter(({ id }) => !ids?.includes(id))?.map(({ id, tipo }) => ({ id, label: tipo }))}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+OpcoesForm.propTypes = { dados: PropTypes.object, options: PropTypes.array, onClose: PropTypes.func };
+
+export function OpcoesForm({ dados, options, onClose }) {
   const dispatch = useDispatch();
-  const { isSaving, componentes } = useSelector((state) => state.gaji9);
+  const { id, label, labelP, item } = dados;
+  const { isSaving } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
-    items: Yup.array(Yup.object({ item: Yup.mixed().required().label('Componente') })),
+    items: Yup.array(Yup.object({ item: Yup.mixed().required().label(label) })),
   });
   const defaultValues = useMemo(() => ({ items: [{ item: null }] }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -142,15 +105,15 @@ export function ComponetesForm({ id, ids, onClose }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
   const onSubmit = async () => {
-    const params = { patch: true, getItem: 'selectedItem', id, msg: 'Componentes adicionados', onClose };
-    dispatch(createItem('componentesSeg', JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
+    const params = { patch: true, getItem: 'selectedItem', id, msg: 'Items adicionados', onClose };
+    dispatch(createItem(item, JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
   };
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitleAlt
         sx={{ mb: 2 }}
-        title="Adicionar componentes"
+        title={`Adicionar ${labelP}`}
         action={<AddItem dados={{ small: true }} onClick={() => append({ item: null })} />}
       />
       <DialogContent>
@@ -159,9 +122,9 @@ export function ComponetesForm({ id, ids, onClose }) {
             {fields.map((item, index) => (
               <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
                 <RHFAutocompleteObj
-                  label="Componente"
+                  label={label}
+                  options={options}
                   name={`items[${index}].item`}
-                  options={listaProdutos(componentes)?.filter(({ id }) => !ids?.includes(id))}
                   getOptionDisabled={(option) => values.items.some(({ item }) => item?.id === option.id)}
                 />
                 {values.items.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
@@ -204,10 +167,8 @@ export function RegraForm({ dados, onClose }) {
   const values = watch();
 
   const onSubmit = async () => {
-    const params = { msg: 'Regra adicionada', onClose, clausulaId: dados?.id };
-    dispatch(
-      createItem('regrasClausula', JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]), params)
-    );
+    const formData = JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]);
+    dispatch(createItem('regrasClausula', formData, { clausulaId: dados?.id, msg: 'Regra adicionada', onClose }));
   };
 
   return (

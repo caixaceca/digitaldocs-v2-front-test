@@ -387,9 +387,13 @@ export function AnularForm({ fase, cartoes, uo, uosList, onClose }) {
               />
               <TableBody>
                 {cartoes.map((row, index) => (
-                  <TableRow key={`${row.id}_${index}`} hover>
-                    <TableCell padding="checkbox" sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}>
-                      <Checkbox checked={selected.includes(row.id)} onClick={() => onSelectRow(row.id)} />
+                  <TableRow key={`${row.id}_${index}`} hover selected={selected?.includes(row?.id)}>
+                    <TableCell
+                      align="center"
+                      padding="checkbox"
+                      sx={{ '&.MuiTableCell-paddingCheckbox': { padding: 1 } }}
+                    >
+                      <Checkbox size="small" checked={selected.includes(row.id)} onClick={() => onSelectRow(row.id)} />
                     </TableCell>
                     <TableCell>{ptDate(row.data_emissao)}</TableCell>
                     <TableCell align="center">{row?.numero}</TableCell>

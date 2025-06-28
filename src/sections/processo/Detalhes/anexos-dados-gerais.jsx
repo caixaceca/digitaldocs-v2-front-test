@@ -126,9 +126,9 @@ export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, e
   return (
     <Button
       variant="soft"
+      onClick={() => viewAnexo(anexo)}
       color={url ? 'success' : 'inherit'}
       disabled={preview || isLoadingFile === file}
-      onClick={() => viewAnexo(anexo)}
       startIcon={isLoadingFile === file ? <CircularProgress size={26} /> : getFileThumb(false, null, nome)}
       sx={{
         flexGrow: 1,

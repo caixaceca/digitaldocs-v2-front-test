@@ -27,6 +27,7 @@ export default function Controle() {
   const tabsList = useMemo(
     () =>
       [
+        { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
         ...(isAdmin || isAuditoria || estadoInicial(meusAmbientes)
           ? [
               { value: 'Entradas', component: <TableControle from="Entradas" /> },
@@ -34,7 +35,6 @@ export default function Controle() {
               { value: 'Devoluções', component: <TableControle from="Devoluções" /> },
             ]
           : []),
-        { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
         ...(isAdmin || isAuditoria || cc?.uo?.label === 'DOP-CE' || cc?.uo?.tipo === 'Agências'
           ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
           : []),

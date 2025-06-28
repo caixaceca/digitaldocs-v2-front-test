@@ -21,7 +21,7 @@ import { TableSearchNotFound } from '../../../components/table';
 import { DialogConfirmar } from '../../../components/CustomDialog';
 import { CellChecked, newLineText, noDados } from '../../../components/Panel';
 import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
-import { RegraForm, TiposTitularesForm, ComponetesForm, SegmentosForm } from './form-opcoes';
+import { RegraForm, TiposTitularesForm, ComponetesForm, SegmentosForm, FinalidadesForm } from './form-opcoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -147,17 +147,24 @@ export function OpcoesClausula() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, item: PropTypes.string };
+Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, item: PropTypes.string, na: PropTypes.bool };
 
-export function Relacionados({ id, dados = [], item = 'tipo de titular' }) {
+export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = false }) {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
   const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
+  useEffect(() => {
+    if (item === 'Finalidade') dispatch(getFromGaji9('finalidades'));
+  }, [dispatch, item]);
+
   const eliminarItem = () => {
-    const params = { itemId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
     const itemDel =
-      (item === 'componente' && 'componenteSeg') || (item === 'segmento' && 'segmentoCl') || 'tipoTitularCl';
+      (item === 'Segmento' && 'segmentoCl') ||
+      (item === 'Componente' && 'componenteSeg') ||
+      (item === 'Finalidade' && 'finalidadeSeg') ||
+      'tipoTitularCl';
+    const params = { itemId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
     dispatch(deleteItem(itemDel, { ...params, onClose: () => setModal('') }));
   };
 
@@ -166,15 +173,15 @@ export function Relacionados({ id, dados = [], item = 'tipo de titular' }) {
       <Table sx={{ mt: 2 }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small">
-              {(item === 'componente' && 'Componente') || (item === 'segmento' && 'Segmento') || 'Tipo de titular'}
-            </TableCell>
+            <TableCell size="small">{item}</TableCell>
             <TableCell size="small" align="center">
               Ativo
             </TableCell>
-            <TableCell size="small" align="right" width={10}>
-              <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
-            </TableCell>
+            {!na && (
+              <TableCell size="small" align="right" width={10}>
+                <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
+              </TableCell>
+            )}
           </TableRow>
         </TableHead>
         {dados?.length === 0 ? (
@@ -184,32 +191,42 @@ export function Relacionados({ id, dados = [], item = 'tipo de titular' }) {
             {dados?.map((row, index) => (
               <TableRow haver key={`relacionado_${index}`}>
                 <TableCell>
-                  {row?.componente || row?.segmento || labelTitular(row?.tipo_titular, row?.consumidor) || noDados()}
+                  {row?.segmento ||
+                    row?.designacao ||
+                    row?.componente ||
+                    row?.finalidade ||
+                    labelTitular(row?.tipo_titular, row?.consumidor) ||
+                    noDados()}
                 </TableCell>
                 <CellChecked check={row?.ativo} />
-                <TableCell>
-                  <DefaultAction small label="ELIMINAR" onClick={() => setModal(row?.id)} />
-                </TableCell>
+                {!na && (
+                  <TableCell>
+                    <DefaultAction small label="ELIMINAR" onClick={() => setModal(row?.id)} disabled={!row?.ativo} />
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
         )}
       </Table>
 
-      {modal === 'create' && item === 'componente' && (
+      {modal === 'create' && item === 'Componente' && (
         <ComponetesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'componentes')} />
       )}
-      {modal === 'create' && item === 'segmento' && (
+      {modal === 'create' && item === 'Finalidade' && (
+        <FinalidadesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'finalidades')} />
+      )}
+      {modal === 'create' && item === 'Segmento' && (
         <SegmentosForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'segmentos')} />
       )}
-      {modal === 'create' && item === 'tipo de titular' && (
+      {modal === 'create' && item === 'Tipo de titular' && (
         <TiposTitularesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'tipos_titulares')} />
       )}
       {!!modal && modal !== 'create' && (
         <DialogConfirmar
           isSaving={isSaving}
+          desc="eliminar este item"
           onClose={() => setModal('')}
-          desc={`eliminar este ${item}`}
           handleOk={() => eliminarItem()}
         />
       )}
@@ -223,10 +240,11 @@ function extrairIds(dados, item) {
   const ids = [];
   if (item === 'segmentos' && dados?.segmento_id != null) ids.push(dados.segmento_id);
   if (item === 'componentes' && dados?.componente_id != null) ids.push(dados.componente_id);
+  if (item === 'finalidades' && dados?.finalidade_id != null) ids.push(dados.finalidade_id);
   if (item === 'tipos_titulares' && dados?.tipo_titular_id != null) ids.push(dados.tipo_titular_id);
   if (Array.isArray(dados[item])) {
     dados[item].forEach((t) => {
-      if (t?.id != null) ids.push(t.id);
+      if (t?.id !== null && t.ativo) ids.push(t.id);
     });
   }
   return ids;
