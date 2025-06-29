@@ -1,5 +1,4 @@
 import sumBy from 'lodash/sumBy';
-import PropTypes from 'prop-types';
 import { useMemo, useState } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -31,7 +30,7 @@ import { applySortFilter } from './applySortFilter';
 // _mock_
 import { meses, mesesAbr } from '../../_mock';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const chartOptionsCommon = (theme) => ({
   colors: [theme.palette.success.main, theme.palette.focus.main, theme.palette.primary.dark],
@@ -63,9 +62,7 @@ const chartOptionsCommon = (theme) => ({
   },
 });
 
-// ----------------------------------------------------------------------
-
-EntradaTrabalhado.propTypes = { entradas: PropTypes.bool, saidas: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function EntradaTrabalhado({ entradas, saidas }) {
   const theme = useTheme();
@@ -154,9 +151,7 @@ export function EntradaTrabalhado({ entradas, saidas }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ProcessosTrabalhados.propTypes = { indicadores: PropTypes.string, acao: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ProcessosTrabalhados({ indicadores, acao = false }) {
   const [mes, setMes] = useState(null);
@@ -234,9 +229,7 @@ export function ProcessosTrabalhados({ indicadores, acao = false }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Colaboradores.propTypes = { entradas: PropTypes.bool, saidas: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Colaboradores({ entradas, saidas }) {
   const [mes, setMes] = useState(null);
@@ -326,14 +319,7 @@ export function Colaboradores({ entradas, saidas }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TotalItem.propTypes = {
-  entrada: PropTypes.bool,
-  assunto: PropTypes.string,
-  totalEntrada: PropTypes.number,
-  totalTrabalhado: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TotalItem({ assunto, totalTrabalhado = 0, totalEntrada = 0, entrada = false }) {
   return (
@@ -349,20 +335,7 @@ export function TotalItem({ assunto, totalTrabalhado = 0, totalEntrada = 0, entr
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DadosMes.propTypes = {
-  mp: PropTypes.bool,
-  item: PropTypes.string,
-  detalhes: PropTypes.bool,
-  entrada: PropTypes.number,
-  viewEntrada: PropTypes.bool,
-  colaborador: PropTypes.bool,
-  trabalhado: PropTypes.number,
-  indicadores: PropTypes.array,
-  totalEntrada: PropTypes.number,
-  totalTrabalhado: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DadosMes({
   mp,
@@ -462,7 +435,7 @@ export function DadosMes({
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function entradaTrabalhado(entradas, saidas) {
   const dadosCompletos = [];
@@ -481,22 +454,19 @@ function entradaTrabalhado(entradas, saidas) {
   return dadosCompletos;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function agruparIndicadores(dados, colaboradores, item) {
   const dadosGrouped = [];
   dados.reduce((res, value) => {
     if (!res[value[item]]) {
-      if (item === 'mes') {
-        res[value[item]] = { item: value[item], indicadores: [] };
-      } else if (item === 'perfil_id') {
+      if (item === 'mes') res[value[item]] = { item: value[item], indicadores: [] };
+      else if (item === 'perfil_id') {
         const colaborador = colaboradores?.find((colab) => colab?.perfil_id === value[item]);
         res[value[item]] = { id: value[item], label: colaborador?.perfil?.displayName || value[item], total: 0 };
-      } else if (item === 'tipo') {
-        res[value[item]] = { label: value?.tipo || value[item], total: 0 };
-      } else if (item === 'forma') {
-        res[value[item]] = { label: value?.forma || value[item], total: 0 };
-      }
+      } else if (item === 'tipo') res[value[item]] = { label: value?.tipo || value[item], total: 0 };
+      else if (item === 'forma') res[value[item]] = { label: value?.forma || value[item], total: 0 };
+
       dadosGrouped.push(res[value[item]]);
     }
     if (item === 'mes') {
@@ -517,7 +487,7 @@ function agruparIndicadores(dados, colaboradores, item) {
   return dadosGrouped;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function agruparPorMes(dados, item) {
   const dadosGrouped = [];

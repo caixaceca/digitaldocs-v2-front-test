@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -27,8 +26,6 @@ import { applySortFilter } from './applySortFilter';
 import { GrupoForm, FuncaoForm, RecursoForm, MarcadorForm, VariavelForm } from './form-gaji9';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-TableParamsGaji9.propTypes = { item: PropTypes.string, inativos: PropTypes.bool };
 
 export default function TableParamsGaji9({ item, inativos }) {
   const dispatch = useDispatch();

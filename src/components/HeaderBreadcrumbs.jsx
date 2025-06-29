@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -6,9 +5,7 @@ import Typography from '@mui/material/Typography';
 //
 import Breadcrumbs from './Breadcrumbs';
 
-// ----------------------------------------------------------------------
-
-HeaderBreadcrumbs.propTypes = { links: PropTypes.array, action: PropTypes.node, heading: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function HeaderBreadcrumbs({ heading, links, action, ...others }) {
   return (

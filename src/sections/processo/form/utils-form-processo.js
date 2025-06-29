@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { updateDados } from '../../../redux/slices/stepper';
 import { updateItem } from '../../../redux/slices/digitaldocs';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function submitDados(values, isEdit, id, dispatch, enqueueSnackbar, onClose) {
   try {
@@ -21,7 +21,7 @@ export function submitDados(values, isEdit, id, dispatch, enqueueSnackbar, onClo
   }
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function bodyEditar(dados) {
   const formData = {};
@@ -106,7 +106,7 @@ function bodyEditar(dados) {
   return formData;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function entidadesList(isEdit, entidades, assunto) {
   if (entidades) return entidades.split(';').map((row) => ({ numero: row }));

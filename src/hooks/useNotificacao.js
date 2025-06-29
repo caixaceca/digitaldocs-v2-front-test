@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function useNotificacao({ done, error, onClose }) {
   const { enqueueSnackbar } = useSnackbar();

@@ -1,11 +1,10 @@
-import PropTypes from 'prop-types';
 import { createContext } from 'react';
 // hooks
 import useLocalStorage from '../hooks/useLocalStorage';
 // config
 import { defaultSettings } from '../config';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const initialState = {
   ...defaultSettings,
@@ -30,9 +29,7 @@ const initialState = {
 
 const SettingsContext = createContext(initialState);
 
-// ----------------------------------------------------------------------
-
-SettingsProvider.propTypes = { children: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SettingsProvider({ children }) {
   const [settings, setSettings] = useLocalStorage('settings', {
@@ -93,23 +90,13 @@ function SettingsProvider({ children }) {
     <SettingsContext.Provider
       value={{
         ...settings,
-
-        // Mode
         onToggleMode,
         onChangeMode,
-
-        // Layout
         onToggleLayout,
         onChangeLayout,
-
-        // Contrast
         onChangeContrast,
         onToggleContrast,
-
-        // Stretch
         onToggleStretch,
-
-        // Reset
         onResetSetting,
       }}
     >

@@ -1,12 +1,9 @@
-import PropTypes from 'prop-types';
 // @mui
 import Avatar from '@mui/material/Avatar';
 // utils
 import { BASEURL } from '../../utils/apisUrl';
 
-// ----------------------------------------------------------------------
-
-Aplicacoes.propTypes = { minhasAplicacoes: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Aplicacoes({ minhasAplicacoes = [] }) {
   return minhasAplicacoes?.length === 0

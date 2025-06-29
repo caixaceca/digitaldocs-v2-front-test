@@ -1,7 +1,7 @@
 // hooks
 import { applySort, getComparator } from '../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function findColaborador(mail, colaboradores) {
   const colaborador = colaboradores?.find(({ email }) => email?.toLowerCase() === mail?.toLowerCase());
@@ -10,14 +10,14 @@ export function findColaborador(mail, colaboradores) {
     : mail;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function setItemValue(newValue, setItem, localS, id) {
   if (setItem) setItem(newValue);
   if (localS) localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function objectsEqual(o1, o2) {
   return o1.id === o2.id;
@@ -35,7 +35,7 @@ export function subtractArrays(a1, a2) {
   return arr;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function transicoesList(transicoes, estados, label, checklist) {
   const lista =
@@ -61,13 +61,13 @@ export function transicaoDesc(transicao) {
     : '';
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function removerPropriedades(obj, propriedades) {
   return Object.fromEntries(Object.entries(obj).filter(([key]) => !propriedades.includes(key)));
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function perfisAad(colaboradores, from) {
   return colaboradores
@@ -89,7 +89,7 @@ export function perfisAad(colaboradores, from) {
     }));
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function utilizadoresGaji9(colaboradores, funcoes, from) {
   const idsFuncoes = funcoes?.map(({ utilizador_id: utId }) => utId) || [];
@@ -100,7 +100,7 @@ export function utilizadoresGaji9(colaboradores, funcoes, from) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function sortPermissoes(permissoes) {
   if (!permissoes || permissoes?.length === 0) return [];
@@ -114,7 +114,7 @@ export function sortPermissoes(permissoes) {
   });
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function meusAcessosGaji9(grupos) {
   if (!grupos || grupos?.length === 0) return [];
@@ -140,7 +140,7 @@ export function meusAcessosGaji9(grupos) {
   return resultado;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const getProximoAnterior = (processos, selectedId) => {
   const index = processos.findIndex(({ id }) => id === Number(selectedId));
@@ -153,11 +153,11 @@ export const getProximoAnterior = (processos, selectedId) => {
   };
 };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const vdt = { shouldValidate: true, shouldDirty: true, shouldTouch: true };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getLocalStorageArray(key) {
   try {

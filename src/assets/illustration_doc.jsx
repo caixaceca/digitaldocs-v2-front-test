@@ -3,7 +3,7 @@ import { memo } from 'react';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function DocIllustration({ ...other }) {
   const theme = useTheme();

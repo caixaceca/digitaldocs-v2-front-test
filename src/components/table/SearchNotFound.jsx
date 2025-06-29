@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -8,9 +7,7 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import { DocIllustration, DocIllustration404 } from '../../assets';
 
-// ----------------------------------------------------------------------
-
-SearchNotFound.propTypes = { message: PropTypes.string, height: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function SearchNotFound({ message = '', height = 250 }) {
   return (
@@ -25,9 +22,7 @@ export default function SearchNotFound({ message = '', height = 250 }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchNotFoundSmall.propTypes = { message: PropTypes.string.isRequired };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchNotFoundSmall({ message }) {
   return (
@@ -40,9 +35,7 @@ export function SearchNotFoundSmall({ message }) {
       {message}
     </Stack>
   );
-} // ----------------------------------------------------------------------
-
-SearchNotFound404.propTypes = { message: PropTypes.string, noShadow: PropTypes.bool };
+} // ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchNotFound404({ message, noShadow = false }) {
   return (
@@ -59,9 +52,7 @@ export function SearchNotFound404({ message, noShadow = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TableSearchNotFound.propTypes = { message: PropTypes.string, height: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableSearchNotFound({ message, height = 220 }) {
   return (

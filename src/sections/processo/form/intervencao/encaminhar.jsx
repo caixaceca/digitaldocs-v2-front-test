@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
@@ -52,8 +51,6 @@ const destinoItem = {
 
 // --- ENCAMINHAR/DEVOLVER PROCESSO ------------------------------------------------------------------------------------
 
-EncaminharStepper.propTypes = { dados: PropTypes.object };
-
 export default function EncaminharStepper({ dados }) {
   const dispatch = useDispatch();
   const { acao, destinos, gerencia = false, onClose } = dados;
@@ -101,8 +98,6 @@ export default function EncaminharStepper({ dados }) {
 }
 
 // --- ENCAMINHAR EM SÉRIE ---------------------------------------------------------------------------------------------
-
-EncaminharEmSerie.propTypes = { dados: PropTypes.object };
 
 export function EncaminharEmSerie({ dados }) {
   const dispatch = useDispatch();
@@ -232,8 +227,6 @@ export function EncaminharEmSerie({ dados }) {
   );
 }
 
-OutrosEmSerie.propTypes = { acao: PropTypes.string };
-
 export function OutrosEmSerie({ acao }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
@@ -331,8 +324,6 @@ export function OutrosEmSerie({ acao }) {
 
 // --- ENCAMINHAR EM PARALELO ------------------------------------------------------------------------------------------
 
-EncaminharEmParalelo.propTypes = { onClose: PropTypes.func, destinos: PropTypes.array };
-
 export function EncaminharEmParalelo({ destinos, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
@@ -422,13 +413,6 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
 }
 
 // --- CONFIDENCILAIDADES --------------------------------------------------------------------------------------
-
-Confidencialidade.propTypes = {
-  perfisIncluidos: PropTypes.string,
-  perfisExcluidos: PropTypes.string,
-  estadosIncluidos: PropTypes.string,
-  estadosExcluidos: PropTypes.string,
-};
 
 export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIncluidos, perfisExcluidos }) {
   const { colaboradores } = useSelector((state) => state.intranet);

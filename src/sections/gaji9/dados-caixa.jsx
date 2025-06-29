@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -24,8 +23,6 @@ import { FormProvider, RHFTextField, RHFNumberField } from '../../components/hoo
 import { DetalhesContent } from './detalhes-gaji9';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-InfoCaixa.propTypes = { onClose: PropTypes.func, item: PropTypes.string };
 
 export default function InfoCaixa({ onClose, item }) {
   const { temPermissao } = usePermissao();
@@ -60,8 +57,6 @@ export default function InfoCaixa({ onClose, item }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-InfoForm.propTypes = { onClose: PropTypes.func };
 
 export function InfoForm({ onClose }) {
   const dispatch = useDispatch();

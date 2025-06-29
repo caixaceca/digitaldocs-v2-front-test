@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Table from '@mui/material/Table';
@@ -24,8 +23,6 @@ import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
 import { RegraForm, TiposTitularesForm, ComponetesForm, SegmentosForm, FinalidadesForm } from './form-opcoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-AlineasClausula.propTypes = { dados: PropTypes.array };
 
 export function AlineasClausula({ dados = [] }) {
   return (
@@ -146,8 +143,6 @@ export function OpcoesClausula() {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-Relacionados.propTypes = { id: PropTypes.number, dados: PropTypes.array, item: PropTypes.string, na: PropTypes.bool };
 
 export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = false }) {
   const dispatch = useDispatch();

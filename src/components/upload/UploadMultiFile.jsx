@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 // @mui
 import Box from '@mui/material/Box';
@@ -8,7 +7,7 @@ import BlockContent from './BlockContent';
 import RejectionFiles from './RejectionFiles';
 import MultiFilePreview from './MultiFilePreview';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const DropZoneStyle = styled('div')(({ theme }) => ({
   outline: 'none',
@@ -19,16 +18,7 @@ const DropZoneStyle = styled('div')(({ theme }) => ({
   '&:hover': { opacity: 0.72, cursor: 'pointer' },
 }));
 
-// ----------------------------------------------------------------------
-
-UploadMultiFile.propTypes = {
-  sx: PropTypes.object,
-  error: PropTypes.bool,
-  onRemove: PropTypes.func,
-  helperText: PropTypes.node,
-  showPreview: PropTypes.bool,
-  files: PropTypes.array.isRequired,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function UploadMultiFile({ error, showPreview = false, files, onRemove, helperText, sx, ...other }) {
   const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({ ...other });

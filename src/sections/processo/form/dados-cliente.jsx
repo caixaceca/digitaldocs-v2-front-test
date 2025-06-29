@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // form
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
@@ -14,9 +13,7 @@ import GridItem from '../../../components/GridItem';
 import { DefaultAction } from '../../../components/Actions';
 import { RHFTextField, RHFNumberField, RHFDataEntrada } from '../../../components/hook-form';
 
-// ----------------------------------------------------------------------
-
-DadosCliente.propTypes = { noperacao: PropTypes.string, fluxo: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DadosCliente({ noperacao = '', fluxo = null }) {
   const { watch, control } = useFormContext();
@@ -76,9 +73,7 @@ export default function DadosCliente({ noperacao = '', fluxo = null }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Entidades.propTypes = { append: PropTypes.func, remove: PropTypes.func, fields: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Entidades({ fields = [], append, remove }) {
   return (

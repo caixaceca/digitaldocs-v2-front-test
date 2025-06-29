@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -6,13 +5,7 @@ import Typography from '@mui/material/Typography';
 import { fData } from '../../utils/formatNumber';
 import { getFileThumb } from '../../utils/formatFile';
 
-// ----------------------------------------------------------------------
-
-FileDescription.propTypes = {
-  file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-  size: PropTypes.object,
-  sx: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FileDescription({ file, size = false, sx }) {
   const isNotFormatFile = typeof file === 'string';

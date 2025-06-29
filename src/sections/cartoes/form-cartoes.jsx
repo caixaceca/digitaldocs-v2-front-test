@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { format, add, sub } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
@@ -39,14 +38,7 @@ import { TableHeadCustom } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObj } from '../../components/hook-form';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ValidarMultiploForm.propTypes = {
-  fase: PropTypes.string,
-  balcao: PropTypes.number,
-  cartoes: PropTypes.array,
-  onClose: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ValidarMultiploForm({ fase, cartoes = [], balcao, onClose }) {
   const dispatch = useDispatch();
@@ -145,15 +137,7 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ConfirmarPorDataForm.propTypes = {
-  fase: PropTypes.string,
-  datai: PropTypes.object,
-  dataf: PropTypes.object,
-  balcao: PropTypes.object,
-  onClose: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null, onClose }) {
   const dispatch = useDispatch();
@@ -220,9 +204,7 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-BalcaoEntregaForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function BalcaoEntregaForm({ onClose }) {
   const dispatch = useDispatch();
@@ -280,15 +262,7 @@ export function BalcaoEntregaForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-AnularForm.propTypes = {
-  uo: PropTypes.number,
-  fase: PropTypes.string,
-  uosList: PropTypes.array,
-  cartoes: PropTypes.array,
-  onClose: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function AnularForm({ fase, cartoes, uo, uosList, onClose }) {
   const { order, orderBy, selected, onSelectRow, onSelectAllRows, onSort } = useTable({

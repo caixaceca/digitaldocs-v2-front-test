@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // @mui
 import Fab from '@mui/material/Fab';
@@ -43,9 +42,7 @@ import { DialogConfirmar } from './CustomDialog';
 const wh = { width: 38, height: 38 };
 const whsmall = { width: 30, height: 30 };
 
-// ----------------------------------------------------------------------
-
-ActionButton.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ActionButton({ options = {} }) {
   const dispatch = useDispatch();
@@ -57,17 +54,7 @@ export function ActionButton({ options = {} }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DefaultAction.propTypes = {
-  small: PropTypes.bool,
-  button: PropTypes.bool,
-  icon: PropTypes.string,
-  color: PropTypes.string,
-  label: PropTypes.string,
-  onClick: PropTypes.func,
-  variant: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DefaultAction({
   icon,
@@ -170,9 +157,7 @@ export function DefaultAction({
   );
 }
 
-// ----------------------------------------------------------------------
-
-AddItem.propTypes = { dados: PropTypes.object, onClick: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function AddItem({ dados = {}, onClick = null }) {
   const { small = false, label = 'Adicionar' } = dados;
@@ -195,9 +180,7 @@ export function AddItem({ dados = {}, onClick = null }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Fechar.propTypes = { button: PropTypes.bool, large: PropTypes.bool, onClick: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Fechar({ button = false, large = false, onClick }) {
   return button ? (
@@ -220,18 +203,7 @@ export function Fechar({ button = false, large = false, onClick }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DialogButons.propTypes = {
-  edit: PropTypes.bool,
-  desc: PropTypes.string,
-  label: PropTypes.string,
-  color: PropTypes.string,
-  onClose: PropTypes.func,
-  isSaving: PropTypes.bool,
-  hideSubmit: PropTypes.bool,
-  handleDelete: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DialogButons({
   onClose,
@@ -272,16 +244,7 @@ export function DialogButons({
   );
 }
 
-// ----------------------------------------------------------------------
-
-ButtonsStepper.propTypes = {
-  label: PropTypes.string,
-  onClose: PropTypes.func,
-  isSaving: PropTypes.bool,
-  hideSubmit: PropTypes.bool,
-  handleSubmit: PropTypes.func,
-  labelCancel: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ButtonsStepper({
   onClose,
@@ -315,9 +278,7 @@ export function ButtonsStepper({
   );
 }
 
-// ----------------------------------------------------------------------
-
-MaisProcessos.propTypes = { verMais: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function MaisProcessos({ verMais }) {
   return (
@@ -327,9 +288,7 @@ export function MaisProcessos({ verMais }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Voltar.propTypes = { fab: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Voltar({ fab }) {
   const navigate = useNavigate();

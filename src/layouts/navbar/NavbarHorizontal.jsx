@@ -14,7 +14,7 @@ import { NavSectionHorizontal } from '../../components/nav-section';
 import NavConfig from './NavConfig';
 import Aplicacoes from './Aplicacoes';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const RootStyle = styled(AppBar)(({ theme }) => ({
   transition: theme.transitions.create('top', {
@@ -30,7 +30,7 @@ const RootStyle = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function NavbarHorizontal() {
   const { minhasAplicacoes } = useSelector((state) => state.intranet);

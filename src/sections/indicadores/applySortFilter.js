@@ -1,7 +1,7 @@
 // hooks
 import { applySort } from '../../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function applySortFilter({ dados, item, acao, colaborador, mes, comparator }) {
   if (comparator) dados = applySort(dados, comparator);

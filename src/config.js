@@ -3,7 +3,7 @@ import { ptPT } from '@mui/material/locale';
 // authentication
 import { PublicClientApplication } from '@azure/msal-browser';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const ambiente =
   (window.location.hostname === 'localhost' && 'local') ||
@@ -23,13 +23,9 @@ export const msalConfig = {
 };
 
 export const msalInstance = new PublicClientApplication(msalConfig);
+export const loginRequest = { scopes: ['User.Read', 'Presence.Read.All', 'openid', 'profile'] };
 
-export const loginRequest = {
-  authority: import.meta.env.VITE_AUTHORITY_AAD,
-  scopes: ['User.Read', 'Presence.Read.All', 'openid', 'profile'],
-};
-
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const HEADER = {
   MOBILE_HEIGHT: 58,
@@ -50,7 +46,7 @@ export const NAVBAR = {
 
 export const ICON = { NAVBAR_ITEM: 22, NAVBAR_ITEM_HORIZONTAL: 20 };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const defaultSettings = {
   themeMode: 'light',
@@ -61,7 +57,7 @@ export const defaultSettings = {
   themeStretch: false,
 };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const allLangs = [{ label: 'Português', value: 'pt', systemValue: ptPT }];
 export const defaultLang = allLangs[0];

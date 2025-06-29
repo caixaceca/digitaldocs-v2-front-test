@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useMemo, useEffect } from 'react';
 // form
@@ -32,9 +31,7 @@ import { listaTitrulares, listaProdutos } from '../../../gaji9/applySortFilter';
 //
 import { submitDados } from '../utils-form-processo';
 
-// ----------------------------------------------------------------------
-
-FormInfoCredito.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormInfoCredito({ dados }) {
   const dispatch = useDispatch();

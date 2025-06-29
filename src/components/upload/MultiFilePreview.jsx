@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { AnimatePresence } from 'framer-motion';
 // @mui
 import List from '@mui/material/List';
@@ -14,13 +13,7 @@ import { getFileThumb, getFileData } from '../../utils/formatFile';
 //
 import Image from '../Image';
 
-// ----------------------------------------------------------------------
-
-MultiFilePreview.propTypes = {
-  onRemove: PropTypes.func,
-  showPreview: PropTypes.bool,
-  files: PropTypes.array.isRequired,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function MultiFilePreview({ showPreview = false, files, onRemove }) {
   const hasFile = files.length > 0;

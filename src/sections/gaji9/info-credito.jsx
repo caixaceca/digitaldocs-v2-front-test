@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -39,7 +38,7 @@ import { Resgisto } from '../parametrizacao/Detalhes';
 import { IntervenienteForm, DataContrato } from './form-credito';
 import { applySortFilter, labelTitular } from './applySortFilter';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function InfoCredito() {
   const { credito, isLoading } = useSelector((state) => state.gaji9);
@@ -169,9 +168,7 @@ export default function InfoCredito() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TableInfoCredito.propTypes = { params: PropTypes.object, dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableInfoCredito({ params, dados = [] }) {
   const dispatch = useDispatch();

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
 import List from '@mui/material/List';
@@ -20,7 +19,7 @@ import { normalizeText } from '../utils/formatText';
 import Scrollbar from './Scrollbar';
 import { SearchField } from './SearchToolbar';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function not(a, b) {
   return a.filter((value) => b.indexOf(value) === -1);
@@ -34,9 +33,7 @@ function union(a, b) {
   return [...a, ...not(b, a)];
 }
 
-// ----------------------------------------------------------------------
-
-ListSelect.propTypes = { disponiveis: PropTypes.array, atribuidos: PropTypes.array, changeItems: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ListSelect({ disponiveis, atribuidos, changeItems }) {
   const [checked, setChecked] = useState([]);
@@ -148,7 +145,7 @@ export default function ListSelect({ disponiveis, atribuidos, changeItems }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function filterDados(dados, filter) {
   return filter

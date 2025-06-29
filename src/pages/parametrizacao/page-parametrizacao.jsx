@@ -21,7 +21,7 @@ import TabParametrizacao from '../../sections/parametrizacao/TabParametrizacao';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageParametrizacao() {
   const { themeStretch } = useSettings();

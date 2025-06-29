@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -28,9 +27,7 @@ import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 import { GrupoDetail, BalcoesRepresentante, SubtiposGarantias } from './sub-items';
 import { OpcoesClausula, AlineasClausula, Relacionados } from './clausulas/opcoes-clausulas';
 
-// ----------------------------------------------------------------------
-
-DetalhesGaji9.propTypes = { closeModal: PropTypes.func, item: PropTypes.string, opcao: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
   const { selectedItem, clausulaOpcional } = useSelector((state) => state.gaji9);
@@ -51,9 +48,7 @@ export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DetalhesTab.propTypes = { item: PropTypes.string, dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function DetalhesTab({ item, dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
@@ -108,9 +103,7 @@ function DetalhesTab({ item, dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-UtilizadorInfo.propTypes = { dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function UtilizadorInfo({ dados = [] }) {
   return (
@@ -130,9 +123,7 @@ function UtilizadorInfo({ dados = [] }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DetalhesContent.propTypes = { dados: PropTypes.object, item: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DetalhesContent({ dados = null, item = '' }) {
   const { isLoading } = useSelector((state) => state.gaji9);

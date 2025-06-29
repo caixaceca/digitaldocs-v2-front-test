@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -12,7 +11,7 @@ import useSettings from '../../../hooks/useSettings';
 import BoxMask from './BoxMask';
 import GridItem from '../../GridItem';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   display: 'flex',
@@ -23,7 +22,7 @@ const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 1.25,
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function SettingLayout() {
   const { themeLayout, onChangeLayout } = useSettings();
@@ -51,9 +50,7 @@ export default function SettingLayout() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-VerticalBox.propTypes = { isSelected: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 const style = { width: 1, height: 32, borderRadius: 0.5 };
 
@@ -83,8 +80,6 @@ function VerticalBox({ isSelected }) {
     </>
   );
 }
-
-HorizontalBox.propTypes = { isSelected: PropTypes.bool };
 
 function HorizontalBox({ isSelected }) {
   return (

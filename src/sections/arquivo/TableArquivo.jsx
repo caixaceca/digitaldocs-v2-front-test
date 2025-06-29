@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -38,7 +37,7 @@ import { applySortFilter } from '../parametrizacao/applySortFilter';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD_ARQUIVOS = [
   { id: 'referencia', label: 'Referência' },
@@ -57,9 +56,7 @@ const TABLE_HEAD_PEDIDOS = [
   { id: '', width: 10 },
 ];
 
-// ----------------------------------------------------------------------
-
-TableArquivo.propTypes = { tab: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableArquivo({ tab }) {
   const dispatch = useDispatch();
@@ -238,7 +235,7 @@ export default function TableArquivo({ tab }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function pedidosList(dados, colaboradores, uos) {
   const pedidos = [];

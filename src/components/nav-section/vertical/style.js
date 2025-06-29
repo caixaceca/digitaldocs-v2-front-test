@@ -9,7 +9,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 // config
 import { ICON, NAVBAR } from '../../../config';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const ListItemStyle = styled(ListItemButton, {
   shouldForwardProp: (prop) => prop !== 'active',
@@ -44,7 +44,7 @@ export const ListItemStyle = styled(ListItemButton, {
   }),
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const ListItemTextStyle = styled(ListItemText, {
   shouldForwardProp: (prop) => prop !== 'isCollapse',
@@ -58,7 +58,7 @@ export const ListItemTextStyle = styled(ListItemText, {
   }),
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const ListItemIconStyle = styled(ListItemIcon)({
   width: ICON.NAVBAR_ITEM,
@@ -69,7 +69,7 @@ export const ListItemIconStyle = styled(ListItemIcon)({
   '& svg': { width: '100%', height: '100%' },
 });
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const ListSubheaderStyle = styled(ListSubheader)(({ theme }) => ({
   backgroundColor: 'transparent',

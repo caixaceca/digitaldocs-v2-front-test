@@ -9,7 +9,7 @@ import { getComparator, applySort } from '../../hooks/useTable';
 import { getAccessToken } from './intranet';
 import { selectUtilizador, headerOptions, actionGet, doneSucess, hasError } from './sliceActions';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const initialState = {
   done: '',
@@ -102,7 +102,7 @@ export default slice.reducer;
 // Actions
 export const { setModal, getSuccess, resetProcesso, alterarBalcaopSuccess } = slice.actions;
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getAll(item, params) {
   return async (dispatch, getState) => {
@@ -170,7 +170,7 @@ export function getAll(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getListaProcessos(item, params) {
   return async (dispatch, getState) => {
@@ -236,7 +236,7 @@ export function getListaProcessos(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getProcesso(item, params) {
   return async (dispatch, getState) => {
@@ -270,7 +270,7 @@ export function getProcesso(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getInfoProcesso(item, params) {
   return async (dispatch, getState) => {
@@ -347,7 +347,7 @@ export function getInfoProcesso(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getAnexo(item, params) {
   return async (dispatch, getState) => {
@@ -385,7 +385,7 @@ export function getAnexo(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function createProcesso(item, dados, params) {
   return async (dispatch, getState) => {
@@ -415,7 +415,7 @@ export function createProcesso(item, dados, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function createItem(item, dados, params) {
   return async (dispatch, getState) => {
@@ -443,7 +443,7 @@ export function createItem(item, dados, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function updateItem(item, dados, params) {
   return async (dispatch, getState) => {
@@ -523,7 +523,7 @@ export function updateItem(item, dados, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function deleteItem(item, params) {
   return async (dispatch, getState) => {
@@ -559,7 +559,7 @@ export function deleteItem(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function processarProcesso(processo, perfilId, dispatch, aceitar, ht) {
   const { estados = [], anexos_entidades: anexosEnt = [], anexos = [] } = processo;

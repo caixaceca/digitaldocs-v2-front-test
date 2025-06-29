@@ -1,5 +1,4 @@
 import ExcelJS from 'exceljs';
-import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
 // utils
 import { fNumber } from '../../../utils/formatNumber';
@@ -9,9 +8,7 @@ import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalh
 // _mock
 import { dis } from '../../../_mock';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ExportarDados.propTypes = { dados: PropTypes.array, tabela: PropTypes.string, titulo: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ExportarDados({ titulo, dados, tabela }) {
   const exportToExcel = async () => {

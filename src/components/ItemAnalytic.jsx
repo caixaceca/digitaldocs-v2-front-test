@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -9,14 +8,7 @@ import { fNumber, fPercent } from '../utils/formatNumber';
 // components
 import { Todos } from '../assets';
 
-// ----------------------------------------------------------------------
-
-ItemAnalytic.propTypes = {
-  title: PropTypes.string,
-  color: PropTypes.string,
-  total: PropTypes.number,
-  percent: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ItemAnalytic({ title, total, color = 'focus.main', percent = 100 }) {
   return (

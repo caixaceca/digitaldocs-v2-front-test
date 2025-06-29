@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { m } from 'framer-motion';
-import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 // @mui
 import Box from '@mui/material/Box';
@@ -42,7 +41,7 @@ import { FormSugestao, DenunciaForm } from '../../sections/home/HomeForm';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const RootStyle = styled(AppBar, {
   shouldForwardProp: (prop) => prop !== 'isCollapse' && prop !== 'isOffset' && prop !== 'verticalLayout',
@@ -75,13 +74,7 @@ const RootStyle = styled(AppBar, {
   },
 }));
 
-// ----------------------------------------------------------------------
-
-DashboardHeader.propTypes = {
-  isCollapse: PropTypes.bool,
-  onOpenSidebar: PropTypes.func,
-  verticalLayout: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DashboardHeader({ onOpenSidebar, isCollapse = false, verticalLayout = false }) {
   const [modal, setModal] = useState('');
@@ -136,9 +129,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   );
 }
 
-// ----------------------------------------------------------------------
-
-HelpButton.propTypes = { title: PropTypes.string, action: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function HelpButton({ title, action }) {
   return (
@@ -163,7 +154,7 @@ function HelpButton({ title, action }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Parabens() {
   const { toggle: open, onOpen, onClose } = useToggle();
@@ -191,14 +182,7 @@ function Parabens() {
   ) : null;
 }
 
-// ----------------------------------------------------------------------
-
-IconButtonHeader.propTypes = {
-  open: PropTypes.bool,
-  setOpen: PropTypes.func,
-  total: PropTypes.number,
-  title: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function IconButtonHeader({ title, open, setOpen, total }) {
   return (

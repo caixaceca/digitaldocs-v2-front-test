@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import ReactQuill from 'react-quill-new';
 // @mui
 import Box from '@mui/material/Box';
@@ -6,7 +5,7 @@ import { styled } from '@mui/material/styles';
 //
 import EditorToolbar, { formats, redoChange, undoChange } from './EditorToolbar';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const RootStyle = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
@@ -29,18 +28,7 @@ const RootStyle = styled(Box)(({ theme }) => ({
   },
 }));
 
-// ----------------------------------------------------------------------
-
-Editor.propTypes = {
-  sx: PropTypes.object,
-  error: PropTypes.bool,
-  simple: PropTypes.bool,
-  helperText: PropTypes.node,
-  placeholder: PropTypes.string,
-  id: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Editor({
   sx,

@@ -1,5 +1,4 @@
 import { add } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useMemo, useState, useEffect } from 'react';
 import { PDFDownloadLink, Page, View, Text, Document } from '@react-pdf/renderer';
 // @mui
@@ -13,9 +12,7 @@ import { getFileThumb, downloadDoc } from '../../../utils/formatFile';
 // components
 import { styles, RodapeAlt, CabecalhoAlt } from '../../../components/ExportDados';
 
-// ----------------------------------------------------------------------
-
-DownloadPdf.propTypes = { documento: PropTypes.node, ficheiro: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DownloadPdf({ documento, ficheiro }) {
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -54,9 +51,7 @@ export function DownloadPdf({ documento, ficheiro }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-ParecerExport.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ParecerExport({ dados }) {
   const anexos = useMemo(() => dados?.anexos?.filter(({ ativo }) => ativo), [dados?.anexos]);
@@ -110,9 +105,7 @@ export default function ParecerExport({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-InfoItem.propTypes = { label: PropTypes.string, value: PropTypes.string, value1: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function InfoItem({ label, value = '', value1 = null }) {
   const assunto = label === 'Assunto';

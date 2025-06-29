@@ -1,5 +1,4 @@
 import sumBy from 'lodash/sumBy';
-import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
@@ -38,7 +37,7 @@ import { DuracaoEquipa, Conclusao, Execucao } from './Duracao';
 import { Criacao, DevolvidosTipos, Origem } from './TotalProcessos';
 import { EntradaTrabalhado, ProcessosTrabalhados, Colaboradores } from './SGQ';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TotalProcessos() {
   const { indicadores } = useSelector((state) => state.indicadores);
@@ -79,7 +78,7 @@ export function TotalProcessos() {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Duracao() {
   const { indicadores } = useSelector((state) => state.indicadores);
@@ -106,7 +105,7 @@ export function Duracao() {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SGQ() {
   const { indicadores } = useSelector((state) => state.indicadores);
@@ -158,9 +157,7 @@ export function SGQ() {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-IndicadorItem.propTypes = { children: PropTypes.node, isLoading: PropTypes.bool, isNotFound: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function IndicadorItem({ isLoading = false, isNotFound = false, children = null }) {
   return (
@@ -174,16 +171,7 @@ export function IndicadorItem({ isLoading = false, isNotFound = false, children 
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-CardInfo.propTypes = {
-  dev: PropTypes.bool,
-  title: PropTypes.string,
-  label: PropTypes.string,
-  total: PropTypes.number,
-  conclusao: PropTypes.bool,
-  percentagem: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function CardInfo({ title, label, total, conclusao = false, dev = false, percentagem = -1 }) {
   const iconOptions = { width: 50, height: 50, opacity: 0.48 };
@@ -231,14 +219,7 @@ export function CardInfo({ title, label, total, conclusao = false, dev = false, 
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ColaboradorCard.propTypes = {
-  detail: PropTypes.bool,
-  total: PropTypes.number,
-  assuntos: PropTypes.array,
-  colaboradorDados: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -307,16 +288,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TableExport.propTypes = {
-  dados: PropTypes.array,
-  total: PropTypes.number,
-  label: PropTypes.string,
-  vista: PropTypes.string,
-  label1: PropTypes.string,
-  percentagem: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableExport({ label, label1, dados, total = 0, percentagem = false, vista = '' }) {
   return (
@@ -360,9 +332,7 @@ export function TableExport({ label, label1, dados, total = 0, percentagem = fal
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TabView.propTypes = { vista: PropTypes.string, setVista: PropTypes.func, exportar: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TabView({ vista, setVista, exportar = null }) {
   return (
@@ -377,7 +347,7 @@ export function TabView({ vista, setVista, exportar = null }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function dadosResumo(dados, item, label) {
   const total = sumBy(dados, item);

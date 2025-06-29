@@ -3,7 +3,7 @@ import { normalizeText } from '../../utils/formatText';
 // hooks
 import { applySort, getComparator } from '../../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function applySortFilter({ dados, filter, comparator }) {
   dados = applySort(dados, comparator);
@@ -38,7 +38,7 @@ export function applySortFilter({ dados, filter, comparator }) {
   return dados;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function listaTitrulares(tiposTitulares) {
   return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({ id, label: labelTitular(descritivo, consumidor) }));

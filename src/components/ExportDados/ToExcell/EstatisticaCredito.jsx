@@ -1,6 +1,5 @@
 import ExcelJS from 'exceljs';
 import { sumBy } from 'lodash';
-import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
 // utils
 import { ptDate } from '../../../utils/formatTime';
@@ -10,13 +9,11 @@ import { useSelector } from '../../../redux/store';
 //
 import { ExportToExcell, fileInfo, sheetProperty, estiloCabecalho, ajustarLargura } from './CommonProperties';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const borderCinza = { style: 'thin', color: { argb: 'AAAAAA' } };
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ExportarEstatisticaCred.propTypes = { uo: PropTypes.string, periodo: PropTypes.string, vista: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ExportarEstatisticaCred({ uo, periodo, vista }) {
   const { cc } = useSelector((state) => state.intranet);
@@ -231,7 +228,7 @@ export default function ExportarEstatisticaCred({ uo, periodo, vista }) {
   return <ExportToExcell handleExport={exportToExcel} />;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function dadosResumo(dados, segmento, linha) {
   const entradas = dadosPorItem(dados?.entrada, segmento, linha);
@@ -448,7 +445,7 @@ function dadosPorItem(dados, segmento, linha) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function addCabecalho(sheet, tab) {
   sheet.columns = [

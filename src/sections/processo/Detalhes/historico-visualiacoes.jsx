@@ -16,7 +16,7 @@ import { SkeletonBar } from '../../../components/skeleton';
 import { SearchNotFound } from '../../../components/table';
 import { ColaboradorInfo } from '../../../components/Panel';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Views() {
   const dispatch = useDispatch();
@@ -82,7 +82,7 @@ export default function Views() {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function groupByColaborador(dados, item) {
   const dadosList = [];

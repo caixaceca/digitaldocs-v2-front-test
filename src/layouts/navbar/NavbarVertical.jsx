@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import Snowfall from 'react-snowfall';
 import { NavLink as RouterLink } from 'react-router-dom';
 // @mui
@@ -29,7 +28,7 @@ import Aplicacoes from './Aplicacoes';
 import NavbarAcount from './NavbarAcount';
 import CollapseButton from './CollapseButton';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const RootStyle = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('lg')]: {
@@ -38,9 +37,7 @@ const RootStyle = styled('div')(({ theme }) => ({
   },
 }));
 
-// ----------------------------------------------------------------------
-
-NavbarVertical.propTypes = { isOpenSidebar: PropTypes.bool, onCloseSidebar: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   const theme = useTheme();

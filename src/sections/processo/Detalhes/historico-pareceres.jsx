@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -20,14 +19,7 @@ import { ColaboradorInfo } from '../../../components/Panel';
 import { Info, InfoCriador } from './estados-processo';
 import ParecerExport, { DownloadPdf } from './minuta-parecer';
 
-// ----------------------------------------------------------------------
-
-Pareceres.propTypes = {
-  estado: PropTypes.string,
-  assunto: PropTypes.string,
-  pareceres: PropTypes.array,
-  estadoId: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Pareceres({ pareceres, estado, estadoId, assunto }) {
   const dispatch = useDispatch();
@@ -54,15 +46,7 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Parecer.propTypes = {
-  accord: PropTypes.string,
-  parecer: PropTypes.object,
-  estadoId: PropTypes.number,
-  handleEditar: PropTypes.func,
-  handleAccord: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord }) {
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
@@ -127,9 +111,7 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
   );
 }
 
-// ----------------------------------------------------------------------
-
-PareceresEstado.propTypes = { assunto: PropTypes.string, pareceres: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function PareceresEstado({ pareceres, assunto }) {
   const { colaboradores } = useSelector((state) => state.intranet);

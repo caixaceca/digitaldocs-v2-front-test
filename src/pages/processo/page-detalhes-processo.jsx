@@ -43,7 +43,7 @@ import { DesarquivarForm } from '../../sections/processo/form/form-arquivo';
 
 import useMenuProcesso from '../../sections/processo/Detalhes/menu';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageProcesso() {
   const { id } = useParams();

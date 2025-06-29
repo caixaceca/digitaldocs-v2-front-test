@@ -10,7 +10,7 @@ import TabsWrapper from '../../components/TabsWrapper';
 // sections
 import TableArquivo from '../../sections/arquivo/TableArquivo';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageArquivo() {
   const { themeStretch } = useSettings();

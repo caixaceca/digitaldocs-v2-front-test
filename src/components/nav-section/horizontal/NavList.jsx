@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // @mui
@@ -8,13 +7,7 @@ import { PaperStyle } from './style';
 import NavItem from './NavItem';
 import { getActive, isExternalLink } from '..';
 
-// ----------------------------------------------------------------------
-
-NavList.propTypes = {
-  data: PropTypes.object,
-  depth: PropTypes.number,
-  hasChildren: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NavList({ data, depth, hasChildren }) {
   const menuRef = useRef(null);
@@ -81,12 +74,7 @@ export default function NavList({ data, depth, hasChildren }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-NavSubList.propTypes = {
-  data: PropTypes.array,
-  depth: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function NavSubList({ data, depth }) {
   return (

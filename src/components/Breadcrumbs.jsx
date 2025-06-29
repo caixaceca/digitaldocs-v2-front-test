@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
@@ -7,9 +6,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import MUIBreadcrumbs from '@mui/material/Breadcrumbs';
 
-// ----------------------------------------------------------------------
-
-Breadcrumbs.propTypes = { activeLast: PropTypes.bool, links: PropTypes.array.isRequired };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Breadcrumbs({ links, activeLast = false, ...other }) {
   const currentLink = links[links.length - 1].name;
@@ -49,9 +46,7 @@ export default function Breadcrumbs({ links, activeLast = false, ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-LinkItem.propTypes = { link: PropTypes.shape({ href: PropTypes.string, icon: PropTypes.any, name: PropTypes.string }) };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function LinkItem({ link }) {
   const { href, name, icon } = link;

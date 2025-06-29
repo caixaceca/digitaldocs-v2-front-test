@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
@@ -28,9 +27,7 @@ import { ButtonsStepper } from '../../../../components/Actions';
 //
 import { entidadesList, submitDados } from '../utils-form-processo';
 
-// ----------------------------------------------------------------------
-
-FormInfoExterno.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormInfoExterno({ dados }) {
   const dispatch = useDispatch();

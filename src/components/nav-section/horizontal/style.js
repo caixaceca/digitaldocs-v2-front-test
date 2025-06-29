@@ -7,7 +7,7 @@ import cssStyles from '../../../utils/cssStyles';
 // config
 import { NAVBAR } from '../../../config';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const ListItemStyle = styled(ListItemButton, {
   shouldForwardProp: (prop) => prop !== 'active' && prop !== 'open',
@@ -65,7 +65,7 @@ export const ListItemStyle = styled(ListItemButton, {
   };
 });
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const PaperStyle = styled(Popover)(({ theme }) => ({
   pointerEvents: 'none',

@@ -5,7 +5,7 @@ import { normalizeText } from '../../utils/formatText';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function dadosList(cartoes, uos) {
   return cartoes?.map((row) => ({

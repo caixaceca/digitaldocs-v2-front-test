@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 // @mui
@@ -29,9 +28,7 @@ import { SearchToolbarProcessos } from '../../components/SearchToolbar';
 import { AddItem, DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
-// ----------------------------------------------------------------------
-
-TableProcessos.propTypes = { from: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableProcessos({ from }) {
   const navigate = useNavigate();
@@ -231,7 +228,7 @@ export default function TableProcessos({ from }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function applySortFilter({ dados, comparator, filter, colaborador, from }) {
   dados = applySort(dados, comparator);

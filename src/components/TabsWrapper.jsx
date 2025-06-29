@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -12,7 +11,7 @@ import { setItemValue } from '../utils/formatObject';
 import { Voltar } from './Actions';
 import { TabsWrapperStyle } from './Panel';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TabsWrapperStyleSimple = styled('div')(({ theme }) => ({
   zIndex: 9,
@@ -25,16 +24,7 @@ const TabsWrapperStyleSimple = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: { paddingRight: theme.spacing(2) },
 }));
 
-// ----------------------------------------------------------------------
-
-TabsWrapper.propTypes = {
-  tab: PropTypes.string,
-  voltar: PropTypes.bool,
-  title: PropTypes.string,
-  changeTab: PropTypes.func,
-  tabsList: PropTypes.array,
-  currentTab: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab, voltar = false }) {
   return (
@@ -66,14 +56,7 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
   );
 }
 
-// ----------------------------------------------------------------------
-
-TabsWrapperSimple.propTypes = {
-  sx: PropTypes.object,
-  changeTab: PropTypes.func,
-  tabsList: PropTypes.array,
-  currentTab: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
   return (
@@ -95,9 +78,7 @@ export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TabCard.propTypes = { tabs: PropTypes.array, tipo: PropTypes.string, item: PropTypes.string, setTipo: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TabCard({ tabs, tipo, item = '', setTipo }) {
   return (

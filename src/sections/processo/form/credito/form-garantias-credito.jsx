@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -43,9 +42,7 @@ const garantiaSquema = {
   codigo_hipoteca_cartorio: '',
 };
 
-// ----------------------------------------------------------------------
-
-GarantiasSeparados.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function GarantiasSeparados({ dados }) {
   const dispatch = useDispatch();
@@ -109,9 +106,7 @@ export function GarantiasSeparados({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-FormGarantias.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function FormGarantias({ dados }) {
   const { fields, remove, append, garantiasList, isEdit } = dados;

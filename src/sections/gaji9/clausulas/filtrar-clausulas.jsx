@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -14,9 +13,7 @@ import { useDispatch, useSelector } from '../../../redux/store';
 import { sitClausulas } from '../../../_mock';
 import { listaTitrulares, listaGarantias } from '../applySortFilter';
 
-// ----------------------------------------------------------------------
-
-FiltrarClausulas.propTypes = { inativos: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FiltrarClausulas({ inativos }) {
   const dispatch = useDispatch();
@@ -84,14 +81,7 @@ export default function FiltrarClausulas({ inativos }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SelectItem.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.object,
-  setItem: PropTypes.func,
-  options: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SelectItem({ label, value, setItem, options }) {
   const item =

@@ -24,7 +24,7 @@ import AcessoGaji9 from './acesso-gaji9';
 import CreditoForm, { PreviewForm } from '../../sections/gaji9/form-credito';
 import InfoCredito, { TableInfoCredito } from '../../sections/gaji9/info-credito';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageCreditoDetalhes() {
   const { id } = useParams();

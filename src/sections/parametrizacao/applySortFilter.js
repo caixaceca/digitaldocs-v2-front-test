@@ -3,7 +3,7 @@ import { normalizeText } from '../../utils/formatText';
 // hooks
 import { applySort } from '../../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function applySortFilter({ dados, filter, comparator }) {
   dados = applySort(dados, comparator);
@@ -45,7 +45,7 @@ export function applySortFilter({ dados, filter, comparator }) {
   return dados;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function listaPerfis(perfis, colaboradores) {
   perfis = perfis?.map(({ perfil_id: id }) => ({

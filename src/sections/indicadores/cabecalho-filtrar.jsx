@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { format, add } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -36,18 +35,6 @@ const agrupamentos = ['Unidade orgânica', 'Colaborador'];
 const momentos = ['Criação no sistema', 'Data de entrada'];
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-Cabecalho.propTypes = {
-  tab: PropTypes.string,
-  top: PropTypes.string,
-  setTop: PropTypes.func,
-  title: PropTypes.string,
-  vista: PropTypes.string,
-  setVista: PropTypes.func,
-  changeTab: PropTypes.func,
-  tabsList: PropTypes.array,
-  currentTab: PropTypes.string,
-};
 
 export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList = [], currentTab = '', changeTab }) {
   const dispatch = useDispatch();
@@ -423,14 +410,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FilterAutocomplete.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.object,
-  options: PropTypes.array,
-  setValue: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function FilterAutocomplete({ label, value, options, setValue, ...other }) {
   const localS =
@@ -453,14 +433,7 @@ function FilterAutocomplete({ label, value, options, setValue, ...other }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FilterRG.propTypes = {
-  value: PropTypes.string,
-  localS: PropTypes.string,
-  options: PropTypes.array,
-  setValue: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function FilterRG({ localS, value, setValue, options = [] }) {
   return (

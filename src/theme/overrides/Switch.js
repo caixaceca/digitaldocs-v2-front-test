@@ -1,6 +1,6 @@
 import { alpha } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Switch(theme) {
   const isLight = theme.palette.mode === 'light';

@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 // utils
 import { formatDate } from '../../../../utils/formatTime';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const shapeAnexos = (outros, checkList, solto) =>
   Yup.object().shape({
@@ -30,7 +30,7 @@ export const shapeAnexos = (outros, checkList, solto) =>
     ),
   });
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const defaultAnexos = (dadosStepper, checkList, anexos) => ({
   anexos: dadosStepper?.anexos || [],
@@ -45,17 +45,17 @@ export const defaultAnexos = (dadosStepper, checkList, anexos) => ({
     })),
 });
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const limparValoresNulos = (obj) =>
   Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== '' && value !== null && value !== undefined));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const garantiasAssociadas = (garantias) =>
   garantias?.map((row) => limparValoresNulos({ ...row, tipo_garantia_id: row?.tipo_garantia_id?.id }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function appendAnexos(formData, anexos, outros, checklist) {
   let index = 0;

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -6,9 +5,7 @@ import Typography from '@mui/material/Typography';
 // assets
 import { UploadIllustration } from '../../assets';
 
-// ----------------------------------------------------------------------
-
-BlockContent.propTypes = { multiple: PropTypes.bool, small: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function BlockContent({ multiple = false, small = false }) {
   return (

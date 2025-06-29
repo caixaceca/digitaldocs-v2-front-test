@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -20,9 +19,7 @@ import { getFromIntranet } from '../../redux/slices/intranet';
 import Markdown from '../../components/Markdown';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 
-// ----------------------------------------------------------------------
-
-AjudaDialog.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function AjudaDialog({ onClose }) {
   const dispatch = useDispatch();
@@ -44,7 +41,7 @@ export default function AjudaDialog({ onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Documentos() {
   const { documentosAjuda, isLoading } = useSelector((state) => state.intranet);
@@ -90,7 +87,7 @@ function Documentos() {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Perguntas() {
   const [controlled, setControlled] = useState(false);

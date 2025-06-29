@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // utils
 import { noEstado, podeArquivar, processoEstadoInicial, gestorEstado } from '../../utils/validarAcesso';
 // redux
@@ -14,7 +13,7 @@ import { DefaultAction } from '../../components/Actions';
 import { ArquivarForm } from './form/form-arquivo';
 import { EncaminharStepper } from './form/intervencao';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Intervencao() {
   const dispatch = useDispatch();
@@ -102,8 +101,6 @@ export default function Intervencao() {
 }
 
 // --- ENCAMINHAR/DEVOLVER PROCESSO ------------------------------------------------------------------------------------
-
-Encaminhar.propTypes = { dados: PropTypes.object };
 
 export function Encaminhar({ dados }) {
   const dispatch = useDispatch();

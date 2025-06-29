@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 // @mui
 import Link from '@mui/material/Link';
@@ -12,14 +11,7 @@ import { ForbiddenIllustration } from '../assets';
 // redux
 import { useSelector } from '../redux/store';
 
-// ----------------------------------------------------------------------
-
-RoleBasedGuard.propTypes = {
-  children: PropTypes.node,
-  hasContent: PropTypes.bool,
-  showChildren: PropTypes.bool,
-  roles: PropTypes.arrayOf(PropTypes.string),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function RoleBasedGuard({ hasContent, roles, children = null, showChildren = false }) {
   const navigate = useNavigate();

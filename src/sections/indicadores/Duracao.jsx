@@ -1,5 +1,4 @@
 import sumBy from 'lodash/sumBy';
-import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -31,7 +30,7 @@ import { IndicadorItem, CardInfo, TableExport, TabView, dadosResumo } from './In
 // _mock_
 import { meses } from '../../_mock';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'assunto', label: 'Assunto', align: 'left' },
@@ -39,9 +38,7 @@ const TABLE_HEAD = [
   { id: 'tempo_execucao', label: 'Tempo médio', align: 'left' },
 ];
 
-// ----------------------------------------------------------------------
-
-Execucao.propTypes = { indicadores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Execucao({ indicadores }) {
   const { isLoading } = useSelector((state) => state.indicadores);
@@ -200,9 +197,7 @@ export function Execucao({ indicadores }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Conclusao.propTypes = { indicadores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Conclusao({ indicadores }) {
   const { uos } = useSelector((state) => state.intranet);
@@ -259,9 +254,7 @@ export function Conclusao({ indicadores }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DuracaoEquipa.propTypes = { indicadores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DuracaoEquipa({ indicadores }) {
   const { isLoading } = useSelector((state) => state.indicadores);
@@ -309,7 +302,7 @@ export function DuracaoEquipa({ indicadores }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function duracaoGroup(dados, item) {
   const dadosGrouped = [];

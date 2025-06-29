@@ -1,13 +1,13 @@
 // hooks
 import { getComparator, applySort } from '../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function temAcesso(acessos, acessosList) {
   return !!acessosList?.find((row) => acessos?.includes(row));
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function temNomeacao(colaborador) {
   let nomeacao = '';
@@ -25,13 +25,13 @@ export function temNomeacao(colaborador) {
   return nomeacao;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function emailCheck(mail, check) {
   return mail?.split('')?.reverse()?.join('')?.toLowerCase() === (check || 'vc.axiac@arove.ordnavi');
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
   let colaboradoresList = [];
@@ -49,7 +49,7 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
   return colaboradoresList?.map(({ id: cid, perfil_id: id, nome, uo_id: uoId }) => ({ id, cid, label: nome, uoId }));
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
   let uosList = [];
@@ -66,7 +66,7 @@ export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
   return uosList?.map(({ id, balcao, label }) => ({ id: key === 'balcao' ? balcao : id, label }));
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
   let estadosList = [];
@@ -86,7 +86,7 @@ export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function UosGerente(meusAmbientes) {
   const uosGerente = [];
@@ -96,7 +96,7 @@ export function UosGerente(meusAmbientes) {
   return uosGerente;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAgencia, gerencia) => {
   const { fluxo, estado, htransicoes } = processo;
@@ -115,7 +115,7 @@ export const podeArquivar = (processo, meusAmbientes, arquivarProcessos, fromAge
   );
 };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function paraLevantamento(assunto) {
   return (
@@ -126,7 +126,7 @@ export function paraLevantamento(assunto) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function fluxosGmkt(assunto) {
   return assunto === 'Preçário' || assunto === 'Formulário' || assunto === 'Produtos e Serviços';
@@ -163,7 +163,7 @@ export function estadoFixo(assunto) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function noEstado(estado, labels) {
   return !!labels?.find((row) => estado?.includes(row));
@@ -173,19 +173,19 @@ export function processoEstadoInicial(meusAmbientes, estadoId) {
   return !!meusAmbientes?.find(({ id }) => id === Number(estadoId))?.isinicial;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function arquivoAtendimento(assunto, encGer) {
   return (paraLevantamento(assunto) || assunto?.includes('Conta Caixa Ordenado')) && encGer;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function estadoInicial(meusAmbientes) {
   return !!meusAmbientes?.find(({ isinicial }) => isinicial);
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function pertencoAoEstado(meusAmbientes, estados) {
   return !!meusAmbientes?.find(({ nome }) => estados?.includes(nome));
@@ -199,7 +199,7 @@ export function gestorEstado(meusAmbientes, estadoId) {
   return !!meusAmbientes?.find(({ id, gestor }) => id === estadoId && gestor);
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function eliminarAnexo(meusAmbientes, modificar, estadoAnexo, estadoId) {
   return (
@@ -209,7 +209,7 @@ export function eliminarAnexo(meusAmbientes, modificar, estadoAnexo, estadoId) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function findColaboradores(colaboradores, idsList) {
   return colaboradores

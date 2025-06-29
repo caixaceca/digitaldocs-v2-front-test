@@ -1,14 +1,11 @@
 import ExcelJS from 'exceljs';
-import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
 // utils
 import { fMonthYear } from '../../../utils/formatTime';
 //
 import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './CommonProperties';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ExportarDados.propTypes = { dados: PropTypes.array, tabela: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ExportarDados({ dados, tabela }) {
   const exportToExcel = async () => {

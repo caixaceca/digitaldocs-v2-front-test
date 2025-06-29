@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -21,9 +20,7 @@ import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import { RegrasForm } from './form-estado';
 import { DetalhesContent } from './Detalhes';
 
-// ----------------------------------------------------------------------
-
-DetalhesTransicao.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesTransicao({ dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
@@ -46,9 +43,7 @@ export default function DetalhesTransicao({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RegrasTransicoes.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function RegrasTransicoes({ dados }) {
   const dispatch = useDispatch();

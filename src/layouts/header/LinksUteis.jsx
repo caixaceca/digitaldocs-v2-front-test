@@ -17,11 +17,11 @@ import { IconButtonHeader } from '.';
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const LogoApp = styled(Avatar)(() => ({ p: 0.5, width: '33px', height: '33px' }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function LinksUteis() {
   const [open, setOpen] = useState(null);

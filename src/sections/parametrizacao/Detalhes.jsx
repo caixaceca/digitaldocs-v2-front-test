@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -34,7 +33,7 @@ import { Criado, CellChecked, DataLabel } from '../../components/Panel';
 import { DestinatarioForm } from './form-fluxo';
 import DetalhesTransicao from './detalhes-transicao';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const fields = [
   { key: 'ativo', title: 'Ativo:' },
@@ -65,9 +64,7 @@ const fields = [
   { key: 'is_con', title: 'Comunicação de operação de numerário:' },
 ];
 
-// ----------------------------------------------------------------------
-
-Detalhes.propTypes = { item: PropTypes.string, closeModal: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Detalhes({ item, closeModal }) {
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -94,14 +91,7 @@ export function Detalhes({ item, closeModal }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DetalhesContent.propTypes = {
-  uo: PropTypes.object,
-  item: PropTypes.string,
-  dados: PropTypes.object,
-  perfil: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DetalhesContent({ dados = null, item = '', perfil = null, uo = null }) {
   const { isLoading } = useSelector((state) => state.parametrizacao);
@@ -256,9 +246,7 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
   );
 }
 
-// ----------------------------------------------------------------------
-
-Notificacao.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Notificacao({ dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
@@ -282,9 +270,7 @@ function Notificacao({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Notificacoes.propTypes = { destinatarios: PropTypes.array, id: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Notificacoes({ destinatarios, id }) {
   const [destinatario, setDestinatario] = useState(null);
@@ -333,9 +319,7 @@ function Notificacoes({ destinatarios, id }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Resgisto.propTypes = { label: PropTypes.string, por: PropTypes.string, em: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Resgisto({ label, por = '', em = '' }) {
   return por || em ? (
@@ -349,14 +333,7 @@ export function Resgisto({ label, por = '', em = '' }) {
   ) : null;
 }
 
-// ----------------------------------------------------------------------
-
-TableRowItem.propTypes = {
-  item: PropTypes.node,
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  text: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  title: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableRowItem({ title, id = 0, text = '', item = null }) {
   return text || item ? (
@@ -370,8 +347,6 @@ export function TableRowItem({ title, id = 0, text = '', item = null }) {
     </TableRow>
   ) : null;
 }
-
-LabelSN.propTypes = { item: PropTypes.bool };
 
 export function LabelSN({ item = false }) {
   return <Label color={item ? 'success' : 'default'}>{item ? 'Sim' : 'Não'}</Label>;

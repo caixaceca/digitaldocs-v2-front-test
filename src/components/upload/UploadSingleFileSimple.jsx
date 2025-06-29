@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -9,7 +8,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { fData } from '../../utils/formatNumber';
 import { getFileThumb } from '../../utils/formatFile';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const StyledDropZone = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -36,15 +35,7 @@ const PlaceholderStyle = styled('div')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
 }));
 
-// ----------------------------------------------------------------------
-
-UploadSingleFileSimple.propTypes = {
-  sx: PropTypes.object,
-  error: PropTypes.bool,
-  disabled: PropTypes.bool,
-  helperText: PropTypes.node,
-  file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function UploadSingleFileSimple({ error = false, disabled = false, helperText, file, sx, ...other }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ multiple: false, ...other });

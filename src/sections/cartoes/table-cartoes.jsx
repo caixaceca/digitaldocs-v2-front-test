@@ -35,7 +35,7 @@ import { UoData } from '../tabela/uo-data-filter';
 import { dadosList, tiposCartoes, datas, applySortFilter } from './utils-cartoes';
 import { ValidarMultiploForm, BalcaoEntregaForm, ConfirmarPorDataForm, AnularForm } from './form-cartoes';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'data_emissao', label: 'Data emissão' },
@@ -49,7 +49,7 @@ const TABLE_HEAD = [
   { id: '' },
 ];
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableCartoes() {
   const {

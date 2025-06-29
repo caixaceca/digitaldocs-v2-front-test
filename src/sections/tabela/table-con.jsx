@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -31,7 +30,7 @@ import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD_CON = [
   { id: 'nome_cliente', label: 'Cliente', align: 'left' },
@@ -53,9 +52,7 @@ const TABLE_HEAD_JF = [
   { id: '', width: 10 },
 ];
 
-// ----------------------------------------------------------------------
-
-TableCON.propTypes = { item: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableCON({ item = 'con' }) {
   const {
@@ -208,7 +205,7 @@ export default function TableCON({ item = 'con' }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function applySortFilter({ dados, comparator, filter }) {
   dados = applySort(dados, comparator);

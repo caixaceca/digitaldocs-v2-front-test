@@ -11,7 +11,7 @@ import useSettings from '../../../hooks/useSettings';
 import BoxMask from './BoxMask';
 import GridItem from '../../GridItem';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   height: 72,
@@ -23,7 +23,7 @@ const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 1.25,
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function SettingMode() {
   const { themeMode, onChangeMode } = useSettings();

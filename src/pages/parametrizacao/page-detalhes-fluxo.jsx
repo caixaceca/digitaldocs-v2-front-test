@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -40,7 +39,7 @@ import { Detalhes, DetalhesContent } from '../../sections/parametrizacao/Detalhe
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageDetalhesFluxo() {
   const { id } = useParams();
@@ -180,9 +179,7 @@ export default function PageDetalhesFluxo() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Transicoes.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Transicoes({ options }) {
   const { transicao, setTransicao, transicoes, checklist } = options;

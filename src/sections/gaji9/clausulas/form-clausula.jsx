@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -51,8 +50,6 @@ export const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ClausulaForm.propTypes = { onClose: PropTypes.func };
-
 export default function ClausulaForm({ onClose }) {
   const dispatch = useDispatch();
   const { activeStep } = useSelector((state) => state.stepper);
@@ -90,8 +87,6 @@ export default function ClausulaForm({ onClose }) {
     </Dialog>
   );
 }
-
-Identificacao.propTypes = { onClose: PropTypes.func };
 
 function Identificacao({ onClose }) {
   const dispatch = useDispatch();
@@ -322,8 +317,6 @@ function Numeros() {
   );
 }
 
-Alineas.propTypes = { numeroIndex: PropTypes.number };
-
 export function Alineas({ numeroIndex }) {
   const { control } = useFormContext();
   const [item, setItem] = useState(null);
@@ -372,8 +365,6 @@ export function Alineas({ numeroIndex }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-Resumo.propTypes = { onClose: PropTypes.func };
 
 function Resumo({ onClose }) {
   const dispatch = useDispatch();
@@ -478,9 +469,7 @@ function Resumo({ onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TitleResumo.propTypes = { title: PropTypes.string, action: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function TitleResumo({ title, action }) {
   return (
@@ -490,13 +479,7 @@ function TitleResumo({ title, action }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TableRowItem.propTypes = {
-  item: PropTypes.node,
-  text: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  title: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function TableRowItem({ title, text = '', item = null }) {
   return text || item ? (
@@ -511,7 +494,7 @@ function TableRowItem({ title, text = '', item = null }) {
   ) : null;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SearchVariavel() {
   const [variavel, setVariavel] = useState(null);

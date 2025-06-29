@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { BrowserAuthError, EventType } from '@azure/msal-browser';
 import { msalInstance, loginRequest } from '../config';
 
@@ -11,16 +10,20 @@ export const AuthProvider = ({ children }) => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadActiveAccount = () => {
+  const loadActiveAccount = async () => {
+    await msalInstance.initialize();
     let currentAccount = msalInstance.getActiveAccount();
-    if (!currentAccount) {
-      const allAccounts = msalInstance.getAllAccounts();
-      if (allAccounts.length > 0) {
-        currentAccount = allAccounts[0];
-        msalInstance.setActiveAccount(currentAccount);
-      }
+    if (currentAccount) {
+      setAccount(currentAccount);
+      return;
     }
-    setAccount(currentAccount || null);
+
+    const allAccounts = msalInstance.getAllAccounts();
+    if (allAccounts.length > 0) {
+      currentAccount = allAccounts[0];
+      msalInstance.setActiveAccount(currentAccount);
+      setAccount(currentAccount);
+    }
   };
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export const AuthProvider = ({ children }) => {
         msalInstance.setActiveAccount(event.payload.account);
         loadActiveAccount();
       }
+
       if (event.eventType === EventType.LOGOUT_SUCCESS) setAccount(null);
     });
 
@@ -57,6 +61,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async () => {
+    if (loginLoading) return;
+
     setLoginLoading(true);
     try {
       const response = await msalInstance.loginPopup(loginRequest);
@@ -86,7 +92,9 @@ export const AuthProvider = ({ children }) => {
         logoutHint: activeAccount.username,
         postLogoutRedirectUri: window.location.origin,
       });
-    } else msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
+    } else {
+      msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
+    }
   };
 
   return (
@@ -97,8 +105,6 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-AuthProvider.propTypes = { children: PropTypes.node.isRequired };
 
 export const useAuthContext = () => {
   const context = useContext(AuthContext);

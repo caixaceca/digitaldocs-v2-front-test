@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Step from '@mui/material/Step';
@@ -13,7 +12,7 @@ import StepConnector from '@mui/material/StepConnector';
 import { useDispatch } from '../redux/store';
 import { gotoStep } from '../redux/slices/stepper';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const Connector = styled(StepConnector)(({ theme }) => ({
   top: 10,
@@ -23,9 +22,7 @@ const Connector = styled(StepConnector)(({ theme }) => ({
   '&.Mui-active, &.Mui-completed': { '& .MuiStepConnector-line': { borderColor: theme.palette.primary.main } },
 }));
 
-// ----------------------------------------------------------------------
-
-Steps.propTypes = { sx: PropTypes.object, activeStep: PropTypes.number, steps: PropTypes.arrayOf(PropTypes.string) };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Steps({ steps, activeStep, sx, ...other }) {
   const dispatch = useDispatch();
@@ -61,9 +58,7 @@ export default function Steps({ steps, activeStep, sx, ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-StepIcon.propTypes = { active: PropTypes.bool, completed: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function StepIcon({ active, completed }) {
   return (

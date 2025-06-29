@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -14,7 +13,7 @@ import { useSelector } from '../redux/store';
 
 const iconWH = { width: 14, height: 14 };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const CustomAvatar = forwardRef(({ name, ...other }, ref) => {
   const renderContent = (
@@ -28,11 +27,7 @@ const CustomAvatar = forwardRef(({ name, ...other }, ref) => {
 
 export default CustomAvatar;
 
-CustomAvatar.propTypes = { sx: PropTypes.object, name: PropTypes.string };
-
-// ----------------------------------------------------------------------
-
-AvatarBedge.propTypes = { id: PropTypes.number, children: PropTypes.node, sx: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function AvatarBedge({ id, children, sx = null }) {
   const { colaboradores } = useSelector((state) => state.intranet);

@@ -13,7 +13,7 @@ import { IconButtonHeader } from '.';
 import Scrollbar from '../../components/Scrollbar';
 import MenuPopover from '../../components/MenuPopover';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Notificacoes() {
   const [open, setOpen] = useState(null);

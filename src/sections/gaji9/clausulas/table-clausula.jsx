@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -34,8 +33,6 @@ import FiltrarClausulas from './filtrar-clausulas';
 import { applySortFilter, labelTitular } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-TableClausula.propTypes = { inativos: PropTypes.bool };
 
 export default function TableClausula({ inativos }) {
   const dispatch = useDispatch();

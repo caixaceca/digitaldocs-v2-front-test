@@ -1,12 +1,9 @@
-import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
-
-Logo.propTypes = { disabledLink: PropTypes.bool, sx: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Logo({ disabledLink = false, sx }) {
   const theme = useTheme();
@@ -114,9 +111,6 @@ export default function Logo({ disabledLink = false, sx }) {
     </Box>
   );
 
-  if (disabledLink) {
-    return <>{logo}</>;
-  }
-
+  if (disabledLink) return <>{logo}</>;
   return <RouterLink to="/">{logo}</RouterLink>;
 }

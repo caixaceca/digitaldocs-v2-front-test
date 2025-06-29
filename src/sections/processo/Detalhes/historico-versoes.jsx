@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -20,9 +19,7 @@ import { ColaboradorInfo } from '../../../components/Panel';
 //
 import DetalhesProcesso from './detalhes';
 
-// ----------------------------------------------------------------------
-
-Versoes.propTypes = { id: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Versoes({ id }) {
   const dispatch = useDispatch();

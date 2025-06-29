@@ -1,7 +1,7 @@
 // components
 import { getIcon } from '../components/Image';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const FORMAT_IMG = ['jpg', 'jpeg', 'gif', 'bmp', 'png'];
 const FORMAT_VIDEO = ['m4v', 'avi', 'mpg', 'mp4', 'webm'];
@@ -12,7 +12,7 @@ const FORMAT_PDF = ['pdf', 'PDF'];
 const FORMAT_PHOTOSHOP = ['psd'];
 const FORMAT_ILLUSTRATOR = ['ai', 'esp'];
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getFileType(fileUrl = '') {
   return (fileUrl && fileUrl.split('.').pop()) || '';
@@ -90,13 +90,13 @@ export function getFileThumb(thumbp, sx, fileUrl = '') {
   return thumb;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function canPreview(anexo) {
   return (anexo?.conteudo === 'application/pdf' && 'pdf') || (getFileFormat(anexo?.anexo) === 'image' && 'image') || '';
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getFileData(file, index) {
   if (typeof file === 'string') return { key: index ? `${file}-${index}` : file, preview: file };
@@ -113,7 +113,7 @@ export function getFileData(file, index) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function downloadDoc(url, nome) {
   const link = document.createElement('a');

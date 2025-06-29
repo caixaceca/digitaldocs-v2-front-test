@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -29,7 +28,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 // import { ConfidencialidadesForm } from '../form/intervencao';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD_RETENCOES = [
   { id: 'nome', label: 'Colaborador' },
@@ -58,9 +57,7 @@ const TABLE_HEAD_CONF = [
   { id: '', width: 10 },
 ];
 
-// ----------------------------------------------------------------------
-
-TableDetalhes.propTypes = { id: PropTypes.number, item: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableDetalhes({ id, item }) {
   const {
@@ -232,9 +229,7 @@ export default function TableDetalhes({ id, item }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Criterios.propTypes = { dados: PropTypes.array, colaboradores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Criterios({ dados, colaboradores }) {
   const estadosIncluidos = dados.filter(({ estado_incluido_id: estado }) => estado).map((item) => item.estado_incluido);
@@ -266,8 +261,6 @@ export function Criterios({ dados, colaboradores }) {
   );
 }
 
-ItemsCriterios.propTypes = { label: PropTypes.string, estados: PropTypes.array, colaboradores: PropTypes.array };
-
 export function ItemsCriterios({ label, estados = [], colaboradores = [] }) {
   return (
     <Stack direction="row" spacing={1} alignItems="center">
@@ -298,7 +291,7 @@ export function ItemsCriterios({ label, estados = [], colaboradores = [] }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function applySortFilter({ dados, comparator, filter }) {
   dados = applySort(dados, comparator);

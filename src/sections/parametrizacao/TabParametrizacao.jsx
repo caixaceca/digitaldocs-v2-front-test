@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -9,10 +8,7 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 //
 import TableParametrizacao from './TableParametrizacao';
 
-// ----------------------------------------------------------------------
-// Componente principal
-
-TabParametrizacao.propTypes = { item: PropTypes.string, label: PropTypes.string, subTabs: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TabParametrizacao({ item, label, subTabs }) {
   return subTabs ? (
@@ -25,9 +21,7 @@ export default function TabParametrizacao({ item, label, subTabs }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SubTabsParametrizacao.propTypes = { item: PropTypes.string, label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SubTabsParametrizacao({ item, label }) {
   const [currentTab, setCurrentTab] = useState(

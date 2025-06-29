@@ -1,7 +1,7 @@
 import { pt } from 'date-fns/locale';
 import { add, format, isSameYear, isSameMonth, formatDistance, formatDistanceToNow } from 'date-fns';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function formatDate(date, newFormat) {
   if (!date) return '';

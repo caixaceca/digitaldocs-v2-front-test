@@ -1,10 +1,9 @@
-import PropTypes from 'prop-types';
 import { Quill } from 'react-quill-new';
 // components
 import Iconify from '../Iconify';
 import EditorToolbarStyle from './EditorToolbarStyle';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const FONT_FAMILY = ['Neo Sans Std', 'Arial', 'Tahoma', 'Georgia', 'Impact', 'Verdana'];
 const FONT_SIZE = [
@@ -122,5 +121,3 @@ export default function EditorToolbar({ id, isSimple, ...other }) {
     </EditorToolbarStyle>
   );
 }
-
-EditorToolbar.propTypes = { id: PropTypes.string.isRequired, isSimple: PropTypes.bool };

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -35,9 +34,7 @@ import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-fo
 // _mock
 import { dis, estadosCivis } from '../../../_mock';
 
-// ----------------------------------------------------------------------
-
-InfoCredito.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function InfoCredito({ dados }) {
   const [currentTab, setCurrentTab] = useState('Dados');
@@ -60,9 +57,7 @@ export function InfoCredito({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DadosCredito.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function DadosCredito({ dados }) {
   const [openSituacao, setOpenSituacao] = useState('');
@@ -136,9 +131,7 @@ function DadosCredito({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Garantias.propTypes = { id: PropTypes.string, dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Garantias({ dados }) {
   const dispatch = useDispatch();
@@ -217,9 +210,7 @@ function Garantias({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DetalhesGarantia.propTypes = { dados: PropTypes.object, closeModal: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DetalhesGarantia({ dados, closeModal }) {
   return (
@@ -257,9 +248,7 @@ export function DetalhesGarantia({ dados, closeModal }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-InfoCon.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function InfoCon({ dados }) {
   return (

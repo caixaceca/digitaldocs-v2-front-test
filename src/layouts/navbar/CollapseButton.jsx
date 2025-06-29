@@ -1,15 +1,9 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 // components
 import { IconButtonAnimate } from '../../components/animate';
 
-// ----------------------------------------------------------------------
-
-CollapseButton.propTypes = {
-  collapseClick: PropTypes.bool,
-  onToggleCollapse: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function CollapseButton({ onToggleCollapse, collapseClick }) {
   return (
@@ -18,12 +12,8 @@ export default function CollapseButton({ onToggleCollapse, collapseClick }) {
         sx={{
           lineHeight: 0,
           transition: (theme) =>
-            theme.transitions.create('transform', {
-              duration: theme.transitions.duration.shorter,
-            }),
-          ...(collapseClick && {
-            transform: 'rotate(180deg)',
-          }),
+            theme.transitions.create('transform', { duration: theme.transitions.duration.shorter }),
+          ...(collapseClick && { transform: 'rotate(180deg)' }),
         }}
       >
         {icon}
@@ -32,7 +22,7 @@ export default function CollapseButton({ onToggleCollapse, collapseClick }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const icon = (
   <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">

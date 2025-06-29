@@ -8,7 +8,7 @@ import digitaldocsReducer from './slices/digitaldocs';
 import indicadorestReducer from './slices/indicadores';
 import parametrizacaoReducer from './slices/parametrizacao';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const rootPersistConfig = { key: 'root', storage, keyPrefix: 'redux-', whitelist: [] };
 

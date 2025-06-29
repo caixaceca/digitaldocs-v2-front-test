@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
@@ -9,24 +8,7 @@ import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 //
 import { ListItemStyle, ListItemTextStyle, ListItemIconStyle } from './style';
 
-// ----------------------------------------------------------------------
-
-NavItem.propTypes = {
-  active: PropTypes.bool,
-  open: PropTypes.bool,
-  isCollapse: PropTypes.bool,
-  depth: PropTypes.number,
-  item: PropTypes.shape({
-    children: PropTypes.array,
-    icon: PropTypes.any,
-    info: PropTypes.any,
-    path: PropTypes.string,
-    title: PropTypes.string,
-    disabled: PropTypes.bool,
-    caption: PropTypes.string,
-    roles: PropTypes.arrayOf(PropTypes.string),
-  }),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NavItem({ item, depth, active, open, isCollapse, ...other }) {
   const { title, icon, info, children, disabled, caption, roles } = item;
@@ -77,9 +59,7 @@ export default function NavItem({ item, depth, active, open, isCollapse, ...othe
   return <RoleBasedGuard roles={roles}>{renderContent}</RoleBasedGuard>;
 }
 
-// ----------------------------------------------------------------------
-
-DotIcon.propTypes = { active: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DotIcon({ active }) {
   return (

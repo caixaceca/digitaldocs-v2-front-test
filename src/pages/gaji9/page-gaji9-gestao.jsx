@@ -18,7 +18,7 @@ import TabsWrapper from '../../components/TabsWrapper';
 import AcessoGaji9 from './acesso-gaji9';
 import TabGaji9 from '../../sections/gaji9/items';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageGaji9Gestao() {
   const navigate = useNavigate();

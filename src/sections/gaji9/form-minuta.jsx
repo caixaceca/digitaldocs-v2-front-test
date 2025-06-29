@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useMemo, useEffect } from 'react';
 
 // form
@@ -20,8 +19,6 @@ import { DialogButons } from '../../components/Actions';
 import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-PreviewForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func };
 
 export function PreviewForm({ id = 0, onClose }) {
   const dispatch = useDispatch();
@@ -59,8 +56,6 @@ export function PreviewForm({ id = 0, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-PreviewMinutaForm.propTypes = { onClose: PropTypes.func };
 
 export function PreviewMinutaForm({ onClose }) {
   const dispatch = useDispatch();

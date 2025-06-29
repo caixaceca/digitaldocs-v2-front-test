@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
@@ -30,9 +29,7 @@ import { dis, estadosCivis } from '../../../../_mock';
 //
 import { submitDados } from '../utils-form-processo';
 
-// ----------------------------------------------------------------------
-
-FormDepositante.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormDepositante({ dados }) {
   const dispatch = useDispatch();

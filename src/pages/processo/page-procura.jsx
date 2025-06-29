@@ -34,7 +34,7 @@ import { SearchToolbarProcura } from '../../components/SearchToolbar';
 import { DefaultAction, MaisProcessos } from '../../components/Actions';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'entrada', label: 'Nº', align: 'left' },
@@ -46,7 +46,7 @@ const TABLE_HEAD = [
   { id: '', width: 10 },
 ];
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageProcura() {
   const navigate = useNavigate();

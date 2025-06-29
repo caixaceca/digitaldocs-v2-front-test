@@ -1,13 +1,10 @@
-import PropTypes from 'prop-types';
 import { View, Text, Image } from '@react-pdf/renderer';
 // utils
 import { formatDate, ptDate } from '../../utils/formatTime';
 // components
 import styles from './ExportStylePdf';
 
-// ----------------------------------------------------------------------
-
-Cabecalho.propTypes = { title: PropTypes.string, codificacao: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Cabecalho({ title, codificacao = '' }) {
   return (
@@ -27,9 +24,7 @@ export function Cabecalho({ title, codificacao = '' }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-CabecalhoAlt.propTypes = { cabecalho: PropTypes.bool, codificacao: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function CabecalhoAlt({ cabecalho = false, codificacao = '' }) {
   return (
@@ -64,9 +59,7 @@ export function CabecalhoAlt({ cabecalho = false, codificacao = '' }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Validacao.propTypes = { por: PropTypes.string, em: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Validacao({ por, em }) {
   return (
@@ -95,9 +88,7 @@ export function Validacao({ por, em }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Rodape.propTypes = { noOrigin: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Rodape({ noOrigin = false }) {
   return (
@@ -113,9 +104,7 @@ export function Rodape({ noOrigin = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RodapeAlt.propTypes = { rodape: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RodapeAlt({ rodape = false }) {
   return (
@@ -145,9 +134,7 @@ export function RodapeAlt({ rodape = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RodapeContrato.propTypes = { codificacao: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RodapeContrato({ codificacao = false }) {
   return (

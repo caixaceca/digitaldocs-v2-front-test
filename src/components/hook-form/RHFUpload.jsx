@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
@@ -6,9 +5,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 // type
 import { UploadMultiFile, UploadSingleFile, UploadSingleFileSimple } from '../upload';
 
-// ----------------------------------------------------------------------
-
-RHFUploadSingleFile.propTypes = { name: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFUploadSingleFile({ name, ...other }) {
   const { control } = useFormContext();
@@ -39,9 +36,7 @@ export function RHFUploadSingleFile({ name, ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFUploadMultiFile.propTypes = { name: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFUploadMultiFile({ name, ...other }) {
   const { control } = useFormContext();
@@ -72,9 +67,7 @@ export function RHFUploadMultiFile({ name, ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFUploadFileSimple.propTypes = { name: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFUploadFileSimple({ name, ...other }) {
   const { control } = useFormContext();

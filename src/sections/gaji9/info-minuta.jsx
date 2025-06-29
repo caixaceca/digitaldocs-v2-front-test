@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -25,9 +24,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import { applySortFilter } from './applySortFilter';
 import DetalhesGaji9, { DetalhesContent } from './detalhes-gaji9';
 
-// ----------------------------------------------------------------------
-
-InfoMinuta.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function InfoMinuta({ onClose }) {
   const { minuta } = useSelector((state) => state.gaji9);
@@ -47,9 +44,7 @@ export default function InfoMinuta({ onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TableInfoMinuta.propTypes = { item: PropTypes.string, onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableInfoMinuta({ item, onClose }) {
   const {
@@ -156,9 +151,7 @@ export function TableInfoMinuta({ item, onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-GarantiaComponente.propTypes = { onClose: PropTypes.func, garantia: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function GarantiaComponente({ onClose, garantia = false }) {
   return (

@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -31,8 +30,6 @@ import { DefaultAction, DialogButons } from '../../components/Actions';
 // _mock_
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-MarcadorForm.propTypes = { onClose: PropTypes.func };
 
 export function MarcadorForm({ onClose }) {
   const dispatch = useDispatch();
@@ -86,8 +83,6 @@ export function MarcadorForm({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-VariavelForm.propTypes = { onClose: PropTypes.func };
 
 export function VariavelForm({ onClose }) {
   const dispatch = useDispatch();
@@ -159,8 +154,6 @@ export function VariavelForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-GrupoForm.propTypes = { onClose: PropTypes.func };
-
 export function GrupoForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
@@ -214,8 +207,6 @@ export function GrupoForm({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-RecursoGrupoForm.propTypes = { onClose: PropTypes.func, selectedItem: PropTypes.object, grupoId: PropTypes.string };
 
 export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
   const dispatch = useDispatch();
@@ -349,8 +340,6 @@ export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-RecursoForm.propTypes = { onClose: PropTypes.func };
-
 export function RecursoForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
@@ -404,8 +393,6 @@ export function RecursoForm({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-UtilizadorGrupoForm.propTypes = { grupoId: PropTypes.string, onClose: PropTypes.func, selectedItem: PropTypes.object };
 
 export function UtilizadorGrupoForm({ grupoId, onClose, selectedItem }) {
   const dispatch = useDispatch();
@@ -479,8 +466,6 @@ export function UtilizadorGrupoForm({ grupoId, onClose, selectedItem }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-FuncaoForm.propTypes = { onClose: PropTypes.func };
-
 export function FuncaoForm({ onClose }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -550,8 +535,6 @@ export function FuncaoForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-BalcaoForm.propTypes = { id: PropTypes.number, item: PropTypes.object, onClose: PropTypes.func };
-
 export function BalcaoForm({ id, item, onClose }) {
   const dispatch = useDispatch();
   const isEdit = item?.action === 'editar';
@@ -607,8 +590,6 @@ export function BalcaoForm({ id, item, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-ItemComponent.propTypes = { item: PropTypes.object, rows: PropTypes.number, children: PropTypes.node };
 
 export function ItemComponent({ item, rows, children }) {
   const { isLoading, isEdit } = useSelector((state) => state.gaji9);

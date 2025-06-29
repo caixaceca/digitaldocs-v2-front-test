@@ -1,9 +1,8 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import { alpha, styled } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const RootStyle = styled('span')(({ theme, ownerState }) => {
   const isLight = theme.palette.mode === 'light';
@@ -63,16 +62,7 @@ const RootStyle = styled('span')(({ theme, ownerState }) => {
   };
 });
 
-// ----------------------------------------------------------------------
-
-Label.propTypes = {
-  sx: PropTypes.object,
-  endIcon: PropTypes.node,
-  children: PropTypes.node,
-  startIcon: PropTypes.node,
-  variant: PropTypes.oneOf(['filled', 'outlined', 'ghost']),
-  color: PropTypes.oneOf(['default', 'primary', 'secondary', 'info', 'success', 'warning', 'error']),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Label({ children, color = 'default', variant = 'ghost', startIcon, endIcon, sx }) {
   const style = { width: 18, height: 18, '& svg, img': { width: 1, height: 1, objectFit: 'cover' } };

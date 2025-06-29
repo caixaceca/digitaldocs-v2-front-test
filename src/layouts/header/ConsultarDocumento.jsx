@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 import Lightbox from 'yet-another-react-lightbox';
 // @mui
 import Box from '@mui/material/Box';
@@ -24,7 +23,7 @@ import GridItem from '../../components/GridItem';
 import { Loading } from '../../components/LoadingScreen';
 import { ConsultarDocForm } from '../../sections/home/HomeForm';
 
-Documento.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------
 
 export default function Documento({ onClose }) {
   const { documentoPdex, error, isLoading } = useSelector((state) => state.intranet);
@@ -212,8 +211,6 @@ export default function Documento({ onClose }) {
 
 // ---------------------------------------------------------
 
-ImagemSecao.propTypes = { documentoPdex: PropTypes.object };
-
 function ImagemSecao({ documentoPdex }) {
   const [image, setImage] = useState('');
   const { foto, foto_sem_cor: semCor, dedao_esquerdo: esquerdo, dedao_direito: direito, assinatura } = documentoPdex;
@@ -239,7 +236,7 @@ function ImagemSecao({ documentoPdex }) {
   );
 }
 
-Imagem.propTypes = { image: PropTypes.string, setImage: PropTypes.func, doc: PropTypes.bool };
+// ---------------------------------------------------------
 
 function Imagem({ image, setImage, doc = '' }) {
   return (
@@ -261,8 +258,6 @@ function Imagem({ image, setImage, doc = '' }) {
 
 // ---------------------------------------------------------
 
-Secao.propTypes = { titulo: PropTypes.string, children: PropTypes.node };
-
 function Secao({ titulo, children }) {
   return (
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, height: 1 }}>
@@ -276,8 +271,6 @@ function Secao({ titulo, children }) {
 }
 
 // ---------------------------------------------------------
-
-TextItem.propTypes = { label: PropTypes.string, value: PropTypes.string };
 
 function TextItem({ label = '', value = '' }) {
   return value ? (

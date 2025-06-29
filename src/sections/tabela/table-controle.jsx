@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -37,9 +36,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import { UoData } from './uo-data-filter';
 import applySortFilter, { dadosList } from './applySortFilter';
 
-// ----------------------------------------------------------------------
-
-TableControle.propTypes = { from: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableControle({ from }) {
   const navigate = useNavigate();
@@ -271,14 +268,7 @@ export default function TableControle({ from }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-ResumoTrabalhados.propTypes = {
-  uo: PropTypes.string,
-  dados: PropTypes.array,
-  assunto: PropTypes.string,
-  colaborador: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ResumoTrabalhados({ dados = [], assunto = '', colaborador = '', uo = '' }) {
   const totalUo = dados?.length || 0;
@@ -318,7 +308,7 @@ export function ResumoTrabalhados({ dados = [], assunto = '', colaborador = '', 
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function tableHeaders(item) {
   return [

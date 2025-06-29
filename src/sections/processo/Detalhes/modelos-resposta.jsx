@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { saveAs } from 'file-saver';
 import { useSnackbar } from 'notistack';
 import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
@@ -245,8 +244,6 @@ export default function ModelosRespostas() {
     </GridItem>
   );
 }
-
-ButtonModelo.propTypes = { evento: PropTypes.func, modelo: PropTypes.string };
 
 function ButtonModelo({ modelo, evento }) {
   return (

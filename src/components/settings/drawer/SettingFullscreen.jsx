@@ -8,7 +8,7 @@ import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlin
 // hooks
 import useSettings from '../../../hooks/useSettings';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function SettingFullscreen() {
   const { onResetSetting } = useSettings();

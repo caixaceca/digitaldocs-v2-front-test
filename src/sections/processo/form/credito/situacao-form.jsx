@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 // form
 import { useForm } from 'react-hook-form';
@@ -28,8 +27,6 @@ import { DialogConfirmar } from '../../../../components/CustomDialog';
 import { shapeMixed, shapeNumber, shapeText } from '../../../../components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-FormSituacao.propTypes = { onClose: PropTypes.func };
 
 export function FormSituacao({ onClose }) {
   const dispatch = useDispatch();
@@ -136,8 +133,6 @@ export function FormSituacao({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-EliminarDadosSituacao.propTypes = { onClose: PropTypes.func };
 
 export function EliminarDadosSituacao({ onClose }) {
   const dispatch = useDispatch();

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
@@ -14,7 +13,7 @@ import Label from '../../components/Label';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const RootStyle = styled('div')(({ theme }) => ({
   '&:before': {
@@ -38,9 +37,7 @@ const InfoStyle = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: { left: theme.spacing(2) },
 }));
 
-// ----------------------------------------------------------------------
-
-PerfilCover.propTypes = { perfilColaborador: PropTypes.object, isDeFeria: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PerfilCover({ perfilColaborador, isDeFeria }) {
   const { isLoading } = useSelector((state) => state.intranet);

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -27,9 +26,7 @@ import TableParamsGaji9 from './table-parametrizacao';
 import TableClausula from './clausulas/table-clausula';
 import TableIdentificadores from './table-identificadores';
 
-// ----------------------------------------------------------------------
-
-TabGaji9.propTypes = { item: PropTypes.string, label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TabGaji9({ item, label }) {
   const [inativos, setInativos] = useState(false);
@@ -49,9 +46,7 @@ export default function TabGaji9({ item, label }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Parametrizacao.propTypes = { inativos: PropTypes.bool, setInativos: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Parametrizacao({ inativos, setInativos }) {
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('gaji9Parametrizacao') || 'Utilizadores');
@@ -90,9 +85,7 @@ function Parametrizacao({ inativos, setInativos }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Identificadores.propTypes = { inativos: PropTypes.bool, setInativos: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Identificadores({ inativos, setInativos }) {
   const { temPermissao } = usePermissao();
@@ -151,9 +144,7 @@ function Identificadores({ inativos, setInativos }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Actions.propTypes = { label: PropTypes.string, inativos: PropTypes.bool, setInativos: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Actions({ inativos, setInativos, label = '' }) {
   const dispatch = useDispatch();
@@ -197,7 +188,7 @@ function Actions({ inativos, setInativos, label = '' }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function ButtonInfoCaixa() {
   const dispatch = useDispatch();
@@ -218,7 +209,7 @@ function ButtonInfoCaixa() {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function EstadoMinuta() {
   const dispatch = useDispatch();

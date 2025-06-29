@@ -10,7 +10,7 @@ import BoxMask from './BoxMask';
 import GridItem from '../../GridItem';
 import { Contraste, ContrasteAlt } from '../../../assets';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   height: 72,
@@ -22,7 +22,7 @@ const BoxStyle = styled(CardActionArea)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 1.25,
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function SettingContrast() {
   const { themeContrast, onChangeContrast } = useSettings();

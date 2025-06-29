@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 // @mui
 import CssBaseline from '@mui/material/CssBaseline';
@@ -8,17 +7,12 @@ import useSettings from '../../hooks/useSettings';
 //
 import componentsOverride from '../../theme/overrides';
 
-// ----------------------------------------------------------------------
-
-ThemeContrast.propTypes = { children: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ThemeContrast({ children }) {
   const defaultTheme = useTheme();
-
   const { themeContrast } = useSettings();
-
   const isLight = defaultTheme.palette.mode === 'light';
-
   const shadowColor = isLight ? defaultTheme.palette.grey[500] : defaultTheme.palette.common.black;
 
   const styles = {

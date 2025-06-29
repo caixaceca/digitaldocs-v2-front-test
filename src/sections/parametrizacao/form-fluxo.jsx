@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
@@ -38,9 +37,7 @@ import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 //
 import { ItemComponent } from './ParametrizacaoForm';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FluxoForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function FluxoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -124,9 +121,7 @@ export function FluxoForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ClonarFluxoForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ClonarFluxoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -193,9 +188,7 @@ export function ClonarFluxoForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TransicaoForm.propTypes = { onClose: PropTypes.func, fluxoId: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TransicaoForm({ onClose, fluxoId }) {
   const dispatch = useDispatch();
@@ -277,9 +270,7 @@ export function TransicaoForm({ onClose, fluxoId }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ChecklistForm.propTypes = { fluxo: PropTypes.object, onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ChecklistForm({ fluxo, onClose }) {
   const dispatch = useDispatch();
@@ -399,9 +390,7 @@ export function ChecklistForm({ fluxo, onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-NotificacaoForm.propTypes = { fluxo: PropTypes.object, transicao: PropTypes.object, onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function NotificacaoForm({ fluxo, transicao, onClose }) {
   const dispatch = useDispatch();
@@ -459,9 +448,7 @@ export function NotificacaoForm({ fluxo, transicao, onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DestinatarioForm.propTypes = { id: PropTypes.number, selectedItem: PropTypes.object, onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DestinatarioForm({ id, onClose, selectedItem }) {
   const isEdit = selectedItem?.id;
@@ -589,9 +576,7 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Transicao.propTypes = { item: PropTypes.string, transicao: PropTypes.string, fluxo: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Transicao({ item, transicao, fluxo = false }) {
   return (

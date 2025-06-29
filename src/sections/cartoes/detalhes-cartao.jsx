@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
@@ -18,9 +17,7 @@ import { Criado } from '../../components/Panel';
 import { SearchNotFoundSmall } from '../../components/table';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 
-// ----------------------------------------------------------------------
-
-Detalhes.propTypes = { closeModal: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Detalhes({ closeModal }) {
   const { uos } = useSelector((state) => state.intranet);
@@ -135,9 +132,7 @@ export function Detalhes({ closeModal }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TextItem.propTypes = { title: PropTypes.string, text: PropTypes.string, text1: PropTypes.node, label: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TextItem({ title, text = '', text1 = null, label = null }) {
   return text || label || text1 ? (

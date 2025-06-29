@@ -17,7 +17,7 @@ import TableCON from '../sections/tabela/table-con';
 import TableControle from '../sections/tabela/table-controle';
 import TableCartoes from '../sections/cartoes/table-cartoes';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Controle() {
   const { themeStretch } = useSettings();

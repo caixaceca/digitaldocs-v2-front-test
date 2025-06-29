@@ -1,5 +1,4 @@
 import sumBy from 'lodash/sumBy';
-import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -17,7 +16,7 @@ import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndica
 //
 import { TabView, CardInfo, dadosResumo, TableExport, IndicadorItem } from './Indicadores';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const chartOptionsCommon = (theme) => ({
   colors: [theme.palette.success.main, theme.palette.primary.dark],
@@ -45,9 +44,7 @@ const chartOptionsCommon = (theme) => ({
   },
 });
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Criacao.propTypes = { vista: PropTypes.string, indicadores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Criacao({ vista, indicadores }) {
   const { isLoading } = useSelector((state) => state.indicadores);
@@ -117,9 +114,7 @@ export function Criacao({ vista, indicadores }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DevolvidosTipos.propTypes = { indicadores: PropTypes.array, dev: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DevolvidosTipos({ dev, indicadores }) {
   const theme = useTheme();
@@ -177,9 +172,7 @@ export function DevolvidosTipos({ dev, indicadores }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Origem.propTypes = { top: PropTypes.string, indicadores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Origem({ top, indicadores }) {
   const theme = useTheme();
@@ -251,7 +244,7 @@ export function Origem({ top, indicadores }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function origensItem(indicadores, uos, colaboradores, agrupamento, topNumb) {
   const dados = [];

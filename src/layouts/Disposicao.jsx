@@ -22,7 +22,7 @@ import { DialogTitleAlt } from '../components/CustomDialog';
 // sections
 import FraseContent from '../sections/home/FraseContent';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const whicon = { width: 65, height: 65 };
 
@@ -44,7 +44,7 @@ const BpCheckedIcon = styled('span')(({ color }) => ({
   'input:hover ~ &': { filter: 'grayscale(0%)', transform: 'scale(1.15)', color },
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Disposicao() {
   const dispatch = useDispatch();

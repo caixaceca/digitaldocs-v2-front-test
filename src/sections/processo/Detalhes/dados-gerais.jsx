@@ -17,7 +17,7 @@ import DetalhesProcesso from './detalhes';
 import Anexos from './anexos-dados-gerais';
 import GridItem from '../../../components/GridItem';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DadosGerais() {
   const { isLoadingP, processo } = useSelector((state) => state.digitaldocs);

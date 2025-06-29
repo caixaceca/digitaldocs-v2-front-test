@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
@@ -8,22 +7,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { setDataUtil } from '../../utils/formatTime';
 import { setItemValue } from '../../utils/formatObject';
 
-// ----------------------------------------------------------------------
-
-UoData.propTypes = {
-  uo: PropTypes.object,
-  setUo: PropTypes.func,
-  data: PropTypes.object,
-  cartoes: PropTypes.bool,
-  datai: PropTypes.object,
-  dataf: PropTypes.object,
-  setData: PropTypes.func,
-  setDatai: PropTypes.func,
-  setDataf: PropTypes.func,
-  entradas: PropTypes.bool,
-  uosList: PropTypes.array,
-  setSelected: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function UoData({
   uo,

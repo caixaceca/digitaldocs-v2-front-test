@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import PropTypes from 'prop-types';
 // redux
 import { useDispatch, useSelector } from '../../../../redux/store';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
@@ -8,8 +7,6 @@ import FormInfoCredito from './form-info-credito';
 import FormAnexosCredito from './form-anexos-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-ProcessoCredito.propTypes = { dados: PropTypes.object };
 
 export default function ProcessoCredito({ dados }) {
   const dispatch = useDispatch();

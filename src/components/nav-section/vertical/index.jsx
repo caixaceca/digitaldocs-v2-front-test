@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -6,12 +5,7 @@ import List from '@mui/material/List';
 import { ListSubheaderStyle } from './style';
 import NavList from './NavList';
 
-// ----------------------------------------------------------------------
-
-NavSectionVertical.propTypes = {
-  isCollapse: PropTypes.bool,
-  navConfig: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NavSectionVertical({ navConfig, isCollapse, ...other }) {
   return (

@@ -5,7 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { useSelector, useDispatch } from '../redux/store';
 import { changeMeuAmbiente, getSuccess } from '../redux/slices/parametrizacao';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Ambiente({ ...other }) {
   const dispatch = useDispatch();
@@ -29,7 +29,7 @@ export function Ambiente({ ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Fluxo({ ...other }) {
   const dispatch = useDispatch();

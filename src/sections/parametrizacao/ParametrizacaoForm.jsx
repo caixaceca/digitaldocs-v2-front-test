@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
@@ -37,9 +36,7 @@ import { shapeDate } from '../../components/hook-form/yup-shape';
 // _mock
 import { codacessos, objetos, listaConcelhos } from '../../_mock';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-AcessoForm.propTypes = { onClose: PropTypes.func, perfilIdA: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function AcessoForm({ perfilIdA, onClose }) {
   const dispatch = useDispatch();
@@ -99,9 +96,7 @@ export function AcessoForm({ perfilIdA, onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-MotivoPendenciaForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function MotivoPendenciaForm({ onClose }) {
   const dispatch = useDispatch();
@@ -155,9 +150,7 @@ export function MotivoPendenciaForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-MotivoTransicaoForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function MotivoTransicaoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -240,9 +233,7 @@ export function MotivoTransicaoForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-OrigemForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function OrigemForm({ onClose }) {
   const dispatch = useDispatch();
@@ -340,9 +331,7 @@ export function OrigemForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-LinhaForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function LinhaForm({ onClose }) {
   const dispatch = useDispatch();
@@ -405,9 +394,7 @@ export function LinhaForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DespesaForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DespesaForm({ onClose }) {
   const dispatch = useDispatch();
@@ -460,9 +447,7 @@ export function DespesaForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DocumentoForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DocumentoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -564,9 +549,7 @@ export function DocumentoForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ItemComponent.propTypes = { item: PropTypes.object, rows: PropTypes.number, children: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ItemComponent({ item, rows, children }) {
   const { isLoading, isEdit } = useSelector((state) => state.parametrizacao);

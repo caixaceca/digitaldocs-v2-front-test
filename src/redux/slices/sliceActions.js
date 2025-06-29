@@ -3,7 +3,7 @@ import { errorMsg } from '../../utils/formatText';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function actionGet(state, payload) {
   if (!payload || !payload?.item) return;
@@ -28,7 +28,7 @@ export function actionGet(state, payload) {
   }
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function dadosLabel(dados, item) {
   if (!dados || !dados?.length === 0) return [];
@@ -115,7 +115,7 @@ export function actionCloseModal(state) {
   state.selectedItem = null;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export async function doneSucess(msg, dispatch, action) {
   if (msg) dispatch(action({ item: 'done', dados: msg }));
@@ -129,7 +129,7 @@ export async function hasError(error, dispatch, action) {
   dispatch(action({ item: 'error', dados: '' }));
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function headerOptions({ accessToken, mail = '', cc, ct, mfd }) {
   if (cc) {
@@ -151,7 +151,7 @@ export function headerOptions({ accessToken, mail = '', cc, ct, mfd }) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const selectUtilizador = (state) => {
   if (!state) return {};

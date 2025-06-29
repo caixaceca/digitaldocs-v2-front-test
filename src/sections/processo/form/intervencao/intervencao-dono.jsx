@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
@@ -25,8 +24,6 @@ import { FormProvider, RHFTextField, RHFAutocompleteObj } from '../../../../comp
 
 // --- RESGATAR PROCESSO -----------------------------------------------------------------------------------------------
 
-ResgatarForm.propTypes = { dados: PropTypes.object, onClose: PropTypes.func };
-
 export function ResgatarForm({ dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
@@ -44,8 +41,6 @@ export function ResgatarForm({ dados, onClose }) {
 }
 
 // --- ATRIBUIR/AFETAR PROCESSO ----------------------------------------------------------------------------------------
-
-AtribuirForm.propTypes = { colaboradores: PropTypes.array, onClose: PropTypes.func };
 
 export function AtribuirForm({ colaboradores, onClose }) {
   const dispatch = useDispatch();
@@ -99,8 +94,6 @@ export function AtribuirForm({ colaboradores, onClose }) {
 
 // --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
 
-LibertarForm.propTypes = { onClose: PropTypes.func };
-
 export function LibertarForm({ onClose }) {
   const dispatch = useDispatch();
   const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
@@ -118,8 +111,6 @@ export function LibertarForm({ onClose }) {
 }
 
 // --- COLOCAR PROCESSO PENDENTE ---------------------------------------------------------------------------------------
-
-FocalPointForm.propTypes = { ids: PropTypes.object, onClose: PropTypes.func };
 
 export function FocalPointForm({ ids, onClose }) {
   const dispatch = useDispatch();
@@ -175,8 +166,6 @@ export function FocalPointForm({ ids, onClose }) {
 }
 
 // --- DOMICILIAR PROCESSO ---------------------------------------------------------------------------------------------
-
-DomiciliarForm.propTypes = { ids: PropTypes.object, onClose: PropTypes.func };
 
 export function DomiciliarForm({ ids, onClose }) {
   const dispatch = useDispatch();

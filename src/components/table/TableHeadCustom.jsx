@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
@@ -7,7 +6,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableSortLabel from '@mui/material/TableSortLabel';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const visuallyHidden = {
   border: 0,
@@ -21,18 +20,7 @@ const visuallyHidden = {
   clip: 'rect(0 0 0 0)',
 };
 
-// ----------------------------------------------------------------------
-
-TableHeadCustom.propTypes = {
-  onSort: PropTypes.func,
-  orderBy: PropTypes.string,
-  headLabel: PropTypes.array,
-  rowCount: PropTypes.number,
-  numSelected: PropTypes.number,
-  onSelectAllRows: PropTypes.func,
-  order: PropTypes.oneOf(['asc', 'desc']),
-  sx: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableHeadCustom({
   order,

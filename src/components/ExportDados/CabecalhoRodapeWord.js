@@ -1,6 +1,6 @@
 import { Header, Footer, TextRun, ImageRun, Paragraph, PageNumber, AlignmentType } from 'docx';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function CabecalhoWord(cabecalho, logo, codificacao) {
   return {
@@ -31,7 +31,7 @@ export function CabecalhoWord(cabecalho, logo, codificacao) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RodapeWord(rodape, iso27001, iso9001) {
   return {

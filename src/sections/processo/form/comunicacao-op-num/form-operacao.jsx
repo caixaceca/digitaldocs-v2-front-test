@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // form
 import { useForm } from 'react-hook-form';
@@ -18,9 +17,7 @@ import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
 import { FormProvider, RHFTextField, RHFDataEntrada, RHFNumberField } from '../../../../components/hook-form';
 
-// ----------------------------------------------------------------------
-
-FormOperacao.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormOperacao({ dados }) {
   const dispatch = useDispatch();

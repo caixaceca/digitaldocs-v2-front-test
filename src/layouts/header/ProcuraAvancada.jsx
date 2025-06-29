@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 // @mui
@@ -27,7 +26,7 @@ import useToggle from '../../hooks/useToggle';
 // components
 import GridItem from '../../components/GridItem';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ProcuraAvancada() {
   const navigate = useNavigate();
@@ -197,14 +196,7 @@ export default function ProcuraAvancada() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TextFieldNumb.propTypes = {
-  value: PropTypes.string,
-  label: PropTypes.string,
-  localS: PropTypes.string,
-  setValue: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TextFieldNumb({ value = '', setValue, label, localS }) {
   return (

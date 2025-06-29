@@ -11,7 +11,7 @@ import { BASEURL, BASEURLSLIM, INTRANETHUBAPI } from '../../utils/apisUrl';
 // hooks
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const initialState = {
   isSaving: false,
@@ -53,7 +53,7 @@ export default slice.reducer;
 // Actions
 export const { getSuccess } = slice.actions;
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function authenticateColaborador() {
   return async (dispatch) => {
@@ -107,7 +107,7 @@ export async function getAccessToken() {
   }
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getInfoIntranet(id) {
   return async (dispatch) => {
@@ -126,7 +126,7 @@ export function getInfoIntranet(id) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function getFromIntranet(item, params) {
   return async (dispatch, getState) => {
@@ -207,7 +207,7 @@ export function getFromIntranet(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function createItem(item, dados, params) {
   return async (dispatch, getState) => {

@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
@@ -16,7 +15,7 @@ import { AnexoItem } from './anexos-dados-gerais';
 import { SearchNotFound } from '../../../components/table';
 import RoleBasedGuard from '../../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TodosAnexos() {
   const dispatch = useDispatch();
@@ -64,9 +63,7 @@ export default function TodosAnexos() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-AnexosGroup.propTypes = { dados: PropTypes.object, onEliminar: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function AnexosGroup({ dados, onEliminar }) {
   const { anexos, titulo = '', viewAnexo, modificar = false, meusAmbientes = [], estadoId = '' } = dados;

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -11,9 +10,7 @@ import { getFromGaji9, getInfoGaji } from '../../redux/slices/gaji9';
 import { LoadingPanel } from '../../components/LoadingScreen';
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
-
-AcessoGaji9.propTypes = { item: PropTypes.string, children: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function AcessoGaji9({ children, item }) {
   const dispatch = useDispatch();

@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
@@ -27,7 +26,7 @@ import { DefaultAction } from '../../../components/Actions';
 import ModelosRespostas from './modelos-resposta';
 import { PdfPreview, ImagemPreview } from './preview-anexo';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const sx1 = {
   borderRadius: 1,
@@ -37,9 +36,7 @@ const sx1 = {
   bgcolor: 'background.neutral',
 };
 
-// ----------------------------------------------------------------------
-
-Anexos.propTypes = { anexos: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
@@ -106,16 +103,7 @@ export default function Anexos({ anexos }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-AnexoItem.propTypes = {
-  preview: PropTypes.bool,
-  anexo: PropTypes.object,
-  parecer: PropTypes.bool,
-  viewAnexo: PropTypes.func,
-  eliminado: PropTypes.bool,
-  onEliminar: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, eliminado = false, onEliminar = null }) {
   const { colaboradores } = useSelector((state) => state.intranet);
@@ -183,7 +171,7 @@ export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, e
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function anexosPorData(anexos) {
   const anexosGroup = [];

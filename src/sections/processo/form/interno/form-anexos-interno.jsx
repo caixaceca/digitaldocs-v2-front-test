@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 // form
 import { useForm } from 'react-hook-form';
@@ -18,9 +17,7 @@ import { ButtonsStepper } from '../../../../components/Actions';
 import Anexos from '../anexos';
 import { shapeAnexos, defaultAnexos, appendAnexos } from '../anexos/utils-anexos';
 
-// ----------------------------------------------------------------------
-
-FormAnexosInterno.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormAnexosInterno({ dados }) {
   const dispatch = useDispatch();

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useCallback } from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
@@ -13,9 +12,7 @@ import GridItem from '../../../../components/GridItem';
 import { DefaultAction } from '../../../../components/Actions';
 import { RHFDatePicker, RHFNumberField, RHFUploadFileSimple } from '../../../../components/hook-form';
 
-// ----------------------------------------------------------------------
-
-FormDocumentosChecklist.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormDocumentosChecklist({ dados }) {
   const { control, setValue } = useFormContext();

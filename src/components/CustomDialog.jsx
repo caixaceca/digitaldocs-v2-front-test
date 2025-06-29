@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { Viewer } from '@react-pdf-viewer/core';
 import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
@@ -19,17 +18,7 @@ import { Fechar } from './Actions';
 import { SearchNotFound } from './table';
 import { Loading } from './LoadingScreen';
 
-// ----------------------------------------------------------------------
-
-DialogConfirmar.propTypes = {
-  desc: PropTypes.string,
-  title: PropTypes.string,
-  color: PropTypes.string,
-  onClose: PropTypes.func,
-  content: PropTypes.node,
-  handleOk: PropTypes.func,
-  isSaving: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color, onClose, handleOk, content = null }) {
   return (
@@ -52,16 +41,7 @@ export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color
   );
 }
 
-// ----------------------------------------------------------------------
-
-DialogTitleAlt.propTypes = {
-  sx: PropTypes.object,
-  action: PropTypes.node,
-  title: PropTypes.string,
-  onClose: PropTypes.func,
-  stepper: PropTypes.node,
-  subtitle: PropTypes.node,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DialogTitleAlt({ title, onClose = null, sx = null, action, subtitle = null, stepper = null }) {
   return (
@@ -81,9 +61,7 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
   );
 }
 
-// ----------------------------------------------------------------------
-
-DialogPreviewDoc.propTypes = { params: PropTypes.object, onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DialogPreviewDoc({ params, onClose }) {
   const theme = useTheme();

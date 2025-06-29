@@ -16,7 +16,7 @@ import { DiscoFicheiros } from '../../sections/indicadores/disco-ficheiros';
 import EstatisticaCredito from '../../sections/indicadores/EstatisticaCredito';
 import { TotalProcessos, Duracao, SGQ } from '../../sections/indicadores/Indicadores';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageIndicadores() {
   const { themeStretch } = useSettings();

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { add, sub } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
@@ -36,7 +35,7 @@ import { DialogTitleAlt } from '../../components/CustomDialog';
 import TableProcessos from '../../sections/tabela/table-processos';
 import ProcessoForm from '../../sections/processo/form/form-processo';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageFilaTrabalho() {
   const dispatch = useDispatch();
@@ -150,9 +149,7 @@ export default function PageFilaTrabalho() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TotalProcessos.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TotalProcessos({ onClose }) {
   const dispatch = useDispatch();

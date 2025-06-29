@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -37,8 +36,6 @@ import DetalhesGaji9 from './detalhes-gaji9';
 import { applySortFilter } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-TableIdentificadores.propTypes = { item: PropTypes.string, inativos: PropTypes.bool };
 
 export default function TableIdentificadores({ item, inativos }) {
   const dispatch = useDispatch();

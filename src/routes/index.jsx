@@ -12,7 +12,7 @@ import IntranetLayout from '../layouts';
 // components
 import LoadingScreen from '../components/LoadingScreen';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const Loadable = (Component) => (props) => (
   <Suspense fallback={<LoadingScreen />}>

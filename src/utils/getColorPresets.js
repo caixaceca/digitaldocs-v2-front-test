@@ -1,7 +1,7 @@
 // theme
 import palette from '../theme/palette';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const colorPresets = [
   // DEFAULT
@@ -47,7 +47,7 @@ export default function getColorPresets(presetsKey) {
   return { blue: bluePreset, orange: orangePreset, red: redPreset, default: defaultPreset }[presetsKey];
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function colorLabel(value, padrao = 'primary') {
   return (

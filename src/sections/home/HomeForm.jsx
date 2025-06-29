@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 // form
 import { useForm } from 'react-hook-form';
@@ -30,9 +29,7 @@ import {
   RHFUploadSingleFile,
 } from '../../components/hook-form';
 
-// ----------------------------------------------------------------------
-
-FormSugestao.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function FormSugestao({ onClose }) {
   const dispatch = useDispatch();
@@ -82,9 +79,7 @@ export function FormSugestao({ onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DenunciaForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DenunciaForm({ onClose }) {
   const dispatch = useDispatch();
@@ -139,7 +134,7 @@ export function DenunciaForm({ onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ConsultarDocForm() {
   const dispatch = useDispatch();

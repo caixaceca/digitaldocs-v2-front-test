@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -24,8 +23,6 @@ const RootStyle = styled('div')(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 1.5,
   '&:hover': { backgroundColor: theme.palette.grey['500_32'] },
 }));
-
-NavbarAccount.propTypes = { isCollapse: PropTypes.bool };
 
 export default function NavbarAccount({ isCollapse }) {
   const { account, logout } = useAuthContext();

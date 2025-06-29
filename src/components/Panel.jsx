@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -26,9 +25,7 @@ import Label from './Label';
 import SvgIconStyle from './SvgIconStyle';
 import MyAvatar, { AvatarBedge } from './MyAvatar';
 
-// ----------------------------------------------------------------------
-
-Panel.propTypes = { sx: PropTypes.object, label: PropTypes.string, value: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Panel({ label, value, sx }) {
   return value ? (
@@ -61,17 +58,7 @@ export default function Panel({ label, value, sx }) {
   ) : null;
 }
 
-// ----------------------------------------------------------------------
-
-Criado.propTypes = {
-  sx: PropTypes.object,
-  tipo: PropTypes.string,
-  value: PropTypes.string,
-  caption: PropTypes.bool,
-  value1: PropTypes.string,
-  baralhar: PropTypes.bool,
-  iconText: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Criado({ iconText = '', tipo = '', value, value1 = '', caption = false, baralhar = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.disabled' };
@@ -103,19 +90,7 @@ export function Criado({ iconText = '', tipo = '', value, value1 = '', caption =
   ) : null;
 }
 
-// ----------------------------------------------------------------------
-
-ColaboradorInfo.propTypes = {
-  id: PropTypes.number,
-  sx: PropTypes.object,
-  other: PropTypes.node,
-  foto: PropTypes.string,
-  nome: PropTypes.string,
-  caption: PropTypes.bool,
-  label: PropTypes.string,
-  labelAlt: PropTypes.string,
-  labelAltCaption: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ColaboradorInfo({
   nome,
@@ -159,9 +134,7 @@ export function ColaboradorInfo({
   );
 }
 
-// ----------------------------------------------------------------------
-
-Checked.propTypes = { check: PropTypes.bool, color: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Checked({ check, color = '' }) {
   return check ? (
@@ -171,8 +144,6 @@ export function Checked({ check, color = '' }) {
   );
 }
 
-CellChecked.propTypes = { check: PropTypes.bool };
-
 export function CellChecked({ check }) {
   return (
     <TableCell align="center">
@@ -181,9 +152,7 @@ export function CellChecked({ check }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DataLabel.propTypes = { data: PropTypes.string, termino: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DataLabel({ data = '', termino = false }) {
   return (
@@ -198,9 +167,7 @@ export function DataLabel({ data = '', termino = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SemDados.propTypes = { message: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SemDados({ message }) {
   return (
@@ -212,9 +179,7 @@ export function SemDados({ message }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-BoxMask.propTypes = { sx: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function BoxMask({ sx = null }) {
   return (
@@ -237,7 +202,7 @@ export function BoxMask({ sx = null }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const TabsWrapperStyle = styled('div')(({ theme }) => ({
   zIndex: 9,
@@ -250,7 +215,7 @@ export const TabsWrapperStyle = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: { justifyContent: 'flex-end', paddingRight: theme.spacing(2) },
 }));
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function noDados(text) {
   return (
@@ -260,7 +225,7 @@ export function noDados(text) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function newLineText(text = '') {
   if (!text) return '';
@@ -268,15 +233,7 @@ export function newLineText(text = '') {
   return newText;
 }
 
-// ----------------------------------------------------------------------
-
-Felicitacoes.propTypes = {
-  tempo: PropTypes.bool,
-  niver: PropTypes.bool,
-  novos: PropTypes.bool,
-  onClose: PropTypes.func,
-  colaborador: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Felicitacoes({ onClose, colaborador = null, niver = false, tempo = false, novos = false }) {
   const partProp = { position: 'absolute', color: 'success.main' };

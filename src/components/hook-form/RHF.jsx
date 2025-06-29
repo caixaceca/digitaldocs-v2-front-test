@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
@@ -11,9 +10,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // utils
 import { setDataUtil } from '../../utils/formatTime';
 
-// ----------------------------------------------------------------------
-
-RHFNumberField.propTypes = { name: PropTypes.string, tipo: PropTypes.string, noFormat: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
   const { control } = useFormContext();
@@ -49,9 +46,7 @@ export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFAutocomplete.propTypes = { name: PropTypes.string, label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFAutocomplete({ name, label, ...other }) {
   const { control } = useFormContext();
@@ -71,14 +66,7 @@ export function RHFAutocomplete({ name, label, ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFAutocompleteSmp.propTypes = {
-  name: PropTypes.string,
-  label: PropTypes.string,
-  options: PropTypes.array,
-  multiple: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...other }) {
   const { control } = useFormContext();
@@ -103,14 +91,7 @@ export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFAutocompleteObj.propTypes = {
-  small: PropTypes.bool,
-  name: PropTypes.string,
-  label: PropTypes.string,
-  options: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFAutocompleteObj({ name, options, label, small = false, ...other }) {
   const { control } = useFormContext();
@@ -137,15 +118,7 @@ export function RHFAutocompleteObj({ name, options, label, small = false, ...oth
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFDatePicker.propTypes = {
-  small: PropTypes.bool,
-  name: PropTypes.string,
-  label: PropTypes.string,
-  dateTime: PropTypes.bool,
-  required: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFDatePicker({ name, label = '', small = false, required = false, dateTime = false, ...other }) {
   const { control } = useFormContext();
@@ -187,7 +160,7 @@ export function RHFDatePicker({ name, label = '', small = false, required = fals
   );
 }
 
-RHFDataEntrada.propTypes = { name: PropTypes.string, label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFDataEntrada({ name, label = '', ...other }) {
   const { control } = useFormContext();
@@ -213,9 +186,7 @@ export function RHFDataEntrada({ name, label = '', ...other }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RHFDateIF.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFDateIF({ options }) {
   const { datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false } = options;
@@ -242,7 +213,7 @@ export function RHFDateIF({ options }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const datePickerConf = (clearable) => ({
   field: { clearable },

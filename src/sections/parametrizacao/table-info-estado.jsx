@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -27,9 +26,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 //
 import { applySortFilter } from './applySortFilter';
 
-// ----------------------------------------------------------------------
-
-TableInfoEstado.propTypes = { item: PropTypes.string, dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableInfoEstado({ item, dados }) {
   const {
@@ -148,7 +145,7 @@ export default function TableInfoEstado({ item, dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function colaboradoresList(transicoes, colaboradores) {
   const perfisAssociados = [];

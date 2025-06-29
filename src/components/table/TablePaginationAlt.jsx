@@ -1,21 +1,10 @@
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TablePagination from '@mui/material/TablePagination';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-// ----------------------------------------------------------------------
-
-TablePaginationAlt.propTypes = {
-  dense: PropTypes.bool,
-  page: PropTypes.number,
-  count: PropTypes.number,
-  onChangePage: PropTypes.func,
-  rowsPerPage: PropTypes.number,
-  onChangeDense: PropTypes.func,
-  onChangeRowsPerPage: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TablePaginationAlt({
   page,

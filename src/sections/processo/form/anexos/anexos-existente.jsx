@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
@@ -18,9 +17,7 @@ import { useSelector, useDispatch } from '../../../../redux/store';
 import { Criado } from '../../../../components/Panel';
 import { DefaultAction } from '../../../../components/Actions';
 
-// ----------------------------------------------------------------------
-
-AnexosExistente.propTypes = { onOpen: PropTypes.func, anexos: PropTypes.array, noTitle: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function AnexosExistente({ anexos, onOpen = null, noTitle = false }) {
   const dispatch = useDispatch();

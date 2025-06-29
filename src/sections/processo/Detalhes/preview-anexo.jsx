@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 import Lightbox from 'yet-another-react-lightbox';
 import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
 import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
@@ -10,9 +9,7 @@ import { useTheme } from '@mui/material/styles';
 // components
 import Image from '../../../components/Image';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-PdfPreview.propTypes = { url: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function PdfPreview({ url }) {
   const theme = useTheme();
@@ -33,9 +30,7 @@ export function PdfPreview({ url }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ImagemPreview.propTypes = { imagem: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ImagemPreview({ imagem }) {
   const [index, setIndex] = useState(-1);

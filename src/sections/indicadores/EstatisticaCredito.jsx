@@ -1,5 +1,4 @@
 import sumBy from 'lodash/sumBy';
-import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -49,11 +48,11 @@ import { BarChart, SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import ExportarEstatisticaCred from '../../components/ExportDados/ToExcell/EstatisticaCredito';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const frSegmentoStyle = { pl: '12px !important', typography: 'subtitle2' };
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function EstatisticaCredito() {
   const dispatch = useDispatch();
@@ -197,7 +196,7 @@ export default function EstatisticaCredito() {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Totais() {
   const { isLoading, resumoEstCredito } = useSelector((state) => state.indicadores);
@@ -291,9 +290,7 @@ export function Totais() {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TableEstatistica.propTypes = { from: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableEstatistica({ from }) {
   const [filter, setFilter] = useState('');
@@ -442,18 +439,7 @@ export function TableEstatistica({ from }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-Segmento.propTypes = {
-  from: PropTypes.string,
-  linha1: PropTypes.string,
-  linha2: PropTypes.string,
-  linha3: PropTypes.string,
-  segmento: PropTypes.string,
-  linha1Dados: PropTypes.array,
-  linha2Dados: PropTypes.array,
-  linha3Dados: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2Dados, linha3Dados }) {
   const lengthLinha1 = linha1Dados?.length > 1 ? linha1Dados?.length : 0;
@@ -554,9 +540,7 @@ function Segmento({ from, linha1, linha2, linha3, segmento, linha1Dados, linha2D
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-SegmentoStd.propTypes = { from: PropTypes.string, segmento: PropTypes.string, dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SegmentoStd({ from, segmento, dados }) {
   const length = dados?.length;
@@ -591,17 +575,7 @@ function SegmentoStd({ from, segmento, dados }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TableRowTotal.propTypes = {
-  empty: PropTypes.bool,
-  from: PropTypes.string,
-  color: PropTypes.string,
-  nivel: PropTypes.number,
-  total: PropTypes.number,
-  total1: PropTypes.number,
-  length: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function TableRowTotal({ total, total1 = 0, nivel, from, color = '', empty = false, length = -1 }) {
   const cell =
@@ -648,17 +622,7 @@ function TableRowTotal({ total, total1 = 0, nivel, from, color = '', empty = fal
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FirstRowSegmento.propTypes = {
-  total: PropTypes.bool,
-  from: PropTypes.string,
-  dados: PropTypes.object,
-  linha: PropTypes.string,
-  length: PropTypes.number,
-  length1: PropTypes.number,
-  segmento: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function FirstRowSegmento({ segmento, linha, dados, total = false, length, from, length1 }) {
   const color =
@@ -683,14 +647,7 @@ function FirstRowSegmento({ segmento, linha, dados, total = false, length, from,
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FirstRowLinha.propTypes = {
-  from: PropTypes.string,
-  dados: PropTypes.object,
-  linha: PropTypes.string,
-  length: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function FirstRowLinha({ linha, dados, length, from }) {
   return (
@@ -703,14 +660,7 @@ function FirstRowLinha({ linha, dados, length, from }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-DadosCell.propTypes = {
-  total: PropTypes.bool,
-  from: PropTypes.string,
-  index: PropTypes.number,
-  dados: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function DadosCell({ dados, from, index = 1, total }) {
   return dados ? (
@@ -760,9 +710,7 @@ function DadosCell({ dados, from, index = 1, total }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-CardResumo.propTypes = { qtd: PropTypes.number, total: PropTypes.number, label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function CardResumo({ total, label, qtd }) {
   const theme = useTheme();
@@ -822,14 +770,7 @@ function CardResumo({ total, label, qtd }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TotaisLinha.propTypes = {
-  first: PropTypes.bool,
-  dados: PropTypes.array,
-  linha: PropTypes.string,
-  segmento: PropTypes.string,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
   const color =
@@ -859,9 +800,7 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-TableRowTotais.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function TableRowTotais({ dados }) {
   return ['qtdEnt', 'valEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valCont', 'qtdId', 'valId']?.map((row) => (
@@ -871,9 +810,7 @@ function TableRowTotais({ dados }) {
   ));
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-EmptyRow.propTypes = { segmento: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function EmptyRow({ segmento }) {
   return (
@@ -886,7 +823,7 @@ function EmptyRow({ segmento }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function filterDados(dados, filter) {
   if (filter) {
@@ -917,7 +854,7 @@ function filterDados(dados, filter) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function dadosResumo(dados, segmento, linha) {
   const entradas = dadosPorItem(dados?.entrada, segmento, linha);

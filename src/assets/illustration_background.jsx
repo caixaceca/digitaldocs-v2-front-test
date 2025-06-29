@@ -2,7 +2,7 @@ import { memo } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function BackgroundIllustration() {
   const theme = useTheme();

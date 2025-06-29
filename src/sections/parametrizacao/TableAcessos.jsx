@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // @mui
@@ -38,9 +37,7 @@ import { applySortFilter } from './applySortFilter';
 // _mock
 import { codacessos, objetos } from '../../_mock';
 
-// ----------------------------------------------------------------------
-
-TableAcessos.propTypes = { tab: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableAcessos({ tab }) {
   const {

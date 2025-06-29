@@ -28,7 +28,7 @@ import { EstadoForm, PerfisEstadoForm, RegrasForm, EstadosPerfilForm } from '../
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageDetalhesEstado() {
   const { id } = useParams();

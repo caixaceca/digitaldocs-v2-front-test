@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 // @mui
 import { ptPT } from '@mui/material/locale';
@@ -14,9 +13,7 @@ import breakpoints from './breakpoints';
 import componentsOverride from './overrides';
 import shadows, { customShadows } from './shadows';
 
-// ----------------------------------------------------------------------
-
-ThemeProvider.propTypes = { children: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ThemeProvider({ children }) {
   const { themeMode } = useSettings();

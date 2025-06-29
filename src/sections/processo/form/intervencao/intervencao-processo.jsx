@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
@@ -36,8 +35,6 @@ import Anexos from '../anexos';
 import { Confidencialidade, confidenciaIds } from './encaminhar';
 
 // --- CONFIDENCILAIDADES ----------------------------------------------------------------------------------------------
-
-ConfidencialidadesForm.propTypes = { processoId: PropTypes.number };
 
 export function ConfidencialidadesForm({ processoId }) {
   const dispatch = useDispatch();
@@ -101,8 +98,6 @@ export function ConfidencialidadesForm({ processoId }) {
 }
 
 // --- COLOCAR PROCESSO PENDENTE ---------------------------------------------------------------------------------------
-
-ColocarPendenteForm.propTypes = { onClose: PropTypes.func };
 
 export function ColocarPendenteForm({ onClose }) {
   const dispatch = useDispatch();
@@ -194,8 +189,6 @@ export function ColocarPendenteForm({ onClose }) {
 }
 
 // --- FINALIZAR NOTAS EXTERNAS ----------------------------------------------------------------------------------------
-
-FinalizarNeForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func };
 
 export function FinalizarNeForm({ id, onClose }) {
   const dispatch = useDispatch();
@@ -289,8 +282,6 @@ export function FinalizarNeForm({ id, onClose }) {
 
 // --- FINALIZAR OPE ---------------------------------------------------------------------------------------------------
 
-FinalizarOpeForm.propTypes = { id: PropTypes.number, onClose: PropTypes.func };
-
 export function FinalizarOpeForm({ id, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
@@ -310,8 +301,6 @@ export function FinalizarOpeForm({ id, onClose }) {
 }
 
 // --- FINALIZAR PROCESSO ----------------------------------------------------------------------------------------------
-
-AnexosForm.propTypes = { onClose: PropTypes.func };
 
 export function AnexosForm({ onClose }) {
   const dispatch = useDispatch();
@@ -369,8 +358,6 @@ export function AnexosForm({ onClose }) {
 }
 
 // --- LIBERTAR PROCESSO -----------------------------------------------------------------------------------------------
-
-EliminarReativar.propTypes = { ids: PropTypes.object, onClose: PropTypes.func };
 
 export function EliminarReativar({ ids, onClose }) {
   const dispatch = useDispatch();

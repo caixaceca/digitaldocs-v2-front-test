@@ -1,23 +1,16 @@
-import PropTypes from 'prop-types';
 import { memo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 //
 import NavList from './NavList';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const hideScrollbar = {
   msOverflowStyle: 'none',
   scrollbarWidth: 'none',
   overflowY: 'scroll',
-  '&::-webkit-scrollbar': {
-    display: 'none',
-  },
-};
-
-NavSectionHorizontal.propTypes = {
-  navConfig: PropTypes.array,
+  '&::-webkit-scrollbar': { display: 'none' },
 };
 
 function NavSectionHorizontal({ navConfig }) {

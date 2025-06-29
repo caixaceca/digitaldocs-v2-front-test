@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -10,9 +9,7 @@ import { useSelector } from '../../redux/store';
 // components
 import { newLineText } from '../../components/Panel';
 
-// ----------------------------------------------------------------------
-
-FraseContent.propTypes = { frase: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function FraseContent({ frase }) {
   const { colaboradores } = useSelector((state) => state.intranet);

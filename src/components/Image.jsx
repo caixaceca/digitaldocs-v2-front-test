@@ -1,19 +1,8 @@
-import PropTypes from 'prop-types';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 // @mui
 import Box from '@mui/material/Box';
 
-// ----------------------------------------------------------------------
-
-// ----------------------------------------------------------------------
-
-Image.propTypes = {
-  sx: PropTypes.object,
-  effect: PropTypes.string,
-  otherSx: PropTypes.object,
-  disabledEffect: PropTypes.bool,
-  ratio: PropTypes.oneOf(['4/3', '3/4', '6/4', '4/6', '16/9', '9/16', '21/9', '9/21', '3/1', '1/3', '1/1']),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Image({ ratio, disabledEffect = false, effect = 'blur', sx, otherSx = null, ...other }) {
   if (ratio) {
@@ -74,7 +63,7 @@ export default function Image({ ratio, disabledEffect = false, effect = 'blur', 
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function getRatio(ratio = '1/1') {
   return {
@@ -92,7 +81,7 @@ function getRatio(ratio = '1/1') {
   }[ratio];
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const getIcon = (name, thumbp, sx) =>
   thumbp ? (

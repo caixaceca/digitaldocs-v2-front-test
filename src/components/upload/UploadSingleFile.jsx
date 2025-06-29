@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 // @mui
 import Box from '@mui/material/Box';
@@ -11,7 +10,7 @@ import BlockContent from './BlockContent';
 import RejectionFiles from './RejectionFiles';
 import FileDescription from './FileDescription';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const DropZoneStyle = styled('div')(({ theme }) => ({
   outline: 'none',
@@ -25,14 +24,7 @@ const DropZoneStyle = styled('div')(({ theme }) => ({
   '&:hover': { opacity: 0.72, cursor: 'pointer' },
 }));
 
-// ----------------------------------------------------------------------
-
-UploadSingleFile.propTypes = {
-  sx: PropTypes.object,
-  error: PropTypes.bool,
-  helperText: PropTypes.node,
-  file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function UploadSingleFile({ error = false, file, helperText, sx, ...other }) {
   const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({

@@ -1,11 +1,8 @@
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 
-// ----------------------------------------------------------------------
-
-NotaProcesso.propTypes = { nota: PropTypes.string, segmento: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NotaProcesso({ nota = '', segmento = '' }) {
   return !(segmento === 'E' && nota === 'Entidade primária com apenas o documento primário em vigor!') ? (

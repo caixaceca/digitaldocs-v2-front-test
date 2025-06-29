@@ -21,7 +21,7 @@ import { SearchNotFound404 } from '../../components/table';
 import PerfilCover from '../../sections/sobre/PerfilCover';
 import TableAcessos from '../../sections/parametrizacao/TableAcessos';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageAcessosPerfil() {
   const { id } = useParams();

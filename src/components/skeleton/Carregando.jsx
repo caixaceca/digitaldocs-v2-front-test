@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
@@ -8,9 +7,7 @@ import TableCell from '@mui/material/TableCell';
 //
 import GridItem from '../GridItem';
 
-// ----------------------------------------------------------------------
-
-SkeletonContainer.propTypes = { height: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SkeletonContainer({ height = { xs: 400, sm: 760 } }) {
   return (
@@ -18,9 +15,7 @@ export function SkeletonContainer({ height = { xs: 400, sm: 760 } }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SkeletonBar.propTypes = { column: PropTypes.number, height: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SkeletonBar({ column, height = 50 }) {
   return (
@@ -32,13 +27,13 @@ export function SkeletonBar({ column, height = 50 }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function PieChart() {
   return <Skeleton variant="circular" sx={{ width: 280, height: 280 }} />;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function BarChart() {
   return (
@@ -53,9 +48,7 @@ export function BarChart() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-FormLoading.propTypes = { rows: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function FormLoading({ rows = 0 }) {
   return (
@@ -86,7 +79,7 @@ export function FormLoading({ rows = 0 }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SkeletonEntidade() {
   return (
@@ -104,7 +97,7 @@ export function SkeletonEntidade() {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SkeletonProcesso() {
   return (
@@ -131,9 +124,7 @@ export function SkeletonProcesso() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SkeletonTable.propTypes = { column: PropTypes.number, row: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SkeletonTable({ column, row }) {
   return [...Array(row)].map((_, index) => (

@@ -24,7 +24,7 @@ import AcessoGaji9 from './acesso-gaji9';
 import { PreviewForm } from '../../sections/gaji9/form-minuta';
 import InfoMinuta, { TableInfoMinuta } from '../../sections/gaji9/info-minuta';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageMinutaDetalhes() {
   const { id } = useParams();

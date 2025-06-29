@@ -1,11 +1,8 @@
-import PropTypes from 'prop-types';
 // @mui
 import Radio from '@mui/material/Radio';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-// ----------------------------------------------------------------------
-
-BoxMask.propTypes = { value: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function BoxMask({ value }) {
   return (

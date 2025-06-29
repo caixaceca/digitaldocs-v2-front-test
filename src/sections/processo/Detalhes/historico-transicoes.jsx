@@ -1,6 +1,5 @@
 import { add } from 'date-fns';
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
@@ -18,9 +17,7 @@ import { Criado } from '../../../components/Panel';
 //
 import { Info, InfoCriador } from './estados-processo';
 
-// ----------------------------------------------------------------------
-
-Transicoes.propTypes = { transicoes: PropTypes.array, assunto: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Transicoes({ transicoes, assunto }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
@@ -41,15 +38,7 @@ export default function Transicoes({ transicoes, assunto }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Transicao.propTypes = {
-  uos: PropTypes.array,
-  assunto: PropTypes.string,
-  transicao: PropTypes.object,
-  addConector: PropTypes.bool,
-  colaboradores: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores = [] }) {
   const acao = useMemo(
@@ -181,9 +170,7 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
   );
 }
 
-// ----------------------------------------------------------------------
-
-Data.propTypes = { entrada: PropTypes.string, saida: PropTypes.string, limite: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Data({ entrada, saida, limite }) {
   return (

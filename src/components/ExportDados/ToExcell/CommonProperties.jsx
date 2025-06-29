@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
@@ -6,13 +5,11 @@ import Tooltip from '@mui/material/Tooltip';
 // utils
 import { getFileThumb } from '../../../utils/formatFile';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const borderBranco = { style: 'thin', color: { argb: 'FFFFFF' } };
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ExportToExcell.propTypes = { handleExport: PropTypes.func, small: PropTypes.bool, absolute: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ExportToExcell({ handleExport, small = false, absolute = false }) {
   return (
@@ -30,7 +27,7 @@ export function ExportToExcell({ handleExport, small = false, absolute = false }
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function fileInfo(workbook) {
   workbook.created = new Date();
@@ -65,9 +62,7 @@ export function ajustarLargura(sheet) {
     let maxLength = 0;
     column.eachCell({ includeEmpty: true }, (cell) => {
       const cellValue = cell.value ? cell.value.toString() : '';
-      if (cellValue.length > maxLength) {
-        maxLength = cellValue.length;
-      }
+      if (cellValue.length > maxLength) maxLength = cellValue.length;
     });
     column.width = maxLength + 2;
   });

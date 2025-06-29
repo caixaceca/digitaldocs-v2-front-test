@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // @mui
@@ -9,14 +8,7 @@ import Collapse from '@mui/material/Collapse';
 import NavItem from './NavItem';
 import { getActive, isExternalLink } from '..';
 
-// ----------------------------------------------------------------------
-
-NavList.propTypes = {
-  data: PropTypes.object,
-  depth: PropTypes.number,
-  hasChildren: PropTypes.bool,
-  isCollapse: PropTypes.bool,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NavList({ data, depth, hasChildren, isCollapse = false }) {
   const navigate = useNavigate();
@@ -65,9 +57,7 @@ export default function NavList({ data, depth, hasChildren, isCollapse = false }
   );
 }
 
-// ----------------------------------------------------------------------
-
-NavSubList.propTypes = { data: PropTypes.array, depth: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function NavSubList({ data, depth }) {
   return (

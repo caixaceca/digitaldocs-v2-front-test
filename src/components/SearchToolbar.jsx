@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
@@ -18,14 +17,7 @@ import { Ambiente, Fluxo } from '../sections/AmbienteFluxo';
 // _mock_
 import { meses } from '../_mock';
 
-// ----------------------------------------------------------------------
-
-SearchToolbarSimple.propTypes = {
-  item: PropTypes.string,
-  filter: PropTypes.string,
-  children: PropTypes.node,
-  setFilter: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchToolbarSimple({ filter, item = '', setFilter, children = null }) {
   return (
@@ -37,9 +29,7 @@ export function SearchToolbarSimple({ filter, item = '', setFilter, children = n
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchTransicao.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchTransicao({ options }) {
   const { modo, origem, destino, setModo, setDestino, setOrigem, estadosList } = options;
@@ -81,9 +71,7 @@ export function SearchTransicao({ options }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchToolbarProcura.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchToolbarProcura({ options }) {
   const {
@@ -152,19 +140,7 @@ export function SearchToolbarProcura({ options }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchToolbarProcessos.propTypes = {
-  tab: PropTypes.string,
-  filter: PropTypes.string,
-  setFilter: PropTypes.func,
-  segmento: PropTypes.string,
-  setSegmento: PropTypes.func,
-  colaborador: PropTypes.object,
-  meuAmbiente: PropTypes.object,
-  setColaborador: PropTypes.func,
-  colaboradoresList: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchToolbarProcessos({
   tab,
@@ -227,22 +203,7 @@ export function SearchToolbarProcessos({
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchToolbarEntradas.propTypes = {
-  from: PropTypes.string,
-  filter: PropTypes.string,
-  estado: PropTypes.string,
-  assunto: PropTypes.string,
-  setFilter: PropTypes.func,
-  setEstado: PropTypes.func,
-  setAssunto: PropTypes.func,
-  estadosList: PropTypes.array,
-  assuntosList: PropTypes.array,
-  colaborador: PropTypes.string,
-  setColaborador: PropTypes.func,
-  colaboradoresList: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchToolbarEntradas({
   from,
@@ -312,9 +273,7 @@ export function SearchToolbarEntradas({
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchToolbarCartoes.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchToolbarCartoes({ options }) {
   const { filter, setFilter, tipoCartao, tiposCartao, setTipoCartao } = options;
@@ -343,9 +302,7 @@ export function SearchToolbarCartoes({ options }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-TableToolbarPerfilEstados.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TableToolbarPerfilEstados({ options }) {
   const { uo, filter, setUo, setFilter } = options;
@@ -382,23 +339,7 @@ export function TableToolbarPerfilEstados({ options }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchIndicadores.propTypes = {
-  mes: PropTypes.object,
-  setMes: PropTypes.func,
-  item: PropTypes.string,
-  setItem: PropTypes.func,
-  detalhes: PropTypes.bool,
-  itemsList: PropTypes.array,
-  setDetalhes: PropTypes.func,
-  viewEntrada: PropTypes.bool,
-  indicador: PropTypes.string,
-  colaborador: PropTypes.object,
-  setColaborador: PropTypes.func,
-  setViewEntrada: PropTypes.func,
-  colaboradoresList: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchIndicadores({
   mes,
@@ -476,9 +417,7 @@ export function SearchIndicadores({
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchAutocomplete.propTypes = { options: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchAutocomplete({ options, ...others }) {
   const { value = null, label, valuel = null, setValue, dados = [] } = options;
@@ -497,9 +436,7 @@ export function SearchAutocomplete({ options, ...others }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SearchField.propTypes = { item: PropTypes.string, filter: PropTypes.string, setFilter: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchField({ item, filter, setFilter, ...others }) {
   return (
@@ -519,8 +456,6 @@ export function SearchField({ item, filter, setFilter, ...others }) {
     />
   );
 }
-
-RemoverFiltros.propTypes = { removerFiltro: PropTypes.func };
 
 export function RemoverFiltros({ removerFiltro }) {
   return (

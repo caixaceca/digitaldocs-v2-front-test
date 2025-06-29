@@ -5,7 +5,7 @@ import { fYear } from '../utils/formatTime';
 import { useDispatch, useSelector } from '../redux/store';
 import { getProcesso } from '../redux/slices/digitaldocs';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function useProcesso({ id, perfilId }) {
   const dispatch = useDispatch();
@@ -18,7 +18,7 @@ export function useProcesso({ id, perfilId }) {
   return processo;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function useIdentificacao({ id }) {
   const { uos } = useSelector((state) => state.intranet);

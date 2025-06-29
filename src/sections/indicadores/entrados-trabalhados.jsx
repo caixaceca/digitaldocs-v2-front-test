@@ -1,5 +1,4 @@
 import sumBy from 'lodash/sumBy';
-import PropTypes from 'prop-types';
 import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
@@ -32,9 +31,7 @@ import { DialogTitleAlt } from '../../components/CustomDialog';
 //
 import { IndicadorItem, ColaboradorCard } from './Indicadores';
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-EntradasTrabalhados.propTypes = { indicadores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function EntradasTrabalhados({ indicadores }) {
   const [colaborador1, setColaborador1] = useState(null);
@@ -208,14 +205,7 @@ export function EntradasTrabalhados({ indicadores }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-ColaboradorComp.propTypes = {
-  colaborador: PropTypes.object,
-  setColaborador: PropTypes.func,
-  colaboradorComp: PropTypes.object,
-  colaboradoresList: PropTypes.array,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function ColaboradorComp({ colaborador, colaboradoresList = [], colaboradorComp, setColaborador }) {
   return (
@@ -246,15 +236,7 @@ export function ColaboradorComp({ colaborador, colaboradoresList = [], colaborad
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-LineProgress.propTypes = {
-  item: PropTypes.string,
-  isTotal: PropTypes.bool,
-  leftSuccess: PropTypes.bool,
-  trabalhadoC1: PropTypes.number,
-  trabalhadoC2: PropTypes.number,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSuccess }) {
   const theme = useTheme();
@@ -288,7 +270,7 @@ export function LineProgress({ item, trabalhadoC1, trabalhadoC2, isTotal, leftSu
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function indicadoresGroupBy(dados, item) {
   const dadosGrouped = [];
@@ -305,7 +287,7 @@ function indicadoresGroupBy(dados, item) {
   return dadosGrouped;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function colaboradoresFilter(colaboradores, dados) {
   const colaboradoresList = [];

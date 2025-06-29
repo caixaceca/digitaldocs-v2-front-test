@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -22,8 +21,6 @@ import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-TiposTitularesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
-
 export function TiposTitularesForm({ id, ids, onClose }) {
   const { tiposTitulares } = useSelector((state) => state.gaji9);
 
@@ -37,8 +34,6 @@ export function TiposTitularesForm({ id, ids, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-SegmentosForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
 
 export function SegmentosForm({ id, ids, onClose }) {
   const { segmentos } = useSelector((state) => state.gaji9);
@@ -56,8 +51,6 @@ export function SegmentosForm({ id, ids, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ComponetesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
-
 export function ComponetesForm({ id, ids, onClose }) {
   const { componentes } = useSelector((state) => state.gaji9);
 
@@ -72,8 +65,6 @@ export function ComponetesForm({ id, ids, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-FinalidadesForm.propTypes = { id: PropTypes.number, ids: PropTypes.array, onClose: PropTypes.func };
-
 export function FinalidadesForm({ id, ids, onClose }) {
   const { finalidades } = useSelector((state) => state.gaji9);
 
@@ -87,8 +78,6 @@ export function FinalidadesForm({ id, ids, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-OpcoesForm.propTypes = { dados: PropTypes.object, options: PropTypes.array, onClose: PropTypes.func };
 
 export function OpcoesForm({ dados, options, onClose }) {
   const dispatch = useDispatch();
@@ -139,8 +128,6 @@ export function OpcoesForm({ dados, options, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-RegraForm.propTypes = { dados: PropTypes.object, onClose: PropTypes.func };
 
 export function RegraForm({ dados, onClose }) {
   const dispatch = useDispatch();

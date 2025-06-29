@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
@@ -32,9 +31,7 @@ import { DetalhesContent } from './detalhes-gaji9';
 import { SubtiposForm } from './form-identificadores';
 import { BalcaoForm, RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9';
 
-// ----------------------------------------------------------------------
-
-GrupoDetail.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function GrupoDetail({ dados }) {
   const [currentTab, setCurrentTab] = useState('Info');
@@ -76,9 +73,7 @@ export function GrupoDetail({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RecursosUtilizadores.propTypes = { id: PropTypes.string, dados: PropTypes.array, recursos: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function RecursosUtilizadores({ id, dados = [], recursos = false }) {
   const dispatch = useDispatch();
@@ -181,9 +176,7 @@ function RecursosUtilizadores({ id, dados = [], recursos = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-BalcoesRepresentante.propTypes = { id: PropTypes.string, dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function BalcoesRepresentante({ id, dados = [] }) {
   const dispatch = useDispatch();
@@ -244,9 +237,7 @@ export function BalcoesRepresentante({ id, dados = [] }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SubtiposGarantias.propTypes = { id: PropTypes.string, dados: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SubtiposGarantias({ id, dados = [] }) {
   const dispatch = useDispatch();
@@ -295,9 +286,7 @@ export function SubtiposGarantias({ id, dados = [] }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Detalhes.propTypes = { onClose: PropTypes.func, dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Detalhes({ dados, onClose }) {
   return (
@@ -310,9 +299,7 @@ function Detalhes({ dados, onClose }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Actions.propTypes = { setItem: PropTypes.func, row: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Actions({ row, setItem }) {
   return (
@@ -330,9 +317,7 @@ function Actions({ row, setItem }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-CellHeader.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function CellHeader({ dados }) {
   return (
@@ -342,7 +327,7 @@ function CellHeader({ dados }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SemDados() {
   return (

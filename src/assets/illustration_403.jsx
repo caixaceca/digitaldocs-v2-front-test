@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 //
 import BackgroundIllustration from './illustration_background';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function ForbiddenIllustration({ ...other }) {
   const theme = useTheme();

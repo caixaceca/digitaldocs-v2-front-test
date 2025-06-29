@@ -1,13 +1,10 @@
-import PropTypes from 'prop-types';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-// ----------------------------------------------------------------------
-
-RHFSwitch.propTypes = { name: PropTypes.string, otherSx: PropTypes.object, onChange: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) {
   const { control } = useFormContext();
@@ -30,14 +27,7 @@ export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) 
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-FilterSwitch.propTypes = {
-  value: PropTypes.bool,
-  label: PropTypes.string,
-  localS: PropTypes.string,
-  setValue: PropTypes.func,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function FilterSwitch({ label, value, setValue, localS = '' }) {
   return (

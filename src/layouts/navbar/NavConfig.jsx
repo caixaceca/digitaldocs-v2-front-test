@@ -5,7 +5,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // assets
 import { Home, Portal, Arquivo, Controle, Contrato, Dashboard, FilaTrabalho, Parametrizacao } from '../../assets';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const navConfig = [
   {

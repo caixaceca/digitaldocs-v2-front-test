@@ -1,6 +1,6 @@
 import { useSelector } from '../redux/store';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function usePermissao() {
   const { adminGaji9, utilizador } = useSelector((state) => state.gaji9);
@@ -20,7 +20,7 @@ export function usePermissao() {
   return { temPermissao, utilizador, isAdmin, isGerente };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function useAcesso({ acessos }) {
   const { meusacessos } = useSelector((state) => state.parametrizacao);

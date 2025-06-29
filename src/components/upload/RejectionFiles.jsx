@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -8,11 +7,7 @@ import Typography from '@mui/material/Typography';
 import { fData } from '../../utils/formatNumber';
 import { getFileData } from '../../utils/formatFile';
 
-// ----------------------------------------------------------------------
-
-RejectionFiles.propTypes = {
-  fileRejections: PropTypes.array.isRequired,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function RejectionFiles({ fileRejections }) {
   return (

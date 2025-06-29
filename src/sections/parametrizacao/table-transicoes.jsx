@@ -22,7 +22,7 @@ import { SkeletonTable } from '../../components/skeleton';
 import { SearchTransicao } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableTransicoes() {
   const {
@@ -137,7 +137,7 @@ export default function TableTransicoes() {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function applySortFilter({ dados, modo, origem, destino, comparator }) {
   dados = applySort(dados, comparator);

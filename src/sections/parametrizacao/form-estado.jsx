@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
@@ -38,9 +37,7 @@ import { ItemComponent } from './ParametrizacaoForm';
 
 const ps = { perfil_id: null, gestor: false, padrao: false, observador: false, data_limite: null, data_inicial: null };
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-EstadoForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function EstadoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -124,9 +121,7 @@ export function EstadoForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-EstadosPerfilForm.propTypes = { onClose: PropTypes.func, perfilIdE: PropTypes.number, estadoId: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
   const dispatch = useDispatch();
@@ -209,9 +204,7 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-PerfisEstadoForm.propTypes = { onClose: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function PerfisEstadoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -282,14 +275,7 @@ export function PerfisEstadoForm({ onClose }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-RegrasForm.propTypes = {
-  item: PropTypes.object,
-  estado: PropTypes.bool,
-  onClose: PropTypes.func,
-  selectedItem: PropTypes.object,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   const dispatch = useDispatch();

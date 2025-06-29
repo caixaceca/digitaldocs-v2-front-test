@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
@@ -34,8 +33,6 @@ import GridItem from '../../../components/GridItem';
 import { DialogButons } from '../../../components/Actions';
 
 // --- ARQUIVAR PROCESSO -----------------------------------------------------------------------------------------------
-
-ArquivarForm.propTypes = { naoFinal: PropTypes.array, onClose: PropTypes.func };
 
 export function ArquivarForm({ naoFinal, onClose }) {
   const dispatch = useDispatch();
@@ -149,8 +146,6 @@ export function ArquivarForm({ naoFinal, onClose }) {
 }
 
 // --- DESARQUIVAR PROCESSO --------------------------------------------------------------------------------------------
-
-DesarquivarForm.propTypes = { id: PropTypes.number, colaboradores: PropTypes.array };
 
 export function DesarquivarForm({ id, colaboradores }) {
   const dispatch = useDispatch();

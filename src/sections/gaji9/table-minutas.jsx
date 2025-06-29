@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -26,8 +25,6 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import { applySortFilter, labelTitular } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-TableMinutas.propTypes = { item: PropTypes.string, inativos: PropTypes.bool };
 
 export default function TableMinutas({ item, inativos }) {
   const navigate = useNavigate();

@@ -1,11 +1,8 @@
-import PropTypes from 'prop-types';
 import { View, Text } from '@react-pdf/renderer';
 // components
 import styles from './ExportStylePdf';
 
-// ----------------------------------------------------------------------
-
-Title.propTypes = { label: PropTypes.string, mt: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Title({ label, mt = false }) {
   return (
@@ -15,9 +12,7 @@ export function Title({ label, mt = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Subtitle.propTypes = { label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Subtitle({ label }) {
   return (
@@ -29,9 +24,7 @@ export function Subtitle({ label }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Label.propTypes = { label: PropTypes.string, props: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Label({ label, props = [] }) {
   return (
@@ -41,8 +34,6 @@ export function Label({ label, props = [] }) {
   );
 }
 
-Value.propTypes = { value: PropTypes.string, props: PropTypes.array };
-
 export function Value({ value, props = [] }) {
   return (
     <View style={[styles.pr0, styles.alignLeft, ...props]}>
@@ -51,9 +42,7 @@ export function Value({ value, props = [] }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Item.propTypes = { label: PropTypes.string, value: PropTypes.string, lprops: PropTypes.array, vprops: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Item({ label, value = '', lprops = [], vprops = [] }) {
   return (
@@ -64,8 +53,6 @@ export function Item({ label, value = '', lprops = [], vprops = [] }) {
   );
 }
 
-ItemAlt.propTypes = { label: PropTypes.string, value: PropTypes.string, style: PropTypes.object };
-
 export function ItemAlt({ label, value = ' ', style }) {
   return (
     <View style={[...style, styles.pl0]}>
@@ -75,9 +62,7 @@ export function ItemAlt({ label, value = ' ', style }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Row.propTypes = { children: PropTypes.node, mt: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Row({ children, mt = false }) {
   return (
@@ -87,8 +72,6 @@ export function Row({ children, mt = false }) {
   );
 }
 
-RowItemAlt.propTypes = { label: PropTypes.string, value: PropTypes.string, style: PropTypes.object };
-
 export function RowItemAlt({ label, value = ' ', style }) {
   return (
     <Row mt>
@@ -97,9 +80,7 @@ export function RowItemAlt({ label, value = ' ', style }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-RowAlt.propTypes = { label: PropTypes.string, value: PropTypes.string, tree: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function RowAlt({ label, value, tree = false }) {
   return (
@@ -112,7 +93,7 @@ export function RowAlt({ label, value, tree = false }) {
       />
     </Row>
   );
-} // ----------------------------------------------------------------------
+} // ---------------------------------------------------------------------------------------------------------------------
 
 export function NadaConsta() {
   return (

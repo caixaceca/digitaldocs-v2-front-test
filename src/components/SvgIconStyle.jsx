@@ -1,10 +1,7 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 
-// ----------------------------------------------------------------------
-
-SvgIconStyle.propTypes = { src: PropTypes.string.isRequired, sx: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function SvgIconStyle({ src, sx }) {
   return (

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
@@ -27,9 +26,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 import { applySortFilter } from './applySortFilter';
 import { EstadoDetail } from './TableParametrizacao';
 
-// ----------------------------------------------------------------------
-
-TableInfoFluxo.propTypes = { item: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableInfoFluxo({ item }) {
   const {
@@ -162,7 +159,7 @@ export default function TableInfoFluxo({ item }) {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function estadosList(dados = [], estados = [], uos = []) {
   const estadosProcessados = new Set();

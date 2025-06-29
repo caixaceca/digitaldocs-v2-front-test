@@ -25,7 +25,7 @@ import { ColaboradorInfo, Criado, noDados } from '../../components/Panel';
 import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'nome', label: 'Nome' },
@@ -35,7 +35,7 @@ const TABLE_HEAD = [
   { id: '' },
 ];
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Acessos() {
   const {
@@ -134,7 +134,7 @@ export default function Acessos() {
   );
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function applySortFilter({ colaboradores, comparator, filter, uo }) {
   colaboradores = applySort(colaboradores, comparator);

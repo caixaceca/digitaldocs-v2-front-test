@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import PropTypes from 'prop-types';
 import { useMemo, useEffect } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -34,8 +33,6 @@ import { shapeMixed } from '../../components/hook-form/yup-shape';
 import { listaTitrulares } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-CreditoForm.propTypes = { onClose: PropTypes.func };
 
 export default function CreditoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -162,8 +159,6 @@ export default function CreditoForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-IntervenienteForm.propTypes = { id: PropTypes.number, dados: PropTypes.array, onClose: PropTypes.func };
-
 export function IntervenienteForm({ id, dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
@@ -231,8 +226,6 @@ export function IntervenienteForm({ id, dados, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-DataContrato.propTypes = { creditoId: PropTypes.number, onClose: PropTypes.func };
-
 export function DataContrato({ creditoId, onClose }) {
   const dispatch = useDispatch();
   const { selectedItem, isSaving } = useSelector((state) => state.gaji9);
@@ -291,8 +284,6 @@ export function DataContrato({ creditoId, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-PropostaForm.propTypes = { onClose: PropTypes.func };
-
 export function PropostaForm({ onClose }) {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.gaji9);
@@ -326,8 +317,6 @@ export function PropostaForm({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-PreviewForm.propTypes = { item: PropTypes.string, onClose: PropTypes.func };
 
 export function PreviewForm({ item, onClose }) {
   const dispatch = useDispatch();

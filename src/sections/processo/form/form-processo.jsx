@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 // @mui
@@ -30,9 +29,7 @@ import ProcessoCredito from './credito';
 import ProcessoExterno from './externo';
 import ProcessoCON from './comunicacao-op-num';
 
-// ----------------------------------------------------------------------
-
-ProcessoForm.propTypes = { isEdit: PropTypes.bool, processo: PropTypes.object, ambientId: PropTypes.number };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   const navigate = useNavigate();
@@ -147,9 +144,7 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   );
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-EstadoAssunto.propTypes = { dados: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function EstadoAssunto({ dados }) {
   const { value = null, setValue, options = [], label = 'Estado', isEdit = false } = dados;

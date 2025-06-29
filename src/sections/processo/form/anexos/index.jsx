@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Card from '@mui/material/Card';
@@ -11,9 +10,7 @@ import AnexosExistente from './anexos-existente';
 import FormDocumentosChecklist from './form-documento-checklist';
 import { RHFUploadMultiFile } from '../../../../components/hook-form';
 
-// ----------------------------------------------------------------------
-
-Anexos.propTypes = { outros: PropTypes.bool, anexos: PropTypes.array, solto: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Anexos({ outros, anexos, solto = false }) {
   const { watch, control, setValue } = useFormContext();

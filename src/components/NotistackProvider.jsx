@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import PropTypes from 'prop-types';
 import { SnackbarProvider, MaterialDesignContent } from 'notistack';
 // @mui
 import Box from '@mui/material/Box';
@@ -12,7 +11,7 @@ import WarningOutlinedIcon from '@mui/icons-material/WarningOutlined';
 //
 import { IconButtonAnimate } from './animate';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const StyledMaterialDesignContent = styled(MaterialDesignContent)(({ theme }) => ({
   fontWeight: 700,
@@ -25,16 +24,11 @@ const StyledMaterialDesignContent = styled(MaterialDesignContent)(({ theme }) =>
     },
 }));
 
-// ----------------------------------------------------------------------
-
-NotistackProvider.propTypes = { children: PropTypes.node };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function NotistackProvider({ children }) {
   const notistackRef = useRef(null);
-
-  const onClose = (key) => () => {
-    notistackRef.current.closeSnackbar(key);
-  };
+  const onClose = (key) => () => notistackRef.current.closeSnackbar(key);
 
   return (
     <SnackbarProvider
@@ -68,12 +62,7 @@ export default function NotistackProvider({ children }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SnackbarIcon.propTypes = {
-  icon: PropTypes.node,
-  color: PropTypes.oneOf(['primary', 'secondary', 'info', 'success', 'warning', 'error']),
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 function SnackbarIcon({ icon, color }) {
   return (

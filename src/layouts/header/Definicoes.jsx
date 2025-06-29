@@ -18,7 +18,7 @@ import SettingFullscreen from '../../components/settings/drawer/SettingFullscree
 //
 import { IconButtonHeader } from '.';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Definicoes() {
   const [open, setOpen] = useState(null);

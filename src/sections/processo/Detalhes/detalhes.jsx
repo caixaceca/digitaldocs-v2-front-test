@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -34,13 +33,11 @@ import { colorProcesso } from '../../tabela/table-processos';
 // _mock
 import { dis } from '../../../_mock';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral', minHeight: 36 };
 
-// ----------------------------------------------------------------------
-
-DetalhesProcesso.propTypes = { isPS: PropTypes.bool, processo: PropTypes.object, versoes: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesProcesso({ isPS = false, processo, versoes = false }) {
   const { origens } = useSelector((state) => state.parametrizacao);
@@ -255,15 +252,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
   );
 }
 
-// ----------------------------------------------------------------------
-
-TextItem.propTypes = {
-  label: PropTypes.node,
-  text: PropTypes.string,
-  title: PropTypes.string,
-  baralhar: PropTypes.bool,
-  situacao: PropTypes.node,
-};
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function TextItem({ title = '', text = '', label = null, baralhar = false, situacao = null }) {
   return (title && text) || label ? (
@@ -286,9 +275,7 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
   ) : null;
 }
 
-// ----------------------------------------------------------------------
-
-Duplicado.propTypes = { ccDup: PropTypes.string, dataDup: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Duplicado({ ccDup, dataDup }) {
   return (
@@ -306,9 +293,7 @@ export function Duplicado({ ccDup, dataDup }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-SubItem.propTypes = { value: PropTypes.string, label: PropTypes.string };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SubItem({ value, label }) {
   return value ? (
@@ -321,9 +306,7 @@ export function SubItem({ value, label }) {
   ) : null;
 }
 
-// ----------------------------------------------------------------------
-
-ValorItem.propTypes = { title: PropTypes.string, valor: PropTypes.number, cativos: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function ValorItem({ title, valor, cativos }) {
   const { toggle: open, onOpen, onClose } = useToggle();

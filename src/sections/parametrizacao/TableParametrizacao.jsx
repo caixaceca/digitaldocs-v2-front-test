@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 // @mui
@@ -42,8 +41,6 @@ import { EstadoForm } from './form-estado';
 import { applySortFilter } from './applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-TableParametrizacao.propTypes = { item: PropTypes.string };
 
 export default function TableParametrizacao({ item }) {
   const dispatch = useDispatch();
@@ -262,9 +259,7 @@ export default function TableParametrizacao({ item }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-EstadoDetail.propTypes = { row: PropTypes.object };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function EstadoDetail({ row = null }) {
   return (
@@ -278,9 +273,7 @@ export function EstadoDetail({ row = null }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Fluxos.propTypes = { fluxo: PropTypes.object, setFluxo: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Fluxos({ fluxo = null, setFluxo }) {
   const { fluxos } = useSelector((state) => state.parametrizacao);

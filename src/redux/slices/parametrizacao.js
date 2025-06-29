@@ -19,7 +19,7 @@ import {
 } from './sliceActions';
 import { getAccessToken } from './intranet';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 const initialState = {
   done: '',
@@ -149,7 +149,7 @@ export default slice.reducer;
 // Actions
 export const { openModal, getSuccess, closeModal, setModal, changeMeuAmbiente, addRole } = slice.actions;
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function geParamsUtil() {
   return async (dispatch) => {
@@ -242,7 +242,7 @@ export function getFromParametrizacao(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function createItem(item, dados, params) {
   return async (dispatch, getState) => {
@@ -307,7 +307,7 @@ export function createItem(item, dados, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function updateItem(item, dados, params) {
   return async (dispatch, getState) => {
@@ -356,7 +356,7 @@ export function updateItem(item, dados, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function deleteItem(item, params) {
   return async (dispatch, getState) => {
@@ -405,7 +405,7 @@ export function deleteItem(item, params) {
   };
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const meusFluxos = (fluxos) =>
   applySort(fluxos ?? [], getComparator('asc', 'assunto')).map((item) => ({ ...item, id: item.fluxo_id }));

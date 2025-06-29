@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -24,9 +23,7 @@ import MyAvatar, { AvatarBedge } from '../../../components/MyAvatar';
 import Pareceres from './historico-pareceres';
 import { Encaminhar, destinosProcesso } from '../intervencao-em-serie';
 
-// ----------------------------------------------------------------------
-
-Estados.propTypes = { handleAceitar: PropTypes.func };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function Estados({ handleAceitar }) {
   const dispatch = useDispatch();
@@ -175,9 +172,7 @@ export default function Estados({ handleAceitar }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-Info.propTypes = { dados: PropTypes.object, colaboradores: PropTypes.array };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function Info({ dados, colaboradores }) {
   return (
@@ -228,9 +223,7 @@ export function Info({ dados, colaboradores }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-DataParecer.propTypes = { data1: PropTypes.string, data2: PropTypes.string, envio: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DataParecer({ data1, data2 = '', envio = false }) {
   return (
@@ -257,9 +250,7 @@ export function DataParecer({ data1, data2 = '', envio = false }) {
   );
 }
 
-// ----------------------------------------------------------------------
-
-InfoCriador.propTypes = { dados: PropTypes.object, criador: PropTypes.object, temParecer: PropTypes.bool };
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function InfoCriador({ criador = null, temParecer = false, dados = null }) {
   const { id, perfil_id: pid = '', perfil = null, uo = null, foto_disk: foto = '' } = criador;

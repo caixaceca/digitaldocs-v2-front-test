@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 // redux
@@ -9,8 +8,6 @@ import FormAnexosCON from './form-anexos-con';
 import FormDepositante from './form-depositante';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-ProcessoCON.propTypes = { dados: PropTypes.object };
 
 export default function ProcessoCON({ dados }) {
   const { activeStep } = useSelector((state) => state.stepper);

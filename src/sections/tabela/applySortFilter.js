@@ -3,7 +3,7 @@ import { normalizeText } from '../../utils/formatText';
 // hooks
 import { applySort } from '../../hooks/useTable';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function applySortFilter({ from, dados, comparator, filter, colaborador, assunto, estado }) {
   dados = applySort(dados, comparator);
@@ -29,7 +29,7 @@ export default function applySortFilter({ from, dados, comparator, filter, colab
   return dados;
 }
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function dadosList(array, colaboradores, uos, from) {
   const dados = [];

@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { format } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useEffect, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -35,8 +34,6 @@ import { ItemComponent } from './form-gaji9';
 import { freguesiasConcelhos } from '../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-ProdutoForm.propTypes = { onClose: PropTypes.func };
 
 export function ProdutoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -94,8 +91,6 @@ export function ProdutoForm({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-SegmentoForm.propTypes = { onClose: PropTypes.func };
 
 export function SegmentoForm({ onClose }) {
   const dispatch = useDispatch();
@@ -179,8 +174,6 @@ export function SegmentoForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-TipoTitularForm.propTypes = { onClose: PropTypes.func };
-
 export function TipoTitularForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
@@ -238,8 +231,6 @@ export function TipoTitularForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-TipoForm.propTypes = { item: PropTypes.string, label: PropTypes.string, onClose: PropTypes.func };
-
 export function TipoForm({ item, label, onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
@@ -289,8 +280,6 @@ export function TipoForm({ item, label, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-GarantiaForm.propTypes = { onClose: PropTypes.func };
 
 export function GarantiaForm({ onClose }) {
   const dispatch = useDispatch();
@@ -347,8 +336,6 @@ export function GarantiaForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-SeguroForm.propTypes = { onClose: PropTypes.func };
-
 export function SeguroForm({ onClose }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
@@ -401,8 +388,6 @@ export function SeguroForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-SubtiposForm.propTypes = { id: PropTypes.number, item: PropTypes.object, onClose: PropTypes.func };
-
 export function SubtiposForm({ id, item, onClose }) {
   const dispatch = useDispatch();
   const isEdit = item?.action === 'editar';
@@ -449,8 +434,6 @@ export function SubtiposForm({ id, item, onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-RepresentanteForm.propTypes = { onClose: PropTypes.func };
 
 export function RepresentanteForm({ onClose }) {
   const dispatch = useDispatch();
@@ -590,8 +573,6 @@ export function RepresentanteForm({ onClose }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-FreguesiaForm.propTypes = { onClose: PropTypes.func };
 
 export function FreguesiaForm({ onClose }) {
   const dispatch = useDispatch();
