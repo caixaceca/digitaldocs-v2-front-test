@@ -21,7 +21,7 @@ export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) 
         />
       }
       labelPlacement="start"
-      sx={{ mt: { sm: 1 }, ml: 0, width: 1, justifyContent: 'center', ...otherSx }}
+      sx={{ mt: { sm: !other?.mt ? 1 : 0 }, ml: 0, width: 1, justifyContent: 'center', ...otherSx }}
       {...other}
     />
   );

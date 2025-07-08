@@ -8,8 +8,8 @@ import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import { styled, useTheme } from '@mui/material/styles';
 // utils
-import { BASEURL } from '../../utils/apisUrl';
 import cssStyles from '../../utils/cssStyles';
+import { getIntranetFile } from '../../utils/formatFile';
 // config
 import { NAVBAR, ambiente } from '../../config';
 // hooks
@@ -92,7 +92,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
         <Stack spacing={3} alignItems="center" sx={{ p: 5, width: 1, textAlign: 'center' }}>
           {certificacoes.map(({ designacao, imagem_disco: imagem }, index) => (
             <Box key={designacao || `cert_${index}`} sx={{ px: 3 }}>
-              <Image alt={designacao} src={`${BASEURL}/certificacao/file/certificacao/${imagem}`} />
+              <Image alt={designacao} src={getIntranetFile('certificado', imagem)} />
             </Box>
           ))}
         </Stack>

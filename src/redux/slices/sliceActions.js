@@ -14,7 +14,7 @@ export function actionGet(state, payload) {
     case 'cc':
       state.dateUpdate = new Date();
       state.perfilId = dados?.perfil_id || '';
-      state[item] = { ...dados, perfil: state.perfil };
+      state[item] = dados;
       break;
 
     case 'creditos':
@@ -157,7 +157,7 @@ export const selectUtilizador = (state) => {
   if (!state) return {};
 
   const { mail, perfilId, cc } = state;
-  const idColaborador = cc ? cc.id : null;
+  const idColaborador = cc ? cc?.id : null;
 
   return { mail, perfilId, idColaborador };
 };

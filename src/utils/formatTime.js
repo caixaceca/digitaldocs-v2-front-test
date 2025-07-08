@@ -110,3 +110,16 @@ export function diferencaAnos(data) {
   const anos = formatDate(new Date(), 'yyyy') - formatDate(data, 'yyyy');
   return `${anos} ano${anos > 1 ? 's' : ''}`;
 }
+
+export function normalizeData(dateString) {
+  if (!dateString) return '';
+
+  const ddmmyyyyRegex = /^\d{2}-\d{2}-\d{4}$/;
+
+  if (ddmmyyyyRegex.test(dateString)) {
+    const [day, month, year] = dateString.split('-');
+    return `${year}-${month}-${day}`;
+  }
+
+  return dateString;
+}

@@ -47,9 +47,9 @@ export default function ProcuraAvancada() {
 
   useEffect(() => {
     const storedUoId = Number(localStorage.getItem('uoSearch'));
-    const selectedUo = uosList.find(({ id }) => id === storedUoId) || uosList.find(({ id }) => id === cc?.uo?.id);
+    const selectedUo = uosList.find(({ id }) => id === storedUoId) || uosList.find(({ id }) => id === cc?.uo_id);
     if (selectedUo) setUo(selectedUo);
-  }, [cc?.uo?.id, uosList]);
+  }, [cc?.uo_id, uosList]);
 
   const searchProcessos = () => {
     dispatch(

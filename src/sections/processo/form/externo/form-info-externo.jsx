@@ -69,10 +69,10 @@ export default function FormInfoExterno({ dados }) {
       referencia: dadosStepper?.referencia || processo?.referencia || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
-      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
+      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
       origem_id: dadosStepper?.origem_id || origensList?.find(({ id }) => id === processo?.origem_id) || null,
     }),
-    [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo?.balcao]
+    [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo_balcao]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -84,7 +84,7 @@ export default function FormInfoExterno({ dados }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo?.balcao]);
+  }, [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo_balcao]);
 
   const onSubmit = async () => {
     submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);

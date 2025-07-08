@@ -99,9 +99,10 @@ export default function Router() {
           path: 'gaji9',
           children: [
             { element: <Navigate to="/gaji9/gestao" replace />, index: true },
-            { path: 'gestao', element: <Gaji9Gestao /> },
-            { path: 'minuta/:id', element: <MinutaDetalhes /> },
-            { path: 'credito/:id', element: <CreditoDetalhes /> },
+            { path: 'gestao', element: <GestaoGaji9 /> },
+            { path: 'minuta/:id', element: <DetalhesMinuta /> },
+            { path: 'credito/:id', element: <DetalhesCredito /> },
+            { path: 'clausula/:id', element: <DetalhesClausula /> },
           ],
         },
       ],
@@ -134,6 +135,7 @@ const DetalhesEstado = Loadable(lazy(() => import('../pages/parametrizacao/page-
 
 // ------------------------------------------------------- GAJ-i9 ------------------------------------------------------
 
-const Gaji9Gestao = Loadable(lazy(() => import('../pages/gaji9/page-gaji9-gestao')));
-const MinutaDetalhes = Loadable(lazy(() => import('../pages/gaji9/page-minuta-detalhes')));
-const CreditoDetalhes = Loadable(lazy(() => import('../pages/gaji9/page-credito-detalhes')));
+const GestaoGaji9 = Loadable(lazy(() => import('../pages/gaji9/page-gestao-gaji9')));
+const DetalhesMinuta = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-minuta')));
+const DetalhesCredito = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-credito')));
+const DetalhesClausula = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-clausula')));

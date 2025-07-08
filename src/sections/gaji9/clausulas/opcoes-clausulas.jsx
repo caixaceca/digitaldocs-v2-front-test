@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 // @mui
+import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import TableRow from '@mui/material/TableRow';
@@ -9,37 +10,40 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 // utils
 import { fNumber } from '../../../utils/formatNumber';
+import { numeroParaLetra } from '../../../utils/formatText';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromGaji9, deleteItem } from '../../../redux/slices/gaji9';
+import { getFromGaji9, setModal, deleteItem } from '../../../redux/slices/gaji9';
 // components
 import DetalhesGaji9 from '../detalhes-gaji9';
 import { labelTitular } from '../applySortFilter';
 import { DefaultAction } from '../../../components/Actions';
 import { TableSearchNotFound } from '../../../components/table';
 import { DialogConfirmar } from '../../../components/CustomDialog';
+import SearchNotFound from '../../../components/table/SearchNotFound';
 import { CellChecked, newLineText, noDados } from '../../../components/Panel';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
-import { RegraForm, TiposTitularesForm, ComponetesForm, SegmentosForm, FinalidadesForm } from './form-opcoes';
+import { ComponetesForm, SegmentosForm, FinalidadesForm } from './form-opcoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function AlineasClausula({ dados = [] }) {
+export function AlineasClausula({ dados = [], condicional = false }) {
   return (
-    <Stack sx={{ px: 0.5, mt: 3 }}>
+    <Card sx={condicional ? { boxShadow: 'none', bgcolor: 'transparent' } : { p: 3 }}>
       {dados?.length === 0 ? (
-        <SearchNotFoundSmall message="Nenhum número adicionado..." />
+        <SearchNotFound message="Nenhum número adicionado..." />
       ) : (
         <>
           {dados?.map(({ numero_ordem: numero, conteudo, sub_alineas: alineas }, index) => (
             <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
-              <Typography variant="subtitle2">{numero}.</Typography>
+              {numero && <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>{numero}.</Typography>}
               <Stack>
-                <Typography variant="body2">{newLineText(conteudo)}</Typography>
+                {conteudo && <Typography variant={condicional ? 'body2' : 'body1'}>{newLineText(conteudo)}</Typography>}
                 {alineas?.map(({ numero_ordem: numero, conteudo }, index1) => (
                   <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                    <Typography variant="subtitle2">{numero}.</Typography>
-                    <Typography variant="body2">{newLineText(conteudo)}</Typography>
+                    <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>
+                      {numeroParaLetra(numero)}.
+                    </Typography>
+                    <Typography variant={condicional ? 'body2' : 'body1'}>{newLineText(conteudo)}</Typography>
                   </Stack>
                 ))}
               </Stack>
@@ -47,7 +51,7 @@ export function AlineasClausula({ dados = [] }) {
           ))}
         </>
       )}
-    </Stack>
+    </Card>
   );
 }
 
@@ -56,22 +60,12 @@ export function AlineasClausula({ dados = [] }) {
 export function OpcoesClausula() {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
-  const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
   const clausula = [];
   const opcoes = clausula?.opcoes || [];
-
-  useEffect(() => {
-    dispatch(getFromGaji9('clausulas', { condicional: true }));
-  }, [dispatch]);
 
   const openModal = (modal, id) => {
     setModal(modal);
     if (modal === 'detalhes') dispatch(getFromGaji9('clausula', { id, item: 'clausulaOpcional' }));
-  };
-
-  const eliminarRegra = () => {
-    const params = { condicionalId: modal, clausulaId: clausula?.clausula_id };
-    dispatch(deleteItem('eliminarRegra', { ...params, msg: 'Regra eliminada', onClose: () => setModal('') }));
   };
 
   return (
@@ -101,7 +95,7 @@ export function OpcoesClausula() {
         ) : (
           <TableBody>
             {opcoes?.map((row, index) => (
-              <TableRow haver key={`regra_${index}`}>
+              <TableRow hover key={`regra_${index}`}>
                 <TableCell>{clausula?.titulo || noDados()}</TableCell>
                 <TableCell align="right">
                   {row?.montante_maior_que && <Typography>{`> ${fNumber(row?.montante_maior_que)}`}</Typography>}
@@ -117,10 +111,7 @@ export function OpcoesClausula() {
                 <CellChecked check={row?.segunda_habitacao} />
                 <CellChecked check={row?.isencao_comissao} />
                 <TableCell>
-                  <Stack direction="row" spacing={0.75}>
-                    <DefaultAction small label="ELIMINAR" onClick={() => openModal(row?.clausula_id, '')} />
-                    <DefaultAction small label="DETALHES" onClick={() => openModal('detalhes', row?.clausula_id)} />
-                  </Stack>
+                  <DefaultAction small label="DETALHES" onClick={() => openModal('detalhes', row?.clausula_id)} />
                 </TableCell>
               </TableRow>
             ))}
@@ -129,25 +120,16 @@ export function OpcoesClausula() {
       </Table>
 
       {modal === 'detalhes' && <DetalhesGaji9 closeModal={() => setModal('')} item="clausulas" opcao />}
-      {modal === 'create' && <RegraForm onClose={() => setModal('')} dados={selectedItem} />}
-      {!!modal && modal !== 'create' && modal !== 'detalhes' && (
-        <DialogConfirmar
-          isSaving={isSaving}
-          desc="eliminar esta regra"
-          onClose={() => setModal('')}
-          handleOk={() => eliminarRegra()}
-        />
-      )}
     </>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = false }) {
+export function Relacionados({ id, dados = [], item = '', na = false }) {
   const dispatch = useDispatch();
   const [modal, setModal] = useState('');
-  const { isSaving, selectedItem } = useSelector((state) => state.gaji9);
+  const { isSaving } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
     if (item === 'Finalidade') dispatch(getFromGaji9('finalidades'));
@@ -157,23 +139,20 @@ export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = fa
     const itemDel =
       (item === 'Segmento' && 'segmentoCl') ||
       (item === 'Componente' && 'componenteSeg') ||
-      (item === 'Finalidade' && 'finalidadeSeg') ||
-      'tipoTitularCl';
+      (item === 'Finalidade' && 'finalidadeSeg');
     const params = { itemId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
     dispatch(deleteItem(itemDel, { ...params, onClose: () => setModal('') }));
   };
 
   return (
-    <>
-      <Table sx={{ mt: 2 }}>
+    <Card sx={{ p: 1 }}>
+      <Table>
         <TableHead>
           <TableRow>
-            <TableCell size="small">{item}</TableCell>
-            <TableCell size="small" align="center">
-              Ativo
-            </TableCell>
+            <TableCell>{item}</TableCell>
+            <TableCell align="center">Ativo</TableCell>
             {!na && (
-              <TableCell size="small" align="right" width={10}>
+              <TableCell align="right" width={10}>
                 <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
               </TableCell>
             )}
@@ -184,7 +163,7 @@ export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = fa
         ) : (
           <TableBody>
             {dados?.map((row, index) => (
-              <TableRow haver key={`relacionado_${index}`}>
+              <TableRow hover key={`relacionado_${index}`}>
                 <TableCell>
                   {row?.segmento ||
                     row?.designacao ||
@@ -205,18 +184,9 @@ export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = fa
         )}
       </Table>
 
-      {modal === 'create' && item === 'Componente' && (
-        <ComponetesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'componentes')} />
-      )}
-      {modal === 'create' && item === 'Finalidade' && (
-        <FinalidadesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'finalidades')} />
-      )}
-      {modal === 'create' && item === 'Segmento' && (
-        <SegmentosForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'segmentos')} />
-      )}
-      {modal === 'create' && item === 'Tipo de titular' && (
-        <TiposTitularesForm onClose={() => setModal('')} id={id} ids={extrairIds(selectedItem, 'tipos_titulares')} />
-      )}
+      {modal === 'create' && item === 'Componente' && <ComponetesForm onClose={() => setModal('')} id={id} />}
+      {modal === 'create' && item === 'Finalidade' && <FinalidadesForm onClose={() => setModal('')} id={id} />}
+      {modal === 'create' && item === 'Segmento' && <SegmentosForm onClose={() => setModal('')} id={id} />}
       {!!modal && modal !== 'create' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -225,22 +195,77 @@ export function Relacionados({ id, dados = [], item = 'Tipo de titular', na = fa
           handleOk={() => eliminarItem()}
         />
       )}
-    </>
+    </Card>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function extrairIds(dados, item) {
-  const ids = [];
-  if (item === 'segmentos' && dados?.segmento_id != null) ids.push(dados.segmento_id);
-  if (item === 'componentes' && dados?.componente_id != null) ids.push(dados.componente_id);
-  if (item === 'finalidades' && dados?.finalidade_id != null) ids.push(dados.finalidade_id);
-  if (item === 'tipos_titulares' && dados?.tipo_titular_id != null) ids.push(dados.tipo_titular_id);
-  if (Array.isArray(dados[item])) {
-    dados[item].forEach((t) => {
-      if (t?.id !== null && t.ativo) ids.push(t.id);
-    });
-  }
-  return ids;
+export function RelacionadosCl({ dados = [], item = 'Tipo de titular' }) {
+  const dispatch = useDispatch();
+
+  return (
+    <Card sx={{ p: 1 }}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>{item}</TableCell>
+            {item === 'Condição' ? <TableCell>Conteúdo</TableCell> : <TableCell align="center">Ativo</TableCell>}
+            <TableCell width={10}> </TableCell>
+          </TableRow>
+        </TableHead>
+        {dados?.length === 0 ? (
+          <TableSearchNotFound height={150} message="Não foi encontrado nenhum item..." />
+        ) : (
+          <TableBody>
+            {dados?.map(({ id, ativo = false, ...res }, index) => (
+              <TableRow hover key={`relacionado_${index}`}>
+                {item === 'Condição' ? (
+                  <>
+                    <TableCell sx={{ fontWeight: 'bold' }}>
+                      {(res?.com_nip && 'Com NIP') ||
+                        (res?.com_seguro && 'Com seguro') ||
+                        (res?.isencao_comissao && 'Isenção de comissão') ||
+                        (res?.habitacao_propria_1 && '1ª habitação própria') ||
+                        (res?.taxa_juros_negociado && 'Taxa juros negociada') ||
+                        (res?.isento_imposto_selo && 'Isento de imposto selo') ||
+                        (res?.com_prazo_utilizacao && 'Com prazo de utilização') ||
+                        (res?.prazo_maior_que && `Prazo maior que ${fNumber(res?.prazo_maior_que)}`) ||
+                        (res?.prazo_menor_que && `Prazo menor que ${fNumber(res?.prazo_menor_que)}`) ||
+                        (res?.montante_maior_que && `Montante maior que ${fNumber(res?.montante_maior_que)}`) ||
+                        (res?.montante_menor_que && `Montante menor que ${fNumber(res?.montante_menor_que)}`)}
+                    </TableCell>
+                    <TableCell>
+                      {res?.alinea && <AlineasClausula dados={[res?.alinea]} condicional />}
+                      {res?.sub_alinea && (
+                        <AlineasClausula
+                          dados={[{ conteudo: `Número: ${res?.numero_ordem}`, sub_alineas: [res?.sub_alinea] }]}
+                          condicional
+                        />
+                      )}
+                    </TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell>
+                      {res?.segmento || labelTitular(res?.tipo_titular, res?.consumidor) || noDados()}
+                    </TableCell>
+                    <CellChecked check={item === 'Condição' || ativo} />
+                  </>
+                )}
+                <TableCell>
+                  <DefaultAction
+                    small
+                    label="ELIMINAR"
+                    disabled={item !== 'Condição' && !ativo}
+                    onClick={() => dispatch(setModal({ item: `eliminar-${item}`, dados: id }))}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        )}
+      </Table>
+    </Card>
+  );
 }

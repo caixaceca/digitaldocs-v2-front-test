@@ -160,7 +160,7 @@ function Parabens() {
   const { toggle: open, onOpen, onClose } = useToggle();
   const { cc } = useSelector((state) => state.intranet);
   const aniversarianteHoje =
-    cc?.data_cel_aniv && formatDate(cc?.data_cel_aniv, 'dd-MM') === formatDate(new Date(), 'dd-MM');
+    cc?.data_aniversario && formatDate(cc?.data_aniversario, 'dd-MM') === formatDate(new Date(), 'dd-MM');
   const tempoServicoHoje =
     cc?.data_admissao &&
     formatDate(cc?.data_admissao, 'yyyy') !== formatDate(new Date(), 'yyyy') &&
@@ -207,8 +207,8 @@ export function IconButtonHeader({ title, open, setOpen, total }) {
             {title === 'Ajuda' && <AjudaIcon />}
             {title === 'Links úteis' && <LinksIcon />}
             {title === 'Denúncia' && <DenunciaIcon />}
-            {title === 'Definições' && <DefinicoesIcon />}
             {title === 'Consultar documento' && <Id />}
+            {title === 'Definições' && <DefinicoesIcon />}
           </Box>
         )}
       </IconButtonAnimate>

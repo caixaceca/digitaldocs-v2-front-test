@@ -16,8 +16,8 @@ import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // utils
-import { getFile } from '../utils/getFile';
 import { baralharString } from '../utils/formatText';
+import { getIntranetFile } from '../utils/formatFile';
 import { ptDateTime, diferencaAnos } from '../utils/formatTime';
 // components
 import Logo from './Logo';
@@ -106,7 +106,7 @@ export function ColaboradorInfo({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
       <AvatarBedge id={id}>
-        <MyAvatar name={baralharString(nome)} src={getFile('colaborador', baralharString(foto, true))} />
+        <MyAvatar name={baralharString(nome)} src={getIntranetFile('colaborador', foto)} />
       </AvatarBedge>
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>

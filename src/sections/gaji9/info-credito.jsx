@@ -175,7 +175,7 @@ export function TableInfoCredito({ params, dados = [] }) {
   const { temPermissao, isGerente } = usePermissao();
   const [filter, setFilter] = useState(localStorage.getItem(`${tab}_form`) || '');
 
-  const { contratado = false, id, tab } = params;
+  const { contratado = false, id, tab = '' } = params;
   const {
     page,
     order,

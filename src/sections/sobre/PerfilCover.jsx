@@ -4,8 +4,8 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
 // utils
-import { getFile } from '../../utils/getFile';
 import { nomeacaoBySexo } from '../../utils/formatText';
+import { getIntranetFile } from '../../utils/formatFile';
 // redux
 import { useSelector } from '../../redux/store';
 // components
@@ -59,7 +59,7 @@ export default function PerfilCover({ perfilColaborador, isDeFeria }) {
                 borderColor: 'common.white',
               }}
               name={perfilColaborador?.perfil?.displayName}
-              src={getFile('colaborador', perfilColaborador?.foto_disk)}
+              src={getIntranetFile('colaborador', perfilColaborador?.foto_disk)}
             />
           </AvatarBedge>
         </Stack>

@@ -29,59 +29,65 @@ const GREY = {
 
 // SETUP COLORS
 const PRIMARY = {
-  lighter: '#C8FACD',
-  light: '#5BE584',
+  lighter: '#E6F4DB',
+  light: '#A3D98A',
   main: '#5AAA28',
-  dark: '#007B55',
-  darker: '#005249',
+  dark: '#3E7A1B',
+  darker: '#275110',
   contrastText: '#fff',
 };
+
 const SECONDARY = {
-  lighter: '#D6E4FF',
-  light: '#84A9FF',
+  lighter: '#DDE5FF',
+  light: '#809FFF',
   main: '#3366FF',
-  dark: '#1939B7',
-  darker: '#091A7A',
+  dark: '#1A4FCC',
+  darker: '#103399',
   contrastText: '#fff',
 };
+
 const INFO = {
-  lighter: '#CAFDF5',
-  light: '#61F3F3',
+  lighter: '#D2F4FA',
+  light: '#66D9EB',
   main: '#00B8D9',
-  dark: '#006C9C',
-  darker: '#003768',
+  dark: '#0089A0',
+  darker: '#005B6B',
   contrastText: '#fff',
 };
+
 const SUCCESS = {
-  lighter: '#edfae6',
-  light: '#a8c997',
+  lighter: '#E6F4DB',
+  light: '#A3D98A',
   main: '#5AAA28',
-  dark: '#2f690c',
-  darker: '#08660D',
+  dark: '#3E7A1B',
+  darker: '#275110',
   contrastText: '#fff',
 };
+
 const WARNING = {
-  lighter: '#FFF7CD',
-  light: '#FFE16A',
-  main: '#FFC107',
-  dark: '#B78103',
-  darker: '#7A4F01',
+  lighter: '#FFF3CC',
+  light: '#FFD966',
+  main: '#FF9800',
+  dark: '#CC7700',
+  darker: '#994F00',
   contrastText: GREY[800],
 };
+
 const ERROR = {
-  lighter: '#FFE7D9',
-  light: '#FFA48D',
+  lighter: '#FFDADA',
+  light: '#FF8A85',
   main: '#FF4842',
-  dark: '#B72136',
-  darker: '#7A0C2E',
+  dark: '#CC3833',
+  darker: '#992926',
   contrastText: '#fff',
 };
+
 const FOCUS = {
-  lighter: '#EEEEEE',
-  light: '#CCCCCC',
+  lighter: '#F0F0F0',
+  light: '#D6D6D6',
   main: '#AAAAAA',
-  dark: '#888888',
-  darker: '#555555',
+  dark: '#7A7A7A',
+  darker: '#4D4D4D',
   contrastText: '#fff',
 };
 

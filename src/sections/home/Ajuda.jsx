@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
-import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import Accordion from '@mui/material/Accordion';
 import CardHeader from '@mui/material/CardHeader';
@@ -11,12 +10,11 @@ import DialogContent from '@mui/material/DialogContent';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 //
-import { BASEURL } from '../../utils/apisUrl';
-import { getFileThumb } from '../../utils/formatFile';
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromIntranet } from '../../redux/slices/intranet';
 // components
 import Markdown from '../../components/Markdown';
+import ButtonAnexo from '../../components/anexos/button-anexo';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -65,19 +63,7 @@ function Documentos() {
           ) : (
             <Stack spacing={1}>
               {docs?.map(({ anexo, nome }) => (
-                <Button
-                  fullWidth
-                  variant="soft"
-                  rel="noopener"
-                  target="_blank"
-                  color="inherit"
-                  key={`doc_${anexo}`}
-                  startIcon={getFileThumb(false, null, nome)}
-                  href={`${BASEURL}sobre/file/sobre_caixa/${anexo}`}
-                  sx={{ textAlign: 'left', boxShadow: 'none', justifyContent: 'left' }}
-                >
-                  {nome}
-                </Button>
+                <ButtonAnexo item="noticia" key={anexo} file={{ nome, filename: anexo }} />
               ))}
             </Stack>
           )}

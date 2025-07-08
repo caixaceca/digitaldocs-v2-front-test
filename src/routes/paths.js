@@ -33,5 +33,6 @@ export const PATH_DIGITALDOCS = {
     gestao: '/gaji9/gestao',
     minuta: '/gaji9/minuta/:id',
     credito: '/gaji9/credito/:id',
+    clausula: '/gaji9/clausula/:id',
   },
 };

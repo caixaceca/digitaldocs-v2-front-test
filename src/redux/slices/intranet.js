@@ -25,8 +25,8 @@ const initialState = {
   frase: null,
   ajuda: null,
   perfil: null,
+  docPdex: null,
   dateUpdate: null,
-  documentoPdex: null,
   docIdentificacao: null,
   uos: [],
   links: [],
@@ -61,8 +61,7 @@ export function authenticateColaborador() {
       const accessToken = await getAccessToken();
       const msalProfile = await callMsGraph(accessToken);
       dispatch(slice.actions.getSuccess({ item: 'mail', dados: msalProfile?.userPrincipalName }));
-      // const perfil = await axios.post(`${BASEURL}/perfil/msal`, msalProfile, {
-      const perfil = await axios.post(`${INTRANETHUBAPI}/v2/portal/perfis/msal`, msalProfile, {
+      const perfil = await axios.post(`${INTRANETHUBAPI}/v2/portal/pfs/msal`, msalProfile, {
         headers: { Authorization: `Bearer ${accessToken}` },
         withCredentials: true,
       });
@@ -116,11 +115,11 @@ export function getInfoIntranet(id) {
     await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('colaboradores'));
     await new Promise((resolve) => setTimeout(resolve, 500));
+    dispatch(getFromIntranet('uos', { label: 'label' }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
     await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('links', { label: 'nome' }));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromIntranet('uos', { label: 'label' }));
     await new Promise((resolve) => setTimeout(resolve, 500));
     dispatch(getFromIntranet('certificacoes'));
   };
@@ -170,13 +169,17 @@ export function getFromIntranet(item, params) {
             })
           );
         }
-      } else if (item === 'documentoPdex') {
+      } else if (item === 'docPdex') {
         const options = { headers: { Authorization: `Bearer ${accessToken}` } };
         const apiUrl =
-          (params?.tipoSearch === 'NIF' && '/v1/pdex/nif?nif=') ||
-          (params?.tipoSearch === 'REGISTO COMERCIAL' && '/v1/pdex/registo_comercial?num_doc=') ||
-          '/v1/pdex/dados_bb?num_doc=';
-        const response = await axios.get(`${INTRANETHUBAPI}${apiUrl}${params?.numeroSearch}`, options);
+          (params?.tipoSearch === 'Pesquisar NIF' && `/v1/pdex/nif?nif=${params?.numDoc}`) ||
+          (params?.tipoSearch === 'Pesquisar CNI pelo Nº de BI' && `/v1/pdex/cni_from_bi?num_bi=${params?.numDoc}`) ||
+          (params?.tipoSearch === 'Pesquisar Registo Comercial' &&
+            `/v1/pdex/registo_comercial?num_doc=${params?.numDoc}`) ||
+          (params?.tipoSearch === 'Pesquisar por Doc. ID, NIF ou Nome' &&
+            `/v1/pdex/d2n/pessoa?${params?.numDoc ? `&doc_id=${params?.numDoc}` : ''}${params?.nifSearch ? `&nif=${params?.nifSearch}` : ''}${params?.nomeSearch ? `&nome=${params?.nomeSearch}` : ''}`) ||
+          `/v1/pdex/dados_bb?num_doc=${params?.numDoc}`;
+        const response = await axios.get(`${INTRANETHUBAPI}${apiUrl}`, options);
         dispatch(slice.actions.getSuccess({ item, dados: { ...params, ...response.data?.objeto } }));
       } else {
         const apiUrl =
@@ -185,10 +188,10 @@ export function getFromIntranet(item, params) {
           (item === 'frase' && `${BASEURL}/frase_semana/ativa`) ||
           (item === 'certificacoes' && `${BASEURL}/certificacao`) ||
           (item === 'links' && `${BASEURL}/aplicacao/links/uteis`) ||
-          (item === 'cc' && `${BASEURL}/colaborador/${params?.id}`) ||
           (item === 'perguntas' && `${BASEURL}/help/perguntas_frequentes`) ||
           (item === 'minhasAplicacoes' && `${BASEURL}/aplicacao/aplicacoes/me`) ||
           (item === 'documentosAjuda' && `${BASEURL}/atc?categoria=documentosAjuda`) ||
+          (item === 'cc' && `${INTRANETHUBAPI}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
           (item === 'disposicao' && `${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`) ||
           (item === 'docIdentificacao' &&
             `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`) ||
@@ -196,7 +199,10 @@ export function getFromIntranet(item, params) {
         if (apiUrl) {
           const response = await axios.get(apiUrl, options);
           if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: !!response.data }));
-          else dispatch(slice.actions.getSuccess({ item, dados: response.data, label: params?.label || '' }));
+          else {
+            const data = response.data?.objeto || response.data;
+            dispatch(slice.actions.getSuccess({ item, dados: data, label: params?.label || '' }));
+          }
         }
       }
     } catch (error) {

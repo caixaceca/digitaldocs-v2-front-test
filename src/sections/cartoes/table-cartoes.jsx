@@ -85,7 +85,7 @@ export default function TableCartoes() {
   const { cartoes, done, isLoading, isOpenModal } = useSelector((state) => state.digitaldocs);
   const { isAdmin, isAuditoria, confirmarCartoes, meusAmbientes } = useSelector((state) => state.parametrizacao);
 
-  const [fase, setFase] = useState(cc?.uo?.tipo === 'Agências' ? 'Receção' : 'Emissão');
+  const [fase, setFase] = useState(cc?.uo_tipo === 'Agências' ? 'Receção' : 'Emissão');
   const uosList = useMemo(
     () =>
       UosAcesso(
@@ -97,7 +97,7 @@ export default function TableCartoes() {
       ),
     [cc, isAdmin, isAuditoria, meusAmbientes, fase, uos]
   );
-  const acessoDop = useMemo(() => fase === 'Emissão' && cc?.uo?.label === 'DOP-CE', [cc?.uo?.label, fase]);
+  const acessoDop = useMemo(() => fase === 'Emissão' && cc?.uo_label === 'DOP-CE', [cc?.uo_label, fase]);
   const acessoAgencia = useMemo(
     () => fase === 'Receção' && uosList?.find(({ id }) => id === uo?.id),
     [fase, uo?.id, uosList]
@@ -115,12 +115,12 @@ export default function TableCartoes() {
     if (fase === 'Receção' && uosList?.length > 0 && !uosList?.map(({ id }) => id)?.includes(uo?.id)) {
       const uoSel =
         uosList?.find(({ id }) => id === Number(localStorage.getItem('uoCartao'))) ||
-        uosList?.find(({ id }) => id === cc?.uo?.balcao) ||
+        uosList?.find(({ id }) => id === cc?.uo_balcao) ||
         uosList[0];
       localStorage.setItem('uoCartao', uoSel?.id || '');
       setUo(uoSel);
     }
-  }, [uosList, fase, uo, cc?.uo?.balcao]);
+  }, [uosList, fase, uo, cc?.uo_balcao]);
 
   useEffect(() => {
     if (datai && fase === 'Emissão') dispatch(getAll(fase, datas(datai, dataf)));
@@ -191,7 +191,7 @@ export default function TableCartoes() {
               setSelected={setSelected}
             />
             <Stack direction="row" alignItems="center" spacing={1}>
-              {(isAdmin || isAuditoria || cc?.uo?.tipo === 'Agências') && (
+              {(isAdmin || isAuditoria || cc?.uo_tipo === 'Agências') && (
                 <Autocomplete
                   fullWidth
                   size="small"

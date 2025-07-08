@@ -43,7 +43,7 @@ export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function DialogTitleAlt({ title, onClose = null, sx = null, action, subtitle = null, stepper = null }) {
+export function DialogTitleAlt({ title, onClose = null, sx = null, action, subtitle = null, content = null }) {
   return (
     <DialogTitle sx={{ ...sx }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
@@ -56,7 +56,7 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
           {onClose && <Fechar onClick={onClose} />}
         </Stack>
       </Stack>
-      {stepper}
+      {content}
     </DialogTitle>
   );
 }

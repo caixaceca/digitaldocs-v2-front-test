@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Checkbox from '@mui/material/Checkbox';
 import TableRow from '@mui/material/TableRow';
@@ -10,33 +10,31 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
-import { getLocalStorageArray } from '../../../utils/formatObject';
+import { PATH_DIGITALDOCS } from '../../../routes/paths';
+import { getLocalStorageArray, contarIdsValidos } from '../../../utils/formatObject';
 // hooks
-import { usePermissao } from '../../../hooks/useAcesso';
 import useTable, { getComparator } from '../../../hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getFromGaji9, setModal, closeModal, deleteItem } from '../../../redux/slices/gaji9';
+import { dispatch, useSelector } from '../../../redux/store';
+import { getSuccess, setModal } from '../../../redux/slices/gaji9';
 // Components
 import Scrollbar from '../../../components/Scrollbar';
 import { DefaultAction } from '../../../components/Actions';
 import { Criado, noDados } from '../../../components/Panel';
 import { SkeletonTable } from '../../../components/skeleton';
-import { DialogConfirmar } from '../../../components/CustomDialog';
+import DialogPreviewDoc from '../../../components/CustomDialog';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
 import ClausulaForm from './form-clausula';
-import DetalhesGaji9 from '../detalhes-gaji9';
-import { PreviewMinutaForm } from '../form-minuta';
 import FiltrarClausulas from './filtrar-clausulas';
+import { PreviewMinutaForm } from '../form-minuta';
 import { applySortFilter, labelTitular } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableClausula({ inativos }) {
-  const dispatch = useDispatch();
-  const { temPermissao } = usePermissao();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState(localStorage.getItem('filterclausulas') || '');
 
   const {
@@ -61,7 +59,7 @@ export default function TableClausula({ inativos }) {
     defaultSelected: getLocalStorageArray('selectedClausulas'),
   });
 
-  const { clausulas, isLoading, isSaving, selectedItem, modalGaji9 } = useSelector((state) => state.gaji9);
+  const { clausulas, isLoading, modalGaji9, previewFile, isLoadingDoc } = useSelector((state) => state.gaji9);
 
   const dataFiltered = applySortFilter({ filter, comparator: getComparator(order, orderBy), dados: clausulas || [] });
   const isNotFound = !dataFiltered.length;
@@ -74,18 +72,6 @@ export default function TableClausula({ inativos }) {
   useEffect(() => {
     localStorage.setItem('selectedClausulas', JSON.stringify(selected));
   }, [selected]);
-
-  const openModal = (modal, dados) => {
-    const eliminar = modal === 'eliminar-clausula';
-    const isEdit = modal === 'form-clausula' || modal === 'clonar-clausula';
-    dispatch(setModal({ item: modal, dados: eliminar ? dados : null, isEdit }));
-    if (!eliminar) dispatch(getFromGaji9('clausula', { id: dados?.id, item: 'selectedItem' }));
-  };
-
-  const confirmDelete = () => {
-    const params = { id: selectedItem?.id, msg: 'Cláusula eliminada' };
-    dispatch(deleteItem('clausulas', { ...params, onClose: () => dispatch(setModal({ item: '', dados: null })) }));
-  };
 
   return (
     <>
@@ -100,8 +86,8 @@ export default function TableClausula({ inativos }) {
                 order={order}
                 onSort={onSort}
                 orderBy={orderBy}
-                numSelected={selected?.length}
                 rowCount={dataFiltered?.length}
+                numSelected={contarIdsValidos(selected, dataFiltered)}
                 onSelectAllRows={(checked) =>
                   onSelectAllRows(
                     checked,
@@ -159,21 +145,13 @@ export default function TableClausula({ inativos }) {
                         <Criado caption tipo="user" value={row?.feito_por || row?.modificador || row?.criador} />
                       </TableCell>
                       <TableCell align="center" width={10}>
-                        <Stack direction="row" spacing={0.5} justifyContent="right">
-                          <DefaultAction small label="CLONAR" onClick={() => openModal('clonar-clausula', row)} />
-                          <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-clausula', row)} />
-                          {row?.ativo && temPermissao(['UPDATE_CLAUSULA']) && (
-                            <DefaultAction small label="EDITAR" onClick={() => openModal('form-clausula', row)} />
-                          )}
-                          <DefaultAction
-                            small
-                            label="DETALHES"
-                            onClick={() => {
-                              if (!selected?.includes(row?.id)) onSelectRow(row?.id);
-                              openModal('view-clausula', row);
-                            }}
-                          />
-                        </Stack>
+                        <DefaultAction
+                          label="DETALHES"
+                          onClick={() => {
+                            if (!selected?.includes(row?.id)) onSelectRow(row?.id);
+                            navigate(`${PATH_DIGITALDOCS.gaji9.root}/clausula/${row?.id}`);
+                          }}
+                        />
                       </TableCell>
                     </TableRow>
                   ))
@@ -198,20 +176,16 @@ export default function TableClausula({ inativos }) {
             onChangeRowsPerPage={onChangeRowsPerPage}
           />
         )}
-      </Card>
 
-      {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
-      {modalGaji9 === 'clonar-clausula' && <ClausulaForm onClose={() => dispatch(closeModal())} />}
-      {modalGaji9 === 'preview-minuta' && <PreviewMinutaForm onClose={() => dispatch(closeModal())} />}
-      {modalGaji9 === 'view-clausula' && <DetalhesGaji9 closeModal={() => dispatch(closeModal())} item="clausulas" />}
-      {modalGaji9 === 'eliminar-clausula' && (
-        <DialogConfirmar
-          isSaving={isSaving}
-          desc="eliminar esta cláusula"
-          handleOk={() => confirmDelete()}
-          onClose={() => dispatch(setModal({ item: '', dados: null }))}
-        />
-      )}
+        {modalGaji9 === 'preview-minuta' && <PreviewMinutaForm onClose={() => dispatch(setModal())} />}
+        {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={() => dispatch(setModal())} clausula={null} />}
+        {(isLoadingDoc || previewFile) && (
+          <DialogPreviewDoc
+            onClose={() => dispatch(getSuccess({ item: 'previewFile', dados: '' }))}
+            params={{ url: previewFile, isLoading: isLoadingDoc, titulo: 'Previsualização Minuta' }}
+          />
+        )}
+      </Card>
     </>
   );
 }

@@ -35,7 +35,7 @@ export default function Controle() {
               { value: 'Devoluções', component: <TableControle from="Devoluções" /> },
             ]
           : []),
-        ...(isAdmin || isAuditoria || cc?.uo?.label === 'DOP-CE' || cc?.uo?.tipo === 'Agências'
+        ...(isAdmin || isAuditoria || cc?.uo_label === 'DOP-CE' || cc?.uo_tipo === 'Agências'
           ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
           : []),
         ...(isAdmin || isAuditoria || temAcesso(['con-100'], meusacessos)
@@ -45,7 +45,7 @@ export default function Controle() {
           ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
           : []),
       ] || [],
-    [meusAmbientes, meusacessos, isAdmin, isAuditoria, cc?.uo]
+    [isAdmin, isAuditoria, meusAmbientes, cc?.uo_label, cc?.uo_tipo, meusacessos]
   );
 
   const [currentTab, setCurrentTab] = useState(

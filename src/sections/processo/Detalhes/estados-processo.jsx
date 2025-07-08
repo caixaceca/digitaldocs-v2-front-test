@@ -8,8 +8,8 @@ import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { getFile } from '../../../utils/getFile';
 import { baralharString } from '../../../utils/formatText';
+import { getIntranetFile } from '../../../utils/formatFile';
 import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
 // redux
@@ -257,7 +257,7 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
       <AvatarBedge id={id}>
-        <MyAvatar src={getFile('colaborador', foto)} />
+        <MyAvatar src={getIntranetFile('colaborador', foto)} />
       </AvatarBedge>
       <Stack
         useFlexGap

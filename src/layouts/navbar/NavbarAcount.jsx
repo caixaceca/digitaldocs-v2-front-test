@@ -7,8 +7,8 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
 //
-import { getFile } from '../../utils/getFile';
 import { useSelector } from '../../redux/store';
+import { getIntranetFile } from '../../utils/formatFile';
 import { useAuthContext } from '../../providers/auth-provider';
 // components
 import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
@@ -41,7 +41,11 @@ export default function NavbarAccount({ isCollapse }) {
       )}
       <RootStyle sx={{ ...(isCollapse && { p: 1 }) }}>
         <AvatarBedge id={cc?.id}>
-          <MyAvatar name={account?.name} sx={{ height: 44, width: 44 }} src={getFile('colaborador', cc?.foto_disk)} />
+          <MyAvatar
+            name={account?.name}
+            sx={{ height: 44, width: 44 }}
+            src={getIntranetFile('colaborador', cc?.foto_anexo)}
+          />
         </AvatarBedge>
         <Box sx={{ ml: 2, ...(isCollapse && { ml: 0, width: 0 }) }}>
           <Typography variant="subtitle2" noWrap sx={{ maxWidth: 170 }}>

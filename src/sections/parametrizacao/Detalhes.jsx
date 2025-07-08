@@ -324,7 +324,7 @@ function Notificacoes({ destinatarios, id }) {
 export function Resgisto({ label, por = '', em = '' }) {
   return por || em ? (
     <Stack spacing={0.5}>
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center' }}>
         {label}:
       </Typography>
       {!!por && <Criado tipo="user" value={por} baralhar caption />}

@@ -53,7 +53,7 @@ export default function Disposicao() {
   const { frase, cc } = useSelector((state) => state.intranet);
 
   const handleChange = (event) => {
-    const msg = `${saudacao()} ${cc?.perfil?.nome}!`;
+    const msg = `${saudacao()} ${cc?.nome}!`;
     dispatch(createItem('disposicao', JSON.stringify({ disposicao: event.target.value }), { msg }));
   };
 

@@ -79,12 +79,12 @@ export default function TableControle({ from }) {
     if (uosList?.length > 0 && !uosList?.map(({ id }) => id)?.includes(uo?.id)) {
       const currentUo =
         uosList?.find(({ id }) => id === Number(localStorage.getItem('uoC'))) ||
-        uosList?.find(({ id }) => id === cc?.uo?.id) ||
+        uosList?.find(({ id }) => id === cc?.uo_id) ||
         uosList[0];
       localStorage.setItem('uoC', currentUo.id || '');
       setUo(currentUo);
     }
-  }, [uosList, uo, cc?.uo?.id]);
+  }, [uosList, uo, cc?.uo_id]);
 
   useEffect(() => {
     if ((from === 'Entradas' || from === 'Devoluções') && uo?.id && dataValido(dataf) && dataValido(datai)) {
@@ -120,9 +120,8 @@ export default function TableControle({ from }) {
   const isNotFound = !dataFiltered.length;
 
   useEffect(() => {
-    if (colaboradoresList?.length === 1 && cc?.perfil?.nome === colaboradoresList[0])
-      setColaborador(colaboradoresList[0]);
-  }, [cc?.perfil?.nome, colaboradoresList]);
+    if (colaboradoresList?.length === 1 && cc?.nome === colaboradoresList[0]) setColaborador(colaboradoresList[0]);
+  }, [cc?.nome, colaboradoresList]);
 
   useEffect(() => {
     setPage(0);

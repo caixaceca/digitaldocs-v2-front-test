@@ -1,7 +1,7 @@
 // @mui
 import Avatar from '@mui/material/Avatar';
 // utils
-import { BASEURL } from '../../utils/apisUrl';
+import { getIntranetFile } from '../../utils/formatFile';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -12,11 +12,7 @@ export default function Aplicacoes({ minhasAplicacoes = [] }) {
         path: link,
         title: nome,
         icon: (
-          <Avatar
-            alt={nome}
-            sx={{ p: 0.25, width: '25px', height: '25px' }}
-            src={`${BASEURL}/aplicacao/logo/${logo}`}
-          />
+          <Avatar alt={nome} sx={{ p: 0.25, width: '25px', height: '25px' }} src={getIntranetFile('aplicacao', logo)} />
         ),
       }));
 }

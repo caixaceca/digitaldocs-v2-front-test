@@ -11,6 +11,13 @@ export const shapeNumber = (label, sit1, sit2, item) =>
     otherwise: () => Yup.mixed().notRequired(),
   });
 
+export const shapeNumberZero = (label, sit1, sit2, item) =>
+  Yup.mixed().when(item, {
+    is: (val) => val === sit1 || (sit2 && val === sit2),
+    then: () => Yup.number().min(0).required().label(label),
+    otherwise: () => Yup.mixed().notRequired(),
+  });
+
 export const shapeText = (label, sit1, sit2, item) =>
   Yup.mixed().when(item, {
     is: (val) => val === sit1 || (sit2 && val === sit2),

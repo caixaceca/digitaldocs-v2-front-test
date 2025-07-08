@@ -36,11 +36,11 @@ export function emailCheck(mail, check) {
 export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
   let colaboradoresList = [];
   if (isAdmin || cc?.nomeacao === 'Administrador Executivo') colaboradoresList = colaboradores;
-  else if (cc?.uo?.label === 'DCN')
+  else if (cc?.uo_label === 'DCN')
     colaboradoresList = colaboradores?.filter(({ uo }) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Norte');
-  else if (cc?.uo?.label === 'DCS')
+  else if (cc?.uo_label === 'DCS')
     colaboradoresList = colaboradores?.filter(({ uo }) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Sul');
-  else if (cc?.uo?.label === 'DOP') colaboradoresList = colaboradores?.filter(({ uo }) => uo?.label?.includes('DOP'));
+  else if (cc?.uo_label === 'DOP') colaboradoresList = colaboradores?.filter(({ uo }) => uo?.label?.includes('DOP'));
   else if (UosGerente(meusAmbientes)?.length > 0)
     colaboradoresList = colaboradores?.filter(({ uo }) => UosGerente(meusAmbientes)?.includes(uo?.id));
   else if (temNomeacao(cc)) colaboradoresList = colaboradores?.filter(({ uo }) => uo?.id === cc?.uo_id);
@@ -54,11 +54,11 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
 export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
   let uosList = [];
   if (acessoAll || cc?.nomeacao === 'Administrador Executivo') uosList = uos;
-  else if (cc?.uo?.label === 'DCN')
+  else if (cc?.uo_label === 'DCN')
     uosList = uos?.filter(({ tipo, morada }) => tipo === 'Agências' && morada?.regiao === 'Norte');
-  else if (cc?.uo?.label === 'DCS')
+  else if (cc?.uo_label === 'DCS')
     uosList = uos?.filter(({ tipo, morada }) => tipo === 'Agências' && morada?.regiao === 'Sul');
-  else if (cc?.uo?.label === 'DOP') uosList = uos?.filter(({ label }) => label?.includes('DOP'));
+  else if (cc?.uo_label === 'DOP') uosList = uos?.filter(({ label }) => label?.includes('DOP'));
   else if (meusAmbientes?.length > 0)
     uosList = uos?.filter(({ id }) => meusAmbientes?.map(({ uo_id: uoId }) => uoId)?.includes(Number(id)));
   else uosList = uos?.filter(({ id }) => id === cc?.uo_id);
@@ -75,9 +75,9 @@ export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
   const uosDCN = uos?.filter((uo) => uo?.tipo === 'Agências' && uo?.morada?.regiao === 'Norte')?.map(({ id }) => id);
 
   if (isAdmin || cc?.nomeacao === 'Administrador Executivo') estadosList = estados;
-  else if (cc?.uo?.label === 'DCN') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCN?.includes(uoId));
-  else if (cc?.uo?.label === 'DCS') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCS?.includes(uoId));
-  else if (cc?.uo?.label === 'DOP') estadosList = estados?.filter(({ uo_id: uoId }) => uosDOP?.includes(uoId));
+  else if (cc?.uo_label === 'DCN') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCN?.includes(uoId));
+  else if (cc?.uo_label === 'DCS') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCS?.includes(uoId));
+  else if (cc?.uo_label === 'DOP') estadosList = estados?.filter(({ uo_id: uoId }) => uosDOP?.includes(uoId));
   else estadosList = meusAmbientes?.filter((item) => item?.id > 0);
 
   return applySort(

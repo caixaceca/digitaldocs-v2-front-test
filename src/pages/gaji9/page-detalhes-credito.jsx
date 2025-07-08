@@ -33,6 +33,7 @@ export default function PageCreditoDetalhes() {
   const { themeStretch } = useSettings();
   const [currentTab, setCurrentTab] = useState('Dados');
   const { temPermissao, isGerente } = usePermissao();
+  const permissao = isGerente || temPermissao(['READ_CREDITO']);
 
   const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving, done } = useSelector(
     (state) => state.gaji9
@@ -41,8 +42,8 @@ export default function PageCreditoDetalhes() {
 
   useEffect(() => {
     dispatch(getSuccess({ item: 'credito', dados: null }));
-    if (id && (isGerente || temPermissao(['READ_CREDITO']))) dispatch(getFromGaji9('credito', { id }));
-  }, [dispatch, id, isGerente, temPermissao]);
+    if (id && permissao) dispatch(getFromGaji9('credito', { id }));
+  }, [dispatch, id, permissao]);
 
   const tabsList = [
     { value: 'Dados', component: <InfoCredito /> },
@@ -85,7 +86,7 @@ export default function PageCreditoDetalhes() {
           action={
             credito?.ativo &&
             !credito?.contratado &&
-            (isGerente || temPermissao(['READ_CREDITO'])) && (
+            permissao && (
               <Stack direction="row" spacing={0.75} alignItems="center">
                 {currentTab === 'Dados' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
                   <>

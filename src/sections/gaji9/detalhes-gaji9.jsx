@@ -1,14 +1,12 @@
 import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
-import ListItem from '@mui/material/ListItem';
 import TableBody from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { colorLabel } from '../../utils/getColorPresets';
@@ -55,21 +53,16 @@ function DetalhesTab({ item, dados }) {
 
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
-    ...((item === 'clausulas' && [
-      { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
-      { value: 'Tipos de titular', component: <Relacionados id={dados?.id} dados={dados?.tipos_titulares} /> },
-      { value: 'Segmentos', component: <Relacionados item="Segmento" id={dados?.id} dados={dados?.segmentos} /> },
+    ...((item === 'segmentos' && [
+      {
+        value: 'Componentes',
+        component: <Relacionados item="Componente" id={dados?.id} dados={dados?.componentes} />,
+      },
+      {
+        value: 'Finalidades',
+        component: <Relacionados item="Finalidade" id={dados?.id} dados={dados?.finalidades} />,
+      },
     ]) ||
-      (item === 'segmentos' && [
-        {
-          value: 'Componentes',
-          component: <Relacionados item="Componente" id={dados?.id} dados={dados?.componentes} />,
-        },
-        {
-          value: 'Finalidades',
-          component: <Relacionados item="Finalidade" id={dados?.id} dados={dados?.finalidades} />,
-        },
-      ]) ||
       (item === 'finalidades' && [
         { value: 'Segmentos', component: <Relacionados item="Segmento" na id={dados?.id} dados={dados?.segmentos} /> },
       ]) ||
@@ -95,7 +88,7 @@ function DetalhesTab({ item, dados }) {
       <TabsWrapperSimple
         tabsList={tabsList}
         currentTab={currentTab}
-        sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
+        sx={{ my: 2, boxShadow: 'none' }}
         changeTab={(_, newValue) => setCurrentTab(newValue)}
       />
       <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
@@ -142,136 +135,124 @@ export function DetalhesContent({ dados = null, item = '' }) {
         <>
           {dados ? (
             <>
-              <List>
-                <ListItem disableGutters divider sx={{ pb: 0 }}>
-                  <Typography variant="subtitle1">Dados</Typography>
-                </ListItem>
-                <Table size="small">
-                  <TableBody>
-                    <TableRowItem title="ID:" text={dados?.id} />
-                    <TableRowItem title="Utilizador ID:" text={dados?.utilizador_id} />
-                    <TableRowItem title="Versão:" text={dados?.versao} />
-                    <TableRowItem title="Situação:" text={dados?.situacao} />
-                    {item === 'Minuta' && (
-                      <TableRowItem
-                        title="Estado:"
-                        item={<Label color={cor || 'default'}>{est || 'Desconhecido'}</Label>}
-                      />
-                    )}
+              <Table size="small" sx={{ my: 1 }}>
+                <TableBody>
+                  <TableRowItem title="ID:" text={dados?.id} />
+                  <TableRowItem title="Utilizador ID:" text={dados?.utilizador_id} />
+                  <TableRowItem title="Versão:" text={dados?.versao} />
+                  <TableRowItem title="Situação:" text={dados?.situacao} />
+                  {item === 'Minuta' && (
                     <TableRowItem
-                      title="Secção:"
-                      text={
-                        (dados?.solta && 'Solta') ||
-                        (dados?.seccao_identificacao && 'Secção de identificação') ||
-                        (dados?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
-                        ''
-                      }
+                      title="Estado:"
+                      item={<Label color={cor || 'default'}>{est || 'Desconhecido'}</Label>}
                     />
-                    <TableRowItem title="Nº entidade:" text={dados?.numero} />
-                    <TableRowItem title="Sigla:" text={dados?.sigla} />
-                    <TableRowItem title="Código:" text={dados?.codigo} />
-                    <TableRowItem title="Nome:" text={dados?.nome} />
-                    <TableRowItem title="Tipo:" text={dados?.tipo} />
-                    <TableRowItem title="Designação:" text={dados?.designacao} />
-                    <TableRowItem title="Descrição:" text={dados?.descricao} />
-                    <TableRowItem title="Telefone:" text={dados?.telefone} />
-                    <TableRowItem title="Email:" text={dados?.email || dados?.utilizador_email} />
-                    <TableRowItem title="Capital social:" text={dados?.capital_social} />
-                    <TableRowItem title="Balcão:" text={dados?.balcao} />
-                    <TableRowItem title="Função:" text={dados?.funcao || dados?._role} />
-                    <TableRowItem title="Atua como:" text={dados?.atua_como} />
-                    <TableRowItem title="Estado civil:" text={dados?.estado_civil} />
-                    <TableRowItem title="Documento:" text={dados?.documento} />
-                    {dados?.descritivo && (
-                      <TableRowItem
-                        title="Descritivo:"
-                        text={`${dados?.descritivo}${dados?.documento_tipo ? ` (${dados?.documento_tipo})` : ''}`}
-                      />
-                    )}
-                    {dados?.numero_ordem > -1 && (
-                      <TableRowItem
-                        title="Nº de cláusula:"
-                        text={`${dados?.numero_ordem}${dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''}`}
-                      />
-                    )}
-                    <TableRowItem title="Doc. identificação:" text={dados?.cni} />
-                    <TableRowItem title="Local emissão:" text={dados?.local_emissao || dados?.emissor} />
-                    <TableRowItem title="Prefixo:" text={dados?.prefixo} />
-                    <TableRowItem title="Sufixo:" text={dados?.sufixo} />
-                    <TableRowItem title="Rótulo:" text={dados?.rotulo} />
-                    <TableRowItem title="Minuta:" text={dados?.minuta} />
-                    <TableRowItem title={item === 'clausulas' ? 'Epígrafe:' : 'Título:'} text={dados?.titulo} />
-                    <TableRowItem title="Subtítulo:" text={dados?.subtitulo} />
-                    <TableRowItem title="Representante:" text={dados?.representante} />
-                    <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
-                    <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
-                    <TableRowItem title="Tipo de titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
-                    <TableRowItem title="Tipo de garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
+                  )}
+                  <TableRowItem
+                    title="Secção:"
+                    text={
+                      (dados?.solta && 'Solta') ||
+                      (dados?.seccao_identificacao && 'Secção de identificação') ||
+                      (dados?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
+                      ''
+                    }
+                  />
+                  <TableRowItem title="Nº entidade:" text={dados?.numero} />
+                  <TableRowItem title="Sigla:" text={dados?.sigla} />
+                  <TableRowItem title="Código:" text={dados?.codigo} />
+                  <TableRowItem title="Nome:" text={dados?.nome} />
+                  <TableRowItem title="Tipo:" text={dados?.tipo} />
+                  <TableRowItem title="Designação:" text={dados?.designacao} />
+                  <TableRowItem title="Descrição:" text={dados?.descricao} />
+                  <TableRowItem title="Telefone:" text={dados?.telefone} />
+                  <TableRowItem title="Email:" text={dados?.email || dados?.utilizador_email} />
+                  <TableRowItem title="Capital social:" text={dados?.capital_social} />
+                  <TableRowItem title="Balcão:" text={dados?.balcao} />
+                  <TableRowItem title="Função:" text={dados?.funcao || dados?._role} />
+                  <TableRowItem title="Atua como:" text={dados?.atua_como} />
+                  <TableRowItem title="Estado civil:" text={dados?.estado_civil} />
+                  <TableRowItem title="Documento:" text={dados?.documento} />
+                  {dados?.descritivo && (
                     <TableRowItem
-                      title="Subtipo da garantia:"
-                      text={dados?.subtipo_garantia}
-                      id={dados?.subtipo_garantia_id}
+                      title="Descritivo:"
+                      text={`${dados?.descritivo}${dados?.documento_tipo ? ` (${dados?.documento_tipo})` : ''}`}
                     />
-                    <TableRowItem title="Segmento:" text={dados?.segmento} id={dados?.segmento_id} />
-                    <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
-                    <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
-                    <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
-                    <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />
-                    <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />
-                    <TableRowItem title="Data emissão:" text={ptDateTime(dados?.data_termino)} />
-                    <TableRowItem title="NIF:" text={dados?.nif} />
-                    <TableRowItem title="Freguesia:" text={dados?.freguesia} />
-                    <TableRowItem title="Freguesia na banca:" text={dados?.freguesia_banca} />
-                    <TableRowItem title="Concelho:" text={dados?.concelho} />
-                    <TableRowItem title="Naturalidade na banca:" text={dados?.naturalidade_banca} />
-                    <TableRowItem title="Residência:" text={dados?.residencia} />
-                    <TableRowItem title="Naturalidade:" text={dados?.naturalidade} />
-                    <TableRowItem title="Ilha:" text={dados?.ilha} />
-                    <TableRowItem title="Região:" text={dados?.regiao} />
+                  )}
+                  {dados?.numero_ordem > -1 && (
+                    <TableRowItem
+                      title="Nº de cláusula:"
+                      text={`${dados?.numero_ordem}${dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''}`}
+                    />
+                  )}
+                  <TableRowItem title="Doc. identificação:" text={dados?.cni} />
+                  <TableRowItem title="Local emissão:" text={dados?.local_emissao || dados?.emissor} />
+                  <TableRowItem title="Prefixo:" text={dados?.prefixo} />
+                  <TableRowItem title="Sufixo:" text={dados?.sufixo} />
+                  <TableRowItem title="Rótulo:" text={dados?.rotulo} />
+                  <TableRowItem title="Minuta:" text={dados?.minuta} />
+                  <TableRowItem title={item === 'clausulas' ? 'Epígrafe:' : 'Título:'} text={dados?.titulo} />
+                  <TableRowItem title="Subtítulo:" text={dados?.subtitulo} />
+                  <TableRowItem title="Representante:" text={dados?.representante} />
+                  <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
+                  <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
+                  <TableRowItem title="Tipo de titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
+                  <TableRowItem title="Tipo de garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
+                  <TableRowItem
+                    title="Subtipo da garantia:"
+                    text={dados?.subtipo_garantia}
+                    id={dados?.subtipo_garantia_id}
+                  />
+                  <TableRowItem title="Segmento:" text={dados?.segmento} id={dados?.segmento_id} />
+                  <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
+                  <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
+                  <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
+                  <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />
+                  <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />
+                  <TableRowItem title="Data emissão:" text={ptDateTime(dados?.data_termino)} />
+                  <TableRowItem title="NIF:" text={dados?.nif} />
+                  <TableRowItem title="Freguesia:" text={dados?.freguesia} />
+                  <TableRowItem title="Freguesia na banca:" text={dados?.freguesia_banca} />
+                  <TableRowItem title="Concelho:" text={dados?.concelho} />
+                  <TableRowItem title="Naturalidade na banca:" text={dados?.naturalidade_banca} />
+                  <TableRowItem title="Residência:" text={dados?.residencia} />
+                  <TableRowItem title="Naturalidade:" text={dados?.naturalidade} />
+                  <TableRowItem title="Ilha:" text={dados?.ilha} />
+                  <TableRowItem title="Região:" text={dados?.regiao} />
 
-                    <TableRowItem title="Nº matricula:" text={dados?.num_matricula} />
-                    <TableRowItem title="Local matricula:" text={dados?.local_matricula} />
-                    <TableRowItem title="Email:" text={dados?.morada_eletronico} />
-                    <TableRowItem title="Endereço:" text={dados?.morada_sede} />
-                    {'consumidor' in dados && (
-                      <TableRowItem title="Consumidor:" item={<LabelSN item={dados?.consumidor} />} />
-                    )}
-                    {'instituicao' in dados && (
-                      <TableRowItem title="Intituição:" item={<LabelSN item={dados?.instituicao} />} />
-                    )}
-                    {'condicional' in dados && (
-                      <TableRowItem title="Condicional:" item={<LabelSN item={dados?.condicional} />} />
-                    )}
-                    <TableRowItem title="Entrada em vigor:" text={ptDateTime(dados?.data_vigor)} />
-                    <TableRowItem title="Publicado por:" text={dados?.cc_vigor} />
-                    <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
-                    <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
-                    <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
-                    {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
-                    <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
-                  </TableBody>
-                </Table>
-              </List>
-              {item !== 'componentes' && (
-                <List>
-                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                    <Typography variant="subtitle1">Registo</Typography>
-                  </ListItem>
-                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
-                    <Resgisto
-                      label={item === 'titulares' ? 'Carregado' : 'Criado'}
-                      em={dados?.criado_em || dados?.carregado_em}
-                      por={dados?.criador || dados?.criado_por || dados?.carregado_por}
-                    />
-                    <Resgisto
-                      label={item === 'titulares' ? 'Recaregado' : 'Modificado'}
-                      em={dados?.modificado_em || dados?.recarregado_em}
-                      por={dados?.modificador || dados?.modificado_por || dados?.recarregado_por}
-                    />
-                    <Resgisto label="Entrega" em={dados?.entrega_em} por={dados?.entrega_por} />
-                  </Stack>
-                </List>
-              )}
+                  <TableRowItem title="Nº matricula:" text={dados?.num_matricula} />
+                  <TableRowItem title="Local matricula:" text={dados?.local_matricula} />
+                  <TableRowItem title="Email:" text={dados?.morada_eletronico} />
+                  <TableRowItem title="Endereço:" text={dados?.morada_sede} />
+                  {'consumidor' in dados && (
+                    <TableRowItem title="Consumidor:" item={<LabelSN item={dados?.consumidor} />} />
+                  )}
+                  {'instituicao' in dados && (
+                    <TableRowItem title="Intituição:" item={<LabelSN item={dados?.instituicao} />} />
+                  )}
+                  <TableRowItem title="Entrada em vigor:" text={ptDateTime(dados?.data_vigor)} />
+                  <TableRowItem title="Publicado por:" text={dados?.cc_vigor} />
+                  <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
+                  <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
+                  <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
+                  {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
+                  <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
+                </TableBody>
+              </Table>
+              <Stack>
+                <Divider sx={{ my: 1 }} />
+                <Stack useFlexGap flexWrap="wrap" direction="row" spacing={3} justifyContent="center">
+                  <Resgisto
+                    label={item === 'titulares' ? 'Carregado' : 'Criado'}
+                    em={dados?.criado_em || dados?.carregado_em}
+                    por={dados?.criador || dados?.criado_por || dados?.carregado_por}
+                  />
+                  <Resgisto
+                    label={item === 'titulares' ? 'Recaregado' : 'Modificado'}
+                    em={dados?.modificado_em || dados?.recarregado_em}
+                    por={dados?.modificador || dados?.modificado_por || dados?.recarregado_por}
+                  />
+                  <Resgisto label="Entrega" em={dados?.entrega_em} por={dados?.entrega_por} />
+                </Stack>
+              </Stack>
             </>
           ) : (
             <SearchNotFoundSmall message="Item não disponível..." />

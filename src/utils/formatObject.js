@@ -167,3 +167,11 @@ export function getLocalStorageArray(key) {
     return [];
   }
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function contarIdsValidos(ids, dados) {
+  if (!ids || !dados || !ids?.length || !dados?.length) return 0;
+  const filtrados = dados.filter(({ id }) => ids.includes(id));
+  return filtrados.length;
+}

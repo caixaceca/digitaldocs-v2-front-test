@@ -177,13 +177,12 @@ function Actions({ inativos, setInativos, label = '' }) {
           <DefaultAction button label="Adicionar" onClick={() => dispatch(openModal('add'))} />
         )}
       {label === 'Cláusulas' && temPermissao(['CREATE_CLAUSULA']) && (
-        <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: 'form-clausula' }))} />
+        <>
+          <DefaultAction button label="Prév. minuta" onClick={() => dispatch(setModal({ item: 'preview-minuta' }))} />
+          <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ item: 'form-clausula' }))} />
+        </>
       )}
       {label === 'Representantes' && temPermissao(['READ_INSTITUICAO']) && <ButtonInfoCaixa />}
-
-      {label === 'Cláusulas' && (
-        <DefaultAction button label="Pré-visualizar" onClick={() => dispatch(setModal({ item: 'preview-minuta' }))} />
-      )}
     </Stack>
   );
 }

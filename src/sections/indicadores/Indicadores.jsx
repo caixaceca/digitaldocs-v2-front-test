@@ -16,9 +16,9 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import LinearProgress from '@mui/material/LinearProgress';
 // utils
-import { getFile } from '../../utils/getFile';
 import { baralharString } from '../../utils/formatText';
 import { setItemValue } from '../../utils/formatObject';
+import { getIntranetFile } from '../../utils/formatFile';
 import { fYear, fMonthYear } from '../../utils/formatTime';
 import { fNumber, fPercent, fNumber2 } from '../../utils/formatNumber';
 // redux
@@ -238,7 +238,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
         >
           <MyAvatar
             name={colaborador?.perfil?.displayName}
-            src={getFile('colaborador', colaborador?.foto_disk)}
+            src={getIntranetFile('colaborador', colaborador?.foto_disk)}
             sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
           />
           <Stack>

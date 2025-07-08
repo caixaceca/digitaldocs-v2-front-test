@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -21,13 +22,14 @@ import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { vdt } from '../../../utils/formatObject';
+import { PATH_DIGITALDOCS } from '../../../routes/paths';
+import { numeroParaLetra } from '../../../utils/formatText';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { updateDados, resetDados, backStep, gotoStep } from '../../../redux/slices/stepper';
 import { getSuccess, getFromGaji9, createItem, updateItem } from '../../../redux/slices/gaji9';
 // components
 import {
-  RHFSwitch,
   FormProvider,
   RHFTextField,
   RHFNumberField,
@@ -40,8 +42,6 @@ import { DialogTitleAlt, DialogConfirmar } from '../../../components/CustomDialo
 import { AddItem, DefaultAction, ButtonsStepper } from '../../../components/Actions';
 //
 import { sitClausulas } from '../../../_mock';
-import { ItemComponent } from '../form-gaji9';
-import { LabelSN } from '../../parametrizacao/Detalhes';
 import { listaTitrulares, listaGarantias, subTiposGarantia } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -50,15 +50,21 @@ export const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function ClausulaForm({ onClose }) {
+export default function ClausulaForm({ onClose, clausula = null }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { activeStep } = useSelector((state) => state.stepper);
-  const { isEdit, modalGaji9, selectedItem } = useSelector((state) => state.gaji9);
+  const { isEdit, modalGaji9, cid, done } = useSelector((state) => state.gaji9);
 
   const onClose1 = useCallback(() => {
     onClose();
     dispatch(resetDados());
   }, [onClose, dispatch]);
+
+  useEffect(() => {
+    if (cid?.id && (done === 'Cláusula adicionada' || done === 'Cláusula clonada'))
+      navigate(`${PATH_DIGITALDOCS.gaji9.root}/clausula/${cid?.id}`);
+  }, [cid?.id, done, navigate]);
 
   useEffect(() => {
     dispatch(getFromGaji9('variaveis'));
@@ -69,7 +75,7 @@ export default function ClausulaForm({ onClose }) {
       <DialogTitleAlt
         onClose={() => onClose1()}
         title={`${(modalGaji9 === 'clonar-clausula' && 'Clonar') || (isEdit && 'Editar') || 'Adicionar'} cláusula`}
-        stepper={
+        content={
           <>
             <Steps activeStep={activeStep} steps={['Identificação', 'Conteúdo', 'Números', 'Resumo']} sx={{ mt: 3 }} />
             {(activeStep === 1 || activeStep === 2) && <SearchVariavel />}
@@ -77,23 +83,19 @@ export default function ClausulaForm({ onClose }) {
         }
       />
       <DialogContent>
-        <ItemComponent item={selectedItem} rows={3}>
-          {activeStep === 0 && <Identificacao onClose={onClose1} />}
-          {activeStep === 1 && <Conteudo />}
-          {activeStep === 2 && <Numeros />}
-          {activeStep === 3 && <Resumo onClose={onClose1} />}
-        </ItemComponent>
+        {activeStep === 0 && <Identificacao onClose={onClose1} clausula={clausula} />}
+        {activeStep === 1 && <Conteudo clausula={clausula} />}
+        {activeStep === 2 && <Numeros clausula={clausula} />}
+        {activeStep === 3 && <Resumo clausula={clausula} onClose={onClose1} />}
       </DialogContent>
     </Dialog>
   );
 }
 
-function Identificacao({ onClose }) {
+function Identificacao({ onClose, clausula }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { isEdit, tiposTitulares, tiposGarantias, segmentos, tipoGarantia, selectedItem } = useSelector(
-    (state) => state.gaji9
-  );
+  const { isEdit, tiposTitulares, tiposGarantias, segmentos, tipoGarantia } = useSelector((state) => state.gaji9);
 
   const titularCl = localStorage.getItem('titularCl');
   const garantiaCl = localStorage.getItem('garantiaCl');
@@ -105,26 +107,25 @@ function Identificacao({ onClose }) {
 
   const defaultValues = useMemo(
     () => ({
-      condicional: dadosStepper?.condicional ?? !!selectedItem?.condicional,
-      situacao: dadosStepper?.situacao ?? sitClausulas?.find(({ id }) => id === selectedItem?.situacao),
-      segmento: dadosStepper?.segmento || getItem(segmentosList, selectedItem?.segmento_id, segmentoCl),
-      titular: dadosStepper?.titular || getItem(titularesList, selectedItem?.tipo_titular_id, titularCl),
-      garantia: dadosStepper?.garantia || getItem(garantiasList, selectedItem?.tipo_garantia_id, garantiaCl),
+      situacao: dadosStepper?.situacao ?? sitClausulas?.find(({ id }) => id === clausula?.situacao),
+      segmento: dadosStepper?.segmento || getItem(segmentosList, clausula?.segmento_id, segmentoCl),
+      titular: dadosStepper?.titular || getItem(titularesList, clausula?.tipo_titular_id, titularCl),
+      garantia: dadosStepper?.garantia || getItem(garantiasList, clausula?.tipo_garantia_id, garantiaCl),
       subtipoGarantia:
         dadosStepper?.subtipoGarantia ||
-        (selectedItem?.subtipo_garantia_id && {
-          id: selectedItem?.subtipo_garantia_id,
-          label: selectedItem?.subtipo_garantia,
+        (clausula?.subtipo_garantia_id && {
+          id: clausula?.subtipo_garantia_id,
+          label: clausula?.subtipo_garantia,
         }) ||
         null,
       seccao:
         dadosStepper?.seccao ||
-        (selectedItem?.solta && 'Solta') ||
-        (selectedItem?.seccao_identificacao && 'Secção de identificação') ||
-        (selectedItem?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
+        (clausula?.solta && 'Solta') ||
+        (clausula?.seccao_identificacao && 'Secção de identificação') ||
+        (clausula?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
         null,
     }),
-    [dadosStepper, selectedItem, titularesList, garantiasList, segmentosList, titularCl, garantiaCl, segmentoCl]
+    [dadosStepper, clausula, titularesList, garantiasList, segmentosList, titularCl, garantiaCl, segmentoCl]
   );
 
   const methods = useForm({ defaultValues });
@@ -134,7 +135,7 @@ function Identificacao({ onClose }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
+  }, [clausula]);
 
   useEffect(() => {
     getSuccess({ item: 'tipoGarantia', dados: null });
@@ -161,9 +162,6 @@ function Identificacao({ onClose }) {
                 label="Secção"
                 options={['Solta', 'Secção de identificação', 'Secção de identificação Caixa']}
               />
-              <Stack sx={{ px: isEdit ? 2 : 5 }}>
-                <RHFSwitch name="condicional" label="Condicional" />
-              </Stack>
             </Stack>
           </Stack>
           <RHFAutocompleteObj name="titular" label="Tipo de titular" options={titularesList} />
@@ -189,10 +187,9 @@ function Identificacao({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Conteudo() {
+function Conteudo({ clausula }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { selectedItem } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
     numero_ordem: Yup.number().min(0).integer().required().label('Nº de cláusula'),
@@ -203,11 +200,11 @@ function Conteudo() {
 
   const defaultValues = useMemo(
     () => ({
-      titulo: dadosStepper?.titulo || selectedItem?.titulo || '',
-      conteudo: dadosStepper?.conteudo || selectedItem?.conteudo || '',
-      numero_ordem: dadosStepper?.numero_ordem || selectedItem?.numero_ordem || 1,
+      titulo: dadosStepper?.titulo || clausula?.titulo || '',
+      conteudo: dadosStepper?.conteudo || clausula?.conteudo || '',
+      numero_ordem: dadosStepper?.numero_ordem || clausula?.numero_ordem || 1,
     }),
-    [dadosStepper, selectedItem]
+    [dadosStepper, clausula]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -237,10 +234,9 @@ function Conteudo() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Numeros() {
+export function Numeros({ clausula }) {
   const dispatch = useDispatch();
   const [item, setItem] = useState(null);
-  const { selectedItem } = useSelector((state) => state.gaji9);
   const { dadosStepper } = useSelector((state) => state.stepper);
 
   const formSchema = Yup.object().shape({
@@ -258,8 +254,8 @@ function Numeros() {
   });
 
   const defaultValues = useMemo(
-    () => ({ alineas: dadosStepper?.alineas || selectedItem?.alineas || [] }),
-    [dadosStepper, selectedItem]
+    () => ({ alineas: dadosStepper?.alineas || clausula?.alineas || [] }),
+    [dadosStepper, clausula]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
@@ -366,18 +362,18 @@ export function Alineas({ numeroIndex }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Resumo({ onClose }) {
+function Resumo({ onClose, clausula }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const { isEdit, modalGaji9, selectedItem, isSaving } = useSelector((state) => state.gaji9);
+  const { isEdit, modalGaji9, isSaving } = useSelector((state) => state.gaji9);
 
   const handleSubmit = async () => {
     const formData = {
       ativo: true,
+      condicional: false,
       titulo: dadosStepper?.titulo,
       conteudo: dadosStepper?.conteudo,
       situacao: dadosStepper?.situacao?.id,
-      condicional: dadosStepper?.condicional,
       solta: dadosStepper?.seccao === 'Solta',
       segmento_id: dadosStepper?.segmento?.id,
       tipo_titular_id: dadosStepper?.titular?.id,
@@ -406,10 +402,11 @@ function Resumo({ onClose }) {
         : null),
     };
 
-    const msg = `Cláusula ${(modalGaji9 === 'clonar-clausula' && 'clonado') || (isEdit && 'atualizada') || 'adicionada'}`;
-    const params = { onClose, id: selectedItem?.id, msg };
+    const msg = `Cláusula ${(modalGaji9 === 'clonar-clausula' && 'clonada') || (isEdit && 'atualizada') || 'adicionada'}`;
+    const params = { onClose, id: clausula?.id, msg, getItem: 'clausula' };
+
     if (isEdit && modalGaji9 !== 'clonar-clausula') dispatch(updateItem('clausulas', JSON.stringify(formData), params));
-    else dispatch(createItem('clausulas', JSON.stringify(formData), params));
+    else dispatch(createItem('clausulas', JSON.stringify(formData), { ...params, getItem: 'cid' }));
   };
 
   return (
@@ -419,7 +416,6 @@ function Resumo({ onClose }) {
         <TableBody>
           <TableRowItem title="Situação :" text={dadosStepper?.situacao?.label} />
           <TableRowItem title="Secção :" text={dadosStepper?.seccao || 'Sem secção'} />
-          <TableRowItem title="Condicional:" item={<LabelSN item={dadosStepper?.condicional} />} />
           <TableRowItem title="Tipo de titular:" text={dadosStepper?.titular?.label} />
           <TableRowItem title="Tipo de garantia:" text={dadosStepper?.garantia?.label} />
           <TableRowItem title="Subtipo da garantia:" text={dadosStepper?.subtipoGarantia?.label} />
@@ -445,7 +441,7 @@ function Resumo({ onClose }) {
               </Typography>
               {alineas?.map(({ conteudo, numero_ordem: num }, index1) => (
                 <Stack direction="row" key={`res_alinea_${index}_sub_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                  <Typography variant="subtitle2">{num}.</Typography>
+                  <Typography variant="subtitle2">{numeroParaLetra(num)}.</Typography>
                   <Typography variant="body2" sx={{ textAlign: 'justify' }}>
                     {newLineText(conteudo)}
                   </Typography>
@@ -496,7 +492,7 @@ function TableRowItem({ title, text = '', item = null }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function SearchVariavel() {
+export function SearchVariavel() {
   const [variavel, setVariavel] = useState(null);
   const { variaveis } = useSelector((state) => state.gaji9);
   return (

@@ -67,7 +67,7 @@ export default function FormInfoCredito({ dados }) {
       obs: dadosStepper?.obs || processo?.observacao || '',
       cliente: dadosStepper?.cliente || processo?.cliente || null,
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
-      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
+      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
       // info credito
       garantia: dadosStepper?.garantia || credito?.garantia || '',
       taxa_juro: dadosStepper?.taxa_juro || credito?.taxa_juro || '',
@@ -83,7 +83,7 @@ export default function FormInfoCredito({ dados }) {
       tipo_titular_id:
         dadosStepper?.tipo_titular_id || tiposTitularList?.find(({ id }) => id === credito?.tipo_titular_id) || null,
     }),
-    [processo, credito, dadosStepper, componentesList, tiposTitularList, uos, estado?.uo_id, cc?.uo?.balcao, fluxo?.id]
+    [processo, credito, dadosStepper, componentesList, tiposTitularList, uos, estado?.uo_id, cc?.uo_balcao, fluxo?.id]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, reset, setValue, handleSubmit } = methods;
@@ -92,7 +92,7 @@ export default function FormInfoCredito({ dados }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processo, dadosStepper, componentesList, tiposTitularList, uos, estado?.uo_id, cc?.uo?.balcao, fluxo?.id]);
+  }, [processo, dadosStepper, componentesList, tiposTitularList, uos, estado?.uo_id, cc?.uo_balcao, fluxo?.id]);
 
   const onSubmit = async () => {
     submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);

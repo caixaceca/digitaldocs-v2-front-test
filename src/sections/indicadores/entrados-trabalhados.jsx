@@ -14,9 +14,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import LinearProgress from '@mui/material/LinearProgress';
 // utils
-import { getFile } from '../../utils/getFile';
 import { useToggle1 } from '../../hooks/useToggle';
 import { setItemValue } from '../../utils/formatObject';
+import { getIntranetFile } from '../../utils/formatFile';
 import { fNumber, fPercent } from '../../utils/formatNumber';
 import { ColaboradoresAcesso } from '../../utils/validarAcesso';
 // hooks
@@ -218,7 +218,7 @@ export function ColaboradorComp({ colaborador, colaboradoresList = [], colaborad
       >
         <MyAvatar
           name={colaborador?.label}
-          src={getFile('colaborador', colaborador?.foto)}
+          src={getIntranetFile('colaborador', colaborador?.foto)}
           sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
         />
         <Autocomplete

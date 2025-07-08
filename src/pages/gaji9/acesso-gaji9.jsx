@@ -22,13 +22,14 @@ export default function AcessoGaji9({ children, item }) {
     () =>
       (item === 'gestao' && utilizador) ||
       (item === 'minuta' && temPermissao(['READ_MINUTA'])) ||
+      (item === 'clausula' && temPermissao(['READ_CLAUSULA'])) ||
       (item === 'credito' && (isGerente || temPermissao(['READ_CREDITO']))),
     [item, temPermissao, isGerente, utilizador]
   );
 
   useEffect(() => {
-    if (!utilizador && cc?.perfil?.ad_id) dispatch(getFromGaji9('utilizador', { id: cc?.perfil?.ad_id }));
-  }, [dispatch, utilizador, cc?.perfil?.ad_id]);
+    if (!utilizador && cc?.ad_id) dispatch(getFromGaji9('utilizador', { id: cc?.ad_id }));
+  }, [dispatch, utilizador, cc?.ad_id]);
 
   useEffect(() => {
     if (temAcesso && item !== 'minuta') dispatch(getInfoGaji(item));

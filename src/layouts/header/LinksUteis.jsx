@@ -8,10 +8,9 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-// utils
-import { BASEURL } from '../../utils/apisUrl';
-// redux
+//
 import { useSelector } from '../../redux/store';
+import { getIntranetFile } from '../../utils/formatFile';
 // components
 import { IconButtonHeader } from '.';
 import Scrollbar from '../../components/Scrollbar';
@@ -51,7 +50,7 @@ export default function LinksUteis() {
               <Link target="_blank" key={link} href={link} rel="noreferrer">
                 <MenuItem divider sx={{ py: 1.25, px: 2.5, borderStyle: 'dotted' }}>
                   <ListItemIcon>
-                    <LogoApp variant="rounded" alt={nome} src={`${BASEURL}/aplicacao/logo/${logo}`} />
+                    <LogoApp variant="rounded" alt={nome} src={getIntranetFile('aplicacao', logo)} />
                   </ListItemIcon>
                   <ListItemText primaryTypographyProps={{ variant: 'body2', color: 'text.primary' }}>
                     {nome}

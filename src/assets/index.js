@@ -9,6 +9,7 @@ export {
   Eliminar,
   Detalhes,
   Resgatar,
+  IconClick,
   Contraste,
   Seguimento,
   ContrasteAlt,

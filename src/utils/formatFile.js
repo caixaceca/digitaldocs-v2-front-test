@@ -1,4 +1,4 @@
-// components
+import { INTRANETFILE } from './apisUrl';
 import { getIcon } from '../components/Image';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -122,4 +122,12 @@ export function downloadDoc(url, nome) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function getIntranetFile(item, file = '') {
+  let path = item === 'colaborador' ? '' : '/assets/Shape.svg';
+  if (file) path = `${INTRANETFILE}/stf/v2/media/download/${item}?filename=${file}`;
+  return path;
 }

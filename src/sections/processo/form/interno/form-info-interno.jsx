@@ -74,7 +74,7 @@ export default function FormInfoInterno({ dados }) {
       data_inicio: dadosStepper?.data_inicio || fillData(processo?.data_inicio, null),
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
-      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo?.balcao,
+      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
       data_arquivamento: dadosStepper?.data_arquivamento || fillData(processo?.data_arquivamento, null),
       titular:
         dadosStepper?.titular ||
@@ -82,7 +82,7 @@ export default function FormInfoInterno({ dados }) {
         (fluxo?.assunto === 'Diário' && `Diário ${format(new Date(), 'dd/MM/yyyy')} - `) ||
         '',
     }),
-    [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo, estado?.uo_id]
+    [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo_balcao, estado?.uo_id]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -92,7 +92,7 @@ export default function FormInfoInterno({ dados }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo, estado?.uo_id]);
+  }, [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo_balcao, estado?.uo_id]);
 
   const onSubmit = async () => {
     submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);

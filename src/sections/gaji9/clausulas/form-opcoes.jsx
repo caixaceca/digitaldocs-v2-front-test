@@ -1,28 +1,37 @@
 import * as Yup from 'yup';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 // @mui
-import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { listaProdutos, listaTitrulares } from '../applySortFilter';
+import { shapeNumberZero } from '../../../components/hook-form/yup-shape';
 // redux
-import { createItem } from '../../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../../redux/store';
+import { getFromGaji9, createItem } from '../../../redux/slices/gaji9';
+import { updateDados, resetDados } from '../../../redux/slices/stepper';
 // components
-import GridItem from '../../../components/GridItem';
+import {
+  FormProvider,
+  RHFTextField,
+  RHFNumberField,
+  RHFAutocompleteObj,
+  RHFAutocompleteSmp,
+} from '../../../components/hook-form';
+import Steps from '../../../components/Steps';
+import { SearchVariavel } from './form-clausula';
 import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { AddItem, DefaultAction, DialogButons } from '../../../components/Actions';
-import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../../components/hook-form';
+import { AddItem, DefaultAction, DialogButons, ButtonsStepper } from '../../../components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TiposTitularesForm({ id, ids, onClose }) {
-  const { tiposTitulares } = useSelector((state) => state.gaji9);
+export function TiposTitularesForm({ id, onClose }) {
+  const { clausula, tiposTitulares } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(clausula, 'tipos_titulares');
 
   return (
     <OpcoesForm
@@ -35,8 +44,9 @@ export function TiposTitularesForm({ id, ids, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SegmentosForm({ id, ids, onClose }) {
+export function SegmentosForm({ id, dados, onClose }) {
   const { segmentos } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(dados, 'segmentos');
 
   return (
     <OpcoesForm
@@ -51,8 +61,9 @@ export function SegmentosForm({ id, ids, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function ComponetesForm({ id, ids, onClose }) {
-  const { componentes } = useSelector((state) => state.gaji9);
+export function ComponetesForm({ id, onClose }) {
+  const { selectedItem, componentes } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(selectedItem, 'componentes');
 
   return (
     <OpcoesForm
@@ -65,8 +76,9 @@ export function ComponetesForm({ id, ids, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function FinalidadesForm({ id, ids, onClose }) {
-  const { finalidades } = useSelector((state) => state.gaji9);
+export function FinalidadesForm({ id, onClose }) {
+  const { selectedItem, finalidades } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(selectedItem, 'finalidades');
 
   return (
     <OpcoesForm
@@ -94,7 +106,8 @@ export function OpcoesForm({ dados, options, onClose }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
   const onSubmit = async () => {
-    const params = { patch: true, getItem: 'selectedItem', id, msg: 'Items adicionados', onClose };
+    const getItem = item === 'componentesSeg' || item === 'finalidadesSeg' ? 'selectedItem' : 'clausula';
+    const params = { patch: true, getItem, id, msg: 'Items adicionados', onClose };
     dispatch(createItem(item, JSON.stringify(values?.items?.map(({ item }) => item?.id)), params));
   };
 
@@ -129,64 +142,246 @@ export function OpcoesForm({ dados, options, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RegraForm({ dados, onClose }) {
+export function CondicionalForm({ onClose, id }) {
   const dispatch = useDispatch();
-  const { isSaving, clausulas } = useSelector((state) => state.gaji9);
+  const { activeStep } = useSelector((state) => state.stepper);
+  const { selectedItem } = useSelector((state) => state.gaji9);
 
-  const formSchema = Yup.object().shape({ clausula_id: Yup.mixed().required().label('Cláusula') });
+  const onClose1 = useCallback(() => {
+    onClose();
+    dispatch(resetDados());
+  }, [onClose, dispatch]);
+
+  useEffect(() => {
+    dispatch(getFromGaji9('variaveis'));
+  }, [dispatch]);
+
+  return (
+    <Dialog open fullWidth maxWidth="md">
+      <DialogTitleAlt
+        onClose={() => onClose1()}
+        title="Adicionar condição"
+        content={
+          <>
+            <Steps activeStep={activeStep} steps={['Condição', 'Conteúdo']} sx={{ mt: 3 }} />
+            {activeStep === 1 && <SearchVariavel />}
+          </>
+        }
+      />
+      <DialogContent>
+        {activeStep === 0 && <Condicao onClose={onClose1} dados={selectedItem} />}
+        {activeStep === 1 && <Conteudo onClose={onClose1} dados={selectedItem} id={id} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Condicao({ onClose, dados }) {
+  const dispatch = useDispatch();
+  const { dadosStepper } = useSelector((state) => state.stepper);
+
+  const formSchema = Yup.object().shape({
+    condicao: Yup.mixed().required().label('Condição'),
+    conteudo_sub: Yup.mixed().required().label('Conteúdo afetado'),
+    maior_que: shapeNumberZero('Maior que', 'Montante', 'Prazo', 'condicao'),
+    menor_que: shapeNumberZero('Menor que', 'Montante', 'Prazo', 'condicao'),
+  });
+
   const defaultValues = useMemo(
     () => ({
-      clausula_id: null,
-      prazo_maior_que: null,
-      prazo_menor_que: null,
-      montante_maior_que: null,
-      montante_menor_que: null,
-      representante: false,
-      isencao_comissao: false,
-      segunda_habitacao: false,
-      taxa_juros_negociado: false,
+      condicao: dadosStepper?.condicao || null,
+      menor_que: dadosStepper?.menor_que || '',
+      maior_que: dadosStepper?.maior_que || '',
+      conteudo_sub: dadosStepper?.conteudo_sub || dados?.conteudo_sub || null,
     }),
-    []
+    [dados, dadosStepper]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
 
+  return (
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+    >
+      <Stack spacing={3}>
+        <Stack spacing={3} direction="row" justifyContent="center" sx={{ pt: 1 }}>
+          <RHFAutocompleteSmp
+            name="condicao"
+            options={[
+              'Prazo',
+              'Montante',
+              'Com NIP',
+              'Com Seguro',
+              'Com prazo de utilização',
+              'Isenção de comissão',
+              'Isento de imposto selo',
+              'Taxa juros negociada',
+              '1ª habitação própria',
+            ]}
+            label="Condição"
+          />
+          {(values?.condicao === 'Montante' || values?.condicao === 'Prazo') && (
+            <>
+              <RHFNumberField name="maior_que" label="Maior que" />
+              <RHFNumberField name="menor_que" label="Menor que" />
+            </>
+          )}
+        </Stack>
+        <RHFAutocompleteSmp name="conteudo_sub" options={['Número', 'Alínea']} label="Conteúdo afetado" />
+      </Stack>
+      <ButtonsStepper onClose={onClose} labelCancel="Cancelar" />
+    </FormProvider>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function Conteudo({ dados, onClose, id }) {
+  const dispatch = useDispatch();
+  const { dadosStepper } = useSelector((state) => state.stepper);
+  const isAlinea = dadosStepper?.conteudo_sub === 'Alínea';
+
+  const formSchema = Yup.object().shape(
+    isAlinea
+      ? {
+          conteudo: Yup.string().required().label('Conteúdo'),
+          numero: Yup.number().positive().integer().label('Número'),
+          numero_ordem: Yup.number().positive().integer().label('Alínea'),
+        }
+      : {
+          numero_ordem: Yup.number().positive().integer().label('Número'),
+          sub_alineas: Yup.array(
+            Yup.object({
+              conteudo: Yup.string().required().label('Conteúdo'),
+              numero_ordem: Yup.number().positive().integer().label('Alínea'),
+            })
+          ),
+        }
+  );
+
+  const defaultValues = useMemo(
+    () =>
+      isAlinea
+        ? {
+            numero: dadosStepper?.numero || dados?.numero || '',
+            conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
+            numero_ordem: dadosStepper?.numero_ordem || dados?.numero_ordem || '',
+          }
+        : {
+            conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
+            sub_alineas: dadosStepper?.sub_alineas || dados?.sub_alineas || [],
+            numero_ordem: dadosStepper?.numero_ordem || dados?.numero_ordem || '',
+          },
+    [isAlinea, dadosStepper, dados]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { append, remove, fields } = useFieldArray({ control, name: 'sub_alineas' });
+
   const onSubmit = async () => {
-    const formData = JSON.stringify([{ ...values, clausula_id: values?.clausula_id?.id }]);
-    dispatch(createItem('regrasClausula', formData, { clausulaId: dados?.id, msg: 'Regra adicionada', onClose }));
+    const formData = {
+      ...(dadosStepper?.condicao === 'Com NIP' ? { com_nip: true } : null),
+      ...(dadosStepper?.condicao === 'Com seguro' ? { com_seguro: true } : null),
+      ...(dadosStepper?.condicao === 'Isenção de comissão' ? { isencao_comissao: true } : null),
+      ...(dadosStepper?.condicao === '1ª habitação própria' ? { habitacao_propria_1: true } : null),
+      ...(dadosStepper?.condicao === 'Taxa juros negociada' ? { taxa_juros_negociado: true } : null),
+      ...(dadosStepper?.condicao === 'Isento de imposto selo' ? { isento_imposto_selo: true } : null),
+      ...(dadosStepper?.condicao === 'Com prazo de utilização' ? { com_prazo_utilizacao: true } : null),
+      ...(dadosStepper?.condicao === 'Prazo'
+        ? { prazo_maior_que: dadosStepper.maior_que, prazo_menor_que: dadosStepper.menor_que }
+        : null),
+      ...(dadosStepper?.condicao === 'Montante'
+        ? { montante_maior_que: dadosStepper.maior_que, montante_menor_que: dadosStepper.menor_que }
+        : null),
+
+      ...(isAlinea
+        ? {
+            numero_ordem: values?.numero,
+            sub_alinea: { conteudo: values?.conteudo, numero_ordem: values?.numero_ordem },
+          }
+        : {
+            alinea: {
+              conteudo: values?.conteudo,
+              numero_ordem: values?.numero_ordem,
+              ...(values?.sub_alineas?.length > 0 ? { sub_alineas: values?.sub_alineas } : null),
+            },
+          }),
+    };
+    const params = { id, msg: 'Condicional adicionado', getItem: 'clausula', onClose };
+    dispatch(createItem('condicionalCl', JSON.stringify(formData), params));
   };
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitleAlt title="Adicionar regras" />
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ pt: 3 }}>
-            <GridItem
-              children={
-                <RHFAutocompleteObj
-                  label="Cláusula"
-                  name="clausula_id"
-                  options={clausulas
-                    ?.filter(({ titulo }) => titulo === dados?.titulo)
-                    ?.map(({ id, titulo }) => ({ id, label: `${titulo} (ID: ${id})` }))}
-                />
-              }
-            />
-            <GridItem xs={6} children={<RHFNumberField label="Montante maior que" name="montante_maior_que" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Montante menor que" name="montante_menor_que" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Prazo maior que" name="prazo_maior_que" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Prazo menor que" name="prazo_menor_que" />} />
-            <GridItem xs={6} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" />} />
-            <GridItem xs={6} children={<RHFSwitch name="segunda_habitacao" label="Segunda habitação" />} />
-            <GridItem xs={6} children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" />} />
-            <GridItem xs={6} children={<RHFSwitch name="representante" label="Representante" />} />
-          </Grid>
-          <DialogButons isSaving={isSaving} onClose={onClose} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+      {isAlinea ? (
+        <Stack spacing={3} justifyContent="center" sx={{ pt: 1 }}>
+          <Stack spacing={3} direction="row" justifyContent="center">
+            <RHFNumberField name="numero" label="Número" sx={{ width: 180 }} />
+            <RHFNumberField name="numero_ordem" label="Alínea" sx={{ width: 180 }} />
+          </Stack>
+          <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name="conteudo" />
+        </Stack>
+      ) : (
+        <Stack sx={{ pt: 1 }}>
+          <Stack spacing={3} direction="row" justifyContent="center">
+            <RHFNumberField name="numero_ordem" label="Nº" sx={{ width: 100 }} />
+            <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name="conteudo" />
+          </Stack>
+          <Stack spacing={2} sx={{ pl: { md: 14 }, mt: 3 }}>
+            {fields.map((item, index) => (
+              <Stack spacing={1} direction="row" alignItems="center" key={`sub_alinea_${item.id}`}>
+                <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
+                  <RHFNumberField
+                    size="small"
+                    label="Alínea"
+                    sx={{ width: 70 }}
+                    name={`sub_alineas[${index}].numero_ordem`}
+                  />
+                  <RHFTextField
+                    multiline
+                    minRows={3}
+                    maxRows={10}
+                    size="small"
+                    label="Conteúdo"
+                    name={`sub_alineas[${index}].conteudo`}
+                  />
+                </Stack>
+                <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
+              </Stack>
+            ))}
+            <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+              <AddItem
+                dados={{ small: true, label: 'Alínea' }}
+                onClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '' })}
+              />
+            </Stack>
+          </Stack>
+        </Stack>
+      )}
+      <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
+    </FormProvider>
   );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function extrairIds(dados, item) {
+  const ids = [];
+  if (item === 'segmentos' && dados?.segmento_id != null) ids.push(dados.segmento_id);
+  if (item === 'componentes' && dados?.componente_id != null) ids.push(dados.componente_id);
+  if (item === 'finalidades' && dados?.finalidade_id != null) ids.push(dados.finalidade_id);
+  if (item === 'tipos_titulares' && dados?.tipo_titular_id != null) ids.push(dados.tipo_titular_id);
+  if (Array.isArray(dados?.[item])) {
+    dados?.[item].forEach((t) => {
+      if (t?.id !== null && t.ativo) ids.push(t.id);
+    });
+  }
+  return ids;
 }

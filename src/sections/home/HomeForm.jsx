@@ -17,7 +17,7 @@ import useAnexos from '../../hooks/useAnexos';
 import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { createItem, getFromIntranet } from '../../redux/slices/intranet';
+import { getSuccess, getFromIntranet, createItem } from '../../redux/slices/intranet';
 // components
 import GridItem from '../../components/GridItem';
 import { DialogButons } from '../../components/Actions';
@@ -138,30 +138,62 @@ export function DenunciaForm({ onClose }) {
 
 export function ConsultarDocForm() {
   const dispatch = useDispatch();
-  const { documentoPdex, isLoading } = useSelector((state) => state.intranet);
+  const { docPdex, isLoading } = useSelector((state) => state.intranet);
 
-  const formSchema = Yup.object().shape({
-    tipoSearch: Yup.mixed().required().label('Tipo'),
-    numeroSearch: Yup.string().required().label('Nº de identificação'),
-  });
   const defaultValues = useMemo(
-    () => ({ tipoSearch: documentoPdex?.tipoSearch ?? null, numeroSearch: documentoPdex?.numeroSearch ?? '' }),
-    [documentoPdex]
+    () => ({
+      numDoc: docPdex?.numDoc ?? '',
+      nifSearch: docPdex?.nifSearch ?? '',
+      nomeSearch: docPdex?.nomeSearch ?? '',
+      tipoSearch: docPdex?.tipoSearch ?? null,
+    }),
+    [docPdex]
   );
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
+  const methods = useForm({ defaultValues });
+  const { watch, setValue, handleSubmit } = methods;
   const values = watch();
 
   return (
-    <FormProvider
-      methods={methods}
-      onSubmit={handleSubmit(() => dispatch(getFromIntranet('documentoPdex', { ...values, reset: { dados: null } })))}
-    >
-      <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
-        <RHFAutocompleteSmp label="Tipo" name="tipoSearch" options={['NIF', 'CNI/BI', 'REGISTO COMERCIAL']} />
-        <RHFTextField name="numeroSearch" label="Nº de identificação" />
-        <Stack sx={{ pt: 0.5 }}>
-          <Fab size="medium" type="submit" disabled={isLoading || !values.tipoSearch || !values?.numeroSearch}>
+    <FormProvider methods={methods} onSubmit={handleSubmit(() => dispatch(getFromIntranet('docPdex', values)))}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ pt: 2 }}>
+        <Stack spacing={2} sx={{ flexGrow: 1 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexGrow: 1 }}>
+            <RHFAutocompleteSmp
+              label="Tipo"
+              disableClearable
+              name="tipoSearch"
+              options={[
+                'Pesquisar NIF',
+                'Pesquisar CNI/BI',
+                'Pesquisar CNI pelo Nº de BI',
+                'Pesquisar Registo Comercial',
+                'Pesquisar por Doc. ID, NIF ou Nome',
+              ]}
+              onChange={(event, newValue) => {
+                setValue('numDoc', '');
+                setValue('nifSearch', '');
+                setValue('nomeSearch', '');
+                setValue('tipoSearch', newValue);
+                dispatch(getSuccess({ item: 'docPdex', dados: null }));
+              }}
+            />
+            <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+              <RHFTextField name="numDoc" label="Nº de identificação" />
+              {values?.tipoSearch === 'Pesquisar por Doc. ID, NIF ou Nome' && (
+                <RHFTextField name="nifSearch" label="NIF" />
+              )}
+            </Stack>
+          </Stack>
+          {values?.tipoSearch === 'Pesquisar por Doc. ID, NIF ou Nome' && (
+            <RHFTextField name="nomeSearch" label="Nome" />
+          )}
+        </Stack>
+        <Stack>
+          <Fab
+            size="medium"
+            type="submit"
+            disabled={isLoading || !values.tipoSearch || (!values?.numDoc && !values?.nifSearch && !values?.nomeSearch)}
+          >
             <SearchIcon />
           </Fab>
         </Stack>

@@ -47,7 +47,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   );
   const [uo, setUo] = useState(
     uosList?.find(({ id }) => Number(id) === Number(localStorage.getItem('uoIndic'))) ||
-      uosList?.find(({ id }) => Number(id) === Number(cc?.uo?.id)) ||
+      uosList?.find(({ id }) => Number(id) === Number(cc?.uo_id)) ||
       null
   );
 
@@ -87,7 +87,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   );
   const [balcao, setBalcao] = useState(
     balcoesList?.find(({ id }) => Number(id) === Number(localStorage.getItem('balcaoIndic'))) ||
-      balcoesList?.find(({ id }) => Number(id) === Number(cc?.uo?.id)) ||
+      balcoesList?.find(({ id }) => Number(id) === Number(cc?.uo_id)) ||
       null
   );
   const [estado, setEstado] = useState(
@@ -100,15 +100,15 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   );
 
   useEffect(() => {
-    if (!uo && uosList && (localStorage.getItem('uoIndic') || cc?.uo?.id)) {
+    if (!uo && uosList && (localStorage.getItem('uoIndic') || cc?.uo_id)) {
       setUo(
         uosList?.find(({ id }) => Number(id) === Number(localStorage.getItem('uoIndic'))) ||
-          uosList?.find(({ id }) => Number(id) === Number(cc?.uo?.id))
+          uosList?.find(({ id }) => Number(id) === Number(cc?.uo_id))
       );
-      localStorage.setItem('uoIndic', localStorage.getItem('uoIndic') || cc?.uo?.id || '');
+      localStorage.setItem('uoIndic', localStorage.getItem('uoIndic') || cc?.uo_id || '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uosList, cc?.uo?.id]);
+  }, [uosList, cc?.uo_id]);
 
   useEffect(() => {
     if (!perfil?.id && colaboradoresList && (localStorage.getItem('colaboradorIndic') || perfilId)) {

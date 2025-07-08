@@ -2,10 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // redux
 import { getFromGaji9 } from '../../../redux/slices/gaji9';
 import { useDispatch, useSelector } from '../../../redux/store';
@@ -31,7 +29,6 @@ export default function FiltrarClausulas({ inativos }) {
   const getStoredValue = (key, list) =>
     list?.find(({ id }) => Number(id) === Number(localStorage.getItem(key))) || null;
 
-  const [condicional, setCondicional] = useState(() => getStoredValue(false));
   const [seccao, setSeccao] = useState(() => getStoredValue('seccaoCl', seccoesList));
   const [titular, setTitular] = useState(() => getStoredValue('titularCl', titularesList));
   const [garantia, setGarantia] = useState(() => getStoredValue('garantiaCl', garantiasList));
@@ -44,7 +41,6 @@ export default function FiltrarClausulas({ inativos }) {
     dispatch(
       getFromGaji9('clausulas', {
         inativos,
-        condicional,
         titularId: titular?.id || null,
         solta: seccao?.label === 'Solta',
         garantiaId: garantia?.id || null,
@@ -54,7 +50,7 @@ export default function FiltrarClausulas({ inativos }) {
         identificacao: seccao?.label === 'Secção de identificação Caixa',
       })
     );
-  }, [segmento?.id, situacao, condicional, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
+  }, [segmento?.id, situacao, dispatch, garantia?.id, inativos, seccao?.label, titular?.id]);
 
   return (
     <Card sx={{ p: 1.5, mb: 3 }}>
@@ -62,12 +58,6 @@ export default function FiltrarClausulas({ inativos }) {
         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} sx={{ width: 1 }}>
           <SelectItem label="Situação" value={situacao} setItem={setSituacao} options={sitClausulas} />
           <SelectItem label="Secção" value={seccao} setItem={setSeccao} options={seccoesList} />
-
-          <FormControlLabel
-            label="Condicional"
-            sx={{ ml: 0, px: { md: 5 } }}
-            control={<Switch checked={condicional} onChange={(event) => setCondicional(event.target.checked)} />}
-          />
         </Stack>
         <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={1}>
           <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1} sx={{ width: 1 }}>

@@ -145,7 +145,7 @@ export default function ExportarEstatisticaCred({ uo, periodo, vista }) {
         { text: '\nPeríodo: ', font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: periodo, font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: '\nGerado por: ', font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
-        { text: cc?.perfil?.nome || '', font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
+        { text: cc?.nome || '', font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: ` (${ptDate(new Date())})`, font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
       ],
     };

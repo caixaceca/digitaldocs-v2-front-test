@@ -109,6 +109,12 @@ export function saudacao() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function numeroParaLetra(numero) {
+  return String.fromCharCode(96 + numero);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export const pdfInfo = {
   modificationDate: new Date(),
   producer: 'react-pdf/renderer',

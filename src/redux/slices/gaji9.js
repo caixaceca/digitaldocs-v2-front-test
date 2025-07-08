@@ -31,6 +31,7 @@ const initialState = {
   isLoadingDoc: false,
   credito: null,
   infoPag: null,
+  clausula: null,
   infoCaixa: null,
   propostaId: null,
   utilizador: null,
@@ -124,6 +125,8 @@ export function getInfoGaji(item) {
 export function getFromGaji9(item, params) {
   return async (dispatch) => {
     if (!params?.notLoading) dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    if (params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params?.reset?.dados }));
+
     try {
       const accessToken = await getAccessToken();
       // console.log(accessToken);
@@ -175,7 +178,7 @@ export function getFromGaji9(item, params) {
         (item === 'creditos' &&
           `/v1/suportes/creditos/localizar?cursor=${params?.cursor || 0}${params?.balcao ? `&balcao=${params?.balcao}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.codigo ? `&codigo=${params?.codigo}` : ''}${params?.proposta ? `&numero_proposta=${params?.proposta}` : ''}`) ||
         (item === 'clausulas' &&
-          `/v1/clausulas/lista?ativo=${!params?.inativos}&situacao=${params?.situacao}${params?.solta ? `&solta=true` : ''}${params?.condicional ? `&condicional=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.segmentoId ? `&segmento_id=${params?.segmentoId}` : ''}`) ||
+          `/v1/clausulas/lista?ativo=${!params?.inativos}&situacao=${params?.situacao}${params?.solta ? `&solta=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.segmentoId ? `&segmento_id=${params?.segmentoId}` : ''}`) ||
         '';
       if (apiUrl) {
         if (params?.reset)
@@ -205,6 +208,7 @@ export function getFromGaji9(item, params) {
         }
 
         if (params?.msg) doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+        if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
         params?.onClose?.();
       }
     } catch (error) {
@@ -227,7 +231,7 @@ export function getDocumento(item, params) {
       const accessToken = await getAccessToken();
       const apiUrl =
         (item === 'contrato' && `/v1/contratos/download?codigo=${params?.codigo}`) ||
-        (item === 'minutav2' && `/v2/minutas/documento/preview?restrito=true`) ||
+        (item === 'minutav2' && `/v2/minutas/documento/preview?restrito=${params?.restrito}`) ||
         (item === 'gerar-contrato' &&
           `/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
         (item === 'preview-contrato' &&
@@ -236,7 +240,13 @@ export function getDocumento(item, params) {
           `/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
         '';
       if (apiUrl) {
-        const headrs = { responseType: 'arraybuffer', headers: { Authorization: `Bearer ${accessToken}` } };
+        const headrs = {
+          responseType: 'arraybuffer',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            ...(item === 'minutav2' ? { 'content-type': 'application/json' } : {}),
+          },
+        };
         const response =
           item === 'gerar-contrato' || item === 'minutav2'
             ? await axios.post(`${BASEURLGAJI9}${apiUrl}`, item === 'minutav2' ? JSON.stringify(params) : null, headrs)
@@ -295,6 +305,7 @@ export function createItem(item, dados, params) {
         (item === 'componentes' && `/v1/produtos/importar/one`) ||
         (item === 'colaboradorGrupo' && `/v1/acs/utilizadores/grupo`) ||
         (item === 'representantes' && `/v1/acs/representantes/definir`) ||
+        (item === 'condicionalCl' && `/v1/clausulas/c2c/${params?.id}`) ||
         (item === 'finalidadesSeg' && `/v1/clausulas/segmentos/${params?.id}/finalidades`) ||
         (item === 'componentesSeg' && `/v1/clausulas/segmentos/${params?.id}/componentes`) ||
         (item === 'segmentosCl' && `/v1/clausulas/assoc/segmentos?clausula_id=${params?.id}`) ||
@@ -321,8 +332,9 @@ export function createItem(item, dados, params) {
           );
         }
       }
-      params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -388,7 +400,8 @@ export function updateItem(item, dados, params) {
         } else {
           const response = await axios.put(`${BASEURLGAJI9}${apiUrl}`, dados, options);
           if (item === 'prg') dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
-          else if (params?.getItem) dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto }));
+          else if (params?.getItem)
+            dispatch(getSuccess({ item: params?.getItem, dados: response.data?.clausula || response.data?.objeto }));
           else {
             const dadosItem =
               (item === 'colaboradorGrupo' && JSON.parse(dados)) ||
@@ -402,8 +415,9 @@ export function updateItem(item, dados, params) {
           }
         }
       }
-      params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -429,10 +443,11 @@ export function deleteItem(item, params) {
         (item === 'finalidades' && `/v1/suportes/finalidade?id=${params?.id}`) ||
         (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel?id=${params?.id}`) ||
         (item === 'credito' && `/v1/suportes/creditos/proposta?credito_id=${params?.id}`) ||
+        (item === 'condicionalCl' && `/v1/clausulas/c2c/${params?.id}?id=${params?.itemId}`) ||
         (item === 'finalidadeSeg' && `/v1/clausulas/segmentos/${params?.itemId}/finalidades/${params?.id}`) ||
         (item === 'componenteSeg' && `/v1/clausulas/segmentos/${params?.itemId}/componentes/${params?.id}`) ||
-        (item === 'segmentoCl' && `/v1/clausulas/assoc/segmentos/${params?.id}?clausula_id=${params?.itemId}`) ||
-        (item === 'tipoTitularCl' && `/v1/clausulas/tipo_titulares/${params?.id}?clausula_id=${params?.itemId}`) ||
+        (item === 'segmentoCl' && `/v1/clausulas/assoc/segmentos/${params?.itemId}?clausula_id=${params?.id}`) ||
+        (item === 'tipoTitularCl' && `/v1/clausulas/tipo_titulares/${params?.itemId}?clausula_id=${params?.id}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.creditoId}&contrato_id=${params?.id}`) ||
         (item === 'subtipos' &&
           `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}&subtipo_id=${params?.id}`) ||
@@ -453,8 +468,9 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id, desativar }));
         }
       }
-      params?.onClose?.();
       doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

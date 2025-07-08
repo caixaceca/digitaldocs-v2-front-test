@@ -118,7 +118,7 @@ export function DefaultAction({
       label === 'Adicionar' ||
       label === 'Mostrar detalhes' ||
       label === 'Carregar proposta') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
-    ((label === 'CONTRATO' || label === 'Pré-visualizar') &&
+    ((label === 'CONTRATO' || label === 'Pré-visualizar' || label === 'Prév. minuta') &&
       getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
     ((label === 'Gerir acessos' || label === 'Transições' || label === 'Comparar colaboradores') && (
       <SwapHorizOutlinedIcon />

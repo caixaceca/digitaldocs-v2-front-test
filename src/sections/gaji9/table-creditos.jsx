@@ -67,7 +67,7 @@ export default function TableCredito() {
       UosAcesso(
         uos?.filter(({ tipo }) => tipo === 'Agências'),
         cc,
-        isAdmin || isAuditoria || cc?.tipo !== 'Agências',
+        isAdmin || isAuditoria || cc?.uo_tipo !== 'Agências',
         [],
         'balcao'
       ),
