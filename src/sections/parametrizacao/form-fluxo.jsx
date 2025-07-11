@@ -454,16 +454,16 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
   const isEdit = selectedItem?.id;
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { isSaving } = useSelector((state) => state.parametrizacao);
   const { colaboradores } = useSelector((state) => state.intranet);
-  const perfisList = useMemo(
+  const { isSaving } = useSelector((state) => state.parametrizacao);
+  const colaboradoresList = useMemo(
     () => colaboradores?.map(({ id, nome, email }) => ({ id, label: nome, email })),
     [colaboradores]
   );
 
   const formSchema = Yup.object().shape({
-    perfil: isEdit && Yup.mixed().required().label('Colaborador'),
-    destinatarios: !isEdit && Yup.array(Yup.object({ perfil: Yup.mixed().required().label('Colaborador') })),
+    colaborador: isEdit && Yup.mixed().required().label('Colaborador'),
+    destinatarios: !isEdit && Yup.array(Yup.object({ colaborador: Yup.mixed().required().label('Colaborador') })),
   });
 
   const defaultValues = useMemo(
@@ -471,12 +471,12 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
       telefone: selectedItem?.telefone || '',
       data_inicio: fillData(selectedItem?.data_inicio, null),
       data_termino: fillData(selectedItem?.data_termino, null),
-      destinatarios: isEdit ? [] : [{ perfil: null, data_inicio: null, data_termino: null, telefone: '' }],
-      perfil: isEdit
-        ? perfisList?.find(({ email }) => email?.toLowerCase() === selectedItem?.email?.toLowerCase())
+      destinatarios: isEdit ? [] : [{ colaborador: null, data_inicio: null, data_termino: null, telefone: '' }],
+      colaborador: isEdit
+        ? colaboradoresList?.find(({ email }) => email?.toLowerCase() === selectedItem?.email?.toLowerCase())
         : null,
     }),
-    [selectedItem, isEdit, perfisList]
+    [selectedItem, isEdit, colaboradoresList]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, watch, control, handleSubmit } = methods;
@@ -492,7 +492,7 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
     try {
       const destinatario = (dados) => ({
         telefone: dados?.telefone,
-        email: dados?.perfil?.email,
+        email: dados?.colaborador?.email,
         data_inicio: dados?.data_inicio ? format(dados.data_inicio, 'yyyy-MM-dd') : null,
         data_termino: dados?.data_termino ? format(dados.data_termino, 'yyyy-MM-dd') : null,
       });
@@ -518,7 +518,7 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
           {!isEdit && (
             <AddItem
               dados={{ small: true }}
-              onClick={() => append({ perfil: null, data_inicio: null, data_termino: null, telefone: '' })}
+              onClick={() => append({ colaborador: null, data_inicio: null, data_termino: null, telefone: '' })}
             />
           )}
         </Stack>
@@ -528,7 +528,9 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
           <Grid container spacing={3} sx={{ pt: 3 }}>
             {isEdit ? (
               <>
-                <GridItem children={<RHFAutocompleteObj label="Colaborador" options={perfisList} name="perfil" />} />
+                <GridItem
+                  children={<RHFAutocompleteObj label="Colaborador" options={colaboradoresList} name="colaborador" />}
+                />
                 <GridItem children={<RHFTextField label="Telefone" name="telefone" />} />
                 <GridItem sm={6} children={<RHFDatePicker label="Data de início" name="data_inicio" />} />
                 <GridItem sm={6} children={<RHFDatePicker label="Data de fim" name="data_termino" />} />
@@ -540,8 +542,8 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
                     <GridItem md={5}>
                       <RHFAutocompleteObj
                         label="Colaborador"
-                        options={perfisList}
-                        name={`destinatarios[${index}].perfil`}
+                        options={colaboradoresList}
+                        name={`destinatarios[${index}].colaborador`}
                       />
                     </GridItem>
                     <GridItem md={2}>

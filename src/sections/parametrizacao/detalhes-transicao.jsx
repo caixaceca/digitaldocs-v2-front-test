@@ -82,7 +82,7 @@ function RegrasTransicoes({ dados }) {
           {dados?.regras?.map((row, index) => (
             <TableRow hover key={`${row?.id}_${index}`}>
               <TableCell>
-                {colaboradores?.find(({ perfil }) => perfil?.id === row?.perfil_id)?.nome || row?.perfil_id}
+                {colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id)?.nome || row?.perfil_id}
               </TableCell>
               <TableCell align="right">{fPercent(row?.percentagem)}</TableCell>
               <CellChecked check={row?.para_aprovacao} />

@@ -401,8 +401,7 @@ function confidencialidadesIds(dados, item, label, colaboradores) {
         id: val[item],
         label: label
           ? val[label]
-          : colaboradores?.find(({ perfil_id: pid }) => pid === val[item])?.perfil?.displayName ||
-            `PerfilID: ${val[item]}`,
+          : colaboradores?.find(({ perfil_id: pid }) => pid === val[item])?.nome || `PerfilID: ${val[item]}`,
       })) || []
   );
 }

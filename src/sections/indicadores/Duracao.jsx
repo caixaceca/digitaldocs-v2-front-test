@@ -51,7 +51,7 @@ export function Execucao({ indicadores }) {
     ? estados?.find(({ id }) => Number(id) === Number(localStorage.getItem('estadoIndic')))
     : '';
   const colaborador = localStorage.getItem('colaboradorIndic')
-    ? colaboradores?.find(({ perfil }) => Number(perfil?.id) === Number(localStorage.getItem('colaboradorIndic')))
+    ? colaboradores?.find(({ perfil_id: id }) => Number(id) === Number(localStorage.getItem('colaboradorIndic')))
     : '';
   const {
     page,
@@ -77,7 +77,7 @@ export function Execucao({ indicadores }) {
             <Typography sx={{ textAlign: 'center' }}>
               Em média {colaborador?.sexo === 'Masculino' ? 'o ' : 'a '}
               <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
-                {colaborador?.perfil?.displayName}
+                {colaborador?.nome}
               </Typography>{' '}
               passa{' '}
               <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
@@ -322,7 +322,7 @@ function duracaoGroup(dados, item) {
 function conclusaoP(indicadores, uos) {
   const conclusaoByItem = [];
   indicadores?.forEach(({ dmedh, uo_origem_id: uoId }) => {
-    const uo = uos?.find(({ id }) => id === uoId);
+    const uo = uos?.find(({ id }) => Number(id) === Number(uoId));
     conclusaoByItem.push({ dias: dmedh / 24, label: uo?.label || uoId });
   });
 

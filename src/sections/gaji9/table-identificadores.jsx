@@ -19,7 +19,7 @@ import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, ColaboradorInfo, noDados } from '../../components/Panel';
+import { CellChecked, Colaborador, noDados } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import {
@@ -101,11 +101,10 @@ export default function TableIdentificadores({ item, inativos }) {
       (item === 'representantes' &&
         representantes?.map((row) => ({
           ...row,
-          uo: uos?.find(({ balcao }) => balcao === row?.balcao)?.label || '',
+          uo: uos?.find(({ balcao }) => Number(balcao) === Number(row?.balcao))?.label || '',
           colaborador: colaboradores?.find(
-            ({ perfil }) =>
-              perfil?.id_aad === row?.utilizador_id ||
-              perfil?.mail?.toLowerCase() === row?.utilizador_email?.toLowerCase()
+            ({ ad_id: adId, email }) =>
+              adId === row?.utilizador_id || email?.toLowerCase() === row?.utilizador_email?.toLowerCase()
           ),
         }))) ||
       [],
@@ -152,15 +151,7 @@ export default function TableIdentificadores({ item, inativos }) {
                     <TableRow hover key={`${item}_${index}`}>
                       <TableCell>
                         {item === 'representantes' ? (
-                          <ColaboradorInfo
-                            labelAltCaption
-                            id={row?.colaborador?.id}
-                            labelAlt={row?.utilizador_id}
-                            foto={row?.colaborador?.foto_disk}
-                            caption={!row?.colaborador?.uo?.label}
-                            nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
-                            label={row?.colaborador?.uo?.desegnicao || 'Perfil sem ID_AAD na Intranet'}
-                          />
+                          <Colaborador row={row} />
                         ) : (
                           <>
                             {(item === 'componentes' && row?.codigo) ||

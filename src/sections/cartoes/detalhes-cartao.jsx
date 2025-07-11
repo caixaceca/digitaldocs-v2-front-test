@@ -22,10 +22,10 @@ import { DialogTitleAlt } from '../../components/CustomDialog';
 export function Detalhes({ closeModal }) {
   const { uos } = useSelector((state) => state.intranet);
   const { selectedItem, isLoading } = useSelector((state) => state.digitaldocs);
-  const bEntrega = uos?.find(({ balcao }) => balcao === Number(selectedItem?.balcao_entrega));
-  const bEmissao = uos?.find(({ balcao }) => balcao === Number(selectedItem?.balcao_emissao));
-  const bDomicilio = uos?.find(({ balcao }) => balcao === Number(selectedItem?.balcao_cliente));
-  const bEntregaOriginal = uos?.find(({ balcao }) => balcao === Number(selectedItem?.balcao_entrega_original));
+  const bEntrega = uos?.find(({ balcao }) => Number(balcao) === Number(selectedItem?.balcao_entrega));
+  const bEmissao = uos?.find(({ balcao }) => Number(balcao) === Number(selectedItem?.balcao_emissao));
+  const bDomicilio = uos?.find(({ balcao }) => Number(balcao) === Number(selectedItem?.balcao_cliente));
+  const bEntregaOriginal = uos?.find(({ balcao }) => Number(balcao) === Number(selectedItem?.balcao_entrega_original));
 
   return (
     <Dialog open onClose={closeModal} fullWidth maxWidth="sm">

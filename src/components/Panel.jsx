@@ -92,6 +92,20 @@ export function Criado({ iconText = '', tipo = '', value, value1 = '', caption =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function Colaborador({ row }) {
+  return (
+    <ColaboradorInfo
+      labelAltCaption
+      id={row?.colaborador?.id}
+      labelAlt={row?.utilizador_id}
+      foto={row?.colaborador?.foto_anexo}
+      caption={!row?.colaborador?.uo_label}
+      label={row?.colaborador?.uo || 'Perfil sem ID_AAD na Intranet'}
+      nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
+    />
+  );
+}
+
 export function ColaboradorInfo({
   nome,
   foto,

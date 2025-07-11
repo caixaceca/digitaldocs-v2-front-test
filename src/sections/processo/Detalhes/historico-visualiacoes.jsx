@@ -53,9 +53,9 @@ export default function Views() {
                     <Stack direction="row" alignItems="center" sx={{ flexGrow: 1 }} justifyContent="space-between">
                       <ColaboradorInfo
                         id={colaborador?.id}
-                        foto={colaborador?.foto_disk}
-                        label={colaborador?.uo?.label}
-                        nome={colaborador?.perfil?.displayName || `Perfil: ${perfilId}`}
+                        label={colaborador?.uo_label}
+                        foto={colaborador?.foto_anexo}
+                        nome={colaborador?.nome || `Perfil: ${perfilId}`}
                       />
                       <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>
                         <Typography variant="subtitle1">{views?.length}</Typography>

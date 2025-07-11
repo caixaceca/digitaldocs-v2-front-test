@@ -38,7 +38,7 @@ export function dadosList(array, colaboradores, uos, from) {
   const colaboradoresList = [];
 
   array?.forEach((row) => {
-    const uo = uos?.find(({ id }) => id === Number(row?.uo_origem_id));
+    const uo = uos?.find(({ id }) => Number(id) === Number(row?.uo_origem_id));
     const criado = colaboradores?.find(({ id }) => id === Number(row?.perfil_dono_id));
     const colaborador = colaboradores?.find(({ id }) => id === row?.dono || id === row?.perfil_id);
     if (colaborador && !colaboradoresList.includes(colaborador?.label)) colaboradoresList.push(colaborador?.label);

@@ -4,11 +4,9 @@ import { createSlice } from '@reduxjs/toolkit';
 import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '../../graph';
-import { addRole } from './parametrizacao';
 import { loginRequest, msalInstance } from '../../config';
-// utils
+import { addRole, getFromParametrizacao } from './parametrizacao';
 import { BASEURL, BASEURLSLIM, INTRANETHUBAPI } from '../../utils/apisUrl';
-// hooks
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -65,8 +63,8 @@ export function authenticateColaborador() {
         headers: { Authorization: `Bearer ${accessToken}` },
         withCredentials: true,
       });
-      dispatch(slice.actions.getSuccess({ item: 'perfil', dados: perfil.data?.objeto }));
-      perfil.data?.objeto?.grupos?.forEach(({ grupo }) => dispatch(addRole(grupo)));
+      dispatch(slice.actions.getSuccess({ item: 'perfil', dados: perfil?.data?.objeto }));
+      perfil?.data?.objeto?.grupos?.forEach(({ grupo }) => dispatch(addRole(grupo)));
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     }
@@ -108,20 +106,26 @@ export async function getAccessToken() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function getInfoIntranet(id) {
+export function getInfoInicial(id, inicial) {
   return async (dispatch) => {
-    dispatch(getFromIntranet('disposicao', { id, data: format(new Date(), 'yyyy-MM-dd') }));
-    dispatch(getFromIntranet('frase'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromIntranet('colaboradores'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromIntranet('uos', { label: 'label' }));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromIntranet('links', { label: 'nome' }));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromIntranet('certificacoes'));
+    if (!inicial) await dispatch(getFromIntranet('cc', { id }));
+    await dispatch(getFromIntranet('colaboradores'));
+    await dispatch(getFromIntranet('uos', { label: 'label' }));
+
+    await dispatch(getFromParametrizacao('meusambientes'));
+    await dispatch(getFromParametrizacao('meusacessos'));
+    await dispatch(getFromParametrizacao('fluxos'));
+    await dispatch(getFromParametrizacao('estados'));
+    await dispatch(getFromParametrizacao('origens'));
+    await dispatch(getFromParametrizacao('motivosPendencia'));
+
+    if (inicial) {
+      dispatch(getFromIntranet('frase'));
+      await dispatch(getFromIntranet('disposicao', { id, data: format(new Date(), 'yyyy-MM-dd') }));
+      await dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
+      await dispatch(getFromIntranet('links', { label: 'nome' }));
+      await dispatch(getFromIntranet('certificacoes'));
+    }
   };
 }
 
@@ -138,36 +142,22 @@ export function getFromIntranet(item, params) {
       const options = headerOptions({ accessToken, mail, cc: false, ct: false, mfd: false });
 
       if (item === 'colaboradores') {
-        const colaboradores = await axios.get(`${BASEURL}/colaborador`, options);
-        const perfis = await axios.get(`${BASEURL}/perfil`, options);
-        const colaboradoresPerfis = colaboradores.data
-          // ?.filter(({ is_active: ativo }) => ativo)
-          ?.map((row) => ({
-            ...row,
-            email: row?.perfil?.mail,
-            nome: row?.perfil?.displayName,
-            perfil: perfis?.data?.find(({ id }) => Number(id) === Number(row?.perfil_id)) || row?.perfil,
-          }));
-        dispatch(slice.actions.getSuccess({ item, dados: colaboradoresPerfis, label: 'nome' }));
+        const requests = [true, false].map((ativo) =>
+          axios.get(`${INTRANETHUBAPI}/v2/portal/cls/load`, { ...options, params: { ativo } })
+        );
 
-        // USERS PRESENCE
-        const ids = perfis?.data?.filter(({ id_aad: idAd }) => idAd)?.map(({ id_aad: id }) => id);
-        if (ids?.length > 0) {
-          const presences = await axios.post(
-            `https://graph.microsoft.com/v1.0/communications/getPresencesByUserId`,
-            { ids },
-            options
-          );
-          dispatch(
-            slice.actions.getSuccess({
-              item,
-              label: 'nome',
-              dados: colaboradoresPerfis?.map((row) => ({
-                ...row,
-                presence: presences.data?.value?.find(({ id }) => id === row?.perfil?.id_aad) || null,
-              })),
-            })
-          );
+        const responses = await Promise.all(requests);
+        const colaboradores = [...(responses[0].data?.objeto || []), ...(responses[1].data?.objeto || [])];
+        dispatch(slice.actions.getSuccess({ item, label: 'nome', dados: colaboradores }));
+
+        const ids = colaboradores.map(({ ad_id: id }) => id).filter(Boolean);
+
+        if (ids.length > 0) {
+          const presencesApi = `https://graph.microsoft.com/v1.0/communications/getPresencesByUserId`;
+          const presencesResponse = await axios.post(presencesApi, { ids }, options);
+          const presenceMap = new Map((presencesResponse.data?.value || []).map((p) => [p.id, p]));
+          const colabPresence = colaboradores.map((row) => ({ ...row, presence: presenceMap.get(row?.ad_id) || null }));
+          dispatch(slice.actions.getSuccess({ item, label: 'nome', dados: colabPresence }));
         }
       } else if (item === 'docPdex') {
         const options = { headers: { Authorization: `Bearer ${accessToken}` } };
@@ -184,12 +174,12 @@ export function getFromIntranet(item, params) {
       } else {
         const apiUrl =
           (item === 'ajuda' && `${BASEURL}/help/ajuda`) ||
-          (item === 'uos' && `${BASEURL}/unidade_organica`) ||
           (item === 'frase' && `${BASEURL}/frase_semana/ativa`) ||
           (item === 'certificacoes' && `${BASEURL}/certificacao`) ||
           (item === 'links' && `${BASEURL}/aplicacao/links/uteis`) ||
           (item === 'perguntas' && `${BASEURL}/help/perguntas_frequentes`) ||
           (item === 'minhasAplicacoes' && `${BASEURL}/aplicacao/aplicacoes/me`) ||
+          (item === 'uos' && `${INTRANETHUBAPI}/v2/portal/uos/load?ativo=true`) ||
           (item === 'documentosAjuda' && `${BASEURL}/atc?categoria=documentosAjuda`) ||
           (item === 'cc' && `${INTRANETHUBAPI}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
           (item === 'disposicao' && `${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`) ||

@@ -292,10 +292,8 @@ function indicadoresGroupBy(dados, item) {
 function colaboradoresFilter(colaboradores, dados) {
   const colaboradoresList = [];
   dados?.forEach((row) => {
-    const colab = colaboradores?.find((item) => item.perfil_id === row?.item);
-    if (colab) {
-      colaboradoresList.push({ id: colab?.perfil_id, foto: colab?.foto_disk, label: colab?.perfil?.displayName });
-    }
+    const colab = colaboradores?.find(({ perfil_id: pid }) => pid === row?.item);
+    if (colab) colaboradoresList.push({ id: colab?.perfil_id, foto: colab?.foto_anexo, label: colab?.nome });
   });
 
   return colaboradoresList;

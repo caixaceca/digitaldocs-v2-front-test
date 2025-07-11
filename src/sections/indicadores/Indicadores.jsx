@@ -237,13 +237,13 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           sx={{ py: 1.5, bgcolor: detail && 'background.neutral', borderRadius: 1 }}
         >
           <MyAvatar
-            name={colaborador?.perfil?.displayName}
-            src={getIntranetFile('colaborador', colaborador?.foto_disk)}
+            name={colaborador?.nome}
+            src={getIntranetFile('colaborador', colaborador?.foto_anexo)}
             sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}
           />
           <Stack>
             <Typography variant="subtitle1" noWrap>
-              {baralharString(colaborador?.perfil?.displayName)}
+              {baralharString(colaborador?.nome)}
             </Typography>
             <Stack spacing={1} direction="row" alignItems="center" sx={{ color: 'text.success' }}>
               <Typography variant="h6">{fNumber(totalColaborador)}</Typography>

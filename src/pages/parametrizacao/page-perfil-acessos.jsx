@@ -28,7 +28,7 @@ export default function PageAcessosPerfil() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const colaborador = colaboradores?.find(({ perfil }) => Number(perfil?.id) === Number(id));
+  const colaborador = colaboradores?.find(({ perfil_id: pid }) => Number(pid) === Number(id));
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabAcesso') || 'Acessos');
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function PageAcessosPerfil() {
     <Page title="Perfil do colaborador | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Card sx={{ mb: 3, height: 170, position: 'relative' }}>
-          <PerfilCover perfilColaborador={colaborador} />
+          <PerfilCover colaborador={colaborador} />
           <TabsWrapperStyle>
             <Tabs value={currentTab} onChange={(_, val) => setItemValue(val, setCurrentTab, 'tabAcesso', false)}>
               {TABS.map(({ value }) => (

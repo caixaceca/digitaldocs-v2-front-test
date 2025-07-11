@@ -54,7 +54,7 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
     () =>
       t?.domiciliacao
         ? colaboradores?.find(({ email }) => email?.toLowerCase() === t?.perfil_id?.toLowerCase())
-        : colaboradores?.find(({ perfil }) => perfil?.id === t?.perfil_id),
+        : colaboradores?.find(({ perfil_id: pid }) => pid === t?.perfil_id),
     [colaboradores, t?.domiciliacao, t?.perfil_id]
   );
   const arqSistema = useMemo(() => t?.observacao?.includes('por inatividade a pelo menos 6 meses'), [t?.observacao]);

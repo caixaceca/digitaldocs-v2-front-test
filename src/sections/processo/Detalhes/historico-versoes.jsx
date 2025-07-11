@@ -73,9 +73,9 @@ export default function Versoes({ id }) {
                       </Stack>
                       <ColaboradorInfo
                         id={colaborador?.id}
-                        foto={colaborador?.foto_disk}
-                        label={colaborador?.uo?.label}
-                        nome={colaborador?.perfil?.displayName || row.feito_por}
+                        label={colaborador?.uo_label}
+                        foto={colaborador?.foto_anexo}
+                        nome={colaborador?.nome || row.feito_por}
                       />
                     </Stack>
                   </AccordionSummary>

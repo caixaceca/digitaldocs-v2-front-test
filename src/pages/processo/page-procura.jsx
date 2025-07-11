@@ -135,10 +135,7 @@ export default function PageProcura() {
       applySortFilter({
         dados: dados?.dados,
         comparator: getComparator(order, orderBy),
-        uo,
-        search,
-        estado,
-        assunto,
+        ...{ uo, search, estado, assunto },
       }),
     [dados, order, orderBy, uo, search, estado, assunto, applySortFilter]
   );
@@ -175,7 +172,7 @@ export default function PageProcura() {
                 <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
                   <Panel
                     label="U.O"
-                    value={uos?.find((row) => row?.id === Number(localStorage.getItem('uoSearch')))?.label}
+                    value={uos?.find(({ id }) => id === Number(localStorage.getItem('uoSearch')))?.label}
                   />
                   <Panel label="Nº entrada" value={localStorage.getItem('entrada')} />
                   <Panel label="Nº operação" value={localStorage.getItem('noperacao')} />

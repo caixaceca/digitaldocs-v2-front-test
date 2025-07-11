@@ -23,8 +23,7 @@ import useSettings from '../../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getIndicadores } from '../../redux/slices/indicadores';
-import { geParamsUtil } from '../../redux/slices/parametrizacao';
-import { getFromIntranet, getSuccess } from '../../redux/slices/intranet';
+import { getInfoInicial, getSuccess } from '../../redux/slices/intranet';
 // components
 import Page from '../../components/Page';
 import Label from '../../components/Label';
@@ -47,11 +46,7 @@ export default function PageFilaTrabalho() {
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 10 }) < new Date()) {
-      dispatch(getFromIntranet('cc', { id: cc?.id }));
-      dispatch(getFromIntranet('colaboradores'));
-      dispatch(geParamsUtil());
-    }
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 10 }) < new Date()) dispatch(getInfoInicial(cc?.id, false));
   }, [dispatch, cc?.id, dateUpdate]);
 
   const tabs = useMemo(() => {
@@ -88,9 +83,7 @@ export default function PageFilaTrabalho() {
     if (!tabs.map((tab) => tab.value).includes(currentTab)) setItemValue(tabs[0]?.value, setCurrentTab, 'tabProcessos');
   }, [tabs, currentTab]);
 
-  const refreshDados = () => {
-    dispatch(getSuccess({ item: 'dateUpdate', dados: sub(new Date(), { minutes: 10 }) }));
-  };
+  const refreshDados = () => dispatch(getSuccess({ item: 'dateUpdate', dados: sub(new Date(), { minutes: 10 }) }));
 
   return (
     <Page title="Fila de trabalho | DigitalDocs">

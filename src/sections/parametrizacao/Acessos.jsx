@@ -85,25 +85,25 @@ export default function Acessos() {
                           caption
                           id={row?.id}
                           nome={row?.nome}
-                          foto={row?.foto_disk}
-                          label={nomeacaoBySexo(row.nomeacao || row?.funcao, row?.sexo)}
+                          foto={row?.foto_anexo}
+                          label={nomeacaoBySexo(row.nomeacao_funcao, row?.sexo)}
                         />
                       </TableCell>
                       <TableCell align="left">
-                        <Typography variant="subtitle2"> {row?.uo?.label}</Typography>
+                        <Typography variant="subtitle2"> {row?.uo_label}</Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Balcão nº {row?.uo?.balcao}
+                          Balcão nº {row?.balcao}
                         </Typography>
                       </TableCell>
                       <TableCell>{row?.vinculo || noDados()}</TableCell>
                       <TableCell>
-                        <Criado value={row?.perfil?.mail} />
-                        <Criado value={row?.perfil?.businessPhones} />
+                        <Criado value={row?.email} />
+                        <Criado value={row?.telefone} />
                       </TableCell>
                       <TableCell align="center" width={50}>
                         <DefaultAction
                           label="Gerir acessos"
-                          onClick={() => navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${row?.perfil?.id}`)}
+                          onClick={() => navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/acesso/${row?.perfil_id}`)}
                         />
                       </TableCell>
                     </TableRow>
@@ -138,7 +138,7 @@ export default function Acessos() {
 
 function applySortFilter({ colaboradores, comparator, filter, uo }) {
   colaboradores = applySort(colaboradores, comparator);
-  if (uo) colaboradores = colaboradores.filter(({ uo }) => uo?.label === uo);
+  if (uo) colaboradores = colaboradores.filter(({ uo_label: label }) => label === uo);
   if (filter && filter !== null) {
     const normalizedFilter = normalizeText(filter);
     colaboradores = colaboradores.filter(

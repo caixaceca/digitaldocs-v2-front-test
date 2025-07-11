@@ -79,7 +79,7 @@ export default function TableInfoEstado({ item, dados }) {
                         <ColaboradorInfo
                           caption
                           id={row?.cid}
-                          foto={row?.foto_disk}
+                          foto={row?.foto}
                           nome={row?.nome || `Perfil: ${row.perfil_id}`}
                           label={nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}
                         />
@@ -87,9 +87,9 @@ export default function TableInfoEstado({ item, dados }) {
                       {(item === 'colaboradores' && (
                         <>
                           <TableCell align="left">
-                            <Typography variant="subtitle2"> {row?.uo?.label}</Typography>
+                            <Typography variant="subtitle2"> {row?.unidade_organica}</Typography>
                             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                              Balcão nº {row?.uo?.balcao}
+                              Balcão nº {row?.balcao}
                             </Typography>
                           </TableCell>
                           <TableCell>
@@ -150,16 +150,16 @@ export default function TableInfoEstado({ item, dados }) {
 function colaboradoresList(transicoes, colaboradores) {
   const perfisAssociados = [];
   transicoes?.forEach((row) => {
-    const colabByPerfil = colaboradores?.find((colab) => colab?.perfil_id === row.perfil_id);
+    const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row.perfil_id);
     perfisAssociados.push({
       ...row,
-      cid: colabByPerfil?.id,
-      uo: colabByPerfil?.uo,
-      sexo: colabByPerfil?.sexo,
-      foto_disk: colabByPerfil?.foto_disk,
-      nome: colabByPerfil?.perfil?.displayName,
-      unidade_organica: colabByPerfil?.uo?.label,
-      nomeacao_funcao: colabByPerfil?.nomeacao || colabByPerfil?.funcao,
+      cid: colaborador?.id,
+      sexo: colaborador?.sexo,
+      nome: colaborador?.nome,
+      balcao: colaborador?.balcao,
+      foto: colaborador?.foto_anexo,
+      unidade_organica: colaborador?.uo_label,
+      nomeacao_funcao: colaborador?.nomeacao_funcao,
     });
   });
   return perfisAssociados;

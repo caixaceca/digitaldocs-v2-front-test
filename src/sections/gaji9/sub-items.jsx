@@ -25,7 +25,7 @@ import { DefaultAction } from '../../components/Actions';
 import { SearchNotFoundSmall } from '../../components/table';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import { DialogConfirmar, DialogTitleAlt } from '../../components/CustomDialog';
-import { ColaboradorInfo, DataLabel, CellChecked, noDados } from '../../components/Panel';
+import { Colaborador, DataLabel, CellChecked, noDados } from '../../components/Panel';
 //
 import { DetalhesContent } from './detalhes-gaji9';
 import { SubtiposForm } from './form-identificadores';
@@ -51,8 +51,8 @@ export function GrupoDetail({ dados }) {
           dados={dados?.utilizadores?.map((row) => ({
             ...row,
             colaborador: colaboradores?.find(
-              ({ perfil }) =>
-                perfil?.id_aad === row?.utilizador_id || perfil?.mail?.toLowerCase() === row?.email?.toLowerCase()
+              ({ ad_id: adId, email }) =>
+                adId === row?.utilizador_id || email?.toLowerCase() === row?.email?.toLowerCase()
             ),
           }))}
         />
@@ -95,21 +95,7 @@ function RecursosUtilizadores({ id, dados = [], recursos = false }) {
         <TableBody>
           {dados?.map((row, index) => (
             <TableRow hover key={`${row?.id}_${id}_${index}`}>
-              <TableCell>
-                {recursos ? (
-                  row?.recurso
-                ) : (
-                  <ColaboradorInfo
-                    labelAltCaption
-                    id={row?.colaborador?.id}
-                    labelAlt={row?.utilizador_id}
-                    foto={row?.colaborador?.foto_disk}
-                    caption={!row?.colaborador?.uo?.label}
-                    nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
-                    label={row?.colaborador?.uo?.desegnicao || 'Perfil sem ID_AAD na Intranet'}
-                  />
-                )}
-              </TableCell>
+              <TableCell>{recursos ? row?.recurso : <Colaborador row={row} />}</TableCell>
               <TableCell>
                 <DataLabel data={row?.data_inicio || ''} />
                 <DataLabel data={row?.data_termino || ''} termino />

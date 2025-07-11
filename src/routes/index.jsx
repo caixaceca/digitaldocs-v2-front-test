@@ -5,8 +5,7 @@ import { Navigate, useRoutes } from 'react-router-dom';
 import { localVersion } from '../config';
 // redux
 import { useDispatch, useSelector } from '../redux/store';
-import { geParamsUtil } from '../redux/slices/parametrizacao';
-import { authenticateColaborador, getFromIntranet, getInfoIntranet } from '../redux/slices/intranet';
+import { authenticateColaborador, getFromIntranet, getInfoInicial } from '../redux/slices/intranet';
 // layouts
 import IntranetLayout from '../layouts';
 // components
@@ -23,7 +22,7 @@ const Loadable = (Component) => (props) => (
 export default function Router() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { cc, perfil, perfilId } = useSelector((state) => state.intranet);
+  const { cc, perfil } = useSelector((state) => state.intranet);
 
   useEffect(() => {
     fetch('/meta.json', { cache: 'no-store' })
@@ -46,12 +45,8 @@ export default function Router() {
   }, [dispatch, perfil?.colaborador_id]);
 
   useEffect(() => {
-    if (cc?.id) dispatch(getInfoIntranet(cc?.id));
+    if (cc?.id) dispatch(getInfoInicial(cc?.id, true));
   }, [dispatch, cc?.id]);
-
-  useEffect(() => {
-    if (perfilId) dispatch(geParamsUtil());
-  }, [dispatch, perfilId]);
 
   return useRoutes([
     {

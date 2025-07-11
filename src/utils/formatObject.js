@@ -5,9 +5,7 @@ import { applySort, getComparator } from '../hooks/useTable';
 
 export function findColaborador(mail, colaboradores) {
   const colaborador = colaboradores?.find(({ email }) => email?.toLowerCase() === mail?.toLowerCase());
-  return colaborador
-    ? `${colaborador?.perfil?.displayName} ${colaborador?.uo?.label ? `(${colaborador?.uo?.label})` : ''}`
-    : mail;
+  return colaborador ? `${colaborador?.nome} ${colaborador?.uo_label ? `(${colaborador?.uo_label})` : ''}` : mail;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -71,19 +69,19 @@ export function removerPropriedades(obj, propriedades) {
 
 export function perfisAad(colaboradores, from) {
   return colaboradores
-    ?.filter(({ perfil }) => perfil?.id_aad)
+    ?.filter(({ ad_id: adId }) => adId)
     ?.map((row) => ({
+      id: row?.ad_id,
       label: row?.nome,
       email: row?.email,
-      id: row?.perfil?.id_aad,
       ...(from === 'representantes'
         ? {
             sexo: row?.sexo,
-            balcao: row?.uo?.balcao,
+            balcao: row?.balcao,
+            concelho: row?.concelho,
+            funcao: row?.nomeacao_funcao,
             estado_civil: row?.estado_civil,
-            concelho: row?.morada?.concelho,
-            funcao: row?.nomeacao || row?.funcao,
-            residencia: `${row?.morada?.concelho}${row?.morada?.zona ? ` - ${row?.morada?.zona}` : ''}`,
+            residencia: `${row?.concelho}${row?.zona ? ` - ${row?.zona}` : ''}`,
           }
         : null),
     }));
@@ -95,7 +93,7 @@ export function utilizadoresGaji9(colaboradores, funcoes, from) {
   const idsFuncoes = funcoes?.map(({ utilizador_id: utId }) => utId) || [];
 
   return perfisAad(
-    colaboradores?.filter(({ perfil }) => idsFuncoes?.includes(perfil?.id_aad)),
+    colaboradores?.filter(({ ad_id: adId }) => idsFuncoes?.includes(adId)),
     from
   );
 }

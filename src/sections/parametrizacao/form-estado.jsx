@@ -63,7 +63,7 @@ export function EstadoForm({ onClose }) {
       is_decisao: selectedItem?.is_decisao || false,
       is_inicial: selectedItem?.is_inicial || false,
       nivel_decisao: selectedItem?.nivel_decisao || null,
-      uo_id: uosList?.find(({ id }) => id === selectedItem?.uo_id) || null,
+      uo_id: uosList?.find(({ id }) => Number(id) === Number(selectedItem?.uo_id)) || null,
     }),
     [selectedItem, uosList]
   );
@@ -249,7 +249,7 @@ export function PerfisEstadoForm({ onClose }) {
                       <RHFAutocompleteObj
                         label="Colaborador"
                         name={`perfis[${index}].perfil_id`}
-                        options={colaboradores?.map(({ perfil_id: pidp, nome }) => ({ id: pidp, label: nome }))}
+                        options={colaboradores?.map(({ perfil_id: pid, nome }) => ({ id: pid, label: nome }))}
                         getOptionDisabled={(option) => values.perfis.some(({ perfil }) => perfil?.id === option.id)}
                       />
                     </Stack>

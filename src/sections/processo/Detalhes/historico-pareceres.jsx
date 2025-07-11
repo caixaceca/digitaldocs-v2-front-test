@@ -76,9 +76,9 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
               {colaborador && (
                 <ColaboradorInfo
                   id={colaborador?.id}
-                  foto={colaborador?.foto_disk}
-                  labelAlt={colaborador?.uo?.label}
-                  nome={colaborador?.perfil?.displayName}
+                  nome={colaborador?.nome}
+                  foto={colaborador?.foto_anexo}
+                  labelAlt={colaborador?.uo_label}
                   other={
                     temParecer && (
                       <Box>

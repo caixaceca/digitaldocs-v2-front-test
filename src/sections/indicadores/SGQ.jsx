@@ -462,8 +462,8 @@ function agruparIndicadores(dados, colaboradores, item) {
     if (!res[value[item]]) {
       if (item === 'mes') res[value[item]] = { item: value[item], indicadores: [] };
       else if (item === 'perfil_id') {
-        const colaborador = colaboradores?.find((colab) => colab?.perfil_id === value[item]);
-        res[value[item]] = { id: value[item], label: colaborador?.perfil?.displayName || value[item], total: 0 };
+        const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === value[item]);
+        res[value[item]] = { id: value[item], label: colaborador?.nome || value[item], total: 0 };
       } else if (item === 'tipo') res[value[item]] = { label: value?.tipo || value[item], total: 0 };
       else if (item === 'forma') res[value[item]] = { label: value?.forma || value[item], total: 0 };
 
@@ -472,11 +472,11 @@ function agruparIndicadores(dados, colaboradores, item) {
     if (item === 'mes') {
       const colaborador =
         'perfil_id' in value
-          ? colaboradores?.find((colab) => colab?.perfil_id === value?.perfil_id) || value?.perfil_id
+          ? colaboradores?.find(({ perfil_id: pid }) => pid === value?.perfil_id) || value?.perfil_id
           : '';
       res[value[item]].indicadores.push({
         total: value?.total,
-        label: colaborador?.perfil?.displayName || colaborador || value?.tipo || value?.forma,
+        label: colaborador?.nome || colaborador || value?.tipo || value?.forma,
       });
     } else if (item === 'perfil_id' || item === 'tipo' || item === 'forma') {
       res[value[item]].total += value?.total;

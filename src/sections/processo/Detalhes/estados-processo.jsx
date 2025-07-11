@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { baralharString } from '../../../utils/formatText';
 import { getIntranetFile } from '../../../utils/formatFile';
 import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
@@ -74,7 +73,7 @@ export default function Estados({ handleAceitar }) {
                         <Typography sx={{ typography: 'caption', color: 'info.main' }}>
                           {preso ? '' : 'Este processo foi tribuído a '}
                           <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                            {baralharString(afeto?.perfil?.displayName)}
+                            {afeto?.nome}
                           </Typography>
                           {preso ? ' está trabalhando no processo' : ''} neste estado.
                         </Typography>
@@ -197,7 +196,7 @@ export function Info({ dados, colaboradores }) {
           <Divider flexItem sx={{ pt: 3 }} />
           <Stack spacing={3} divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} sx={{ mt: 3 }}>
             {dados?.pareceres?.map((row, index) => {
-              const criador = colaboradores?.find(({ perfil }) => perfil?.id === row?.perfil_id);
+              const criador = colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id);
               return (
                 <Stack key={`parecer_${index}_${row?.id}`} direction="row" spacing={1.5}>
                   <Stack sx={{ width: 1 }}>
@@ -253,11 +252,10 @@ export function DataParecer({ data1, data2 = '', envio = false }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function InfoCriador({ criador = null, temParecer = false, dados = null }) {
-  const { id, perfil_id: pid = '', perfil = null, uo = null, foto_disk: foto = '' } = criador;
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
-      <AvatarBedge id={id}>
-        <MyAvatar src={getIntranetFile('colaborador', foto)} />
+      <AvatarBedge id={criador?.id}>
+        <MyAvatar src={getIntranetFile('colaborador', criador?.foto_anexo)} />
       </AvatarBedge>
       <Stack
         useFlexGap
@@ -270,18 +268,18 @@ export function InfoCriador({ criador = null, temParecer = false, dados = null }
         <Box>
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <Typography noWrap variant="subtitle2">
-              {perfil?.displayName || `Perfil ID: ${pid}`}
+              {criador?.nome || `Perfil ID: ${criador?.perfil_id}`}
             </Typography>
-            {uo?.label && (
+            {criador?.uo_label && (
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                ({uo?.label})
+                ({criador?.uo_label})
               </Typography>
             )}
           </Stack>
-          {perfil?.mail && (
+          {criador?.email && (
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {perfil?.mail}
-              {perfil?.businessPhones?.[0] ? ` | ${perfil?.businessPhones?.[0]}` : ''}
+              {criador?.email}
+              {criador?.telefone?.[0] ? ` | ${criador?.telefone?.[0]}` : ''}
             </Typography>
           )}
         </Box>

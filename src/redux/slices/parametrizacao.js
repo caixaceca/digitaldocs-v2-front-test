@@ -151,22 +151,6 @@ export const { openModal, getSuccess, closeModal, setModal, changeMeuAmbiente, a
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function geParamsUtil() {
-  return async (dispatch) => {
-    dispatch(getFromParametrizacao('meusambientes'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromParametrizacao('meusacessos'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromParametrizacao('fluxos'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromParametrizacao('estados'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromParametrizacao('origens'));
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    dispatch(getFromParametrizacao('motivosPendencia'));
-  };
-}
-
 export function getFromParametrizacao(item, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));

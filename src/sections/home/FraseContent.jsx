@@ -14,7 +14,7 @@ import { newLineText } from '../../components/Panel';
 export default function FraseContent({ frase }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const sugeridoPor = colaboradores?.find(({ id }) => id === frase?.sugerido_por);
-  const isKPI = emailCheck(sugeridoPor?.perfil?.mail, '') && frase?.frase?.includes('KPI - Key Performance Indicator');
+  const isKPI = emailCheck(sugeridoPor?.email, '') && frase?.frase?.includes('KPI - Key Performance Indicator');
   return (
     <Stack sx={{ flexGrow: 1, color: 'text.secondary' }}>
       <Typography gutterBottom variant="h6" sx={{ textAlign: 'center' }}>
@@ -56,11 +56,11 @@ export default function FraseContent({ frase }) {
           <Typography variant="subtitle2">{frase?.autor}</Typography>
         </Stack>
       )}
-      {frase?.colaborador && (
+      {!!sugeridoPor && (
         <Stack direction="row" alignItems="center" justifyContent="right" spacing={0.5}>
           <Typography variant="caption">Citado por:</Typography>
           <Typography variant="subtitle2">
-            {frase?.colaborador?.perfil?.displayName} ({frase?.colaborador?.uo?.label})
+            {sugeridoPor?.nome} ({sugeridoPor?.uo_label})
           </Typography>
         </Stack>
       )}

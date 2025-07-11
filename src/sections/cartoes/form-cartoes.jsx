@@ -217,7 +217,7 @@ export function BalcaoEntregaForm({ onClose }) {
 
   const formSchema = Yup.object().shape({ balcao: Yup.mixed().required('Balcão de entrega não pode ficar vazio') });
   const defaultValues = useMemo(
-    () => ({ balcao: uosList?.find(({ id }) => id === selectedItem?.balcao_entrega) }),
+    () => ({ balcao: uosList?.find(({ id }) => Number(id) === Number(selectedItem?.balcao_entrega)) }),
     [selectedItem, uosList]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });

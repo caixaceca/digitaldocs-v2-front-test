@@ -238,14 +238,14 @@ export function Criterios({ dados, colaboradores }) {
     .filter(({ perfil_incluido_id: pid }) => pid)
     .map(
       (item) =>
-        colaboradores?.find(({ perfil_id: pid }) => pid === item.perfil_incluido_id)?.perfil?.displayName ||
+        colaboradores?.find(({ perfil_id: pid }) => pid === item.perfil_incluido_id)?.nome ||
         `PerfilID: ${item.perfil_incluido_id}`
     );
   const perfisExcluidos = dados
     .filter(({ perfil_excluido_id: pid }) => pid)
     .map(
       (item) =>
-        colaboradores?.find(({ perfil_id: pid }) => pid === item.perfil_excluido_id)?.perfil?.displayName ||
+        colaboradores?.find(({ perfil_id: pid }) => pid === item.perfil_excluido_id)?.nome ||
         `PerfilID: ${item.perfil_excluido_id}`
     );
 
@@ -316,8 +316,8 @@ function dadosComColaboradores(dados, colaboradores) {
       ...row,
       idColab: colaborador?.id,
       mail: colaborador?.email,
-      uo: colaborador?.uo?.label,
-      foto: colaborador?.foto_disk,
+      uo: colaborador?.uo_label,
+      foto: colaborador?.foto_anexo,
       nome: colaborador?.nome || `Perfil: ${row.perfil_id}`,
     });
   });

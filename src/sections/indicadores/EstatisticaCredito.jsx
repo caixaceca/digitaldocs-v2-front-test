@@ -78,8 +78,8 @@ export default function EstatisticaCredito() {
     [cc, isAdmin, isAuditoria, meusAmbientes, uos]
   );
   const [uo, setUo] = useState(
-    uosList?.find(({ id }) => id === Number(localStorage.getItem('uoEst'))) ||
-      uosList?.find(({ id }) => id === Number(cc?.uo_id)) || { id: -1, label: 'Caixa' }
+    uosList?.find(({ id }) => Number(id) === Number(localStorage.getItem('uoEst'))) ||
+      uosList?.find(({ id }) => Number(id) === Number(cc?.uo_id)) || { id: -1, label: 'Caixa' }
   );
 
   const tabsList = useMemo(

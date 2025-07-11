@@ -51,7 +51,10 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
   const entidadesList = useMemo(() => entidadesParse(entidade), [entidade]);
   const devolvido = useMemo(() => htransicoes?.[0]?.modo === 'Devolução', [htransicoes]);
   const origem = useMemo(() => origens?.find(({ id }) => id === origemId), [origens, origemId]);
-  const bd = useMemo(() => uos?.find(({ balcao: balcaoUo }) => balcaoUo === balcao)?.label, [balcao, uos]);
+  const bd = useMemo(
+    () => uos?.find(({ balcao: balcaoUo }) => Number(balcaoUo) === Number(balcao))?.label,
+    [balcao, uos]
+  );
   const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
 
   return (
@@ -116,7 +119,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                           <Typography sx={{ typography: 'caption', color: 'info.main' }}>
                             {row?.preso ? '' : 'Atribuído a '}
                             <Typography variant="spam" sx={{ fontWeight: 900 }}>
-                              {baralharString(colaboradorAfeto?.perfil?.displayName)}
+                              {colaboradorAfeto?.nome}
                             </Typography>
                             {row?.preso ? ' está trabalhando neste processo' : ''}.
                           </Typography>

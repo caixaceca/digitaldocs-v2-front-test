@@ -69,7 +69,7 @@ const fields = [
 export function Detalhes({ item, closeModal }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { selectedItem } = useSelector((state) => state.parametrizacao);
-  const perfil = selectedItem?.perfil_id
+  const colaborador = selectedItem?.perfil_id
     ? colaboradores?.find(({ perfil_id: pid }) => Number(pid) === Number(selectedItem?.perfil_id))
     : null;
 
@@ -84,7 +84,7 @@ export function Detalhes({ item, closeModal }) {
       <DialogContent>
         {(item === 'Transições' && <DetalhesTransicao dados={selectedItem} />) ||
           (item === 'Notificações' && <Notificacao dados={selectedItem} />) || (
-            <DetalhesContent dados={selectedItem} item={item} perfil={perfil} />
+            <DetalhesContent dados={selectedItem} item={item} colaborador={colaborador} />
           )}
       </DialogContent>
     </Dialog>
@@ -93,9 +93,9 @@ export function Detalhes({ item, closeModal }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function DetalhesContent({ dados = null, item = '', perfil = null, uo = null }) {
+export function DetalhesContent({ dados = null, item = '', colaborador = null, uo = null }) {
   const { isLoading } = useSelector((state) => state.parametrizacao);
-  const uoAlt = uo || perfil?.uo;
+  const uoAlt = uo || (colaborador && { label: colaborador?.uo, balcao: colaborador?.balcao }) || null;
 
   return (
     <>
@@ -170,19 +170,21 @@ export function DetalhesContent({ dados = null, item = '', perfil = null, uo = n
                         text={`${dados?.prazoemdias} dia${dados?.prazoemdias > 1 ? 's' : ''}`}
                       />
                     )}
-                    {perfil && (
-                      <TableRowItem
-                        title="Colaborador:"
-                        text={`${perfil?.perfil?.displayName} (ID_Perfil: ${perfil?.perfil_id})`}
-                      />
+                    {colaborador && (
+                      <>
+                        <TableRowItem
+                          title="Colaborador:"
+                          text={`${colaborador?.nome} (ID_Perfil: ${colaborador?.perfil_id})`}
+                        />
+                        <TableRowItem
+                          title="Função:"
+                          text={nomeacaoBySexo(colaborador?.nomeacao_funcao, colaborador?.sexo)}
+                        />
+                      </>
                     )}
-                    {perfil && (
-                      <TableRowItem
-                        title="Função:"
-                        text={nomeacaoBySexo(perfil?.nomeacao || perfil?.funcao, perfil?.sexo)}
-                      />
+                    {uoAlt && (
+                      <TableRowItem title="U.O:" text={`${uoAlt?.label}${uoAlt?.id ? ` (ID: ${uoAlt?.id})` : ''}`} />
                     )}
-                    {uoAlt && <TableRowItem title="U.O:" text={`${uoAlt?.label} (ID: ${uoAlt?.id})`} />}
                     {uoAlt && <TableRowItem title="Balcão:" text={uoAlt?.balcao} />}
                     {'corpo' in dados && (
                       <TableRowItem title="Corpo:" item={<Markdown own children={dados?.corpo} />} />

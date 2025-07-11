@@ -10,7 +10,7 @@ import { getComparator, applySort } from '../../hooks/useTable';
 export function dadosList(cartoes, uos) {
   return cartoes?.map((row) => ({
     ...row,
-    entrega: uos?.find(({ balcao }) => balcao === Number(row?.balcao_entrega))?.label || row?.balcao_entrega,
+    entrega: uos?.find(({ balcao }) => Number(balcao) === Number(row?.balcao_entrega))?.label || row?.balcao_entrega,
   }));
 }
 

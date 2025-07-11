@@ -247,9 +247,9 @@ function pedidosList(dados, colaboradores, uos) {
       balcao: uo?.balcao,
       cid: colaborador?.id,
       uo: uo?.label || row?.uo_id,
-      foto: colaborador?.foto_disk,
-      uoColab: colaborador?.uo?.label,
-      nome: colaborador?.perfil?.displayName || row.perfil_id,
+      foto: colaborador?.foto_anexo,
+      uoColab: colaborador?.uo_label,
+      nome: colaborador?.nome || row.perfil_id,
     });
   });
   return pedidos;

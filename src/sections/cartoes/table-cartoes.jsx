@@ -114,8 +114,8 @@ export default function TableCartoes() {
   useEffect(() => {
     if (fase === 'Receção' && uosList?.length > 0 && !uosList?.map(({ id }) => id)?.includes(uo?.id)) {
       const uoSel =
-        uosList?.find(({ id }) => id === Number(localStorage.getItem('uoCartao'))) ||
-        uosList?.find(({ id }) => id === cc?.uo_balcao) ||
+        uosList?.find(({ id }) => Number(id) === Number(localStorage.getItem('uoCartao'))) ||
+        uosList?.find(({ id }) => Number(id) === Number(cc?.uo_balcao)) ||
         uosList[0];
       localStorage.setItem('uoCartao', uoSel?.id || '');
       setUo(uoSel);

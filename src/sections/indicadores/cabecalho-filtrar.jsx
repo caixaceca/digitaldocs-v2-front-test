@@ -93,7 +93,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   const [estado, setEstado] = useState(
     estadosList?.find(({ id }) => Number(id) === Number(localStorage.getItem('estadoIndic'))) || null
   );
-  const [perfil, setPerfil] = useState(
+  const [colaborador, setColaborador] = useState(
     colaboradoresList?.find(({ id }) => Number(id) === Number(localStorage.getItem('colaboradorIndic'))) ||
       colaboradoresList?.find(({ id }) => Number(id) === Number(perfilId)) ||
       null
@@ -111,8 +111,8 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   }, [uosList, cc?.uo_id]);
 
   useEffect(() => {
-    if (!perfil?.id && colaboradoresList && (localStorage.getItem('colaboradorIndic') || perfilId)) {
-      setPerfil(
+    if (!colaborador?.id && colaboradoresList && (localStorage.getItem('colaboradorIndic') || perfilId)) {
+      setColaborador(
         colaboradoresList?.find(({ id }) => Number(id) === Number(localStorage.getItem('colaboradorIndic'))) ||
           colaboradoresList?.find(({ id }) => Number(id) === Number(perfilId))
       );
@@ -138,8 +138,8 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
 
     const uoId = uo?.id || '';
     const fluxoId = fluxo?.id || '';
-    const perfilId = perfil?.id || '';
     const estadoId = estado?.id || '';
+    const perfilId = colaborador?.id || '';
     const porEstado = agrEntradas === 'Estado';
     const validarDistinto = tab === 'entradaTrabalhado';
     const destinoId = porEstado ? estado?.id : balcao?.id;
@@ -205,9 +205,9 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
     dispatch,
     perfilId,
     fluxo?.id,
-    perfil?.id,
     agrupamento,
     agrEntradas,
+    colaborador?.id,
   ]);
 
   const haveColaborador =
@@ -274,7 +274,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
             <Panel label="Balcão" value={balcao?.label} />
           )}
           {haveEstado && estado?.label && <Panel label="Estado" value={estado?.label} />}
-          {haveColaborador && perfil?.label && <Panel label="Colaborador" value={perfil?.label} />}
+          {haveColaborador && colaborador?.label && <Panel label="Colaborador" value={colaborador?.label} />}
           {tab === 'devolucoes' && origem && <Panel label="Origem" value={origem} />}
           {(tab === 'conclusao' || tab === 'execucao') && fluxo?.label && (
             <Panel label="Assunto" value={balcao?.fluxo} />
@@ -351,14 +351,14 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
                   value={estado}
                   setValue={setEstado}
                   options={estadosList}
-                  disableClearable={haveEstado && !perfil && !fluxo}
+                  disableClearable={haveEstado && !colaborador && !fluxo}
                 />
               )}
               {haveColaborador && (
                 <FilterAutocomplete
-                  value={perfil}
+                  value={colaborador}
                   label="Colaborador"
-                  setValue={setPerfil}
+                  setValue={setColaborador}
                   options={colaboradoresList}
                   disableClearable={tab === 'execucao' && !estado && !fluxo}
                 />
@@ -369,7 +369,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
                   label="Assunto"
                   setValue={setFluxo}
                   options={fluxosList}
-                  disableClearable={tab === 'execucao' && !perfil && !estado}
+                  disableClearable={tab === 'execucao' && !colaborador && !estado}
                 />
               )}
               {(tab === 'entradaTrabalhado' || tab === 'totalTrabalhados' || tab === 'acao') && (

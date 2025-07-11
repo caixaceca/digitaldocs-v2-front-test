@@ -250,7 +250,7 @@ function origensItem(indicadores, uos, colaboradores, agrupamento, topNumb) {
   const dados = [];
   indicadores?.forEach(({ objeto_id: objeto, total }, index) => {
     if (agrupamento === 'Unidade orgânica') {
-      const uo = uos?.find(({ id }) => id === objeto);
+      const uo = uos?.find(({ id }) => Number(id) === Number(objeto));
       if (topNumb !== 'Todos' && index < topNumb) dados.push({ total, label: uo?.label || objeto });
       else if (topNumb === 'Todos') dados.push({ total, label: uo?.label || objeto });
     } else if (agrupamento === 'Colaborador') {

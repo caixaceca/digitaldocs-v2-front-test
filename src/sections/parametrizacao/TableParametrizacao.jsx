@@ -306,7 +306,7 @@ function Fluxos({ fluxo = null, setFluxo }) {
 export function dadosComColaborador(dados, colaboradores) {
   return dados?.map((row) => ({
     ...row,
-    nome: colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id)?.perfil?.displayName || row?.perfil_id,
+    nome: colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id)?.nome || row?.perfil_id,
   }));
 }
 

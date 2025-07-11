@@ -39,14 +39,14 @@ const InfoStyle = styled('div')(({ theme }) => ({
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function PerfilCover({ perfilColaborador, isDeFeria }) {
+export default function PerfilCover({ colaborador, isDeFeria }) {
   const { isLoading } = useSelector((state) => state.intranet);
   return (
     <RootStyle>
       <InfoStyle>
         <Stack>
           <AvatarBedge
-            id={perfilColaborador?.id}
+            id={colaborador?.id}
             sx={{ border: (theme) => `2px solid ${theme.palette.common.white}`, width: 15, height: 15 }}
           >
             <MyAvatar
@@ -58,14 +58,14 @@ export default function PerfilCover({ perfilColaborador, isDeFeria }) {
                 height: { xs: 80, md: 128 },
                 borderColor: 'common.white',
               }}
-              name={perfilColaborador?.perfil?.displayName}
-              src={getIntranetFile('colaborador', perfilColaborador?.foto_disk)}
+              name={colaborador?.nome}
+              src={getIntranetFile('colaborador', colaborador?.foto_anexo)}
             />
           </AvatarBedge>
         </Stack>
         <Stack sx={{ ml: 3, mt: { md: -2 }, color: 'common.white', textAlign: { md: 'left' } }}>
           <Stack direction="row" alignItems="center" spacing={1} sx={{ pr: 1 }}>
-            {!perfilColaborador && isLoading ? (
+            {!colaborador && isLoading ? (
               <Stack>
                 <Skeleton sx={{ height: 26, width: 300, bgcolor: '#fff', opacity: 0.48, transform: 'scale(1)' }} />
                 <Skeleton
@@ -77,9 +77,9 @@ export default function PerfilCover({ perfilColaborador, isDeFeria }) {
               </Stack>
             ) : (
               <>
-                {perfilColaborador ? (
+                {colaborador ? (
                   <Typography variant="h5" noWrap>
-                    {perfilColaborador?.perfil?.displayName || perfilColaborador?.perfil?.mail}
+                    {colaborador?.nome || colaborador?.email}
                   </Typography>
                 ) : (
                   <Typography variant="h6" noWrap sx={{ fontStyle: 'italic', fontWeight: 'normal', pr: 1 }}>
@@ -99,13 +99,13 @@ export default function PerfilCover({ perfilColaborador, isDeFeria }) {
             )}
           </Stack>
 
-          {!!perfilColaborador && (
+          {!!colaborador && (
             <>
               <Typography noWrap variant="subtitle2">
-                {nomeacaoBySexo(perfilColaborador?.nomeacao || perfilColaborador?.funcao, perfilColaborador?.sexo)}
+                {nomeacaoBySexo(colaborador?.nomeacao_funcao, colaborador?.sexo)}
               </Typography>
               <Typography noWrap variant="body2">
-                {perfilColaborador?.uo?.desegnicao}
+                {colaborador?.uo}
               </Typography>
             </>
           )}
