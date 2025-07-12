@@ -40,7 +40,7 @@ export default function FormInfoExterno({ dados }) {
   const { origens } = useSelector((state) => state.parametrizacao);
 
   const origensList = useMemo(
-    () => origens.map(({ id, designacao, seguimento }) => ({ id, label: `${designacao} - ${seguimento}` })) || [],
+    () => origens?.map(({ id, designacao, seguimento }) => ({ id, label: `${designacao} - ${seguimento}` })) || [],
     [origens]
   );
 

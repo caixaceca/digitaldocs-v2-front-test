@@ -111,6 +111,10 @@ export function ColocarPendenteForm({ onClose }) {
   const { watch, setValue, handleSubmit } = methods;
   const values = watch();
 
+  useEffect(() => {
+    dispatch(getFromParametrizacao('motivosPendencia'));
+  }, [dispatch]);
+
   const onSubmit = (action) => {
     try {
       const params = { id: selectedItem?.id };

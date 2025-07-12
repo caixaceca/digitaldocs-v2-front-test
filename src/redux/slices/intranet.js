@@ -117,7 +117,6 @@ export function getInfoInicial(id, inicial) {
     await dispatch(getFromParametrizacao('fluxos'));
     await dispatch(getFromParametrizacao('estados'));
     await dispatch(getFromParametrizacao('origens'));
-    await dispatch(getFromParametrizacao('motivosPendencia'));
 
     if (inicial) {
       dispatch(getFromIntranet('frase'));
@@ -125,6 +124,7 @@ export function getInfoInicial(id, inicial) {
       await dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
       await dispatch(getFromIntranet('links', { label: 'nome' }));
       await dispatch(getFromIntranet('certificacoes'));
+      await dispatch(getFromParametrizacao('motivosPendencia'));
     }
   };
 }

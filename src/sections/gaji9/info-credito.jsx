@@ -173,9 +173,10 @@ export default function InfoCredito() {
 export function TableInfoCredito({ params, dados = [] }) {
   const dispatch = useDispatch();
   const { temPermissao, isGerente } = usePermissao();
+  const { contratado = false, id, tab = '' } = params;
+  const permissao = isGerente || temPermissao(['READ_CONTRATO']);
   const [filter, setFilter] = useState(localStorage.getItem(`${tab}_form`) || '');
 
-  const { contratado = false, id, tab = '' } = params;
   const {
     page,
     order,
@@ -193,9 +194,8 @@ export function TableInfoCredito({ params, dados = [] }) {
   const { isSaving, isLoading, modalGaji9, selectedItem, contratos } = useSelector((state) => state.gaji9);
 
   useEffect(() => {
-    if (tab === 'contratos' && (isGerente || temPermissao(['READ_CONTRATO'])))
-      dispatch(getFromGaji9('contratos', { id }));
-  }, [dispatch, tab, id, isGerente, temPermissao]);
+    if (tab === 'contratos' && permissao) dispatch(getFromGaji9('contratos', { id }));
+  }, [dispatch, tab, id, permissao]);
 
   useEffect(() => {
     setPage(0);
