@@ -92,7 +92,7 @@ export default function Acessos() {
                       <TableCell align="left">
                         <Typography variant="subtitle2"> {row?.uo_label}</Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Balcão nº {row?.balcao}
+                          Balcão nº {row?.uo_balcao}
                         </Typography>
                       </TableCell>
                       <TableCell>{row?.vinculo || noDados()}</TableCell>

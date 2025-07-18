@@ -76,10 +76,10 @@ export default function FormInfoCredito({ dados }) {
       setor_atividade: dadosStepper?.setor_atividade || credito?.setor_atividade || '',
       prazo_amortizacao: dadosStepper?.prazo_amortizacao || credito?.prazo_amortizacao || '',
       montante_solicitado: dadosStepper?.montante_solicitado || credito?.montante_solicitado || '',
-      linha_id:
-        dadosStepper?.linha_id || (credito?.linha_id && { id: credito?.linha_id, label: credito?.linha }) || null,
       componente_id:
         dadosStepper?.componente_id || componentesList?.find(({ id }) => id === credito?.componente_id) || null,
+      linha_id:
+        dadosStepper?.linha_id || (credito?.linha_id && { id: credito?.linha_id, label: credito?.linha }) || null,
       tipo_titular_id:
         dadosStepper?.tipo_titular_id || tiposTitularList?.find(({ id }) => id === credito?.tipo_titular_id) || null,
     }),

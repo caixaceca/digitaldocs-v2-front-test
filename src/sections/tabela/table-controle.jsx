@@ -41,6 +41,7 @@ import applySortFilter, { dadosList } from './applySortFilter';
 export default function TableControle({ from }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [uo, setUo] = useState(null);
   const [data, setData] = useState(getDataLS('dataC', new Date()));
   const [datai, setDatai] = useState(getDataLS('dataIC', new Date()));
@@ -78,8 +79,8 @@ export default function TableControle({ from }) {
   useEffect(() => {
     if (uosList?.length > 0 && !uosList?.map(({ id }) => id)?.includes(uo?.id)) {
       const currentUo =
-        uosList?.find(({ id }) => id === Number(localStorage.getItem('uoC'))) ||
-        uosList?.find(({ id }) => id === cc?.uo_id) ||
+        uosList?.find(({ id }) => Number(id) === Number(localStorage.getItem('uoC'))) ||
+        uosList?.find(({ id }) => Number(id) === Number(cc?.uo_id)) ||
         uosList[0];
       localStorage.setItem('uoC', currentUo.id || '');
       setUo(currentUo);

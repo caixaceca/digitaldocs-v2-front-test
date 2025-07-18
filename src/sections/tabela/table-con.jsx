@@ -33,7 +33,7 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD_CON = [
-  { id: 'nome_cliente', label: 'Cliente', align: 'left' },
+  { id: 'nome_cliente', label: 'Cliente' },
   { id: 'titular_ordenador', label: 'Ordenador', align: 'center' },
   { id: 'conta_processo', label: 'Nº de conta', align: 'right' },
   { id: 'Valor', label: 'Valor', align: 'right' },
@@ -43,12 +43,12 @@ const TABLE_HEAD_CON = [
 ];
 
 const TABLE_HEAD_JF = [
-  { id: 'referencia', label: 'Referência', align: 'left' },
-  { id: 'titular', label: 'Titular', align: 'left' },
-  { id: 'origem', label: 'Origem', align: 'left' },
-  { id: 'doc_1', label: 'Doc. identificação', align: 'left' },
-  { id: 'operacao', label: 'Operação', align: 'left' },
-  { id: 'data_entrada', label: 'Registo', align: 'left' },
+  { id: 'referencia', label: 'Referência' },
+  { id: 'titular', label: 'Titular' },
+  { id: 'origem', label: 'Origem' },
+  { id: 'doc_1', label: 'Doc. identificação' },
+  { id: 'operacao', label: 'Operação' },
+  { id: 'data_entrada', label: 'Registo' },
   { id: '', width: 10 },
 ];
 

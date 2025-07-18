@@ -37,11 +37,11 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../
 // ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'entrada', label: 'Nº', align: 'left' },
-  { id: 'titular', label: 'Titular', align: 'left' },
-  { id: 'entidades', label: 'Cliente/Entidade', align: 'left' },
-  { id: 'assunto', label: 'Assunto', align: 'left' },
-  { id: 'estado', label: 'Estado', align: 'left' },
+  { id: 'entrada', label: 'Nº' },
+  { id: 'titular', label: 'Titular' },
+  { id: 'entidades', label: 'Cliente/Entidade' },
+  { id: 'assunto', label: 'Assunto' },
+  { id: 'estado', label: 'Estado' },
   { id: 'criado_em', label: 'Criado' },
   { id: '', width: 10 },
 ];

@@ -140,10 +140,10 @@ export default function TableIdentificadores({ item, inativos }) {
                   <SkeletonTable
                     row={10}
                     column={
-                      (item === 'freguesias' && 6) ||
-                      (item === 'componentes' && 5) ||
-                      ((item === 'tiposTitulares' || item === 'representantes') && 4) ||
-                      3
+                      (item === 'freguesias' && 5) ||
+                      (item === 'componentes' && 4) ||
+                      ((item === 'tiposTitulares' || item === 'representantes' || item === 'tiposGarantias') && 3) ||
+                      2
                     }
                   />
                 ) : (
@@ -185,7 +185,7 @@ export default function TableIdentificadores({ item, inativos }) {
                           </TableCell>
                         )) ||
                         (item === 'tiposTitulares' && <CellChecked check={row.consumidor} />)}
-                      <CellChecked check={row.ativo} />
+                      {item === 'tiposGarantias' && <CellChecked check={row.reais} />}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {((item === 'segmentos' && temPermissao(['UPDATE_SEGMENTO'])) ||
@@ -271,8 +271,8 @@ function headerTable(item) {
           { id: 'regiao', label: 'Região' },
         ]
       : []),
+    ...(item === 'tiposGarantias' ? [{ id: 'reais', label: 'Real', align: 'center' }] : []),
     ...(item === 'tiposTitulares' ? [{ id: 'consumidor', label: 'Consumidor', align: 'center' }] : []),
-    { id: 'ativo', label: 'Ativo', align: 'center' },
     { id: '', width: 10 },
   ];
 }

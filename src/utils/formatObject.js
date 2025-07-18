@@ -77,7 +77,7 @@ export function perfisAad(colaboradores, from) {
       ...(from === 'representantes'
         ? {
             sexo: row?.sexo,
-            balcao: row?.balcao,
+            balcao: row?.uo_balcao,
             concelho: row?.concelho,
             funcao: row?.nomeacao_funcao,
             estado_civil: row?.estado_civil,

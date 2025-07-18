@@ -69,8 +69,8 @@ export default function FormInfoExterno({ dados }) {
       referencia: dadosStepper?.referencia || processo?.referencia || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
-      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
       origem_id: dadosStepper?.origem_id || origensList?.find(({ id }) => id === processo?.origem_id) || null,
+      balcao: processo?.balcao || uos?.find(({ id }) => Number(id) === Number(estado?.uo_id))?.balcao || cc?.uo_balcao,
     }),
     [isEdit, processo, origensList, dadosStepper, fluxo, estado?.uo_id, uos, cc?.uo_balcao]
   );

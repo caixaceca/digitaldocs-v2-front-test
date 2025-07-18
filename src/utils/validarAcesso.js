@@ -42,8 +42,8 @@ export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
     dados = colaboradores?.filter(({ uo_tipo: tipo, uo_regiao: regiao }) => tipo === 'Agências' && regiao === 'Sul');
   else if (cc?.uo_label === 'DOP') dados = colaboradores?.filter(({ uo_label: label }) => label?.includes('DOP'));
   else if (UosGerente(meusAmbientes)?.length > 0)
-    dados = colaboradores?.filter(({ uo_id: uoId }) => UosGerente(meusAmbientes)?.includes(uoId));
-  else if (temNomeacao(cc)) dados = colaboradores?.filter(({ uo_id: uoId }) => uoId === cc?.uo_id);
+    dados = colaboradores?.filter(({ uo_id: uoId }) => UosGerente(meusAmbientes)?.includes(Number(uoId)));
+  else if (temNomeacao(cc)) dados = colaboradores?.filter(({ uo_id: uoId }) => Number(uoId) === Number(cc?.uo_id));
   else dados = colaboradores?.filter(({ id }) => id === cc?.id);
 
   return dados?.map(({ id: cid, perfil_id: id, nome, uo_id: uoId }) => ({ id, cid, label: nome, uoId }));
@@ -74,9 +74,9 @@ export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
   const uosDCN = uos?.filter(({ tipo, regiao }) => tipo === 'Agências' && regiao === 'Norte')?.map(({ id }) => id);
 
   if (isAdmin || cc?.nomeacao === 'Administrador Executivo') estadosList = estados;
-  else if (cc?.uo_label === 'DCN') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCN?.includes(uoId));
-  else if (cc?.uo_label === 'DCS') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCS?.includes(uoId));
-  else if (cc?.uo_label === 'DOP') estadosList = estados?.filter(({ uo_id: uoId }) => uosDOP?.includes(uoId));
+  else if (cc?.uo_label === 'DCN') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCN?.includes(Number(uoId)));
+  else if (cc?.uo_label === 'DCS') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCS?.includes(Number(uoId)));
+  else if (cc?.uo_label === 'DOP') estadosList = estados?.filter(({ uo_id: uoId }) => uosDOP?.includes(Number(uoId)));
   else estadosList = meusAmbientes?.filter((item) => item?.id > 0);
 
   return applySort(

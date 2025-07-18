@@ -74,8 +74,8 @@ export default function FormInfoInterno({ dados }) {
       data_inicio: dadosStepper?.data_inicio || fillData(processo?.data_inicio, null),
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       entidades: dadosStepper?.entidades || entidadesList(isEdit, processo?.entidade, fluxo?.assunto),
-      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
       data_arquivamento: dadosStepper?.data_arquivamento || fillData(processo?.data_arquivamento, null),
+      balcao: processo?.balcao || uos?.find(({ id }) => Number(id) === Number(estado?.uo_id))?.balcao || cc?.uo_balcao,
       titular:
         dadosStepper?.titular ||
         processo?.titular ||

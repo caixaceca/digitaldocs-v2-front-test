@@ -286,6 +286,7 @@ export function GarantiaForm({ onClose }) {
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
+    reais: Yup.mixed().required().label('Tipo'),
     codigo: Yup.string().required().label('Código'),
     designacao: Yup.string().required().label('Designação'),
   });
@@ -296,6 +297,7 @@ export function GarantiaForm({ onClose }) {
       designacao: selectedItem?.designacao ?? '',
       descritivo: selectedItem?.descritivo ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
+      reais: (selectedItem && selectedItem?.reais && 'Real') || (selectedItem && 'Pessoal') || null,
     }),
     [selectedItem, isEdit]
   );
@@ -310,8 +312,9 @@ export function GarantiaForm({ onClose }) {
   }, [selectedItem]);
 
   const onSubmit = async () => {
+    const formData = { ...values, reais: values?.reais === 'Real' };
     const params = { id: selectedItem?.id, msg: `Tipo de garantia ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
-    dispatch((isEdit ? updateItem : createItem)('tiposGarantias', JSON.stringify(values), params));
+    dispatch((isEdit ? updateItem : createItem)('tiposGarantias', JSON.stringify(formData), params));
   };
 
   return (
@@ -321,7 +324,10 @@ export function GarantiaForm({ onClose }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="codigo" label="Código" />
+              <Stack direction="row" spacing={3}>
+                <RHFTextField name="codigo" label="Código" />
+                <RHFAutocompleteSmp name="reais" label="Tipo" options={['Real', 'Pessoal']} />
+              </Stack>
               <RHFTextField name="designacao" label="Designação" />
               <RHFTextField name="descritivo" label="Descritivo" />
               {isEdit && <RHFSwitch name="ativo" label="Ativo" />}

@@ -49,7 +49,11 @@ export default function PageDetalhesEstado() {
       value: 'Dados',
       component: (
         <Card sx={{ p: 3, pt: 1 }}>
-          <DetalhesContent dados={estado} item="Estado" uo={uos?.find(({ id }) => id === estado?.uo_id)} />
+          <DetalhesContent
+            item="Estado"
+            dados={estado}
+            uo={uos?.find(({ id }) => Number(id) === Number(estado?.uo_id))}
+          />
         </Card>
       ),
     },

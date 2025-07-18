@@ -24,7 +24,7 @@ import AcessoGaji9 from './acesso-gaji9';
 import { DialogConfirmar } from '../../components/CustomDialog';
 import { DetalhesContent } from '../../sections/gaji9/detalhes-gaji9';
 import ClausulaForm from '../../sections/gaji9/clausulas/form-clausula';
-import { AlineasClausula, RelacionadosCl } from '../../sections/gaji9/clausulas/opcoes-clausulas';
+import { NumerosClausula, RelacionadosCl } from '../../sections/gaji9/clausulas/opcoes-clausulas';
 import { SegmentosForm, TiposTitularesForm, CondicionalForm } from '../../sections/gaji9/clausulas/form-opcoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ export default function PageDetalhesClausula() {
         </Card>
       ),
     },
-    { value: 'Números', component: <AlineasClausula dados={clausula?.alineas} /> },
+    { value: 'Números', component: <NumerosClausula dados={clausula?.alineas} id={id} /> },
     { value: 'Tipos de titular', component: <RelacionadosCl id={id} dados={clausula?.tipos_titulares} /> },
     { value: 'Segmentos', component: <RelacionadosCl item="Segmento" id={id} dados={clausula?.segmentos} /> },
     {

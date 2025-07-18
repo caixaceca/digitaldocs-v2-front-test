@@ -22,35 +22,64 @@ import { TableSearchNotFound } from '../../../components/table';
 import { DialogConfirmar } from '../../../components/CustomDialog';
 import SearchNotFound from '../../../components/table/SearchNotFound';
 import { CellChecked, newLineText, noDados } from '../../../components/Panel';
-import { ComponetesForm, SegmentosForm, FinalidadesForm } from './form-opcoes';
+import { ComponetesForm, SegmentosForm, FinalidadesForm, CondicionalForm } from './form-opcoes';
+
+const sx = { '&:hover': { backgroundColor: 'action.hover', borderRadius: 1.5 }, p: 1.25 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function AlineasClausula({ dados = [], condicional = false }) {
+export function NumerosClausula({ id = '', dados = [], condicional = false, minuta = false }) {
+  const [item, setItem] = useState('');
+
   return (
-    <Card sx={condicional ? { boxShadow: 'none', bgcolor: 'transparent' } : { p: 3 }}>
+    <Card sx={condicional || minuta ? { boxShadow: 'none', bgcolor: 'transparent', borderRadius: 0 } : { p: 2 }}>
       {dados?.length === 0 ? (
         <SearchNotFound message="Nenhum número adicionado..." />
       ) : (
-        <>
-          {dados?.map(({ numero_ordem: numero, conteudo, sub_alineas: alineas }, index) => (
-            <Stack direction="row" key={`alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
-              {numero && <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>{numero}.</Typography>}
-              <Stack>
-                {conteudo && <Typography variant={condicional ? 'body2' : 'body1'}>{newLineText(conteudo)}</Typography>}
-                {alineas?.map(({ numero_ordem: numero, conteudo }, index1) => (
-                  <Stack direction="row" key={`alinea_${index}_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
-                    <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>
-                      {numeroParaLetra(numero)}.
-                    </Typography>
-                    <Typography variant={condicional ? 'body2' : 'body1'}>{newLineText(conteudo)}</Typography>
-                  </Stack>
-                ))}
+        <Stack spacing={condicional ? 1.5 : 0.5}>
+          {dados?.map((numero, index) => (
+            <Stack spacing={1} direction="row" key={`numero_${index}`} sx={condicional ? null : sx}>
+              {!condicional && !minuta && (
+                <DefaultAction
+                  small
+                  label="CONDICIONAL"
+                  onClick={() => setItem({ ...numero, conteudo_sub: 'Número' })}
+                />
+              )}
+              <Stack spacing={1} direction="row">
+                {numero?.numero_ordem && (
+                  <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>{numero?.numero_ordem}.</Typography>
+                )}
+                <Stack spacing={condicional ? 1 : 0}>
+                  {numero?.conteudo && (
+                    <Typography variant={condicional ? 'body2' : 'body1'}>{newLineText(numero?.conteudo)}</Typography>
+                  )}
+                  {numero?.sub_alineas?.map((alinea, index1) => (
+                    <Stack spacing={1} direction="row" sx={condicional ? null : sx} key={`num_${index}_al_${index1}`}>
+                      {!condicional && !minuta && (
+                        <DefaultAction
+                          small
+                          label="CONDICIONAL"
+                          onClick={() => setItem({ ...alinea, conteudo_sub: 'Alínea', numero: numero?.numero_ordem })}
+                        />
+                      )}
+                      <Stack direction="row" spacing={condicional ? 0.5 : 1}>
+                        <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>
+                          {numeroParaLetra(alinea?.numero_ordem)}.
+                        </Typography>
+                        <Typography variant={condicional ? 'body2' : 'body1'}>
+                          {newLineText(alinea?.conteudo)}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  ))}
+                </Stack>
               </Stack>
             </Stack>
           ))}
-        </>
+        </Stack>
       )}
+      {item && <CondicionalForm onClose={() => setItem(null)} id={id} dados={item} />}
     </Card>
   );
 }
@@ -136,23 +165,22 @@ export function Relacionados({ id, dados = [], item = '', na = false }) {
   }, [dispatch, item]);
 
   const eliminarItem = () => {
-    const itemDel =
-      (item === 'Segmento' && 'segmentoCl') ||
-      (item === 'Componente' && 'componenteSeg') ||
-      (item === 'Finalidade' && 'finalidadeSeg');
+    const itemDel = (item === 'Componente' && 'componenteSeg') || (item === 'Finalidade' && 'finalidadeSeg');
     const params = { itemId: id, id: modal, msg: 'Item eliminado', getItem: 'selectedItem' };
     dispatch(deleteItem(itemDel, { ...params, onClose: () => setModal('') }));
   };
 
   return (
-    <Card sx={{ p: 1 }}>
+    <>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>{item}</TableCell>
-            <TableCell align="center">Ativo</TableCell>
+            <TableCell size="small">{item}</TableCell>
+            <TableCell size="small" align="center">
+              Ativo
+            </TableCell>
             {!na && (
-              <TableCell align="right" width={10}>
+              <TableCell size="small" align="right" width={10}>
                 <DefaultAction small label="Adicionar" onClick={() => setModal('create')} />
               </TableCell>
             )}
@@ -165,12 +193,7 @@ export function Relacionados({ id, dados = [], item = '', na = false }) {
             {dados?.map((row, index) => (
               <TableRow hover key={`relacionado_${index}`}>
                 <TableCell>
-                  {row?.segmento ||
-                    row?.designacao ||
-                    row?.componente ||
-                    row?.finalidade ||
-                    labelTitular(row?.tipo_titular, row?.consumidor) ||
-                    noDados()}
+                  {row?.segmento || row?.componente || row?.finalidade || row?.designacao || noDados()}
                 </TableCell>
                 <CellChecked check={row?.ativo} />
                 {!na && (
@@ -184,9 +207,9 @@ export function Relacionados({ id, dados = [], item = '', na = false }) {
         )}
       </Table>
 
+      {modal === 'create' && item === 'Segmento' && <SegmentosForm onClose={() => setModal('')} id={id} />}
       {modal === 'create' && item === 'Componente' && <ComponetesForm onClose={() => setModal('')} id={id} />}
       {modal === 'create' && item === 'Finalidade' && <FinalidadesForm onClose={() => setModal('')} id={id} />}
-      {modal === 'create' && item === 'Segmento' && <SegmentosForm onClose={() => setModal('')} id={id} />}
       {!!modal && modal !== 'create' && (
         <DialogConfirmar
           isSaving={isSaving}
@@ -195,7 +218,7 @@ export function Relacionados({ id, dados = [], item = '', na = false }) {
           handleOk={() => eliminarItem()}
         />
       )}
-    </Card>
+    </>
   );
 }
 
@@ -223,24 +246,36 @@ export function RelacionadosCl({ dados = [], item = 'Tipo de titular' }) {
                 {item === 'Condição' ? (
                   <>
                     <TableCell sx={{ fontWeight: 'bold' }}>
-                      {(res?.com_nip && 'Com NIP') ||
-                        (res?.com_seguro && 'Com seguro') ||
-                        (res?.isencao_comissao && 'Isenção de comissão') ||
-                        (res?.habitacao_propria_1 && '1ª habitação própria') ||
-                        (res?.taxa_juros_negociado && 'Taxa juros negociada') ||
-                        (res?.isento_imposto_selo && 'Isento de imposto selo') ||
-                        (res?.com_prazo_utilizacao && 'Com prazo de utilização') ||
-                        (res?.prazo_maior_que && `Prazo maior que ${fNumber(res?.prazo_maior_que)}`) ||
-                        (res?.prazo_menor_que && `Prazo menor que ${fNumber(res?.prazo_menor_que)}`) ||
-                        (res?.montante_maior_que && `Montante maior que ${fNumber(res?.montante_maior_que)}`) ||
-                        (res?.montante_menor_que && `Montante menor que ${fNumber(res?.montante_menor_que)}`)}
+                      <Typography variant="subtitle2">
+                        {(res?.com_nip && 'Com NIP') ||
+                          (res?.com_seguro && 'Com seguro') ||
+                          (res?.isencao_comissao && 'Isenção de comissão') ||
+                          (res?.habitacao_propria_1 && '1ª habitação própria') ||
+                          (res?.taxa_juros_negociado && 'Taxa juros negociada') ||
+                          (res?.isento_imposto_selo && 'Isento de imposto selo') ||
+                          (res?.com_prazo_utilizacao && 'Com prazo de utilização')}
+                      </Typography>
+                      {res?.prazo_maior_que != null && res?.prazo_menor_que != null && (
+                        <Typography variant="subtitle2" noWrap>
+                          Prazo: <br />
+                          {fNumber(res?.prazo_maior_que)} - {fNumber(res?.prazo_menor_que)}
+                        </Typography>
+                      )}
+                      {res?.montante_maior_que != null && res?.montante_menor_que != null && (
+                        <>
+                          <Typography variant="body2">Montante:</Typography>
+                          <Typography variant="subtitle2" noWrap>
+                            {fNumber(res?.montante_maior_que)} - {fNumber(res?.montante_menor_que)}
+                          </Typography>
+                        </>
+                      )}
                     </TableCell>
                     <TableCell>
-                      {res?.alinea && <AlineasClausula dados={[res?.alinea]} condicional />}
+                      {res?.alinea && <NumerosClausula dados={[res?.alinea]} condicional />}
                       {res?.sub_alinea && (
-                        <AlineasClausula
-                          dados={[{ conteudo: `Número: ${res?.numero_ordem}`, sub_alineas: [res?.sub_alinea] }]}
+                        <NumerosClausula
                           condicional
+                          dados={[{ conteudo: `Número: ${res?.numero_ordem}`, sub_alineas: [res?.sub_alinea] }]}
                         />
                       )}
                     </TableCell>

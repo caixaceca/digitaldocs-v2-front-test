@@ -352,7 +352,7 @@ export function DadosMes({
   const { order, orderBy, onSort } = useTable({ defaultOrderBy: 'label', defaultOrder: 'asc' });
   const indicadoresOrdenados = applySortFilter({ comparator: getComparator(order, orderBy), dados: indicadores });
   const TABLE_HEAD = [
-    { id: 'label', label: colaborador ? 'Colaborador' : 'Assunto', align: 'left' },
+    { id: 'label', label: colaborador ? 'Colaborador' : 'Assunto' },
     { id: 'total', label: 'Total', align: 'right' },
     { id: '', label: '%', align: 'right' },
   ];

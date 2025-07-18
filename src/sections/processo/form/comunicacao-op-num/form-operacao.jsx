@@ -44,7 +44,7 @@ export default function FormOperacao({ dados }) {
       origem_fundo: dadosStepper?.origem_fundo || processo?.con?.origem_fundo || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       finalidade_fundo: dadosStepper?.finalidade_fundo || processo?.con?.finalidade || '',
-      balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
+      balcao: processo?.balcao || uos?.find(({ id }) => Number(id) === Number(estado?.uo_id))?.balcao || cc?.uo_balcao,
     }),
     [dadosStepper, processo, uos, estado?.uo_id, cc?.uo_balcao, fluxo?.id]
   );

@@ -142,10 +142,9 @@ export function OpcoesForm({ dados, options, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function CondicionalForm({ onClose, id }) {
+export function CondicionalForm({ id, dados = useCallback, onClose }) {
   const dispatch = useDispatch();
   const { activeStep } = useSelector((state) => state.stepper);
-  const { selectedItem } = useSelector((state) => state.gaji9);
 
   const onClose1 = useCallback(() => {
     onClose();
@@ -169,8 +168,8 @@ export function CondicionalForm({ onClose, id }) {
         }
       />
       <DialogContent>
-        {activeStep === 0 && <Condicao onClose={onClose1} dados={selectedItem} />}
-        {activeStep === 1 && <Conteudo onClose={onClose1} dados={selectedItem} id={id} />}
+        {activeStep === 0 && <Condicao onClose={onClose1} dados={dados} />}
+        {activeStep === 1 && <Conteudo onClose={onClose1} dados={dados} id={id} />}
       </DialogContent>
     </Dialog>
   );
@@ -185,8 +184,8 @@ export function Condicao({ onClose, dados }) {
   const formSchema = Yup.object().shape({
     condicao: Yup.mixed().required().label('Condição'),
     conteudo_sub: Yup.mixed().required().label('Conteúdo afetado'),
-    maior_que: shapeNumberZero('Maior que', 'Montante', 'Prazo', 'condicao'),
-    menor_que: shapeNumberZero('Menor que', 'Montante', 'Prazo', 'condicao'),
+    maior_que: shapeNumberZero('Valor maior que', ['Prazo', 'Montante', '1ª habitação própria'], 'condicao'),
+    menor_que: shapeNumberZero('Valor menor que', ['Prazo', 'Montante', '1ª habitação própria'], 'condicao'),
   });
 
   const defaultValues = useMemo(
@@ -208,10 +207,12 @@ export function Condicao({ onClose, dados }) {
       methods={methods}
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
-      <Stack spacing={3}>
-        <Stack spacing={3} direction="row" justifyContent="center" sx={{ pt: 1 }}>
+      <Stack spacing={3} sx={{ pt: 1 }}>
+        <RHFAutocompleteSmp name="conteudo_sub" options={['Número', 'Alínea']} label="Conteúdo afetado" />
+        <Stack spacing={3} direction="row" justifyContent="center">
           <RHFAutocompleteSmp
             name="condicao"
+            label="Condição"
             options={[
               'Prazo',
               'Montante',
@@ -219,20 +220,19 @@ export function Condicao({ onClose, dados }) {
               'Com Seguro',
               'Com prazo de utilização',
               'Isenção de comissão',
-              'Isento de imposto selo',
               'Taxa juros negociada',
               '1ª habitação própria',
             ]}
-            label="Condição"
           />
-          {(values?.condicao === 'Montante' || values?.condicao === 'Prazo') && (
+          {(values?.condicao === 'Prazo' ||
+            values?.condicao === 'Montante' ||
+            values?.condicao === '1ª habitação própria') && (
             <>
-              <RHFNumberField name="maior_que" label="Maior que" />
-              <RHFNumberField name="menor_que" label="Menor que" />
+              <RHFNumberField name="maior_que" label="Valor maior que" />
+              <RHFNumberField name="menor_que" label="Valor menor que" />
             </>
           )}
         </Stack>
-        <RHFAutocompleteSmp name="conteudo_sub" options={['Número', 'Alínea']} label="Conteúdo afetado" />
       </Stack>
       <ButtonsStepper onClose={onClose} labelCancel="Cancelar" />
     </FormProvider>
@@ -290,7 +290,6 @@ function Conteudo({ dados, onClose, id }) {
       ...(dadosStepper?.condicao === 'Com NIP' ? { com_nip: true } : null),
       ...(dadosStepper?.condicao === 'Com seguro' ? { com_seguro: true } : null),
       ...(dadosStepper?.condicao === 'Isenção de comissão' ? { isencao_comissao: true } : null),
-      ...(dadosStepper?.condicao === '1ª habitação própria' ? { habitacao_propria_1: true } : null),
       ...(dadosStepper?.condicao === 'Taxa juros negociada' ? { taxa_juros_negociado: true } : null),
       ...(dadosStepper?.condicao === 'Isento de imposto selo' ? { isento_imposto_selo: true } : null),
       ...(dadosStepper?.condicao === 'Com prazo de utilização' ? { com_prazo_utilizacao: true } : null),
@@ -299,6 +298,13 @@ function Conteudo({ dados, onClose, id }) {
         : null),
       ...(dadosStepper?.condicao === 'Montante'
         ? { montante_maior_que: dadosStepper.maior_que, montante_menor_que: dadosStepper.menor_que }
+        : null),
+      ...(dadosStepper?.condicao === '1ª habitação própria'
+        ? {
+            habitacao_propria_1: true,
+            montante_maior_que: dadosStepper.maior_que,
+            montante_menor_que: dadosStepper.menor_que,
+          }
         : null),
 
       ...(isAlinea

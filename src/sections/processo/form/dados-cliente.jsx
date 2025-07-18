@@ -3,14 +3,12 @@ import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 // utils
 import { fluxosGmkt, bancaDigital } from '../../../utils/validarAcesso';
 // components
 import GridItem from '../../../components/GridItem';
-import { DefaultAction } from '../../../components/Actions';
+import { AddItem, DefaultAction } from '../../../components/Actions';
 import { RHFTextField, RHFNumberField, RHFDataEntrada } from '../../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -96,9 +94,7 @@ export function Entidades({ fields = [], append, remove }) {
       ))}
       <GridItem sm={6} lg={3}>
         <Stack justifyContent="center" alignItems="flex-start" sx={{ height: 1 }}>
-          <Button variant="soft" startIcon={<AddCircleIcon />} onClick={() => append({ numero: '' })}>
-            Entidade
-          </Button>
+          <AddItem onClick={() => append({ numero: '' })} dados={{ label: 'Entidade' }} />
         </Stack>
       </GridItem>
     </>

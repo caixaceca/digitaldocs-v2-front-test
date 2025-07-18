@@ -3,6 +3,7 @@ export {
   Media,
   Editar,
   Maximo,
+  AddIcon,
   AddAnexo,
   Libertar,
   Atribuir,

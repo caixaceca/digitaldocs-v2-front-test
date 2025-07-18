@@ -111,7 +111,10 @@ export default function TableParametrizacao({ item }) {
       (item === 'motivosPendencia' && motivosPendencia) ||
       (item === 'motivosTransicao' && motivosTransicao) ||
       (item === 'estados' &&
-        estados?.map((row) => ({ ...row, uo: uos?.find(({ id }) => id === row?.uo_id)?.label || row?.uo_id }))) ||
+        estados?.map((row) => ({
+          ...row,
+          uo: uos?.find(({ id }) => Number(id) === Number(row?.uo_id))?.label || row?.uo_id,
+        }))) ||
       [],
     comparator: getComparator(order, orderBy),
   });

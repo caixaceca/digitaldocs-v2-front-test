@@ -240,7 +240,7 @@ export default function TableArquivo({ tab }) {
 function pedidosList(dados, colaboradores, uos) {
   const pedidos = [];
   dados?.forEach((row) => {
-    const uo = uos?.find(({ id }) => id === row.uo_id);
+    const uo = uos?.find(({ id }) => Number(id) === Number(row.uo_id));
     const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === row.perfil_id);
     pedidos.push({
       ...row,

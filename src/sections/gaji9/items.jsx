@@ -164,10 +164,10 @@ function Actions({ inativos, setInativos, label = '' }) {
         <DefaultAction button label="Carregar proposta" onClick={() => dispatch(setModal({ item: 'form-proposta' }))} />
       )}
       {label !== 'Créditos' &&
+        label !== 'Minutas' &&
         label !== 'Cláusulas' &&
-        label !== 'Minutas públicas' &&
         (isAdmin ||
-          (label === 'Minutas' && temPermissao(['CREATE_MINUTA'])) ||
+          // (label === 'Minutas' && temPermissao(['CREATE_MINUTA'])) ||
           (label === 'Produtos' && temPermissao(['CREATE_PRODUTO/COMPONENTE'])) ||
           (label === 'Representantes' && temPermissao(['CREATE_REPRESENTANTE'])) ||
           (label === 'Freguesias' && temPermissao(['CREATE_DIVISAO ADMINISTRATIVA'])) ||

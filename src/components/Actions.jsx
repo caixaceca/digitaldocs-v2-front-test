@@ -14,7 +14,6 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -33,9 +32,19 @@ import useResponsive from '../hooks/useResponsive';
 // redux
 import { useDispatch } from '../redux/store';
 import { openModal, setModal } from '../redux/slices/parametrizacao';
-// assets
-import { Editar, Arquivo, AddAnexo, Seguimento, Libertar, Resgatar, Detalhes, Eliminar, Atribuir } from '../assets';
 //
+import {
+  Editar,
+  AddIcon,
+  Arquivo,
+  AddAnexo,
+  Libertar,
+  Resgatar,
+  Detalhes,
+  Eliminar,
+  Atribuir,
+  Seguimento,
+} from '../assets';
 import SvgIconStyle from './SvgIconStyle';
 import { DialogConfirmar } from './CustomDialog';
 
@@ -116,8 +125,9 @@ export function DefaultAction({
     ((icon === 'adicionar' ||
       label === 'ADICIONAR' ||
       label === 'Adicionar' ||
+      label === 'CONDICIONAL' ||
       label === 'Mostrar detalhes' ||
-      label === 'Carregar proposta') && <AddCircleIcon sx={{ width: small ? 18 : 22 }} />) ||
+      label === 'Carregar proposta') && <AddIcon sx={{ width: small ? 20 : 22 }} />) ||
     ((label === 'CONTRATO' || label === 'Pré-visualizar' || label === 'Prév. minuta') &&
       getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
     ((label === 'Gerir acessos' || label === 'Transições' || label === 'Comparar colaboradores') && (
@@ -167,8 +177,8 @@ export function AddItem({ dados = {}, onClick = null }) {
     <Stack>
       <Button
         variant="soft"
-        startIcon={<AddCircleIcon />}
         size={small ? 'small' : 'medium'}
+        startIcon={<AddIcon sx={{ width: small ? 20 : 22 }} />}
         onClick={() => {
           if (onClick) onClick();
           else dispatch(openModal('add'));

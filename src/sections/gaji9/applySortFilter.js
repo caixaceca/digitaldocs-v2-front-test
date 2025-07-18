@@ -45,7 +45,10 @@ export function listaTitrulares(tiposTitulares) {
 }
 
 export function listaProdutos(componentes) {
-  return componentes?.map(({ id, rotulo, descritivo }) => ({ id, label: `${rotulo || descritivo} (ID: ${id})` }));
+  return componentes?.map(({ id, codigo, rotulo, descritivo }) => ({
+    id,
+    label: `${codigo ? `${codigo} » ` : ''}${rotulo || descritivo}`,
+  }));
 }
 
 export function listaGarantias(tiposGarantias) {

@@ -23,7 +23,7 @@ import { TabsWrapperSimple } from '../../components/TabsWrapper';
 //
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 import { GrupoDetail, BalcoesRepresentante, SubtiposGarantias } from './sub-items';
-import { OpcoesClausula, AlineasClausula, Relacionados } from './clausulas/opcoes-clausulas';
+import { OpcoesClausula, NumerosClausula, Relacionados } from './clausulas/opcoes-clausulas';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ function DetalhesTab({ item, dados }) {
         { value: 'Balcões', component: <BalcoesRepresentante id={dados?.id} dados={dados?.balcoes} /> },
       ]) ||
       (item === 'clausulaMinuta' && [
-        { value: 'Números', component: <AlineasClausula dados={dados?.alineas} /> },
+        { value: 'Números', component: <NumerosClausula dados={dados?.alineas} minuta /> },
         { value: 'Cláusulas opcionais', component: <OpcoesClausula /> },
       ]) ||
       (item === 'funcoes' && [
@@ -233,6 +233,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                   <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
                   <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
+                  {'ativo' in dados && <TableRowItem title="Tipo:" text={dados?.reais ? 'Real' : 'Pessoal'} />}
                   {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
                   <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                 </TableBody>

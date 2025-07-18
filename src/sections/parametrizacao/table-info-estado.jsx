@@ -156,8 +156,8 @@ function colaboradoresList(transicoes, colaboradores) {
       cid: colaborador?.id,
       sexo: colaborador?.sexo,
       nome: colaborador?.nome,
-      balcao: colaborador?.balcao,
       foto: colaborador?.foto_anexo,
+      balcao: colaborador?.uo_balcao,
       unidade_organica: colaborador?.uo_label,
       nomeacao_funcao: colaborador?.nomeacao_funcao,
     });

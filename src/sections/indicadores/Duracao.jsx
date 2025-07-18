@@ -33,9 +33,9 @@ import { meses } from '../../_mock';
 // ---------------------------------------------------------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'assunto', label: 'Assunto', align: 'left' },
-  { id: 'nome', label: 'Estado', align: 'left' },
-  { id: 'tempo_execucao', label: 'Tempo médio', align: 'left' },
+  { id: 'assunto', label: 'Assunto' },
+  { id: 'nome', label: 'Estado' },
+  { id: 'tempo_execucao', label: 'Tempo médio' },
 ];
 
 // ---------------------------------------------------------------------------------------------------------------------

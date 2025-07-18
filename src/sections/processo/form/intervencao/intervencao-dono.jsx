@@ -218,7 +218,7 @@ export function DomiciliarForm({ ids, onClose }) {
                 name="estado"
                 label="Estado"
                 options={estados
-                  ?.filter(({ uo_id: uoId }) => uoId === values?.uo?.id)
+                  ?.filter(({ uo_id: uoId }) => Number(uoId) === Number(values?.uo?.id))
                   ?.map(({ id, nome }) => ({ id, label: nome }))}
                 onChange={(event, newValue) => setValue('estado', newValue, vdt)}
               />

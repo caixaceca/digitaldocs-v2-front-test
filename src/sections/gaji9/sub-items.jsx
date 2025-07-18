@@ -293,8 +293,8 @@ function Actions({ row, setItem }) {
       <Stack direction="row" spacing={0.5} justifyContent="right">
         {row?.ativo && (
           <>
-            <DefaultAction small label="EDITAR" onClick={() => setItem({ action: 'editar', ...row })} />
             <DefaultAction small label="ELIMINAR" onClick={() => setItem({ action: 'eliminar', ...row })} />
+            <DefaultAction small label="EDITAR" onClick={() => setItem({ action: 'editar', ...row })} />
           </>
         )}
         <DefaultAction small label="DETALHES" onClick={() => setItem({ action: 'detalhes', ...row })} />
