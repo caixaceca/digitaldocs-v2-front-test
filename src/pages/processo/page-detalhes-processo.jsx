@@ -88,13 +88,8 @@ export default function PageProcesso() {
     if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
   }, [tabsList, currentTab]);
 
-  const irParaProcesso = (idProcesso) => {
-    navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${idProcesso}`);
-  };
-
-  const openModal = (modal, dados) => {
-    dispatch(setModal({ modal: modal || '', dados: dados || null }));
-  };
+  const irParaProcesso = (idProcesso) => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${idProcesso}`);
+  const openModal = (modal, dados) => dispatch(setModal({ modal: modal || '', dados: dados || null }));
 
   const eliminarAnexo = () => {
     const { id: anexoId, estadoId, entidade } = selectedItem;
@@ -108,8 +103,9 @@ export default function PageProcesso() {
       openModal();
       if (
         !done.includes('Anexo') &&
-        !done.includes('Stiuação') &&
+        !done.includes('Situação') &&
         !done.includes('Garantia') &&
+        done !== 'Enviado' &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
         done !== 'Processo resgatado' &&

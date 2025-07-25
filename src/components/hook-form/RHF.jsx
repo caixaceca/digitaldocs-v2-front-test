@@ -48,28 +48,9 @@ export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RHFAutocomplete({ name, label, ...other }) {
+export function RHFAutocompleteSmp({ name, label, multiple = false, ...other }) {
   const { control } = useFormContext();
-
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState: { error } }) => (
-        <Autocomplete
-          {...field}
-          renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
-          {...other}
-        />
-      )}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...other }) {
-  const { control } = useFormContext();
+  const { dc = false, ...rest } = other;
 
   return (
     <Controller
@@ -79,12 +60,11 @@ export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...
         <Autocomplete
           {...field}
           fullWidth
-          options={options}
           multiple={multiple}
-          disableClearable={!!other?.dc}
+          disableClearable={!!dc}
           onChange={(event, newValue) => field.onChange(newValue)}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
-          {...other}
+          {...rest}
         />
       )}
     />
@@ -93,8 +73,9 @@ export function RHFAutocompleteSmp({ name, options, label, multiple = false, ...
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RHFAutocompleteObj({ name, options, label, small = false, ...other }) {
+export function RHFAutocompleteObj({ name, label, small = false, ...other }) {
   const { control } = useFormContext();
+  const { dc = false, ...rest } = other;
 
   return (
     <Controller
@@ -104,14 +85,13 @@ export function RHFAutocompleteObj({ name, options, label, small = false, ...oth
         <Autocomplete
           {...field}
           fullWidth
-          options={options}
-          disableClearable={!!other?.dc}
+          disableClearable={!!dc}
           size={small ? 'small' : 'medium'}
           getOptionLabel={(option) => option?.label}
           onChange={(event, newValue) => field.onChange(newValue)}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
-          {...other}
+          {...rest}
         />
       )}
     />

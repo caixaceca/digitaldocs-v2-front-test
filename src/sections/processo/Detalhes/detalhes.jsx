@@ -92,7 +92,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
               }
               label={
                 <Stack spacing={0.75} divider={<Divider flexItem sx={{ borderStyle: 'dotted' }} />}>
-                  {(estados?.length > 0 ? estados : [estado])?.map((row, index) => {
+                  {(estados?.length > 0 ? estados : [estado?.duplicado ? null : estado])?.map((row, index) => {
                     const colaboradorAfeto = colaboradores?.find(({ perfil_id: pid }) => pid === row?.perfil_id);
                     return (
                       <Stack key={`estado_${row?.id}_${index}`} sx={{ pl: 0.25 }}>
@@ -152,15 +152,6 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                   <Criado tipo="data" value={ptDateTime(processo?.criado_em)} sx={{ pr: 0 }} />
                   <Criado tipo="user" value={processo?.criador ?? ''} baralhar sx={{ pr: 0 }} />
                 </>
-              }
-            />
-          )}
-          {processo?.duplicado && (
-            <TextItem
-              label={
-                <Stack direction="row" spacing={1}>
-                  <Duplicado ccDup={processo?.duplicado_por} dataDup={processo?.duplicado_em} />
-                </Stack>
               }
             />
           )}

@@ -12,7 +12,7 @@ export default function ProcessoInterno({ dados }) {
   const { activeStep } = useSelector((state) => state.stepper);
 
   return (
-    <Box sx={{ pt: 3 }}>
+    <Box sx={{ pt: 1 }}>
       {activeStep === 0 && <FormInfoInterno dados={dados} />}
       {activeStep === 1 && <FormAnexosInterno dados={dados} />}
     </Box>

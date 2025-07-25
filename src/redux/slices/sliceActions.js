@@ -117,10 +117,13 @@ export function actionCloseModal(state) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export async function doneSucess(msg, dispatch, action) {
-  if (msg) dispatch(action({ item: 'done', dados: msg }));
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  dispatch(action({ item: 'done', dados: '' }));
+export async function doneSucess(params, dispatch, action) {
+  if (params?.msg) {
+    dispatch(action({ item: 'done', dados: params?.msg }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    dispatch(action({ item: 'done', dados: '' }));
+  }
+  params?.onClose?.();
 }
 
 export async function hasError(error, dispatch, action) {

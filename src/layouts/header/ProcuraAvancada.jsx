@@ -111,7 +111,7 @@ export default function ProcuraAvancada() {
             </Stack>
           </DialogTitle>
           <DialogContent sx={{ pb: 0 }}>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid container spacing={2} sx={{ pt: 3 }}>
               {avancada ? (
                 <>
                   <GridItem md={6}>

@@ -207,9 +207,7 @@ export function getFromGaji9(item, params) {
           dispatch(slice.actions.getSuccess({ item: params?.item || item, dados }));
         }
 
-        if (params?.msg) doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-        if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
-        params?.onClose?.();
+        if (params?.msg) doneSucess(params, dispatch, slice.actions.getSuccess);
       }
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -332,9 +330,7 @@ export function createItem(item, dados, params) {
           );
         }
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -415,9 +411,7 @@ export function updateItem(item, dados, params) {
           }
         }
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -468,9 +462,7 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id, desativar }));
         }
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      if (params?.onClose) await new Promise((resolve) => setTimeout(resolve, 250));
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

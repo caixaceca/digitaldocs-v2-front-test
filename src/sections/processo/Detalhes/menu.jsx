@@ -15,8 +15,8 @@ import Pareceres, { PareceresEstado } from './historico-pareceres';
 export default function useMenuProcesso({ id, processo, handleAceitar }) {
   const { isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
   const { estado = null, credito = null, con = null } = processo || {};
+  const { valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
   const { estados = [], htransicoes = [], pareceres_estado: pareceres = [] } = processo || {};
-  const { fluxo_id: valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
 
   const tabsList = useMemo(() => {
     const tabs = [];

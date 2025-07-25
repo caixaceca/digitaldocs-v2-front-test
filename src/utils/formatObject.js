@@ -78,10 +78,9 @@ export function perfisAad(colaboradores, from) {
         ? {
             sexo: row?.sexo,
             balcao: row?.uo_balcao,
-            concelho: row?.concelho,
+            concelho: row?.uo_concelho,
             funcao: row?.nomeacao_funcao,
             estado_civil: row?.estado_civil,
-            residencia: `${row?.concelho}${row?.zona ? ` - ${row?.zona}` : ''}`,
           }
         : null),
     }));

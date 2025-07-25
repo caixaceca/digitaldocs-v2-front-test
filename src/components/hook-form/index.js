@@ -8,7 +8,6 @@ export {
   RHFDatePicker,
   RHFDataEntrada,
   RHFNumberField,
-  RHFAutocomplete,
   RHFAutocompleteObj,
   RHFAutocompleteSmp,
 } from './RHF';

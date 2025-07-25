@@ -51,12 +51,7 @@ export default function getColorPresets(presetsKey) {
 
 export function colorLabel(value, padrao = 'primary') {
   return (
-    ((value === 'Preso' ||
-      value === 'Tarefas' ||
-      value === 'Aprovado' ||
-      value === 'Favorável' ||
-      value?.includes('CREATE')) &&
-      'success') ||
+    ((value === 'Preso' || value === 'Tarefas' || value === 'Favorável' || value?.includes('CREATE')) && 'success') ||
     ((value === 'Pendentes' || value === 'Pendente' || value === 'Favorável parcial' || value?.includes('UPDATE')) &&
       'warning') ||
     ((value === 'Em análise' || value === 'Atribuídos' || value === 'Afeto' || value?.includes('READ')) && 'info') ||

@@ -10,46 +10,65 @@ import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import DialogContent from '@mui/material/DialogContent';
 // redux
+import { updateDados } from '../../../../redux/slices/stepper';
+import { createItem } from '../../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../../redux/store';
-import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
 // components
-import {
-  RHFSwitch,
-  FormProvider,
-  RHFTextField,
-  RHFNumberField,
-  RHFAutocompleteObj,
-} from '../../../../components/hook-form';
 import GridItem from '../../../../components/GridItem';
 import { SemDados } from '../../../../components/Panel';
 import { DialogTitleAlt } from '../../../../components/CustomDialog';
-import { DefaultAction, DialogButons } from '../../../../components/Actions';
+import { DefaultAction, DialogButons, ButtonsStepper } from '../../../../components/Actions';
+import { FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '../../../../components/hook-form';
 //
 import { garantiasAssociadas } from '../anexos/utils-anexos';
 import { listaGarantias } from '../../../gaji9/applySortFilter';
 
-const garantiaSquema = {
-  moeda: '',
-  conta_dp: '',
-  fiador: false,
-  avalista: false,
-  pessoal: false,
+const garantiaSchema = {
   valor_garantia: '',
+  numero_livranca: '',
   numero_entidade: null,
   tipo_garantia_id: null,
-  codigo_hipoteca_camara: '',
-  codigo_hipoteca_cartorio: '',
+  valor_premio_seguro: '',
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function GarantiasSeparados({ dados }) {
+export default function GarantiasIniciais() {
+  const dispatch = useDispatch();
+  const { dadosStepper } = useSelector((state) => state.stepper);
+  const { tiposGarantia } = useSelector((state) => state.parametrizacao);
+
+  const garantiasList = useMemo(() => listaGarantias(tiposGarantia), [tiposGarantia]);
+
+  const formSchema = Yup.object().shape({
+    garantias: Yup.array(Yup.object({ tipo_garantia_id: Yup.mixed().required().label('Garantia') })),
+  });
+
+  const defaultValues = useMemo(() => ({ garantias: dadosStepper?.garantias || [] }), [dadosStepper]);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, control, handleSubmit } = methods;
+  const values = watch();
+  const { fields, append, remove } = useFieldArray({ control, name: 'garantias' });
+
+  return (
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+    >
+      <FormGarantias dados={{ fields, append, remove, garantiasList }} />
+      <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
+    </FormProvider>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function GarantiasSeparados({ processoId, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
   const { tiposGarantia } = useSelector((state) => state.parametrizacao);
 
-  const { isEdit, garantia, creditoId, processoId, onClose } = dados;
   const garantiasList = useMemo(() => listaGarantias(tiposGarantia), [tiposGarantia]);
 
   useEffect(() => {
@@ -60,46 +79,26 @@ export function GarantiasSeparados({ dados }) {
     garantias: Yup.array(Yup.object({ tipo_garantia_id: Yup.mixed().required().label('Garantia') })),
   });
 
-  const defaultValues = useMemo(
-    () => ({
-      garantias: garantia
-        ? [{ ...garantia, tipo_garantia_id: garantiasList?.find(({ id }) => id === garantia?.tipo_garantia_id) }]
-        : [garantiaSquema],
-    }),
-    [garantia, garantiasList]
-  );
+  const defaultValues = useMemo(() => ({ garantias: [garantiaSchema] }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
   const values = watch();
   const { fields, append, remove } = useFieldArray({ control, name: 'garantias' });
 
   const onSubmit = async () => {
-    const params = {
-      onClose,
-      creditoId,
-      processoId,
-      fillCredito: true,
-      id: garantia?.id || '',
-      msg: isEdit ? 'Garantia atualizada' : 'Garantias adicionadas',
-    };
-    const formData = garantiasAssociadas(values.garantias);
-    dispatch(
-      (isEdit ? updateItem : createItem)('garantias', JSON.stringify(isEdit ? formData[0] : formData), { ...params })
-    );
+    const params = { fillCredito: true, processoId, msg: 'Garantias adicionadas', onClose };
+    dispatch(createItem('garantias', JSON.stringify(garantiasAssociadas(values.garantias)), params));
   };
 
   return (
     <Dialog open fullWidth maxWidth="lg">
-      <DialogTitleAlt title={isEdit ? 'Atualizar garantia' : 'Adicionar garantias'} onClose={onClose} />
+      <DialogTitleAlt title="Adicionar garantias" onClose={onClose} sx={{ pb: 2 }} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <FormGarantias dados={{ fields, append, remove, garantiasList, isEdit }} />
-          <DialogButons
-            isSaving={isSaving}
-            onClose={onClose}
-            label={isEdit ? 'Guardar' : ''}
-            hideSubmit={fields?.length === 0}
-          />
+          <Stack sx={{ pt: 1 }}>
+            <FormGarantias dados={{ fields, append, remove, garantiasList }} />
+          </Stack>
+          <DialogButons onClose={onClose} isSaving={isSaving} hideSubmit={fields?.length === 0} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -109,18 +108,18 @@ export function GarantiasSeparados({ dados }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function FormGarantias({ dados }) {
-  const { fields, remove, append, garantiasList, isEdit } = dados;
+  const { fields, remove, append, garantiasList } = dados;
   return (
-    <Stack spacing={3} sx={{ pt: 3 }}>
+    <Stack spacing={3}>
       {fields?.length === 0 ? (
         <SemDados message="Ainda não foi adicionada nenhuma garantia..." />
       ) : (
         <Stack spacing={3} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
           {fields.map((item, index) => (
-            <Stack direction="row" alignItems="center" spacing={2} key={item.id}>
+            <Stack direction="row" alignItems="center" spacing={1} key={item.id}>
               <Stack sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
-                  <GridItem md={6}>
+                  <GridItem sm={6} md={5}>
                     <RHFAutocompleteObj
                       label="Garantia"
                       options={garantiasList}
@@ -130,43 +129,22 @@ function FormGarantias({ dados }) {
                   <GridItem sm={6} md={3}>
                     <RHFNumberField label="Valor da garantia" name={`garantias[${index}].valor_garantia`} />
                   </GridItem>
-                  <GridItem sm={6} md={3}>
-                    <RHFTextField label="Moeda" name={`garantias[${index}].moeda`} />
-                  </GridItem>
-                  <GridItem sm={6} md={3}>
+                  <GridItem xs={6} md={2}>
                     <RHFNumberField noFormat label="Nº de entidade" name={`garantias[${index}].numero_entidade`} />
                   </GridItem>
-                  <GridItem sm={6} md={3}>
-                    <RHFNumberField noFormat label="Conta DP" name={`garantias[${index}].conta_dp`} />
-                  </GridItem>
-                  <GridItem sm={6} md={3}>
-                    <RHFTextField label="Hipoteca câmara" name={`garantias[${index}].codigo_hipoteca_camara`} />
-                  </GridItem>
-                  <GridItem sm={6} md={3}>
-                    <RHFTextField label="Hipoteca cartório" name={`garantias[${index}].codigo_hipoteca_cartorio`} />
-                  </GridItem>
-                  <GridItem xs={4}>
-                    <RHFSwitch name={`garantias[${index}].fiador`} label="Fiador" otherSx={{ mt: 0 }} />
-                  </GridItem>
-                  <GridItem xs={4}>
-                    <RHFSwitch name={`garantias[${index}].avalista`} label="Avalista" otherSx={{ mt: 0 }} />
-                  </GridItem>
-                  <GridItem xs={4}>
-                    <RHFSwitch name={`garantias[${index}].pessoal`} label="Pessoal" otherSx={{ mt: 0 }} />
+                  <GridItem xs={6} md={2}>
+                    <RHFTextField label="Nº de livrança" name={`garantias[${index}].numero_livranca`} />
                   </GridItem>
                 </Grid>
               </Stack>
-              {!isEdit && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
+              <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
             </Stack>
           ))}
         </Stack>
       )}
-
-      {!isEdit && (
-        <Stack direction="row" justifyContent="center">
-          <DefaultAction small button label="Garantia" icon="adicionar" onClick={() => append(garantiaSquema)} />
-        </Stack>
-      )}
+      <Stack direction="row" justifyContent="center">
+        <DefaultAction small button label="Garantia" icon="adicionar" onClick={() => append(garantiaSchema)} />
+      </Stack>
     </Stack>
   );
 }

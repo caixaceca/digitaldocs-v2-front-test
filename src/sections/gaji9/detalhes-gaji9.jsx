@@ -233,7 +233,12 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                   <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
                   <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
-                  {'ativo' in dados && <TableRowItem title="Tipo:" text={dados?.reais ? 'Real' : 'Pessoal'} />}
+                  {'reais' in dados && (
+                    <TableRowItem
+                      title="Tipo:"
+                      text={<Label color="default">{dados?.reais ? 'Real' : 'Pessoal'}</Label>}
+                    />
+                  )}
                   {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
                   <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                 </TableBody>

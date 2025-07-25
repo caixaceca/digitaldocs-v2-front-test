@@ -13,7 +13,7 @@ export default function ProcessoCON({ dados }) {
   const { activeStep } = useSelector((state) => state.stepper);
 
   return (
-    <Box sx={{ pt: 3 }}>
+    <Box sx={{ pt: 1 }}>
       {activeStep === 0 && <FormOperacao dados={dados} />}
       {activeStep === 1 && <FormDepositante dados={dados} />}
       {activeStep === 2 && <FormAnexosCON dados={dados} />}

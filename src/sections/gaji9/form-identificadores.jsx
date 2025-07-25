@@ -452,6 +452,7 @@ export function RepresentanteForm({ onClose }) {
 
   const formSchema = Yup.object().shape({
     nif: Yup.string().required().label('NIF'),
+    sexo: Yup.string().required().label('Sexo'),
     funcao: Yup.string().required().label('Função'),
     concelho: Yup.mixed().required().label('Concelho'),
     freguesia: Yup.mixed().required().label('Fregusia'),
@@ -461,8 +462,9 @@ export function RepresentanteForm({ onClose }) {
     residencia: Yup.string().required().label('Residência'),
     cni: Yup.string().required().label('Doc. identificação'),
     balcao: Yup.number().positive().required().label('Balcão'),
+    estado_civil: Yup.string().required().label('Estado civil'),
     local_emissao: Yup.string().required().label('Local emissão'),
-    data_emissao: Yup.date().typeError().required().label('Data de nacimento'),
+    data_emissao: Yup.date().typeError().required().label('Data de emissão'),
   });
 
   const defaultValues = useMemo(
@@ -471,6 +473,7 @@ export function RepresentanteForm({ onClose }) {
       nif: selectedItem?.nif ?? '',
       cni: selectedItem?.cni ?? '',
       nome: selectedItem?.nome ?? '',
+      sexo: selectedItem?.sexo ?? '',
       funcao: selectedItem?.funcao ?? '',
       balcao: selectedItem?.balcao ?? '',
       atua_como: selectedItem?.atua_como ?? '',
@@ -479,7 +482,8 @@ export function RepresentanteForm({ onClose }) {
       residencia: selectedItem?.residencia ?? '',
       observacao: selectedItem?.observacao ?? '',
       ativo: isEdit ? selectedItem?.ativo : true,
-      local_emissao: selectedItem?.local_emissao || null,
+      estado_civil: selectedItem?.estado_civil ?? '',
+      local_emissao: selectedItem?.local_emissao || '',
       data_emissao: fillData(selectedItem?.data_emissao, null),
       utilizador: colaboradoresList?.find(({ id }) => id === selectedItem?.utilizador_id) || null,
     }),
@@ -499,10 +503,8 @@ export function RepresentanteForm({ onClose }) {
     const formData = removerPropriedades(
       {
         ...values,
-        sexo: values?.utilizador?.sexo,
         email: values?.utilizador?.email,
         utilizador_id: values?.utilizador?.id,
-        estado_civil: values?.utilizador?.estado_civil,
         data_emissao: values?.data_emissao ? format(values.data_emissao, 'yyyy-MM-dd') : null,
       },
       ['utilizador']
@@ -513,11 +515,11 @@ export function RepresentanteForm({ onClose }) {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>{isEdit ? 'Atualizar representante' : 'Adicionar representante'}</DialogTitle>
+      <DialogTitle sx={{ pb: 2 }}>{isEdit ? 'Atualizar representante' : 'Adicionar representante'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={5}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
+            <Stack spacing={3} sx={{ pt: 1 }}>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                 <Stack spacing={3} direction="row" sx={{ width: '100%' }}>
                   <RHFAutocompleteObj
@@ -526,12 +528,13 @@ export function RepresentanteForm({ onClose }) {
                     options={colaboradoresList}
                     onChange={(event, newValue) => {
                       setValue('utilizador', newValue, vdt);
+                      setValue('sexo', newValue?.sexo ?? '', vdt);
                       setValue('nome', newValue?.label ?? '', vdt);
                       setValue('balcao', newValue?.balcao ?? '', vdt);
                       setValue('funcao', newValue?.funcao ?? '', vdt);
                       setValue('atua_como', newValue?.funcao ?? '', vdt);
                       setValue('concelho', newValue?.concelho || null, vdt);
-                      setValue('residencia', newValue?.residencia ?? '', vdt);
+                      setValue('estado_civil', newValue?.estado_civil ?? '', vdt);
                     }}
                   />
                   <RHFNumberField label="Balcão" name="balcao" sx={{ maxWidth: 120 }} />
@@ -539,18 +542,18 @@ export function RepresentanteForm({ onClose }) {
                 <RHFTextField name="nome" label="Nome completo" />
               </Stack>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
-                  <RHFTextField name="nif" label="NIF" />
-                  <RHFTextField name="cni" label="Doc. identificação" />
-                </Stack>
-                <Stack spacing={3} direction="row" sx={{ width: { sm: '50%' } }}>
-                  <RHFTextField name="local_emissao" label="Local de emissão" />
-                  <RHFDatePicker disableFuture name="data_emissao" label="Data de emissão" />
-                </Stack>
-              </Stack>
-              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                 <RHFTextField name="funcao" label="Função" />
                 <RHFTextField name="atua_como" label="Atua como" />
+              </Stack>
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                <RHFTextField name="sexo" label="Sexo" />
+                <RHFTextField name="estado_civil" label="Estado civil" />
+                <RHFTextField name="nif" label="NIF" />
+              </Stack>
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                <RHFTextField name="cni" label="Doc. identificação" />
+                <RHFTextField name="local_emissao" label="Local de emissão" />
+                <RHFDatePicker disableFuture name="data_emissao" label="Data de emissão" />
               </Stack>
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                 <RHFAutocompleteSmp

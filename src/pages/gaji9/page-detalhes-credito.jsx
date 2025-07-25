@@ -58,10 +58,7 @@ export default function PageCreditoDetalhes() {
     { value: 'Contratos', component: <TableInfoCredito params={{ id, tab: 'contratos', contratado }} /> },
   ];
 
-  const openForm = (item) => {
-    dispatch(setModal({ item: item || '', dados: null }));
-  };
-
+  const openForm = (item) => dispatch(setModal({ item: item || '', dados: null }));
   useNotificacao({ done, onClose: () => openForm() });
 
   return (

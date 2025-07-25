@@ -104,9 +104,9 @@ export const { setModal, getSuccess, resetProcesso, alterarBalcaopSuccess } = sl
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function getAll(item, params) {
+export function getFromDigitalDocs(item, params) {
   return async (dispatch, getState) => {
-    dispatch(slice.actions.resetProcesso());
+    if (!params?.notRest) dispatch(slice.actions.resetProcesso());
     dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
 
     try {
@@ -156,6 +156,13 @@ export function getAll(item, params) {
         case 'cartao': {
           const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
+          break;
+        }
+        case 'contratacao-gaji9': {
+          await axios.get(
+            `${BASEURLDD}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`,
+            options
+          );
           break;
         }
 
@@ -337,8 +344,7 @@ export function getInfoProcesso(item, params) {
           } else dispatch(slice.actions.addItemProcesso({ item, dados: response.data.objeto }));
         }
       }
-      params?.onClose?.();
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -395,18 +401,11 @@ export function createProcesso(item, dados, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
-      const response = await axios.post(
-        `${BASEURLDD}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`,
-        dados,
-        options
-      );
+      const apiUrl = `${BASEURLDD}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`;
+      const response = await axios.post(apiUrl, dados, options);
 
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
       dispatch(slice.actions.getSuccess({ item: 'processo', dados: response?.data?.objeto }));
-      if (params?.garantias)
-        dispatch(createItem('garantias', params?.garantias, { processoId: response?.data?.objeto?.id }));
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -433,8 +432,7 @@ export function createItem(item, dados, params) {
         if (item === 'garantias')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }
-      params?.onClose?.();
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -490,8 +488,6 @@ export function updateItem(item, dados, params) {
           `/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
         (item === 'encaminhar paralelo' &&
           `/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}&estado_dono_id=${params?.dono}`) ||
-        (item === 'garantias' &&
-          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
         (item === 'atribuir' &&
           `/v2/processos/atribuicao/${perfilId}?perfil_afeto_id=${params?.id}&processo_id=${params?.processoId}&estado_id=${params?.estadoId}`) ||
         '';
@@ -503,7 +499,6 @@ export function updateItem(item, dados, params) {
       }
       if (item === 'processo') {
         const response = await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
-        if (params?.garantias) dispatch(createItem('garantias', params?.garantias, { processoId: params?.id }));
         processarProcesso(response.data.objeto, perfilId, dispatch, '', false);
       }
       if (item === 'adicionar-anexos') {
@@ -513,8 +508,7 @@ export function updateItem(item, dados, params) {
         );
         processarProcesso(data.objeto, perfilId, dispatch, '', false);
       }
-      params?.onClose?.();
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -549,8 +543,7 @@ export function deleteItem(item, params) {
         if (item === 'garantias')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }
-      params?.onClose?.();
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

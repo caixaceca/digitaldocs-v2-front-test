@@ -5,6 +5,7 @@ import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
@@ -221,11 +222,9 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                   </Stack>
                 </List>
               )}
-              <List>
-                <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                  <Typography variant="subtitle1">Registo</Typography>
-                </ListItem>
-                <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
+              <Stack>
+                <Divider sx={{ my: 1 }} />
+                <Stack useFlexGap flexWrap="wrap" direction="row" spacing={3} justifyContent="center">
                   <Resgisto
                     label="Criado"
                     por={dados?.criador || dados?.feito_por}
@@ -237,7 +236,7 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                     por={dados?.modificador || dados?.modificado_por}
                   />
                 </Stack>
-              </List>
+              </Stack>
             </>
           ) : (
             <SearchNotFoundSmall message="Item não disponível..." />

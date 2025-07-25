@@ -61,7 +61,7 @@ export default function EncaminharStepper({ dados }) {
 
   return (
     <Dialog open fullWidth maxWidth="md">
-      <DialogTitle sx={{ pb: 2 }}>
+      <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
           {acao?.charAt(0)?.toUpperCase() + acao?.slice(1)?.toLowerCase()} processo
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>

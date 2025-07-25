@@ -222,7 +222,7 @@ export function createItem(item, dados, params) {
         const options = headerOptions({ accessToken, mail, cc: false, ct: true, mfd: item !== 'disposicao' });
         await axios.post(apiUrl, dados, options);
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

@@ -15,7 +15,7 @@ import { FormProvider } from '../../../../components/hook-form';
 import { ButtonsStepper } from '../../../../components/Actions';
 // sections
 import Anexos from '../anexos';
-import { shapeAnexos, defaultAnexos, garantiasAssociadas, appendAnexos } from '../anexos/utils-anexos';
+import { shapeAnexos, defaultAnexos, appendAnexos } from '../anexos/utils-anexos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -61,9 +61,15 @@ export default function FormAnexosCredito({ dados }) {
       if (dadosStepper.cliente) formData.append('cliente', dadosStepper.cliente);
       if (dadosStepper?.numero_proposta) formData.append('numero_proposta', dadosStepper.numero_proposta);
 
+      dadosStepper.garantias.forEach((row, index) => {
+        formData.append(`garantias[${index}].tipo_garantia_id`, row?.tipo_garantia_id?.id);
+        if (row.valor_garantia) formData.append(`garantias[${index}].valor_garantia`, row.valor_garantia);
+        if (row.numero_entidade) formData.append(`garantias[${index}].numero_entidade`, row.numero_entidade);
+        if (row.numero_livranca) formData.append(`garantias[${index}].numero_livranca`, row.numero_livranca);
+      });
+
       appendAnexos(formData, values.anexos, outros, values.checklist);
-      const garantias = dadosStepper?.garantias?.length > 0 ? garantiasAssociadas(dadosStepper.garantias) : null;
-      dispatch(createProcesso('processo', formData, { id, garantias, msg: 'Processo adicionado', onClose }));
+      dispatch(createProcesso('processo', formData, { id, msg: 'Processo adicionado', onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

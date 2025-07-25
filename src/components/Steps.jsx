@@ -28,7 +28,7 @@ export default function Steps({ steps, activeStep, sx, ...other }) {
   const dispatch = useDispatch();
 
   return (
-    <Stepper alternativeLabel activeStep={activeStep} connector={<Connector />} sx={{ mb: 4, ...sx }} {...other}>
+    <Stepper alternativeLabel activeStep={activeStep} connector={<Connector />} sx={{ mb: 2, pb: 2, ...sx }} {...other}>
       {steps.map((label, index) => (
         <Step key={label}>
           <StepLabel

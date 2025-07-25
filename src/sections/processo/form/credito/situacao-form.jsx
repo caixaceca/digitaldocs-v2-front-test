@@ -28,12 +28,11 @@ import { shapeMixed, shapeNumber, shapeText } from '../../../../components/hook-
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function FormSituacao({ onClose }) {
+export function FormSituacao({ dados, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const { credito = null } = processo;
-  const situacoes = (credito?.situacao_final_mes === 'Aprovado' && ['Contratado', 'Desistido']) || [
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const situacoes = (dados?.situacao_final_mes === 'Aprovado' && ['Contratado', 'Desistido']) || [
     'Aprovado',
     'Indeferido',
     'Desistido',
@@ -54,15 +53,15 @@ export function FormSituacao({ onClose }) {
       situacao: null,
       data_referencia: null,
       escalao_decisao: null,
-      garantia: credito?.garantia,
-      taxa_juro: credito?.taxa_juro,
-      prazo_amortizacao: credito?.prazo_amortizacao,
+      garantia: dados?.garantia,
+      taxa_juro: dados?.taxa_juro,
+      prazo_amortizacao: dados?.prazo_amortizacao,
       montante:
-        (credito?.situacao_final_mes === 'Em análise' && credito?.montante_solicitado) ||
-        (credito?.situacao_final_mes === 'Aprovado' && credito?.montante_aprovado) ||
+        (dados?.situacao_final_mes === 'Em análise' && dados?.montante_solicitado) ||
+        (dados?.situacao_final_mes === 'Aprovado' && dados?.montante_aprovado) ||
         '',
     }),
-    [credito]
+    [dados]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -72,18 +71,18 @@ export function FormSituacao({ onClose }) {
   const onSubmit = async () => {
     try {
       const formData = {
-        garantia: values?.garantia ?? null,
-        montante: values?.montante ?? null,
-        taxa_juro: values?.taxa_juro ?? null,
+        garantia: values?.garantia ?? '',
+        montante: values?.montante ?? '',
+        taxa_juro: values?.taxa_juro ?? '',
         aprovar: values.situacao === 'Aprovado',
         desistir: values.situacao === 'Desistido',
         contratar: values.situacao === 'Contratado',
         indeferir: values.situacao === 'Indeferido',
         escalao_decisao: values?.escalao_decisao ?? null,
-        prazo_amortizacao: values?.prazo_amortizacao ?? null,
+        prazo_amortizacao: values?.prazo_amortizacao ?? '',
         data_referencia: formatDate(values?.data_referencia, 'yyyy-MM-dd'),
       };
-      const params = { id: processo?.id, creditoId: credito?.id, msg: 'Stiuação atualizada' };
+      const params = { id: dados?.processoId, creditoId: dados?.id, msg: 'Situação atualizada' };
       dispatch(updateItem('situacaoCredito', JSON.stringify(formData), { ...params, onClose, fillCredito: true }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -134,12 +133,10 @@ export function FormSituacao({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function EliminarDadosSituacao({ onClose }) {
+export function EliminarDadosSituacao({ dados, onClose }) {
   const dispatch = useDispatch();
-  const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const { credito = null } = processo;
-  const situacao = credito?.situacao_final_mes;
-  const params = { id: processo?.id, creditoId: credito?.id, msg: 'Stiuação eliminada' };
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const { situacao_final_mes: situacao = '' } = dados;
 
   return (
     <DialogConfirmar
@@ -159,7 +156,7 @@ export function EliminarDadosSituacao({ onClose }) {
               contratar: situacao === 'Contratado',
               indeferir: situacao === 'Indeferido',
             }),
-            { ...params, fillCredito: true, onClose }
+            { id: dados?.processoId, creditoId: dados?.id, msg: 'Situação eliminada', fillCredito: true, onClose }
           )
         )
       }

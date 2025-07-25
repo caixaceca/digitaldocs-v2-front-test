@@ -65,7 +65,7 @@ export default function FormInfoCredito({ dados }) {
     () => ({
       fluxo_id: fluxo?.id,
       obs: dadosStepper?.obs || processo?.observacao || '',
-      cliente: dadosStepper?.cliente || processo?.cliente || null,
+      cliente: dadosStepper?.cliente || processo?.cliente || '',
       data_entrada: dadosStepper?.data_entrada || fillData(processo?.data_entrada, null),
       balcao: processo?.balcao || uos?.find(({ id }) => id === estado?.uo_id)?.balcao || cc?.uo_balcao,
       // info credito
@@ -100,7 +100,7 @@ export default function FormInfoCredito({ dados }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center" sx={{ mt: 3 }}>
+      <Stack direction="column" spacing={3} justifyContent="center" alignItems="center">
         <Box sx={{ width: 1 }}>
           <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
             <Grid container spacing={3}>

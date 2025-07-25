@@ -20,7 +20,7 @@ import { useNotificacao } from '../../hooks/useNotificacao';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
-import { setModal, getAll } from '../../redux/slices/digitaldocs';
+import { setModal, getFromDigitalDocs } from '../../redux/slices/digitaldocs';
 // Components
 import { Checked } from '../../components/Panel';
 import Scrollbar from '../../components/Scrollbar';
@@ -106,7 +106,7 @@ export default function TableCartoes() {
   useEffect(() => {
     if (done === 'Receção dos cartões confirmada' || done === 'Confirmação anulada') {
       setSelected([]);
-      dispatch(getAll(fase, { uoId: uo?.id, ...datas(datai, dataf) }));
+      dispatch(getFromDigitalDocs(fase, { uoId: uo?.id, ...datas(datai, dataf) }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -123,11 +123,12 @@ export default function TableCartoes() {
   }, [uosList, fase, uo, cc?.uo_balcao]);
 
   useEffect(() => {
-    if (datai && fase === 'Emissão') dispatch(getAll(fase, datas(datai, dataf)));
+    if (datai && fase === 'Emissão') dispatch(getFromDigitalDocs(fase, datas(datai, dataf)));
   }, [dispatch, datai, dataf, fase]);
 
   useEffect(() => {
-    if (datai && uo?.id && fase === 'Receção') dispatch(getAll(fase, { uoId: uo?.id, ...datas(datai, dataf) }));
+    if (datai && uo?.id && fase === 'Receção')
+      dispatch(getFromDigitalDocs(fase, { uoId: uo?.id, ...datas(datai, dataf) }));
   }, [dispatch, uo?.id, datai, dataf, fase]);
 
   useEffect(() => {
@@ -166,10 +167,7 @@ export default function TableCartoes() {
     [dataFiltered, fase]
   );
 
-  const openModal = (modal, dados) => {
-    dispatch(setModal({ modal: modal || '', dados: dados || '' }));
-  };
-
+  const openModal = (modal, dados) => dispatch(setModal({ modal: modal || '', dados: dados || '' }));
   useNotificacao({ done, onClose: () => openModal() });
 
   return (
@@ -293,7 +291,7 @@ export default function TableCartoes() {
                               label="DETALHES"
                               onClick={() => {
                                 openModal('detalhes-cartao', null);
-                                dispatch(getAll('cartao', { id: row?.id }));
+                                dispatch(getFromDigitalDocs('cartao', { id: row?.id }));
                               }}
                             />
                           </Stack>

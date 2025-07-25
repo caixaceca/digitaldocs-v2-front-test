@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
-import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
-import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -149,15 +147,13 @@ export default function InfoCredito() {
                   </Stack>
                 ))}
                 {section.title === 'Informações do Processo' && (
-                  <List>
-                    <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                      <Typography variant="subtitle1">Registo</Typography>
-                    </ListItem>
-                    <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 1 }} spacing={2}>
+                  <Stack>
+                    <Divider sx={{ my: 1 }} />
+                    <Stack useFlexGap flexWrap="wrap" direction="row" spacing={3} justifyContent="center">
                       <Resgisto label="Criado" por={credito?.criado_por} em={credito?.criado_em} />
                       <Resgisto label="Modificado" em={credito?.modificado_em} por={credito?.modificado_por} />
                     </Stack>
-                  </List>
+                  </Stack>
                 )}
               </Stack>
             </CardContent>

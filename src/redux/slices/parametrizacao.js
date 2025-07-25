@@ -281,8 +281,7 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.createSuccess({ item, item1: params?.item1 || '', dados: dadosE }));
         }
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -330,8 +329,7 @@ export function updateItem(item, dados, params) {
           dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: dadosR }));
         else dispatch(slice.actions.updateSuccess({ item: params?.item || item, item1: params?.item1, dados: dadosR }));
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -379,8 +377,7 @@ export function deleteItem(item, params) {
           })
         );
       }
-      doneSucess(params?.msg, dispatch, slice.actions.getSuccess);
-      params?.onClose?.();
+      doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

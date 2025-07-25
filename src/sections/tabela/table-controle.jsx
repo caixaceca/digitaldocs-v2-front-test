@@ -19,8 +19,8 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
-import { getAll } from '../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../redux/store';
+import { getFromDigitalDocs } from '../../redux/slices/digitaldocs';
 // Components
 import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
@@ -90,17 +90,17 @@ export default function TableControle({ from }) {
   useEffect(() => {
     if ((from === 'Entradas' || from === 'Devoluções') && uo?.id && dataValido(dataf) && dataValido(datai)) {
       const periodo = { dataInicio: format(datai, 'yyyy-MM-dd'), dataFim: format(dataf, 'yyyy-MM-dd') };
-      dispatch(getAll(from, { item: 'dadosControle', uoId: uo?.id, ...periodo }));
+      dispatch(getFromDigitalDocs(from, { item: 'dadosControle', uoId: uo?.id, ...periodo }));
     }
   }, [dispatch, uo?.id, datai, dataf, from]);
 
   useEffect(() => {
     if (from === 'Trabalhados' && uo?.id && dataValido(data))
-      dispatch(getAll(from, { item: 'dadosControle', uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
+      dispatch(getFromDigitalDocs(from, { item: 'dadosControle', uoId: uo?.id, data: format(data, 'yyyy-MM-dd') }));
   }, [dispatch, uo?.id, data, from]);
 
   useEffect(() => {
-    if (from === 'Por concluir') dispatch(getAll(from, { item: 'dadosControle' }));
+    if (from === 'Por concluir') dispatch(getFromDigitalDocs(from, { item: 'dadosControle' }));
   }, [dispatch, from]);
 
   const colaboradoresAcesso = useMemo(
