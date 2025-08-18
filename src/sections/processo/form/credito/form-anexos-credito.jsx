@@ -29,7 +29,10 @@ export default function FormAnexosCredito({ dados }) {
 
   const { estado, id, onClose } = dados;
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
-  const checkList = useMemo(() => checklist?.filter(({ designacao }) => designacao !== 'OUTROS'), [checklist]);
+  const checkList = useMemo(
+    () => checklist?.filter(({ designacao }) => designacao !== 'OUTROS' && designacao !== 'ATA - PARECER DE CRÉDITO'),
+    [checklist]
+  );
 
   const formSchema = shapeAnexos(outros, checkList);
   const defaultValues = useMemo(() => defaultAnexos(dadosStepper, checkList, []), [dadosStepper, checkList]);

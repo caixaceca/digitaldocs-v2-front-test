@@ -23,10 +23,10 @@ import { useSelector } from '../../redux/store';
 import GridItem from '../../components/GridItem';
 import Chart, { useChart } from '../../components/chart';
 import { SkeletonTable } from '../../components/skeleton';
-import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndicadores';
+import { ExportarIndicadores } from '../../components/exportar-dados/excel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { IndicadorItem, CardInfo, TableExport, TabView, dadosResumo } from './Indicadores';
+import { IndicadorItem, CardInfo, TableIndicadores, TabView, dadosResumo } from './Indicadores';
 // _mock_
 import { meses } from '../../_mock';
 
@@ -227,7 +227,7 @@ export function Conclusao({ indicadores }) {
         <TabView
           vista={vista}
           setVista={setVista}
-          exportar={<ExportarDados tabela="Duração dos processos - Conclusão" dados={conclusaoByItem} />}
+          exportar={<ExportarIndicadores tabela="Duração dos processos - Conclusão" dados={conclusaoByItem} />}
         />
       )}
       <IndicadorItem
@@ -244,7 +244,7 @@ export function Conclusao({ indicadores }) {
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="bar" series={series} options={chartOptions} height={500} />
               ) : (
-                <TableExport label="Estado" label1="Média em dias" dados={conclusaoByItem} />
+                <TableIndicadores label="Estado" label1="Média em dias" dados={conclusaoByItem} />
               )}
             </GridItem>
           </Grid>

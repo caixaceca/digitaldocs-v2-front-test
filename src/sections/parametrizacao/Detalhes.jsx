@@ -58,7 +58,7 @@ const fields = [
   { key: 'is_final', title: 'Estado final:' },
   { key: 'is_decisao', title: 'Estado de decisão:' },
   { key: 'para_aprovacao', title: 'Aprovação:' },
-  { key: 'facultativo', title: 'Facultativo:' },
+  { key: 'decisor', title: 'Decisor:' },
   { key: 'padrao', title: 'Padrão:' },
   { key: 'gestor', title: 'Gestor:' },
   { key: 'observador', title: 'Observador:' },
@@ -81,7 +81,7 @@ export function Detalhes({ item, closeModal }) {
       onClose={closeModal}
       maxWidth={item === 'Transições' || item === 'Notificações' ? 'md' : 'sm'}
     >
-      <DialogTitleAlt title="Detalhes" onClick={closeModal} />
+      <DialogTitleAlt title="Detalhes" onClose={closeModal} />
       <DialogContent>
         {(item === 'Transições' && <DetalhesTransicao dados={selectedItem} />) ||
           (item === 'Notificações' && <Notificacao dados={selectedItem} />) || (
@@ -255,7 +255,7 @@ function Notificacao({ dados }) {
 
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} /> },
-    { value: 'Destinatários', component: <Notificacoes id={dados?.id} destinatarios={destinatarios || []} /> },
+    { value: 'Destinatários', component: <Notificacoes dados={dados} destinatarios={destinatarios || []} /> },
   ];
 
   return (
@@ -273,7 +273,8 @@ function Notificacao({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Notificacoes({ destinatarios, id }) {
+function Notificacoes({ dados, destinatarios }) {
+  const { id, ativo } = dados;
   const [destinatario, setDestinatario] = useState(null);
   return (
     <>
@@ -286,9 +287,11 @@ function Notificacoes({ destinatarios, id }) {
               Ativo
             </TableCell>
             <TableCell size="small">Registo</TableCell>
-            <TableCell size="small" width={10}>
-              <DefaultAction small label="ADICIONAR" onClick={() => setDestinatario({ add: true })} />
-            </TableCell>
+            {ativo && (
+              <TableCell size="small" width={10}>
+                <DefaultAction small label="ADICIONAR" onClick={() => setDestinatario({ add: true })} />
+              </TableCell>
+            )}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -307,9 +310,11 @@ function Notificacoes({ destinatarios, id }) {
                 <Criado tipo="user" value={row?.modificador || row?.criador} baralhar caption />
                 <Criado tipo="data" value={ptDateTime(row?.modificado_em || row?.criado_em)} caption />
               </TableCell>
-              <TableCell>
-                <DefaultAction small label="EDITAR" onClick={() => setDestinatario(row)} />
-              </TableCell>
+              {ativo && (
+                <TableCell>
+                  <DefaultAction disabled={!row?.ativo} small label="EDITAR" onClick={() => setDestinatario(row)} />
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

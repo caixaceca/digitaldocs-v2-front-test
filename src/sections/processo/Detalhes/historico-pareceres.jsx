@@ -24,10 +24,7 @@ import ParecerExport, { DownloadPdf } from './minuta-parecer';
 export default function Pareceres({ pareceres, estado, estadoId, assunto }) {
   const dispatch = useDispatch();
   const [accord, setAccord] = useState(false);
-
-  const handleAccord = (panel) => (event, isExpanded) => {
-    setAccord(isExpanded ? panel : false);
-  };
+  const handleAccord = (panel) => (event, isExpanded) => setAccord(isExpanded ? panel : false);
 
   return (
     <Box sx={{ pb: 3 }}>
@@ -114,12 +111,9 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function PareceresEstado({ pareceres, assunto }) {
-  const { colaboradores } = useSelector((state) => state.intranet);
   const [accord, setAccord] = useState(false);
-
-  const handleAccord = (panel) => (event, isExpanded) => {
-    setAccord(isExpanded ? panel : false);
-  };
+  const { colaboradores } = useSelector((state) => state.intranet);
+  const handleAccord = (panel) => (event, isExpanded) => setAccord(isExpanded ? panel : false);
 
   return (
     <Box sx={{ pb: 3 }}>

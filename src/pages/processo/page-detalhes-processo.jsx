@@ -94,7 +94,7 @@ export default function PageProcesso() {
   const eliminarAnexo = () => {
     const { id: anexoId, estadoId, entidade } = selectedItem;
     const params = { processoId: id, id: anexoId, estadoId, entidade, onClose: openModal };
-    dispatch(deleteItem('anexo', { ...params, msg: 'Anexo eliminado' }));
+    dispatch(deleteItem(estado?.decisor ? 'anexo-parecer' : 'anexo', { ...params, msg: 'Anexo eliminado' }));
   };
 
   useNotificacao({
@@ -153,7 +153,8 @@ export default function PageProcesso() {
                       {/* EM SÉRIE */}
                       {estado && estados?.length === 0 && (
                         <>
-                          {pertencoEstadoId(meusAmbientes, estadoId) &&
+                          {!estado?.decisor &&
+                            pertencoEstadoId(meusAmbientes, estadoId) &&
                             (!estado?.pareceres || estado?.pareceres?.length === 0) && (
                               <>
                                 {estado?.preso && estado?.atribuidoAMim && <Intervencao />}

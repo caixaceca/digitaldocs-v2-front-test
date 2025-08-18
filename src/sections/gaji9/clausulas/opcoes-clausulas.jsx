@@ -8,6 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fNumber } from '../../../utils/formatNumber';
 import { numeroParaLetra } from '../../../utils/formatText';
@@ -40,11 +41,7 @@ export function NumerosClausula({ id = '', dados = [], condicional = false, minu
           {dados?.map((numero, index) => (
             <Stack spacing={1} direction="row" key={`numero_${index}`} sx={condicional ? null : sx}>
               {!condicional && !minuta && (
-                <DefaultAction
-                  small
-                  label="CONDICIONAL"
-                  onClick={() => setItem({ ...numero, conteudo_sub: 'Número' })}
-                />
+                <DefaultAction small label="CONDICIONAL" onClick={() => setItem({ ...numero, componente: 'Número' })} />
               )}
               <Stack spacing={1} direction="row">
                 {numero?.numero_ordem && (
@@ -60,7 +57,7 @@ export function NumerosClausula({ id = '', dados = [], condicional = false, minu
                         <DefaultAction
                           small
                           label="CONDICIONAL"
-                          onClick={() => setItem({ ...alinea, conteudo_sub: 'Alínea', numero: numero?.numero_ordem })}
+                          onClick={() => setItem({ ...alinea, componente: 'Alínea', numero: numero?.numero_ordem })}
                         />
                       )}
                       <Stack direction="row" spacing={condicional ? 0.5 : 1}>
@@ -113,9 +110,7 @@ export function OpcoesClausula() {
             <TableCell size="small">2ª habitação</TableCell>
             <TableCell size="small">Isenção comissão</TableCell>
             <TableCell size="small" align="right" width={10}>
-              <Stack direction="row" justifyContent="right">
-                <DefaultAction small label="Adicionar" onClick={() => openModal('create', '')} />
-              </Stack>
+              {' '}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -229,78 +224,99 @@ export function RelacionadosCl({ dados = [], item = 'Tipo de titular' }) {
 
   return (
     <Card sx={{ p: 1 }}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>{item}</TableCell>
-            {item === 'Condição' ? <TableCell>Conteúdo</TableCell> : <TableCell align="center">Ativo</TableCell>}
-            <TableCell width={10}> </TableCell>
-          </TableRow>
-        </TableHead>
-        {dados?.length === 0 ? (
-          <TableSearchNotFound height={150} message="Não foi encontrado nenhum item..." />
-        ) : (
-          <TableBody>
-            {dados?.map(({ id, ativo = false, ...res }, index) => (
-              <TableRow hover key={`relacionado_${index}`}>
-                {item === 'Condição' ? (
-                  <>
-                    <TableCell sx={{ fontWeight: 'bold' }}>
-                      <Typography variant="subtitle2">
-                        {(res?.com_nip && 'Com NIP') ||
-                          (res?.com_seguro && 'Com seguro') ||
-                          (res?.isencao_comissao && 'Isenção de comissão') ||
-                          (res?.habitacao_propria_1 && '1ª habitação própria') ||
-                          (res?.taxa_juros_negociado && 'Taxa juros negociada') ||
-                          (res?.isento_imposto_selo && 'Isento de imposto selo') ||
-                          (res?.com_prazo_utilizacao && 'Com prazo de utilização')}
-                      </Typography>
-                      {res?.prazo_maior_que != null && res?.prazo_menor_que != null && (
-                        <Typography variant="subtitle2" noWrap>
-                          Prazo: <br />
-                          {fNumber(res?.prazo_maior_que)} - {fNumber(res?.prazo_menor_que)}
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>{item}</TableCell>
+              {item === 'Condição' ? (
+                <>
+                  <TableCell>Componente</TableCell>
+                  <TableCell>Conteúdo</TableCell>
+                </>
+              ) : (
+                <TableCell align="center">Ativo</TableCell>
+              )}
+              <TableCell width={10}> </TableCell>
+            </TableRow>
+          </TableHead>
+          {dados?.length === 0 ? (
+            <TableSearchNotFound height={150} message="Não foi encontrado nenhum item..." />
+          ) : (
+            <TableBody>
+              {dados?.map(({ id, ativo = false, ...res }, index) => (
+                <TableRow hover key={`relacionado_${index}`}>
+                  {item === 'Condição' ? (
+                    <>
+                      <TableCell sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="subtitle2">
+                          {(res?.com_nip && 'Com NIP') ||
+                            (res?.com_seguro && 'Com seguro') ||
+                            (res?.isencao_comissao && 'Isenção de comissão') ||
+                            (res?.habitacao_propria_1 && '1ª habitação própria') ||
+                            (res?.taxa_juros_negociado && 'Taxa juros negociada') ||
+                            (res?.isento_imposto_selo && 'Isento de imposto selo') ||
+                            (res?.com_prazo_utilizacao && 'Com prazo de utilização')}
                         </Typography>
-                      )}
-                      {res?.montante_maior_que != null && res?.montante_menor_que != null && (
-                        <>
-                          <Typography variant="body2">Montante:</Typography>
+                        {res?.prazo_maior_que != null && res?.prazo_menor_que != null && (
                           <Typography variant="subtitle2" noWrap>
-                            {fNumber(res?.montante_maior_que)} - {fNumber(res?.montante_menor_que)}
+                            Prazo: <br />
+                            {fNumber(res?.prazo_maior_que)} - {fNumber(res?.prazo_menor_que)}
                           </Typography>
-                        </>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {res?.alinea && <NumerosClausula dados={[res?.alinea]} condicional />}
-                      {res?.sub_alinea && (
-                        <NumerosClausula
-                          condicional
-                          dados={[{ conteudo: `Número: ${res?.numero_ordem}`, sub_alineas: [res?.sub_alinea] }]}
-                        />
-                      )}
-                    </TableCell>
-                  </>
-                ) : (
-                  <>
-                    <TableCell>
-                      {res?.segmento || labelTitular(res?.tipo_titular, res?.consumidor) || noDados()}
-                    </TableCell>
-                    <CellChecked check={item === 'Condição' || ativo} />
-                  </>
-                )}
-                <TableCell>
-                  <DefaultAction
-                    small
-                    label="ELIMINAR"
-                    disabled={item !== 'Condição' && !ativo}
-                    onClick={() => dispatch(setModal({ item: `eliminar-${item}`, dados: id }))}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        )}
-      </Table>
+                        )}
+                        {res?.montante_maior_que != null && res?.montante_menor_que != null && (
+                          <>
+                            <Typography variant="subtitle2">Montante:</Typography>
+                            <Typography variant="subtitle2" noWrap>
+                              {fNumber(res?.montante_maior_que)} - {fNumber(res?.montante_menor_que)}
+                            </Typography>
+                          </>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {res?.conteudo_principal && 'Conteúdo principal'}
+                        {res?.alinea && (
+                          <>
+                            Número: <b>{res?.alinea?.numero_ordem}</b>
+                          </>
+                        )}
+                        {res?.sub_alinea && (
+                          <>
+                            Número: <b>{res?.numero_ordem}</b> <br />
+                            Alínea: <b>{numeroParaLetra(res?.sub_alinea?.numero_ordem)}</b>
+                          </>
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ minWidth: 400 }}>
+                        {res?.conteudo_principal && newLineText(res?.conteudo_principal)}
+                        {res?.alinea && <NumerosClausula dados={[res?.alinea]} condicional />}
+                        {res?.sub_alinea && (
+                          <NumerosClausula condicional dados={[{ sub_alineas: [res?.sub_alinea] }]} />
+                        )}
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell>
+                        {res?.segmento || labelTitular(res?.tipo_titular, res?.consumidor) || noDados()}
+                      </TableCell>
+                      <CellChecked check={item === 'Condição' || ativo} />
+                    </>
+                  )}
+                  <TableCell>
+                    <DefaultAction
+                      small
+                      label="ELIMINAR"
+                      disabled={item !== 'Condição' && !ativo}
+                      onClick={() => dispatch(setModal({ item: `eliminar-${item}`, dados: id }))}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          )}
+        </Table>
+      </TableContainer>
     </Card>
   );
 }

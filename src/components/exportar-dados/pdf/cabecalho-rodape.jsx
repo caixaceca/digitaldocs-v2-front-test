@@ -1,12 +1,12 @@
 import { View, Text, Image } from '@react-pdf/renderer';
 // utils
-import { formatDate, ptDate } from '../../utils/formatTime';
-// components
-import styles from './ExportStylePdf';
+import { formatDate, ptDate } from '../../../utils/formatTime';
+//
+import styles from './pdf-styles';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Cabecalho({ title, codificacao = '' }) {
+export function CabecalhoPdf({ title, codificacao = '' }) {
   return (
     <View style={[styles.gridContainer, styles.header]} fixed>
       <View>
@@ -15,7 +15,7 @@ export function Cabecalho({ title, codificacao = '' }) {
           <Text render={({ pageNumber, totalPages }) => ` | ${pageNumber}/${totalPages}`} />
         </View>
         <Text style={[styles.headerTitle]}>{title}</Text>
-        <Text style={[styles.headerCaption2]}>Caixa Económica de Cabo Verde</Text>
+        <Text style={[styles.headerCaption]}>Caixa Económica de Cabo Verde</Text>
       </View>
       <View>
         <Image source="/assets/Caixa_Logo_Branco_Transparente.png" style={{ height: 60, paddingTop: '12mm' }} />
@@ -26,7 +26,7 @@ export function Cabecalho({ title, codificacao = '' }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function CabecalhoAlt({ cabecalho = false, codificacao = '' }) {
+export function CabecalhoPdfAlt({ cabecalho = false, codificacao = '' }) {
   return (
     <>
       {cabecalho ? (
@@ -61,36 +61,7 @@ export function CabecalhoAlt({ cabecalho = false, codificacao = '' }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Validacao({ por, em }) {
-  return (
-    <View style={[styles.table]}>
-      <View style={[styles.tableHeader_]}>
-        <View style={[styles.tableRow, styles.noBorder]}>
-          <View style={[styles.tCell_50, styles.alignCenter]}>
-            <Text>Validado por</Text>
-          </View>
-          <View style={[styles.tCell_50, styles.alignCenter]}>
-            <Text>Validado em</Text>
-          </View>
-        </View>
-      </View>
-      <View style={[styles.tableBody]}>
-        <View style={[styles.tableRow, styles.noBorder]}>
-          <View style={[styles.tCell_50, styles.alignCenter]}>
-            <Text>{por}</Text>
-          </View>
-          <View style={[styles.tCell_50, styles.alignCenter]}>
-            <Text>{em}</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function Rodape({ noOrigin = false }) {
+export function RodapePdf({ noOrigin = false }) {
   return (
     <View style={[styles.footer, styles.footer1, styles.textSuccess]} fixed>
       {noOrigin ? (
@@ -106,7 +77,7 @@ export function Rodape({ noOrigin = false }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RodapeAlt({ rodape = false }) {
+export function RodapePdfAlt({ rodape = false }) {
   return (
     <>
       {rodape ? (
@@ -131,16 +102,5 @@ export function RodapeAlt({ rodape = false }) {
         </View>
       )}
     </>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function RodapeContrato({ codificacao = false }) {
-  return (
-    <View style={[styles.footer, styles.footer3, styles.caption1]} fixed>
-      <Text>{codificacao}</Text>
-      <Text render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
-    </View>
   );
 }

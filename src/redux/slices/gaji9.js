@@ -229,7 +229,8 @@ export function getDocumento(item, params) {
       const accessToken = await getAccessToken();
       const apiUrl =
         (item === 'contrato' && `/v1/contratos/download?codigo=${params?.codigo}`) ||
-        (item === 'minutav2' && `/v2/minutas/documento/preview?restrito=${params?.restrito}`) ||
+        (item === 'minutav2' &&
+          `/v2/minutas/documento/preview?restrito=${params?.restrito}&rascunho=${params?.rascunho}`) ||
         (item === 'gerar-contrato' &&
           `/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
         (item === 'preview-contrato' &&

@@ -24,14 +24,14 @@ export default function SearchNotFound({ message = '', height = 250 }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SearchNotFoundSmall({ message }) {
+export function SearchNotFoundSmall({ message, xs }) {
   return (
     <Stack
       align="center"
       justifyContent="center"
-      sx={{ py: 3, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
+      sx={{ py: xs ? 1.5 : 3, typography: xs ? 'caption' : 'body2', fontStyle: 'italic', color: 'text.secondary' }}
     >
-      <DocIllustration sx={{ height: 130, mb: { xs: 2, sm: 3 } }} />
+      <DocIllustration sx={{ height: xs ? 80 : 130, mb: { xs: xs ? 1 : 2, sm: xs ? 2 : 3 } }} />
       {message}
     </Stack>
   );

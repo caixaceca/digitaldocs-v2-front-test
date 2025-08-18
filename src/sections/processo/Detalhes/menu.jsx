@@ -2,14 +2,15 @@ import { useMemo } from 'react';
 // redux
 import { useSelector } from '../../../redux/store';
 //
+import InfoCon from './info-con';
 import Estados from './estados-processo';
 import DadosGerais from './dados-gerais';
 import TodosAnexos from './todos-anexos';
 import Versoes from './historico-versoes';
 import TableDetalhes from './table-processo';
 import Views from './historico-visualiacoes';
+import InfoCredito from '../info-credito/info';
 import Transicoes from './historico-transicoes';
-import { InfoCredito, InfoCon } from './info-extra';
 import Pareceres, { PareceresEstado } from './historico-pareceres';
 
 export default function useMenuProcesso({ id, processo, handleAceitar }) {

@@ -10,7 +10,7 @@ import { pdfInfo } from '../../../utils/formatText';
 import { ptDateTime } from '../../../utils/formatTime';
 import { getFileThumb, downloadDoc } from '../../../utils/formatFile';
 // components
-import { styles, RodapeAlt, CabecalhoAlt } from '../../../components/ExportDados';
+import { styles, RodapePdfAlt, CabecalhoPdfAlt } from '../../../components/exportar-dados/pdf';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ export default function ParecerExport({ dados }) {
   return (
     <Document {...pdfInfo} title="Minuta parecer">
       <Page size="A4" style={styles.page}>
-        <CabecalhoAlt cabecalho />
+        <CabecalhoPdfAlt cabecalho />
         <View style={[styles.bodyAlt]}>
           <Text style={[styles.title]}>Minuta do parecer</Text>
           <InfoItem label="Nome" value={dados?.perfil} />
@@ -99,7 +99,7 @@ export default function ParecerExport({ dados }) {
             </View>
           )}
         </View>
-        <RodapeAlt rodape />
+        <RodapePdfAlt rodape />
       </Page>
     </Document>
   );

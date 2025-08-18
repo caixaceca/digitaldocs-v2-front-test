@@ -44,6 +44,10 @@ export default function PageDetalhesEstado() {
     if (perfilId && id) dispatch(getFromParametrizacao('estado', { id, reset: { val: null } }));
   }, [dispatch, perfilId, id]);
 
+  useEffect(() => {
+    if (done === 'Estado eliminado') navigate(PATH_DIGITALDOCS.parametrizacao.root);
+  }, [done, navigate]);
+
   const tabsList = [
     {
       value: 'Dados',
@@ -69,14 +73,8 @@ export default function PageDetalhesEstado() {
     dispatch(deleteItem(item || 'regrasEstado', { ...params, ...item1, msg: `${msg || 'Regra'} eliminado` }));
   };
 
-  const closeModal = () => dispatch(setModal());
-  useNotificacao({
-    done,
-    onClose: () => {
-      if (done === 'Estado eliminado') navigate(PATH_DIGITALDOCS.parametrizacao.root);
-      closeModal();
-    },
-  });
+  const onClose = () => dispatch(setModal());
+  useNotificacao({ done, onClose });
 
   return (
     <Page title="Estado | DigitalDocs">
@@ -103,8 +101,8 @@ export default function PageDetalhesEstado() {
                 <Stack direction="row" spacing={0.75} alignItems="center">
                   {currentTab === 'Dados' && (
                     <>
-                      <ActionButton options={{ label: 'Editar', item: 'form-estado', dados: estado }} />
-                      <ActionButton options={{ label: 'Eliminar', item: 'eliminar-item', dados: estado }} />
+                      <ActionButton options={{ sm: true, label: 'Editar', item: 'form-estado', dados: estado }} />
+                      <ActionButton options={{ sm: true, label: 'Eliminar', item: 'eliminar-item', dados: estado }} />
                     </>
                   )}
                   {(currentTab === 'Colaboradores' ||
@@ -124,17 +122,17 @@ export default function PageDetalhesEstado() {
             <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
           )}
 
-          {modalParams === 'form-estado' && <EstadoForm onClose={() => closeModal()} />}
-          {modalParams === 'Colaboradores' && <PerfisEstadoForm onClose={() => closeModal()} />}
-          {modalParams === 'detalhes-estado' && <Detalhes item="" closeModal={() => closeModal()} />}
-          {modalParams === 'colaboradores' && <EstadosPerfilForm estadoId={id} onClose={() => closeModal()} />}
+          {modalParams === 'form-estado' && <EstadoForm onClose={onClose} />}
+          {modalParams === 'Colaboradores' && <PerfisEstadoForm onClose={onClose} />}
+          {modalParams === 'detalhes-estado' && <Detalhes item="" closeModal={onClose} />}
+          {modalParams === 'colaboradores' && <EstadosPerfilForm estadoId={id} onClose={onClose} />}
           {(modalParams === 'Regras parecer' || modalParams === 'regrasEstado') && (
-            <RegrasForm item={estado} estado selectedItem={selectedItem} onClose={() => closeModal()} />
+            <RegrasForm item={estado} estado selectedItem={selectedItem} onClose={onClose} />
           )}
           {modalParams === 'eliminar-item' && (
             <DialogConfirmar
+              onClose={onClose}
               isSaving={isSaving}
-              onClose={() => closeModal()}
               handleOk={() => confirmEliminar()}
               desc={`eliminar est${(currentTab === 'Colaboradores' && 'e colaborador') || (currentTab === 'Regras parecer' && 'a regra') || 'e estado'}`}
             />

@@ -61,4 +61,4 @@ export const defaultSettings = {
 
 export const allLangs = [{ label: 'Português', value: 'pt', systemValue: ptPT }];
 export const defaultLang = allLangs[0];
-export const localVersion = '2.0.1';
+export const localVersion = '2.0.3';

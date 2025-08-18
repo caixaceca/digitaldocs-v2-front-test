@@ -7,10 +7,6 @@ import { getFileThumb } from '../../../utils/formatFile';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const borderBranco = { style: 'thin', color: { argb: 'FFFFFF' } };
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function ExportToExcell({ handleExport, small = false, absolute = false }) {
   return (
     <Box sx={absolute ? { top: 10, right: 10, position: 'absolute' } : null}>
@@ -45,6 +41,8 @@ export function sheetProperty(color, fixed, showGridLines = false) {
 }
 
 export function estiloCabecalho(sheet, rows, columns) {
+  const borderBranco = { style: 'thin', color: { argb: 'FFFFFF' } };
+
   for (let row = 1; row <= rows; row += 1) {
     sheet.getRow(row).height = 20;
     for (let col = 1; col <= columns; col += 1) {

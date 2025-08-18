@@ -7,10 +7,9 @@ import { setItemValue } from '../../utils/formatObject';
 // routes
 import useSettings from '../../hooks/useSettings';
 // hooks
-import useModal from '../../hooks/useModal';
 import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector, useDispatch } from '../../redux/store';
 import { closeModal } from '../../redux/slices/parametrizacao';
 // components
 import Page from '../../components/Page';
@@ -24,8 +23,8 @@ import RoleBasedGuard from '../../guards/RoleBasedGuard';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageParametrizacao() {
+  const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const { handleCloseModal } = useModal(closeModal());
   const { done, isAdmin } = useSelector((state) => state.parametrizacao);
 
   const tabsList = useMemo(
@@ -55,7 +54,7 @@ export default function PageParametrizacao() {
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabParams');
   }, [tabsList, currentTab]);
 
-  useNotificacao({ done, onClose: () => handleCloseModal() });
+  useNotificacao({ done, onClose: () => dispatch(closeModal()) });
 
   return (
     <Page title="Parametrização | DigitalDocs">

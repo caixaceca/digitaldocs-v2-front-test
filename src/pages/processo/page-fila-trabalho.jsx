@@ -22,6 +22,7 @@ import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
+import { meusFluxos } from '../../redux/slices/parametrizacao';
 import { getIndicadores } from '../../redux/slices/indicadores';
 import { getInfoInicial, getSuccess } from '../../redux/slices/intranet';
 // components
@@ -113,17 +114,17 @@ export default function PageFilaTrabalho() {
               allowScrollButtonsMobile
               onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabProcessos')}
             >
-              {tabs.map((tab) => (
+              {tabs.map(({ value, num }) => (
                 <Tab
                   disableRipple
-                  key={tab.value}
+                  key={value}
+                  value={value}
                   sx={{ px: 0.32, py: 1.2 }}
-                  value={tab.value}
                   label={
                     <Stack direction="row" spacing={0.5} alignItems="center">
-                      <Box>{tab.value}</Box>
-                      <Label color={colorLabel(tab.value)} sx={{ p: 0.75, height: 20 }}>
-                        {fNumber(tab.num)}
+                      <Box>{value}</Box>
+                      <Label color={colorLabel(value)} sx={{ p: 0.75, height: 20 }}>
+                        {fNumber(num)}
                       </Label>
                     </Stack>
                   }
@@ -133,7 +134,7 @@ export default function PageFilaTrabalho() {
           </TabsWrapperStyle>
         </Card>
 
-        <Box>{tabs.find((tab) => tab.value === currentTab)?.component}</Box>
+        <Box>{tabs.find(({ value }) => value === currentTab)?.component}</Box>
 
         {open && <TotalProcessos onClose={() => onClose()} />}
         {isOpenModal === 'adicionar-processo' && <ProcessoForm processo={null} ambientId={meuAmbiente?.id} />}
@@ -181,11 +182,11 @@ export function TotalProcessos({ onClose }) {
           <Autocomplete
             fullWidth
             value={fluxo}
+            options={meusFluxos(estado?.fluxos)}
             getOptionLabel={(option) => option?.assunto}
             onChange={(event, newValue) => setFluxo(newValue)}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => <TextField {...params} label="Fluxo" margin="none" />}
-            options={estado?.fluxos?.map(({ fluxo_id: id, assunto }) => ({ id, assunto })) || []}
           />
         </Stack>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mt: 3 }}>

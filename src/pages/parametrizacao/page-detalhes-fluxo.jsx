@@ -9,8 +9,6 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
 import { setItemValue, transicoesList } from '../../utils/formatObject';
-// hooks
-import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, setModal, deleteItem } from '../../redux/slices/parametrizacao';
@@ -49,7 +47,7 @@ export default function PageDetalhesFluxo() {
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
 
   const { perfilId } = useSelector((state) => state.intranet);
-  const { fluxo, selectedItem, modalParams, done, isSaving, isLoading } = useSelector((state) => state.parametrizacao);
+  const { fluxo, selectedItem, modalParams, isSaving, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     if (perfilId && id) dispatch(getFromParametrizacao('fluxo', { id, reset: { val: null } }));
@@ -90,18 +88,12 @@ export default function PageDetalhesFluxo() {
     [currentTab, transicao]
   );
 
-  const closeModal = () => dispatch(setModal());
-  useNotificacao({
-    done,
-    onClose: () => {
-      if (!done.includes('Regra transição')) closeModal();
-    },
-  });
+  const onClose = () => dispatch(setModal());
 
   const handleDelete = () => {
     const item = currentTab === 'Transições' ? 'transicoes' : 'notificacoes';
     const msg = `${currentTab === 'Transições' ? 'Transição' : 'Notificação'} eliminada`;
-    dispatch(deleteItem(item, { item1: currentTab === 'Transições' ? 'fluxo' : '', id: selectedItem?.id, msg }));
+    dispatch(deleteItem(item, { item1: currentTab === 'Transições' && 'fluxo', id: selectedItem?.id, msg, onClose }));
   };
 
   return (
@@ -139,8 +131,8 @@ export default function PageDetalhesFluxo() {
                   )}
                   {currentTab === 'Dados' && (
                     <>
-                      <ActionButton options={{ label: 'Editar', item: 'form-fluxo', dados: fluxo }} />
-                      <ActionButton options={{ label: 'Clonar', item: 'form-clonar', dados: fluxo }} />
+                      <ActionButton options={{ label: 'Editar', item: 'form-fluxo', dados: fluxo, sm: true }} />
+                      <ActionButton options={{ label: 'Clonar', item: 'form-clonar', dados: fluxo, sm: true }} />
                     </>
                   )}
                   {fluxo?.is_ativo && form && <ActionButton options={{ label: 'Adicionar', item: `form-${form}` }} />}
@@ -157,19 +149,19 @@ export default function PageDetalhesFluxo() {
             <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
           )}
 
-          {modalParams === 'form-fluxo' && <FluxoForm onClose={() => closeModal()} />}
-          {modalParams === 'form-clonar' && <ClonarFluxoForm onClose={() => closeModal()} />}
-          {modalParams === 'form-checklist' && <ChecklistForm onClose={() => closeModal()} fluxo={fluxo} />}
-          {modalParams === 'form-transicoes' && <TransicaoForm onClose={() => closeModal()} fluxoId={fluxo?.id} />}
+          {modalParams === 'form-fluxo' && <FluxoForm onClose={onClose} />}
+          {modalParams === 'form-clonar' && <ClonarFluxoForm onClose={onClose} />}
+          {modalParams === 'form-checklist' && <ChecklistForm onClose={onClose} fluxo={fluxo} />}
+          {modalParams === 'detalhes-fluxo' && <Detalhes item={currentTab} closeModal={onClose} />}
+          {modalParams === 'form-transicoes' && <TransicaoForm onClose={onClose} fluxoId={fluxo?.id} />}
           {modalParams === 'form-notificacoes' && (
-            <NotificacaoForm onClose={() => closeModal()} transicao={transicao} fluxo={fluxo} />
+            <NotificacaoForm onClose={onClose} transicao={transicao} fluxo={fluxo} />
           )}
-          {modalParams === 'detalhes-fluxo' && <Detalhes item={currentTab} closeModal={() => closeModal()} />}
           {modalParams === 'eliminar-item' && (
             <DialogConfirmar
+              onClose={onClose}
               isSaving={isSaving}
               handleOk={handleDelete}
-              onClose={() => closeModal()}
               desc={(currentTab === 'Transições' && 'eliminar esta transição') || 'eliminar esta notificação'}
             />
           )}

@@ -8,7 +8,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // hooks
-import useModal from '../../hooks/useModal';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -29,7 +28,6 @@ import { GrupoForm, FuncaoForm, RecursoForm, MarcadorForm, VariavelForm } from '
 
 export default function TableParamsGaji9({ item, inativos }) {
   const dispatch = useDispatch();
-  const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
 
   const {
@@ -92,12 +90,13 @@ export default function TableParamsGaji9({ item, inativos }) {
       (item === 'recursos' && 'recurso') ||
       (item === 'variaveis' && 'variavel') ||
       (item === 'marcadores' && 'marcador');
-    dispatch(openModal(modal));
 
-    dispatch(
-      getFromGaji9(itemSingle, { id: item === 'funcoes' ? dados?.utilizador_id : dados?.id, item: 'selectedItem' })
-    );
+    dispatch(openModal(modal));
+    const id = item === 'funcoes' ? dados?.utilizador_id : dados?.id;
+    dispatch(getFromGaji9(itemSingle, { id, item: 'selectedItem' }));
   };
+
+  const onClose = () => dispatch(closeModal());
 
   return (
     <>
@@ -158,15 +157,14 @@ export default function TableParamsGaji9({ item, inativos }) {
         )}
       </Card>
 
-      {isOpenView && <DetalhesGaji9 closeModal={handleCloseModal} item={item} />}
-
+      {isOpenView && <DetalhesGaji9 closeModal={onClose} item={item} />}
       {isOpenModal && (
         <>
-          {item === 'grupos' && <GrupoForm onClose={handleCloseModal} />}
-          {item === 'funcoes' && <FuncaoForm onClose={handleCloseModal} />}
-          {item === 'recursos' && <RecursoForm onClose={handleCloseModal} />}
-          {item === 'variaveis' && <VariavelForm onClose={handleCloseModal} />}
-          {item === 'marcadores' && <MarcadorForm onClose={handleCloseModal} />}
+          {item === 'grupos' && <GrupoForm onClose={onClose} />}
+          {item === 'funcoes' && <FuncaoForm onClose={onClose} />}
+          {item === 'recursos' && <RecursoForm onClose={onClose} />}
+          {item === 'variaveis' && <VariavelForm onClose={onClose} />}
+          {item === 'marcadores' && <MarcadorForm onClose={onClose} />}
         </>
       )}
     </>

@@ -105,7 +105,7 @@ export default function TableInfoEstado({ item, dados }) {
                           <>
                             <TableCell align="center">{fPercent(row.percentagem)}</TableCell>
                             <CellChecked check={row.para_aprovacao} />
-                            <CellChecked check={row.facultativo} />
+                            <CellChecked check={row.decisor} />
                             <CellChecked check={row.ativo} />
                           </>
                         ))}
@@ -179,7 +179,7 @@ function headerTable(item) {
         { id: 'nome', label: 'Colaborador' },
         { id: 'percentagem', label: 'Percentagem', align: 'center' },
         { id: 'para_aprovacao', label: 'Aprovação', align: 'center' },
-        { id: 'facultativo', label: 'Facultativo', align: 'center' },
+        { id: 'decisor', label: 'Decisor', align: 'center' },
         { id: 'ativo', label: 'Ativo', align: 'center' },
       ]) ||
       []),

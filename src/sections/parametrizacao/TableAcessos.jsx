@@ -12,7 +12,6 @@ import TableContainer from '@mui/material/TableContainer';
 import { ptDateTime } from '../../utils/formatTime';
 import { emailCheck } from '../../utils/validarAcesso';
 // hooks
-import { useNotificacao } from '../../hooks/useNotificacao';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -58,11 +57,9 @@ export default function TableAcessos({ tab }) {
   const dispatch = useDispatch();
   const { mail } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
-  const { isLoading, isSaving, done, acessos, modalParams, estados, estadosPerfil, selectedItem } = useSelector(
+  const { isLoading, isSaving, acessos, modalParams, estados, estadosPerfil, selectedItem } = useSelector(
     (state) => state.parametrizacao
   );
-
-  useNotificacao({ done, onClose: () => dispatch(setModal()) });
 
   const dataFiltered = applySortFilter({
     filter,
@@ -87,8 +84,8 @@ export default function TableAcessos({ tab }) {
   }, [filter]);
 
   const handleDelete = () => {
-    const msg = `${tab === 'acessos' ? 'Acesso' : 'Estado'} eliminado`;
-    dispatch(deleteItem(tab === 'acessos' ? tab : 'estadosPerfil', { id: selectedItem?.id, msg }));
+    const params = { id: selectedItem?.id, msg: `${tab === 'acessos' ? 'Acesso' : 'Estado'} eliminado` };
+    dispatch(deleteItem(tab === 'acessos' ? tab : 'estadosPerfil', { ...params, onClose: () => dispatch(setModal()) }));
   };
 
   return (

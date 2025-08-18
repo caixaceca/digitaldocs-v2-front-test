@@ -182,7 +182,7 @@ export function getFromParametrizacao(item, params) {
         (item === 'acessos' && `/v1/acessos?perfilID=${params?.perfilId}`) ||
         (item === 'componentes' && `/v2/processos/componentes/${perfilId}`) ||
         (item === 'transicao' && `/v1/transicoes/${params?.id}/${perfilId}`) ||
-        (item === 'meusambientes' && `/v1/fluxos/meusambientes/v2/${perfilId}`) ||
+        (item === 'meusambientes' && `/v2/fluxos/meus-ambientes/${perfilId}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/transicao/${params?.id}`) ||
         (item === 'tiposTitular' && `/v2/processos/tipos_titulares/${perfilId}`) ||
         (item === 'tiposGarantia' && `/v2/processos/tipos_garantias/${perfilId}`) ||
@@ -244,16 +244,16 @@ export function createItem(item, dados, params) {
         (item === 'origens' && `/v1/origens`) ||
         (item === 'acessos' && `/v1/acessos`) ||
         (item === 'clonar fluxo' && `/v1/fluxos`) ||
-        (item === 'transicoes' && `/v1/transicoes`) ||
         (item === 'notificacoes' && `/v1/notificacoes`) ||
         (item === 'estado' && `/v1/estados/${perfilId}`) ||
         (item === 'perfis' && `/v1/estados/asscc/perfis`) ||
+        (item === 'transicoes' && `/v1/transicoes/multi`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}`) ||
         (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}`) ||
         (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
-        (item === 'destinatario' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
+        (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}`) ||
         (item === 'regrasEstado' && `/v1/estados/${params?.estadoId}/regras_pareceres/${perfilId}`) ||
         (item === 'regrasTransicao' && `/v1/transicoes/${params?.estadoId}/regras_parecers/${perfilId}`) ||
@@ -269,9 +269,8 @@ export function createItem(item, dados, params) {
           }
           const fluxo = await axios.get(`${BASEURLDD}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
           dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: fluxo.data }));
-        } else if (item === 'destinatario') {
-          const response = await axios.get(`${BASEURLDD}/v1/notificacoes/destinatarios/${params?.id}`, options);
-          dispatch(slice.actions.getSuccess({ item, dados: response.data.objeto }));
+        } else if (item === 'transicoes' || item === 'destinatarios') {
+          dispatch(getFromParametrizacao(item === 'transicoes' ? 'fluxo' : item, { id: params?.id }));
         } else if (params?.getItem) {
           dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data?.objeto ?? null }));
         } else if (item === 'acessos') {
@@ -389,4 +388,7 @@ export function deleteItem(item, params) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export const meusFluxos = (fluxos) =>
-  applySort(fluxos ?? [], getComparator('asc', 'assunto')).map((item) => ({ ...item, id: item.fluxo_id }));
+  applySort(
+    (fluxos ?? [])?.filter(({ ativo }) => ativo),
+    getComparator('asc', 'assunto')
+  )?.map((item) => ({ ...item, id: item.fluxo_id }));

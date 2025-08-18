@@ -4,13 +4,13 @@ import { saveAs } from 'file-saver';
 import { fNumber } from '../../../utils/formatNumber';
 import { ptDateTime, ptDate } from '../../../utils/formatTime';
 //
-import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './CommonProperties';
+import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './formatacoes';
 // _mock
 import { dis } from '../../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function ExportarDados({ titulo, dados, tabela }) {
+export default function ExportarDadosControle({ titulo, dados, tabela }) {
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     fileInfo(workbook);

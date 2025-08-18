@@ -61,7 +61,7 @@ export default function EncaminharStepper({ dados }) {
 
   return (
     <Dialog open fullWidth maxWidth="md">
-      <DialogTitle>
+      <DialogTitle sx={{ mb: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
           {acao?.charAt(0)?.toUpperCase() + acao?.slice(1)?.toLowerCase()} processo
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
@@ -360,11 +360,11 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={2}>
+      <Stack spacing={2} sx={{ pt: 1 }}>
         <RHFAutocompleteObj dc label="Focal Point" options={[estado, ...estados]} name="estado" />
         {fields.map((item, index) => (
           <Card key={`destino_${index}`} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={{ xs: 1, sm: 2 }} alignItems="center">
               <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
                   <GridItem sm={8}>

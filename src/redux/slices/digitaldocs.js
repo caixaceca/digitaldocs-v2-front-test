@@ -256,10 +256,8 @@ export function getProcesso(item, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true });
 
-      const { data } = await axios.get(
-        `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
-        options
-      );
+      const apiUrl = `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
+      const { data } = await axios.get(apiUrl, options);
 
       if (!data?.objeto) return;
       const processo = processarProcesso(data.objeto, perfilId, dispatch, '', true);
@@ -319,6 +317,7 @@ export function getInfoProcesso(item, params) {
           (item === 'hretencoes' && `/v2/processos/ht_retencoes/${idPerfilId}`) ||
           (item === 'hpendencias' && `/v2/processos/ht_pendencias/${idPerfilId}`) ||
           (item === 'hatribuicoes' && `/v2/processos/ht_atribuicoes/${idPerfilId}`) ||
+          (item === 'ht_parecer_cr' && `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/hts`) ||
           (item === 'hvisualizacoes' && `/v2/processos/visualizacoes/${perfilId}?processo_id=${params?.id}`) ||
           (item === 'aceitar' && `/v2/processos/aceitar/${perfilId}/${params?.id}?&estado_id=${params?.estadoId}`) ||
           (item === 'destinos' && `/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
@@ -423,7 +422,13 @@ export function createItem(item, dados, params) {
     try {
       const accessToken = await getAccessToken();
       const { perfilId } = selectUtilizador(getState()?.intranet || {});
+      if (params?.anexo) {
+        const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
+        const apiUrl = `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}`;
+        await axios.put(`${BASEURLDD}${apiUrl}`, params?.anexo, options);
+      }
       const apiUrl =
+        (item === 'parecer-credito' && `${BASEURLDD}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
         (item === 'garantias' && `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
         '';
       if (apiUrl) {
@@ -457,6 +462,11 @@ export function updateItem(item, dados, params) {
         const url = `/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`;
         await axios.patch(`${BASEURLDD}${url}`, params?.anexos, options);
       }
+      if (params?.anexo) {
+        const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
+        const apiUrl = `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}`;
+        await axios.put(`${BASEURLDD}${apiUrl}`, params?.anexo, options);
+      }
 
       const apiUrl =
         // DETALHES
@@ -466,6 +476,7 @@ export function updateItem(item, dados, params) {
         (item === 'confirmar emissao por data' && `/v1/cartoes/validar/todas/emissoes`) ||
         (item === 'desarquivar' && `/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
         (item === 'alterar balcao' && `/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
+        (item === 'parecer-credito' && `/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
         (item === 'pendencia' && `/v2/processos/pender/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'domiciliar' && `/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'confirmar rececao multiplo' && `/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||
@@ -493,7 +504,7 @@ export function updateItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.patch(`${BASEURLDD}${apiUrl}`, dados, options);
+        const response = await axios[params?.put ? 'put' : 'patch'](`${BASEURLDD}${apiUrl}`, dados, options);
         if (params?.fillCredito)
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }
@@ -528,6 +539,8 @@ export function deleteItem(item, params) {
       const { perfilId } = selectUtilizador(getState()?.intranet || {});
 
       const apiUrl =
+        (item === 'anexo-parecer' &&
+          `/v2/processos/${params?.processoId}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}&anexo_id=${params?.id}`) ||
         (item === 'garantias' &&
           `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
         (item === 'processo' &&
@@ -539,7 +552,8 @@ export function deleteItem(item, params) {
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         const response = await axios.delete(`${BASEURLDD}${apiUrl}`, options);
-        if (item === 'anexo') dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
+        if (item === 'anexo' || item === 'anexo-parecer')
+          dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
         if (item === 'garantias')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
       }

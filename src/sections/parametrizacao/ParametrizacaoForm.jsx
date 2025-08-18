@@ -14,6 +14,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fillData } from '../../utils/formatTime';
+import { emailCheck } from '../../utils/validarAcesso';
 import { subtractArrays } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
@@ -72,7 +73,7 @@ export function AcessoForm({ perfilIdA, onClose }) {
   const onSubmit = async () => {
     try {
       const formData = { ...values, objeto: values.objeto.id, acesso: values.acesso.id };
-      const params = { id: selectedItem?.id, msg: `Acesso ${isEdit ? 'atualizado' : 'atribuido'}` };
+      const params = { id: selectedItem?.id, msg: `Acesso ${isEdit ? 'atualizado' : 'atribuido'}`, onClose };
       dispatch((isEdit ? updateItem : createItem)('acessos', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -452,6 +453,7 @@ export function DespesaForm({ onClose }) {
 export function DocumentoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const { mail } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
@@ -511,7 +513,8 @@ export function DocumentoForm({ onClose }) {
       <DialogTitle>{isEdit ? 'Editar documento' : 'Adicionar documento'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          {isEdit && selectedItem?.designacao === 'OUTROS' ? (
+          {(!emailCheck(mail, '') && isEdit && selectedItem?.designacao === 'OUTROS') ||
+          selectedItem?.designacao === 'ATA - PARECER DE CRÉDITO' ? (
             <Stack sx={{ pt: 3, pb: 1 }}>
               <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
                 Este documento não pode ser editado, está em uso para validações na aplicação.

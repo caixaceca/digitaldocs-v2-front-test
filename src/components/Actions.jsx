@@ -67,8 +67,8 @@ export function ActionButton({ options = {} }) {
 
 export function DefaultAction({
   icon,
-  label = '',
   onClick,
+  label = '',
   small = false,
   button = false,
   variant = 'soft',
@@ -108,7 +108,6 @@ export function DefaultAction({
     (label === 'ADICIONAR ANEXO' && <AddAnexo sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'ATAULIZAR DADOS' && <RefreshIcon sx={{ width: 22, height: 22 }} />) ||
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
-    (label === 'CLONAR' && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
@@ -119,6 +118,7 @@ export function DefaultAction({
     ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
+    ((label === 'CLONAR' || label === 'Clonar') && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((label === 'Editar' || label === 'EDITAR' || label === 'FOCAL POINT') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
@@ -226,12 +226,20 @@ export function DialogButons({
   handleDelete = null,
 }) {
   const { toggle: open, onOpen, onClose: onClose1 } = useToggle();
+
   return (
     <DialogActions sx={{ pb: '0px !important', px: '0px !important', mt: 3 }}>
       {desc && (
         <>
           <DefaultAction label="ELIMINAR" onClick={onOpen} />
-          {open && <DialogConfirmar desc={desc} onClose={onClose1} isSaving={isSaving} handleOk={handleDelete} />}
+          {open && (
+            <DialogConfirmar
+              desc={desc}
+              onClose={onClose1}
+              isSaving={isSaving}
+              handleOk={() => handleDelete(onClose1)}
+            />
+          )}
         </>
       )}
       <Box sx={{ flexGrow: 1 }} />

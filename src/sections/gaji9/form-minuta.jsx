@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,7 +20,6 @@ import { getDocumento, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9
 import GridItem from '../../components/GridItem';
 import { DialogButons } from '../../components/Actions';
 import { DialogTitleAlt } from '../../components/CustomDialog';
-import { FilterSwitch } from '../../components/hook-form/RHFSwitch';
 import { RHFSwitch, FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -39,7 +38,7 @@ export function PreviewForm({ id = 0, onClose }) {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ mb: 2 }}>Pré-visualizar minuta</DialogTitle>
+      <DialogTitle sx={{ mb: 1 }}>Pré-visualizar minuta</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack sx={{ pt: 1 }} spacing={3}>
@@ -64,7 +63,6 @@ export function PreviewForm({ id = 0, onClose }) {
 
 export function PreviewMinutaForm({ onClose }) {
   const dispatch = useDispatch();
-  const [restrito, setRestrito] = useState(false);
   const { isSaving } = useSelector((state) => state.gaji9);
   const { tiposTitulares, tiposGarantias, segmentos, tipoGarantia } = useSelector((state) => state.gaji9);
 
@@ -87,6 +85,8 @@ export function PreviewMinutaForm({ onClose }) {
       prazo: '',
       montante: '',
       com_nip: false,
+      restrito: true,
+      rascunho: false,
       com_seguro: false,
       isencao_comissao: false,
       isento_imposto_selo: false,
@@ -114,7 +114,7 @@ export function PreviewMinutaForm({ onClose }) {
         sub_tipo_garantia_id: values?.sub_tipo_garantia_id?.id,
       }).filter(([, v]) => !!v)
     );
-    dispatch(getDocumento('minutav2', { restrito, ...params }));
+    dispatch(getDocumento('minutav2', { restrito: values.restrito, rascunho: values.rascunho, ...params }));
   };
 
   useEffect(() => {
@@ -123,34 +123,32 @@ export function PreviewMinutaForm({ onClose }) {
       dispatch(getFromGaji9('tipoGarantia', { id: values?.tipo_garantia_id?.id, notLoading: true }));
   }, [dispatch, values?.tipo_garantia_id?.id]);
 
-  const changeGarantia = (val) => {
-    setValue('tipo_garantia_id', val, vdt);
-    setValue('sub_tipo_garantia_id', null, vdt);
-  };
-
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitleAlt
-        sx={{ mb: 2 }}
-        title="Pré-visualizar minuta"
-        action={<FilterSwitch value={restrito} label="Restrito" setValue={setRestrito} />}
-      />
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+      <DialogTitleAlt sx={{ mb: 1 }} title="Pré-visualizar minuta" />
       <DialogContent sx={{ pt: 1 }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} sx={{ pt: 1 }}>
-            <GridItem>
+            <GridItem sm={6} children={<RHFSwitch name="rascunho" label="Incluir cláusulas de rascunho" />} />
+            <GridItem sm={6} children={<RHFSwitch name="restrito" label="Restrito" />} />
+            <GridItem sm={6}>
               <RHFAutocompleteObj name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
             </GridItem>
-            <GridItem children={<RHFAutocompleteObj name="segmento_id" label="Segmento" options={segmentosList} />} />
+            <GridItem sm={6}>
+              <RHFAutocompleteObj name="segmento_id" label="Segmento" options={segmentosList} />
+            </GridItem>
             <GridItem>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
                 <RHFAutocompleteObj
                   name="tipo_garantia_id"
                   label="Tipo de garantia"
                   options={garantiasList}
-                  onChange={(_, val) => changeGarantia(val)}
+                  onChange={(event, newVal) => {
+                    setValue('tipo_garantia_id', newVal, vdt);
+                    setValue('sub_tipo_garantia_id', null, vdt);
+                  }}
                 />
-                {values?.garantia?.id && subTiposGarant?.length > 0 && (
+                {values?.tipo_garantia_id?.id && subTiposGarant?.length > 0 && (
                   <RHFAutocompleteObj
                     options={subTiposGarant}
                     name="sub_tipo_garantia_id"
@@ -159,14 +157,22 @@ export function PreviewMinutaForm({ onClose }) {
                 )}
               </Stack>
             </GridItem>
-            <GridItem xs={6} children={<RHFNumberField label="Montante" name="montante" />} />
-            <GridItem xs={6} children={<RHFNumberField label="Prazo" name="prazo" />} />
-            <GridItem xs={6} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" mt />} />
-            <GridItem xs={6} children={<RHFSwitch name="isento_imposto_selo" label="Isento de imposto selo" mt />} />
-            <GridItem xs={6} children={<RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" mt />} />
-            <GridItem xs={6} children={<RHFSwitch name="habitacao_propria_1" label="1º habitação própria" mt />} />
-            <GridItem xs={6} children={<RHFSwitch name="com_prazo_utilizacao" label="Com prazo de utilização" mt />} />
-            <GridItem xs={6} children={<RHFSwitch name="com_seguro" label="Com seguro" mt />} />
+            <GridItem sm={6} children={<RHFNumberField label="Montante" name="montante" />} />
+            <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazo" />} />
+            <GridItem sm={6} md={4} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" mt />} />
+            <GridItem sm={6} md={4}>
+              <RHFSwitch name="isento_imposto_selo" label="Isento de imposto selo" mt />
+            </GridItem>
+            <GridItem sm={6} md={4}>
+              <RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" mt />
+            </GridItem>
+            <GridItem sm={6} md={4}>
+              <RHFSwitch name="habitacao_propria_1" label="1º habitação própria" mt />
+            </GridItem>
+            <GridItem sm={6} md={4}>
+              <RHFSwitch name="com_prazo_utilizacao" label="Com prazo de utilização" mt />
+            </GridItem>
+            <GridItem sm={6} md={4} children={<RHFSwitch name="com_seguro" label="Com seguro" mt />} />
             <GridItem children={<RHFSwitch name="com_nip" label="Com NIP" mt />} />
           </Grid>
           <DialogButons label="Pré-visualizar" isSaving={isSaving} onClose={onClose} />

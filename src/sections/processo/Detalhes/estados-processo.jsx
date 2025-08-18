@@ -201,8 +201,8 @@ export function Info({ dados, colaboradores }) {
                 <Stack key={`parecer_${index}_${row?.id}`} direction="row" spacing={1.5}>
                   <Stack sx={{ width: 1 }}>
                     <InfoCriador
-                      criador={criador || { perfil_id: row?.perfil_id }}
                       temParecer={row?.data_parecer && row?.parecer}
+                      criador={criador || { perfil_id: row?.perfil_id }}
                       dados={{
                         ...row,
                         ...{ perfil: criador?.perfil, assunto: dados?.observacao, estado: dados?.estado_inicial },

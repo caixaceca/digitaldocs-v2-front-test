@@ -86,7 +86,7 @@ function RegrasTransicoes({ dados }) {
               </TableCell>
               <TableCell align="right">{fPercent(row?.percentagem)}</TableCell>
               <CellChecked check={row?.para_aprovacao} />
-              <CellChecked check={row?.facultativo} />
+              <CellChecked check={row?.decisor} />
               <CellChecked check={row?.ativo} />
               <TableCell>
                 <DefaultAction small label="EDITAR" onClick={() => setItem(row)} />

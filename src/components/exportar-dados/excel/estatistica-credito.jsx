@@ -7,7 +7,7 @@ import { fCurrency, fPercent } from '../../../utils/formatNumber';
 // redux
 import { useSelector } from '../../../redux/store';
 //
-import { ExportToExcell, fileInfo, sheetProperty, estiloCabecalho, ajustarLargura } from './CommonProperties';
+import { ExportToExcell, fileInfo, sheetProperty, estiloCabecalho, ajustarLargura } from './formatacoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ const borderCinza = { style: 'thin', color: { argb: 'AAAAAA' } };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function ExportarEstatisticaCred({ uo, periodo, vista }) {
+export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
   const { cc } = useSelector((state) => state.intranet);
   const { resumoEstCredito, estCredito } = useSelector((state) => state.indicadores);
 

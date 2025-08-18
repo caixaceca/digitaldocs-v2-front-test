@@ -25,12 +25,12 @@ export default function Router() {
   const { cc, perfil } = useSelector((state) => state.intranet);
 
   useEffect(() => {
-    fetch('/meta.json', { cache: 'no-store' })
+    fetch(`/meta.json?ts=${Date.now()}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((meta) => {
         if (meta.version && meta.version !== localVersion) {
-          enqueueSnackbar('Aplicação atualizada', { variant: 'success' });
-          window.location.reload();
+          enqueueSnackbar('Nova atualização detectada', { variant: 'info' });
+          window.location.reload(true);
         }
       })
       .catch((err) => console.warn('Erro ao verificar versão da aplicação:', err));

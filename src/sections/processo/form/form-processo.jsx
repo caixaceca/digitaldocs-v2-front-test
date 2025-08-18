@@ -13,11 +13,9 @@ import DialogContent from '@mui/material/DialogContent';
 import { resetDados } from '../../../redux/slices/stepper';
 import { setModal } from '../../../redux/slices/digitaldocs';
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
+import { getFromParametrizacao, meusFluxos } from '../../../redux/slices/parametrizacao';
 // routes
 import { PATH_DIGITALDOCS } from '../../../routes/paths';
-// hooks
-import { useNotificacao } from '../../../hooks/useNotificacao';
 // components
 import Steps from '../../../components/Steps';
 import { Fechar } from '../../../components/Actions';
@@ -44,7 +42,7 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
 
   const fluxosList = useMemo(() => {
     if (!estado?.fluxos) return [];
-    return estado.fluxos.filter((f) => f.ativo).map((f) => ({ ...f, id: f.fluxo_id, nome: f.assunto }));
+    return meusFluxos(estado.fluxos).map((row) => ({ ...row, nome: row?.assunto }));
   }, [estado?.fluxos]);
 
   const estadosList = useMemo(() => meusAmbientes?.filter(({ isinicial }) => isinicial) || [], [meusAmbientes]);
@@ -72,12 +70,9 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
     if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
   }, [dispatch, isEdit, fluxo?.id]);
 
-  useNotificacao({
-    done,
-    onClose: () => {
-      if (done === 'Processo adicionado') navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${newProcesso?.id}`);
-    },
-  });
+  useEffect(() => {
+    if (done === 'Processo adicionado') navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${newProcesso?.id}`);
+  }, [done, navigate, newProcesso?.id]);
 
   const onClose = () => {
     dispatch(setModal());

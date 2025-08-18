@@ -10,7 +10,6 @@ import { useSelector } from '../../redux/store';
 import useSettings from '../../hooks/useSettings';
 import { usePermissao } from '../../hooks/useAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
-import { useNotificacao } from '../../hooks/useNotificacao';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
@@ -61,11 +60,9 @@ export default function PageGaji9Gestao() {
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabGaji9', false);
   }, [tabsList, currentTab]);
 
-  const navigateTo = () => {
+  useEffect(() => {
     if (done === 'Proposta carregada' && propostaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${propostaId}`);
-  };
-
-  useNotificacao({ done, onClose: () => navigateTo() });
+  }, [done, navigate, propostaId]);
 
   return (
     <Page title="GAJ-i9 | DigitalDocs">

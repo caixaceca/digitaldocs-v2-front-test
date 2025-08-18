@@ -3,13 +3,15 @@ import { Outlet } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
+// redux
+import { shallowEqual } from 'react-redux';
+import { useSelector } from '../redux/store';
+import { selectMsgDoneError } from '../redux/selectors/selectMsgDoneError';
 // hooks
 import useSettings from '../hooks/useSettings';
 import useResponsive from '../hooks/useResponsive';
 import { useNotificacao } from '../hooks/useNotificacao';
 import useCollapseDrawer from '../hooks/useCollapseDrawer';
-// redux
-import { useSelector } from '../redux/store';
 // config
 import { HEADER, NAVBAR } from '../config';
 // components
@@ -46,13 +48,10 @@ export default function IntranetLayout() {
   const isDesktop = useResponsive('up', 'lg');
   const verticalLayout = themeLayout === 'vertical';
   const { collapseClick, isCollapse } = useCollapseDrawer();
-  const { error } = useSelector((state) => state.digitaldocs);
-  const { error: erroGaji9 } = useSelector((state) => state.gaji9);
-  const { error: erroIndic } = useSelector((state) => state.indicadores);
-  const { error: erroParam } = useSelector((state) => state.parametrizacao);
-  const { disposicao, error: erroIntranet, done } = useSelector((state) => state.intranet);
+  const { disposicao } = useSelector((state) => state.intranet);
 
-  useNotificacao({ done, error: error || erroIntranet || erroGaji9 || erroParam || erroIndic });
+  const { done, error } = useSelector(selectMsgDoneError, shallowEqual);
+  useNotificacao({ done, error });
 
   if (verticalLayout) {
     return (

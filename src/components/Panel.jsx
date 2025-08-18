@@ -171,9 +171,12 @@ export function CellChecked({ check }) {
 export function DataLabel({ data = '', termino = false }) {
   return (
     <Stack direction="row" spacing={0.5}>
-      <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>{termino ? 'Término' : 'Início'}:</Typography>
+      <Typography noWrap sx={{ typography: 'caption', color: 'text.secondary' }}>
+        {termino ? 'Término' : 'Início'}:
+      </Typography>
       <Typography
-        sx={{ typography: 'caption', fontStyle: !data && 'italic', pr: !data && 0.15, color: !data && 'text.disabled' }}
+        noWrap
+        sx={{ typography: 'caption', ...(!data && { fontStyle: 'italic', pr: 0.15, color: 'text.disabled' }) }}
       >
         {data ? ptDateTime(data) : '(Não definido)'}
       </Typography>

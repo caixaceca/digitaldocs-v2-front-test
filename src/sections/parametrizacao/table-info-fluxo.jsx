@@ -120,14 +120,16 @@ export default function TableInfoFluxo({ item }) {
                           <Stack direction="row" spacing={0.5} justifyContent="right">
                             {fluxo?.is_ativo && (
                               <>
-                                {item !== 'checklist' && (
+                                {item !== 'checklist' && row?.ativo && (
                                   <DefaultAction
                                     small
                                     label="ELIMINAR"
                                     onClick={() => openModal('eliminar-item', row)}
                                   />
                                 )}
-                                <DefaultAction small label="EDITAR" onClick={() => openModal(`form-${item}`, row)} />
+                                {row?.ativo && (
+                                  <DefaultAction small label="EDITAR" onClick={() => openModal(`form-${item}`, row)} />
+                                )}
                               </>
                             )}
                             <DefaultAction small label="DETALHES" onClick={() => openModal('detalhes-fluxo', row)} />

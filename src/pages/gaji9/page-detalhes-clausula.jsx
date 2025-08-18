@@ -9,7 +9,6 @@ import Container from '@mui/material/Container';
 import useSettings from '../../hooks/useSettings';
 import { usePermissao } from '../../hooks/useAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
-import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, setModal, deleteItem } from '../../redux/slices/gaji9';
@@ -40,16 +39,13 @@ export default function PageDetalhesClausula() {
 
   const { clausula, isLoading, modalGaji9, selectedItem, done, isSaving } = useSelector((state) => state.gaji9);
 
-  useNotificacao({
-    done,
-    onClose: () => {
-      if (done === 'Cláusula eliminada') navigate(`${PATH_DIGITALDOCS.gaji9.root}`);
-    },
-  });
-
   useEffect(() => {
     if (permissao) dispatch(getFromGaji9('clausula', { id, reset: { dados: null } }));
   }, [dispatch, id, permissao]);
+
+  useEffect(() => {
+    if (done === 'Cláusula eliminada') navigate(`${PATH_DIGITALDOCS.gaji9.root}`);
+  }, [done, navigate]);
 
   const openModal = (item, dados, isEdit) => {
     dispatch(setModal({ item: item || '', dados: dados || null, isEdit: isEdit || false }));

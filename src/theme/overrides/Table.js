@@ -44,10 +44,10 @@ export default function Table(theme) {
     },
     MuiTablePagination: {
       styleOverrides: {
-        root: { borderTop: `solid 1px ${theme.palette.divider}` },
-        toolbar: { height: 60 },
-        select: { '&:focus': { borderRadius: theme.shape.borderRadius } },
         selectIcon: { width: 20, height: 20, marginTop: -4 },
+        root: { borderTop: `solid 1px ${theme.palette.divider}` },
+        select: { '&:focus': { borderRadius: theme.shape.borderRadius } },
+        toolbar: { minHeight: 30, '@media (min-width: 600px)': { minHeight: '30px !important' } },
       },
     },
   };

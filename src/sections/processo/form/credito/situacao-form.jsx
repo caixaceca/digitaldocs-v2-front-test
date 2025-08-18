@@ -32,11 +32,8 @@ export function FormSituacao({ dados, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const situacoes = (dados?.situacao_final_mes === 'Aprovado' && ['Contratado', 'Desistido']) || [
-    'Aprovado',
-    'Indeferido',
-    'Desistido',
-  ];
+  const situacao = useMemo(() => (dados?.situacao_final_mes || 'em análise').toLowerCase(), [dados]);
+  const situacoes = (situacao === 'aprovado' && ['Contratado', 'Desistido']) || ['Aprovado', 'Indeferido', 'Desistido'];
 
   const formSchema = Yup.object().shape({
     situacao: Yup.mixed().required().label('Situação'),
@@ -57,11 +54,11 @@ export function FormSituacao({ dados, onClose }) {
       taxa_juro: dados?.taxa_juro,
       prazo_amortizacao: dados?.prazo_amortizacao,
       montante:
-        (dados?.situacao_final_mes === 'Em análise' && dados?.montante_solicitado) ||
-        (dados?.situacao_final_mes === 'Aprovado' && dados?.montante_aprovado) ||
+        (situacao === 'em análise' && dados?.montante_solicitado) ||
+        (situacao === 'aprovado' && dados?.montante_aprovado) ||
         '',
     }),
-    [dados]
+    [dados, situacao]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -136,7 +133,7 @@ export function FormSituacao({ dados, onClose }) {
 export function EliminarDadosSituacao({ dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.digitaldocs);
-  const { situacao_final_mes: situacao = '' } = dados;
+  const situacao = useMemo(() => (dados?.situacao_final_mes || 'em análise').toLowerCase(), [dados]);
 
   return (
     <DialogConfirmar
@@ -151,10 +148,10 @@ export function EliminarDadosSituacao({ dados, onClose }) {
               montante: null,
               data_referencia: null,
               escalao_decisao: null,
-              aprovar: situacao === 'Aprovado',
-              desistir: situacao === 'Desistido',
-              contratar: situacao === 'Contratado',
-              indeferir: situacao === 'Indeferido',
+              aprovar: situacao === 'aprovado',
+              desistir: situacao === 'desistido',
+              contratar: situacao === 'contratado',
+              indeferir: situacao === 'indeferido',
             }),
             { id: dados?.processoId, creditoId: dados?.id, msg: 'Situação eliminada', fillCredito: true, onClose }
           )

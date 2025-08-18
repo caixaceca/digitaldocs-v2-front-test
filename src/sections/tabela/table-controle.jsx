@@ -30,7 +30,7 @@ import { Criado, noDados } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
-import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
+import { ExportarDadosControle } from '../../components/exportar-dados/excel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { UoData } from './uo-data-filter';
@@ -155,7 +155,7 @@ export default function TableControle({ from }) {
               />
             )}
             {!isNotFound && (
-              <ExportarDados
+              <ExportarDadosControle
                 tabela={from}
                 dados={dataFiltered}
                 titulo={

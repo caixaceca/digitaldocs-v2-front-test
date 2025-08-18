@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -11,8 +11,8 @@ import DialogContent from '@mui/material/DialogContent';
 import { listaProdutos, listaTitrulares } from '../applySortFilter';
 import { shapeNumberZero } from '../../../components/hook-form/yup-shape';
 // redux
+import { createItem } from '../../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromGaji9, createItem } from '../../../redux/slices/gaji9';
 import { updateDados, resetDados } from '../../../redux/slices/stepper';
 // components
 import {
@@ -30,8 +30,8 @@ import { AddItem, DefaultAction, DialogButons, ButtonsStepper } from '../../../c
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function TiposTitularesForm({ id, onClose }) {
-  const { clausula, tiposTitulares } = useSelector((state) => state.gaji9);
   const ids = extrairIds(clausula, 'tipos_titulares');
+  const { clausula, tiposTitulares } = useSelector((state) => state.gaji9);
 
   return (
     <OpcoesForm
@@ -45,8 +45,8 @@ export function TiposTitularesForm({ id, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function SegmentosForm({ id, dados, onClose }) {
-  const { segmentos } = useSelector((state) => state.gaji9);
   const ids = extrairIds(dados, 'segmentos');
+  const { segmentos } = useSelector((state) => state.gaji9);
 
   return (
     <OpcoesForm
@@ -62,8 +62,8 @@ export function SegmentosForm({ id, dados, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function ComponetesForm({ id, onClose }) {
-  const { selectedItem, componentes } = useSelector((state) => state.gaji9);
   const ids = extrairIds(selectedItem, 'componentes');
+  const { selectedItem, componentes } = useSelector((state) => state.gaji9);
 
   return (
     <OpcoesForm
@@ -77,8 +77,8 @@ export function ComponetesForm({ id, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function FinalidadesForm({ id, onClose }) {
-  const { selectedItem, finalidades } = useSelector((state) => state.gaji9);
   const ids = extrairIds(selectedItem, 'finalidades');
+  const { selectedItem, finalidades } = useSelector((state) => state.gaji9);
 
   return (
     <OpcoesForm
@@ -151,15 +151,11 @@ export function CondicionalForm({ id, dados = useCallback, onClose }) {
     dispatch(resetDados());
   }, [onClose, dispatch]);
 
-  useEffect(() => {
-    dispatch(getFromGaji9('variaveis'));
-  }, [dispatch]);
-
   return (
     <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
         onClose={() => onClose1()}
-        title="Adicionar condição"
+        title="Adicionar condicional"
         content={
           <>
             <Steps activeStep={activeStep} steps={['Condição', 'Conteúdo']} sx={{ mt: 3 }} />
@@ -183,7 +179,7 @@ export function Condicao({ onClose, dados }) {
 
   const formSchema = Yup.object().shape({
     condicao: Yup.mixed().required().label('Condição'),
-    conteudo_sub: Yup.mixed().required().label('Conteúdo afetado'),
+    componente: Yup.mixed().required().label('Componente afetado'),
     maior_que: shapeNumberZero('Valor maior que', ['Prazo', 'Montante', '1ª habitação própria'], 'condicao'),
     menor_que: shapeNumberZero('Valor menor que', ['Prazo', 'Montante', '1ª habitação própria'], 'condicao'),
   });
@@ -193,7 +189,7 @@ export function Condicao({ onClose, dados }) {
       condicao: dadosStepper?.condicao || null,
       menor_que: dadosStepper?.menor_que || '',
       maior_que: dadosStepper?.maior_que || '',
-      conteudo_sub: dadosStepper?.conteudo_sub || dados?.conteudo_sub || null,
+      componente: dadosStepper?.componente || dados?.componente || null,
     }),
     [dados, dadosStepper]
   );
@@ -208,7 +204,12 @@ export function Condicao({ onClose, dados }) {
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
       <Stack spacing={3} sx={{ pt: 1 }}>
-        <RHFAutocompleteSmp name="conteudo_sub" options={['Número', 'Alínea']} label="Conteúdo afetado" />
+        <RHFAutocompleteSmp
+          name="componente"
+          label="Componente afetado"
+          disabled={!!dados?.componente}
+          options={['Conteúdo principal', 'Número', 'Alínea']}
+        />
         <Stack spacing={3} direction="row" justifyContent="center">
           <RHFAutocompleteSmp
             name="condicao"
@@ -217,7 +218,7 @@ export function Condicao({ onClose, dados }) {
               'Prazo',
               'Montante',
               'Com NIP',
-              'Com Seguro',
+              'Com seguro',
               'Com prazo de utilização',
               'Isenção de comissão',
               'Taxa juros negociada',
@@ -244,40 +245,42 @@ export function Condicao({ onClose, dados }) {
 function Conteudo({ dados, onClose, id }) {
   const dispatch = useDispatch();
   const { dadosStepper } = useSelector((state) => state.stepper);
-  const isAlinea = dadosStepper?.conteudo_sub === 'Alínea';
+  const conteudo = useMemo(() => dadosStepper?.componente, [dadosStepper?.componente]);
 
   const formSchema = Yup.object().shape(
-    isAlinea
-      ? {
-          conteudo: Yup.string().required().label('Conteúdo'),
-          numero: Yup.number().positive().integer().label('Número'),
-          numero_ordem: Yup.number().positive().integer().label('Alínea'),
-        }
-      : {
-          numero_ordem: Yup.number().positive().integer().label('Número'),
-          sub_alineas: Yup.array(
-            Yup.object({
-              conteudo: Yup.string().required().label('Conteúdo'),
-              numero_ordem: Yup.number().positive().integer().label('Alínea'),
-            })
-          ),
-        }
+    (conteudo === 'Conteúdo principal' && {
+      conteudo: Yup.string().required().label('Conteúdo'),
+    }) ||
+      (conteudo === 'Alínea' && {
+        conteudo: Yup.string().required().label('Conteúdo'),
+        numero: Yup.number().positive().integer().label('Número'),
+        numero_ordem: Yup.number().positive().integer().label('Alínea'),
+      }) || {
+        numero_ordem: Yup.number().positive().integer().label('Número'),
+        sub_alineas: Yup.array(
+          Yup.object({
+            conteudo: Yup.string().required().label('Conteúdo'),
+            numero_ordem: Yup.number().positive().integer().label('Alínea'),
+          })
+        ),
+      }
   );
 
   const defaultValues = useMemo(
     () =>
-      isAlinea
-        ? {
-            numero: dadosStepper?.numero || dados?.numero || '',
-            conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
-            numero_ordem: dadosStepper?.numero_ordem || dados?.numero_ordem || '',
-          }
-        : {
-            conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
-            sub_alineas: dadosStepper?.sub_alineas || dados?.sub_alineas || [],
-            numero_ordem: dadosStepper?.numero_ordem || dados?.numero_ordem || '',
-          },
-    [isAlinea, dadosStepper, dados]
+      (conteudo === 'Conteúdo principal' && {
+        conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
+      }) ||
+      (conteudo === 'Alínea' && {
+        numero: dadosStepper?.numero || dados?.numero || '',
+        conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
+        numero_ordem: dadosStepper?.numero_ordem || dados?.numero_ordem || '',
+      }) || {
+        conteudo: dadosStepper?.conteudo || dados?.conteudo || '',
+        sub_alineas: dadosStepper?.sub_alineas || dados?.sub_alineas || [],
+        numero_ordem: dadosStepper?.numero_ordem || dados?.numero_ordem || '',
+      },
+    [conteudo, dadosStepper, dados]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -307,18 +310,19 @@ function Conteudo({ dados, onClose, id }) {
           }
         : null),
 
-      ...(isAlinea
-        ? {
-            numero_ordem: values?.numero,
-            sub_alinea: { conteudo: values?.conteudo, numero_ordem: values?.numero_ordem },
-          }
-        : {
-            alinea: {
-              conteudo: values?.conteudo,
-              numero_ordem: values?.numero_ordem,
-              ...(values?.sub_alineas?.length > 0 ? { sub_alineas: values?.sub_alineas } : null),
-            },
-          }),
+      ...((conteudo === 'Conteúdo principal' && {
+        conteudo_principal: values?.conteudo,
+      }) ||
+        (conteudo === 'Alínea' && {
+          numero_ordem: values?.numero,
+          sub_alinea: { conteudo: values?.conteudo, numero_ordem: values?.numero_ordem },
+        }) || {
+          alinea: {
+            conteudo: values?.conteudo,
+            numero_ordem: values?.numero_ordem,
+            ...(values?.sub_alineas?.length > 0 ? { sub_alineas: values?.sub_alineas } : null),
+          },
+        }),
     };
     const params = { id, msg: 'Condicional adicionado', getItem: 'clausula', onClose };
     dispatch(createItem('condicionalCl', JSON.stringify(formData), params));
@@ -326,51 +330,56 @@ function Conteudo({ dados, onClose, id }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      {isAlinea ? (
+      {(conteudo === 'Conteúdo principal' && (
         <Stack spacing={3} justifyContent="center" sx={{ pt: 1 }}>
-          <Stack spacing={3} direction="row" justifyContent="center">
-            <RHFNumberField name="numero" label="Número" sx={{ width: 180 }} />
-            <RHFNumberField name="numero_ordem" label="Alínea" sx={{ width: 180 }} />
-          </Stack>
           <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name="conteudo" />
         </Stack>
-      ) : (
-        <Stack sx={{ pt: 1 }}>
-          <Stack spacing={3} direction="row" justifyContent="center">
-            <RHFNumberField name="numero_ordem" label="Nº" sx={{ width: 100 }} />
+      )) ||
+        (conteudo === 'Alínea' && (
+          <Stack spacing={3} justifyContent="center" sx={{ pt: 1 }}>
+            <Stack spacing={3} direction="row" justifyContent="center">
+              <RHFNumberField name="numero" label="Número" sx={{ width: 180 }} />
+              <RHFNumberField name="numero_ordem" label="Alínea" sx={{ width: 180 }} />
+            </Stack>
             <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name="conteudo" />
           </Stack>
-          <Stack spacing={2} sx={{ pl: { md: 14 }, mt: 3 }}>
-            {fields.map((item, index) => (
-              <Stack spacing={1} direction="row" alignItems="center" key={`sub_alinea_${item.id}`}>
-                <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
-                  <RHFNumberField
-                    size="small"
-                    label="Alínea"
-                    sx={{ width: 70 }}
-                    name={`sub_alineas[${index}].numero_ordem`}
-                  />
-                  <RHFTextField
-                    multiline
-                    minRows={3}
-                    maxRows={10}
-                    size="small"
-                    label="Conteúdo"
-                    name={`sub_alineas[${index}].conteudo`}
-                  />
+        )) || (
+          <Stack sx={{ pt: 1 }}>
+            <Stack spacing={3} direction="row" justifyContent="center">
+              <RHFNumberField name="numero_ordem" label="Nº" sx={{ width: 100 }} />
+              <RHFTextField multiline minRows={3} maxRows={10} label="Conteúdo" name="conteudo" />
+            </Stack>
+            <Stack spacing={2} sx={{ pl: { md: 14 }, mt: 3 }}>
+              {fields.map((item, index) => (
+                <Stack spacing={1} direction="row" alignItems="center" key={`sub_alinea_${item.id}`}>
+                  <Stack spacing={1} direction="row" alignItems="center" justifyContent="center" sx={{ flexGrow: 1 }}>
+                    <RHFNumberField
+                      size="small"
+                      label="Alínea"
+                      sx={{ width: 70 }}
+                      name={`sub_alineas[${index}].numero_ordem`}
+                    />
+                    <RHFTextField
+                      multiline
+                      minRows={3}
+                      maxRows={10}
+                      size="small"
+                      label="Conteúdo"
+                      name={`sub_alineas[${index}].conteudo`}
+                    />
+                  </Stack>
+                  <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
                 </Stack>
-                <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
+              ))}
+              <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+                <AddItem
+                  dados={{ small: true, label: 'Alínea' }}
+                  onClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '' })}
+                />
               </Stack>
-            ))}
-            <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
-              <AddItem
-                dados={{ small: true, label: 'Alínea' }}
-                onClick={() => append({ ativo: true, numero_ordem: fields?.length + 1, conteudo: '' })}
-              />
             </Stack>
           </Stack>
-        </Stack>
-      )}
+        )}
       <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
     </FormProvider>
   );

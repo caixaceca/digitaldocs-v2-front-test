@@ -304,7 +304,7 @@ export function FinalizarOpeForm({ id, onClose }) {
   );
 }
 
-// --- FINALIZAR PROCESSO ----------------------------------------------------------------------------------------------
+// --- ADICIONAR ANEXOS ------------------------------------------------------------------------------------------------
 
 export function AnexosForm({ onClose }) {
   const dispatch = useDispatch();
@@ -315,7 +315,11 @@ export function AnexosForm({ onClose }) {
 
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
   const checkList = useMemo(
-    () => checklist.filter(({ transicao_id: trId, designacao }) => !trId && designacao !== 'OUTROS'),
+    () =>
+      checklist.filter(
+        ({ transicao_id: trId, designacao }) =>
+          !trId && designacao !== 'OUTROS' && designacao !== 'ATA - PARECER DE CRÉDITO'
+      ),
     [checklist]
   );
 

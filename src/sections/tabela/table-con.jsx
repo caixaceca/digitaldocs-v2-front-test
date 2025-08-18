@@ -27,7 +27,7 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { CellChecked, Criado, noDados } from '../../components/Panel';
 import { DefaultAction, MaisProcessos } from '../../components/Actions';
-import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosControle';
+import { ExportarDadosControle } from '../../components/exportar-dados/excel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ export default function TableCON({ item = 'con' }) {
               <RHFDateIF options={{ datai, dataf, setDatai, setDataf, labeli: 'dataICon', labelf: 'dataFCon' }} />
             )}
             {!isNotFound && (
-              <ExportarDados
+              <ExportarDadosControle
                 dados={dataFiltered}
                 tabela={item === 'pjf' ? 'PJF' : 'CON'}
                 titulo={(item === 'pjf' && title) || `${title}  - ${dataLabel(datai, dataf)}`}

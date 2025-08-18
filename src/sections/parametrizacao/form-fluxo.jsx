@@ -78,10 +78,9 @@ export function FluxoForm({ onClose }) {
 
   const onSubmit = async () => {
     try {
-      const params = { id: selectedItem?.id, msg: `Fluxo ${isEdit ? 'atualizado' : 'adicionado'}` };
-      dispatch(
-        (isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), { ...params, getItem: 'selectedItem' })
-      );
+      const msg = `Fluxo ${isEdit ? 'atualizado' : 'adicionado'}`;
+      const params = { id: selectedItem?.id, msg, getItem: 'selectedItem', onClose };
+      dispatch((isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -158,12 +157,8 @@ export function ClonarFluxoForm({ onClose }) {
 
   const onSubmit = async () => {
     try {
-      dispatch(
-        createItem('clonar fluxo', JSON.stringify(values), {
-          msg: 'Fluxo clonado',
-          transicoes: selectedItem?.transicoes?.filter((option) => option?.modo !== 'desarquivamento'),
-        })
-      );
+      const transicoes = selectedItem?.transicoes?.filter((option) => option?.modo !== 'desarquivamento');
+      dispatch(createItem('clonar fluxo', JSON.stringify(values), { msg: 'Fluxo clonado', transicoes, onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -233,8 +228,9 @@ export function TransicaoForm({ onClose, fluxoId }) {
 
   const onSubmit = async () => {
     try {
-      const formData = { ...values, estado_final_id: values?.destino?.id, estado_inicial_id: values?.origem?.id };
-      const params = { item1: 'fluxo', msg: `Transição ${isEdit ? 'atualizada' : 'adicionada'}`, id: selectedItem?.id };
+      const id = isEdit ? selectedItem?.id : fluxoId;
+      const formData = [{ ...values, estado_final_id: values?.destino?.id, estado_inicial_id: values?.origem?.id }];
+      const params = { item1: 'fluxo', msg: `Transição ${isEdit ? 'atualizada' : 'adicionada'}`, id, onClose };
       dispatch((isEdit ? updateItem : createItem)('transicoes', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -250,10 +246,9 @@ export function TransicaoForm({ onClose, fluxoId }) {
             <Grid container spacing={3} sx={{ pt: 3 }}>
               <GridItem sm={6} children={<RHFAutocompleteObj name="origem" label="Origem" options={estadosList} />} />
               <GridItem sm={6} children={<RHFAutocompleteObj name="destino" label="Destino" options={estadosList} />} />
-              <GridItem
-                sm={6}
-                children={<RHFAutocompleteSmp name="modo" label="Modo" options={['Seguimento', 'Devolução']} />}
-              />
+              <GridItem sm={6}>
+                <RHFAutocompleteSmp name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
+              </GridItem>
               <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazoemdias" tipo="dias" />} />
               <GridItem sm={4} children={<RHFSwitch name="is_paralelo" label="Paralelo" />} />
               <GridItem sm={4} children={<RHFSwitch name="requer_parecer" label="Requer parecer" />} />
@@ -322,7 +317,7 @@ export function ChecklistForm({ fluxo, onClose }) {
       const formData = isEdit
         ? docs(values)
         : { fluxo_id: fluxo?.id, documentos: values?.documentos?.map((row) => docs(row)) };
-      const params = { id: selectedItem?.id, msg: isEdit ? 'Documento atualizado' : 'Documento adicionados' };
+      const params = { id: selectedItem?.id, msg: `Documento ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
       dispatch((isEdit ? updateItem : createItem)('checklist', JSON.stringify(formData), { ...params, getItem }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -424,7 +419,7 @@ export function NotificacaoForm({ fluxo, transicao, onClose }) {
   const onSubmit = async () => {
     try {
       const params = { id: selectedItem?.id, msg: `Notificação ${isEdit ? 'atualizada' : 'adicionada'}` };
-      dispatch((isEdit ? updateItem : createItem)('notificacoes', JSON.stringify(values), params));
+      dispatch((isEdit ? updateItem : createItem)('notificacoes', JSON.stringify(values), { ...params, onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -497,21 +492,15 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
         data_termino: dados?.data_termino ? format(dados.data_termino, 'yyyy-MM-dd') : null,
       });
       const formData = isEdit ? destinatario(values) : values?.destinatarios?.map((row) => destinatario(row));
-      const params = {
-        id: selectedItem?.id || id,
-        msg: isEdit ? 'Destinatário atualizado' : 'Destinatários adicionados',
-      };
-
-      dispatch(
-        (isEdit ? updateItem : createItem)(isEdit ? 'destinatarios' : 'destinatario', JSON.stringify(formData), params)
-      );
+      const params = { id: selectedItem?.id || id, msg: `Destinatário ${isEdit ? 'atualizada' : 'adicionada'}` };
+      dispatch((isEdit ? updateItem : createItem)('destinatarios', JSON.stringify(formData), { ...params, onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth={isEdit ? 'sm' : 'lg'}>
+    <Dialog open onClose={onClose} fullWidth maxWidth={isEdit ? 'sm' : 'sm'}>
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           {isEdit ? 'Editar destinatário' : 'Adicionar destinatários'}
@@ -525,51 +514,47 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
       </DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} sx={{ pt: 3 }}>
-            {isEdit ? (
-              <>
-                <GridItem
-                  children={<RHFAutocompleteObj label="Colaborador" options={colaboradoresList} name="colaborador" />}
-                />
-                <GridItem children={<RHFTextField label="Telefone" name="telefone" />} />
-                <GridItem sm={6} children={<RHFDatePicker label="Data de início" name="data_inicio" />} />
-                <GridItem sm={6} children={<RHFDatePicker label="Data de fim" name="data_termino" />} />
-              </>
-            ) : (
-              fields.map((item, index) => (
-                <GridItem key={item.id}>
-                  <Grid container spacing={2}>
-                    <GridItem md={5}>
-                      <RHFAutocompleteObj
-                        label="Colaborador"
-                        options={colaboradoresList}
-                        name={`destinatarios[${index}].colaborador`}
-                      />
-                    </GridItem>
-                    <GridItem md={2}>
+          {isEdit ? (
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFAutocompleteObj label="Colaborador" options={colaboradoresList} name="colaborador" />
+              <RHFTextField label="Telefone" name="telefone" />
+              <Stack direction="row" spacing={3}>
+                <RHFDatePicker label="Data de início" name="data_inicio" />
+                <RHFDatePicker label="Data de fim" name="data_termino" />
+              </Stack>
+            </Stack>
+          ) : (
+            <Stack spacing={2} sx={{ pt: 3 }} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+              {fields.map((item, index) => (
+                <Stack key={item.id} direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                  <Stack spacing={2} sx={{ width: '90%', flexGrow: 1 }}>
+                    <RHFAutocompleteObj
+                      label="Colaborador"
+                      options={colaboradoresList}
+                      name={`destinatarios[${index}].colaborador`}
+                    />
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                       <RHFTextField label="Telefone" name={`destinatarios[${index}].telefone`} />
-                    </GridItem>
-                    <GridItem md={5}>
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ width: { sm: '60%' } }}>
                         <RHFDatePicker label="Data de início" name={`destinatarios[${index}].data_inicio`} />
                         <RHFDatePicker label="Data de fim" name={`destinatarios[${index}].data_termino`} />
-                        {values.destinatarios.length > 1 && (
-                          <DefaultAction label="ELIMINAR" onClick={() => remove(index)} />
-                        )}
                       </Stack>
-                    </GridItem>
-                  </Grid>
-                </GridItem>
-              ))
-            )}
-          </Grid>
+                    </Stack>
+                  </Stack>
+                  {values.destinatarios.length > 1 && (
+                    <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
+                  )}
+                </Stack>
+              ))}
+            </Stack>
+          )}
           <DialogButons
             edit={isEdit}
-            isSaving={isSaving}
             onClose={onClose}
+            isSaving={isSaving}
             desc={isEdit ? 'eliminar esta destinatário' : ''}
             handleDelete={() =>
-              dispatch(deleteItem('destinatarios', { id: selectedItem?.id, msg: 'Destinatário eliminado' }))
+              dispatch(deleteItem('destinatarios', { id: selectedItem?.id, msg: 'Destinatário eliminado', onClose }))
             }
           />
         </FormProvider>

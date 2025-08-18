@@ -12,15 +12,11 @@ import Dialog from '@mui/material/Dialog';
 import SearchIcon from '@mui/icons-material/Search';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-// hooks
+// utils
 import useAnexos from '../../hooks/useAnexos';
-import { useNotificacao } from '../../hooks/useNotificacao';
-// redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getSuccess, getFromIntranet, createItem } from '../../redux/slices/intranet';
 // components
-import GridItem from '../../components/GridItem';
-import { DialogButons } from '../../components/Actions';
 import {
   RHFEditor,
   FormProvider,
@@ -28,15 +24,15 @@ import {
   RHFAutocompleteSmp,
   RHFUploadSingleFile,
 } from '../../components/hook-form';
+import GridItem from '../../components/GridItem';
+import { DialogButons } from '../../components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function FormSugestao({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { done, isSaving } = useSelector((state) => state.intranet);
-
-  useNotificacao({ done, onClose });
+  const { isSaving } = useSelector((state) => state.intranet);
 
   const formSchema = Yup.object().shape({
     titulo: Yup.string().required('Título não pode ficar vazio'),
@@ -54,7 +50,7 @@ export function FormSugestao({ onClose }) {
       formData.append('titulo', values.titulo);
       formData.append('descricao', values.descricao);
       if (values.imagem instanceof File) formData.append('imagem', values.imagem);
-      dispatch(createItem('sugestao', formData, { msg: 'Sugestão enviada' }));
+      dispatch(createItem('sugestao', formData, { msg: 'Sugestão enviada', onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -84,9 +80,7 @@ export function FormSugestao({ onClose }) {
 export function DenunciaForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail, done, isSaving } = useSelector((state) => state.intranet);
-
-  useNotificacao({ done, onClose });
+  const { mail, isSaving } = useSelector((state) => state.intranet);
 
   const formSchema = Yup.object().shape({
     assunto: Yup.string().required('Assunto não pode ficar vazio'),
@@ -109,7 +103,7 @@ export function DenunciaForm({ onClose }) {
       formData.append('denuncia', values.denuncia);
       formData.append('contato_or_email', values.contato_or_email);
       if (values.comprovativo instanceof File) formData.append('comprovativo', values.comprovativo);
-      dispatch(createItem('denuncia', formData, { msg: 'Denúncia enviada' }));
+      dispatch(createItem('denuncia', formData, { msg: 'Denúncia enviada', onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

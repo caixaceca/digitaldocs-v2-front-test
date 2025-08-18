@@ -3,11 +3,11 @@ import { saveAs } from 'file-saver';
 // utils
 import { fMonthYear } from '../../../utils/formatTime';
 //
-import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './CommonProperties';
+import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './formatacoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function ExportarDados({ dados, tabela }) {
+export default function ExportarIndicadores({ dados, tabela }) {
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     fileInfo(workbook);
@@ -34,7 +34,6 @@ export function ExportarDados({ dados, tabela }) {
     estiloCabecalho(workSheet, 1, 2);
     ajustarLargura(workSheet);
 
-    // GERAR E BAIXAR O FICHEIRO
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
     saveAs(blob, `${tabela}.xlsx`);

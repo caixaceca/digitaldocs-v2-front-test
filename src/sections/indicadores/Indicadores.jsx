@@ -56,9 +56,7 @@ export function TotalProcessos() {
     { value: 'tipos', label: 'Fluxos', component: <DevolvidosTipos indicadores={indicadoresList} /> },
   ];
 
-  const handleChangeTab = async (event, newValue) => {
-    setItemValue(newValue, setCurrentTab, 'tabTotal');
-  };
+  const handleChangeTab = async (event, newValue) => setItemValue(newValue, setCurrentTab, 'tabTotal');
 
   return (
     <>
@@ -290,7 +288,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TableExport({ label, label1, dados, total = 0, percentagem = false, vista = '' }) {
+export function TableIndicadores({ label, label1, dados, total = 0, percentagem = false, vista = '' }) {
   return (
     <Table id="table-to-xls-tipo">
       <TableHead>

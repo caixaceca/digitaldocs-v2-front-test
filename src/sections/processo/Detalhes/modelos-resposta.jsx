@@ -13,7 +13,7 @@ import { valorPorExtenso } from '../../../utils/formatText';
 //
 import { useSelector } from '../../../redux/store';
 import GridItem from '../../../components/GridItem';
-import { CabecalhoWord, RodapeWord } from '../../../components/ExportDados';
+import { CabecalhoWord, RodapeWord } from '../../../components/exportar-dados/word';
 
 export default function ModelosRespostas() {
   const { enqueueSnackbar } = useSnackbar();

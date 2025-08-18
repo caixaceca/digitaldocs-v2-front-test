@@ -159,7 +159,7 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
     try {
       const formData = { ...values, estado_id: values?.estado?.id };
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
-      const params1 = { item: estadoId ? 'perfis' : '', item1: estadoId ? 'estado' : '' };
+      const params1 = { item: estadoId ? 'perfis' : '', item1: estadoId ? 'estado' : '', onClose };
       dispatch(
         (isEdit ? updateItem : createItem)('estadosPerfil', JSON.stringify(formData), { ...params, ...params1 })
       );
@@ -288,7 +288,7 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   const formSchema = Yup.object().shape({
     pesos: Yup.array(
       Yup.object({
-        perfil_id: Yup.mixed().required().label('Colaborador'),
+        perfil: Yup.mixed().required().label('Colaborador'),
         percentagem: Yup.number().positive().required().label('Percentagem'),
       })
     ),
@@ -297,8 +297,8 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   const defaultValues = useMemo(
     () => ({
       pesos: isEdit
-        ? [{ ...selectedItem, perfil_id: perfisList?.find(({ id }) => id === selectedItem?.perfil_id) }]
-        : [{ perfil_id: null, percentagem: null, facultativo: false, para_aprovacao: false }],
+        ? [{ ...selectedItem, perfil: perfisList?.find(({ id }) => id === selectedItem?.perfil_id) }]
+        : [{ perfil: null, percentagem: null, decisor: false, para_aprovacao: false }],
     }),
     [isEdit, perfisList, selectedItem]
   );
@@ -313,25 +313,19 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   }, [selectedItem]);
 
   const paramsComum = {
-    onClose,
-    estadoId: item?.id,
-    id: selectedItem?.id,
     getItem: estado ? 'estado' : 'selectedItem',
+    ...{ onClose, estadoId: item?.id, id: selectedItem?.id },
   };
   const action = estado ? 'regrasEstado' : 'regrasTransicao';
 
   const onSubmit = async () => {
     try {
+      const formData = values?.pesos?.map((row) => ({ ...row, perfil_id: row?.perfil?.id }));
       const params = { ...paramsComum, msg: `Regra transição ${isEdit ? 'atualizada' : 'adicionada'}` };
-      const formData = values?.pesos?.map((row) => ({ ...row, perfil_id: row?.perfil_id?.id }));
       dispatch((isEdit ? updateItem : createItem)(action, JSON.stringify(isEdit ? formData[0] : formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
-  };
-
-  const handleDelete = () => {
-    dispatch(deleteItem(action, { ...paramsComum, msg: 'Regra transição eliminada' }));
   };
 
   return (
@@ -342,7 +336,7 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
           {!isEdit && perfisList?.length > 0 && (
             <AddItem
               dados={{ small: true, label: 'Colaborador' }}
-              onClick={() => append({ perfil: null, percentagem: null, facultativo: false, para_aprovacao: false })}
+              onClick={() => append({ perfil: null, percentagem: null, decisor: false, para_aprovacao: false })}
             />
           )}
         </Stack>
@@ -353,12 +347,17 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
             {fields.map((_, index) => (
               <Stack direction="row" spacing={2} key={_.id} alignItems="center">
                 <Stack spacing={2} sx={{ width: 1 }}>
-                  <RHFAutocompleteObj label="Colaborador" options={perfisList} name={`pesos[${index}].perfil_id`} />
+                  <RHFAutocompleteObj
+                    label="Colaborador"
+                    options={perfisList}
+                    name={`pesos[${index}].perfil`}
+                    // getOptionDisabled={(option) => values.pesos.some(({ perfil }) => perfil?.id === option.id)}
+                  />
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
                     <RHFNumberField tipo="%" label="Percentagem" name={`pesos[${index}].percentagem`} />
                     <Stack direction="row" spacing={2}>
                       <RHFSwitch name={`pesos[${index}].para_aprovacao`} label="Aprovação" />
-                      <RHFSwitch name={`pesos[${index}].facultativo`} label="Facultativo" />
+                      <RHFSwitch name={`pesos[${index}].decisor`} label="Decisor" />
                     </Stack>
                   </Stack>
                 </Stack>
@@ -368,10 +367,10 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
           </Stack>
           <DialogButons
             edit={isEdit}
-            isSaving={isSaving}
             onClose={onClose}
-            handleDelete={handleDelete}
+            isSaving={isSaving}
             desc={isEdit ? 'eliminar esta regra' : ''}
+            handleDelete={() => dispatch(deleteItem(action, { ...paramsComum, msg: 'Regra transição eliminada' }))}
           />
         </FormProvider>
       </DialogContent>

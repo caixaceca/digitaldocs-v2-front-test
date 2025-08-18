@@ -12,9 +12,9 @@ import { useSelector } from '../../redux/store';
 // components
 import GridItem from '../../components/GridItem';
 import Chart, { useChart } from '../../components/chart';
-import { ExportarDados } from '../../components/ExportDados/ToExcell/DadosIndicadores';
+import { ExportarIndicadores } from '../../components/exportar-dados/excel';
 //
-import { TabView, CardInfo, dadosResumo, TableExport, IndicadorItem } from './Indicadores';
+import { TabView, CardInfo, dadosResumo, TableIndicadores, IndicadorItem } from './Indicadores';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ export function Criacao({ vista, indicadores }) {
         <TabView
           vista={view}
           setVista={setView}
-          exportar={<ExportarDados tabela="Total de processos - Data" dados={indicadores} />}
+          exportar={<ExportarIndicadores tabela="Total de processos - Data" dados={indicadores} />}
         />
       )}
       <IndicadorItem
@@ -104,7 +104,7 @@ export function Criacao({ vista, indicadores }) {
               {view === 'Gráfico' ? (
                 <Chart type="area" series={series} options={chartOptions} height={400} />
               ) : (
-                <TableExport label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
+                <TableIndicadores label="Data" label1="Quantidade" dados={indicadores} vista={vista} total={total} />
               )}
             </GridItem>
           </Grid>
@@ -145,7 +145,7 @@ export function DevolvidosTipos({ dev, indicadores }) {
         <TabView
           vista={vista}
           setVista={setVista}
-          exportar={<ExportarDados tabela="Total de processos" dados={indicadores} />}
+          exportar={<ExportarIndicadores tabela="Total de processos" dados={indicadores} />}
         />
       )}
       <IndicadorItem
@@ -162,7 +162,7 @@ export function DevolvidosTipos({ dev, indicadores }) {
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
               ) : (
-                <TableExport percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
+                <TableIndicadores percentagem total={total} label="Processo" label1="Quantidade" dados={indicadores} />
               )}
             </GridItem>
           </Grid>
@@ -176,11 +176,12 @@ export function DevolvidosTipos({ dev, indicadores }) {
 
 export function Origem({ top, indicadores }) {
   const theme = useTheme();
+  const { isLoading } = useSelector((state) => state.indicadores);
+  const { colaboradores, uos } = useSelector((state) => state.intranet);
+
   const agrupamento = localStorage.getItem('agrupamento') || 'Unidade orgânica';
   const [vista, setVista] = useState(localStorage.getItem('tabView') || 'Gráfico');
   const topNumb = (top === 'Top 5' && 5) || (top === 'Top 10' && 10) || (top === 'Top 20' && 20) || 'Todos';
-  const { isLoading } = useSelector((state) => state.indicadores);
-  const { colaboradores, uos } = useSelector((state) => state.intranet);
 
   const origemByItem = useMemo(
     () => origensItem(indicadores, uos, colaboradores, agrupamento, topNumb),
@@ -217,7 +218,7 @@ export function Origem({ top, indicadores }) {
         <TabView
           vista={vista}
           setVista={setVista}
-          exportar={<ExportarDados tabela="Origem dos processos" dados={origemByItem} />}
+          exportar={<ExportarIndicadores tabela="Origem dos processos" dados={origemByItem} />}
         />
       )}
       <IndicadorItem
@@ -234,7 +235,13 @@ export function Origem({ top, indicadores }) {
               {vista === 'Gráfico' && series?.[0]?.data?.length > 0 ? (
                 <Chart type="line" series={series} options={chartOptions} height={500} />
               ) : (
-                <TableExport percentagem total={total} label={agrupamento} label1="Quantidade" dados={origemByItem} />
+                <TableIndicadores
+                  percentagem
+                  total={total}
+                  label={agrupamento}
+                  label1="Quantidade"
+                  dados={origemByItem}
+                />
               )}
             </GridItem>
           </Grid>

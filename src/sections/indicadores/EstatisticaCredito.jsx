@@ -46,7 +46,7 @@ import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import { BarChart, SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import ExportarEstatisticaCred from '../../components/ExportDados/ToExcell/EstatisticaCredito';
+import { ExportarEstatisticaCredito } from '../../components/exportar-dados/excel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -98,10 +98,6 @@ export default function EstatisticaCredito() {
     [uo?.id, vista]
   );
 
-  const handleChangeTab = async (event, newValue) => {
-    setItemValue(newValue, setCurrentTab, 'tabEst');
-  };
-
   useEffect(() => {
     if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
       setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabEst', false);
@@ -122,6 +118,8 @@ export default function EstatisticaCredito() {
       dispatch(getEstatisticaCredito('estCreditoIntervalo', { uoID: uo?.id, intervalo }));
     }
   }, [dispatch, perfilId, datai, dataf, uo, vista]);
+
+  const handleChangeTab = async (event, newValue) => setItemValue(newValue, setCurrentTab, 'tabEst');
 
   return (
     <>
@@ -181,7 +179,7 @@ export default function EstatisticaCredito() {
               ) : (
                 <RHFDateIF options={{ datai, dataf, setDatai, setDataf, labeli: 'dataIEst', labelf: 'dataFEst' }} />
               )}
-              <ExportarEstatisticaCred
+              <ExportarEstatisticaCredito
                 vista={vista}
                 uo={uo?.label}
                 periodo={vista === 'Mensal' ? formatDate(data, "MMMM 'de' yyyy") : dataLabel(datai, dataf)}

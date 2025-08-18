@@ -144,11 +144,11 @@ function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores
                     <Label color="info">Domiciliação do processo</Label>
                     <Stack alignItems="center" spacing={0.5} direction="row">
                       <Typography variant="body2">
-                        {uos?.find(({ id }) => id === t?.uo_origem_id)?.desegnicao || t?.uo_origem_id}
+                        {uos?.find(({ id }) => id === t?.uo_origem_id)?.nome || t?.uo_origem_id}
                       </Typography>
                       <DoubleArrowIcon color="success" sx={{ width: 18, height: 18 }} />
                       <Typography variant="body2">
-                        {uos?.find(({ id }) => id === t?.uo_destino_id)?.desegnicao || t?.uo_destino_id}
+                        {uos?.find(({ id }) => id === t?.uo_destino_id)?.nome || t?.uo_destino_id}
                       </Typography>
                     </Stack>
                   </Stack>

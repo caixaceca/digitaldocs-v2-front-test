@@ -21,7 +21,7 @@ export default function TablePaginationAlt({
       spacing={{ xs: 0, sm: 1 }}
       justifyContent="space-between"
       direction={{ xs: 'column', sm: 'row' }}
-      sx={{ borderTop: (theme) => `1px solid ${theme.palette.grey['500_32']}` }}
+      sx={{ borderTop: (theme) => `1px solid ${theme.palette.grey['500_32']}`, pt: dense ? 1 : 2, pb: dense ? 0 : 1 }}
     >
       <FormControlLabel control={<Switch checked={dense} onChange={onChangeDense} />} label="Compacto" />
       <TablePagination
@@ -29,6 +29,7 @@ export default function TablePaginationAlt({
         count={count}
         showLastButton
         showFirstButton
+        component="div"
         rowsPerPage={rowsPerPage}
         onPageChange={onChangePage}
         rowsPerPageOptions={[10, 25, 50, 100]}

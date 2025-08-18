@@ -8,7 +8,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // hooks
-import useModal from '../../hooks/useModal';
 import { usePermissao } from '../../hooks/useAcesso';
 import useTable, { getComparator } from '../../hooks/useTable';
 // redux
@@ -40,7 +39,6 @@ import { applySortFilter } from './applySortFilter';
 export default function TableIdentificadores({ item, inativos }) {
   const dispatch = useDispatch();
   const { temPermissao } = usePermissao();
-  const { handleCloseModal } = useModal(closeModal());
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
 
   const {
@@ -126,6 +124,8 @@ export default function TableIdentificadores({ item, inativos }) {
     if (item === 'componentes') dispatch(getSuccess({ item: 'selectedItem', dados }));
     else dispatch(getFromGaji9(itemSingle, { id: dados?.id, item: 'selectedItem' }));
   };
+
+  const onClose = () => dispatch(closeModal());
 
   return (
     <>
@@ -226,18 +226,18 @@ export default function TableIdentificadores({ item, inativos }) {
         )}
       </Card>
 
-      {isOpenView && <DetalhesGaji9 closeModal={handleCloseModal} item={item} />}
+      {isOpenView && <DetalhesGaji9 closeModal={onClose} item={item} />}
       {isOpenModal && (
         <>
-          {item === 'segmentos' && <SegmentoForm onClose={handleCloseModal} />}
-          {item === 'tiposSeguros' && <SeguroForm onClose={handleCloseModal} />}
-          {item === 'componentes' && <ProdutoForm onClose={handleCloseModal} />}
-          {item === 'freguesias' && <FreguesiaForm onClose={handleCloseModal} />}
-          {item === 'tiposGarantias' && <GarantiaForm onClose={handleCloseModal} />}
-          {item === 'tiposTitulares' && <TipoTitularForm onClose={handleCloseModal} />}
-          {item === 'representantes' && <RepresentanteForm onClose={handleCloseModal} />}
-          {item === 'tiposImoveis' && <TipoForm onClose={handleCloseModal} item={item} label="imóvel" />}
-          {item === 'finalidades' && <TipoForm onClose={handleCloseModal} item={item} label="finalidade" />}
+          {item === 'segmentos' && <SegmentoForm onClose={onClose} />}
+          {item === 'tiposSeguros' && <SeguroForm onClose={onClose} />}
+          {item === 'componentes' && <ProdutoForm onClose={onClose} />}
+          {item === 'freguesias' && <FreguesiaForm onClose={onClose} />}
+          {item === 'tiposGarantias' && <GarantiaForm onClose={onClose} />}
+          {item === 'tiposTitulares' && <TipoTitularForm onClose={onClose} />}
+          {item === 'representantes' && <RepresentanteForm onClose={onClose} />}
+          {item === 'tiposImoveis' && <TipoForm onClose={onClose} item={item} label="imóvel" />}
+          {item === 'finalidades' && <TipoForm onClose={onClose} item={item} label="finalidade" />}
         </>
       )}
     </>

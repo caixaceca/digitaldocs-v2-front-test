@@ -34,16 +34,9 @@ export default function TodosAnexos() {
     anexos?.length > 0 && (
       <AnexosGroup
         dados={{
-          titulo,
-          anexos,
-          viewAnexo,
-          meusAmbientes,
-          estadoId: processo?.estado?.estado_id,
-          modificar: estado?.preso && estado?.atribuidoAMim,
+          ...{ titulo, anexos, viewAnexo, meusAmbientes },
+          ...{ estado: processo?.estado, modificar: estado?.preso && estado?.atribuidoAMim },
         }}
-        onEliminar={(id, entidade) =>
-          dispatch(setModal({ modal: 'eliminar-anexo', dados: { id, estadoId: estado?.estado_id, entidade } }))
-        }
       />
     );
 
@@ -65,12 +58,17 @@ export default function TodosAnexos() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function AnexosGroup({ dados, onEliminar }) {
-  const { anexos, titulo = '', viewAnexo, modificar = false, meusAmbientes = [], estadoId = '' } = dados;
+function AnexosGroup({ dados }) {
+  const dispatch = useDispatch();
+  const { anexos, titulo = '', viewAnexo, modificar = false, meusAmbientes = [], estado = null } = dados;
   const [anexosAtivos, anexosInativos] = useMemo(
     () => [anexos?.filter(({ ativo }) => ativo) || [], anexos?.filter(({ ativo }) => !ativo) || []],
     [anexos]
   );
+
+  const handleEliminar = (id, entidade) => {
+    dispatch(setModal({ modal: 'eliminar-anexo', dados: { id, estadoId: estado?.estado_id, entidade } }));
+  };
 
   return (
     <Stack>
@@ -85,7 +83,12 @@ function AnexosGroup({ dados, onEliminar }) {
             anexo={row}
             key={row?.anexo}
             viewAnexo={viewAnexo}
-            onEliminar={eliminarAnexo(meusAmbientes, modificar, row?.estado_id, estadoId) ? onEliminar : null}
+            onEliminar={
+              (estado?.decisor && row?.estado_id === estado?.estado_id) ||
+              eliminarAnexo(meusAmbientes, modificar, row?.estado_id, estado?.estado_id)
+                ? handleEliminar
+                : null
+            }
           />
         ))}
       </Stack>

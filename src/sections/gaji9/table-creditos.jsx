@@ -151,6 +151,7 @@ export default function TableCredito() {
           )}
         </Stack>
       </Card>
+
       <Card sx={{ p: 1 }}>
         <SearchToolbarSimple item="filterCredito" filter={filter} setFilter={setFilter} />
         <Scrollbar>

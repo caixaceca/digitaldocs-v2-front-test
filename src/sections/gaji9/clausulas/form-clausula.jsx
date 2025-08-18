@@ -17,9 +17,9 @@ import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
-import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 // utils
 import { vdt } from '../../../utils/formatObject';
 import { PATH_DIGITALDOCS } from '../../../routes/paths';
@@ -65,10 +65,6 @@ export default function ClausulaForm({ onClose, clausula = null }) {
     if (cid?.id && (done === 'Cláusula adicionada' || done === 'Cláusula clonada'))
       navigate(`${PATH_DIGITALDOCS.gaji9.root}/clausula/${cid?.id}`);
   }, [cid?.id, done, navigate]);
-
-  useEffect(() => {
-    dispatch(getFromGaji9('variaveis'));
-  }, [dispatch]);
 
   return (
     <Dialog open fullWidth maxWidth="md">
@@ -415,7 +411,7 @@ function Resumo({ onClose, clausula }) {
       <Table size="small">
         <TableBody>
           <TableRowItem title="Situação :" text={dadosStepper?.situacao?.label} />
-          <TableRowItem title="Secção :" text={dadosStepper?.seccao || 'Sem secção'} />
+          <TableRowItem title="Secção :" text={dadosStepper?.seccao} />
           <TableRowItem title="Tipo de titular:" text={dadosStepper?.titular?.label} />
           <TableRowItem title="Tipo de garantia:" text={dadosStepper?.garantia?.label} />
           <TableRowItem title="Subtipo da garantia:" text={dadosStepper?.subtipoGarantia?.label} />
@@ -493,16 +489,37 @@ function TableRowItem({ title, text = '', item = null }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchVariavel() {
+  const dispatch = useDispatch();
   const [variavel, setVariavel] = useState(null);
   const { variaveis } = useSelector((state) => state.gaji9);
+  const filterOptions = createFilterOptions({ stringify: (option) => `${option?.nome} ${option?.descritivo}` });
+  const options = useMemo(() => variaveis?.map(({ nome, descritivo }) => ({ nome, descritivo })) || [], [variaveis]);
+
+  useEffect(() => {
+    dispatch(getFromGaji9('variaveis'));
+  }, [dispatch]);
+
   return (
     <Stack sx={{ mb: 2 }}>
       <Autocomplete
         fullWidth
         value={variavel}
+        options={options}
+        filterOptions={filterOptions}
+        getOptionLabel={(option) => option?.nome || ''}
         onChange={(event, newValue) => setVariavel(newValue)}
         sx={{ borderRadius: 1, bgcolor: 'background.neutral' }}
-        options={variaveis?.map(({ nome, descritivo }) => `${nome}${descritivo ? ` - ${descritivo}` : ''}`)?.sort()}
+        renderOption={(props, option) => {
+          const { key, ...optionProps } = props;
+          return (
+            <Typography key={key} component="li" {...optionProps}>
+              {option?.nome}
+              <Typography variant="span" sx={{ color: 'text.secondary' }}>
+                &nbsp;({option?.descritivo})
+              </Typography>
+            </Typography>
+          );
+        }}
         renderInput={(params) => (
           <TextField
             {...params}
