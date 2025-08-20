@@ -1,4 +1,5 @@
 // @mui
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
@@ -6,6 +7,20 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 //
 import GridItem from '../GridItem';
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Carregando1({ ball = 4, wh = 20 }) {
+  return (
+    <Stack direction="row" justifyContent="center" sx={{ py: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {[...Array(ball)].map((row, index) => (
+          <Skeleton variant="circular" sx={{ width: wh, height: wh, mr: 1 }} key={`index_${index}`} />
+        ))}
+      </Box>
+    </Stack>
+  );
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 

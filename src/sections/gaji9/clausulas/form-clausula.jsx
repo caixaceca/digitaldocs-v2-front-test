@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
@@ -78,7 +79,7 @@ export default function ClausulaForm({ onClose, clausula = null }) {
           </>
         }
       />
-      <DialogContent>
+      <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
         {activeStep === 0 && <Identificacao onClose={onClose1} clausula={clausula} />}
         {activeStep === 1 && <Conteudo clausula={clausula} />}
         {activeStep === 2 && <Numeros clausula={clausula} />}
@@ -512,12 +513,14 @@ export function SearchVariavel() {
         renderOption={(props, option) => {
           const { key, ...optionProps } = props;
           return (
-            <Typography key={key} component="li" {...optionProps}>
-              {option?.nome}
-              <Typography variant="span" sx={{ color: 'text.secondary' }}>
-                &nbsp;({option?.descritivo})
+            <Box component="li" key={key} {...optionProps}>
+              <Typography variant="body2">
+                {option?.nome}
+                <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
+                  &nbsp;({option?.descritivo})
+                </Typography>
               </Typography>
-            </Typography>
+            </Box>
           );
         }}
         renderInput={(params) => (

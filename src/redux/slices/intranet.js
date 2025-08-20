@@ -19,13 +19,16 @@ const initialState = {
   mail: '',
   error: '',
   perfilId: '',
+  modalIntranet: '',
   cc: null,
   frase: null,
   ajuda: null,
   perfil: null,
   docPdex: null,
   dateUpdate: null,
+  selectedItem: null,
   docIdentificacao: null,
+  fichaInformativa: null,
   uos: [],
   links: [],
   perguntas: [],
@@ -42,6 +45,16 @@ const slice = createSlice({
     getSuccess(state, action) {
       actionGet(state, action.payload);
     },
+
+    updateFicha(state, action) {
+      state.fichaInformativa = { ...state.fichaInformativa, ...action.payload };
+    },
+
+    setModal(state, action) {
+      state.isEdit = !!action?.payload?.isEdit;
+      state.modalIntranet = action?.payload?.modal || '';
+      state.selectedItem = action?.payload?.dados || null;
+    },
   },
 });
 
@@ -49,7 +62,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { getSuccess } = slice.actions;
+export const { getSuccess, updateFicha, setModal } = slice.actions;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -183,12 +196,15 @@ export function getFromIntranet(item, params) {
           (item === 'documentosAjuda' && `${BASEURL}/atc?categoria=documentosAjuda`) ||
           (item === 'cc' && `${INTRANETHUBAPI}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
           (item === 'disposicao' && `${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`) ||
+          (item === 'fichaInformativa' && `${BASEURLSLIM}/v1/fichas/dcs/ficha?entidade=${params?.entidade}`) ||
           (item === 'docIdentificacao' &&
             `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`) ||
           '';
         if (apiUrl) {
           const response = await axios.get(apiUrl, options);
           if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: !!response.data }));
+          else if (item === 'fichaInformativa')
+            dispatch(slice.actions.getSuccess({ item, dados: { ...response.data.objeto, numero: params?.entidade } }));
           else {
             const data = response.data?.objeto || response.data;
             dispatch(slice.actions.getSuccess({ item, dados: data, label: params?.label || '' }));

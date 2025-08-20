@@ -51,10 +51,7 @@ export default function AnexosExistente({ anexos, onOpen = null, noTitle = false
                     ) : (
                       <>
                         {`${tipo}${entidade ? ` - ${entidade}` : ''}`}
-                        <Typography
-                          variant="spam"
-                          sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}
-                        >
+                        <Typography component="span" variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.25 }}>
                           &nbsp;({name || path})
                         </Typography>
                       </>

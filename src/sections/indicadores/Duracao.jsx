@@ -76,18 +76,18 @@ export function Execucao({ indicadores }) {
           {colaborador ? (
             <Typography sx={{ textAlign: 'center' }}>
               Em média {colaborador?.sexo === 'Masculino' ? 'o ' : 'a '}
-              <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+              <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                 {colaborador?.nome}
               </Typography>{' '}
               passa{' '}
-              <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+              <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                 {converterSegundos(totalTempo)}
               </Typography>{' '}
               trabalhando em um processo{' '}
               {fluxo && (
                 <>
                   de{' '}
-                  <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                  <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                     {fluxo?.assunto}
                   </Typography>
                 </>
@@ -95,7 +95,7 @@ export function Execucao({ indicadores }) {
               {estado && (
                 <>
                   no estado{' '}
-                  <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                  <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                     {estado?.nome}
                   </Typography>
                 </>
@@ -106,11 +106,11 @@ export function Execucao({ indicadores }) {
               {fluxo ? (
                 <Typography sx={{ textAlign: 'center' }}>
                   Em média um processo de{' '}
-                  <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                  <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                     {fluxo?.assunto}
                   </Typography>{' '}
                   passa{' '}
-                  <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                  <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                     {converterSegundos(
                       (sumBy(
                         dataFiltered?.filter(
@@ -132,7 +132,7 @@ export function Execucao({ indicadores }) {
                   {estado && (
                     <>
                       no estado{' '}
-                      <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                      <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                         {estado?.nome}
                       </Typography>
                     </>
@@ -141,14 +141,14 @@ export function Execucao({ indicadores }) {
               ) : (
                 <Typography sx={{ textAlign: 'center' }}>
                   Em média um processo passa{' '}
-                  <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                  <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                     {converterSegundos(totalTempo)}
                   </Typography>{' '}
                   sendo executado{' '}
                   {estado && (
                     <>
                       no estado{' '}
-                      <Typography variant="spam" sx={{ typography: 'h6', color: 'text.success' }}>
+                      <Typography component="span" variant="subtitle1" sx={{ color: 'text.success' }}>
                         {estado?.nome}
                       </Typography>
                     </>

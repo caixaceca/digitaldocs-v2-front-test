@@ -1,5 +1,13 @@
+import {
+  add,
+  format,
+  isSameYear,
+  isSameMonth,
+  formatDistance,
+  formatDistanceToNow,
+  formatDistanceStrict,
+} from 'date-fns';
 import { pt } from 'date-fns/locale';
-import { add, format, isSameYear, isSameMonth, formatDistance, formatDistanceToNow } from 'date-fns';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -104,6 +112,10 @@ export function dataValido(date) {
 
 export function fillData(data, defaultDate) {
   return data ? add(new Date(data), { hours: 2 }) : defaultDate;
+}
+
+export function getIdade(date, date1) {
+  return formatDistanceStrict(new Date(date), new Date(date1), { unit: 'year', roundingMethod: 'floor', locale: pt });
 }
 
 export function diferencaAnos(data) {

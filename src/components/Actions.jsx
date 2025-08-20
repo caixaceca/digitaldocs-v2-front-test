@@ -15,6 +15,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DialogActions from '@mui/material/DialogActions';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
+import CircularProgress from '@mui/material/CircularProgress';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
@@ -110,15 +111,18 @@ export function DefaultAction({
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
+    (label === 'GERANDO PDF...' && <CircularProgress size={small ? 18 : 24} color="inherit" />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
     ((label === 'RESGATAR' || label === 'REATIVAR') && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
-    ((label === 'Procurar' || label === 'PROCURAR') && <SearchIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'CLONAR' || label === 'Clonar') && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
+    ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (
+      <SearchIcon sx={{ width: small ? 18 : 24 }} />
+    )) ||
     ((label === 'Editar' || label === 'EDITAR' || label === 'FOCAL POINT') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
@@ -128,7 +132,7 @@ export function DefaultAction({
       label === 'CONDICIONAL' ||
       label === 'Mostrar detalhes' ||
       label === 'Carregar proposta') && <AddIcon sx={{ width: small ? 20 : 22 }} />) ||
-    ((label === 'CONTRATO' || label === 'Pré-visualizar' || label === 'Prév. minuta') &&
+    ((icon === 'pdf' || label === 'CONTRATO' || label === 'Pré-visualizar' || label === 'Prév. minuta') &&
       getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||
     ((label === 'Gerir acessos' || label === 'Transições' || label === 'Comparar colaboradores') && (
       <SwapHorizOutlinedIcon />

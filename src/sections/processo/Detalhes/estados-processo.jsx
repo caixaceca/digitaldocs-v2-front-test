@@ -72,7 +72,7 @@ export default function Estados({ handleAceitar }) {
                       {afeto && !temPareceres && (
                         <Typography sx={{ typography: 'caption', color: 'info.main' }}>
                           {preso ? '' : 'Este processo foi tribuído a '}
-                          <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                          <Typography component="span" variant="body2" sx={{ fontWeight: 900 }}>
                             {afeto?.nome}
                           </Typography>
                           {preso ? ' está trabalhando no processo' : ''} neste estado.
@@ -178,7 +178,7 @@ export function Info({ dados, colaboradores }) {
     <>
       {dados?.motivo && (
         <Typography sx={{ pt: 1.5 }}>
-          <Typography variant="spam" sx={{ color: 'info.main' }}>
+          <Typography component="span" variant="body2" sx={{ color: 'info.main' }}>
             Motivo:&nbsp;
           </Typography>
           {dados?.motivo}

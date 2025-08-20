@@ -18,13 +18,11 @@ export function CabecalhoPdf({ title, codificacao = '' }) {
         <Text style={[styles.headerCaption]}>Caixa Económica de Cabo Verde</Text>
       </View>
       <View>
-        <Image source="/assets/Caixa_Logo_Branco_Transparente.png" style={{ height: 60, paddingTop: '12mm' }} />
+        <Image source="/assets/logo_sem_fundo_branco.png" style={{ height: 60, paddingTop: '12mm' }} />
       </View>
     </View>
   );
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
 
 export function CabecalhoPdfAlt({ cabecalho = false, codificacao = '' }) {
   return (
@@ -40,7 +38,7 @@ export function CabecalhoPdfAlt({ cabecalho = false, codificacao = '' }) {
             />
             <View style={[styles.headerLogo]}>
               <Image
-                src="/assets/Caixa_Logo_Branco_Transparente.png"
+                src="/assets/logo_sem_fundo_branco.png"
                 style={{ marginBottom: '7mm', marginLeft: '7mm', width: '31mm' }}
               />
             </View>
@@ -56,6 +54,23 @@ export function CabecalhoPdfAlt({ cabecalho = false, codificacao = '' }) {
         </View>
       )}
     </>
+  );
+}
+
+export function CabecalhoFicha({ title, codificacao }) {
+  return (
+    <View style={[styles.gridContainer, styles.borderCinza, { fontWeight: 'bold', marginBottom: '5mm' }]} fixed>
+      <View style={[styles.verticalCenter, { height: '100%' }]}>
+        <Text style={{ padding: '5mm', paddingTop: '8mm', fontSize: 15, textTransform: 'uppercase', lineHeight: 0 }}>
+          {title}
+        </Text>
+      </View>
+      <View style={{ borderLeft: '1px solid #ddd', width: '50mm' }}>
+        <Image source="/assets/logo_sem_fundo.png" style={{ paddingLeft: '7mm', paddingRight: '7mm' }} />
+        <Text style={[styles.bgSuccess, styles.headerFicha, { color: '#fff' }]}>CODIFICAÇÃO</Text>
+        <Text style={[styles.headerFicha, { fontWeight: 'normal' }]}>{codificacao}</Text>
+      </View>
+    </View>
   );
 }
 
@@ -102,5 +117,39 @@ export function RodapePdfAlt({ rodape = false }) {
         </View>
       )}
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function RodapeFicha({ title1 = 'Elaborado:', title2 = 'Aprovado:', elaborado = '', aprovado = '' }) {
+  return (
+    <View fixed style={[styles.text7, { marginTop: '2mm', lineHeight: 0 }]}>
+      <View
+        style={[styles.gridContainer, styles.bgSuccess, { color: '#fff', paddingTop: '2mm', paddingBottom: '1mm' }]}
+      >
+        <View style={[styles.tCell_33]}>
+          <Text>{title1}</Text>
+        </View>
+        <View style={[styles.tCell_33, styles.alignCenter]}>
+          <Text>{title2}</Text>
+        </View>
+        <View style={[styles.tCell_33, styles.alignRight]}>
+          <Text>Pág:</Text>
+        </View>
+      </View>
+      <View style={[styles.gridContainer, { paddingTop: '2mm', paddingBottom: '1mm' }]}>
+        <View style={[styles.tCell_33]}>
+          <Text>{elaborado}</Text>
+        </View>
+        <View style={[styles.tCell_33, styles.alignCenter]}>
+          <Text>{aprovado}</Text>
+        </View>
+        <View
+          style={[styles.tCell_33, styles.alignRight]}
+          render={({ pageNumber, totalPages }) => <Text>{`${pageNumber}/${totalPages}`}</Text>}
+        />
+      </View>
+    </View>
   );
 }

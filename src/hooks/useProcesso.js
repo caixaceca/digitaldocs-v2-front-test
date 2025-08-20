@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 //
 import { fYear } from '../utils/formatTime';
 //
+import { getSuccess } from '../redux/slices/intranet';
 import { useDispatch, useSelector } from '../redux/store';
 import { getProcesso } from '../redux/slices/digitaldocs';
 
@@ -12,7 +13,10 @@ export function useProcesso({ id, perfilId }) {
   const processo = useSelector((state) => state.digitaldocs.processo);
 
   useEffect(() => {
-    if (id && perfilId) dispatch(getProcesso('processo', { id }));
+    if (id && perfilId) {
+      dispatch(getProcesso('processo', { id }));
+      dispatch(getSuccess({ item: 'fichaInformativa', dados: null }));
+    }
   }, [dispatch, id, perfilId]);
 
   return processo;

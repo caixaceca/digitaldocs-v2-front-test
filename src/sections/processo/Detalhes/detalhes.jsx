@@ -116,9 +116,9 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
                         </Stack>
 
                         {colaboradorAfeto && (
-                          <Typography sx={{ typography: 'caption', color: 'info.main' }}>
+                          <Typography variant="caption" sx={{ color: 'info.main' }}>
                             {row?.preso ? '' : 'Atribuído a '}
-                            <Typography variant="spam" sx={{ fontWeight: 900 }}>
+                            <Typography component="span" variant="caption" sx={{ fontWeight: 900 }}>
                               {colaboradorAfeto?.nome}
                             </Typography>
                             {row?.preso ? ' está trabalhando neste processo' : ''}.
@@ -292,7 +292,7 @@ export function Duplicado({ ccDup, dataDup }) {
 export function SubItem({ value, label }) {
   return value ? (
     <Typography variant="body2">
-      <Typography variant="spam" sx={{ color: 'text.secondary' }}>
+      <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
         {label}
       </Typography>
       &nbsp;{value}
@@ -319,7 +319,7 @@ function ValorItem({ title, valor, cativos }) {
       </Typography>
       <Typography>
         {fCurrency(valor)}
-        <Typography variant="spam" sx={{ typography: 'body2' }}>
+        <Typography component="span" variant="body2">
           &nbsp;({valorPorExtenso(Number(valor || 0))})
         </Typography>
       </Typography>

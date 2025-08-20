@@ -138,7 +138,7 @@ export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, e
           ) : (
             <>
               {`${tipo}${entidade ? ` - ${entidade}` : ''}`}
-              <Typography variant="spam" sx={{ typography: 'body2', color: 'text.secondary', lineHeight: 1.25 }}>
+              <Typography component="span" variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.25 }}>
                 &nbsp;({nome})
               </Typography>
             </>

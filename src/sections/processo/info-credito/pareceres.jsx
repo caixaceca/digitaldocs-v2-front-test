@@ -128,7 +128,7 @@ export function Parecer({ dados, acessoParecer = false, historico = false, openM
               labelAlt={colaborador?.uo_label}
               nome={colaborador?.nome || `Perfil ID: ${perfil}`}
               other={
-                <Box sx={{ mt: 0.5 }}>
+                <Box sx={{ mt: 0.25 }}>
                   <Label color={favoravel ? 'success' : 'error'}>
                     {favoravel ? 'Parecer favorável' : 'Parecer não favorável'}
                   </Label>

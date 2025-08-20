@@ -21,12 +21,18 @@ export function fPercent(number) {
   return numeral(number / 100).format('0.00%');
 }
 
-export function fNumber(number) {
-  return numeral(number || 0).format();
+export function fNumber(number, cd) {
+  const casasDec =
+    (cd === 1 && '0,0.0') || (cd === 2 && '0,0.00') || (cd === 3 && '0,0.000') || (cd === 4 && '0,0.0000') || '';
+  return numeral(number || 0).format(casasDec);
 }
 
 export function fNumber2(number) {
   return replace(numeral(number || 0).format('0.00'), '.00', '');
+}
+
+export function fShortenNumber(number) {
+  return numeral(number).format('0.0a');
 }
 
 export function fData(number) {

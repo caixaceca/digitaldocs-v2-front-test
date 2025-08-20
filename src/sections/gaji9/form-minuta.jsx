@@ -87,13 +87,18 @@ export function PreviewMinutaForm({ onClose }) {
       com_nip: false,
       restrito: true,
       rascunho: false,
+      resolvig: false,
       com_seguro: false,
+      bonificado: false,
+      jovem_bonificado: false,
       isencao_comissao: false,
       isento_imposto_selo: false,
       habitacao_propria_1: false,
       sub_tipo_garantia_id: null,
       taxa_juros_negociado: false,
       com_prazo_utilizacao: false,
+      com_terceiro_outorgante: false,
+      colaborador_empresa_parceira: false,
       segmento_id: getItem(segmentosList, segmentoCl),
       tipo_titular_id: getItem(titularesList, titularCl),
       tipo_garantia_id: getItem(garantiasList, garantiaCl),
@@ -167,13 +172,22 @@ export function PreviewMinutaForm({ onClose }) {
               <RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" mt />
             </GridItem>
             <GridItem sm={6} md={4}>
-              <RHFSwitch name="habitacao_propria_1" label="1º habitação própria" mt />
+              <RHFSwitch name="habitacao_propria_1" label="1ª habitação própria" mt />
             </GridItem>
+            <GridItem sm={6} md={4} children={<RHFSwitch name="bonificado" label="Bonificado" mt />} />
+            <GridItem sm={6} md={4} children={<RHFSwitch name="jovem_bonificado" label="Jovem bonificado" mt />} />
             <GridItem sm={6} md={4}>
               <RHFSwitch name="com_prazo_utilizacao" label="Com prazo de utilização" mt />
             </GridItem>
             <GridItem sm={6} md={4} children={<RHFSwitch name="com_seguro" label="Com seguro" mt />} />
-            <GridItem children={<RHFSwitch name="com_nip" label="Com NIP" mt />} />
+            <GridItem sm={6} md={4}>
+              <RHFSwitch name="com_terceiro_outorgante" label="Com 3º outorgante" mt />
+            </GridItem>
+            <GridItem sm={6} md={4}>
+              <RHFSwitch name="colaborador_empresa_parceira" label="Colaborador de empresa parceira" mt />
+            </GridItem>
+            <GridItem sm={6} md={4} children={<RHFSwitch name="resolving" label="Resolving" mt />} />
+            <GridItem sm={6} md={4} children={<RHFSwitch name="com_nip" label="Com NIP" mt />} />
           </Grid>
           <DialogButons label="Pré-visualizar" isSaving={isSaving} onClose={onClose} />
         </FormProvider>

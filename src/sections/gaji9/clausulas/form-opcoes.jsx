@@ -220,9 +220,14 @@ export function Condicao({ onClose, dados }) {
               'Com NIP',
               'Com seguro',
               'Com prazo de utilização',
+              'Com 3º outorgante',
               'Isenção de comissão',
               'Taxa juros negociada',
               '1ª habitação própria',
+              'Resolving',
+              'Bonificado',
+              'Jovem bonificado',
+              'Colaborador de empresa parceira',
             ]}
           />
           {(values?.condicao === 'Prazo' ||
@@ -291,11 +296,16 @@ function Conteudo({ dados, onClose, id }) {
   const onSubmit = async () => {
     const formData = {
       ...(dadosStepper?.condicao === 'Com NIP' ? { com_nip: true } : null),
+      ...(dadosStepper?.condicao === 'Resolving' ? { revolving: true } : null),
       ...(dadosStepper?.condicao === 'Com seguro' ? { com_seguro: true } : null),
+      ...(dadosStepper?.condicao === 'Bonificado' ? { bonificado: true } : null),
+      ...(dadosStepper?.condicao === 'Jovem bonificado' ? { jovem_bonificado: true } : null),
       ...(dadosStepper?.condicao === 'Isenção de comissão' ? { isencao_comissao: true } : null),
       ...(dadosStepper?.condicao === 'Taxa juros negociada' ? { taxa_juros_negociado: true } : null),
+      ...(dadosStepper?.condicao === 'Com 3º outorgante' ? { com_terceiro_outorgante: true } : null),
       ...(dadosStepper?.condicao === 'Isento de imposto selo' ? { isento_imposto_selo: true } : null),
       ...(dadosStepper?.condicao === 'Com prazo de utilização' ? { com_prazo_utilizacao: true } : null),
+      ...(dadosStepper?.condicao === 'Colaborador de empresa parceira' ? { colaborador_empresa_parceira: true } : null),
       ...(dadosStepper?.condicao === 'Prazo'
         ? { prazo_maior_que: dadosStepper.maior_que, prazo_menor_que: dadosStepper.menor_que }
         : null),

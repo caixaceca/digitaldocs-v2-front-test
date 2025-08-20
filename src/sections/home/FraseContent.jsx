@@ -20,7 +20,7 @@ export default function FraseContent({ frase }) {
       <Typography gutterBottom variant="h6" sx={{ textAlign: 'center' }}>
         Frase da semana
         {format(new Date(), 'MM') === '03' && (
-          <Typography variant="spam" sx={{ fontWeight: 300 }}>
+          <Typography component="span" variant="body2" sx={{ fontWeight: 300 }}>
             &nbsp;- Especial março mês da Mulher 🌹
           </Typography>
         )}
