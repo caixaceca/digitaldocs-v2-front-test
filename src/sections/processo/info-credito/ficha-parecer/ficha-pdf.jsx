@@ -5,10 +5,10 @@ import {
   docInfo,
   colorDoc,
   estadoCivil,
-  totalFiancas,
   dataNascimento,
   extractClientes,
   movimentosConta,
+  responsabilidadesCaixa,
 } from './calculos';
 import { pdfInfo } from '../../../../utils/formatText';
 import { ptDate, getIdade } from '../../../../utils/formatTime';
@@ -309,7 +309,7 @@ export default function FichaPdf({ dados }) {
           {renderSection(
             '6. Créditos e outras responsabilidades',
             false,
-            dividas?.length > 1 ? [...dividas, totalFiancas(dividas)] : dividas,
+            dividas?.length > 1 ? [...dividas, responsabilidadesCaixa(dividas)] : dividas,
             [
               { title: 'Produto', options: [styles.tCell_18, styles.bgCinza] },
               { title: 'Conta', options: [styles.tCell_13, styles.bgCinza] },
@@ -336,7 +336,7 @@ export default function FichaPdf({ dados }) {
             <View>
               <EmptyRow />
               {(garantiasPrestadas?.length > 1
-                ? [...garantiasPrestadas, totalFiancas(garantiasPrestadas)]
+                ? [...garantiasPrestadas, responsabilidadesCaixa(garantiasPrestadas)]
                 : garantiasPrestadas
               )?.map((row, index) => (
                 <View
@@ -359,7 +359,7 @@ export default function FichaPdf({ dados }) {
             <View>
               <EmptyRow />
               {(garantiasRecebidas?.length > 1
-                ? [...garantiasRecebidas, totalFiancas(garantiasRecebidas)]
+                ? [...garantiasRecebidas, responsabilidadesCaixa(garantiasRecebidas)]
                 : garantiasRecebidas
               )?.map((row, index) => (
                 <View
@@ -404,7 +404,7 @@ export default function FichaPdf({ dados }) {
           {renderSection(
             '7. Responsabilidades como Fiador/Avalista',
             true,
-            fiancas?.length > 1 ? [...fiancas, totalFiancas(fiancas)] : fiancas,
+            fiancas?.length > 1 ? [...fiancas, responsabilidadesCaixa(fiancas)] : fiancas,
             [
               { title: 'Produto', options: [styles.tCell_25, styles.bgSuccess] },
               { title: 'Nº cliente', options: [styles.tCell_10, styles.bgSuccess] },

@@ -10,7 +10,7 @@ import { fNumber, fPercent, fCurrency } from '../../../../utils/formatNumber';
 //
 import Label from '../../../../components/Label';
 import { noDados } from '../../../../components/Panel';
-import { totalFiancas, dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
+import { responsabilidadesCaixa, dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -182,10 +182,10 @@ export function Movimentos({ dados, totaisConta }) {
         {rowInfo({ tipo: 'Total', totais: true, valor: dados.reduce((soma, row) => soma + row.valor, 0) })}
       </TableBody>
       {totaisConta?.length > 1 && (
-        <>
+        <TableBody>
           <EmptyRow cells={4} message="Total por conta" variant="head" />
           {totaisConta?.map((row) => rowInfo({ totais: true, ...row }))}
-        </>
+        </TableBody>
       )}
     </>
   ) : (
@@ -237,14 +237,14 @@ export function Responsabilidades({ responsabilidades }) {
       />
       <TableBody>
         {dividas?.map((row) => rowInfo(row))}
-        {dividas?.length > 1 && rowInfo(totalFiancas(dividas))}
+        {dividas?.length > 1 && rowInfo(responsabilidadesCaixa(dividas))}
         {(garantiasRecebidas?.length > 0 || garantiasPrestadas?.length > 0) && (
           <EmptyRow cells={8} message="OUTRAS" variant="head" />
         )}
         {garantiasRecebidas?.map((row) => rowInfo(row))}
-        {garantiasRecebidas?.length > 1 && rowInfo(totalFiancas(garantiasRecebidas))}
+        {garantiasRecebidas?.length > 1 && rowInfo(responsabilidadesCaixa(garantiasRecebidas))}
         {garantiasPrestadas?.map((row) => rowInfo(row))}
-        {garantiasPrestadas?.length > 1 && rowInfo(totalFiancas(garantiasPrestadas))}
+        {garantiasPrestadas?.length > 1 && rowInfo(responsabilidadesCaixa(garantiasPrestadas))}
         {irregularidades?.length > 0 && <EmptyRow cells={8} message="Histórico de incidentes" variant="head" war />}
         {irregularidades?.map((row) => rowInfo(row, true))}
       </TableBody>
@@ -285,8 +285,10 @@ export function AvalesFiancas({ dados }) {
           { label: 'Situação', align: 'center' },
         ]}
       />
-      <TableBody>{dados?.map((row) => rowInfo(row))}</TableBody>
-      {dados?.length > 1 && rowInfo(totalFiancas(dados))}
+      <TableBody>
+        {dados?.map((row) => rowInfo(row))}
+        {dados?.length > 1 && rowInfo(responsabilidadesCaixa(dados))}
+      </TableBody>
     </>
   ) : (
     <NadaConsta />
@@ -380,9 +382,9 @@ function Cabecalho({ item, headLabel }) {
   return (
     <TableHead>
       <TableRow>
-        {headLabel.map((headCell, index) => (
-          <TableCell align={headCell?.align || 'left'} key={`${item}_${index}`}>
-            {headCell.label}
+        {headLabel.map((row, index) => (
+          <TableCell align={row?.align || 'left'} key={`${row?.label}_${item}_${index}`}>
+            {row?.label}
           </TableCell>
         ))}
       </TableRow>
@@ -396,7 +398,11 @@ export const rowInfo = (title, value, total, extra = null) => {
   const isTitle = value === '*title*';
   return value ? (
     <TableRow hover={!isTitle} sx={{ whiteSpace: 'nowrap' }}>
-      <TableCell colSpan={1} align="right" sx={{ color: !isTitle && 'text.secondary', fontWeight: 'bold' }}>
+      <TableCell
+        colSpan={1}
+        align="right"
+        sx={{ color: (total && 'success.main') || (!isTitle && 'text.secondary'), fontWeight: 'bold' }}
+      >
         {title}:
       </TableCell>
       {!isTitle ? (

@@ -8,26 +8,26 @@ import { getComparator, applySort } from '../../../../hooks/useTable';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function calcRendimento(solvabilidade, bruto) {
-  return (
-    (bruto &&
-      solvabilidade &&
-      Number(solvabilidade?.renda_bruto_mensal || 0) + Number(solvabilidade?.renda_bruto_mensal_conjuge || 0)) ||
-    (solvabilidade &&
-      Number(solvabilidade?.renda_liquido_mensal || 0) + Number(solvabilidade?.renda_liquido_mensal_conjuge || 0)) ||
-    ''
-  );
+export function calcRendimento(rendimento, bruto) {
+  if (!rendimento) return 0;
+
+  const renda = bruto
+    ? [rendimento.renda_bruto_mensal, rendimento.renda_bruto_mensal_conjuge]
+    : [rendimento.renda_liquido_mensal, rendimento.renda_liquido_mensal_conjuge];
+
+  return renda.reduce((sum, val) => sum + Number(val || 0), 0);
 }
 
-export function valorPrestacao(solvabilidade) {
-  const taxa =
-    (solvabilidade?.tipo_credito === 'Outros particulares' && solvabilidade?.taxa_juros / 100 / 12) ||
-    (solvabilidade?.tipo_credito === 'Habitação própria' && (1 + solvabilidade?.taxa_juros / 100) ** (1 / 12) - 1) ||
-    0;
+export function valorPrestacao(pedido) {
+  if (!pedido) return 0;
 
-  return solvabilidade
-    ? ((solvabilidade?.montante * taxa) / (1 - (1 / (1 + taxa)) ** solvabilidade?.prazo))?.toFixed(0)
-    : '';
+  const { componente, taxa_juro: tj, montante_solicitado: montante, prazo_amortizacao: prazo } = pedido;
+  const isHabitacao = componente?.toLowerCase()?.includes('habitação');
+
+  const taxa = isHabitacao ? (1 + tj / 100) ** (1 / 12) - 1 : tj / 100 / 12;
+  const prestacao = (montante * taxa) / (1 - (1 / (1 + taxa)) ** prazo);
+
+  return prestacao.toFixed(0);
 }
 
 export function totalDespesas(solvabilidade) {
@@ -58,6 +58,25 @@ export function servicoMensalDivida(solvabilidade) {
     Number(totalServicoDividaOb(solvabilidade)) +
     Number(valorPrestacao(solvabilidade))
   );
+}
+
+export const responsabilidadesCaixa = (responsabilidades) =>
+  (responsabilidades || []).reduce(
+    (acc, item) => {
+      acc.valor += Math.abs(item.valor);
+      acc.saldo_divida += Math.abs(item.saldo_divida);
+      acc.valor_prestacao += Math.abs(item.valor_prestacao);
+      return acc;
+    },
+    { totais: true, valor: 0, saldo_divida: 0, valor_prestacao: 0 }
+  );
+
+export function dividasConsolidadas(dividas, solicitado, prestacao) {
+  return {
+    valor: Number(dividas?.valor || 0) + Number(solicitado || 0),
+    divida: Number(dividas?.saldo_divida || 0) + Number(solicitado || 0),
+    prestacao: Number(dividas?.valor_prestacao || 0) + Number(prestacao || 0),
+  };
 }
 
 export function limiteDsti(solvabilidade) {
@@ -102,20 +121,22 @@ export function valorDstiCorrigido(solvabilidade) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function extractClientes(data) {
-  const saldos = [];
-  const titulos = [];
-  const dividas = [];
-  const clientes = [];
-  const restruturacoes = [];
-  const irregularidades = [];
-  const garantiasRecebidas = [];
-  const garantiasPrestadas = [];
+export function extractClientes(data = []) {
   const totaisPorMoedaMap = new Map();
 
-  if (data && Array.isArray(data)) {
-    data.forEach((cliente) => {
-      clientes.push({
+  const {
+    saldos,
+    titulos,
+    dividas,
+    clientes,
+    restruturacoes,
+    irregularidades,
+    garantiasPrestadas,
+    garantiasRecebidas,
+  } = data.reduce(
+    (acc, cliente) => {
+      // clientes
+      acc.clientes.push({
         balcao: cliente?.balcao,
         cliente: cliente?.cliente,
         relacao: cliente?.relacao,
@@ -123,40 +144,48 @@ export function extractClientes(data) {
         titularidade: cliente?.titularidade,
         data_abertura: cliente?.data_abertura,
       });
-      if (cliente.saldos && Array.isArray(cliente.saldos)) {
-        cliente.saldos.forEach((saldo) => {
-          saldos.push(saldo);
-          const totalAtual = totaisPorMoedaMap.get(saldo.moeda) || 0;
-          totaisPorMoedaMap.set(saldo.moeda, totalAtual + saldo.saldo);
-        });
-      }
-      if (cliente.titulos && Array.isArray(cliente.titulos)) cliente.titulos.forEach((titulo) => titulos.push(titulo));
 
-      if (cliente.responsabilidades && Array.isArray(cliente.responsabilidades)) {
-        cliente.responsabilidades.forEach((responsabilidade) => {
-          if (responsabilidade?.classe === 'Garantias Prestadas') garantiasPrestadas.push(responsabilidade);
-          else if (responsabilidade?.classe === 'Garantias Recebidas') garantiasRecebidas.push(responsabilidade);
-          else {
-            dividas.push(responsabilidade);
-            if (
-              responsabilidade?.maior_irregularidade &&
-              responsabilidade?.maior_irregularidade !== responsabilidade?.situacao
-            ) {
-              irregularidades.push(responsabilidade);
-            }
+      // saldos
+      (cliente.saldos || []).forEach((saldo) => {
+        acc.saldos.push(saldo);
+        totaisPorMoedaMap.set(saldo.moeda, (totaisPorMoedaMap.get(saldo.moeda) || 0) + saldo.saldo);
+      });
+
+      // titulos
+      (cliente.titulos || []).forEach((titulo) => acc.titulos.push(titulo));
+
+      // responsabilidades
+      (cliente.responsabilidades || []).forEach((resp) => {
+        if (resp?.classe === 'Garantias Prestadas') acc.garantiasPrestadas.push(resp);
+        else if (resp?.classe === 'Garantias Recebidas') acc.garantiasRecebidas.push(resp);
+        else {
+          acc.dividas.push(resp);
+          if (resp?.maior_irregularidade && resp?.maior_irregularidade !== resp?.situacao) {
+            acc.irregularidades.push(resp);
           }
-        });
-      }
-      if (cliente.com_historico_restruturacao)
-        restruturacoes?.push({ cliente: cliente?.cliente, data: cliente?.data_referencia_restruturacao });
-    });
-  }
+        }
+      });
 
-  const totalSaldoPorMoeda = Array.from(totaisPorMoedaMap.entries()).map(([moeda, total]) => ({
-    moeda,
-    saldo: total,
-    totais: true,
-  }));
+      // restruturações
+      if (cliente.com_historico_restruturacao) {
+        acc.restruturacoes.push({ cliente: cliente?.cliente, data: cliente?.data_referencia_restruturacao });
+      }
+
+      return acc;
+    },
+    {
+      saldos: [],
+      titulos: [],
+      dividas: [],
+      clientes: [],
+      restruturacoes: [],
+      irregularidades: [],
+      garantiasPrestadas: [],
+      garantiasRecebidas: [],
+    }
+  );
+
+  const totalSaldoPorMoeda = Array.from(totaisPorMoedaMap, ([moeda, saldo]) => ({ moeda, saldo, totais: true }));
 
   return {
     saldos,
@@ -170,6 +199,8 @@ export function extractClientes(data) {
     clientes: applySort(clientes, getComparator('asc', 'relacao')),
   };
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function movimentosConta(movimentos) {
   const movimentosDebito = [];
@@ -194,17 +225,6 @@ export function movimentosConta(movimentos) {
 
   return { movimentosDebito, movimentosCredito, totaisDebConta, totaisCredConta };
 }
-
-export const totalFiancas = (fiancas) =>
-  (fiancas || []).reduce(
-    (acc, item) => {
-      acc.valor += Math.abs(item.valor);
-      acc.saldo_divida += Math.abs(item.saldo_divida);
-      acc.valor_prestacao += Math.abs(item.valor_prestacao);
-      return acc;
-    },
-    { totais: true, valor: 0, saldo_divida: 0, valor_prestacao: 0 }
-  );
 
 // ---------------------------------------------------------------------------------------------------------------------
 

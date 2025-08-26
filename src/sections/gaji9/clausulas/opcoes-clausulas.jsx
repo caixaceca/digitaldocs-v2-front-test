@@ -253,13 +253,13 @@ export function RelacionadosCl({ dados = [], item = 'Tipo de titular' }) {
                           {(res?.com_nip && 'Com NIP') ||
                             (res?.revolving && 'Resolving') ||
                             (res?.com_seguro && 'Com seguro') ||
-                            (res?.bonificado && 'Bonificadpo') ||
+                            (res?.construcao && 'Construção') ||
+                            (res?.bonificado && 'Bonificado') ||
                             (res?.jovem_bonificado && 'Jovem bonificadpo') ||
                             (res?.isencao_comissao && 'Isenção de comissão') ||
                             (res?.habitacao_propria_1 && '1ª habitação própria') ||
                             (res?.taxa_juros_negociado && 'Taxa juros negociada') ||
                             (res?.com_terceiro_outorgante && 'Com 3º outorgante') ||
-                            (res?.isento_imposto_selo && 'Isento de imposto selo') ||
                             (res?.com_prazo_utilizacao && 'Com prazo de utilização') ||
                             (res?.colaborador_empresa_parceira && 'Colaborador de empresa parceira')}
                         </Typography>

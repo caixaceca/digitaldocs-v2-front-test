@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -63,6 +63,7 @@ export function PreviewForm({ id = 0, onClose }) {
 
 export function PreviewMinutaForm({ onClose }) {
   const dispatch = useDispatch();
+  const [garantia, setGarantia] = useState('');
   const { isSaving } = useSelector((state) => state.gaji9);
   const { tiposTitulares, tiposGarantias, segmentos, tipoGarantia } = useSelector((state) => state.gaji9);
 
@@ -78,6 +79,7 @@ export function PreviewMinutaForm({ onClose }) {
     segmento_id: Yup.mixed().required().label('Segmento'),
     tipo_garantia_id: Yup.mixed().required().label('Garantia'),
     tipo_titular_id: Yup.mixed().required().label('Tipo de titular'),
+    sub_tipo_garantia_id: garantia === 'OUTRAS HIPOTECAS' && Yup.mixed().required().label('Subtipo da garantia'),
   });
 
   const defaultValues = useMemo(
@@ -90,9 +92,9 @@ export function PreviewMinutaForm({ onClose }) {
       resolvig: false,
       com_seguro: false,
       bonificado: false,
+      construcao: false,
       jovem_bonificado: false,
       isencao_comissao: false,
-      isento_imposto_selo: false,
       habitacao_propria_1: false,
       sub_tipo_garantia_id: null,
       taxa_juros_negociado: false,
@@ -137,10 +139,10 @@ export function PreviewMinutaForm({ onClose }) {
             <GridItem sm={6} children={<RHFSwitch name="rascunho" label="Incluir cláusulas de rascunho" />} />
             <GridItem sm={6} children={<RHFSwitch name="restrito" label="Restrito" />} />
             <GridItem sm={6}>
-              <RHFAutocompleteObj name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
+              <RHFAutocompleteObj name="segmento_id" label="Segmento" options={segmentosList} />
             </GridItem>
             <GridItem sm={6}>
-              <RHFAutocompleteObj name="segmento_id" label="Segmento" options={segmentosList} />
+              <RHFAutocompleteObj name="tipo_titular_id" label="Tipo de titular" options={titularesList} />
             </GridItem>
             <GridItem>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
@@ -149,6 +151,7 @@ export function PreviewMinutaForm({ onClose }) {
                   label="Tipo de garantia"
                   options={garantiasList}
                   onChange={(event, newVal) => {
+                    setGarantia(newVal?.label || '');
                     setValue('tipo_garantia_id', newVal, vdt);
                     setValue('sub_tipo_garantia_id', null, vdt);
                   }}
@@ -165,14 +168,12 @@ export function PreviewMinutaForm({ onClose }) {
             <GridItem sm={6} children={<RHFNumberField label="Montante" name="montante" />} />
             <GridItem sm={6} children={<RHFNumberField label="Prazo" name="prazo" />} />
             <GridItem sm={6} md={4} children={<RHFSwitch name="isencao_comissao" label="Isenção de comissão" mt />} />
+            <GridItem sm={6} md={4} children={<RHFSwitch name="construcao" label="Construção" mt />} />
             <GridItem sm={6} md={4}>
-              <RHFSwitch name="isento_imposto_selo" label="Isento de imposto selo" mt />
+              <RHFSwitch name="habitacao_propria_1" label="1ª habitação própria" mt />
             </GridItem>
             <GridItem sm={6} md={4}>
               <RHFSwitch name="taxa_juros_negociado" label="Taxa juros negociada" mt />
-            </GridItem>
-            <GridItem sm={6} md={4}>
-              <RHFSwitch name="habitacao_propria_1" label="1ª habitação própria" mt />
             </GridItem>
             <GridItem sm={6} md={4} children={<RHFSwitch name="bonificado" label="Bonificado" mt />} />
             <GridItem sm={6} md={4} children={<RHFSwitch name="jovem_bonificado" label="Jovem bonificado" mt />} />

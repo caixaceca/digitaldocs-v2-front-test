@@ -5,26 +5,28 @@ import TableBody from '@mui/material/TableBody';
 import { fPercent, fCurrency } from '../../../../utils/formatNumber';
 //
 import { rowInfo } from './dados-ficha';
+import { valorPrestacao, calcRendimento, dividasConsolidadas } from './calculos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SituacaoProfissional() {
+export function SituacaoProfissional({ conjuge = false, dados }) {
   return (
     <TableBody>
-      {rowInfo('Tipo de contrato', 'Contrato', false)}
-      {rowInfo('Rendimento bruto proponente', fCurrency(0), false)}
-      {rowInfo('Rendimento bruto cônjuge', fCurrency(0), false)}
-      {rowInfo('Total rendimento bruto', fCurrency(0), true)}
-      {rowInfo('Rendimento líquido proponente', fCurrency(0), false)}
-      {rowInfo('Rendimento líquido cônjuge', fCurrency(0), false)}
-      {rowInfo('Total rendimento líquido', fCurrency(0), true)}
+      {rowInfo('Tipo de contrato', dados?.tipo_contrato, false)}
+      {rowInfo('Rendimento bruto proponente', fCurrency(dados?.renda_bruto_mensal), false)}
+      {conjuge && rowInfo('Rendimento bruto cônjuge', fCurrency(dados?.renda_bruto_mensal_conjuge), false)}
+      {conjuge && rowInfo('Total rendimento bruto', fCurrency(calcRendimento(dados, true)), true)}
+      {rowInfo('Rendimento líquido proponente', fCurrency(dados?.renda_liquido_mensal), false)}
+      {conjuge && rowInfo('Rendimento líquido cônjuge', fCurrency(dados?.renda_liquido_mensal_conjuge), false)}
+      {conjuge && rowInfo('Total rendimento líquido', fCurrency(calcRendimento(dados, false)), true)}
     </TableBody>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function NovoFinanciamento({ dados }) {
+export function NovoFinanciamento({ dados, dividas }) {
+  const consolidadas = dividasConsolidadas(dividas, dados?.montante_solicitado, valorPrestacao(dados));
   return (
     <TableBody>
       {rowInfo('Capital pretendido', fCurrency(dados?.montante_solicitado), false)}
@@ -33,11 +35,11 @@ export function NovoFinanciamento({ dados }) {
       {rowInfo('Taxa do preçario', dados?.taxa_precario || '', false)}
       {rowInfo('Origem da taxa', dados?.origem_taxa || '', false)}
       {rowInfo('Prazo de amortização', `${dados?.prazo_amortizacao} meses`, false)}
-      {rowInfo('Prestação mensal', fCurrency(0), false)}
+      {rowInfo('Prestação mensal', fCurrency(valorPrestacao(dados)), false)}
       {rowInfo('Dívidas consolidadas após o fincanciamento', '*title*', false)}
-      {rowInfo('Capital inicial', fCurrency(0), true)}
-      {rowInfo('Saldo em dívida', fCurrency(0), true)}
-      {rowInfo('Serviço mensal da dívida', fCurrency(0), true)}
+      {rowInfo('Capital inicial', fCurrency(consolidadas?.valor), true)}
+      {rowInfo('Saldo em dívida', fCurrency(consolidadas?.divida), true)}
+      {rowInfo('Serviço mensal da dívida', fCurrency(consolidadas?.prestacao), true)}
     </TableBody>
   );
 }

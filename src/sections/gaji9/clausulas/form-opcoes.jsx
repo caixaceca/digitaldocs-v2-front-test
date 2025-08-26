@@ -30,8 +30,8 @@ import { AddItem, DefaultAction, DialogButons, ButtonsStepper } from '../../../c
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function TiposTitularesForm({ id, onClose }) {
-  const ids = extrairIds(clausula, 'tipos_titulares');
   const { clausula, tiposTitulares } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(clausula, 'tipos_titulares');
 
   return (
     <OpcoesForm
@@ -45,8 +45,8 @@ export function TiposTitularesForm({ id, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function SegmentosForm({ id, dados, onClose }) {
-  const ids = extrairIds(dados, 'segmentos');
   const { segmentos } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(dados, 'segmentos');
 
   return (
     <OpcoesForm
@@ -62,8 +62,8 @@ export function SegmentosForm({ id, dados, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function ComponetesForm({ id, onClose }) {
-  const ids = extrairIds(selectedItem, 'componentes');
   const { selectedItem, componentes } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(selectedItem, 'componentes');
 
   return (
     <OpcoesForm
@@ -77,8 +77,8 @@ export function ComponetesForm({ id, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function FinalidadesForm({ id, onClose }) {
-  const ids = extrairIds(selectedItem, 'finalidades');
   const { selectedItem, finalidades } = useSelector((state) => state.gaji9);
+  const ids = extrairIds(selectedItem, 'finalidades');
 
   return (
     <OpcoesForm
@@ -224,6 +224,7 @@ export function Condicao({ onClose, dados }) {
               'Isenção de comissão',
               'Taxa juros negociada',
               '1ª habitação própria',
+              'Construção',
               'Resolving',
               'Bonificado',
               'Jovem bonificado',
@@ -299,11 +300,11 @@ function Conteudo({ dados, onClose, id }) {
       ...(dadosStepper?.condicao === 'Resolving' ? { revolving: true } : null),
       ...(dadosStepper?.condicao === 'Com seguro' ? { com_seguro: true } : null),
       ...(dadosStepper?.condicao === 'Bonificado' ? { bonificado: true } : null),
+      ...(dadosStepper?.condicao === 'Construção' ? { construcao: true } : null),
       ...(dadosStepper?.condicao === 'Jovem bonificado' ? { jovem_bonificado: true } : null),
       ...(dadosStepper?.condicao === 'Isenção de comissão' ? { isencao_comissao: true } : null),
       ...(dadosStepper?.condicao === 'Taxa juros negociada' ? { taxa_juros_negociado: true } : null),
       ...(dadosStepper?.condicao === 'Com 3º outorgante' ? { com_terceiro_outorgante: true } : null),
-      ...(dadosStepper?.condicao === 'Isento de imposto selo' ? { isento_imposto_selo: true } : null),
       ...(dadosStepper?.condicao === 'Com prazo de utilização' ? { com_prazo_utilizacao: true } : null),
       ...(dadosStepper?.condicao === 'Colaborador de empresa parceira' ? { colaborador_empresa_parceira: true } : null),
       ...(dadosStepper?.condicao === 'Prazo'

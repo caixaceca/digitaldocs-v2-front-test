@@ -25,7 +25,7 @@ import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-fo
 // _mock
 import { Garantias } from './garantias';
 import PareceresCredito from './pareceres';
-// import FichaAnalise from './ficha-parecer/index';
+// import FichaAnalise from './ficha-parecer';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

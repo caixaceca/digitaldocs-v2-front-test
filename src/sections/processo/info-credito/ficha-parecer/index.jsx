@@ -13,8 +13,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 // utils
 import { downloadDoc } from '../../../../utils/formatFile';
 import { setModal } from '../../../../redux/slices/intranet';
-import { extractClientes, movimentosConta } from './calculos';
 import { useDispatch, useSelector } from '../../../../redux/store';
+import { extractClientes, movimentosConta, responsabilidadesCaixa } from './calculos';
 //
 import {
   Saldos,
@@ -28,10 +28,10 @@ import {
   Responsabilidades,
 } from './dados-ficha';
 import FichaPdf from './ficha-pdf';
+import FormFicha from './form-ficha';
 import { SearchEntidade } from './procurar';
 import { DefaultAction } from '../../../../components/Actions';
 import SearchNotFound from '../../../../components/table/SearchNotFound';
-import { SituacaoFinancaeiraForm } from './form-ficha';
 import { Dsti, Despesas, Proposta, DstiCorrigido, NovoFinanciamento, SituacaoProfissional } from './info-solvabilidade';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -46,11 +46,28 @@ export default function FichaAnalise() {
 
   return (
     <>
-      <Stack direction="row" useFlexGap flexWrap="wrap" justifyContent="space-between" spacing={1} sx={{ mb: 3 }}>
+      <Stack
+        useFlexGap
+        spacing={1}
+        sx={{ mb: 3 }}
+        direction="row"
+        flexWrap="wrap"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
           Ficha de Análise e Parecer
         </Typography>
-        <SearchEntidade entidades={entidades} />
+        <Stack direction="row" spacing={2} alignItems="center">
+          <DefaultAction
+            small
+            button
+            icon="adicionar"
+            label="Info. adicional"
+            onClick={() => actionModal({ modal: 'form-ficha' })}
+          />
+          <SearchEntidade entidades={entidades} />
+        </Stack>
       </Stack>
       {isLoading ? (
         <Stack spacing={3}>
@@ -61,20 +78,23 @@ export default function FichaAnalise() {
       ) : (
         <>
           {fichaInformativa?.entidade ? (
-            <Ficha credito={processo?.credito || null} ficha={fichaInformativa} actionModal={actionModal} />
+            <Ficha credito={processo?.credito || null} ficha={fichaInformativa} />
           ) : (
             <SearchNotFound message="Informação da entidade não encontrada..." />
           )}
+
+          {modalIntranet === 'form-ficha' && (
+            <FormFicha onClose={() => actionModal({ modal: '' })} ficha={fichaInformativa} />
+          )}
         </>
       )}
-      {modalIntranet === 'sit-financ-rendimento' && <SituacaoFinancaeiraForm onClose={actionModal} />}
     </>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Ficha({ credito, ficha, actionModal }) {
+export function Ficha({ credito, ficha }) {
   const {
     saldos,
     titulos,
@@ -86,19 +106,21 @@ export function Ficha({ credito, ficha, actionModal }) {
     totalSaldoPorMoeda,
     clientes: clientesList,
   } = useMemo(() => extractClientes(ficha?.clientes || {}), [ficha?.clientes]);
-  const { numero, conjuge = null, fiancas, entidade, mensagens, central_risco: cr, movimentos = [] } = ficha || {};
+
+  const { conjuge = null, rendimento = null } = ficha || {};
+  const { numero, fiancas, entidade, mensagens, central_risco: cr, movimentos = [] } = ficha || {};
   const { movimentosDebito, movimentosCredito, totaisDebConta, totaisCredConta } = useMemo(
     () => movimentosConta(movimentos),
     [movimentos]
   );
+  const dividasConsolidadas = useMemo(() => responsabilidadesCaixa(dividas), [dividas]);
 
   return (
     <Stack spacing={2}>
       <AccordionItem
         open
         title="1. Identificação"
-        children={<Identificcao entidade={{ numero, ...entidade }} />}
-        action={<DefaultAction small label="EDITAR" onClick={() => actionModal({ modal: 'dados-conjuge' })} />}
+        children={<Identificcao entidade={{ numero, ...entidade, conjuge }} />}
       />
       <AccordionItem title="2. Clientes associados" children={<Clientes dados={clientesList} />} />
       <AccordionItem
@@ -124,11 +146,13 @@ export function Ficha({ credito, ficha, actionModal }) {
       <AccordionItem title="9. Mensagens pendentes" children={<Mensagens dados={mensagens} />} />
       <AccordionItem title="10. Restruturações" children={<Restruturacoes dados={restruturacoes} />} />
       <AccordionItem
-        children={<SituacaoProfissional />}
+        children={<SituacaoProfissional dados={rendimento} />}
         title="11. Situação profissional do proponente e Rendimento do agregado familiar (mensal)"
-        action={<DefaultAction small label="EDITAR" onClick={() => actionModal({ modal: 'sit-financ-rendimento' })} />}
       />
-      <AccordionItem title="12. Novo financiamento" children={<NovoFinanciamento dados={credito} />} />
+      <AccordionItem
+        title="12. Novo financiamento"
+        children={<NovoFinanciamento dados={credito} dividas={dividasConsolidadas} />}
+      />
       <AccordionItem title="13. DSTI - Debt Service To Income (<=50%)" children={<Dsti />} />
       <AccordionItem title="14. Outras despesas regulares (média mensal)" children={<Despesas />} />
       <AccordionItem title="15. DSTI corrigido (<=70%)" children={<DstiCorrigido />} />

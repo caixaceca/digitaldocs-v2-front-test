@@ -13,8 +13,8 @@ export default function NavList({ data, depth, hasChildren }) {
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const active = getActive(data.path, pathname);
   const [open, setOpen] = useState(false);
+  const active = getActive(data.path, pathname);
 
   useEffect(() => {
     if (open) setOpen(false);
