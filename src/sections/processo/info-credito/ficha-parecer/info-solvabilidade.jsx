@@ -1,80 +1,150 @@
 // @mui
-
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
+import Typography from '@mui/material/Typography';
 // utils
+import { newLineText } from '../../../../components/Panel';
 import { fPercent, fCurrency } from '../../../../utils/formatNumber';
 //
-import { rowInfo } from './dados-ficha';
-import { valorPrestacao, calcRendimento, dividasConsolidadas } from './calculos';
+import {
+  limiteDsti,
+  dstiCorrigido,
+  totalDespesas,
+  dstiDisponivel,
+  valorPrestacao,
+  calcRendimento,
+  percentagemDsti,
+  limiteDstiCorrigido,
+  dstiAposContratacao,
+  dividasConsolidadas,
+} from './calculos';
+import { rowInfo, EmptyRow } from './dados-ficha';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SituacaoProfissional({ conjuge = false, dados }) {
+export function SituacaoProfissional({ dados }) {
   return (
     <TableBody>
       {rowInfo('Tipo de contrato', dados?.tipo_contrato, false)}
       {rowInfo('Rendimento bruto proponente', fCurrency(dados?.renda_bruto_mensal), false)}
-      {conjuge && rowInfo('Rendimento bruto cônjuge', fCurrency(dados?.renda_bruto_mensal_conjuge), false)}
-      {conjuge && rowInfo('Total rendimento bruto', fCurrency(calcRendimento(dados, true)), true)}
+      {dados?.conjuge && rowInfo('Rendimento bruto cônjuge', fCurrency(dados?.renda_bruto_mensal_conjuge), false)}
+      {dados?.conjuge && rowInfo('Total rendimento bruto', fCurrency(calcRendimento(dados, true)), true)}
       {rowInfo('Rendimento líquido proponente', fCurrency(dados?.renda_liquido_mensal), false)}
-      {conjuge && rowInfo('Rendimento líquido cônjuge', fCurrency(dados?.renda_liquido_mensal_conjuge), false)}
-      {conjuge && rowInfo('Total rendimento líquido', fCurrency(calcRendimento(dados, false)), true)}
+      {dados?.conjuge && rowInfo('Rendimento líquido cônjuge', fCurrency(dados?.renda_liquido_mensal_conjuge), false)}
+      {dados?.conjuge && rowInfo('Total rendimento líquido', fCurrency(calcRendimento(dados, false)), true)}
     </TableBody>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function NovoFinanciamento({ dados, dividas }) {
-  const consolidadas = dividasConsolidadas(dividas, dados?.montante_solicitado, valorPrestacao(dados));
+export function NovoFinanciamento({ dados }) {
+  const { credito = null } = dados || {};
+  const prestacao = valorPrestacao(credito);
+  const consolidadas = dividasConsolidadas(dados, credito?.montante_solicitado, prestacao);
+  const prestacaoM40 =
+    credito?.componente?.includes('Habitação') &&
+    valorPrestacao(credito) > calcRendimento(dados?.rendimento, true) * 0.4;
+
   return (
     <TableBody>
-      {rowInfo('Capital pretendido', fCurrency(dados?.montante_solicitado), false)}
-      {rowInfo('Tipo de crédito', dados?.componente, false)}
-      {rowInfo('Taxa de juros', fPercent(dados?.taxa_juro), false)}
-      {rowInfo('Taxa do preçario', dados?.taxa_precario || '', false)}
-      {rowInfo('Origem da taxa', dados?.origem_taxa || '', false)}
-      {rowInfo('Prazo de amortização', `${dados?.prazo_amortizacao} meses`, false)}
-      {rowInfo('Prestação mensal', fCurrency(valorPrestacao(dados)), false)}
+      {rowInfo('Capital pretendido', fCurrency(credito?.montante_solicitado), false)}
+      {rowInfo('Tipo de crédito', credito?.componente, false)}
+      {rowInfo('Taxa de juros', fPercent(credito?.taxa_juro), false)}
+      {rowInfo('Taxa do preçario', credito?.taxa_precario || '', false)}
+      {rowInfo('Origem da taxa', credito?.origem_taxa || '', false)}
+      {rowInfo('Prazo de amortização', `${credito?.prazo_amortizacao} meses`, false)}
+      {rowInfo('Prestação mensal', fCurrency(valorPrestacao(credito)), false)}
       {rowInfo('Dívidas consolidadas após o fincanciamento', '*title*', false)}
       {rowInfo('Capital inicial', fCurrency(consolidadas?.valor), true)}
-      {rowInfo('Saldo em dívida', fCurrency(consolidadas?.divida), true)}
-      {rowInfo('Serviço mensal da dívida', fCurrency(consolidadas?.prestacao), true)}
+      {rowInfo('Saldo em dívida', fCurrency(consolidadas?.saldo_divida), true)}
+      {rowInfo(
+        'Serviço mensal da dívida',
+        fCurrency(consolidadas?.valor_prestacao),
+        true,
+        prestacaoM40 ? <Alerta alerta="A prestação excede 40% do rend. bruto mensal do agregado." /> : null
+      )}
     </TableBody>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Dsti() {
+export function Dsti({ dados }) {
+  const dsti = percentagemDsti(dados);
   return (
     <TableBody>
-      {rowInfo('Limite do DSTI', fCurrency(0))}
-      {rowInfo('DSTI', fPercent(0))}
+      {rowInfo('Limite do DSTI', fCurrency(limiteDsti(dados?.rendimento)))}
+      {rowInfo('DSTI disponível', fCurrency(dstiDisponivel(dados)))}
+      {rowInfo(
+        'DSTI',
+        fPercent(dsti),
+        false,
+        dsti > 50 ? <Alerta alerta="DSTI ultrapassa o limite recomendável." /> : null
+      )}
+      {rowInfo('DSTI após contratação', fCurrency(dstiAposContratacao(dados)))}
     </TableBody>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Despesas() {
+export function Despesas({ dados }) {
   return (
     <TableBody>
-      {rowInfo('Água', fCurrency(0), false)}
-      {rowInfo('Eletricidade', fCurrency(0), false)}
-      {rowInfo('Outras', fCurrency(0), false)}
-      {rowInfo('Total despesas', fCurrency(0), true)}
+      {dados?.map(({ despesa, valor }) => rowInfo(despesa, fCurrency(valor), false))}
+      {dados?.length > 1 && rowInfo('Total despesas', fCurrency(totalDespesas(dados)), true)}
+      {dados?.length === 0 && <EmptyRow cells={2} message="Nenhuma despesa encontrada..." empty />}
     </TableBody>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function DstiCorrigido() {
+export function DstiCorrigido({ dados }) {
+  const corrigido = dstiCorrigido(dados);
   return (
     <TableBody>
-      {rowInfo('Limite do DSTI corrigido', fCurrency(0), false)}
-      {rowInfo('DSTI corrigido', fPercent(0), false)}
+      {rowInfo('Limite do DSTI corrigido', fCurrency(limiteDstiCorrigido(dados)), false)}
+      {rowInfo(
+        'DSTI corrigido',
+        fPercent(corrigido),
+        false,
+        corrigido > 70 ? <Alerta alerta="DSTI Corrigido ultrapassa o limite recomendável." /> : null
+      )}
+    </TableBody>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function LimiteAval({ rendimento }) {
+  return (
+    <TableBody>
+      {rendimento ? (
+        <TableRow>
+          <TableCell>{fCurrency(limiteDsti(rendimento) * 2)}</TableCell>
+        </TableRow>
+      ) : (
+        <EmptyRow cells={2} message="Sem rendimento..." empty />
+      )}
+    </TableBody>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Parecer({ parecer }) {
+  return (
+    <TableBody>
+      {parecer ? (
+        <TableRow>
+          <TableCell>{newLineText(parecer)}</TableCell>
+        </TableRow>
+      ) : (
+        <EmptyRow cells={2} message="Ainda não foi adicionado o parecer..." empty />
+      )}
     </TableBody>
   );
 }
@@ -82,18 +152,35 @@ export function DstiCorrigido() {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function Proposta({ dados }) {
+  const { credito = null, proposta = null } = dados || {};
   return (
     <TableBody>
-      {rowInfo('Tipo de crédito', dados?.componente)}
-      {rowInfo('Finalidade', dados?.finalidade)}
-      {rowInfo('Montante', fCurrency(dados?.montante_solicitado))}
-      {rowInfo('Taxa de juro', fPercent(dados?.taxa_juro) || '')}
-      {rowInfo('Prazo de utilização', `${dados?.prazo_utilizacao || 0} meses`)}
-      {rowInfo('Prazo de amortização', `${dados?.prazo_amortizacao} meses`)}
-      {rowInfo('Valor da prestação', fCurrency(0))}
-      {rowInfo('Comissões', 'comissões')}
-      {rowInfo('Garantia', 'garantia')}
-      {rowInfo('Outros', 'outros')}
+      {proposta ? (
+        <>
+          {rowInfo('Tipo de crédito', credito?.componente)}
+          {rowInfo('Finalidade', credito?.finalidade)}
+          {rowInfo('Montante', fCurrency(proposta?.montante))}
+          {rowInfo('Taxa de juro', fPercent(proposta?.taxa_juro) || '')}
+          {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao} meses`)}
+          {rowInfo('Prazo de utilização', proposta?.prazo_utilizacao ? `${proposta?.prazo_utilizacao || 0} meses` : '')}
+          {rowInfo('Valor da prestação', fCurrency(valorPrestacao(credito)))}
+          {rowInfo('Comissões', proposta?.comissoes)}
+          {rowInfo('Garantia', credito?.garantia)}
+          {rowInfo('Outros', proposta?.observacao)}
+        </>
+      ) : (
+        <EmptyRow cells={2} message="Os dados da proposta ainda não foram preenchidas..." empty />
+      )}
     </TableBody>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Alerta({ alerta }) {
+  return (
+    <Typography component="span" variant="subtitle2" sx={{ color: 'error.main' }}>
+      {` *ALERTA: ${alerta}`}
+    </Typography>
   );
 }

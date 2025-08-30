@@ -18,6 +18,12 @@ export function calcRendimento(rendimento, bruto) {
   return renda.reduce((sum, val) => sum + Number(val || 0), 0);
 }
 
+export function totalDespesas(dados) {
+  return dados.reduce((total, item) => total + Number(item.valor), 0);
+}
+
+// --------- DSTI ------------------------------------------------------------------------------------------------------
+
 export function valorPrestacao(pedido) {
   if (!pedido) return 0;
 
@@ -30,37 +36,21 @@ export function valorPrestacao(pedido) {
   return prestacao.toFixed(0);
 }
 
-export function totalDespesas(solvabilidade) {
-  return solvabilidade
-    ? Number(solvabilidade?.agua) + Number(solvabilidade?.eletricidade) + Number(solvabilidade?.outras)
-    : 0;
+export function prestacaoDividas(dados = []) {
+  return dados?.reduce((total, item) => total + Math.abs(Number(item.valor_prestacao)), 0);
 }
 
-export function totalServicoDividaCaixa(solvabilidade) {
-  return (
-    solvabilidade?.dividas
-      ?.filter(({ origem, tipo }) => origem === 'Caixa' && tipo === 'Divida')
-      ?.reduce((total, item) => total + Number(item.valor_prestacao), 0) || 0
-  );
+export function totalPrestacao(dados) {
+  const prestacao = valorPrestacao(dados?.credito);
+  const prestacaoCaixa = prestacaoDividas(dados?.dividas);
+  const prestacaoExterna = prestacaoDividas(dados?.dividasExternas);
+
+  return Number(prestacao) + Number(prestacaoCaixa) + Number(prestacaoExterna);
 }
 
-export function totalServicoDividaOb(solvabilidade) {
-  return (
-    solvabilidade?.dividas
-      ?.filter(({ origem, tipo }) => origem === 'Outros' && tipo === 'Divida')
-      ?.reduce((total, item) => total + Number(item.valor_prestacao), 0) || 0
-  );
-}
+// --------- DSTI ------------------------------------------------------------------------------------------------------
 
-export function servicoMensalDivida(solvabilidade) {
-  return (
-    Number(totalServicoDividaCaixa(solvabilidade)) +
-    Number(totalServicoDividaOb(solvabilidade)) +
-    Number(valorPrestacao(solvabilidade))
-  );
-}
-
-export const responsabilidadesCaixa = (responsabilidades) =>
+export const responsabilidadesInfo = (responsabilidades) =>
   (responsabilidades || []).reduce(
     (acc, item) => {
       acc.valor += Math.abs(item.valor);
@@ -71,52 +61,54 @@ export const responsabilidadesCaixa = (responsabilidades) =>
     { totais: true, valor: 0, saldo_divida: 0, valor_prestacao: 0 }
   );
 
-export function dividasConsolidadas(dividas, solicitado, prestacao) {
+export function dividasConsolidadas(responsabilidade, solicitado, prestacao) {
+  const caixa = responsabilidadesInfo(responsabilidade?.dividas);
+  const externas = responsabilidadesInfo(responsabilidade?.dividasExternas);
+
   return {
-    valor: Number(dividas?.valor || 0) + Number(solicitado || 0),
-    divida: Number(dividas?.saldo_divida || 0) + Number(solicitado || 0),
-    prestacao: Number(dividas?.valor_prestacao || 0) + Number(prestacao || 0),
+    valor: caixa?.valor + externas.valor + Number(solicitado || 0),
+    saldo_divida: caixa?.saldo_divida + externas.saldo_divida + Number(solicitado || 0),
+    valor_prestacao: caixa?.valor_prestacao + externas.valor_prestacao + Number(prestacao || 0),
   };
 }
 
-export function limiteDsti(solvabilidade) {
-  return solvabilidade ? calcRendimento(solvabilidade) * 0.5 : '';
+// --------- DSTI ------------------------------------------------------------------------------------------------------
+
+export function limiteDsti(rendimento) {
+  return rendimento ? calcRendimento(rendimento) * 0.5 : '';
 }
 
-export function percentagemDsti(solvabilidade) {
+export function percentagemDsti(dados) {
+  const rendimento = calcRendimento(dados?.rendimento);
+  return (!dados && '') || (rendimento > 0 && (totalPrestacao(dados) / rendimento) * 100) || 0;
+}
+
+export function dstiDisponivel(dados) {
+  const limite = limiteDsti(dados?.rendimento);
+  const prestacaoCaixa = prestacaoDividas(dados?.dividas);
+  const prestacaoExterna = prestacaoDividas(dados?.dividasExternas);
+
+  return limite - (prestacaoCaixa + prestacaoExterna);
+}
+
+export function dstiAposContratacao(dados) {
+  return dados ? dstiDisponivel(dados) - valorPrestacao(dados?.credito) : '';
+}
+
+// --------- DSTI CORRIGIDO --------------------------------------------------------------------------------------------
+
+export function dstiCorrigido(dados) {
+  const rendimento = calcRendimento(dados?.rendimento);
   return (
-    (!solvabilidade && '') ||
-    (calcRendimento(solvabilidade) > 1 && (servicoMensalDivida(solvabilidade) / calcRendimento(solvabilidade)) * 100) ||
+    (!dados && '') ||
+    (rendimento > 0 && ((totalPrestacao(dados) + totalDespesas(dados?.despesas)) / rendimento) * 100) ||
     0
   );
 }
 
-export function dstiDisponivel(solvabilidade) {
-  return solvabilidade
-    ? limiteDsti(solvabilidade) - (totalServicoDividaCaixa(solvabilidade) + totalServicoDividaOb(solvabilidade))
-    : '';
-}
-
-export function dstiAposContratacao(solvabilidade) {
-  return solvabilidade ? (dstiDisponivel(solvabilidade) - valorPrestacao(solvabilidade))?.toFixed(0) : '';
-}
-
-export function dstiCorrigido(solvabilidade) {
-  return (
-    (!solvabilidade && '') ||
-    (calcRendimento(solvabilidade) > 1 &&
-      ((servicoMensalDivida(solvabilidade) + (totalDespesas(solvabilidade) || 0)) / calcRendimento(solvabilidade)) *
-        100) ||
-    0
-  );
-}
-
-export function valorDstiCorrigido(solvabilidade) {
-  return (
-    (!solvabilidade && '') ||
-    (calcRendimento(solvabilidade) > 1 && limiteDsti(solvabilidade) + calcRendimento(solvabilidade) * 0.2) ||
-    0
-  );
+export function limiteDstiCorrigido(dados) {
+  const rendimento = calcRendimento(dados?.rendimento);
+  return (!dados && '') || (rendimento > 0 && limiteDsti(dados) + rendimento * 0.2) || 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -236,17 +228,8 @@ export function dividaList(origem, tipo, dividas = []) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const dividaListFicha = (divida, dividas = []) =>
-  dividas.map(({ valor = 0, saldo_divida: sd = 0, valor_prestacao: vp = 0 }) => ({
-    origem: 'Caixa',
-    valor_prestacao: Math.abs(vp),
-    capital_em_divida: Math.abs(sd),
-    capital_inicial: Math.abs(valor),
-    tipo: divida ? 'Divida' : 'Aval',
-  }));
-
-export function textParecer(stepper, solvabilidade, finalidade) {
-  const { dividas = [] } = solvabilidade || {};
+export function textParecer(ficha) {
+  const { dividas = [] } = ficha || {};
 
   const avalesCaixa = dividaList('Caixa', 'Aval', dividas);
   const avalesOutros = dividaList('Outros', 'Aval', dividas);
@@ -263,20 +246,20 @@ export function textParecer(stepper, solvabilidade, finalidade) {
     .filter(Boolean)
     .join('');
 
-  const dsti = percentagemDsti(solvabilidade);
-  const dsticorigiso = dstiCorrigido(solvabilidade);
+  const dsti = percentagemDsti(ficha);
+  const dsticorigiso = dstiCorrigido(ficha);
 
   const textDividas =
     dividasCaixa.length === 0 && dividasOutros.length === 0 && avalesCaixa.length === 0 && avalesOutros.length === 0
       ? 'O cliente não tem crédito ativo nem responsabilidade como fiador/avalista em créditos a terceiros.'
       : `O cliente apresenta as seguintes responsabilidades financeiras:\n${dividasText}`;
 
-  return `${stepper?.nome_cliente || ''}, cliente nº ${stepper?.cliente || ''} desde "MÊS de ANO", com salário domiciliado na Caixa. É funcionário(a) do(a) "EMPRESA/INSTITUIÇÃO" desde "MÊS de ANO", auferindo um vencimento mensal bruto de ${fCurrency(
-    stepper?.rendimento
-  )}.\n\nO cliente solicita um crédito no valor de ${fCurrency(stepper?.montante)}, correspondente a ${fShortenNumber(
-    stepper?.montante / stepper?.rendimento
-  )} vezes o seu salário, destinado a ${finalidade}. O crédito proposto tem as seguintes condições:\n- Prazo de amortização: ${stepper?.prazo_amortizacao} meses;\n- Taxa de juros: ${fPercent(stepper?.taxa_juros)};\n- Prestação mensal: ${fCurrency(stepper?.valor_prestacao)};
-  \nSituação Financeira\n${textDividas}\nAnálise da Solvabilidade\n- Conforme ficha de avaliação de solvabilidade, o DSTI é de ${fPercent(dsti)}, o DSTI Corrigido é de ${fPercent(dsticorigiso)}, indicando que o cliente ${dsti > 50 || dsticorigiso > 70 ? 'está fora' : 'ainda se encontra dentro'} do limite de esforço recomendado;\n- Apresenta como garantia a fiança do(s) fiador(es) acima referenciado(s), o que fortalece a proposta do crédito.
+  return `${ficha?.titular ?? 'NOME DO CLIENTE'}${ficha?.rendimento?.nome_conjuge ? ` e ${ficha?.rendimento?.nome_conjuge}` : ''}, cliente nº ${ficha?.cliente ?? 'Nº DE CLIENTE'} desde "MÊS de ANO", com salário domiciliado na Caixa. É funcionário(a) do(a) "EMPRESA/INSTITUIÇÃO" desde "MÊS de ANO", auferindo um vencimento mensal bruto de ${fCurrency(
+    calcRendimento(ficha?.rendimento, true)
+  )}.\n\nO cliente solicita um crédito no valor de ${fCurrency(ficha?.proposta?.montante)}, correspondente a ${fShortenNumber(
+    ficha?.proposta?.montante / calcRendimento(ficha?.rendimento, true)
+  )} vezes o seu salário, destinado a ${ficha?.finalidade ?? 'FINALIDADE'}. O crédito proposto tem as seguintes condições:\n- Prazo de amortização: ${ficha?.prazo_amortizacao ?? 'XX'} meses;\n- Taxa de juros: ${fPercent(ficha?.credito?.taxa_juros)};\n- Prestação mensal: ${fCurrency(ficha?.credito?.valor_prestacao)};
+  \nSituação Financeira\n${textDividas}\nAnálise da Solvabilidade\n- Conforme ficha de avaliação de solvabilidade, o DSTI é de ${fPercent(dsti)}, o DSTI Corrigido é de ${fPercent(dsticorigiso)}, indicando que o cliente ${dsti > 50 || dsticorigiso > 70 ? 'está fora' : 'ainda se encontra dentro'} do limite de esforço recomendado;\n- Apresenta como garantia ${ficha?.credito?.garantia}, o que fortalece a proposta do crédito.
   \nPelo exposto, somos de parecer "FAVORÁVEL/NÃO FAVORÁVEL" à contratação do crédito, considerando o cumprimento dos critérios de avaliação e o enquadramento da cliente dentro do perfil de risco aceitável. No entanto, a aprovação final deverá ser submetida para apreciação superior para melhor análise e decisão.`;
 }
 

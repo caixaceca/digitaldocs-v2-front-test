@@ -47,7 +47,10 @@ import { listaTitrulares, listaGarantias, subTiposGarantia } from '../applySortF
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const getItem = (list, ...ids) => list?.find(({ id }) => ids.some((val) => Number(id) === Number(val))) || null;
+export const getItem = (list, idEx, idSel, isEdit) =>
+  (idEx && list?.find(({ id }) => Number(id) === Number(idEx))) ||
+  (idSel && !isEdit && list?.find(({ id }) => Number(id) === Number(idSel))) ||
+  null;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -105,9 +108,9 @@ function Identificacao({ onClose, clausula }) {
   const defaultValues = useMemo(
     () => ({
       situacao: dadosStepper?.situacao ?? sitClausulas?.find(({ id }) => id === clausula?.situacao),
-      segmento: dadosStepper?.segmento || getItem(segmentosList, clausula?.segmento_id, segmentoCl),
-      titular: dadosStepper?.titular || getItem(titularesList, clausula?.tipo_titular_id, titularCl),
-      garantia: dadosStepper?.garantia || getItem(garantiasList, clausula?.tipo_garantia_id, garantiaCl),
+      segmento: dadosStepper?.segmento || getItem(segmentosList, clausula?.segmento_id, segmentoCl, isEdit),
+      titular: dadosStepper?.titular || getItem(titularesList, clausula?.tipo_titular_id, titularCl, isEdit),
+      garantia: dadosStepper?.garantia || getItem(garantiasList, clausula?.tipo_garantia_id, garantiaCl, isEdit),
       subtipoGarantia:
         dadosStepper?.subtipoGarantia ||
         (clausula?.subtipo_garantia_id && {
@@ -122,7 +125,7 @@ function Identificacao({ onClose, clausula }) {
         (clausula?.seccao_identificacao_caixa && 'Secção de identificação Caixa') ||
         null,
     }),
-    [dadosStepper, clausula, titularesList, garantiasList, segmentosList, titularCl, garantiaCl, segmentoCl]
+    [dadosStepper, clausula, titularesList, garantiasList, segmentosList, titularCl, garantiaCl, segmentoCl, isEdit]
   );
 
   const methods = useForm({ defaultValues });

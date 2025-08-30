@@ -25,7 +25,7 @@ import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-fo
 // _mock
 import { Garantias } from './garantias';
 import PareceresCredito from './pareceres';
-// import FichaAnalise from './ficha-parecer';
+import FichaAnalise from './ficha-parecer';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ export default function InfoCredito({ dados }) {
   const tabsList = [
     { value: 'Dados', component: <DadosCredito dados={dados} /> },
     { value: 'Garantias', component: <Garantias dados={dados} /> },
-    // { value: 'Ficha de análise', component: <FichaAnalise /> },
+    { value: 'Ficha de análise', component: <FichaAnalise /> },
     { value: 'Pareceres', component: <PareceresCredito /> },
   ];
 

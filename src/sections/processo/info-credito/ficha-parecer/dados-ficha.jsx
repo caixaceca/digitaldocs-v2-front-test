@@ -10,7 +10,7 @@ import { fNumber, fPercent, fCurrency } from '../../../../utils/formatNumber';
 //
 import Label from '../../../../components/Label';
 import { noDados } from '../../../../components/Panel';
-import { responsabilidadesCaixa, dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
+import { responsabilidadesInfo, dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -237,14 +237,14 @@ export function Responsabilidades({ responsabilidades }) {
       />
       <TableBody>
         {dividas?.map((row) => rowInfo(row))}
-        {dividas?.length > 1 && rowInfo(responsabilidadesCaixa(dividas))}
+        {dividas?.length > 1 && rowInfo(responsabilidadesInfo(dividas))}
         {(garantiasRecebidas?.length > 0 || garantiasPrestadas?.length > 0) && (
           <EmptyRow cells={8} message="OUTRAS" variant="head" />
         )}
         {garantiasRecebidas?.map((row) => rowInfo(row))}
-        {garantiasRecebidas?.length > 1 && rowInfo(responsabilidadesCaixa(garantiasRecebidas))}
+        {garantiasRecebidas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasRecebidas))}
         {garantiasPrestadas?.map((row) => rowInfo(row))}
-        {garantiasPrestadas?.length > 1 && rowInfo(responsabilidadesCaixa(garantiasPrestadas))}
+        {garantiasPrestadas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasPrestadas))}
         {irregularidades?.length > 0 && <EmptyRow cells={8} message="Histórico de incidentes" variant="head" war />}
         {irregularidades?.map((row) => rowInfo(row, true))}
       </TableBody>
@@ -287,7 +287,7 @@ export function AvalesFiancas({ dados }) {
       />
       <TableBody>
         {dados?.map((row) => rowInfo(row))}
-        {dados?.length > 1 && rowInfo(responsabilidadesCaixa(dados))}
+        {dados?.length > 1 && rowInfo(responsabilidadesInfo(dados))}
       </TableBody>
     </>
   ) : (
@@ -433,13 +433,17 @@ function CellValor({ valor = 0, moeda = 'CVE', total = false }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function EmptyRow({ cells = 4, message = ' ', variant = '' }) {
+export function EmptyRow({ cells = 4, message = ' ', variant = '', empty }) {
   return (
     <TableRow>
       <TableCell
         colSpan={cells}
         variant={variant}
-        sx={{ border: 'none', color: message === 'Histórico de incidentes' && 'warning.main' }}
+        sx={{
+          border: 'none',
+          color: message === 'Histórico de incidentes' && 'warning.main',
+          ...(empty && { fontStyle: 'italic', color: 'text.secondary' }),
+        }}
       >
         {message}
       </TableCell>
