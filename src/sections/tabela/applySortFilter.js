@@ -39,9 +39,12 @@ export function dadosList(array, colaboradores, uos, from) {
 
   array?.forEach((row) => {
     const uo = uos?.find(({ id }) => Number(id) === Number(row?.uo_origem_id));
-    const criado = colaboradores?.find(({ id }) => id === Number(row?.perfil_dono_id));
+    const criador = colaboradores?.find(({ id }) => id === Number(row?.perfil_dono_id));
     const colaborador = colaboradores?.find(({ id }) => id === row?.dono || id === row?.perfil_id);
-    if (colaborador && !colaboradoresList.includes(colaborador?.label)) colaboradoresList.push(colaborador?.label);
+    if (from === 'Devoluções') {
+      if (criador && !colaboradoresList.includes(criador?.label)) colaboradoresList.push(criador?.label);
+    } else if (colaborador && !colaboradoresList.includes(colaborador?.label))
+      colaboradoresList.push(colaborador?.label);
 
     if (row?.nome && !estadosList.includes(row?.nome)) estadosList.push(row?.nome);
     if (row?.nome === 'Arquivo' && !estadosList.includes('Excepto Arquivo')) estadosList.push('Excepto Arquivo');
@@ -53,7 +56,7 @@ export function dadosList(array, colaboradores, uos, from) {
     dados.push({
       ...row,
       balcao: uo?.balcao || '',
-      dono: criado?.label || row?.perfil_dono_id || '',
+      dono: criador?.label || row?.perfil_dono_id || '',
       colaborador: colaborador?.label || row?.dono || row?.perfil_id || '',
       uoLabel: (uo && uo?.tipo === 'Agências' && `Agência ${uo?.label}`) || uo?.label || '',
     });

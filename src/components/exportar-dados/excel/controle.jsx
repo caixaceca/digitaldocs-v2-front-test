@@ -104,7 +104,7 @@ export default function ExportarDadosControle({ titulo, dados, tabela }) {
       workSheet.addRow([
         ...(tabela !== 'PJF' && tabela !== 'CON'
           ? [
-              row?.nentrada || row?.entrada || '',
+              row?.nentrada || '',
               row?.titular || '',
               row?.conta || row?.cliente || row?.entidades || '',
               row?.assunto || '',
@@ -126,7 +126,7 @@ export default function ExportarDadosControle({ titulo, dados, tabela }) {
             ptDateTime(row?.data_transicao),
             row?.motivo || '',
             row?.observacao || '',
-            (row?.imputavel === true && 'Sim') || (row?.imputavel === false && 'Não') || '',
+            (row?.imputavel && 'Sim') || (row?.imputavel === false && 'Não') || 'Não definido',
           ]) ||
           (tabela === 'PJF' && [
             row?.referencia || '',

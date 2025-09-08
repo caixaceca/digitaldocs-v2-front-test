@@ -12,7 +12,6 @@ import {
   dstiCorrigido,
   totalDespesas,
   dstiDisponivel,
-  valorPrestacao,
   calcRendimento,
   percentagemDsti,
   limiteDstiCorrigido,
@@ -40,22 +39,20 @@ export function SituacaoProfissional({ dados }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function NovoFinanciamento({ dados }) {
-  const { credito = null } = dados || {};
-  const prestacao = valorPrestacao(credito);
-  const consolidadas = dividasConsolidadas(dados, credito?.montante_solicitado, prestacao);
+  const { valorPrestacao = 0, credito = null, proposta = null } = dados || {};
+  const consolidadas = dividasConsolidadas(dados, proposta?.montante || credito?.montante_solicitado, valorPrestacao);
   const prestacaoM40 =
-    credito?.componente?.includes('Habitação') &&
-    valorPrestacao(credito) > calcRendimento(dados?.rendimento, true) * 0.4;
+    credito?.componente?.includes('Habitação') && valorPrestacao > calcRendimento(dados?.rendimento, true) * 0.4;
 
   return (
     <TableBody>
-      {rowInfo('Capital pretendido', fCurrency(credito?.montante_solicitado), false)}
+      {rowInfo('Capital pretendido', fCurrency(proposta?.montante || credito?.montante_solicitado), false)}
       {rowInfo('Tipo de crédito', credito?.componente, false)}
-      {rowInfo('Taxa de juros', fPercent(credito?.taxa_juro), false)}
+      {rowInfo('Taxa de juros', fPercent(proposta?.taxa_juro || credito?.taxa_juro), false)}
       {rowInfo('Taxa do preçario', credito?.taxa_precario || '', false)}
       {rowInfo('Origem da taxa', credito?.origem_taxa || '', false)}
-      {rowInfo('Prazo de amortização', `${credito?.prazo_amortizacao} meses`, false)}
-      {rowInfo('Prestação mensal', fCurrency(valorPrestacao(credito)), false)}
+      {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao || credito?.prazo_amortizacao} meses`, false)}
+      {rowInfo('Prestação mensal', fCurrency(valorPrestacao), false)}
       {rowInfo('Dívidas consolidadas após o fincanciamento', '*title*', false)}
       {rowInfo('Capital inicial', fCurrency(consolidadas?.valor), true)}
       {rowInfo('Saldo em dívida', fCurrency(consolidadas?.saldo_divida), true)}
@@ -152,7 +149,7 @@ export function Parecer({ parecer }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function Proposta({ dados }) {
-  const { credito = null, proposta = null } = dados || {};
+  const { credito = null, proposta = null, valorPrestacao = 0 } = dados || {};
   return (
     <TableBody>
       {proposta ? (
@@ -163,7 +160,7 @@ export function Proposta({ dados }) {
           {rowInfo('Taxa de juro', fPercent(proposta?.taxa_juro) || '')}
           {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao} meses`)}
           {rowInfo('Prazo de utilização', proposta?.prazo_utilizacao ? `${proposta?.prazo_utilizacao || 0} meses` : '')}
-          {rowInfo('Valor da prestação', fCurrency(valorPrestacao(credito)))}
+          {rowInfo('Valor da prestação', fCurrency(valorPrestacao))}
           {rowInfo('Comissões', proposta?.comissoes)}
           {rowInfo('Garantia', credito?.garantia)}
           {rowInfo('Outros', proposta?.observacao)}

@@ -13,8 +13,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import useAnexos from '../../../../hooks/useAnexos';
+import { createItem } from '../../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../../redux/store';
-import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
 // components
 import { DialogButons } from '../../../../components/Actions';
@@ -58,7 +58,7 @@ export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
       }
       const formData = { favoravel: values.favoravel, descritivo: values?.descritivo };
       const params = { id: pId, msg: `Parecer ${isEdit ? 'atualizado' : 'enviado'}`, put: true, anexo, estadoId };
-      dispatch((isEdit ? updateItem : createItem)('parecer-credito', JSON.stringify(formData), { ...params, onClose }));
+      dispatch(createItem('parecer-credito', JSON.stringify(formData), { ...params, onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

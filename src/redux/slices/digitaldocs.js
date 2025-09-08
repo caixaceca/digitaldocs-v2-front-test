@@ -428,7 +428,7 @@ export function createItem(item, dados, params) {
         await axios.put(`${BASEURLDD}${apiUrl}`, params?.anexo, options);
       }
       const apiUrl =
-        (item === 'parecer-credito' && `${BASEURLDD}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
+        (item === 'parecer-credito' && `${BASEURLDD}/v2/processos/${params?.id}/cr/${1}/pareceres`) ||
         (item === 'garantias' && `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
         '';
       if (apiUrl) {
@@ -476,7 +476,6 @@ export function updateItem(item, dados, params) {
         (item === 'confirmar emissao por data' && `/v1/cartoes/validar/todas/emissoes`) ||
         (item === 'desarquivar' && `/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
         (item === 'alterar balcao' && `/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
-        (item === 'parecer-credito' && `/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
         (item === 'pendencia' && `/v2/processos/pender/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'domiciliar' && `/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'confirmar rececao multiplo' && `/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||

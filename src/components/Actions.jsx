@@ -67,7 +67,7 @@ export function ActionButton({ options = {} }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function DefaultAction({
-  icon,
+  icon = '',
   onClick,
   label = '',
   small = false,
@@ -127,10 +127,9 @@ export function DefaultAction({
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
     ((icon === 'adicionar' ||
-      label === 'ADICIONAR' ||
-      label === 'Adicionar' ||
       label === 'CONDICIONAL' ||
       label === 'Mostrar detalhes' ||
+      label?.toLocaleLowerCase() === 'adicionar' ||
       label === 'Carregar proposta') && <AddIcon sx={{ width: small ? 20 : 22 }} />) ||
     ((icon === 'pdf' || label === 'CONTRATO' || label === 'Pré-visualizar' || label === 'Prév. minuta') &&
       getFileThumb(true, { width: small ? 18 : 22 }, 'export.pdf')) ||

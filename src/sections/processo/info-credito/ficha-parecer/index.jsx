@@ -13,8 +13,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 // utils
 import { downloadDoc } from '../../../../utils/formatFile';
 import { setModal } from '../../../../redux/slices/intranet';
-import { extractClientes, movimentosConta } from './calculos';
 import { useDispatch, useSelector } from '../../../../redux/store';
+import { extractClientes, movimentosConta, calcValorPrestacao } from './calculos';
 //
 import {
   Saldos,
@@ -52,6 +52,23 @@ export default function FichaAnalise() {
 
   const { titular, entidade = '', cliente, credito = null } = processo || {};
   const entidades = useMemo(() => entidade?.split(';')?.map((row) => row) || [], [entidade]);
+  const valorPrestacao = useMemo(
+    () =>
+      fichaInformativa?.proposta
+        ? calcValorPrestacao({
+            componente: credito?.componente,
+            taxa: fichaInformativa?.proposta?.taxa_juro,
+            montante: fichaInformativa?.proposta?.montante,
+            prazo: fichaInformativa?.proposta?.prazo_amortizacao,
+          })
+        : calcValorPrestacao({
+            taxa: credito?.taxa_juro,
+            componente: credito?.componente,
+            prazo: credito?.prazo_amortizacao,
+            montante: credito?.montante_solicitado,
+          }),
+    [credito, fichaInformativa]
+  );
 
   const actionModal = ({ modal = '' }) => dispatch(setModal({ modal }));
 
@@ -89,7 +106,12 @@ export default function FichaAnalise() {
       ) : (
         <>
           {fichaInformativa?.entidade ? (
-            <Ficha credito={credito || null} ficha={fichaInformativa} actionModal={actionModal} />
+            <Ficha
+              ficha={fichaInformativa}
+              credito={credito || null}
+              actionModal={actionModal}
+              valorPrestacao={valorPrestacao}
+            />
           ) : (
             <SearchNotFound message="Informação da entidade não encontrada..." />
           )}
@@ -100,7 +122,7 @@ export default function FichaAnalise() {
           {modalIntranet === 'form-parecer' && (
             <FormParecer
               onClose={() => actionModal({ modal: '' })}
-              ficha={{ titular, ...fichaInformativa, cliente, credito }}
+              ficha={{ valorPrestacao, titular, ...fichaInformativa, cliente, credito }}
             />
           )}
         </>
@@ -111,7 +133,7 @@ export default function FichaAnalise() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Ficha({ credito, ficha, actionModal }) {
+export function Ficha({ credito, ficha, valorPrestacao, actionModal }) {
   const {
     saldos,
     titulos,
@@ -155,7 +177,9 @@ export function Ficha({ credito, ficha, actionModal }) {
       <AccordionItem
         title="6. Crédito e outras responsabilidades"
         children={
-          <Responsabilidades responsabilidades={{ dividas, garantiasPrestadas, garantiasRecebidas, irregularidades }} />
+          <Responsabilidades
+            responsabilidades={{ dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas }}
+          />
         }
       />
       <AccordionItem title="7. Responsabilidades como Fiador/Avalista" children={<AvalesFiancas dados={fiancas} />} />
@@ -168,16 +192,18 @@ export function Ficha({ credito, ficha, actionModal }) {
       />
       <AccordionItem
         title="12. Novo financiamento"
-        children={<NovoFinanciamento dados={{ credito, rendimento, dividas, dividasExternas }} />}
+        children={
+          <NovoFinanciamento dados={{ valorPrestacao, proposta, credito, rendimento, dividas, dividasExternas }} />
+        }
       />
       <AccordionItem
         title="13. DSTI - Debt Service To Income (<=50%)"
-        children={<Dsti dados={{ dividas, dividasExternas, rendimento, credito }} />}
+        children={<Dsti dados={{ valorPrestacao, dividas, dividasExternas, rendimento, credito }} />}
       />
       <AccordionItem title="14. Outras despesas regulares (média mensal)" children={<Despesas dados={despesas} />} />
       <AccordionItem
         title="15. DSTI corrigido (<=70%)"
-        children={<DstiCorrigido dados={{ dividas, dividasExternas, rendimento, credito, despesas }} />}
+        children={<DstiCorrigido dados={{ valorPrestacao, dividas, dividasExternas, rendimento, credito, despesas }} />}
       />
       <AccordionItem title="16. Limite máximo Aval/Fiança" children={<LimiteAval rendimento={rendimento} />} />
       <AccordionItem
@@ -192,7 +218,10 @@ export function Ficha({ credito, ficha, actionModal }) {
           />
         }
       />
-      <AccordionItem title="18. Proposta de Financiamento" children={<Proposta dados={{ credito, proposta }} />} />
+      <AccordionItem
+        title="18. Proposta de Financiamento"
+        children={<Proposta dados={{ valorPrestacao, credito, proposta }} />}
+      />
       <BaixarFicha dados={ficha} />
     </Stack>
   );

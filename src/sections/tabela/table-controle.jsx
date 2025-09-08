@@ -9,9 +9,10 @@ import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { baralharString, contaCliEnt } from '../../utils/formatText';
+import { contaCliEnt } from '../../utils/formatText';
 import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
 import { ptDateTime, getDataLS, dataValido, fToNow, fYear, dataLabel } from '../../utils/formatTime';
 // routes
@@ -26,9 +27,9 @@ import Label from '../../components/Label';
 import Scrollbar from '../../components/Scrollbar';
 import ItemAnalytic from '../../components/ItemAnalytic';
 import { DefaultAction } from '../../components/Actions';
-import { Criado, noDados } from '../../components/Panel';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { Criado, noDados, newLineText } from '../../components/Panel';
 import { SearchToolbarEntradas } from '../../components/SearchToolbar';
 import { ExportarDadosControle } from '../../components/exportar-dados/excel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
@@ -193,7 +194,7 @@ export default function TableControle({ from }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={tableHeaders(from)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable column={(from === 'Devoluções' && 8) || 7} row={10} />
+                  <SkeletonTable column={7} row={10} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${from}_${index}`}>
@@ -202,27 +203,54 @@ export default function TableControle({ from }) {
                         {row?.balcao ? `/${row.balcao}` : ''}
                         {row?.criado_em ? `/${fYear(row?.criado_em)}` : ''}
                       </TableCell>
-                      <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
-                      <TableCell>{contaCliEnt(row)}</TableCell>
+                      {from === 'Devoluções' ? (
+                        <TableCell>
+                          {row.titular ?? noDados()}
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            {contaCliEnt(row)}
+                          </Typography>
+                        </TableCell>
+                      ) : (
+                        <>
+                          <TableCell>{row.titular ?? noDados()}</TableCell>
+                          <TableCell>{contaCliEnt(row)}</TableCell>
+                        </>
+                      )}
                       <TableCell>{row?.assunto}</TableCell>
-                      <TableCell>
-                        {row?.nome || row?.estado_inicial}
-                        {row?.motivo && (
-                          <Label variant="ghost" color="warning" sx={{ ml: 1 }}>
-                            PENDENTE: {row?.motivo}
-                          </Label>
-                        )}
-                        {row?.trabalhado_em && from === 'Por concluir' && (
-                          <Criado
-                            caption
-                            tipo="data"
-                            sx={{ color: 'text.secondary' }}
-                            value1={fToNow(row.trabalhado_em)}
-                            value={ptDateTime(row.trabalhado_em)}
-                          />
-                        )}
-                      </TableCell>
-                      {from === 'Devoluções' && <TableCell>{row?.motivo || row?.observacao}</TableCell>}
+                      {from === 'Devoluções' ? (
+                        <>
+                          <TableCell>{row?.estado_inicial}</TableCell>
+                          <TableCell sx={{ maxWidth: 300 }}>
+                            {row?.motivo && <Typography variant="body2">{row?.motivo}</Typography>}
+                            {row?.observacao && (
+                              <Typography
+                                variant="body2"
+                                sx={row?.motivo && { color: 'text.secondary', typography: 'caption' }}
+                              >
+                                {newLineText(row?.observacao)}
+                              </Typography>
+                            )}
+                          </TableCell>
+                        </>
+                      ) : (
+                        <TableCell>
+                          {row?.nome || row?.estado_inicial}
+                          {row?.motivo && (
+                            <Label variant="ghost" color="warning" sx={{ ml: 1 }}>
+                              PENDENTE: {row?.motivo}
+                            </Label>
+                          )}
+                          {row?.trabalhado_em && from === 'Por concluir' && (
+                            <Criado
+                              caption
+                              tipo="data"
+                              sx={{ color: 'text.secondary' }}
+                              value1={fToNow(row.trabalhado_em)}
+                              value={ptDateTime(row.trabalhado_em)}
+                            />
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell width={10}>
                         <Criado caption tipo="data" value={ptDateTime(row.criado_em || row?.data_transicao)} />
                         <Criado
@@ -313,15 +341,19 @@ export function ResumoTrabalhados({ dados = [], assunto = '', colaborador = '', 
 function tableHeaders(item) {
   return [
     { id: item === 'Devoluções' ? 'entrada' : 'nentrada', label: 'Nº' },
-    { id: 'titular', label: 'Titular' },
-    { id: 'entidades', label: 'Cliente' },
+    ...(item === 'Devoluções'
+      ? [{ id: 'titular', label: 'Cliente' }]
+      : [
+          { id: 'titular', label: 'Titular' },
+          { id: 'entidades', label: 'Cliente' },
+        ]),
     { id: 'assunto', label: 'Assunto' },
     { id: item === 'Devoluções' ? 'estado_inicial' : 'nome', label: item === 'Devoluções' ? 'Origem' : 'Estado atual' },
     ...((item === 'Por concluir' && [{ id: 'colaborador', label: 'Criado' }]) ||
       (item === 'Entradas' && [{ id: 'criado_em', label: 'Criado' }]) ||
       (item === 'Trabalhados' && [{ id: 'colaborador', label: 'Colaborador' }]) ||
       (item === 'Devoluções' && [
-        { id: 'observacao', label: 'Motivo' },
+        { id: 'motivo', label: 'Motivo' },
         { id: 'data_transicao', label: 'Devolvido em' },
       ]) ||
       []),

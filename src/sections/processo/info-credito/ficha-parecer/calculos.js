@@ -24,16 +24,16 @@ export function totalDespesas(dados) {
 
 // --------- DSTI ------------------------------------------------------------------------------------------------------
 
-export function valorPrestacao(pedido) {
-  if (!pedido) return 0;
+export function calcValorPrestacao(dados) {
+  if (!dados?.montante || !dados?.taxa || !dados?.prazo) return 0;
 
-  const { componente, taxa_juro: tj, montante_solicitado: montante, prazo_amortizacao: prazo } = pedido;
+  const { componente, taxa, montante, prazo } = dados;
   const isHabitacao = componente?.toLowerCase()?.includes('habitação');
 
-  const taxa = isHabitacao ? (1 + tj / 100) ** (1 / 12) - 1 : tj / 100 / 12;
-  const prestacao = (montante * taxa) / (1 - (1 / (1 + taxa)) ** prazo);
+  const taxaAplicado = isHabitacao ? (1 + taxa / 100) ** (1 / 12) - 1 : taxa / 100 / 12;
+  const prestacao = (montante * taxaAplicado) / (1 - (1 / (1 + taxaAplicado)) ** prazo);
 
-  return prestacao.toFixed(0);
+  return Number(prestacao.toFixed(0));
 }
 
 export function prestacaoDividas(dados = []) {
@@ -41,11 +41,10 @@ export function prestacaoDividas(dados = []) {
 }
 
 export function totalPrestacao(dados) {
-  const prestacao = valorPrestacao(dados?.credito);
   const prestacaoCaixa = prestacaoDividas(dados?.dividas);
   const prestacaoExterna = prestacaoDividas(dados?.dividasExternas);
 
-  return Number(prestacao) + Number(prestacaoCaixa) + Number(prestacaoExterna);
+  return Number(dados?.valorPrestacao) + Number(prestacaoCaixa) + Number(prestacaoExterna);
 }
 
 // --------- DSTI ------------------------------------------------------------------------------------------------------
@@ -92,7 +91,7 @@ export function dstiDisponivel(dados) {
 }
 
 export function dstiAposContratacao(dados) {
-  return dados ? dstiDisponivel(dados) - valorPrestacao(dados?.credito) : '';
+  return dados ? dstiDisponivel(dados) - dados?.valorPrestacao : '';
 }
 
 // --------- DSTI CORRIGIDO --------------------------------------------------------------------------------------------
@@ -108,7 +107,7 @@ export function dstiCorrigido(dados) {
 
 export function limiteDstiCorrigido(dados) {
   const rendimento = calcRendimento(dados?.rendimento);
-  return (!dados && '') || (rendimento > 0 && limiteDsti(dados) + rendimento * 0.2) || 0;
+  return (!dados && '') || (rendimento > 0 && limiteDsti(dados?.rendimento) + rendimento * 0.2) || 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -258,7 +257,7 @@ export function textParecer(ficha) {
     calcRendimento(ficha?.rendimento, true)
   )}.\n\nO cliente solicita um crédito no valor de ${fCurrency(ficha?.proposta?.montante)}, correspondente a ${fShortenNumber(
     ficha?.proposta?.montante / calcRendimento(ficha?.rendimento, true)
-  )} vezes o seu salário, destinado a ${ficha?.finalidade ?? 'FINALIDADE'}. O crédito proposto tem as seguintes condições:\n- Prazo de amortização: ${ficha?.prazo_amortizacao ?? 'XX'} meses;\n- Taxa de juros: ${fPercent(ficha?.credito?.taxa_juros)};\n- Prestação mensal: ${fCurrency(ficha?.credito?.valor_prestacao)};
+  )} vezes o seu salário, destinado a ${ficha?.credito?.finalidade ?? 'FINALIDADE'}. O crédito proposto tem as seguintes condições:\n- Prazo de amortização: ${ficha?.proposta?.prazo_amortizacao ?? 'XX'} meses;\n- Taxa de juros: ${fPercent(ficha?.proposta?.taxa_juro)};\n- Prestação mensal: ${fCurrency(ficha?.valorPrestacao)};
   \nSituação Financeira\n${textDividas}\nAnálise da Solvabilidade\n- Conforme ficha de avaliação de solvabilidade, o DSTI é de ${fPercent(dsti)}, o DSTI Corrigido é de ${fPercent(dsticorigiso)}, indicando que o cliente ${dsti > 50 || dsticorigiso > 70 ? 'está fora' : 'ainda se encontra dentro'} do limite de esforço recomendado;\n- Apresenta como garantia ${ficha?.credito?.garantia}, o que fortalece a proposta do crédito.
   \nPelo exposto, somos de parecer "FAVORÁVEL/NÃO FAVORÁVEL" à contratação do crédito, considerando o cumprimento dos critérios de avaliação e o enquadramento da cliente dentro do perfil de risco aceitável. No entanto, a aprovação final deverá ser submetida para apreciação superior para melhor análise e decisão.`;
 }

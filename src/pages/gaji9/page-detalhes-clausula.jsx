@@ -23,6 +23,7 @@ import AcessoGaji9 from './acesso-gaji9';
 import { DialogConfirmar } from '../../components/CustomDialog';
 import { DetalhesContent } from '../../sections/gaji9/detalhes-gaji9';
 import ClausulaForm from '../../sections/gaji9/clausulas/form-clausula';
+import CondicionaisForm from '../../sections/gaji9/clausulas/form-condicional';
 import { NumerosClausula, RelacionadosCl } from '../../sections/gaji9/clausulas/opcoes-clausulas';
 import { SegmentosForm, TiposTitularesForm, CondicionalForm } from '../../sections/gaji9/clausulas/form-opcoes';
 
@@ -88,7 +89,7 @@ export default function PageDetalhesClausula() {
           tabsList={tabsList}
           currentTab={currentTab}
           changeTab={setCurrentTab}
-          title={clausula?.titulo || 'Detalhes da cláusula'}
+          title={clausula?.titulo ? `Cláusula: ${clausula?.titulo}` : 'Detalhes da cláusula'}
         />
 
         <HeaderBreadcrumbs
@@ -113,9 +114,26 @@ export default function PageDetalhesClausula() {
                   </>
                 )}
                 {((clausula?.segmento_id && currentTab === 'Segmentos') ||
-                  (clausula?.tipo_titular_id && currentTab === 'Tipos de titular') ||
-                  (clausula?.alineas?.length > 0 && currentTab === 'Condicionais')) && (
+                  (clausula?.tipo_titular_id && currentTab === 'Tipos de titular')) && (
                   <DefaultAction button small label="Adicionar" onClick={() => openModal(currentTab)} />
+                )}
+                {currentTab === 'Condicionais' && (
+                  <>
+                    <DefaultAction
+                      small
+                      button
+                      icon="adicionar"
+                      label="Condicional"
+                      onClick={() => openModal('Condicional')}
+                    />
+                    <DefaultAction
+                      small
+                      button
+                      icon="adicionar"
+                      label="Condicionais"
+                      onClick={() => openModal(currentTab)}
+                    />
+                  </>
                 )}
               </Stack>
             )
@@ -129,7 +147,8 @@ export default function PageDetalhesClausula() {
             <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
           )}
 
-          {modalGaji9 === 'Condicionais' && <CondicionalForm onClose={() => openModal()} id={id} />}
+          {modalGaji9 === 'Condicional' && <CondicionalForm onClose={() => openModal()} id={id} />}
+          {modalGaji9 === 'Condicionais' && <CondicionaisForm onClose={() => openModal()} id={id} />}
           {modalGaji9 === 'Tipos de titular' && <TiposTitularesForm onClose={() => openModal()} id={id} />}
           {modalGaji9 === 'form-clausula' && <ClausulaForm onClose={() => openModal()} clausula={clausula} />}
           {modalGaji9 === 'clonar-clausula' && <ClausulaForm onClose={() => openModal()} clausula={clausula} />}

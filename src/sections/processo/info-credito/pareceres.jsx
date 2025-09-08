@@ -80,8 +80,17 @@ export default function PareceresCredito() {
             Histórico
           </Typography>
           <Divider sx={{ mt: '5px !important', mb: '-10px !important' }} />
-          {historicoPareceres?.map((row) => (
-            <Parecer historico dados={row} openModal={openModal} key={`historico_${row?.id}`} />
+          {agruparPorEstado(historicoPareceres)?.map((row) => (
+            <Stack key={row?.estado_id}>
+              <Typography variant="subtitle2" sx={{ pb: 1 }}>
+                {row?.estado}
+              </Typography>
+              <Stack spacing={2}>
+                {row?.pareceres?.map((parecer) => (
+                  <Parecer historico dados={parecer} openModal={openModal} key={`historico_${parecer?.id}`} />
+                ))}
+              </Stack>
+            </Stack>
           ))}
         </Stack>
       )}
@@ -106,7 +115,7 @@ export function Parecer({ dados, acessoParecer = false, historico = false, openM
   const [expand, setExpand] = useState(false);
   const { colaboradores, perfilId } = useSelector((state) => state.intranet);
 
-  const { perfil_id: perfil, favoravel, parecer, estado, dado_em: em = '' } = dados;
+  const { perfil_id: perfil, favoravel, parecer, dado_em: em = '' } = dados;
   const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === perfil);
 
   return (
@@ -140,12 +149,7 @@ export function Parecer({ dados, acessoParecer = false, historico = false, openM
                 <DefaultAction small label="EDITAR" color="warning" onClick={() => openModal('parecer-cr', dados)} />
               </Box>
             )}
-            {historico && (
-              <Box sx={{ pr: 1 }}>
-                <Typography variant="overline">{estado}</Typography>
-                <Criado tipo="data" caption value={ptDateTime(em)} />
-              </Box>
-            )}
+            {historico && <Criado tipo="data" caption value={ptDateTime(em)} />}
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
@@ -157,4 +161,16 @@ export function Parecer({ dados, acessoParecer = false, historico = false, openM
       </Accordion>
     </Stack>
   );
+}
+
+function agruparPorEstado(pareceres) {
+  const mapa = pareceres.reduce((acc, item) => {
+    if (!acc[item.estado_id]) {
+      acc[item.estado_id] = { estado_id: item.estado_id, estado: item.estado, pareceres: [] };
+    }
+    acc[item.estado_id].pareceres.push(item);
+    return acc;
+  }, {});
+
+  return Object.values(mapa);
 }

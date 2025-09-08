@@ -286,6 +286,8 @@ export function createItem(item, dados, params) {
 
     try {
       const accessToken = await getAccessToken();
+      const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
+
       const apiUrl =
         (item === 'grupos' && `/v1/acs/grupos`) ||
         (item === 'funcoes' && `/v1/acs/roles`) ||
@@ -315,7 +317,6 @@ export function createItem(item, dados, params) {
         (item === 'balcoes' && `/v1/acs/representantes/acumular/balcao?representante_id=${params?.repId}`) ||
         '';
       if (apiUrl) {
-        const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
         const response = await axios.post(`${BASEURLGAJI9}${apiUrl}`, dados, options);
         if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));
@@ -331,6 +332,16 @@ export function createItem(item, dados, params) {
           );
         }
       }
+
+      if (item === 'condicionaisCl') {
+        const requisicoes = dados.map(async (row) => {
+          const ausencia = axios.post(`${BASEURLGAJI9}/v1/clausulas/c2c/${params?.id}`, JSON.stringify(row), options);
+          return ausencia;
+        });
+        const responses = await Promise.all(requisicoes);
+        dispatch(getSuccess({ item: 'clausula', dados: responses[responses.length - 1].data?.clausula || null }));
+      }
+
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);

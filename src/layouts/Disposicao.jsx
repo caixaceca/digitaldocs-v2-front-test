@@ -64,7 +64,7 @@ export default function Disposicao() {
         onClose={() => dispatch(getSuccess({ item: 'disposicao', dados: true }))}
       />
       <DialogContent sx={{ mt: 3 }}>
-        <Stack direction="row" justifyContent="center">
+        <Stack direction="row" justifyContent="center" sx={{ mb: 1 }}>
           <RadioGroup row value={value} name="disposicao" ref={radioGroupRef} onChange={handleChange}>
             {disposicoes.map((option) => (
               <Tooltip key={option.value} title={option.value.toUpperCase()} arrow>
@@ -84,7 +84,7 @@ export default function Disposicao() {
             ))}
           </RadioGroup>
         </Stack>
-        <Stack direction="row" justifyContent="center">
+        <Stack direction="row" justifyContent="center" sx={{ bgcolor: 'background.neutral', borderRadius: 1.5 }}>
           <FraseContent frase={frase} />
         </Stack>
       </DialogContent>

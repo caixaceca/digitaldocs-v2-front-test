@@ -16,8 +16,8 @@ export default function FraseContent({ frase }) {
   const sugeridoPor = colaboradores?.find(({ id }) => id === frase?.sugerido_por);
   const isKPI = emailCheck(sugeridoPor?.email, '') && frase?.frase?.includes('KPI - Key Performance Indicator');
   return (
-    <Stack sx={{ flexGrow: 1, color: 'text.secondary' }}>
-      <Typography gutterBottom variant="h6" sx={{ textAlign: 'center' }}>
+    <Stack sx={{ p: 2, flexGrow: 1, color: 'text.secondary' }}>
+      <Typography gutterBottom variant="h6" sx={{ textAlign: 'center', color: 'success.main' }}>
         Frase da semana
         {format(new Date(), 'MM') === '03' && (
           <Typography component="span" variant="body2" sx={{ fontWeight: 300 }}>
