@@ -150,7 +150,7 @@ function GerarContrato({ id }) {
     <>
       {(utilizador?._role === 'GERENTE' || temPermissao(['READ_CREDITO'])) && (
         <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
-          <DefaultAction button variant="contained" label="Gerar contrato - GAJi9" onClick={() => onOpen()} />
+          <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={() => onOpen()} />
         </Stack>
       )}
       {open && (
@@ -158,9 +158,10 @@ function GerarContrato({ id }) {
           color="success"
           onClose={onClose}
           isSaving={isLoading}
-          desc="enviar este processo para a plataforma GAJi9 para proceder à geração do contrato"
+          title="Enviar para GAJ-i9"
+          desc="enviar este processo para o GAJ-i9 para proceder à geração do contrato"
           handleOk={() =>
-            dispatch(getFromDigitalDocs('contratacao-gaji9', { id, notRest: true, msg: 'Enviado', onClose }))
+            dispatch(getFromDigitalDocs('contratacao-gaji9', { id, notRest: true, msg: 'Processo enviado', onClose }))
           }
         />
       )}

@@ -50,7 +50,7 @@ export default function FichaAnalise() {
   const { processo } = useSelector((state) => state.digitaldocs);
   const { fichaInformativa, modalIntranet, isLoading } = useSelector((state) => state.intranet);
 
-  const { titular, entidade = '', cliente, credito = null } = processo || {};
+  const { entidade = '', titular = '', cliente = '', credito = null } = processo || {};
   const entidades = useMemo(() => entidade?.split(';')?.map((row) => row) || [], [entidade]);
   const valorPrestacao = useMemo(
     () =>
@@ -107,9 +107,12 @@ export default function FichaAnalise() {
         <>
           {fichaInformativa?.entidade ? (
             <Ficha
+              titular={titular}
+              cliente={cliente}
               ficha={fichaInformativa}
               credito={credito || null}
               actionModal={actionModal}
+              modalIntranet={modalIntranet}
               valorPrestacao={valorPrestacao}
             />
           ) : (
@@ -119,12 +122,6 @@ export default function FichaAnalise() {
           {modalIntranet === 'form-ficha' && (
             <FormFicha credito={credito} ficha={fichaInformativa} onClose={() => actionModal({ modal: '' })} />
           )}
-          {modalIntranet === 'form-parecer' && (
-            <FormParecer
-              onClose={() => actionModal({ modal: '' })}
-              ficha={{ valorPrestacao, titular, ...fichaInformativa, cliente, credito }}
-            />
-          )}
         </>
       )}
     </>
@@ -133,7 +130,7 @@ export default function FichaAnalise() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Ficha({ credito, ficha, valorPrestacao, actionModal }) {
+export function Ficha({ credito, ficha, valorPrestacao, titular, cliente, modalIntranet, actionModal }) {
   const {
     saldos,
     titulos,
@@ -146,8 +143,8 @@ export function Ficha({ credito, ficha, valorPrestacao, actionModal }) {
     clientes: clientesList,
   } = useMemo(() => extractClientes(ficha?.clientes || {}), [ficha?.clientes]);
 
-  const { parecer = '' } = ficha || {};
-  const { conjuge = null, rendimento = null, despesas = [], dividas_externas: dividasExternas = [] } = ficha || {};
+  const { rendimento = null, despesas = [], parecer = '' } = ficha || {};
+  const { dividas_externas: dividasExternas = [], avales_externas: avalesExternos = [] } = ficha || {};
   const { numero, fiancas, entidade, mensagens, central_risco: cr, movimentos = [], proposta = null } = ficha || {};
   const { movimentosDebito, movimentosCredito, totaisDebConta, totaisCredConta } = useMemo(
     () => movimentosConta(movimentos),
@@ -159,7 +156,7 @@ export function Ficha({ credito, ficha, valorPrestacao, actionModal }) {
       <AccordionItem
         open
         title="1. Identificação"
-        children={<Identificcao entidade={{ numero, ...entidade, conjuge }} />}
+        children={<Identificcao entidade={{ numero, ...entidade, ...rendimento }} />}
       />
       <AccordionItem title="2. Clientes associados" children={<Clientes dados={clientesList} />} />
       <AccordionItem
@@ -182,13 +179,16 @@ export function Ficha({ credito, ficha, valorPrestacao, actionModal }) {
           />
         }
       />
-      <AccordionItem title="7. Responsabilidades como Fiador/Avalista" children={<AvalesFiancas dados={fiancas} />} />
+      <AccordionItem
+        title="7. Responsabilidades como Fiador/Avalista"
+        children={<AvalesFiancas dados={{ fiancas, avalesExternos }} />}
+      />
       <AccordionItem title="8. Informações da central de riscos" children={<CentralRisco cr={cr} />} />
       <AccordionItem title="9. Mensagens pendentes" children={<Mensagens dados={mensagens} />} />
       <AccordionItem title="10. Restruturações" children={<Restruturacoes dados={restruturacoes} />} />
       <AccordionItem
         children={<SituacaoProfissional dados={rendimento} />}
-        title="11. Situação profissional do proponente e Rendimento do agregado familiar (mensal)"
+        title="11. Situação profissional e Rendimento do agregado familiar (mensal)"
       />
       <AccordionItem
         title="12. Novo financiamento"
@@ -210,19 +210,28 @@ export function Ficha({ credito, ficha, valorPrestacao, actionModal }) {
         title="17. Parecer"
         children={<Parecer parecer={ficha?.parecer || ''} />}
         action={
-          <DefaultAction
-            small
-            button
-            label={parecer ? 'Editar' : 'Adicionar'}
-            onClick={() => actionModal({ modal: 'form-parecer' })}
-          />
+          proposta && (
+            <DefaultAction
+              small
+              button
+              label={parecer ? 'Editar' : 'Adicionar'}
+              onClick={() => actionModal({ modal: 'form-parecer' })}
+            />
+          )
         }
       />
       <AccordionItem
         title="18. Proposta de Financiamento"
         children={<Proposta dados={{ valorPrestacao, credito, proposta }} />}
       />
-      <BaixarFicha dados={ficha} />
+      <BaixarFicha dados={{ valorPrestacao, titular, dividas, cliente, credito, parecer, ...ficha }} />
+
+      {modalIntranet === 'form-parecer' && (
+        <FormParecer
+          onClose={() => actionModal({ modal: '' })}
+          ficha={{ valorPrestacao, titular, cliente, dividas, credito, ...ficha }}
+        />
+      )}
     </Stack>
   );
 }
@@ -273,7 +282,7 @@ export function BaixarFicha({ dados }) {
   useEffect(() => {
     if (pdfUrl) {
       setBaixar(false);
-      downloadDoc(pdfUrl, `Ficha Informativa de Entidade - ${dados?.numero}`);
+      downloadDoc(pdfUrl, `Ficha de Análise e Parecer de Crédito - ${dados?.numero}`);
     }
   }, [setPdfUrl, pdfUrl, dados?.numero]);
 
@@ -282,7 +291,7 @@ export function BaixarFicha({ dados }) {
       {baixar ? (
         <PDFDownloadLink
           style={{ textDecoration: 'none' }}
-          fileName={`Ficha Informativa de Entidade - ${dados?.numero}`}
+          fileName={`Ficha de Análise e Parecer de Crédito - ${dados?.numero}`}
           document={<FichaPdf dados={{ ...dados, analista: cc?.nome, uo: cc?.uo_label }} />}
         >
           {({ loading, url }) => {

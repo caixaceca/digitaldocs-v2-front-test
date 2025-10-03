@@ -70,6 +70,10 @@ const slice = createSlice({
       state.processo[item] = dados;
     },
 
+    enviarContratacao(state) {
+      state.processo.credito.enviado_para_contratacao = true;
+    },
+
     getFileSuccess(state, action) {
       const { url, anexo } = action.payload;
       if (url) state.objectURLs.push(url);
@@ -159,10 +163,10 @@ export function getFromDigitalDocs(item, params) {
           break;
         }
         case 'contratacao-gaji9': {
-          await axios.get(
-            `${BASEURLDD}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`,
-            options
-          );
+          const apiUrl = `${BASEURLDD}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`;
+          await axios.get(apiUrl, options);
+          dispatch(slice.actions.enviarContratacao());
+          doneSucess(params, dispatch, slice.actions.getSuccess);
           break;
         }
 

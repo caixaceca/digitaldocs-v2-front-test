@@ -4,8 +4,9 @@ import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 // utils
-import { newLineText } from '../../../../components/Panel';
+import Markdown from '../../../../components/Markdown';
 import { fPercent, fCurrency } from '../../../../utils/formatNumber';
+import { normalizeQuillLists } from '../../../../components/exportar-dados/pdf/htmlInlineizer';
 //
 import {
   limiteDsti,
@@ -18,21 +19,38 @@ import {
   dstiAposContratacao,
   dividasConsolidadas,
 } from './calculos';
-import { rowInfo, EmptyRow } from './dados-ficha';
+import { Cabecalho, rowInfo, EmptyRow } from './dados-ficha';
+import { situacaoProfissionalRows } from './utils';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function SituacaoProfissional({ dados }) {
   return (
-    <TableBody>
-      {rowInfo('Tipo de contrato', dados?.tipo_contrato, false)}
-      {rowInfo('Rendimento bruto proponente', fCurrency(dados?.renda_bruto_mensal), false)}
-      {dados?.conjuge && rowInfo('Rendimento bruto cônjuge', fCurrency(dados?.renda_bruto_mensal_conjuge), false)}
-      {dados?.conjuge && rowInfo('Total rendimento bruto', fCurrency(calcRendimento(dados, true)), true)}
-      {rowInfo('Rendimento líquido proponente', fCurrency(dados?.renda_liquido_mensal), false)}
-      {dados?.conjuge && rowInfo('Rendimento líquido cônjuge', fCurrency(dados?.renda_liquido_mensal_conjuge), false)}
-      {dados?.conjuge && rowInfo('Total rendimento líquido', fCurrency(calcRendimento(dados, false)), true)}
-    </TableBody>
+    <>
+      <Cabecalho
+        item="situacao-profissional"
+        headLabel={[
+          { label: '' },
+          { label: 'Situação laboral' },
+          { label: 'Rendimento bruto', align: 'right' },
+          { label: 'Rendimento líquido', align: 'right' },
+        ]}
+      />
+      <TableBody>
+        {dados ? (
+          situacaoProfissionalRows(dados).map((row, idx) => (
+            <TableRow key={idx} hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
+              <TableCell>{row.item}</TableCell>
+              <TableCell>{row.tipo}</TableCell>
+              <TableCell align="right">{fCurrency(row.bruto)}</TableCell>
+              <TableCell align="right">{fCurrency(row.liquido)}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <EmptyRow cells={4} message="Sem rendimento..." empty />
+        )}
+      </TableBody>
+    </>
   );
 }
 
@@ -48,20 +66,22 @@ export function NovoFinanciamento({ dados }) {
     <TableBody>
       {rowInfo('Capital pretendido', fCurrency(proposta?.montante || credito?.montante_solicitado), false)}
       {rowInfo('Tipo de crédito', credito?.componente, false)}
-      {rowInfo('Taxa de juros', fPercent(proposta?.taxa_juro || credito?.taxa_juro), false)}
-      {rowInfo('Taxa do preçario', credito?.taxa_precario || '', false)}
-      {rowInfo('Origem da taxa', credito?.origem_taxa || '', false)}
+      {rowInfo('Taxa do preçario', proposta?.taxa_precario || '', false)}
+      {rowInfo(
+        'Taxa de juros',
+        `${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''}`
+      )}
       {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao || credito?.prazo_amortizacao} meses`, false)}
-      {rowInfo('Prestação mensal', fCurrency(valorPrestacao), false)}
+      {rowInfo(
+        'Prestação mensal',
+        fCurrency(valorPrestacao),
+        false,
+        prestacaoM40 ? <Alerta alerta="A prestação excede 40% do rendimento bruto mensal do agregado" /> : null
+      )}
       {rowInfo('Dívidas consolidadas após o fincanciamento', '*title*', false)}
       {rowInfo('Capital inicial', fCurrency(consolidadas?.valor), true)}
       {rowInfo('Saldo em dívida', fCurrency(consolidadas?.saldo_divida), true)}
-      {rowInfo(
-        'Serviço mensal da dívida',
-        fCurrency(consolidadas?.valor_prestacao),
-        true,
-        prestacaoM40 ? <Alerta alerta="A prestação excede 40% do rend. bruto mensal do agregado." /> : null
-      )}
+      {rowInfo('Serviço mensal', fCurrency(consolidadas?.valor_prestacao), true)}
     </TableBody>
   );
 }
@@ -78,7 +98,7 @@ export function Dsti({ dados }) {
         'DSTI',
         fPercent(dsti),
         false,
-        dsti > 50 ? <Alerta alerta="DSTI ultrapassa o limite recomendável." /> : null
+        dsti > 50 ? <Alerta alerta="DSTI ultrapassa o limite recomendável" /> : null
       )}
       {rowInfo('DSTI após contratação', fCurrency(dstiAposContratacao(dados)))}
     </TableBody>
@@ -91,7 +111,7 @@ export function Despesas({ dados }) {
   return (
     <TableBody>
       {dados?.map(({ despesa, valor }) => rowInfo(despesa, fCurrency(valor), false))}
-      {dados?.length > 1 && rowInfo('Total despesas', fCurrency(totalDespesas(dados)), true)}
+      {dados?.length > 1 && rowInfo('Total', fCurrency(totalDespesas(dados)), true)}
       {dados?.length === 0 && <EmptyRow cells={2} message="Nenhuma despesa encontrada..." empty />}
     </TableBody>
   );
@@ -108,7 +128,7 @@ export function DstiCorrigido({ dados }) {
         'DSTI corrigido',
         fPercent(corrigido),
         false,
-        corrigido > 70 ? <Alerta alerta="DSTI Corrigido ultrapassa o limite recomendável." /> : null
+        corrigido > 70 ? <Alerta alerta="DSTI Corrigido ultrapassa o limite recomendável" /> : null
       )}
     </TableBody>
   );
@@ -137,7 +157,9 @@ export function Parecer({ parecer }) {
     <TableBody>
       {parecer ? (
         <TableRow>
-          <TableCell>{newLineText(parecer)}</TableCell>
+          <TableCell>
+            <Markdown>{normalizeQuillLists(parecer)}</Markdown>
+          </TableCell>
         </TableRow>
       ) : (
         <EmptyRow cells={2} message="Ainda não foi adicionado o parecer..." empty />
@@ -177,7 +199,7 @@ export function Proposta({ dados }) {
 export function Alerta({ alerta }) {
   return (
     <Typography component="span" variant="subtitle2" sx={{ color: 'error.main' }}>
-      {` *ALERTA: ${alerta}`}
+      {` *${alerta}`}
     </Typography>
   );
 }

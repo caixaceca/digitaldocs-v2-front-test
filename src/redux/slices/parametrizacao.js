@@ -59,7 +59,6 @@ const initialState = {
   meusAmbientes: [],
   destinatarios: [],
   estadosPerfil: [],
-  tiposGarantia: [],
   motivosPendencia: [],
   motivosTransicao: [],
   colaboradoresEstado: [],
@@ -185,7 +184,6 @@ export function getFromParametrizacao(item, params) {
         (item === 'meusambientes' && `/v2/fluxos/meus-ambientes/${perfilId}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/transicao/${params?.id}`) ||
         (item === 'tiposTitular' && `/v2/processos/tipos_titulares/${perfilId}`) ||
-        (item === 'tiposGarantia' && `/v2/processos/tipos_garantias/${perfilId}`) ||
         (item === 'colaboradoresEstado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||

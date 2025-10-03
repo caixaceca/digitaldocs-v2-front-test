@@ -15,13 +15,20 @@ const MarkdownStyle = styled('div')(({ theme }) => {
   const isLight = theme.palette.mode === 'light';
 
   return {
-    // List
-    '& ul, & ol': {
+    // Listas UL normais
+    '& ul': {
       ...theme.typography.body1,
       paddingLeft: theme.spacing(5),
-      '& li': {
-        lineHeight: 2,
-      },
+      listStyleType: 'disc',
+      '& li': { lineHeight: 1.5 },
+    },
+
+    // Listas OL normais
+    '& ol': {
+      ...theme.typography.body1,
+      paddingLeft: theme.spacing(5),
+      listStyleType: 'decimal',
+      '& li': { lineHeight: 1.5 },
     },
 
     // Blockquote
@@ -100,4 +107,28 @@ const components = {
   img: ({ ...props }) => <Image alt={props.alt} ratio="16/9" sx={{ borderRadius: 2, my: 5 }} {...props} />,
   a: ({ ...props }) =>
     props.href.includes('http') ? <Link target="_blank" rel="noopener" {...props} /> : <Link {...props} />,
+
+  p: ({ ...props }) => {
+    if (props.style) return <p {...props} />;
+    return <Typography variant="body1" {...props} />;
+  },
+
+  li: ({ node, className, style, ...props }) => {
+    let indent = 0;
+    if (className?.includes('ql-indent-1')) indent = 1;
+    else if (className?.includes('ql-indent-2')) indent = 2;
+    else if (className?.includes('ql-indent-3')) indent = 3;
+    else if (className?.includes('ql-indent-4')) indent = 4;
+    else if (className?.includes('ql-indent-5')) indent = 5;
+
+    const isBullet = node?.properties?.['data-list'] === 'bullet';
+
+    return (
+      <li
+        style={{ marginLeft: indent * 24, lineHeight: 2, listStyleType: isBullet ? 'disc' : undefined, ...style }}
+        className={className}
+        {...props}
+      />
+    );
+  },
 };

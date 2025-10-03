@@ -38,7 +38,6 @@ const initialState = {
   previewFile: null,
   tipoGarantia: null,
   selectedItem: null,
-  minutaContrato: null,
   clausulaOpcional: null,
   estadoMinutas: localStorage.getItem('estadoMinutas') || 'Em análise',
   grupos: [],
@@ -112,11 +111,9 @@ export const { openModal, setModal, getSuccess, closeModal } = slice.actions;
 export function getInfoGaji(item) {
   return async (dispatch) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    dispatch(getFromGaji9('segmentos'));
-    dispatch(getFromGaji9('componentes'));
     dispatch(getFromGaji9('tiposTitulares'));
-    if (item === 'gestao') dispatch(getFromGaji9('funcoes'));
-    if (item !== 'credito') dispatch(getFromGaji9('tiposGarantias'));
+    if (item !== 'credito') dispatch(getFromGaji9('segmentos'));
+    if (item !== 'credito') dispatch(getFromGaji9('componentes'));
   };
 }
 
@@ -151,7 +148,6 @@ export function getFromGaji9(item, params) {
         (item === 'credito' && `/v1/suportes/creditos/detail?credito_id=${params?.id}`) ||
         (item === 'entidade' && `/v1/suportes/entidades/detail?entidade_id=${params?.id}`) ||
         (item === 'gerarDocumento' && `/v1/minutas/gerar/documento?minuta_id=${params?.id}`) ||
-        (item === 'minutaContrato' && `/v1/suportes/creditos/minuta?credito_id=${params?.id}`) ||
         (item === 'representsBalcao' && `/v1/acs/representantes/credito?balcao=${params?.balcao}`) ||
         ((item === 'utilizador' || item === 'funcao') && `/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
@@ -232,14 +228,14 @@ export function getDocumento(item, params) {
         (item === 'minutav2' &&
           `/v2/minutas/documento/preview?restrito=${params?.restrito}&rascunho=${params?.rascunho}`) ||
         (item === 'gerar-contrato' &&
-          `/v1/contratos/gerar?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
+          `/v2/contratos/gerar?credito_id=${params?.creditoId}&representante_id=${params?.representanteId}`) ||
         (item === 'preview-contrato' &&
-          `/v1/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&minuta_id=${params?.minutaId}&representante_id=${params?.representanteId}&cache=${params?.cache}`) ||
+          `/v2/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&representante_id=${params?.representanteId}`) ||
         (item === 'minuta' &&
           `/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
         '';
       if (apiUrl) {
-        const headrs = {
+        const headers = {
           responseType: 'arraybuffer',
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -248,8 +244,8 @@ export function getDocumento(item, params) {
         };
         const response =
           item === 'gerar-contrato' || item === 'minutav2'
-            ? await axios.post(`${BASEURLGAJI9}${apiUrl}`, item === 'minutav2' ? JSON.stringify(params) : null, headrs)
-            : await axios.get(`${BASEURLGAJI9}${apiUrl}`, headrs);
+            ? await axios.post(`${BASEURLGAJI9}${apiUrl}`, item === 'minutav2' ? JSON.stringify(params) : null, headers)
+            : await axios.get(`${BASEURLGAJI9}${apiUrl}`, headers);
         const blob = new Blob([response.data], { type: params?.tipo_conteudo });
         const fileUrl = URL.createObjectURL(blob);
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
@@ -315,6 +311,8 @@ export function createItem(item, dados, params) {
         (item === 'tiposTitularesCl' && `/v1/clausulas/tipo_titulares?clausula_id=${params?.id}`) ||
         (item === 'intervenientes' && `/v1/suportes/creditos/intervenientes?credito_id=${params?.id}`) ||
         (item === 'balcoes' && `/v1/acs/representantes/acumular/balcao?representante_id=${params?.repId}`) ||
+        (item === 'seguro-garantia' &&
+          `/v1/suportes/creditos/seguros_garantia?credito_id=${params?.creditoId}&garantia_id=${params?.garantiaId}`) ||
         '';
       if (apiUrl) {
         const response = await axios.post(`${BASEURLGAJI9}${apiUrl}`, dados, options);
@@ -387,6 +385,8 @@ export function updateItem(item, dados, params) {
           `/v1/tipos_garantias/subtipos?tipo_id=${params?.garantiaId}&subtipo_id=${params?.id}`) ||
         (item === 'balcoes' &&
           `/v1/acs/representantes/acumular/balcao?id=${params?.id}&representante_id=${params?.repId}`) ||
+        (item === 'seguro-garantia' &&
+          `/v1/suportes/creditos/seguros_garantia?seguro_id=${params?.id}&credito_id=${params?.creditoId}&garantia_id=${params?.garantiaId}`) ||
         '';
 
       if (apiUrl) {
@@ -461,6 +461,8 @@ export function deleteItem(item, params) {
           `/v1/acs/representantes/acumular/balcao?id=${params?.id}&representante_id=${params?.repId}`) ||
         (item === 'intervenientes' &&
           `/v1/suportes/creditos/intervenientes?credito_id=${params?.id}&participante_id=${params?.numero}`) ||
+        (item === 'seguro-garantia' &&
+          `/v1/suportes/creditos/seguros_garantia?seguro_id=${params?.id}&credito_id=${params?.creditoId}&garantia_id=${params?.garantiaId}`) ||
         '';
 
       if (apiUrl) {

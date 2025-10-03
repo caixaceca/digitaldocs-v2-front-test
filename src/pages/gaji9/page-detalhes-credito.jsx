@@ -8,7 +8,6 @@ import Container from '@mui/material/Container';
 import useSettings from '../../hooks/useSettings';
 import { usePermissao } from '../../hooks/useAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
-import { useNotificacao } from '../../hooks/useNotificacao';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, setModal, getSuccess, deleteItem } from '../../redux/slices/gaji9';
@@ -21,8 +20,9 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import DialogPreviewDoc, { DialogConfirmar } from '../../components/CustomDialog';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
-import CreditoForm, { PreviewForm } from '../../sections/gaji9/form-credito';
-import InfoCredito, { TableInfoCredito } from '../../sections/gaji9/info-credito';
+import InfoCredito from '../../sections/gaji9/credito/info-credito';
+import { TableInfoCredito } from '../../sections/gaji9/credito/table-info';
+import CreditoForm, { PreviewForm } from '../../sections/gaji9/credito/form-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -31,11 +31,11 @@ export default function PageCreditoDetalhes() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState('Dados');
   const { temPermissao, isGerente } = usePermissao();
+  const [currentTab, setCurrentTab] = useState('Dados');
   const permissao = isGerente || temPermissao(['READ_CREDITO']);
 
-  const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving, done } = useSelector(
+  const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving } = useSelector(
     (state) => state.gaji9
   );
   const contratado = useMemo(() => !!credito?.contratado, [credito?.contratado]);
@@ -59,7 +59,11 @@ export default function PageCreditoDetalhes() {
   ];
 
   const openForm = (item) => dispatch(setModal({ item: item || '', dados: null }));
-  useNotificacao({ done, onClose: () => openForm() });
+
+  const onClose = () => {
+    openForm('', null);
+    navigate(`${PATH_DIGITALDOCS.gaji9.root}`);
+  };
 
   return (
     <Page title="Crédito | DigitalDocs">
@@ -122,19 +126,18 @@ export default function PageCreditoDetalhes() {
                 />
               )}
 
-              {modalGaji9 === 'form-credito' && <CreditoForm onClose={openForm} />}
+              {modalGaji9 === 'form-credito' && <CreditoForm onClose={() => openForm()} />}
+
               {(modalGaji9 === 'preview-contrato' || modalGaji9 === 'gerar-contrato') && (
                 <PreviewForm item={modalGaji9} onClose={() => openForm()} />
               )}
+
               {modalGaji9 === 'eliminar-credito' && (
                 <DialogConfirmar
                   isSaving={isSaving}
                   desc="eliminar este crédito"
                   onClose={() => openForm('', null)}
-                  handleOk={() => {
-                    const onClose = () => navigate(`${PATH_DIGITALDOCS.gaji9.root}`);
-                    dispatch(deleteItem('credito', { id, msg: 'Crédito eliminado', onClose }));
-                  }}
+                  handleOk={() => dispatch(deleteItem('credito', { id, msg: 'Crédito eliminado', onClose }))}
                 />
               )}
             </>

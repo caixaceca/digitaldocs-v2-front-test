@@ -11,26 +11,26 @@ import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { formatDate, fillData } from '../../utils/formatTime';
+import { formatDate, fillData } from '../../../utils/formatTime';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { getFromGaji9, getDocumento, createItem, updateItem } from '../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '../../../redux/store';
+import { getFromGaji9, getDocumento, createItem, updateItem } from '../../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
+  RHFTextField,
   FormProvider,
   RHFDatePicker,
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-  RHFTextField,
-} from '../../components/hook-form';
-import GridItem from '../../components/GridItem';
-import { DialogButons } from '../../components/Actions';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { shapeMixed } from '../../components/hook-form/yup-shape';
+} from '../../../components/hook-form';
+import GridItem from '../../../components/GridItem';
+import { DialogButons } from '../../../components/Actions';
+import { DialogTitleAlt } from '../../../components/CustomDialog';
+import { shapeMixed } from '../../../components/hook-form/yup-shape';
 //
-import { listaTitrulares } from './applySortFilter';
+import { listaTitrulares } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -159,13 +159,13 @@ export default function CreditoForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function IntervenienteForm({ id, dados, onClose }) {
+export function IntervenienteForm({ id, garantiaId = '', dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({
     entidade: Yup.number().min(0).required().label('Nº de entidade'),
-    responsabilidade: Yup.mixed().required().label('Responsabilidade'),
+    responsabilidade: !garantiaId && Yup.mixed().required().label('Responsabilidade'),
     entidade_representada: shapeMixed('Entidade representada', 'Procurador', '', 'responsabilidade'),
   });
 
@@ -176,23 +176,18 @@ export function IntervenienteForm({ id, dados, onClose }) {
 
   const onSubmit = async () => {
     const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', onClose };
-    dispatch(
-      createItem(
-        'intervenientes',
-        JSON.stringify([
-          {
-            designacao: '',
-            numero_ordem: null,
-            numero_entidade: values?.entidade,
-            fiador: values?.responsabilidade === 'Fiador',
-            avalista: values?.responsabilidade === 'Avalista',
-            representante: values?.responsabilidade === 'Procurador',
-            entidade_representada: values.responsabilidade === 'Procurador' ? values.entidade_representada.id : '',
-          },
-        ]),
-        params
-      )
-    );
+    const formData = {
+      designacao: '',
+      numero_ordem: null,
+      garantia_id: garantiaId,
+      dono_garantia: !!garantiaId,
+      numero_entidade: values?.entidade,
+      fiador: values?.responsabilidade === 'Fiador',
+      avalista: values?.responsabilidade === 'Avalista',
+      representante: values?.responsabilidade === 'Procurador',
+      entidade_representada: values.responsabilidade === 'Procurador' ? values.entidade_representada.id : '',
+    };
+    dispatch(createItem('intervenientes', JSON.stringify([formData]), params));
   };
 
   return (
@@ -202,12 +197,14 @@ export function IntervenienteForm({ id, dados, onClose }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack direction="column" spacing={3} sx={{ pt: 1 }}>
             <RHFNumberField noFormat label="Nº de entidade" name="entidade" />
-            <RHFAutocompleteSmp
-              dc
-              name="responsabilidade"
-              label="Responsabilidade"
-              options={['Avalista', 'Fiador', 'Procurador']}
-            />
+            {!garantiaId && (
+              <RHFAutocompleteSmp
+                dc
+                name="responsabilidade"
+                label="Responsabilidade"
+                options={['Avalista', 'Fiador', 'Procurador']}
+              />
+            )}
             {values.responsabilidade === 'Procurador' && (
               <RHFAutocompleteSmp
                 dc
@@ -284,6 +281,57 @@ export function DataContrato({ creditoId, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function SeguroGarantiaForm({ creditoId, garantiaId, selectedItem, onClose }) {
+  const dispatch = useDispatch();
+  const isEdit = selectedItem?.action === 'editar';
+  const { tiposSeguros, isSaving } = useSelector((state) => state.gaji9);
+  const tipos = useMemo(() => tiposSeguros?.map(({ id, designacao }) => ({ id, label: designacao })), [tiposSeguros]);
+
+  useEffect(() => {
+    dispatch(getFromGaji9('tiposSeguros', { notLoading: true }));
+  }, [dispatch]);
+
+  const formSchema = Yup.object().shape({
+    valor: Yup.number().label('Valor do prémio'),
+    tipo: Yup.mixed().required().label('Tipo de seguro'),
+  });
+  const defaultValues = useMemo(
+    () => ({
+      valor: selectedItem?.valor_premio_seguro ?? '',
+      tipo: tipos?.find(({ id }) => id === selectedItem?.tipo_seguro_id) ?? null,
+    }),
+    [selectedItem, tipos]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { watch, handleSubmit } = methods;
+  const values = watch();
+
+  const onSubmit = async () => {
+    const msg = `Seguro ${isEdit ? 'atualizado' : 'adicionado'}`;
+    const dados = { tipo_seguro_id: values?.tipo?.id, premio_seguro: values?.valor ?? 0 };
+    const params = { id: selectedItem?.id, garantiaId, creditoId, getItem: 'credito', msg, onClose };
+    dispatch((isEdit ? updateItem : createItem)('seguro-garantia', JSON.stringify(isEdit ? dados : [dados]), params));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitleAlt title={isEdit ? 'Atualizar seguro' : 'Adicionar seguro'} onClose={onClose} />
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFAutocompleteObj dc name="tipo" label="Tipo de seguro" options={tipos} />
+            <RHFNumberField label="Valor do prémio" name="valor" tipo="CVE" />
+          </Stack>
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function PropostaForm({ onClose }) {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.gaji9);
@@ -320,12 +368,11 @@ export function PropostaForm({ onClose }) {
 
 export function PreviewForm({ item, onClose }) {
   const dispatch = useDispatch();
-  const { isLoadingDoc, credito, minutaContrato, representsBalcao } = useSelector((state) => state.gaji9);
+  const { isLoadingDoc, credito, representsBalcao } = useSelector((state) => state.gaji9);
   const { id, balcao_domicilio: balcao, cliente = '' } = credito;
 
   useEffect(() => {
     dispatch(getFromGaji9('representsBalcao', { balcao, notLoading: true, reset: { val: [] } }));
-    dispatch(getFromGaji9('minutaContrato', { notLoading: true, id, reset: { val: null } }));
   }, [dispatch, balcao, id]);
 
   const representsBalcaoList = useMemo(
@@ -335,7 +382,7 @@ export function PreviewForm({ item, onClose }) {
 
   const formSchema = Yup.object().shape({ representante: Yup.mixed().required().label('Representante') });
   const defaultValues = useMemo(
-    () => ({ cache: false, representante: representsBalcaoList?.length === 1 ? representsBalcaoList[0] : null }),
+    () => ({ representante: representsBalcaoList?.length === 1 ? representsBalcaoList[0] : null }),
     [representsBalcaoList]
   );
 
@@ -346,17 +393,11 @@ export function PreviewForm({ item, onClose }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minutaContrato, representsBalcao]);
+  }, [representsBalcao]);
 
   const onSubmit = async () => {
-    const params = { creditoId: id, minutaId: minutaContrato?.id, representanteId: values?.representante?.id };
-    dispatch(
-      getDocumento(item, {
-        ...params,
-        cache: !values?.cache,
-        titulo: `${item === 'preview-contrato' ? 'Pré-visualização de ' : ''}Contrato: Cliente ${cliente}`,
-      })
-    );
+    const titulo = `${item === 'preview-contrato' ? 'Pré-visualização de ' : ''}Contrato: Cliente ${cliente}`;
+    dispatch(getDocumento(item, { ...{ creditoId: id, representanteId: values?.representante?.id }, titulo }));
   };
 
   return (
@@ -364,7 +405,7 @@ export function PreviewForm({ item, onClose }) {
       <DialogTitleAlt sx={{ mb: 2 }} title={`${item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'} contrato`} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3}>
+          <Stack spacing={3} sx={{ pt: 1 }}>
             {item === 'gerar-contrato' && (
               <Alert severity="warning">
                 <Typography variant="body2">
@@ -376,27 +417,12 @@ export function PreviewForm({ item, onClose }) {
                 </Typography>
               </Alert>
             )}
-
-            <Stack>
-              <Typography sx={{ color: 'text.secondary' }}>Minuta:</Typography>
-              {minutaContrato ? (
-                <>
-                  <Typography variant="subtitle2">{minutaContrato?.titulo}</Typography>
-                  <Typography variant="subtitle2">{minutaContrato?.subtitulo}</Typography>
-                </>
-              ) : (
-                <Typography variant="body2" sx={{ color: 'text.error', opacity: 0.75, fontStyle: 'italic' }}>
-                  *Não foi possível localizar qualquer minuta aplicável ao crédito.
-                </Typography>
-              )}
-            </Stack>
             <RHFAutocompleteObj dc name="representante" label="Representante" options={representsBalcaoList} />
-            <RHFSwitch name="cache" label="Forçar atualização dos dados da banca" />
           </Stack>
           <DialogButons
             onClose={onClose}
             isSaving={isLoadingDoc}
-            hideSubmit={!minutaContrato || !values?.representante?.id}
+            hideSubmit={!values?.representante?.id}
             label={item === 'preview-contrato' ? 'Pré-visualizar' : 'Gerar'}
           />
         </FormProvider>

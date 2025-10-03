@@ -398,10 +398,15 @@ export function UtilizadorGrupoForm({ grupoId, onClose, selectedItem }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving, funcoes } = useSelector((state) => state.gaji9);
+
   const colaboradoresList = useMemo(
     () => utilizadoresGaji9(colaboradores, funcoes, 'funcoes'),
     [funcoes, colaboradores]
   );
+
+  useEffect(() => {
+    dispatch(getFromGaji9('funcoes'));
+  }, [dispatch]);
 
   const formSchema = Yup.object().shape({ colaborador: Yup.mixed().required().label('Colaborador') });
   const defaultValues = useMemo(
@@ -423,7 +428,7 @@ export function UtilizadorGrupoForm({ grupoId, onClose, selectedItem }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
+  }, [selectedItem, colaboradoresList]);
 
   const onSubmit = async () => {
     const params = {
@@ -472,6 +477,10 @@ export function FuncaoForm({ onClose }) {
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.gaji9);
   const colaboradoresList = useMemo(() => perfisAad(colaboradores, 'funcoes'), [colaboradores]);
 
+  useEffect(() => {
+    dispatch(getFromGaji9('funcoes'));
+  }, [dispatch]);
+
   const formSchema = Yup.object().shape({
     role: Yup.mixed().required().label('Função'),
     utilizador: Yup.mixed().required().label('Colaborador'),
@@ -494,7 +503,7 @@ export function FuncaoForm({ onClose }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
+  }, [selectedItem, colaboradoresList]);
 
   const onSubmit = async () => {
     const formData = removerPropriedades(

@@ -10,9 +10,10 @@ export function findColaborador(mail, colaboradores) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function setItemValue(newValue, setItem, localS, id) {
+export function setItemValue(newValue, setItem, itemLocalStorage, id) {
   if (setItem) setItem(newValue);
-  if (localS) localStorage.setItem(localS, (newValue && id && newValue?.id) || (newValue && newValue) || '');
+  if (itemLocalStorage)
+    localStorage.setItem(itemLocalStorage, (newValue && id && newValue?.id) || (newValue && newValue) || '');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

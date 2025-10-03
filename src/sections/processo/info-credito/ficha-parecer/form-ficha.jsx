@@ -12,7 +12,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { textParecer } from './calculos';
+import { textParecer } from './parecer';
 import { fillData } from '../../../../utils/formatTime';
 import { updateFicha } from '../../../../redux/slices/intranet';
 import { useSelector, useDispatch } from '../../../../redux/store';
@@ -20,6 +20,7 @@ import { resetDados, forwardStep, backStep } from '../../../../redux/slices/step
 // components
 import {
   RHFSwitch,
+  RHFEditor,
   FormProvider,
   RHFTextField,
   RHFDatePicker,
@@ -30,8 +31,8 @@ import Steps from '../../../../components/Steps';
 import GridItem from '../../../../components/GridItem';
 import { SemDados } from '../../../../components/Panel';
 import { DialogTitleAlt } from '../../../../components/CustomDialog';
-import { shapeText, shapeNumber, shapeDate } from '../../../../components/hook-form/yup-shape';
 import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '../../../../components/Actions';
+import { shapeText, shapeNumber, shapeDate, shapeMixed } from '../../../../components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -80,8 +81,11 @@ function Rendimento({ dados, onClose }) {
   const formSchema = Yup.object().shape({
     nome_conjuge: shapeText('Nome', true, '', 'conjuge'),
     tipo_contrato: Yup.mixed().required().label('Situação laboral'),
+    local_trabalho: Yup.string().required().label('Local de trabalho'),
     renda_bruto_mensal: Yup.number().positive().label('Rendimento bruto'),
     renda_liquido_mensal: Yup.number().positive().label('Rendimento liquido'),
+    tipo_contrato_conjuge: shapeMixed('Situação laboral', true, '', 'conjuge'),
+    local_trabalho_conjuge: shapeText('Local de trabalho', true, '', 'conjuge'),
     data_nascimento_conjuge: shapeDate('Data de nascimento', true, '', 'conjuge'),
     renda_bruto_mensal_conjuge: shapeNumber('Rendimento bruto', true, '', 'conjuge'),
     renda_liquido_mensal_conjuge: shapeNumber('Rendimento liquido', true, '', 'conjuge'),
@@ -91,9 +95,12 @@ function Rendimento({ dados, onClose }) {
     () => ({
       conjuge: !!dados?.conjuge,
       nome_conjuge: dados?.nome_conjuge || '',
+      local_trabalho: dados?.local_trabalho || '',
       tipo_contrato: dados?.tipo_contrato || null,
       renda_bruto_mensal: dados?.renda_bruto_mensal || '',
       renda_liquido_mensal: dados?.renda_liquido_mensal || '',
+      tipo_contrato_conjuge: dados?.tipo_contrato_conjuge || null,
+      local_trabalho_conjuge: dados?.local_trabalho_conjuge || '',
       renda_bruto_mensal_conjuge: dados?.renda_bruto_mensal_conjuge || '',
       renda_liquido_mensal_conjuge: dados?.renda_liquido_mensal_conjuge || '',
       data_nascimento_conjuge: fillData(dados?.data_nascimento_conjuge, null),
@@ -117,24 +124,37 @@ function Rendimento({ dados, onClose }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
-        <GridItem sm={4}>
+        <GridItem sm={6} md={3}>
           <RHFAutocompleteSmp name="tipo_contrato" label="Situação laboral" options={['Quadro', 'Contratado']} />
         </GridItem>
-        <GridItem sm={4} children={<RHFNumberField tipo="CVE" name="renda_bruto_mensal" label="Rendimento bruto" />} />
-        <GridItem sm={4}>
+        <GridItem sm={6} md={3} children={<RHFTextField name="local_trabalho" label="Local de trabalho" />} />
+        <GridItem sm={6} md={3}>
+          <RHFNumberField tipo="CVE" name="renda_bruto_mensal" label="Rendimento bruto" />
+        </GridItem>
+        <GridItem sm={6} md={3}>
           <RHFNumberField tipo="CVE" name="renda_liquido_mensal" label="Rendimento liquido" />
         </GridItem>
         <GridItem children={<RHFSwitch name="conjuge" label="Cônjuge" />} />
         {values?.conjuge && (
           <>
-            <GridItem children={<RHFTextField name="nome_conjuge" label="Nome" />} />
-            <GridItem sm={4}>
+            <GridItem sm={9} children={<RHFTextField name="nome_conjuge" label="Nome" />} />
+            <GridItem sm={3}>
               <RHFDatePicker name="data_nascimento_conjuge" label="Data de nascimento" disableFuture />
             </GridItem>
-            <GridItem sm={4}>
+            <GridItem sm={6} md={3}>
+              <RHFAutocompleteSmp
+                label="Situação laboral"
+                name="tipo_contrato_conjuge"
+                options={['Quadro', 'Contratado']}
+              />
+            </GridItem>
+            <GridItem sm={6} md={3}>
+              <RHFTextField name="local_trabalho_conjuge" label="Local de trabalho" />
+            </GridItem>
+            <GridItem sm={6} md={3}>
               <RHFNumberField tipo="CVE" name="renda_bruto_mensal_conjuge" label="Rendimento bruto" />
             </GridItem>
-            <GridItem sm={4}>
+            <GridItem sm={6} md={3}>
               <RHFNumberField tipo="CVE" name="renda_liquido_mensal_conjuge" label="Rendimento liquido" />
             </GridItem>
           </>
@@ -347,7 +367,7 @@ export function FormParecer({ ficha, onClose }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const formSchema = Yup.object().shape({ parecer: Yup.string().required().label('Parecer') });
-  const defaultValues = useMemo(() => ({ parecer: ficha?.parecer || textParecer(ficha) || '' }), [ficha]);
+  const defaultValues = useMemo(() => ({ parecer: textParecer(ficha) || '' }), [ficha]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, handleSubmit } = methods;
   const values = watch();
@@ -362,12 +382,12 @@ export function FormParecer({ ficha, onClose }) {
   };
 
   return (
-    <Dialog open fullWidth maxWidth="md">
-      <DialogTitleAlt onClose={onClose} title="Parecer do analista" />
+    <Dialog open fullWidth maxWidth="lg">
+      <DialogTitleAlt onClose={onClose} title="Parecer do analista" sx={{ mb: 2 }} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack sx={{ pt: 3 }}>
-            <GridItem children={<RHFTextField name="parecer" multiline minRows={15} maxRows={20} />} />
+          <Stack sx={{ pt: 1 }}>
+            <GridItem children={<RHFEditor name="parecer" simple />} />
           </Stack>
           <DialogButons onClose={onClose} edit />
         </FormProvider>

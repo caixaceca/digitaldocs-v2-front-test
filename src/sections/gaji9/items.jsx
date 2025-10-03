@@ -21,7 +21,7 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 //
 import InfoCaixa from './dados-caixa';
 import TableMinutas from './table-minutas';
-import TableCredito from './table-creditos';
+import TableCredito from './credito/table-creditos';
 import TableParamsGaji9 from './table-parametrizacao';
 import TableClausula from './clausulas/table-clausula';
 import TableIdentificadores from './table-identificadores';

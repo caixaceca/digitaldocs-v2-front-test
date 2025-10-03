@@ -83,11 +83,11 @@ function RecursosUtilizadores({ id, dados = [], recursos = false }) {
     <>
       <Table sx={{ mt: 3 }}>
         <TableHead>
-          <TableRow>
-            <TableCell size="small">{recursos ? 'Recurso' : 'Utilizador'}</TableCell>
-            <TableCell size="small">Data</TableCell>
-            <TableCell size="small">{recursos ? 'Permissões' : 'Função'}</TableCell>
-            <TableCell size="small" width={10}>
+          <TableRow sx={{ '& .MuiTableCell-root': { py: 1 } }}>
+            <TableCell>{recursos ? 'Recurso' : 'Utilizador'}</TableCell>
+            <TableCell>Data</TableCell>
+            <TableCell>{recursos ? 'Permissões' : 'Função'}</TableCell>
+            <TableCell width={10}>
               {!!id && <DefaultAction label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
             </TableCell>
           </TableRow>
@@ -175,7 +175,7 @@ export function BalcoesRepresentante({ id, dados = [] }) {
     <>
       <Table sx={{ mt: 3 }}>
         <TableHead>
-          <TableRow>
+          <TableRow sx={{ '& .MuiTableCell-root': { py: 1 } }}>
             {[
               { label: 'Balcão' },
               { label: 'Data iníco', center: true },
@@ -184,7 +184,7 @@ export function BalcoesRepresentante({ id, dados = [] }) {
             ]?.map((row) => (
               <CellHeader key={row?.label} dados={row} />
             ))}
-            <TableCell size="small" width={10}>
+            <TableCell width={10}>
               <Stack direction="row" justifyContent="right">
                 {!!id && <DefaultAction button label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
               </Stack>
@@ -235,10 +235,10 @@ export function SubtiposGarantias({ id, dados = [] }) {
     <>
       <Table sx={{ mt: 3 }}>
         <TableHead>
-          <TableRow>
-            <TableCell size="small">Designação</TableCell>
-            <TableCell size="small">Descritivo</TableCell>
-            <TableCell size="small" width={10}>
+          <TableRow sx={{ '& .MuiTableCell-root': { py: 1 } }}>
+            <TableCell>Designação</TableCell>
+            <TableCell>Descritivo</TableCell>
+            <TableCell width={10}>
               <Stack direction="row" justifyContent="right">
                 {!!id && <DefaultAction button label="ADICIONAR" small onClick={() => setItem({ action: 'add' })} />}
               </Stack>
@@ -287,7 +287,7 @@ function Detalhes({ dados, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Actions({ row, setItem }) {
+export function Actions({ row, setItem }) {
   return (
     <TableCell>
       <Stack direction="row" spacing={0.5} justifyContent="right">
@@ -306,19 +306,15 @@ function Actions({ row, setItem }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function CellHeader({ dados }) {
-  return (
-    <TableCell size="small" align={dados?.center ? 'center' : 'left'}>
-      {dados?.label}
-    </TableCell>
-  );
+  return <TableCell align={dados?.center ? 'center' : 'left'}>{dados?.label}</TableCell>;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function SemDados() {
+export function SemDados({ colSpan = 6 }) {
   return (
     <TableRow>
-      <TableCell colSpan={6}>
+      <TableCell colSpan={colSpan}>
         <SearchNotFoundSmall message="Nenhum registo disponível..." />
       </TableCell>
     </TableRow>

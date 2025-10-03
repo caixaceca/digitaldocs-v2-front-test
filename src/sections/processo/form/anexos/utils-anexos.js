@@ -53,7 +53,13 @@ const limparValoresNulos = (obj) =>
 // ---------------------------------------------------------------------------------------------------------------------
 
 export const garantiasAssociadas = (garantias) =>
-  garantias?.map((row) => limparValoresNulos({ ...row, tipo_garantia_id: row?.tipo_garantia_id?.id }));
+  garantias?.map((row) =>
+    limparValoresNulos({
+      ...row,
+      tipo_garantia_id: row?.tipo_garantia_id?.id,
+      subtipo_garantia_id: row?.subtipo_garantia_id?.id,
+    })
+  );
 
 // ---------------------------------------------------------------------------------------------------------------------
 

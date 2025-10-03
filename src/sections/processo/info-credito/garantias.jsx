@@ -44,8 +44,6 @@ export function Garantias({ dados }) {
             <TableCell>Garantia</TableCell>
             <TableCell align="center">Tipo</TableCell>
             <TableCell align="right">Valor</TableCell>
-            <TableCell align="right">Nº entidade</TableCell>
-            <TableCell>Nº livrança</TableCell>
             <TableCell align="center">Ativo</TableCell>
             <TableCell width={10}>
               {modificar && <DefaultAction small button label="Adicionar" onClick={() => setItem({ modal: 'add' })} />}
@@ -55,13 +53,14 @@ export function Garantias({ dados }) {
         <TableBody>
           {garantias?.map((row, index) => (
             <TableRow hover key={`${row?.id}_${id}_${index}`}>
-              <TableCell>{row?.tipo_garantia || noDados('(Não definido)')}</TableCell>
+              <TableCell>
+                {row?.tipo_garantia}
+                {row?.subtipo_garantia ? ` - ${row?.subtipo_garantia}` : ''}
+              </TableCell>
               <TableCell align="center">{row?.reais ? 'Real' : 'Pessoal'}</TableCell>
               <TableCell align="right">
                 {row?.valor_garantia ? `${fCurrency(row?.valor_garantia)}` : noDados('(Não definido)')}
               </TableCell>
-              <TableCell align="right">{row?.numero_entidade || noDados('(Não definido)')}</TableCell>
-              <TableCell>{row?.numero_livranca || noDados('(Não definido)')}</TableCell>
               <CellChecked check={row?.ativo} />
 
               <TableCell>
@@ -108,6 +107,7 @@ function DetalhesGarantia({ dados, onClose }) {
           <Table size="small">
             <TableBody>
               <TableRowItem title="Garantia:" text={dados?.tipo_garantia} />
+              <TableRowItem title="Subtipo:" text={dados?.subtipo_garantia} />
               <TableRowItem title="Tipo:" item={<Label color="default">{dados?.reais ? 'Real' : 'Pessoal'}</Label>} />
               <TableRowItem title="Valor:" text={fCurrency(dados?.valor_garantia)} />
               <TableRowItem title="Nº entidade:" text={dados?.numero_entidade} />

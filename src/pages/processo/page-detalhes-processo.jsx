@@ -105,7 +105,6 @@ export default function PageProcesso() {
         !done.includes('Anexo') &&
         !done.includes('Situação') &&
         !done.includes('Garantia') &&
-        done !== 'Enviado' &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
         done !== 'Processo resgatado' &&

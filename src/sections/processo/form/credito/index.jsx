@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 // redux
+import { getFromGaji9 } from '../../../../redux/slices/gaji9';
 import { useDispatch, useSelector } from '../../../../redux/store';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
 // components
@@ -22,7 +23,7 @@ export default function ProcessoCredito({ dados }) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!dados?.isEdit) dispatch(getFromParametrizacao('tiposGarantia'));
+    if (!dados?.isEdit) dispatch(getFromGaji9('tiposGarantias'));
   }, [dados?.isEdit, dispatch]);
 
   return (

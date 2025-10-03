@@ -140,6 +140,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="ID:" text={dados?.id} />
                   <TableRowItem title="Utilizador ID:" text={dados?.utilizador_id} />
                   <TableRowItem title="Versão:" text={dados?.versao} />
+                  <TableRowItem title="Código:" text={dados?.codigo} />
                   <TableRowItem title="Situação:" text={dados?.situacao} />
                   {item === 'Minuta' && (
                     <TableRowItem
@@ -158,7 +159,6 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   />
                   <TableRowItem title="Nº entidade:" text={dados?.numero} />
                   <TableRowItem title="Sigla:" text={dados?.sigla} />
-                  <TableRowItem title="Código:" text={dados?.codigo} />
                   <TableRowItem title="Nome:" text={dados?.nome} />
                   <TableRowItem title="Tipo:" text={dados?.tipo} />
                   <TableRowItem title="Designação:" text={dados?.designacao} />
@@ -191,9 +191,6 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="Minuta:" text={dados?.minuta} />
                   <TableRowItem title={item === 'clausulas' ? 'Epígrafe:' : 'Título:'} text={dados?.titulo} />
                   <TableRowItem title="Subtítulo:" text={dados?.subtitulo} />
-                  <TableRowItem title="Representante:" text={dados?.representante} />
-                  <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
-                  <TableRowItem title="Data recebido:" text={ptDateTime(dados?.data_recebido)} />
                   <TableRowItem title="Tipo de titular:" text={dados?.tipo_titular} id={dados?.tipo_titular_id} />
                   <TableRowItem title="Tipo de garantia:" text={dados?.tipo_garantia} id={dados?.tipo_garantia_id} />
                   <TableRowItem
@@ -256,7 +253,6 @@ export function DetalhesContent({ dados = null, item = '' }) {
                     em={dados?.modificado_em || dados?.recarregado_em}
                     por={dados?.modificador || dados?.modificado_por || dados?.recarregado_por}
                   />
-                  <Resgisto label="Entrega" em={dados?.entrega_em} por={dados?.entrega_por} />
                 </Stack>
               </Stack>
             </>

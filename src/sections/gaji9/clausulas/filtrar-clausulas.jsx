@@ -17,6 +17,10 @@ export default function FiltrarClausulas({ inativos }) {
   const dispatch = useDispatch();
   const { segmentos, tiposTitulares, tiposGarantias } = useSelector((state) => state.gaji9);
 
+  useEffect(() => {
+    dispatch(getFromGaji9('tiposGarantias'));
+  }, [dispatch]);
+
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
   const segmentosList = useMemo(() => segmentos?.map(({ id, designacao }) => ({ id, label: designacao })), [segmentos]);

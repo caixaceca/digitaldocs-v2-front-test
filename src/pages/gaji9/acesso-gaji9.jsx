@@ -18,6 +18,7 @@ export default function AcessoGaji9({ children, item }) {
 
   const { cc } = useSelector((state) => state.intranet);
   const { isLoading, utilizador } = useSelector((state) => state.gaji9);
+
   const temAcesso = useMemo(
     () =>
       (item === 'gestao' && utilizador) ||

@@ -1,8 +1,6 @@
-import extenso from 'extenso';
 import { add } from 'date-fns';
 // utils
 import { ptDate, getIdade } from '../../../../utils/formatTime';
-import { fCurrency, fShortenNumber, fPercent } from '../../../../utils/formatNumber';
 // hooks
 import { getComparator, applySort } from '../../../../hooks/useTable';
 
@@ -19,7 +17,7 @@ export function calcRendimento(rendimento, bruto) {
 }
 
 export function totalDespesas(dados) {
-  return dados.reduce((total, item) => total + Number(item.valor), 0);
+  return dados?.reduce((total, item) => total + Number(item?.valor), 0);
 }
 
 // --------- DSTI ------------------------------------------------------------------------------------------------------
@@ -62,7 +60,7 @@ export const responsabilidadesInfo = (responsabilidades) =>
 
 export function dividasConsolidadas(responsabilidade, solicitado, prestacao) {
   const caixa = responsabilidadesInfo(responsabilidade?.dividas);
-  const externas = responsabilidadesInfo(responsabilidade?.dividasExternas);
+  const externas = responsabilidadesInfo(responsabilidade?.dividasExternas || responsabilidade?.dividas_externas);
 
   return {
     valor: caixa?.valor + externas.valor + Number(solicitado || 0),
@@ -219,60 +217,21 @@ export function movimentosConta(movimentos) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function dividaList(origem, tipo, dividas = []) {
-  if (!origem || !tipo) return [];
-
-  return dividas.filter(({ origem: rowOrigem, tipo: rowTipo }) => rowOrigem === origem && rowTipo === tipo);
+export function idadeReforma(sexo) {
+  if (!sexo) return 65; // default
+  return sexo.toLowerCase().startsWith('f') ? 60 : 65;
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
+export function idadeCliente(dataNascimento) {
+  if (!dataNascimento) return 0;
 
-export function textParecer(ficha) {
-  const { dividas = [] } = ficha || {};
+  const hoje = new Date();
+  const nascimento = new Date(dataNascimento);
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const mesDiff = hoje.getMonth() - nascimento.getMonth();
 
-  const avalesCaixa = dividaList('Caixa', 'Aval', dividas);
-  const avalesOutros = dividaList('Outros', 'Aval', dividas);
-  const dividasCaixa = dividaList('Caixa', 'Divida', dividas);
-  const dividasOutros = dividaList('Outros', 'Divida', dividas);
-
-  const dividasText = [
-    { qtd: dividasCaixa.length, cred: true, caixa: true },
-    { qtd: dividasOutros.length, cred: true, caixa: false },
-    { qtd: avalesCaixa.length, cred: false, caixa: true },
-    { qtd: avalesOutros.length, cred: false, caixa: false },
-  ]
-    .map(({ qtd, cred, caixa }) => qntResponsa(qtd, cred, caixa))
-    .filter(Boolean)
-    .join('');
-
-  const dsti = percentagemDsti(ficha);
-  const dsticorigiso = dstiCorrigido(ficha);
-
-  const textDividas =
-    dividasCaixa.length === 0 && dividasOutros.length === 0 && avalesCaixa.length === 0 && avalesOutros.length === 0
-      ? 'O cliente não tem crédito ativo nem responsabilidade como fiador/avalista em créditos a terceiros.'
-      : `O cliente apresenta as seguintes responsabilidades financeiras:\n${dividasText}`;
-
-  return `${ficha?.titular ?? 'NOME DO CLIENTE'}${ficha?.rendimento?.nome_conjuge ? ` e ${ficha?.rendimento?.nome_conjuge}` : ''}, cliente nº ${ficha?.cliente ?? 'Nº DE CLIENTE'} desde "MÊS de ANO", com salário domiciliado na Caixa. É funcionário(a) do(a) "EMPRESA/INSTITUIÇÃO" desde "MÊS de ANO", auferindo um vencimento mensal bruto de ${fCurrency(
-    calcRendimento(ficha?.rendimento, true)
-  )}.\n\nO cliente solicita um crédito no valor de ${fCurrency(ficha?.proposta?.montante)}, correspondente a ${fShortenNumber(
-    ficha?.proposta?.montante / calcRendimento(ficha?.rendimento, true)
-  )} vezes o seu salário, destinado a ${ficha?.credito?.finalidade ?? 'FINALIDADE'}. O crédito proposto tem as seguintes condições:\n- Prazo de amortização: ${ficha?.proposta?.prazo_amortizacao ?? 'XX'} meses;\n- Taxa de juros: ${fPercent(ficha?.proposta?.taxa_juro)};\n- Prestação mensal: ${fCurrency(ficha?.valorPrestacao)};
-  \nSituação Financeira\n${textDividas}\nAnálise da Solvabilidade\n- Conforme ficha de avaliação de solvabilidade, o DSTI é de ${fPercent(dsti)}, o DSTI Corrigido é de ${fPercent(dsticorigiso)}, indicando que o cliente ${dsti > 50 || dsticorigiso > 70 ? 'está fora' : 'ainda se encontra dentro'} do limite de esforço recomendado;\n- Apresenta como garantia ${ficha?.credito?.garantia}, o que fortalece a proposta do crédito.
-  \nPelo exposto, somos de parecer "FAVORÁVEL/NÃO FAVORÁVEL" à contratação do crédito, considerando o cumprimento dos critérios de avaliação e o enquadramento da cliente dentro do perfil de risco aceitável. No entanto, a aprovação final deverá ser submetida para apreciação superior para melhor análise e decisão.`;
-}
-
-export function qntResponsa(qtd, cred, caixa) {
-  if (!qtd || qtd <= 0) return '';
-  const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
-
-  const local = caixa ? 'na Caixa, em situação "SITUAÇÃO"' : 'em outros bancos, em situação "SITUAÇÃO"';
-  const plural = qtd > 1 ? 's' : '';
-  const tipo = cred
-    ? `${extenso(qtd)} crédito${plural} ativo${plural} ${local}`
-    : `responsabilidade como Avalista/Fiador em ${extenso(qtd)} crédito${plural} ${local}`;
-
-  return `- ${capitalize(tipo)};\n`;
+  if (mesDiff < 0 || (mesDiff === 0 && hoje.getDate() < nascimento.getDate())) idade -= 1;
+  return idade;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import EditorToolbarStyle from './EditorToolbarStyle';
 
 const FONT_FAMILY = ['Neo Sans Std', 'Arial', 'Tahoma', 'Georgia', 'Impact', 'Verdana'];
 const FONT_SIZE = [
-  ...['8px', '9px', '10px', '12px', '14px', '16px', '20px'],
+  ...['8px', '9px', '10px', '12px', '14px', '16px', '18px', '20px'],
   ...['24px', '32px', '42px', '54px', '68px', '84px', '98px'],
 ];
 const HEADINGS = ['Título 1', 'Título 2', 'Título 3', 'Título 4', 'Título 5', 'Título 6'];
@@ -38,7 +38,7 @@ const renderSelect = (className, options, defaultValue, placeholder) => (
   <select className={className} defaultValue={defaultValue}>
     {placeholder && <option value="">{placeholder}</option>}
     {options.map((value, i) => (
-      <option key={value} value={i + 1 || value}>
+      <option key={value} value={className === 'ql-header' ? i + 1 : value}>
         {value}
       </option>
     ))}
@@ -58,9 +58,9 @@ export default function EditorToolbar({ id, isSimple, ...other }) {
       <div id={id}>
         {/* Font, Size, Heading */}
         <div className="ql-formats">
-          {!isSimple && renderSelect('ql-font', FONT_FAMILY, '', 'Font')}
-          {renderSelect('ql-size', FONT_SIZE, '16px')}
-          {renderSelect('ql-header', HEADINGS, '', 'Normal')}
+          {!isSimple && renderSelect('ql-font', FONT_FAMILY, 'Neo Sans Std', 'Fonte')}
+          {renderSelect('ql-size', FONT_SIZE, '16px', '16px')}
+          {renderSelect('ql-header', HEADINGS, 'Normal', 'Normal')}
         </div>
 
         {/* Text Style */}

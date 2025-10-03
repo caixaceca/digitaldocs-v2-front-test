@@ -97,6 +97,10 @@ function Identificacao({ onClose, clausula }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isEdit, tiposTitulares, tiposGarantias, segmentos, tipoGarantia } = useSelector((state) => state.gaji9);
 
+  useEffect(() => {
+    dispatch(getFromGaji9('tiposGarantias'));
+  }, [dispatch]);
+
   const titularCl = localStorage.getItem('titularCl');
   const garantiaCl = localStorage.getItem('garantiaCl');
   const segmentoCl = localStorage.getItem('segmentoCl');
@@ -414,8 +418,8 @@ function Resumo({ onClose, clausula }) {
       <TitleResumo title="Identificação" action={() => dispatch(gotoStep(0))} />
       <Table size="small">
         <TableBody>
-          <TableRowItem title="Situação :" text={dadosStepper?.situacao?.label} />
-          <TableRowItem title="Secção :" text={dadosStepper?.seccao} />
+          <TableRowItem title="Situação:" text={dadosStepper?.situacao?.label} />
+          <TableRowItem title="Secção:" text={dadosStepper?.seccao} />
           <TableRowItem title="Tipo de titular:" text={dadosStepper?.titular?.label} />
           <TableRowItem title="Tipo de garantia:" text={dadosStepper?.garantia?.label} />
           <TableRowItem title="Subtipo da garantia:" text={dadosStepper?.subtipoGarantia?.label} />

@@ -286,7 +286,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
             <Panel
               label={(datai && dataf && 'Período') || (datai && 'Desde') || (dataf && 'Até')}
               value={
-                (datai && dataf && `${ptDate(datai)}-${ptDate(dataf)}`) ||
+                (datai && dataf && `${ptDate(datai)} - ${ptDate(dataf)}`) ||
                 (datai && ptDate(datai)) ||
                 (dataf && ptDate(dataf))
               }

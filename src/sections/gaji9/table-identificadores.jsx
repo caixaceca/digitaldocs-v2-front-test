@@ -141,14 +141,15 @@ export default function TableIdentificadores({ item, inativos }) {
                     row={10}
                     column={
                       (item === 'freguesias' && 5) ||
-                      (item === 'componentes' && 4) ||
-                      ((item === 'tiposTitulares' || item === 'representantes' || item === 'tiposGarantias') && 3) ||
+                      ((item === 'componentes' || item === 'tiposGarantias') && 4) ||
+                      ((item === 'tiposTitulares' || item === 'representantes') && 3) ||
                       2
                     }
                   />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
+                      {item === 'tiposGarantias' && <TableCell>{row?.codigo}</TableCell>}
                       <TableCell>
                         {item === 'representantes' ? (
                           <Colaborador row={row} />
@@ -248,6 +249,7 @@ export default function TableIdentificadores({ item, inativos }) {
 
 function headerTable(item) {
   return [
+    ...(item === 'tiposGarantias' ? [{ id: 'codigo', label: 'Código' }] : []),
     ...((item === 'tiposTitulares' && [{ id: 'descritivo', label: 'Descritivo' }]) ||
       ((item === 'tiposGarantias' || item === 'tiposSeguros' || item === 'segmentos') && [
         { id: 'designacao', label: 'Designação' },

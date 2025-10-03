@@ -52,7 +52,7 @@ export function listaProdutos(componentes) {
 }
 
 export function listaGarantias(tiposGarantias) {
-  return tiposGarantias?.map(({ id, designacao, descritivo }) => ({ id, label: designacao || descritivo }));
+  return tiposGarantias?.map(({ id, designacao, reais }) => ({ id, label: designacao, reais, subtipos: false }));
 }
 
 export function subTiposGarantia(subtipos) {

@@ -17,7 +17,7 @@ import { fillData } from '../../utils/formatTime';
 import { utilizadoresGaji9, removerPropriedades, vdt } from '../../utils/formatObject';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem, deleteItem } from '../../redux/slices/gaji9';
+import { getFromGaji9, createItem, updateItem, deleteItem } from '../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -450,6 +450,10 @@ export function RepresentanteForm({ onClose }) {
     [funcoes, colaboradores]
   );
 
+  useEffect(() => {
+    dispatch(getFromGaji9('funcoes'));
+  }, [dispatch]);
+
   const formSchema = Yup.object().shape({
     nif: Yup.string().required().label('NIF'),
     sexo: Yup.string().required().label('Sexo'),
@@ -497,7 +501,7 @@ export function RepresentanteForm({ onClose }) {
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
+  }, [selectedItem, colaboradoresList]);
 
   const onSubmit = async () => {
     const formData = removerPropriedades(

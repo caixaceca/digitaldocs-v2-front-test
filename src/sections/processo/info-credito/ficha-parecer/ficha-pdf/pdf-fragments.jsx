@@ -1,9 +1,9 @@
 import { View, Text } from '@react-pdf/renderer';
 //
-import { ptDate } from '../../../../utils/formatTime';
-import { fNumber, fPercent } from '../../../../utils/formatNumber';
+import { ptDate } from '../../../../../utils/formatTime';
+import { fNumber, fPercent } from '../../../../../utils/formatNumber';
 // components
-import { styles } from '../../../../components/exportar-dados/pdf';
+import { styles } from '../../../../../components/exportar-dados/pdf';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -25,27 +25,29 @@ export function TitleFicha({ sub = false, title = '', declaracao = '', options =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RowFicha({ title = '', value = '', options = null, valueAlt = null }) {
+export function RowFicha({ title = '', value = '', options = null, valueAlt = null, small = false }) {
   return value ? (
     <View
       wrap={false}
       style={[styles.borderCinza, styles.tableRowFicha, options?.final ? { borderBottom: '1px solid #ddd' } : {}]}
     >
-      <View
-        style={[
-          styles.viewSubFicha,
-          options?.ficha ? styles.tCell_25 : styles.tCell_35,
-          options?.success ? styles.bgSuccess : styles?.bgCinza,
-        ]}
-      >
-        <Text style={[styles.subFicha, styles.uppercase, styles.textBold, styles.px0]}>{title}</Text>
-      </View>
+      {title && (
+        <View
+          style={[
+            styles.viewSubFicha,
+            options?.success ? styles.bgSuccess : styles?.bgCinza,
+            small || options?.ficha ? styles.tCell_25 : styles.tCell_35,
+          ]}
+        >
+          <Text style={[styles.subFicha, styles.uppercase, styles.textBold, styles.px0]}>{title}</Text>
+        </View>
+      )}
       <View
         style={[
           styles.px0,
           styles.alignLeft,
           styles.verticalCenter,
-          options?.ficha ? styles.tCell_75 : styles.tCell_65,
+          (!title && styles.tCell_100) || ((small || options?.ficha) && styles.tCell_75) || styles.tCell_65,
         ]}
       >
         <Text style={[styles.textCellFicha, { color: '#444' }]}>
@@ -53,7 +55,7 @@ export function RowFicha({ title = '', value = '', options = null, valueAlt = nu
             style={
               value === 'Não definido...'
                 ? [{ color: '#666', fontSize: 8 }]
-                : [{ fontWeight: options?.bold || 'normal', color: options?.color || '#444' }]
+                : [{ fontWeight: options?.bold ? 'bold' : 'normal', color: options?.color || '#444' }]
             }
           >
             {value}
@@ -222,17 +224,22 @@ export function EmptyRow() {
     </View>
   );
 }
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Alerta({ alerta }) {
+  return <Text style={[{ paddingTop: 2, color: '#FF4842', fontWeight: 'bold', fontSize: 8 }]}>{` *${alerta}`}</Text>;
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function NadaConsta({ noLimits }) {
+export function NadaConsta({ message = 'Nada consta...', noLimits }) {
   return (
     <View
       wrap={false}
       style={[styles.borderCinza, styles.tableRowFicha, noLimits ? {} : { borderBottom: '1px solid #ddd' }]}
     >
       <View style={[styles.tCell_100]}>
-        <Text style={[styles.textCellFicha, { color: '#666', fontSize: 8 }]}>Nada consta</Text>
+        <Text style={[styles.textCellFicha, { color: '#666', fontSize: 8 }]}>{message}</Text>
       </View>
     </View>
   );

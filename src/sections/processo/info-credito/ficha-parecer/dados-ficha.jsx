@@ -33,12 +33,18 @@ export function Identificcao({ entidade }) {
       {rowInfo('Telefone', entidade?.telefone || '', false)}
       {rowInfo('Email', entidade?.email || '', false)}
       {rowInfo('Sexo', entidade?.sexo || '', false)}
-      {rowInfo('Estado civil', estadoCivil(entidade?.estado_civil, entidade?.regime_casamento), false)}
       {rowInfo('Data de nascimento', dataNascimento(entidade?.data_nascimento), false)}
       {rowInfo('Filiação', [entidade?.nome_pai, entidade?.nome_mae].filter(Boolean).join(' e ') || '', false)}
       {rowInfo('Morada', entidade?.morada || '', false)}
       {rowInfo('Código de risco', entidade?.codigo_risco || 'Não definido...', false)}
       {rowInfo('Nível de risco', entidade?.nivel_risco || 'Não definido...', false)}
+      {rowInfo('Estado civil', estadoCivil(entidade?.estado_civil, entidade?.regime_casamento), false)}
+      {entidade?.conjuge && (
+        <>
+          {rowInfo('Cônjuge', entidade?.nome_conjuge, false)}
+          {rowInfo('Data nascimento cônjuge', dataNascimento(entidade?.data_nascimento_conjuge), false)}
+        </>
+      )}
     </TableBody>
   );
 }
@@ -196,16 +202,17 @@ export function Movimentos({ dados, totaisConta }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function Responsabilidades({ responsabilidades }) {
-  const { dividas, garantiasPrestadas, garantiasRecebidas, irregularidades } = responsabilidades;
+  const { dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas } = responsabilidades;
+
   const rowInfo = (row, incidente) => (
     <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
-      <TableCell>{(row?.totais && 'Total') || row?.tipo || row?.classe || ' '}</TableCell>
+      <TableCell>{(row?.totais && '') || row?.tipo || row?.classe || ' '}</TableCell>
       <TableCell align="center">{row?.conta || ' '}</TableCell>
       <CellValor valor={row?.valor} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.saldo_divida} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.valor_prestacao} moeda={row?.moeda} total={row?.totais} />
       <TableCell align="right">{row?.taxa_juros ? fPercent(row?.taxa_juros, 2) : ' '}</TableCell>
-      <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
+      <TableCell align="center">
         {row?.data_abertura_credito === row?.data_vencimento || !row?.data_vencimento
           ? ptDate(row?.data_abertura_credito)
           : `${ptDate(row?.data_abertura_credito)} - ${ptDate(row?.data_vencimento)}`}
@@ -225,7 +232,7 @@ export function Responsabilidades({ responsabilidades }) {
       <Cabecalho
         item="responsabilidades"
         headLabel={[
-          { label: 'Produto' },
+          { label: 'Dívidas na caixa', color: 'success.main' },
           { label: 'Conta', align: 'center' },
           { label: 'Capital inicial', align: 'right' },
           { label: 'Saldo em dívida', align: 'right' },
@@ -238,15 +245,42 @@ export function Responsabilidades({ responsabilidades }) {
       <TableBody>
         {dividas?.map((row) => rowInfo(row))}
         {dividas?.length > 1 && rowInfo(responsabilidadesInfo(dividas))}
-        {(garantiasRecebidas?.length > 0 || garantiasPrestadas?.length > 0) && (
-          <EmptyRow cells={8} message="OUTRAS" variant="head" />
+        {dividas?.length === 0 && <EmptyRow empty cells={7} message="Nenhum registo encontrado..." />}
+
+        {/* Dívidas externas  */}
+        {dividasExternas?.length > 0 && (
+          <>
+            <EmptyRow cells={8} message="Dívidas externas" variant="head" />
+            {dividasExternas?.map((row) => rowInfo(row))}
+            {dividasExternas?.length > 1 && rowInfo(responsabilidadesInfo(dividasExternas))}
+          </>
         )}
-        {garantiasRecebidas?.map((row) => rowInfo(row))}
-        {garantiasRecebidas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasRecebidas))}
-        {garantiasPrestadas?.map((row) => rowInfo(row))}
-        {garantiasPrestadas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasPrestadas))}
-        {irregularidades?.length > 0 && <EmptyRow cells={8} message="Histórico de incidentes" variant="head" war />}
-        {irregularidades?.map((row) => rowInfo(row, true))}
+
+        {dividas?.length > 0 && dividasExternas?.length > 0 && (
+          <>
+            <EmptyRow cells={8} message="Dívidas consolidadas" variant="head" />
+            {rowInfo(responsabilidadesInfo([...dividas, ...dividasExternas]))}
+          </>
+        )}
+
+        {/* Outras responsabilidades */}
+        {(garantiasRecebidas?.length > 0 || garantiasPrestadas?.length > 0) && (
+          <>
+            <EmptyRow cells={8} message="Outras responsabilidades" variant="head" />
+            {garantiasRecebidas?.map((row) => rowInfo(row))}
+            {garantiasRecebidas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasRecebidas))}
+            {garantiasPrestadas?.map((row) => rowInfo(row))}
+            {garantiasPrestadas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasPrestadas))}
+          </>
+        )}
+
+        {/* Irregularidades */}
+        {irregularidades?.length > 0 && (
+          <>
+            <EmptyRow cells={8} message="Histórico de incidentes" variant="head" war />
+            {irregularidades?.map((row) => rowInfo(row, true))}
+          </>
+        )}
       </TableBody>
     </>
   ) : (
@@ -257,6 +291,8 @@ export function Responsabilidades({ responsabilidades }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function AvalesFiancas({ dados }) {
+  const { fiancas, avalesExternos } = dados;
+
   const rowInfo = (row) => (
     <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
       <TableCell>{(row?.totais && 'Total') || row?.tipo_credito || ' '}</TableCell>
@@ -271,12 +307,12 @@ export function AvalesFiancas({ dados }) {
     </TableRow>
   );
 
-  return dados?.length > 0 ? (
+  return fiancas?.length > 0 || avalesExternos?.length > 0 ? (
     <>
       <Cabecalho
         item="avales-fiancas"
         headLabel={[
-          { label: 'Produto' },
+          { label: 'Avales/Fianças na caixa', color: 'success.main' },
           { label: 'Nº cliente', align: 'center' },
           { label: 'Resp.', align: 'center' },
           { label: 'Capital inicial', align: 'right' },
@@ -286,8 +322,24 @@ export function AvalesFiancas({ dados }) {
         ]}
       />
       <TableBody>
-        {dados?.map((row) => rowInfo(row))}
-        {dados?.length > 1 && rowInfo(responsabilidadesInfo(dados))}
+        {fiancas?.map((row) => rowInfo(row))}
+        {fiancas?.length > 1 && rowInfo(responsabilidadesInfo(fiancas))}
+        {fiancas?.length === 0 && <EmptyRow empty cells={7} message="Nenhum registo encontrado..." />}
+
+        {/* Avales/Fianças externas  */}
+        {avalesExternos?.length > 0 && (
+          <>
+            <EmptyRow cells={8} message="Avales/Fianças externas" variant="head" />
+            {avalesExternos?.map((row) => rowInfo(row))}
+            {avalesExternos?.length > 1 && rowInfo(responsabilidadesInfo(avalesExternos))}
+          </>
+        )}
+        {fiancas?.length > 0 && avalesExternos?.length > 0 && (
+          <>
+            <EmptyRow cells={8} message="Avales/Fianças consolidadas" variant="head" />
+            {rowInfo(responsabilidadesInfo([...fiancas, ...avalesExternos]))}
+          </>
+        )}
       </TableBody>
     </>
   ) : (
@@ -378,12 +430,12 @@ export function Restruturacoes({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Cabecalho({ item, headLabel }) {
+export function Cabecalho({ item, headLabel }) {
   return (
     <TableHead>
       <TableRow>
         {headLabel.map((row, index) => (
-          <TableCell align={row?.align || 'left'} key={`${row?.label}_${item}_${index}`}>
+          <TableCell align={row?.align || 'left'} key={`${row?.label}_${item}_${index}`} sx={{ color: row?.color }}>
             {row?.label}
           </TableCell>
         ))}
@@ -441,7 +493,7 @@ export function EmptyRow({ cells = 4, message = ' ', variant = '', empty }) {
         variant={variant}
         sx={{
           border: 'none',
-          color: message === 'Histórico de incidentes' && 'warning.main',
+          color: (message === 'Histórico de incidentes' && 'warning.main') || (variant && 'success.main'),
           ...(empty && { fontStyle: 'italic', color: 'text.secondary' }),
         }}
       >
