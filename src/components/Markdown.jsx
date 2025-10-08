@@ -37,7 +37,6 @@ const MarkdownStyle = styled('div')(({ theme }) => {
       fontSize: '1.5em',
       margin: '40px auto',
       position: 'relative',
-      fontFamily: 'Georgia, serif',
       padding: theme.spacing(3, 3, 3, 8),
       borderRadius: Number(theme.shape.borderRadius) * 2,
       backgroundColor: theme.palette.background.neutral,
@@ -46,9 +45,7 @@ const MarkdownStyle = styled('div')(({ theme }) => {
         width: '80%',
       },
       '& p, & span': {
-        marginBottom: '0 !important',
         fontSize: 'inherit !important',
-        fontFamily: 'Georgia, serif !important',
         color: `${theme.palette.text.secondary} !important`,
       },
       '&:before': {
@@ -110,7 +107,7 @@ const components = {
 
   p: ({ ...props }) => {
     if (props.style) return <p {...props} />;
-    return <Typography variant="body1" {...props} />;
+    return <Typography variant="body1" sx={{ m: 0 }} {...props} />;
   },
 
   li: ({ node, className, style, ...props }) => {

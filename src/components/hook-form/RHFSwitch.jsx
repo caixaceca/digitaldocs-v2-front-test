@@ -6,7 +6,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) {
+export default function RHFSwitch({ name, onChange, ...other }) {
+  const { mt = false, ...res } = other;
   const { control } = useFormContext();
 
   return (
@@ -21,8 +22,8 @@ export default function RHFSwitch({ name, onChange, otherSx = null, ...other }) 
         />
       }
       labelPlacement="start"
-      sx={{ mt: { sm: !other?.mt ? 1 : 0 }, ml: 0, width: 1, justifyContent: 'center', ...otherSx }}
-      {...other}
+      sx={{ mt: { sm: mt ? 1 : 0 }, ml: 0, width: 1, justifyContent: 'center' }}
+      {...res}
     />
   );
 }

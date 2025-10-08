@@ -23,18 +23,30 @@ import { DialogConfirmar } from '../../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-form';
 // _mock
-import { Garantias } from './garantias';
 import PareceresCredito from './pareceres';
 import FichaAnalise from './ficha-parecer';
+import MetadadosCredito from './metadados-credito';
+import { GarantiasSeguros } from './garantias-seguros';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function InfoCredito({ dados }) {
-  const [currentTab, setCurrentTab] = useState('Dados');
+  const [currentTab, setCurrentTab] = useState('Info. gerais');
 
   const tabsList = [
-    { value: 'Dados', component: <DadosCredito dados={dados} /> },
-    { value: 'Garantias', component: <Garantias dados={dados} /> },
+    { value: 'Info. gerais', component: <DadosCredito dados={dados} /> },
+    {
+      value: 'Metadados GAJ-i9',
+      component: (
+        <MetadadosCredito
+          modificar={dados?.modificar}
+          dados={dados?.gaji9_metadados}
+          ids={{ processoId: dados?.processoId, creditoId: dados?.id }}
+        />
+      ),
+    },
+    { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} /> },
+    { value: 'Seguros', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} seguro /> },
     { value: 'Ficha de análise', component: <FichaAnalise /> },
     { value: 'Pareceres', component: <PareceresCredito /> },
   ];
@@ -108,15 +120,17 @@ function DadosCredito({ dados }) {
         <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />
         <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />
         <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />
-        {dados?.montante_contratado && (
+        {dados?.montante_contratado ? (
           <TextItem title="Montante contratado:" text={fCurrency(dados?.montante_contratado)} />
-        )}
+        ) : null}
         <TextItem title="Data de aprovação:" text={ptDate(dados?.data_aprovacao)} />
-        {dados?.montante_aprovado && <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />}
+        {dados?.montante_aprovado ? (
+          <TextItem title="Montante aprovado:" text={fCurrency(dados?.montante_aprovado)} />
+        ) : null}
         {dados?.escalao_decisao && situacao !== 'em análise' && (
           <TextItem title="Decisor:" text={dados?.escalao_decisao} />
         )}
-        {dados?.taxa_juro && <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} />}
+        {dados?.taxa_juro ? <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} /> : null}
         <TextItem
           title="Prazo de amortização:"
           text={`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}
@@ -149,7 +163,7 @@ function GerarContrato({ id }) {
   return (
     <>
       {(utilizador?._role === 'GERENTE' || temPermissao(['READ_CREDITO'])) && (
-        <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+        <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
           <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={() => onOpen()} />
         </Stack>
       )}

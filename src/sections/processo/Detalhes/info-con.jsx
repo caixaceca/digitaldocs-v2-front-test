@@ -22,7 +22,7 @@ export default function InfoCon({ dados }) {
           <Typography variant="subtitle1">Operação</Typography>
         </ListItem>
         <TextItem title="Nº da operação:" text={dados?.numero} />
-        {dados?.valor && <TextItem title="Valor:" text={fCurrency(dados?.valor)} />}
+        <TextItem title="Valor:" text={fCurrency(dados?.valor)} />
         <TextItem title="Origem do fundo:" text={newLineText(dados?.origem_fundo)} />
         <TextItem title="Finalidade do fundo:" text={newLineText(dados?.finalidade)} />
         <TextItem title="Beneficiário residente:" text={dados?.residente ? 'SIM' : 'NÃO'} />

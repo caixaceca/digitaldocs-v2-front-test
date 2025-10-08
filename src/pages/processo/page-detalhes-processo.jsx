@@ -103,6 +103,7 @@ export default function PageProcesso() {
       openModal();
       if (
         !done.includes('Anexo') &&
+        !done.includes('Seguro') &&
         !done.includes('Situação') &&
         !done.includes('Garantia') &&
         done !== 'Processo aceitado' &&
@@ -111,6 +112,7 @@ export default function PageProcesso() {
         done !== 'Processo adicionado' &&
         done !== 'Processo atualizado' &&
         done !== 'Focal Point alterado' &&
+        done !== 'Informações atualizadas' &&
         done !== 'Confidencialidade atualizado'
       ) {
         if (proxAnt?.proximo) irParaProcesso(proxAnt?.proximo);

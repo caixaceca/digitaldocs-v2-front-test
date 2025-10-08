@@ -225,7 +225,7 @@ export function Condicao({ onClose, dados }) {
               'Taxa juros negociada',
               '1ª habitação própria',
               'Construção',
-              'Resolving',
+              'Revolving',
               'Bonificado',
               'Jovem bonificado',
               'Colaborador de empresa parceira',
@@ -297,7 +297,7 @@ function Conteudo({ dados, onClose, id }) {
   const onSubmit = async () => {
     const formData = {
       ...(dadosStepper?.condicao === 'Com NIP' ? { com_nip: true } : null),
-      ...(dadosStepper?.condicao === 'Resolving' ? { revolving: true } : null),
+      ...(dadosStepper?.condicao === 'Revolving' ? { revolving: true } : null),
       ...(dadosStepper?.condicao === 'Com seguro' ? { com_seguro: true } : null),
       ...(dadosStepper?.condicao === 'Bonificado' ? { bonificado: true } : null),
       ...(dadosStepper?.condicao === 'Construção' ? { construcao: true } : null),

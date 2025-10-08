@@ -89,7 +89,7 @@ export function PreviewMinutaForm({ onClose }) {
       com_nip: false,
       restrito: true,
       rascunho: false,
-      resolvig: false,
+      revolving: false,
       com_seguro: false,
       bonificado: false,
       construcao: false,
@@ -187,7 +187,7 @@ export function PreviewMinutaForm({ onClose }) {
             <GridItem sm={6} md={4}>
               <RHFSwitch name="colaborador_empresa_parceira" label="Colaborador de empresa parceira" mt />
             </GridItem>
-            <GridItem sm={6} md={4} children={<RHFSwitch name="resolving" label="Resolving" mt />} />
+            <GridItem sm={6} md={4} children={<RHFSwitch name="revolving" label="Revolving" mt />} />
             <GridItem sm={6} md={4} children={<RHFSwitch name="com_nip" label="Com NIP" mt />} />
           </Grid>
           <DialogButons label="Pré-visualizar" isSaving={isSaving} onClose={onClose} />

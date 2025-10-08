@@ -7,29 +7,28 @@ import Divider from '@mui/material/Divider';
 import TableBody from '@mui/material/TableBody';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
-import { ptDate, ptDateTime } from '../../../utils/formatTime';
-// redux
 import { useSelector } from '../../../redux/store';
+import { ptDateTime } from '../../../utils/formatTime';
+import { fCurrency } from '../../../utils/formatNumber';
 // components
 import { SearchNotFoundSmall } from '../../../components/table';
 import { DialogTitleAlt } from '../../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 //
 import SegurosEntidades from './seguros-entidades';
+import MetadadosGarantia from '../../processo/info-credito/metadados-garantia';
 import { TableRowItem, LabelSN, Resgisto } from '../../parametrizacao/Detalhes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesCredito({ onClose, id, item }) {
   const { credito, selectedItem } = useSelector((state) => state.gaji9);
-  const hasTabs = item === 'garantia';
   const dados =
     item === 'garantia' ? credito?.garantias?.find(({ id }) => id === Number(selectedItem?.id)) : selectedItem;
 
   return (
-    <Dialog open fullWidth onClose={onClose} maxWidth={item === 'grupos' || hasTabs ? 'md' : 'sm'}>
-      {hasTabs ? (
+    <Dialog open fullWidth onClose={onClose} maxWidth={item === 'garantia' ? 'md' : 'sm'}>
+      {item === 'garantia' ? (
         <DetalhesTab id={id} item={item} dados={dados} onClose={onClose} participantes={credito?.participantes} />
       ) : (
         <>
@@ -74,7 +73,7 @@ function DetalhesTab({ id, item, dados, participantes = [], onClose }) {
       },
       {
         value: 'Metadados',
-        component: <DetalhesContent item="metadados-garantia" dados={dados?.metadados} id={id} />,
+        component: <MetadadosGarantia dados={dados?.metadados} />,
       },
     ]) ||
       []),
@@ -83,8 +82,8 @@ function DetalhesTab({ id, item, dados, participantes = [], onClose }) {
   return (
     <>
       <DialogTitleAlt
-        title="Detalhes"
         onClose={onClose}
+        title="Detalhes da garantia"
         content={
           <TabsWrapperSimple
             tabsList={tabsList}
@@ -106,42 +105,6 @@ export function DetalhesContent({ dados = null, item }) {
     <>
       <Table size="small" sx={{ my: 1 }}>
         <TableBody>
-          {/* META DADOS - Garantia */}
-          {item === 'metadados-garantia' && (
-            <>
-              <TableRowItem title="Conta DO:" text={dados?.conta_dp} />
-              <TableRowItem title="Saldo DP:" text={dados?.saldo_dp ? fCurrency(dados?.saldo_dp) : ''} />
-              <TableRowItem title="Balcão DP:" text={dados?.balca_dp} />
-              <TableRowItem title="Data vencimento DP:" text={ptDate(dados?.data_vencimento_dp)} />
-              <TableRowItem title="Data constituição DP:" text={ptDate(dados?.data_constituicao_dp)} />
-              <TableRowItem title="Título:" text={dados?.titulo} />
-              <TableRowItem title="Total título:" text={dados?.total_titulo ? fCurrency(dados?.total_titulo) : ''} />
-              <TableRowItem title="Instituição emissora:" text={dados?.instituicao_emissora_titulo} />
-              <TableRowItem title="Instituição registo:" text={dados?.instituicao_registo_titulo} />
-              <TableRowItem title="Cliente registo:" text={dados?.cliente_registo_titulo} />
-              <TableRowItem title="Conservatória:" text={dados?.conservatoria} />
-              <TableRowItem title="Identificação fração:" text={dados?.identificacao_fracao} />
-              <TableRowItem title="Tipo matriz:" text={dados?.tipo_matriz} />
-              <TableRowItem title="Nº matriz predial:" text={dados?.num_matriz_predial} />
-              <TableRowItem title="Nº registo predial:" text={dados?.num_registo_predial} />
-              <TableRowItem title="Nº descrição predial:" text={dados?.num_descricao_predial} />
-              <TableRowItem title="Tipo de imóvel:" text={dados?.tipo_imovel} />
-              <TableRowItem title="Ilha:" text={dados?.ilha} />
-              <TableRowItem title="Freguesia:" text={dados?.freguesia} />
-              <TableRowItem title="Concelho:" text={dados?.concelho} />
-              <TableRowItem title="Cidade:" text={dados?.cidade} />
-              <TableRowItem title="Zona:" text={dados?.zona} />
-              <TableRowItem title="Área do terreno:" text={dados?.area_terreno ? `${dados?.area_terreno} m²` : ''} />
-              <TableRowItem title="Piso:" text={dados?.piso} />
-              <TableRowItem title="Marca da viatura:" text={dados?.marca_viatura} />
-              <TableRowItem title="Modelo da viatura:" text={dados?.modelo_viatura} />
-              <TableRowItem title="Matrícula da viatura:" text={dados?.matricula_viatura} />
-              <TableRowItem title="Nura da viatura:" text={dados?.nura_viatura} />
-              <TableRowItem title="Ano de fabricação:" text={dados?.ano_fabrico} />
-            </>
-          )}
-
-          {/* CONTRATO */}
           {item === 'contrato' && (
             <>
               <TableRowItem title="Versão:" text={dados?.versao} />
@@ -162,7 +125,7 @@ export function DetalhesContent({ dados = null, item }) {
             </>
           )}
 
-          {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
+          {dados && 'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
         </TableBody>
       </Table>
       <Stack>

@@ -251,7 +251,7 @@ export function RelacionadosCl({ dados = [], item = 'Tipo de titular' }) {
                       <TableCell sx={{ fontWeight: 'bold' }}>
                         <Typography variant="subtitle2">
                           {(res?.com_nip && 'Com NIP') ||
-                            (res?.revolving && 'Resolving') ||
+                            (res?.revolving && 'Revolving') ||
                             (res?.com_seguro && 'Com seguro') ||
                             (res?.construcao && 'Construção') ||
                             (res?.bonificado && 'Bonificado') ||

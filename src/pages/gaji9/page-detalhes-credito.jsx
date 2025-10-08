@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 //
@@ -23,6 +24,7 @@ import AcessoGaji9 from './acesso-gaji9';
 import InfoCredito from '../../sections/gaji9/credito/info-credito';
 import { TableInfoCredito } from '../../sections/gaji9/credito/table-info';
 import CreditoForm, { PreviewForm } from '../../sections/gaji9/credito/form-credito';
+import MetadadosCredito from '../../sections/processo/info-credito/metadados-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +34,7 @@ export default function PageCreditoDetalhes() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { temPermissao, isGerente } = usePermissao();
-  const [currentTab, setCurrentTab] = useState('Dados');
+  const [currentTab, setCurrentTab] = useState('Info. gerais');
   const permissao = isGerente || temPermissao(['READ_CREDITO']);
 
   const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving } = useSelector(
@@ -46,7 +48,17 @@ export default function PageCreditoDetalhes() {
   }, [dispatch, id, permissao]);
 
   const tabsList = [
-    { value: 'Dados', component: <InfoCredito /> },
+    { value: 'Info. gerais', component: <InfoCredito /> },
+    {
+      value: 'Metadados',
+      component: credito?.metadados ? (
+        <MetadadosCredito dados={credito?.metadados} />
+      ) : (
+        <Card sx={{ p: 3 }}>
+          <MetadadosCredito dados={credito?.metadados} />
+        </Card>
+      ),
+    },
     {
       value: 'Garantias',
       component: <TableInfoCredito dados={credito?.garantias} params={{ id, tab: 'garantias', contratado }} />,
@@ -78,18 +90,18 @@ export default function PageCreditoDetalhes() {
 
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Dados' ? 'Detalhes do crédito' : currentTab}
+          heading={currentTab === 'Info. gerais' ? 'Detalhes do crédito' : currentTab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'GAJ-i9', href: PATH_DIGITALDOCS.gaji9.gestao },
-            { name: currentTab === 'Dados' ? 'Detalhes do crédito' : currentTab },
+            { name: currentTab === 'Info. gerais' ? 'Detalhes do crédito' : currentTab },
           ]}
           action={
             credito?.ativo &&
             !credito?.contratado &&
             permissao && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {currentTab === 'Dados' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
+                {currentTab === 'Info. gerais' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
                   <>
                     <DefaultAction small button label="Editar" onClick={() => openForm('form-credito')} />
                     <DefaultAction small button label="Eliminar" onClick={() => openForm('eliminar-credito')} />

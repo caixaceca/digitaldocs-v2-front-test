@@ -13,11 +13,21 @@ numeral.locale('cv-cv' || '');
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function fCurrency(number) {
-  return numeral(number || 0).format('0,0.00$');
+export function fCurrency(value) {
+  if (value === '' || value === null || value === undefined) return '';
+
+  const number = Number(value);
+  if (Number.isNaN(number)) return '';
+
+  return numeral(number).format('0,0.00$');
 }
 
-export function fPercent(number) {
+export function fPercent(value) {
+  if (value === '' || value === null || value === undefined) return '';
+
+  const number = Number(value);
+  if (Number.isNaN(number)) return '';
+
   return numeral(number / 100).format('0.00%');
 }
 

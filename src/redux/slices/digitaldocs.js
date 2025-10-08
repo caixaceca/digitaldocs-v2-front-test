@@ -432,14 +432,15 @@ export function createItem(item, dados, params) {
         await axios.put(`${BASEURLDD}${apiUrl}`, params?.anexo, options);
       }
       const apiUrl =
+        (item === 'seguros' && `${BASEURLDD}/v2/processos/${params?.processoId}/credito/seguros`) ||
         (item === 'parecer-credito' && `${BASEURLDD}/v2/processos/${params?.id}/cr/${1}/pareceres`) ||
         (item === 'garantias' && `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
         '';
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
         const response = await axios.post(apiUrl, dados, options);
-        if (item === 'garantias')
-          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
+        if (item === 'garantias' || item === 'seguros')
+          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
@@ -484,8 +485,13 @@ export function updateItem(item, dados, params) {
         (item === 'domiciliar' && `/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'confirmar rececao multiplo' && `/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||
         (item === 'anular multiplo' && `/v1/cartoes/anular/validacao/listagem?emissao=${params?.emissao}`) ||
+        (item === 'seguros' && `/v2/processos/${params?.processoId}/credito/seguros?seguro_id=${params?.id}`) ||
         (item === 'confirmar emissao por data' && `/v1/cartoes/validar/todas/rececoes?balcao=${params?.balcao}`) ||
         (item === 'anular por balcao e data' && `/v1/cartoes/anular/validacao/todas?emissao=${params?.emissao}`) ||
+        (item === 'metadados-credito' &&
+          `/v2/processos/${params?.processoId}/cr/${params?.creditoId}/metadados/gaji9`) ||
+        (item === 'metadados-garantia' &&
+          `/v2/processos/${params?.processoId}/gr/${params?.garantiaId}/metadados/gaji9`) ||
         (item === 'parecer individual' &&
           `/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`) ||
         (item === 'parecer estado' &&
@@ -509,7 +515,7 @@ export function updateItem(item, dados, params) {
       if (apiUrl) {
         const response = await axios[params?.put ? 'put' : 'patch'](`${BASEURLDD}${apiUrl}`, dados, options);
         if (params?.fillCredito)
-          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
+          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
       }
       if (item === 'processo') {
         const response = await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
@@ -542,6 +548,7 @@ export function deleteItem(item, params) {
       const { perfilId } = selectUtilizador(getState()?.intranet || {});
 
       const apiUrl =
+        (item === 'seguros' && `/v2/processos/${params?.processoId}/credito/seguros?seguro_id=${params?.id}`) ||
         (item === 'anexo-parecer' &&
           `/v2/processos/${params?.processoId}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}&anexo_id=${params?.id}`) ||
         (item === 'garantias' &&
@@ -557,8 +564,8 @@ export function deleteItem(item, params) {
         const response = await axios.delete(`${BASEURLDD}${apiUrl}`, options);
         if (item === 'anexo' || item === 'anexo-parecer')
           dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
-        if (item === 'garantias')
-          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto.credito || null }));
+        if (item === 'garantias' || item === 'seguros')
+          dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {

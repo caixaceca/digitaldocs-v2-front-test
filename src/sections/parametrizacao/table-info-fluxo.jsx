@@ -109,7 +109,7 @@ export default function TableInfoFluxo({ item }) {
                         (item === 'notificacoes' && (
                           <>
                             <TableCell>
-                              <Markdown own children={row.corpo} />
+                              <Markdown children={row.corpo} />
                             </TableCell>
                             <TableCell>{row.via}</TableCell>
                           </>

@@ -300,7 +300,7 @@ export function BaixarFicha({ dados }) {
           }}
         </PDFDownloadLink>
       ) : (
-        <DefaultAction button variant="contained" icon="pdf" label="BAIXAR FICHA" onClick={() => setBaixar(true)} />
+        <DefaultAction button variant="contained" icon="pdf" label="GERAR FICHA" onClick={() => setBaixar(true)} />
       )}
     </Stack>
   );

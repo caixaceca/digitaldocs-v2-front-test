@@ -107,7 +107,7 @@ export default function FormInfoInterno({ dados }) {
         {(fluxo?.assunto === 'OPE DARH' || fluxo?.assunto === 'Transferência Internacional') && (
           <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
             <Grid container spacing={3}>
-              <GridItem children={<RHFSwitch name="agendado" label="Agendar" otherSx={{ mt: 0 }} />} />
+              <GridItem children={<RHFSwitch name="agendado" label="Agendar" mt />} />
               {values.agendado && (
                 <>
                   <GridItem xs={6} md={3}>

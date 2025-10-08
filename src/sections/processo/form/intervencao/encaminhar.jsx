@@ -384,7 +384,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
                   </GridItem>
                   {/* <GridItem>
                     <RHFSwitch
-                      otherSx={{ mt: 0 }}
+                      omt
                       label="Confidencialidade"
                       name={`destinos[${index}].confidencial`}
                     />

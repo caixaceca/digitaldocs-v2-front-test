@@ -165,7 +165,7 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                     {dados?.data_formulario && (
                       <TableRowItem title="Data formulário:" text={ptDate(dados?.data_formulario)} />
                     )}
-                    {'prazoemdias' in dados && (
+                    {dados && 'prazoemdias' in dados && (
                       <TableRowItem
                         title="Prazo:"
                         text={`${dados?.prazoemdias} dia${dados?.prazoemdias > 1 ? 's' : ''}`}
@@ -187,8 +187,8 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                       <TableRowItem title="U.O:" text={`${uoAlt?.label}${uoAlt?.id ? ` (ID: ${uoAlt?.id})` : ''}`} />
                     )}
                     {uoAlt && <TableRowItem title="Balcão:" text={uoAlt?.balcao} />}
-                    {'corpo' in dados && (
-                      <TableRowItem title="Corpo:" item={<Markdown own children={dados?.corpo} />} />
+                    {dados && 'corpo' in dados && (
+                      <TableRowItem title="Corpo:" item={<Markdown children={dados?.corpo} />} />
                     )}
                     <TableRowItem title="Via:" text={dados?.via} />
                     <TableRowItem title="Concelho:" text={dados?.cidade} />

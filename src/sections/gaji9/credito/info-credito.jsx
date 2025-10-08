@@ -77,7 +77,7 @@ export default function InfoCredito() {
           {
             title: 'Metadados',
             content: [
-              { label: 'Resolving', value: metadados?.resolving ? <LabelSN item={metadados?.resolving} /> : null },
+              { label: 'Revolving', value: metadados?.revolving ? <LabelSN item={metadados?.revolving} /> : null },
               {
                 label: 'Com 3º outorgante',
                 value: metadados?.com_terceiro_outorgante ? <LabelSN item={metadados?.com_terceiro_outorgante} /> : '',
@@ -86,9 +86,7 @@ export default function InfoCredito() {
                 label: 'Colaborador empresa parceira',
                 value: metadados?.colaborador_empresa_parceira ? (
                   <LabelSN item={metadados?.colaborador_empresa_parceira} />
-                ) : (
-                  ''
-                ),
+                ) : null,
               },
               { label: 'Bonificado', value: metadados?.bonificado ? <LabelSN item={metadados?.bonificado} /> : '' },
               {
@@ -155,18 +153,11 @@ export default function InfoCredito() {
                   if (!value && label !== 'Email' && label !== 'Morada') return null;
 
                   return (
-                    <Stack
-                      key={idx}
-                      useFlexGap
-                      direction="row"
-                      flexWrap="wrap"
-                      alignItems="center"
-                      sx={{ color: !value && 'text.disabled' }}
-                    >
+                    <Stack key={idx} useFlexGap direction="row" flexWrap="wrap" alignItems="center">
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         {label}:&nbsp;
                       </Typography>
-                      <Typography variant="body2" sx={{ fontStyle: !value && 'italic', color: !value && 'error.main' }}>
+                      <Typography variant="body2" sx={{ ...(!value && { fontStyle: 'italic', color: 'error.main' }) }}>
                         {value || '(Não definido)'}
                       </Typography>
                     </Stack>

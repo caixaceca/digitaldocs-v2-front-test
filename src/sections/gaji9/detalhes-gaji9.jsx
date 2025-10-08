@@ -219,10 +219,10 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="Local matricula:" text={dados?.local_matricula} />
                   <TableRowItem title="Email:" text={dados?.morada_eletronico} />
                   <TableRowItem title="Endereço:" text={dados?.morada_sede} />
-                  {'consumidor' in dados && (
+                  {dados && 'consumidor' in dados && (
                     <TableRowItem title="Consumidor:" item={<LabelSN item={dados?.consumidor} />} />
                   )}
-                  {'instituicao' in dados && (
+                  {dados && 'instituicao' in dados && (
                     <TableRowItem title="Intituição:" item={<LabelSN item={dados?.instituicao} />} />
                   )}
                   <TableRowItem title="Entrada em vigor:" text={ptDateTime(dados?.data_vigor)} />
@@ -230,13 +230,13 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                   <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
                   <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
-                  {'reais' in dados && (
+                  {dados && 'reais' in dados && (
                     <TableRowItem
                       title="Tipo:"
                       text={<Label color="default">{dados?.reais ? 'Real' : 'Pessoal'}</Label>}
                     />
                   )}
-                  {'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
+                  {dados && 'ativo' in dados && <TableRowItem title="Ativo:" item={<LabelSN item={dados?.ativo} />} />}
                   <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                 </TableBody>
               </Table>

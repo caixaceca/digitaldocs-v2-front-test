@@ -54,6 +54,7 @@ const initialState = {
   finalidades: [],
   tiposSeguros: [],
   tiposImoveis: [],
+  tiposTitulos: [],
   tiposGarantias: [],
   tiposTitulares: [],
   representantes: [],
@@ -154,6 +155,7 @@ export function getFromGaji9(item, params) {
           `/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${!!params?.credibox}`) ||
         // LISTA
         (item === 'importar componentes' && `/v1/produtos/importar`) ||
+        (item === 'tiposTitulos' && `/v1/suportes/creditos/tipos/titulos`) ||
         (item === 'grupos' && `/v1/acs/grupos/lista?ativo=${!params?.inativos}`) ||
         (item === 'funcoes' && `/v1/acs/roles/lista?ativo=${!params?.inativos}`) ||
         (item === 'freguesias' && `/v1/divisoes/lista?ativo=${!params?.inativos}`) ||
