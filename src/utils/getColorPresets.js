@@ -51,10 +51,28 @@ export default function getColorPresets(presetsKey) {
 
 export function colorLabel(value, padrao = 'primary') {
   return (
-    ((value === 'Preso' || value === 'Tarefas' || value === 'Favorável' || value?.includes('CREATE')) && 'success') ||
-    ((value === 'Pendentes' || value === 'Pendente' || value === 'Favorável parcial' || value?.includes('UPDATE')) &&
+    ((value === 'Preso' ||
+      value === 'Tarefas' ||
+      value === 'Clientes' ||
+      value === 'Mensagem' ||
+      value === 'Favorável' ||
+      value === 'Encaminhamento' ||
+      value?.includes('CREATE')) &&
+      'success') ||
+    ((value === 'Pendente' ||
+      value === 'Pendentes' ||
+      value === 'Favorável parcial' ||
+      value === 'Alteração do estado' ||
+      value?.includes('UPDATE')) &&
       'warning') ||
-    ((value === 'em análise' || value === 'Atribuídos' || value === 'Afeto' || value?.includes('READ')) && 'info') ||
+    ((value === 'Afeto' ||
+      value === 'Ambos' ||
+      value === 'Em análise' ||
+      value === 'em análise' ||
+      value === 'Atribuídos' ||
+      value === 'Atribuição' ||
+      value?.includes('READ')) &&
+      'info') ||
     ((value === 'Entrada' || value === 'Sem parecer') && 'default') ||
     ((value === 'Retidos' ||
       value === 'desistido' ||

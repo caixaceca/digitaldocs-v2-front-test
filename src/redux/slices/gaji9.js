@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLGAJI9 } from '../../utils/apisUrl';
+import { GAJI9_API_SERVER } from '../../utils/apisUrl';
 import { meusAcessosGaji9 } from '../../utils/formatObject';
 //
 import {
@@ -183,10 +183,10 @@ export function getFromGaji9(item, params) {
           dispatch(slice.actions.getSuccess({ item, dados: item === 'creditos' ? 'reset' : params?.reset?.val }));
 
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.get(`${BASEURLGAJI9}${apiUrl}`, headers);
+        const response = await axios.get(`${GAJI9_API_SERVER}${apiUrl}`, headers);
 
         if (item === 'grupo') {
-          const uts = await axios.get(`${BASEURLGAJI9}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, headers);
+          const uts = await axios.get(`${GAJI9_API_SERVER}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, headers);
           const dados = { ...response.data?.objeto, utilizadores: uts.data?.objeto };
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados }));
         } else if (item === 'funcao' || item === 'utilizador') {
@@ -246,8 +246,12 @@ export function getDocumento(item, params) {
         };
         const response =
           item === 'gerar-contrato' || item === 'minutav2'
-            ? await axios.post(`${BASEURLGAJI9}${apiUrl}`, item === 'minutav2' ? JSON.stringify(params) : null, headers)
-            : await axios.get(`${BASEURLGAJI9}${apiUrl}`, headers);
+            ? await axios.post(
+                `${GAJI9_API_SERVER}${apiUrl}`,
+                item === 'minutav2' ? JSON.stringify(params) : null,
+                headers
+              )
+            : await axios.get(`${GAJI9_API_SERVER}${apiUrl}`, headers);
         const blob = new Blob([response.data], { type: params?.tipo_conteudo });
         const fileUrl = URL.createObjectURL(blob);
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
@@ -317,7 +321,7 @@ export function createItem(item, dados, params) {
           `/v1/suportes/creditos/seguros_garantia?credito_id=${params?.creditoId}&garantia_id=${params?.garantiaId}`) ||
         '';
       if (apiUrl) {
-        const response = await axios.post(`${BASEURLGAJI9}${apiUrl}`, dados, options);
+        const response = await axios.post(`${GAJI9_API_SERVER}${apiUrl}`, dados, options);
         if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));
         else if (params?.getList) dispatch(getFromGaji9(item, { id: params?.id }));
@@ -335,7 +339,11 @@ export function createItem(item, dados, params) {
 
       if (item === 'condicionaisCl') {
         const requisicoes = dados.map(async (row) => {
-          const ausencia = axios.post(`${BASEURLGAJI9}/v1/clausulas/c2c/${params?.id}`, JSON.stringify(row), options);
+          const ausencia = axios.post(
+            `${GAJI9_API_SERVER}/v1/clausulas/c2c/${params?.id}`,
+            JSON.stringify(row),
+            options
+          );
           return ausencia;
         });
         const responses = await Promise.all(requisicoes);
@@ -394,21 +402,21 @@ export function updateItem(item, dados, params) {
       if (apiUrl) {
         if (params?.patch) {
           if (item === 'datas contrato') {
-            if (dados?.data_entrega) await axios.patch(`${BASEURLGAJI9}${apiUrl}`, dados.data_entrega, options);
+            if (dados?.data_entrega) await axios.patch(`${GAJI9_API_SERVER}${apiUrl}`, dados.data_entrega, options);
             if (dados?.data_recebido)
               await axios.patch(
-                `${BASEURLGAJI9}/v1/contratos/recebido?codigo=${params?.codigo}`,
+                `${GAJI9_API_SERVER}/v1/contratos/recebido?codigo=${params?.codigo}`,
                 dados.data_recebido,
                 options
               );
             await dispatch(getFromGaji9('contratos', { id: params?.creditoId }));
           } else {
-            const response = await axios.patch(`${BASEURLGAJI9}${apiUrl}`, dados, options);
+            const response = await axios.patch(`${GAJI9_API_SERVER}${apiUrl}`, dados, options);
             dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: null }));
             dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: response.data?.objeto || null }));
           }
         } else {
-          const response = await axios.put(`${BASEURLGAJI9}${apiUrl}`, dados, options);
+          const response = await axios.put(`${GAJI9_API_SERVER}${apiUrl}`, dados, options);
           if (item === 'prg') dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
           else if (params?.getItem)
             dispatch(getSuccess({ item: params?.getItem, dados: response.data?.clausula || response.data?.objeto }));
@@ -469,7 +477,7 @@ export function deleteItem(item, params) {
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(`${BASEURLGAJI9}${apiUrl}`, options);
+        const response = await axios.delete(`${GAJI9_API_SERVER}${apiUrl}`, options);
         if (item === 'contratos') dispatch(slice.actions.setContratado(false));
         else if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));

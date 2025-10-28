@@ -80,3 +80,7 @@ export default function Label({ children, color = 'default', variant = 'ghost', 
     </RootStyle>
   );
 }
+
+export function LabelSN({ val = false }) {
+  return <Label color={val ? 'success' : 'default'}>{val ? 'Sim' : 'Não'}</Label>;
+}

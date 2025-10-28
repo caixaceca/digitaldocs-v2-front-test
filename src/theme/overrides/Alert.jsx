@@ -22,22 +22,15 @@ export default function Alert(theme) {
         ...(standardVariant && {
           color: theme.palette[color][isLight ? 'darker' : 'lighter'],
           backgroundColor: theme.palette[color][isLight ? 'lighter' : 'darker'],
-          '& .MuiAlert-icon': {
-            color: theme.palette[color][isLight ? 'main' : 'light'],
-          },
+          '& .MuiAlert-icon': { color: theme.palette[color][isLight ? 'main' : 'light'] },
         }),
         // FILLED
-        ...(filledVariant && {
-          color: theme.palette[color].contrastText,
-          backgroundColor: theme.palette[color].main,
-        }),
+        ...(filledVariant && { color: theme.palette[color].contrastText, backgroundColor: theme.palette[color].main }),
         // OUTLINED
         ...(outlinedVariant && {
           color: theme.palette[color][isLight ? 'dark' : 'light'],
           border: `solid 1px ${theme.palette[color].main}`,
-          '& .MuiAlert-icon': {
-            color: theme.palette[color].main,
-          },
+          '& .MuiAlert-icon': { color: theme.palette[color].main },
         }),
       }),
     }));

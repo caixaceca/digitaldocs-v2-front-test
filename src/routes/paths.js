@@ -35,4 +35,8 @@ export const PATH_DIGITALDOCS = {
     credito: '/gaji9/credito/:id',
     clausula: '/gaji9/clausula/:id',
   },
+  suporteCliente: {
+    root: '/suporte-cliente',
+    gestao: '/suporte-cliente/gestao',
+  },
 };

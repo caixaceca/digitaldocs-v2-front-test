@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 // utils
 import { vdt } from '../utils/formatObject';
-import { BASEURLGAJI9 } from '../utils/apisUrl';
+import { GAJI9_API_SERVER } from '../utils/apisUrl';
 import { getAccessToken } from '../redux/slices/intranet';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ export function useSubtiposGarantia(tipo, setValue, index) {
 
       try {
         const accessToken = await getAccessToken();
-        const apiUrl = `${BASEURLGAJI9}/v1/tipos_garantias/detail?id=${tipo.id}`;
+        const apiUrl = `${GAJI9_API_SERVER}/v1/tipos_garantias/detail?id=${tipo.id}`;
         const res = await fetch(apiUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
         const data = await res.json();
 

@@ -10,8 +10,8 @@ export function submitDados(values, isEdit, id, dispatch, enqueueSnackbar, onClo
     const entidadesList = values?.entidades?.length ? values?.entidades?.map(({ numero }) => numero) : null;
 
     if (isEdit) {
-      const formData = bodyEditar({ ...values, entidades: entidadesList });
       const params = { id, msg: 'Processo atualizado', onClose };
+      const formData = bodyEditar({ ...values, entidades: entidadesList });
       dispatch(updateItem('processo', JSON.stringify(formData), params));
     } else {
       dispatch(updateDados({ forward: true, dados: { ...values, entidadesList } }));
@@ -102,6 +102,11 @@ function bodyEditar(dados) {
       } else formData[key] = dados[key];
     }
   });
+
+  if (dados?.fluxo?.assunto === 'Abertura de Conta') {
+    delete formData.cliente;
+    delete formData.conta;
+  }
 
   return formData;
 }

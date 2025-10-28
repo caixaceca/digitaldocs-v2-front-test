@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/apisUrl';
+import { DDOCS_API_SERVER } from '../../utils/apisUrl';
 //
 import { getAccessToken } from './intranet';
 import { selectUtilizador, headerOptions, actionGet, hasError } from './sliceActions';
@@ -106,7 +106,7 @@ export function getIndicadores(item, params) {
       const apiUrl = apiPaths[item] || '';
       if (!apiUrl) return;
 
-      const response = await axios.get(`${BASEURLDD}${apiUrl}?${queryParams}`, options);
+      const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}?${queryParams}`, options);
       dispatch(
         slice.actions.getSuccess({ item: params?.item || 'indicadores', dados: response.data?.objeto || response.data })
       );
@@ -130,7 +130,7 @@ export function getEstatisticaCredito(item, params) {
 
       switch (item) {
         case 'estCreditoMensal': {
-          const basePath = `${BASEURLDD}/v1/indicadores/estatistica/credito/${perfilId}`;
+          const basePath = `${DDOCS_API_SERVER}/v1/indicadores/estatistica/credito/${perfilId}`;
           const uoParam = `uoID=${params?.uoID}`;
           const dataString = `${params?.ano}&mes=${params?.mes}`;
           const requests = [
@@ -140,7 +140,7 @@ export function getEstatisticaCredito(item, params) {
             axios.get(`${basePath}?${uoParam}&fase=indeferido&ano=${dataString}`, options),
             axios.get(`${basePath}?${uoParam}&fase=desistido&ano=${dataString}`, options),
             axios.get(
-              `${BASEURLDD}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`,
+              `${DDOCS_API_SERVER}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`,
               options
             ),
           ];
@@ -162,7 +162,7 @@ export function getEstatisticaCredito(item, params) {
           break;
         }
         case 'estCreditoIntervalo': {
-          const url = `${BASEURLDD}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
+          const url = `${DDOCS_API_SERVER}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
           const response = await axios.get(url, options);
           dispatch(slice.actions.getResumoSuccess({ dados: response.data, uoId: params?.uoID }));
           break;

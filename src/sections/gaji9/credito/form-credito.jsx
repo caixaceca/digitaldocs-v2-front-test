@@ -95,7 +95,7 @@ export default function CreditoForm({ onClose }) {
       data_vencimento_prestacao1: formatDate(values?.data_vencimento_prestacao1, 'yyyy-MM-dd'),
     };
     const params = { getItem: 'credito', id: credito?.id, msg: 'Crédito atualizado' };
-    dispatch(updateItem('credito', JSON.stringify(formData), params));
+    dispatch(updateItem('credito', JSON.stringify(formData), { ...params, onClose }));
   };
 
   return (

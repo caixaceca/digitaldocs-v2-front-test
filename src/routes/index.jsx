@@ -100,6 +100,13 @@ export default function Router() {
             { path: 'clausula/:id', element: <DetalhesClausula /> },
           ],
         },
+        {
+          path: 'suporte-cliente',
+          children: [
+            { element: <Navigate to="/suporte-cliente/gestao" replace />, index: true },
+            { path: 'gestao', element: <SuporteCliente /> },
+          ],
+        },
       ],
     },
 
@@ -134,3 +141,7 @@ const GestaoGaji9 = Loadable(lazy(() => import('../pages/gaji9/page-gestao-gaji9
 const DetalhesMinuta = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-minuta')));
 const DetalhesCredito = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-credito')));
 const DetalhesClausula = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-clausula')));
+
+// --------------------------------------------------- SUPORTE CLIENTE --------------------------------------------------
+
+const SuporteCliente = Loadable(lazy(() => import('../pages/page-gestao-suporte-cliente')));

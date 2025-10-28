@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/apisUrl';
+import { DDOCS_API_SERVER } from '../../utils/apisUrl';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 //
@@ -195,7 +195,7 @@ export function getFromParametrizacao(item, params) {
           `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}${params?.transicaoId ? `&transicao_id=${params?.transicaoId}` : ''}`) ||
         '';
       if (apiUrl) {
-        const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
+        const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}`, options);
         const label =
           (item === 'estados' && 'nome') ||
           (item === 'fluxos' && 'assunto') ||
@@ -258,14 +258,14 @@ export function createItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.post(`${BASEURLDD}${apiUrl}`, dados, options);
+        const response = await axios.post(`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
         if (item === 'clonar fluxo') {
           if (params?.transicoes?.length > 0) {
             const id = response?.data?.id;
             const transicoes = params?.transicoes?.map((row) => ({ ...row, perfilIDCC: perfilId, fluxo_id: id }));
-            await axios.post(`${BASEURLDD}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
+            await axios.post(`${DDOCS_API_SERVER}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
           }
-          const fluxo = await axios.get(`${BASEURLDD}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
+          const fluxo = await axios.get(`${DDOCS_API_SERVER}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
           dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: fluxo.data }));
         } else if (item === 'transicoes' || item === 'destinatarios') {
           dispatch(getFromParametrizacao(item === 'transicoes' ? 'fluxo' : item, { id: params?.id }));
@@ -320,7 +320,7 @@ export function updateItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.put(`${BASEURLDD}${apiUrl}`, dados, options);
+        const response = await axios.put(`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
         const dadosR = (item === 'acessos' && response.data) || response.data?.objeto || response.data || null;
         if (item === 'fluxo' || item === 'estado' || params?.getItem)
           dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: dadosR }));
@@ -363,7 +363,7 @@ export function deleteItem(item, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.delete(`${BASEURLDD}${apiUrl}`, options);
+        const response = await axios.delete(`${DDOCS_API_SERVER}${apiUrl}`, options);
         if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
         dispatch(
           slice.actions.deleteSuccess({

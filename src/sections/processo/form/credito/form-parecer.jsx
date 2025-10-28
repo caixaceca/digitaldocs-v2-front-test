@@ -57,8 +57,8 @@ export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
         anexo = formData;
       }
       const formData = { favoravel: values.favoravel, descritivo: values?.descritivo };
-      const params = { id: pId, msg: `Parecer ${isEdit ? 'atualizado' : 'enviado'}`, put: true, anexo, estadoId };
-      dispatch(createItem('parecer-credito', JSON.stringify(formData), { ...params, onClose }));
+      const params = { id: pId, msg: `Parecer ${isEdit ? 'atualizado' : 'enviado'}`, put: true, estadoId };
+      dispatch(createItem('parecer-credito', JSON.stringify(formData), { ...params, anexo, onClose }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

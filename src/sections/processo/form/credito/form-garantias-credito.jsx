@@ -112,20 +112,18 @@ function FormGarantias({ dados }) {
         <Stack spacing={3} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
           {fields.map((item, index) => (
             <Stack direction="row" alignItems="center" spacing={1} key={item.id}>
-              <Stack sx={{ flexGrow: 1 }}>
-                <Grid container spacing={2}>
-                  <Garantia index={index} />
-                  <GridItem sm={6}>
-                    <RHFNumberField label="Valor da garantia" name={`garantias[${index}].valor_garantia`} />
-                  </GridItem>
-                  <GridItem xs={6} sm={3}>
-                    <RHFNumberField noFormat label="Nº de entidade" name={`garantias[${index}].numero_entidade`} />
-                  </GridItem>
-                  <GridItem xs={6} sm={3}>
-                    <RHFTextField label="Nº de livrança" name={`garantias[${index}].numero_livranca`} />
-                  </GridItem>
-                </Grid>
-              </Stack>
+              <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+                <Garantia index={index} />
+                <GridItem sm={6}>
+                  <RHFNumberField label="Valor da garantia" name={`garantias[${index}].valor_garantia`} />
+                </GridItem>
+                <GridItem xs={6} sm={3}>
+                  <RHFNumberField noFormat label="Nº de entidade" name={`garantias[${index}].numero_entidade`} />
+                </GridItem>
+                <GridItem xs={6} sm={3}>
+                  <RHFTextField label="Nº de livrança" name={`garantias[${index}].numero_livranca`} />
+                </GridItem>
+              </Grid>
               <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
             </Stack>
           ))}
@@ -244,7 +242,8 @@ const shapeGarantia = () =>
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('tipo_garantia_id', {
           is: (tipo) => tipo && tipo.reais === false,
-          then: (schema) => schema.positive().typeError('Introduza um número').required().label('Nº da entidade'),
+          then: (schema) =>
+            schema.positive().integer().typeError('Introduza um número').required().label('Nº da entidade'),
           otherwise: (schema) => schema.nullable(),
         }),
     })

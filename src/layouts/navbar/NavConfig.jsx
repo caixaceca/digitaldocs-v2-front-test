@@ -1,3 +1,5 @@
+//
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 // config
 import { ambiente } from '../../config';
 // routes
@@ -21,6 +23,12 @@ const navConfig = [
         roles: ['arquivo-100', 'arquivo-110', 'arquivo-111'],
       },
       { title: 'GAJ-i9', icon: <Contrato />, roles: ['gaji9-100'], path: PATH_DIGITALDOCS.gaji9.root },
+      {
+        roles: ['suporte-cliente-100'],
+        title: 'Suporte ao cliente',
+        icon: <SupportAgentIcon />,
+        path: PATH_DIGITALDOCS.suporteCliente.root,
+      },
       {
         roles: ['Todo-111'],
         title: 'Parametrização',

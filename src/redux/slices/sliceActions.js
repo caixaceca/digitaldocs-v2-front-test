@@ -134,7 +134,7 @@ export async function hasError(error, dispatch, action) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function headerOptions({ accessToken, mail = '', cc, ct, mfd }) {
+export function headerOptions({ accessToken, mail = '', cc = false, ct, mfd }) {
   if (cc) {
     return {
       headers: {

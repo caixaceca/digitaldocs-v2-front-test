@@ -79,6 +79,7 @@ export function DefaultAction({
   const colorAlt =
     ((label === 'EDITAR' ||
       label === 'Editar' ||
+      label === 'Estado' ||
       label === 'REATIVAR' ||
       label === 'RESGATAR' ||
       label === 'LIBERTAR' ||
@@ -102,7 +103,6 @@ export function DefaultAction({
     (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
     (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
     (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
-    (label === 'ATRIBUIR' && <Atribuir sx={{ width: 22, height: 22 }} />) ||
     (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
     (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
     (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -113,17 +113,20 @@ export function DefaultAction({
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
     (label === 'GERANDO PDF...' && <CircularProgress size={small ? 18 : 24} color="inherit" />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
+    ((label === 'ATRIBUIR' || label === 'Atribuir') && <Atribuir sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'RESGATAR' || label === 'REATIVAR') && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
-    ((label === 'ENCAMINHAR' || label === 'DESPACHO') && <Seguimento sx={{ width: 22, height: 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'CLONAR' || label === 'Clonar') && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (
       <SearchIcon sx={{ width: small ? 18 : 24 }} />
     )) ||
-    ((label === 'Editar' || label === 'EDITAR' || label === 'FOCAL POINT') && (
+    ((label === 'ENCAMINHAR' || label === 'DESPACHO' || label === 'Encaminhar') && (
+      <Seguimento sx={{ width: small ? 18 : 22 }} />
+    )) ||
+    ((label === 'Editar' || label === 'EDITAR' || label === 'FOCAL POINT' || icon === 'editar') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
     )) ||
     ((icon === 'adicionar' ||

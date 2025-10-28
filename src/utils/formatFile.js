@@ -1,4 +1,4 @@
-import { INTRANETFILE } from './apisUrl';
+import { INTRANET_FILE_API_SERVER } from './apisUrl';
 import { getIcon } from '../components/Image';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -128,6 +128,6 @@ export function downloadDoc(url, nome) {
 
 export function getIntranetFile(item, file = '') {
   let path = item === 'colaborador' ? '' : '/assets/Shape.svg';
-  if (file) path = `${INTRANETFILE}/stf/v2/media/download/${item}?filename=${file}`;
+  if (file) path = `${INTRANET_FILE_API_SERVER}/stf/v2/media/download/${item}?filename=${file}`;
   return path;
 }

@@ -19,6 +19,7 @@ export const objetos = [
   { id: 'origem', label: 'Origem' },
   { id: 'perfilestado', label: 'Perfil/Estado' },
   { id: 'transicao', label: 'Transição' },
+  { id: 'suporte-cliente', label: 'Suporte ao cliente' },
   { id: 'con', label: 'Ver lista de processos CON' },
   { id: 'pjf', label: 'Ver lista de processos Judiciais e Fiscais' },
   { id: 'emissao-cartoes', label: 'Ver lista de receção de cartões' },

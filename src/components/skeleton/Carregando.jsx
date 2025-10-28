@@ -152,3 +152,20 @@ export function SkeletonTable({ column, row }) {
     </TableRow>
   ));
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function TicketSkeleton() {
+  return (
+    <Stack spacing={2} sx={{ pt: 3 }}>
+      <Skeleton variant="text" height={36} sx={{ width: { xs: '90%', sm: '40%' }, transform: 'none' }} />
+      <Skeleton variant="text" height={18} sx={{ width: { xs: '60%', sm: '25%' }, transform: 'none' }} />
+      <Skeleton variant="rectangular" height={140} sx={{ borderRadius: 1 }} />
+      <Stack direction="row" spacing={1}>
+        <Skeleton variant="circular" width={40} height={40} />
+        <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 1 }} />
+      </Stack>
+      <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
+    </Stack>
+  );
+}

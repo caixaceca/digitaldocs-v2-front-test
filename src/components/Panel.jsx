@@ -92,7 +92,7 @@ export function Criado({ iconText = '', tipo = '', value, value1 = '', caption =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Colaborador({ row }) {
+export function Colaborador({ row, email }) {
   return (
     <ColaboradorInfo
       labelAltCaption
@@ -100,8 +100,8 @@ export function Colaborador({ row }) {
       labelAlt={row?.utilizador_id}
       foto={row?.colaborador?.foto_anexo}
       caption={!row?.colaborador?.uo_label}
-      label={row?.colaborador?.uo || 'Perfil sem ID_AAD na Intranet'}
       nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
+      label={email ? row?.colaborador?.email : row?.colaborador?.uo || 'Perfil sem ID_AAD na Intranet'}
     />
   );
 }

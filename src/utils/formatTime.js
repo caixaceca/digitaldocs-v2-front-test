@@ -135,3 +135,9 @@ export function normalizeData(dateString) {
 
   return dateString;
 }
+
+export function toHourLabel(value) {
+  const horas = Math.floor(value);
+  const minutos = Math.round((value - horas) * 60);
+  return `${horas}h ${minutos}m`;
+}

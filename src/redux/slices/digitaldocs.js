@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { BASEURLDD } from '../../utils/apisUrl';
+import { DDOCS_API_SERVER } from '../../utils/apisUrl';
 import { downloadDoc, canPreview } from '../../utils/formatFile';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
@@ -128,7 +128,7 @@ export function getFromDigitalDocs(item, params) {
         '';
       if (apiUrl) {
         dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
-        const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
+        const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}`, options);
         dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
       }
 
@@ -136,7 +136,7 @@ export function getFromDigitalDocs(item, params) {
         case 'Emissão': {
           dispatch(slice.actions.getSuccess({ item: 'cartoes', dados: [] }));
           const response = await axios.get(
-            `${BASEURLDD}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
+            `${DDOCS_API_SERVER}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
               params?.dataFim ? `&data_final=${params?.dataFim}` : ''
             }`,
             options
@@ -148,7 +148,7 @@ export function getFromDigitalDocs(item, params) {
           dispatch(slice.actions.getSuccess({ item: 'cartoes', dados: [] }));
           if (params?.uoId) {
             const response = await axios.get(
-              `${BASEURLDD}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
+              `${DDOCS_API_SERVER}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
                 params?.dataFim ? `&data_final=${params?.dataFim}` : ''
               }`,
               options
@@ -158,12 +158,15 @@ export function getFromDigitalDocs(item, params) {
           break;
         }
         case 'cartao': {
-          const response = await axios.get(`${BASEURLDD}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`, options);
+          const response = await axios.get(
+            `${DDOCS_API_SERVER}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`,
+            options
+          );
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
           break;
         }
         case 'contratacao-gaji9': {
-          const apiUrl = `${BASEURLDD}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`;
+          const apiUrl = `${DDOCS_API_SERVER}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`;
           await axios.get(apiUrl, options);
           dispatch(slice.actions.enviarContratacao());
           doneSucess(params, dispatch, slice.actions.getSuccess);
@@ -235,7 +238,7 @@ export function getListaProcessos(item, params) {
       const apiUrl = apiPaths[item] || '';
       if (!apiUrl) return;
 
-      const response = await axios.get(`${BASEURLDD}${apiUrl}?${queryParams}`, options);
+      const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}?${queryParams}`, options);
       const dados = item === 'con' || item === 'pedidosAcesso' ? { objeto: response.data } : response.data;
       dispatch(slice.actions.getListaProcessosSuccess({ item: params?.item || item, ...dados }));
       params?.onClose?.();
@@ -260,7 +263,7 @@ export function getProcesso(item, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true });
 
-      const apiUrl = `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
+      const apiUrl = `${DDOCS_API_SERVER}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
       const { data } = await axios.get(apiUrl, options);
 
       if (!data?.objeto) return;
@@ -293,8 +296,8 @@ export function getInfoProcesso(item, params) {
 
       if (item === 'htransicoes') {
         const [htTransicoesRes, htDomiciliosRes] = await Promise.all([
-          axios.get(`${BASEURLDD}/v2/processos/ht_transicoes/${idPerfilId}`, options),
-          axios.get(`${BASEURLDD}/v2/processos/ht_domicilios/${idPerfilId}`, options),
+          axios.get(`${DDOCS_API_SERVER}/v2/processos/ht_transicoes/${idPerfilId}`, options),
+          axios.get(`${DDOCS_API_SERVER}/v2/processos/ht_domicilios/${idPerfilId}`, options),
         ]);
 
         const htTransicoes = htTransicoesRes?.data?.objeto ?? [];
@@ -338,7 +341,7 @@ export function getInfoProcesso(item, params) {
           '';
 
         if (apiUrl) {
-          const response = await axios.get(`${BASEURLDD}${apiUrl}`, options);
+          const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}`, options);
           if (item === 'resgatar' || item === 'aceitar') {
             processarProcesso(response.data.objeto, perfilId, dispatch, item === 'aceitar' ? params?.estadoId : '');
           } else if (item === 'focal-point') {
@@ -374,7 +377,7 @@ export function getAnexo(item, params) {
       let url = params?.anexo?.url || '';
       if (!url) {
         const response = await axios.get(
-          `${BASEURLDD}/v2/processos/anexo/file/${perfilId}?anexo_id=${params?.anexo?.id}&processo_id=${params?.processoId}&da_entidade=${!!params?.anexo?.entidade}`,
+          `${DDOCS_API_SERVER}/v2/processos/anexo/file/${perfilId}?anexo_id=${params?.anexo?.id}&processo_id=${params?.processoId}&da_entidade=${!!params?.anexo?.entidade}`,
           { ...options, responseType: 'arraybuffer' }
         );
         const blob = await new Blob([response.data], { type: params?.anexo?.conteudo });
@@ -404,7 +407,7 @@ export function createProcesso(item, dados, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
-      const apiUrl = `${BASEURLDD}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`;
+      const apiUrl = `${DDOCS_API_SERVER}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`;
       const response = await axios.post(apiUrl, dados, options);
 
       dispatch(slice.actions.getSuccess({ item: 'processo', dados: response?.data?.objeto }));
@@ -429,12 +432,13 @@ export function createItem(item, dados, params) {
       if (params?.anexo) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
         const apiUrl = `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}`;
-        await axios.put(`${BASEURLDD}${apiUrl}`, params?.anexo, options);
+        await axios.put(`${DDOCS_API_SERVER}${apiUrl}`, params?.anexo, options);
       }
       const apiUrl =
-        (item === 'seguros' && `${BASEURLDD}/v2/processos/${params?.processoId}/credito/seguros`) ||
-        (item === 'parecer-credito' && `${BASEURLDD}/v2/processos/${params?.id}/cr/${1}/pareceres`) ||
-        (item === 'garantias' && `${BASEURLDD}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
+        (item === 'seguros' && `${DDOCS_API_SERVER}/v2/processos/${params?.processoId}/credito/seguros`) ||
+        (item === 'parecer-credito' && `${DDOCS_API_SERVER}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
+        (item === 'garantias' &&
+          `${DDOCS_API_SERVER}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
         '';
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
@@ -465,12 +469,12 @@ export function updateItem(item, dados, params) {
       if (params?.anexos) {
         const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
         const url = `/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`;
-        await axios.patch(`${BASEURLDD}${url}`, params?.anexos, options);
+        await axios.patch(`${DDOCS_API_SERVER}${url}`, params?.anexos, options);
       }
       if (params?.anexo) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
         const apiUrl = `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}`;
-        await axios.put(`${BASEURLDD}${apiUrl}`, params?.anexo, options);
+        await axios.put(`${DDOCS_API_SERVER}${apiUrl}`, params?.anexo, options);
       }
 
       const apiUrl =
@@ -513,17 +517,21 @@ export function updateItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios[params?.put ? 'put' : 'patch'](`${BASEURLDD}${apiUrl}`, dados, options);
+        const response = await axios[params?.put ? 'put' : 'patch'](`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
         if (params?.fillCredito)
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
       }
       if (item === 'processo') {
-        const response = await axios.put(`${BASEURLDD}/v2/processos/ei/${perfilId}/${params?.id}`, dados, options);
+        const response = await axios.put(
+          `${DDOCS_API_SERVER}/v2/processos/ei/${perfilId}/${params?.id}`,
+          dados,
+          options
+        );
         processarProcesso(response.data.objeto, perfilId, dispatch, '', false);
       }
       if (item === 'adicionar-anexos') {
         const { data } = await axios.get(
-          `${BASEURLDD}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
+          `${DDOCS_API_SERVER}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
           options
         );
         processarProcesso(data.objeto, perfilId, dispatch, '', false);
@@ -561,7 +569,7 @@ export function deleteItem(item, params) {
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(`${BASEURLDD}${apiUrl}`, options);
+        const response = await axios.delete(`${DDOCS_API_SERVER}${apiUrl}`, options);
         if (item === 'anexo' || item === 'anexo-parecer')
           dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
         if (item === 'garantias' || item === 'seguros')

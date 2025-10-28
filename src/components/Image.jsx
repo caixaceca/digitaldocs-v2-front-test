@@ -87,5 +87,5 @@ export const getIcon = (name, thumbp, sx) =>
   thumbp ? (
     <Box component="img" src={`/assets/icons/file_format/${name}.svg`} sx={{ flexShrink: 0, ...sx }} />
   ) : (
-    <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24 }} {...sx} />
+    <Image src={`/assets/icons/file_format/${name}.svg`} alt={name} sx={{ width: 24, height: 24, ...sx }} />
   );

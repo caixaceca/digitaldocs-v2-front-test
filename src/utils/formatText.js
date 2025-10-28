@@ -48,6 +48,7 @@ export function entidadesParse(entidades) {
 
 export const errorMsg = (error) => {
   const paths = [
+    'response.data.details',
     'response.data.erro',
     'response.data.error',
     'response.data.errot',

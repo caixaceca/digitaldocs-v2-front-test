@@ -95,7 +95,7 @@ export default function FormInfoInterno({ dados }) {
   }, [isEdit, dadosStepper, processo, uos, fluxo, cc?.uo_balcao, estado?.uo_id]);
 
   const onSubmit = async () => {
-    submitDados(values, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);
+    submitDados({ ...values, fluxo }, isEdit, processo?.id, dispatch, enqueueSnackbar, onClose);
   };
 
   return (

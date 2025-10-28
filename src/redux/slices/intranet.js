@@ -6,7 +6,7 @@ import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-brow
 import { callMsGraph } from '../../graph';
 import { loginRequest, msalInstance } from '../../config';
 import { addRole, getFromParametrizacao } from './parametrizacao';
-import { BASEURL, BASEURLSLIM, INTRANETHUBAPI } from '../../utils/apisUrl';
+import { INTRANET_V1_API_SERVER, SLIM_API_SERVER, INTRANET_HUB_API_SERVER } from '../../utils/apisUrl';
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ export function authenticateColaborador() {
       const accessToken = await getAccessToken();
       const msalProfile = await callMsGraph(accessToken);
       dispatch(slice.actions.getSuccess({ item: 'mail', dados: msalProfile?.userPrincipalName }));
-      const perfil = await axios.post(`${INTRANETHUBAPI}/v2/portal/pfs/msal`, msalProfile, {
+      const perfil = await axios.post(`${INTRANET_HUB_API_SERVER}/v2/portal/pfs/msal`, msalProfile, {
         headers: { Authorization: `Bearer ${accessToken}` },
         withCredentials: true,
       });
@@ -156,7 +156,7 @@ export function getFromIntranet(item, params) {
 
       if (item === 'colaboradores') {
         const requests = [true, false].map((ativo) =>
-          axios.get(`${INTRANETHUBAPI}/v2/portal/cls/load`, { ...options, params: { ativo } })
+          axios.get(`${INTRANET_HUB_API_SERVER}/v2/portal/cls/load`, { ...options, params: { ativo } })
         );
 
         const responses = await Promise.all(requests);
@@ -182,23 +182,23 @@ export function getFromIntranet(item, params) {
           (params?.tipoSearch === 'Pesquisar por Doc. ID, NIF ou Nome' &&
             `/v1/pdex/d2n/pessoa?${params?.numDoc ? `&doc_id=${params?.numDoc}` : ''}${params?.nifSearch ? `&nif=${params?.nifSearch}` : ''}${params?.nomeSearch ? `&nome=${params?.nomeSearch}` : ''}`) ||
           `/v1/pdex/dados_bb?num_doc=${params?.numDoc}`;
-        const response = await axios.get(`${INTRANETHUBAPI}${apiUrl}`, options);
+        const response = await axios.get(`${INTRANET_HUB_API_SERVER}${apiUrl}`, options);
         dispatch(slice.actions.getSuccess({ item, dados: { ...params, ...response.data?.objeto } }));
       } else {
         const apiUrl =
-          (item === 'ajuda' && `${BASEURL}/help/ajuda`) ||
-          (item === 'frase' && `${BASEURL}/frase_semana/ativa`) ||
-          (item === 'certificacoes' && `${BASEURL}/certificacao`) ||
-          (item === 'links' && `${BASEURL}/aplicacao/links/uteis`) ||
-          (item === 'perguntas' && `${BASEURL}/help/perguntas_frequentes`) ||
-          (item === 'minhasAplicacoes' && `${BASEURL}/aplicacao/aplicacoes/me`) ||
-          (item === 'uos' && `${INTRANETHUBAPI}/v2/portal/uos/load?ativo=true`) ||
-          (item === 'documentosAjuda' && `${BASEURL}/atc?categoria=documentosAjuda`) ||
-          (item === 'cc' && `${INTRANETHUBAPI}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
-          (item === 'disposicao' && `${BASEURL}/disposicao/by_data/${params?.id}/${params?.data}`) ||
-          (item === 'fichaInformativa' && `${BASEURLSLIM}/v1/fichas/dcs/ficha?entidade=${params?.entidade}`) ||
+          (item === 'ajuda' && `${INTRANET_V1_API_SERVER}/help/ajuda`) ||
+          (item === 'frase' && `${INTRANET_V1_API_SERVER}/frase_semana/ativa`) ||
+          (item === 'certificacoes' && `${INTRANET_V1_API_SERVER}/certificacao`) ||
+          (item === 'links' && `${INTRANET_V1_API_SERVER}/aplicacao/links/uteis`) ||
+          (item === 'perguntas' && `${INTRANET_V1_API_SERVER}/help/perguntas_frequentes`) ||
+          (item === 'minhasAplicacoes' && `${INTRANET_V1_API_SERVER}/aplicacao/aplicacoes/me`) ||
+          (item === 'uos' && `${INTRANET_HUB_API_SERVER}/v2/portal/uos/load?ativo=true`) ||
+          (item === 'documentosAjuda' && `${INTRANET_V1_API_SERVER}/atc?categoria=documentosAjuda`) ||
+          (item === 'cc' && `${INTRANET_HUB_API_SERVER}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
+          (item === 'disposicao' && `${INTRANET_V1_API_SERVER}/disposicao/by_data/${params?.id}/${params?.data}`) ||
+          (item === 'fichaInformativa' && `${SLIM_API_SERVER}/v1/fichas/dcs/ficha?entidade=${params?.entidade}`) ||
           (item === 'docIdentificacao' &&
-            `${BASEURLSLIM}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`) ||
+            `${SLIM_API_SERVER}/api/v1/sniac/doc/info/production?documento=${params?.doc}&deCache=${params?.cache}`) ||
           '';
         if (apiUrl) {
           const response = await axios.get(apiUrl, options);
@@ -230,9 +230,9 @@ export function createItem(item, dados, params) {
       const accessToken = await getAccessToken();
       const { mail } = selectUtilizador(getState()?.intranet || {});
       const apiUrl =
-        (item === 'denuncia' && `${BASEURL}/denuncia`) ||
-        (item === 'disposicao' && `${BASEURL}/disposicao`) ||
-        (item === 'sugestao' && `${BASEURL}/sugestao/sugestao`) ||
+        (item === 'denuncia' && `${INTRANET_V1_API_SERVER}/denuncia`) ||
+        (item === 'disposicao' && `${INTRANET_V1_API_SERVER}/disposicao`) ||
+        (item === 'sugestao' && `${INTRANET_V1_API_SERVER}/sugestao/sugestao`) ||
         '';
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail, cc: false, ct: true, mfd: item !== 'disposicao' });
