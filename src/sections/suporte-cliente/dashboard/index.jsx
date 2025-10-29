@@ -2,24 +2,25 @@ import { useState } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material//Autocomplete';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // components
 import GridItem from '../../../components/GridItem';
 import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
 //
 import KPI from './kpi';
 import useDashboardMockData from './mock';
-import { EvolucaoDiaria, PorDepartamento } from './chart-dasboard';
+import { Evolucao, PorDepartamento } from './chart-dasboard';
 import { Asuntos, Recentes, Avaliacoes, Desempenho } from './table-dashboard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function AdminDashboardMetrics() {
-  const [period, setPeriod] = useState('Mês atual');
-  const { kpis, daily, byDepartment, bySubject, byEmployee, recentTickets, recentEvaluations } = useDashboardMockData();
+  const [data, setData] = useState(new Date());
+  const [periodo, setPeriodo] = useState('Mensal');
+  const { kpis, daily, monthly, byDepartment, bySubject, byEmployee, recentTickets, recentEvaluations } =
+    useDashboardMockData();
 
   return (
     <>
@@ -27,14 +28,27 @@ export default function AdminDashboardMetrics() {
         sx={{ px: 1 }}
         heading="Painel de Gestão"
         action={
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Período</InputLabel>
-            <Select label="Período" value={period} onChange={(e) => setPeriod(e.target.value)}>
-              <MenuItem value="Mês atual">Mês atual</MenuItem>
-              <MenuItem value="Mês anterior">Mês anterior</MenuItem>
-              <MenuItem value="Últimas 7 dias">Últimas 7 dias</MenuItem>
-            </Select>
-          </FormControl>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Autocomplete
+              fullWidth
+              size="small"
+              value={periodo}
+              disableClearable
+              sx={{ maxWidth: 150 }}
+              options={['Mensal', 'Anual']}
+              onChange={(event, newValue) => setPeriodo(newValue)}
+              renderInput={(params) => <TextField {...params} fullWidth label="Período" />}
+            />
+            <DatePicker
+              value={data}
+              maxDate={new Date()}
+              minDate={new Date('2020-01-01')}
+              onChange={(newValue) => setData(newValue)}
+              label={periodo === 'Mensal' ? 'Mês' : 'Data'}
+              views={periodo === 'Mensal' ? ['month', 'year'] : ['year']}
+              slotProps={{ textField: { size: 'small', sx: { maxWidth: periodo === 'Mensal' ? 300 : 200 } } }}
+            />
+          </Stack>
         }
       />
 
@@ -43,7 +57,7 @@ export default function AdminDashboardMetrics() {
 
         <Grid container spacing={3}>
           <GridItem md={7}>
-            <EvolucaoDiaria dados={daily} />
+            <Evolucao dados={periodo === 'Mensal' ? daily : monthly} periodo={periodo} />
           </GridItem>
           <GridItem md={5}>
             <PorDepartamento dados={byDepartment} />

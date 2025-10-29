@@ -68,10 +68,10 @@ function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 4, melh
 
   return (
     <GridItem xs={6} md={md} xl={2.4}>
-      <Card sx={{ borderLeft: `4px solid`, borderColor: color, height: 1, p: 2 }}>
+      <Card sx={{ height: 1, p: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Box>
-            <Icon sx={{ color, width: 36, height: 36, opacity: 0.64 }}>{icon}</Icon>
+            <Icon sx={{ color, width: 36, height: 36, opacity: 0.72 }}>{icon}</Icon>
           </Box>
           <Box>
             <Typography variant="overline" color="text.secondary">
@@ -89,7 +89,7 @@ function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 4, melh
           <Typography variant="caption" sx={{ color: melhorou ? 'success.main' : 'error.main' }}>
             {signedSub}{' '}
           </Typography>
-          <Typography variant="caption">&nbsp;do que o mês anterior</Typography>
+          <Typography variant="caption">&nbsp;do que o período anterior</Typography>
         </Box>
       </Card>
     </GridItem>

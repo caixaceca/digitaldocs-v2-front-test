@@ -16,7 +16,7 @@ export const GAJI9_API_SERVER = 'https://gaji9teste.caixa.cv/gaji9/api';
 export const INTRANET_V1_API_SERVER = 'https://intraneteste.caixa.cv:5000';
 export const INTRANET_FILE_API_SERVER = 'https://intraneteste.caixa.cv/corenet';
 export const INTRANET_HUB_API_SERVER = 'https://intraneteste.caixa.cv/corenet/api';
-// export const SUPORTE_CLIENTE_API_SERVER = 'https://intraneteste.caixa.cv/suporte';
+// export const SUPORTE_CLIENTE_API_SERVER = 'https://suporteteste.caixa.cv/suporte';
 
 /// --------------------------- PRODUÇÃo --------------------------
 

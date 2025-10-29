@@ -74,12 +74,14 @@ export function Desempenho({ dados }) {
       title="Desempenho por colaborador"
       headLabel={[
         { id: 'employee', label: 'Colaborador' },
+        { id: 'closed', label: 'Fechados', align: 'center' },
         { id: 'resolved', label: 'Resolvidos', align: 'center' },
         { id: 'rating', label: 'Média avaliação', align: 'center' },
       ]}
       body={dados.map((row) => (
         <TableRow key={row.employee} hover>
           <TableCell>{row.employee}</TableCell>
+          <TableCell align="center">{row.closed}</TableCell>
           <TableCell align="center">{row.resolved}</TableCell>
           <Avaliacao rating={row.rating} />
         </TableRow>

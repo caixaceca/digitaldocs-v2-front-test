@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import CardHeader from '@mui/material/CardHeader';
 // utils
+import { mesesAbr } from '../../../_mock/_others';
 import { fNumber, fPercent } from '../../../utils/formatNumber';
 // components
 import Chart, { useChart, getChartColors } from '../../../components/chart';
@@ -65,8 +66,8 @@ export function PorDepartamento({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function EvolucaoDiaria({ dados }) {
-  const categorias = dados.map((i) => i.day);
+export function Evolucao({ dados, periodo }) {
+  const categories = periodo === 'Mensal' ? dados.map((i) => i.day) : dados.map((i) => mesesAbr[i.month - 1].label);
 
   const series = [
     { name: 'Abertos', data: dados.map((i) => i.opened) },
@@ -75,12 +76,12 @@ export function EvolucaoDiaria({ dados }) {
 
   const chartOptions = useChart({
     legend: { position: 'bottom', horizontalAlign: 'center' },
-    xaxis: { categorias },
+    xaxis: { categories },
   });
 
   return (
     <Card sx={{ height: 1 }}>
-      <CardHeader title="Evolução diária" />
+      <CardHeader title={periodo === 'Mensal' ? 'Evolução diária' : 'Evolução mensal'} />
       <Box sx={{ p: 1 }}>
         <Chart type="area" series={series} options={chartOptions} height={300} />
       </Box>

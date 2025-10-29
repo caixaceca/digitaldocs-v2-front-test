@@ -29,6 +29,13 @@ export default function useDashboardMockData() {
     resolved: Math.max(3, Math.round(8 + Math.cos(i / 4) * 4 + Math.random() * 2)),
   }));
 
+  // daily counts for current year
+  const monthly = Array.from({ length: 12 }, (_, i) => ({
+    month: i + 1,
+    opened: Math.max(3, Math.round(110 + Math.sin(i / 3) * 5 + Math.random() * 15)),
+    resolved: Math.max(3, Math.round(103 + Math.cos(i / 4) * 4 + Math.random() * 20)),
+  }));
+
   const byDepartment = [
     { department: 'DOP - CE', count: 125 },
     { department: 'DARH', count: 18 },
@@ -39,33 +46,33 @@ export default function useDashboardMockData() {
   ];
 
   const byEmployee = [
-    { employee: 'Kleiton Andrade', resolved: 78, rating: 4.5 },
-    { employee: 'Jaquelino Semedo', resolved: 52, rating: 4.2 },
-    { employee: 'Ivandro Évora', resolved: 34, rating: 3.3 },
-    { employee: 'Jaqueline Pereira', resolved: 37, rating: 4.0 },
+    { employee: 'Kleiton Andrade', closed: 80, resolved: 78, rating: 4.5 },
+    { employee: 'Jaquelino Semedo', closed: 61, resolved: 52, rating: 4.2 },
+    { employee: 'Ivandro Évora', closed: 34, resolved: 34, rating: 3.3 },
+    { employee: 'Jaqueline Pereira', closed: 33, resolved: 37, rating: 4.0 },
   ];
 
   // LAST 5
   const recentTickets = [
     {
       id: 'TK-2025-0145',
-      subject: 'Acesso Caixanet',
       status: 'IN_PROGRESS',
       customer: 'Bryan Fortes',
+      subject: 'Acesso Caixanet',
       created_at: '2025-10-15T22:36:19.600108',
     },
     {
       id: 'TK-2025-0146',
-      subject: 'Cartão bloqueado',
       status: 'OPEN',
       customer: 'Maria Santos',
+      subject: 'Cartão bloqueado',
       created_at: '2025-10-25T11:36:19.600108',
     },
     {
       id: 'TK-2025-0147',
-      subject: 'Informação sobre crédito',
       status: 'CLOSED',
       customer: 'Joel Évora',
+      subject: 'Informação sobre crédito',
       created_at: '2025-10-25T09:36:19.600108',
     },
   ];
@@ -87,5 +94,5 @@ export default function useDashboardMockData() {
     },
   ];
 
-  return { kpis, daily, byDepartment, bySubject, byEmployee, recentTickets, recentEvaluations };
+  return { kpis, daily, monthly, byDepartment, bySubject, byEmployee, recentTickets, recentEvaluations };
 }
