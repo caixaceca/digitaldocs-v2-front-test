@@ -238,12 +238,21 @@ export function DepartamentoForm({ onClose }) {
       active: true,
       name: uo?.nome ?? '',
       counter: uo?.balcao ?? null,
-      council: 'PRAIA',
-      // council: uo?.concelho ?? '',
       abreviation: uo?.label ?? '',
       latitude: uo?.latitude ?? null,
       longitude: uo?.longitude ?? null,
-      island: uo?.ilha?.toUpperCase() ?? '',
+      island:
+        uo?.ilha
+          .toUpperCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '_') ?? '',
+      council:
+        uo?.concelho
+          .toUpperCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '_') ?? '',
       region: uo?.regiao === 'Sul' ? 'SOUTH' : 'NORTH',
       type:
         (uo?.tipo === 'Agências' && 'AGENCY') || (uo?.tipo === 'Serviços Centrais' && 'CENTRAL_SERVICES') || 'OTHER',
@@ -290,12 +299,14 @@ export function UtilizadorForm({ onClose }) {
 
   const defaultValues = useMemo(
     () => ({
-      role: rolesList?.find(({ label }) => label === selectedItem?.role) ?? null,
+      role: rolesList?.find(({ id }) => id === selectedItem?.role) ?? null,
       colaborador: colbsList?.find(({ id }) => id === selectedItem?.employee_id) ?? null,
       departamento: departsList?.find(({ id }) => id === selectedItem?.department_id) ?? null,
     }),
     [colbsList, departsList, selectedItem]
   );
+
+  console.log(selectedItem);
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, handleSubmit } = methods;

@@ -75,8 +75,10 @@ export function Evolucao({ dados, periodo }) {
   ];
 
   const chartOptions = useChart({
-    legend: { position: 'bottom', horizontalAlign: 'center' },
+    stroke: { width: 2 },
     xaxis: { categories },
+    // markers: { size: 3, strokeWidth: 1 },
+    legend: { position: 'bottom', horizontalAlign: 'center' },
   });
 
   return (

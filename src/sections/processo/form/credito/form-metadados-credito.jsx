@@ -160,15 +160,15 @@ function Condicoes({ dados }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
 
   const formSchema = Yup.object().shape({
-    taxa_taeg: Yup.number().min(0).required().label('Taxa TAEG'),
-    taxa_imposto_selo: Yup.number().min(0).required().label('Taxa de imposto selo'),
-    taxa_juro_precario: Yup.number().min(0).required().label('Taxa de juros precário'),
-    taxa_juro_desconto: Yup.number().min(0).required().label('Taxa de juros desconto'),
-    numero_prestacao: Yup.number().positive().integer().required().label('Nº de prestações'),
-    taxa_comissao_abertura: Yup.number().min(0).required().label('Taxa de comissão abertura'),
+    taxa_taeg: Yup.number().positive().required().label('Taxa TAEG'),
+    taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
+    taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
+    numero_prestacao: Yup.number().positive().max(100).integer().required().label('Nº de prestações'),
     // meses_vencimento: Yup.number().positive().integer().required().label('Meses de vencimento'),
     // prazo_utilizacao: Yup.number().positive().integer().required().label('Prazo de utilização'),
-    taxa_comissao_imobilizacao: Yup.number().min(0).required().label('Taxa de comissão imobilização'),
+    taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Taxa de juros desconto'),
+    taxa_comissao_abertura: Yup.number().min(0).max(100).required().label('Taxa de comissão abertura'),
+    taxa_comissao_imobilizacao: Yup.number().min(0).max(100).required().label('Taxa de comissão imobilização'),
   });
 
   const defaultValues = useMemo(
@@ -177,10 +177,10 @@ function Condicoes({ dados }) {
       numero_prestacao: dadosStepper?.numero_prestacao || dados?.numero_prestacao || '',
       meses_vencimento: dadosStepper?.meses_vencimento || dados?.meses_vencimento || '',
       prazo_utilizacao: dadosStepper?.prazo_utilizacao || dados?.prazo_utilizacao || '',
-      taxa_imposto_selo: dadosStepper?.taxa_imposto_selo || dados?.taxa_imposto_selo || 0,
-      taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || 0,
+      taxa_imposto_selo: dadosStepper?.taxa_imposto_selo || dados?.taxa_imposto_selo || 3.5,
       taxa_juro_desconto: dadosStepper?.taxa_juro_desconto || dados?.taxa_juro_desconto || 0,
-      taxa_comissao_abertura: dadosStepper?.taxa_comissao_abertura || dados?.taxa_comissao_abertura || 0,
+      taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || 11,
+      taxa_comissao_abertura: dadosStepper?.taxa_comissao_abertura || dados?.taxa_comissao_abertura || 1.75,
       taxa_comissao_imobilizacao: dados?.taxa_comissao_imobilizacao || dados?.taxa_comissao_imobilizacao || 0,
     }),
     [dadosStepper, dados]

@@ -107,7 +107,7 @@ export const phasesList = [
   { id: 'VALIDATION', label: 'Validação' },
   { id: 'OPENING', label: 'Abertura' },
   { id: 'ANALYSIS', label: 'Análise' },
-  { id: 'CLOSING', label: 'Fechamento' },
+  { id: 'CLOSING', label: 'Fecho' },
 ];
 
 export const applyList = [
