@@ -7,8 +7,8 @@ import Typography from '@mui/material/Typography';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { getStatusLabel } from '../utils';
 import { useSelector } from '../../../redux/store';
+import { getStatusLabel, useColaborador } from '../utils';
 import { colorLabel } from '../../../utils/getColorPresets';
 // components
 import { Criado } from '../../../components/Panel';
@@ -26,6 +26,7 @@ import { Detalhes } from './detalhes';
 export default function DetalhesTicket({ onClose }) {
   const [currentTab, setCurrentTab] = useState('Detalhes');
   const { isLoading, selectedItem } = useSelector((state) => state.suporte);
+  const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
 
   const tabsList = [
     { value: 'Detalhes', component: <Detalhes ticket={selectedItem} /> },
@@ -36,7 +37,13 @@ export default function DetalhesTicket({ onClose }) {
           historico={[
             { action: 'Abertura', created_at: selectedItem?.created_at },
             ...(getStatusLabel(selectedItem?.status) === 'Fechado' && selectedItem?.closed_at
-              ? [{ action: 'Enceramento', created_at: selectedItem?.closed_at, resolved: selectedItem?.resolved }]
+              ? [
+                  {
+                    action: 'Enceramento',
+                    resolved: selectedItem?.resolved,
+                    created_at: new Date(new Date(selectedItem?.closed_at).getTime() + 5000).toISOString(),
+                  },
+                ]
               : []),
             ...(selectedItem?.ticket_histories ?? []),
             ...(selectedItem?.messages?.map((message) => ({
@@ -96,7 +103,7 @@ export default function DetalhesTicket({ onClose }) {
                       </Typography>
                       <Stack useFlexGap direction="row" flexWrap="wrap" sx={{ color: 'text.secondary' }}>
                         <Criado tipo="company" value={selectedItem?.current_department_name} />
-                        <Criado sx={{ color: 'success.main' }} tipo="user" value={selectedItem?.current_user_name} />
+                        <Criado sx={{ color: 'success.main' }} tipo="user" value={atribuidoA} />
                       </Stack>
                     </Stack>
                     <Chip
@@ -117,7 +124,7 @@ export default function DetalhesTicket({ onClose }) {
 
       {!isLoading && !!selectedItem && selectedItem?.status !== 'CLOSED' && (
         <DialogActions>
-          <Actions id={selectedItem?.id} onClose={onClose} />
+          <Actions dados={selectedItem} onClose={onClose} />
         </DialogActions>
       )}
     </Dialog>

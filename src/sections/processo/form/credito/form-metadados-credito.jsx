@@ -241,7 +241,7 @@ function Custos({ dados }) {
     valor_juro: Yup.number().min(0).required().label('Valor de juros'),
     valor_comissao: Yup.number().min(0).required().label('Valor de comissão'),
     valor_prestacao: Yup.number().positive().required().label('Valor de prestação'),
-    valor_imposto_selo: Yup.number().min(0).required().label('Valor de imposto selo'),
+    valor_imposto_selo: Yup.number().positive().required().label('Valor de imposto selo'),
     valor_prestacao_sem_desconto: Yup.number().positive().required().label('Valor prestação s/ desconto'),
   });
 

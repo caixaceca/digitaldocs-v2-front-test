@@ -1,16 +1,9 @@
-export * from './RHFCheckbox';
-export * from './RHFUpload';
-
 export { default as FormProvider } from './FormProvider';
 
-export {
-  RHFDateIF,
-  RHFDatePicker,
-  RHFDataEntrada,
-  RHFNumberField,
-  RHFAutocompleteObj,
-  RHFAutocompleteSmp,
-} from './RHF';
+export * from './RHF';
+export * from './RHFUpload';
+export * from './RHFCheckbox';
+export * from './RHFDatePicker';
 export { default as RHFEditor } from './RHFEditor';
 export { default as RHFTextField } from './RHFTextField';
 export { default as RHFSwitch, FilterSwitch } from './RHFSwitch';

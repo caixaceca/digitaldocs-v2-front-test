@@ -2,13 +2,15 @@
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import Stack from '@mui/material/Stack';
+import Radio from '@mui/material/Radio';
 import TextField from '@mui/material/TextField';
+import FormLabel from '@mui/material/FormLabel';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
+import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-// utils
-import { setDataUtil } from '../../utils/formatTime';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -97,113 +99,32 @@ export function RHFAutocompleteObj({ name, label, small = false, ...other }) {
     />
   );
 }
-
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RHFDatePicker({ name, label = '', small = false, required = false, dateTime = false, ...other }) {
+export function RHFRadioGroup({ name, label, options = [], row = false, ...other }) {
   const { control } = useFormContext();
 
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState: { error } }) =>
-        dateTime ? (
-          <DateTimePicker
-            label={label}
-            value={field.value}
-            onChange={(newValue) => field.onChange(newValue)}
-            slotProps={{
-              textField: { error, helperText: error?.message, fullWidth: true, size: small ? 'small' : 'medium' },
-            }}
-            {...other}
-          />
-        ) : (
-          <DatePicker
-            label={label}
-            value={field.value}
-            onChange={(newValue) => field.onChange(newValue)}
-            slotProps={{
-              textField: {
-                error,
-                required,
-                fullWidth: true,
-                helperText: error?.message,
-                size: small ? 'small' : 'medium',
-              },
-            }}
-            {...other}
-          />
-        )
-      }
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function RHFDataEntrada({ name, label = '', ...other }) {
-  const { control } = useFormContext();
+  const normalizedOptions = options.map((opt) => (typeof opt === 'string' ? { value: opt, label: opt } : opt));
 
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <DatePicker
-          label={label}
-          value={field.value}
-          onChange={(newValue) => field.onChange(newValue)}
-          slotProps={{ textField: { error, fullWidth: true, helperText: error?.message } }}
-          shouldDisableDate={(date) => {
-            const day = date.getDay();
-            return day === 0 || day === 6;
-          }}
-          {...other}
-        />
+        <FormControl component="fieldset" error={!!error} fullWidth>
+          <Stack direction={row ? 'row' : 'column'} alignItems={row ? 'center' : 'flex-start'} spacing={row ? 2 : 1}>
+            {label && <FormLabel component="legend">{label}</FormLabel>}
+
+            <RadioGroup {...field} row={row} onChange={(event) => field.onChange(event.target.value)} {...other}>
+              {normalizedOptions.map((option) => (
+                <FormControlLabel key={option.value} value={option.value} control={<Radio />} label={option.label} />
+              ))}
+            </RadioGroup>
+          </Stack>
+
+          {error && <FormHelperText>{error.message}</FormHelperText>}
+        </FormControl>
       )}
     />
   );
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function RHFDateIF({ options }) {
-  const { datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false } = options;
-
-  return (
-    <Stack direction="row" spacing={1}>
-      <DatePicker
-        value={datai}
-        label="Data inicial"
-        maxDate={new Date()}
-        slotProps={{ ...datePickerConf(clearable) }}
-        onChange={(newValue) => setDataUtil(newValue, setDatai, labeli, setDataf, labelf, dataf)}
-      />
-      <DatePicker
-        value={dataf}
-        minDate={datai}
-        disabled={!datai}
-        label="Data final"
-        maxDate={new Date()}
-        slotProps={{ ...datePickerConf(clearable) }}
-        onChange={(newValue) => setDataUtil(newValue, setDataf, labelf, '', '', '')}
-      />
-    </Stack>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-const datePickerConf = (clearable) => ({
-  field: { clearable },
-  textField: {
-    size: 'small',
-    fullWidth: true,
-    sx: {
-      width: clearable ? 170 : 150,
-      '&.MuiTextField-root .MuiIconButton-root': { padding: 0.5 },
-      '&.MuiTextField-root .clearButton': { padding: 0.25, opacity: 0.5 },
-    },
-  },
-});

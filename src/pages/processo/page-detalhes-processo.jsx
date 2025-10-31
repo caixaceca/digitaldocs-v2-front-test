@@ -40,7 +40,8 @@ import {
 import ProcessoForm from '../../sections/processo/form/form-processo';
 import Intervencao from '../../sections/processo/intervencao-em-serie';
 import { DesarquivarForm } from '../../sections/processo/form/form-arquivo';
-
+import PareceresComites from '../../sections/processo/info-credito/dialog-pareceres';
+//
 import useMenuProcesso from '../../sections/processo/Detalhes/menu';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -111,6 +112,7 @@ export default function PageProcesso() {
         done !== 'Processo resgatado' &&
         done !== 'Processo adicionado' &&
         done !== 'Processo atualizado' &&
+        done !== 'Condições alteradas' &&
         done !== 'Focal Point alterado' &&
         done !== 'Informações atualizadas' &&
         done !== 'Confidencialidade atualizado'
@@ -136,7 +138,7 @@ export default function PageProcesso() {
             <Stack direction="row" spacing={1} alignItems="center">
               <Voltar fab />
               {processo && (
-                <Stack spacing={0.5} direction={{ xs: 'row' }}>
+                <Stack spacing={0.5} direction="row" alignItems="center">
                   {status === 'A' ? (
                     <>
                       {acessoDesarquivar && (
@@ -154,30 +156,40 @@ export default function PageProcesso() {
                       {/* EM SÉRIE */}
                       {estado && estados?.length === 0 && (
                         <>
-                          {!estado?.decisor &&
-                            pertencoEstadoId(meusAmbientes, estadoId) &&
+                          {pertencoEstadoId(meusAmbientes, estadoId) &&
                             (!estado?.pareceres || estado?.pareceres?.length === 0) && (
                               <>
-                                {estado?.preso && estado?.atribuidoAMim && <Intervencao />}
-                                {estado?.preso && !estado?.atribuidoAMim && gestorEstado(meusAmbientes, estadoId) && (
-                                  <DefaultAction
-                                    label="LIBERTAR"
-                                    onClick={() => openModal('libertar', { id, estadoId, perfilId: estado?.perfil_id })}
-                                  />
-                                )}
-                                {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
-                                  <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
-                                )}
-                                {!estado?.preso && gestorEstado(meusAmbientes, estadoId) && (
-                                  <DefaultAction
-                                    label="ATRIBUIR"
-                                    onClick={() =>
-                                      openModal('atribuir', { estadoId, pid: estado?.perfil_id, processoId: id })
-                                    }
-                                  />
+                                {estado?.decisor ? (
+                                  <PareceresComites estado={estado} />
+                                ) : (
+                                  <>
+                                    {estado?.preso && estado?.atribuidoAMim && <Intervencao />}
+                                    {estado?.preso &&
+                                      !estado?.atribuidoAMim &&
+                                      gestorEstado(meusAmbientes, estadoId) && (
+                                        <DefaultAction
+                                          label="LIBERTAR"
+                                          onClick={() =>
+                                            openModal('libertar', { id, estadoId, perfilId: estado?.perfil_id })
+                                          }
+                                        />
+                                      )}
+                                    {!estado?.preso && (!estado?.perfil_id || estado?.atribuidoAMim) && (
+                                      <DefaultAction label="ACEITAR" onClick={() => handleAceitar(estadoId, 'serie')} />
+                                    )}
+                                    {!estado?.preso && gestorEstado(meusAmbientes, estadoId) && (
+                                      <DefaultAction
+                                        label="ATRIBUIR"
+                                        onClick={() =>
+                                          openModal('atribuir', { estadoId, pid: estado?.perfil_id, processoId: id })
+                                        }
+                                      />
+                                    )}
+                                  </>
                                 )}
                               </>
                             )}
+
                           {/* Resgatar */}
                           {!!ultimaTransicao &&
                             !estado?.preso &&

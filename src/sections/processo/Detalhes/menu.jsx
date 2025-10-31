@@ -13,11 +13,18 @@ import InfoCredito from '../info-credito/info';
 import Transicoes from './historico-transicoes';
 import Pareceres, { PareceresEstado } from './historico-pareceres';
 
+// ---------------------------------------------------------------------------------------------------------------------
+
 export default function useMenuProcesso({ id, processo, handleAceitar }) {
   const { isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
+
   const { estado = null, credito = null, con = null } = processo || {};
   const { valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
   const { estados = [], htransicoes = [], pareceres_estado: pareceres = [] } = processo || {};
+  const modificar = useMemo(
+    () => estado?.preso && estado?.atribuidoAMim && !credito?.enviado_para_contratacao,
+    [credito?.enviado_para_contratacao, estado?.atribuidoAMim, estado?.preso]
+  );
 
   const tabsList = useMemo(() => {
     const tabs = [];
@@ -26,9 +33,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     if (credito)
       tabs.push({
         value: 'Info. crédito',
-        component: (
-          <InfoCredito dados={{ ...credito, processoId: id, modificar: estado?.preso && estado?.atribuidoAMim }} />
-        ),
+        component: <InfoCredito dados={{ ...credito, processoId: id, modificar }} />,
       });
 
     if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
@@ -64,7 +69,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
       });
     }
 
-    if (processo) {
+    if (titular) {
       tabs.push(
         { value: 'Anexos', component: <TodosAnexos /> },
         { value: 'Retenções', component: <TableDetalhes id={id} item="hretencoes" /> },
@@ -73,7 +78,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
       );
     }
 
-    if (processo && (isAdmin || isAuditoria)) {
+    if (titular && (isAdmin || isAuditoria)) {
       tabs.push({ value: 'Versões', component: <Versoes id={id} /> }, { value: 'Visualizações', component: <Views /> });
     }
 
@@ -88,7 +93,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     titular,
     credito,
     isAdmin,
-    processo,
+    modificar,
     pareceres,
     htransicoes,
     isAuditoria,

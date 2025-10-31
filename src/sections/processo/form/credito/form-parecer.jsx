@@ -13,16 +13,22 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import useAnexos from '../../../../hooks/useAnexos';
-import { createItem } from '../../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../../redux/store';
+import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
 import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
 // components
+import {
+  FormProvider,
+  RHFTextField,
+  RHFRadioGroup,
+  RHFNumberField,
+  RHFUploadSingleFile,
+} from '../../../../components/hook-form';
 import { DialogButons } from '../../../../components/Actions';
-import { FormProvider, RHFTextField, RHFSwitch, RHFUploadSingleFile } from '../../../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
+export default function FormParecer({ pId, fluxoId, estadoId, gestor, onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { checklist } = useSelector((state) => state.parametrizacao);
@@ -34,20 +40,26 @@ export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
   );
 
   useEffect(() => {
-    dispatch(getFromParametrizacao('checklist', { fluxoId, reset: { val: [] } }));
-  }, [dispatch, fluxoId]);
+    if (gestor) dispatch(getFromParametrizacao('checklist', { fluxoId, reset: { val: [] } }));
+  }, [dispatch, fluxoId, gestor]);
 
-  const formSchema = Yup.object().shape({ descritivo: Yup.string().required().label('Descrição') });
+  const formSchema = Yup.object().shape({
+    parecer: Yup.string().required().label('Parecer'),
+    descritivo: Yup.string().required().label('Descrição'),
+  });
   const defaultValues = useMemo(
-    () => ({ descritivo: selectedItem?.parecer ?? '', favoravel: selectedItem?.favoravel ?? false, anexo: null }),
-    [selectedItem]
+    () => ({
+      anexo: null,
+      descritivo: selectedItem?.parecer ?? '',
+      parecer: (isEdit && selectedItem?.favoravel && 'Favorável') || (isEdit && 'Não favorável') || '',
+    }),
+    [isEdit, selectedItem]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const { setValue, handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       let anexo = null;
       if (values?.anexo instanceof File) {
@@ -56,7 +68,7 @@ export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
         formData.append('tipo_documento_id', ata.tipo_id);
         anexo = formData;
       }
-      const formData = { favoravel: values.favoravel, descritivo: values?.descritivo };
+      const formData = { favoravel: values.parecer === 'Favorável', descritivo: values?.descritivo };
       const params = { id: pId, msg: `Parecer ${isEdit ? 'atualizado' : 'enviado'}`, put: true, estadoId };
       dispatch(createItem('parecer-credito', JSON.stringify(formData), { ...params, anexo, onClose }));
     } catch (error) {
@@ -72,9 +84,9 @@ export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 2 }}>
-            <RHFSwitch name="favoravel" label="Parecer favorável" />
+            <RHFRadioGroup row name="parecer" label="Parecer" options={['Favorável', 'Não favorável']} />
             <RHFTextField name="descritivo" label="Descrição" multiline minRows={6} maxRows={10} />
-            {ata?.tipo_id && (
+            {gestor && ata?.tipo_id && (
               <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
                 <Typography sx={{ pb: 0.5, pl: 0.5, typography: 'overline' }}>ATA DO PARECER</Typography>
                 <RHFUploadSingleFile small name="anexo" onDrop={dropSingle} />
@@ -82,6 +94,51 @@ export default function FormParecer({ pId, fluxoId, estadoId, onClose }) {
             )}
           </Stack>
           <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function CondicoesForm({ ids, dados, onClose }) {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { isSaving } = useSelector((state) => state.digitaldocs);
+
+  const formSchema = Yup.object().shape({
+    prazo: Yup.number().positive().required().label('Prazo'),
+    montante: Yup.number().positive().required().label('Montante'),
+    taxa_juro: Yup.number().positive().required().label('Taxa de juros'),
+  });
+
+  const defaultValues = useMemo(() => dados, [dados]);
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { handleSubmit } = methods;
+
+  const onSubmit = async (values) => {
+    try {
+      const params = { ...ids, msg: 'Condições alteradas', put: true };
+      dispatch(updateItem('condicoes-aprovacao', JSON.stringify(values), { ...params, onClose }));
+    } catch (error) {
+      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle>Alterar condições</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFNumberField tipo="CVE" name="montante" label="Montante" />
+            <Stack spacing={3} direction="row">
+              <RHFNumberField name="taxa_juro" tipo="%" label="Taxa de juro" />
+              <RHFNumberField name="prazo" tipo="meses" label="Prazo" />
+            </Stack>
+          </Stack>
+          <DialogButons isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>

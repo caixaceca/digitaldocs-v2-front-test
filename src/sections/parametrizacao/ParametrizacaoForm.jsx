@@ -513,8 +513,9 @@ export function DocumentoForm({ onClose }) {
       <DialogTitle>{isEdit ? 'Editar documento' : 'Adicionar documento'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          {(!emailCheck(mail, '') && isEdit && selectedItem?.designacao === 'OUTROS') ||
-          selectedItem?.designacao === 'ATA - PARECER DE CRÉDITO' ? (
+          {isEdit &&
+          !emailCheck(mail, '') &&
+          (selectedItem?.designacao === 'OUTROS' || selectedItem?.designacao === 'ATA - PARECER DE CRÉDITO') ? (
             <Stack sx={{ pt: 3, pb: 1 }}>
               <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
                 Este documento não pode ser editado, está em uso para validações na aplicação.
@@ -525,13 +526,13 @@ export function DocumentoForm({ onClose }) {
               <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
                 <GridItem children={<RHFTextField name="codigo" label="Código" />} />
                 <GridItem children={<RHFTextField name="designacao" label="Designação" />} />
-                <GridItem sm={(values?.tipo === 'Anexo' && 4) || (values?.tipo === 'Formulário' && 6) || 12}>
+                <GridItem xs={values?.tipo === 'Anexo' ? 12 : 6} sm={values?.tipo === 'Anexo' ? 4 : 6}>
                   <RHFAutocompleteSmp name="tipo" label="Tipo" options={['Anexo', 'Formulário']} />
                 </GridItem>
                 {values?.tipo === 'Anexo' && (
                   <>
-                    <GridItem xs={4} children={<RHFSwitch name="identificador" label="Identificador" />} />
-                    <GridItem xs={4} children={<RHFSwitch name="obriga_prazo_validade" label="Validade" />} />
+                    <GridItem xs={4} children={<RHFSwitch mt name="identificador" label="Identificador" />} />
+                    <GridItem xs={4} children={<RHFSwitch mt name="obriga_prazo_validade" label="Validade" />} />
                   </>
                 )}
                 {values?.tipo === 'Formulário' && (
@@ -541,7 +542,7 @@ export function DocumentoForm({ onClose }) {
                     <GridItem children={<RHFTextField name="sub_titulo" label="Subtítulo" />} />
                   </>
                 )}
-                {isEdit && <GridItem xs={4} children={<RHFSwitch name="ativo" label="Ativo" />} />}
+                {isEdit && <GridItem children={<RHFSwitch name="ativo" label="Ativo" />} />}
               </Grid>
               <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
             </ItemComponent>

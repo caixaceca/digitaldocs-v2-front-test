@@ -24,7 +24,7 @@ import { DialogButons } from '../../components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function ActionForm({ id, item = '', onClose: onClose1, closeTicket }) {
+export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket }) {
   const dispatch = useDispatch();
   const { isEdit, isSaving, departamentos, utilizadores } = useSelector((state) => state.suporte);
 
@@ -50,9 +50,10 @@ export function ActionForm({ id, item = '', onClose: onClose1, closeTicket }) {
   const values = watch();
 
   const onSubmit = async (values) => {
+    const params1 = { patch: true, getItem: 'selectedItem' };
     const onClose = item === 'change-department' ? closeTicket : onClose1;
     const msg = (item === 'assign' && 'atribuido') || (item === 'change-department' && 'encaminhado') || '';
-    const params = { id, value: values?.item, resolved: values.resolved, patch: true, getItem: 'selectedItem' };
+    const params = { id: dados?.id, value: values?.item, status: dados?.status, resolved: values.resolved, ...params1 };
     dispatch(updateInSuporte(item, null, { ...params, msg: msg ? `Ticket ${msg}` : 'Estado alterado', onClose }));
   };
 
@@ -74,7 +75,7 @@ export function ActionForm({ id, item = '', onClose: onClose1, closeTicket }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function MessageForm({ id, onClose }) {
+export function MessageForm({ dados, onClose }) {
   const dispatch = useDispatch();
   const { isSaving } = useSelector((state) => state.suporte);
 
@@ -91,8 +92,8 @@ export function MessageForm({ id, onClose }) {
     formData.append('message', new Blob([JSON.stringify(message)], { type: 'application/json' }));
     values?.attachments?.forEach((file) => formData.append('attachments', file));
 
-    const params = { item: 'messages', item1: 'selectedItem', id, msg: 'Mensagem adicionada' };
-    dispatch(createInSuporte('add-message', formData, { id, ...params, onClose }));
+    const params = { id: dados?.id, item: 'messages', item1: 'selectedItem', msg: 'Mensagem adicionada' };
+    dispatch(createInSuporte('add-message', formData, { ...params, status: dados?.status, onClose }));
   };
 
   const { dropMultiple, removeOne } = useAnexos('', 'attachments', setValue, values?.attachments);

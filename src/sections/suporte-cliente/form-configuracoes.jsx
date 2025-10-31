@@ -38,7 +38,7 @@ export function AssuntoForm({ onClose }) {
   const defaultValues = useMemo(
     () => ({
       name: selectedItem?.name ?? '',
-      description: selectedItem?.description ?? null,
+      description: selectedItem?.description ?? '',
       sla_id: slasList?.find(({ id }) => id === selectedItem?.sla_id) ?? null,
       applicability: applyList?.find(({ id }) => id === selectedItem?.applicability) ?? null,
       departament_id: departsList?.find(({ id }) => id === selectedItem?.department_id) ?? null,
@@ -305,8 +305,6 @@ export function UtilizadorForm({ onClose }) {
     }),
     [colbsList, departsList, selectedItem]
   );
-
-  console.log(selectedItem);
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { reset, handleSubmit } = methods;

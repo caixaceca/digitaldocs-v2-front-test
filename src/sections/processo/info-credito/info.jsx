@@ -1,31 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
-import useToggle from '../../../hooks/useToggle';
 import { ptDate } from '../../../utils/formatTime';
-import { usePermissao } from '../../../hooks/useAcesso';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
-// redux
-import { getFromGaji9 } from '../../../redux/slices/gaji9';
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromDigitalDocs } from '../../../redux/slices/digitaldocs';
 // components
 import Label from '../../../components/Label';
 import { TextItem } from '../Detalhes/detalhes';
 import { DefaultAction } from '../../../components/Actions';
-import { DialogConfirmar } from '../../../components/CustomDialog';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-form';
 // _mock
 import PareceresCredito from './pareceres';
 import FichaAnalise from './ficha-parecer';
 import MetadadosCredito from './metadados-credito';
+import EnviarContratacao from './enviar-contratacao';
 import { GarantiasSeguros } from './garantias-seguros';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -48,7 +44,7 @@ export default function InfoCredito({ dados }) {
     { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} /> },
     { value: 'Seguros', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} seguro /> },
     { value: 'Ficha de análise', component: <FichaAnalise /> },
-    { value: 'Pareceres', component: <PareceresCredito /> },
+    { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];
 
   return (
@@ -84,15 +80,15 @@ function DadosCredito({ dados }) {
         <TextItem title="Tipo de titular:" text={dados?.tipo_titular || 'Não definido'} />
         <TextItem title="Segmento:" text={dados?.segmento} />
         <TextItem title="Ent. patronal/Set. atividade:" text={dados?.setor_atividade} />
-        {/* {dados?.valor_divida && (
+        {dados?.valor_divida && (
           <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
             <Label color="info" startIcon={<InfoOutlinedIcon />}>
               Entidade com crédito em dívida
             </Label>
-            <TextItem title="Valor:" text={fCurrency(dados?.valor_divida * 1000)} />
+            <TextItem title="Valor:" text={fCurrency(dados?.valor_divida)} />
             {dados?.periodo && <TextItem title="Data:" text={ptDate(dados?.periodo)} />}
           </Paper>
-        )} */}
+        )}
       </List>
 
       <List sx={{ width: 1, p: 0 }}>
@@ -117,6 +113,7 @@ function DadosCredito({ dados }) {
           </Stack>
         </ListItem>
 
+        <TextItem title="Nível de decisão:" text={dados?.nivel_decisao} />
         <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />
         <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />
         <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />
@@ -137,48 +134,24 @@ function DadosCredito({ dados }) {
         />
         <TextItem title="Garantia:" text={dados?.garantia} />
 
-        {situacao === 'aprovado' && dados?.modificar && <GerarContrato id={dados?.processoId} />}
+        {situacao === 'aprovado' && dados?.modificar && <EnviarContratacao dados={dados} />}
+
+        {dados?.nivel_decisao && (
+          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+            <Label color="focus" startIcon={<InfoOutlinedIcon />}>
+              <Typography variant="caption">Nível de decisão:</Typography>
+              &nbsp;
+              {` ${dados?.nivel_decisao} - `}
+              {(dados?.nivel_decisao === '1' && 'Comité Base') ||
+                (dados?.nivel_decisao === 2 && 'Comité Diretor') ||
+                (dados?.nivel_decisao === 3 && 'Comité Superior')}
+            </Label>
+          </Stack>
+        )}
       </List>
 
       {openSituacao === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpenSituacao('')} />}
       {openSituacao === 'eliminar' && <EliminarDadosSituacao dados={dados} onClose={() => setOpenSituacao('')} />}
     </Stack>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-function GerarContrato({ id }) {
-  const dispatch = useDispatch();
-  const { temPermissao } = usePermissao();
-  const { toggle: open, onOpen, onClose } = useToggle();
-  const { cc } = useSelector((state) => state.intranet);
-  const { utilizador } = useSelector((state) => state.gaji9);
-  const { isLoading } = useSelector((state) => state.digitaldocs);
-
-  useEffect(() => {
-    if (!utilizador && cc?.ad_id) dispatch(getFromGaji9('utilizador', { id: cc?.ad_id }));
-  }, [dispatch, utilizador, cc?.ad_id]);
-
-  return (
-    <>
-      {(utilizador?._role === 'GERENTE' || temPermissao(['READ_CREDITO'])) && (
-        <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
-          <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={() => onOpen()} />
-        </Stack>
-      )}
-      {open && (
-        <DialogConfirmar
-          color="success"
-          onClose={onClose}
-          isSaving={isLoading}
-          title="Enviar para GAJ-i9"
-          desc="enviar este processo para o GAJ-i9 para proceder à geração do contrato"
-          handleOk={() =>
-            dispatch(getFromDigitalDocs('contratacao-gaji9', { id, notRest: true, msg: 'Processo enviado', onClose }))
-          }
-        />
-      )}
-    </>
   );
 }

@@ -144,8 +144,12 @@ export function createInSuporte(item, body, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.post(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
+        if (params?.status === 'OPEN' && item === 'add-message') {
+          const paramss = { id: params?.id, value: { id: 'IN_PROGRESS', label: 'Em análise' } };
+          await dispatch(updateInSuporte('change-status', '', { getItem: 'selectedItem', patch: true, ...paramss }));
+        }
 
+        const response = await axios.post(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
         const dados = response.data?.payload;
         dispatch(slice.actions.createSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
       }
@@ -182,10 +186,15 @@ export function updateInSuporte(item, body, params) {
         (item === 'assign' && `/api/v1/tickets/assign/${params?.id}/${params?.value?.id}`) ||
         (item === 'change-department' && `/api/v1/tickets/change-department/${params?.id}/${params?.value?.id}`) ||
         (item === 'change-status' &&
-          `/api/v1/tickets/change-status/${params?.id}/${params?.value?.id}?resolved=${params?.resolved}`) ||
+          `/api/v1/tickets/change-status/${params?.id}/${params?.value?.id}?resolved=${!!params?.resolved}`) ||
         '';
 
       if (apiUrl) {
+        if (params?.status === 'OPEN' && item !== 'change-status') {
+          const paramss = { id: params.id, value: { id: 'IN_PROGRESS', label: 'Em análise' } };
+          await dispatch(updateInSuporte('change-status', '', { getItem: 'selectedItem', patch: true, ...paramss }));
+        }
+
         const method = params?.patch ? 'patch' : 'put';
         const response = await axios[method](`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
 

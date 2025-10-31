@@ -7,7 +7,7 @@ import { DefaultAction } from '../../../components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Actions({ id, onClose }) {
+export default function Actions({ dados, onClose }) {
   const [modal, setModal] = useState('');
 
   return (
@@ -19,9 +19,9 @@ export default function Actions({ id, onClose }) {
         <DefaultAction small button label="Encaminhar" onClick={() => setModal('change-department')} />
       </Stack>
 
-      {modal === 'add-message' && <MessageForm id={id} onClose={() => setModal('')} />}
+      {modal === 'add-message' && <MessageForm dados={dados} onClose={() => setModal('')} />}
       {modal && modal !== 'add-message' && (
-        <ActionForm item={modal} id={id} onClose={() => setModal('')} closeTicket={onClose} />
+        <ActionForm item={modal} dados={dados} onClose={() => setModal('')} closeTicket={onClose} />
       )}
     </>
   );

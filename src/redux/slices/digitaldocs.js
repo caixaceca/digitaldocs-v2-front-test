@@ -325,6 +325,7 @@ export function getInfoProcesso(item, params) {
           (item === 'hpendencias' && `/v2/processos/ht_pendencias/${idPerfilId}`) ||
           (item === 'hatribuicoes' && `/v2/processos/ht_atribuicoes/${idPerfilId}`) ||
           (item === 'ht_parecer_cr' && `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/hts`) ||
+          (item === 'condicao_aprovacao' && `/v2/processos/${params?.id}/credito/condicao_aprovacao`) ||
           (item === 'hvisualizacoes' && `/v2/processos/visualizacoes/${perfilId}?processo_id=${params?.id}`) ||
           (item === 'aceitar' && `/v2/processos/aceitar/${perfilId}/${params?.id}?&estado_id=${params?.estadoId}`) ||
           (item === 'destinos' && `/v2/processos/destinos/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`) ||
@@ -500,6 +501,8 @@ export function updateItem(item, dados, params) {
           `/v2/processos/parecer/individual/${perfilId}/${params?.processoId}/${params?.id}`) ||
         (item === 'parecer estado' &&
           `/v2/processos/parecer/estado/paralelo/${perfilId}?processo_id=${params?.processoId}`) ||
+        (item === 'condicoes-aprovacao' &&
+          `/v2/processos/${params?.id}/credito/condicao_aprovacao?credito_id=${params?.creditoId}`) ||
         (item === 'situacaoCredito' &&
           `/v2/processos/${params?.id}/operacoes_credito/${perfilId}?credito_id=${params?.creditoId}`) ||
         (item === 'encaminhar serie' &&
@@ -520,20 +523,17 @@ export function updateItem(item, dados, params) {
         const response = await axios[params?.put ? 'put' : 'patch'](`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
         if (params?.fillCredito)
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
+        if (item === 'condicoes-aprovacao')
+          dispatch(slice.actions.addItemProcesso({ item: 'condicao_aprovacao', dados: JSON.parse(dados) }));
       }
       if (item === 'processo') {
-        const response = await axios.put(
-          `${DDOCS_API_SERVER}/v2/processos/ei/${perfilId}/${params?.id}`,
-          dados,
-          options
-        );
+        const url = `${DDOCS_API_SERVER}/v2/processos/ei/${perfilId}/${params?.id}`;
+        const response = await axios.put(url, dados, options);
         processarProcesso(response.data.objeto, perfilId, dispatch, '', false);
       }
       if (item === 'adicionar-anexos') {
-        const { data } = await axios.get(
-          `${DDOCS_API_SERVER}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`,
-          options
-        );
+        const url = `${DDOCS_API_SERVER}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
+        const { data } = await axios.get(url, options);
         processarProcesso(data.objeto, perfilId, dispatch, '', false);
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);

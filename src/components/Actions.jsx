@@ -118,13 +118,15 @@ export function DefaultAction({
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
-    ((label === 'DETALHES' || label === 'DESTINATÁRIOS') && <Detalhes sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'CLONAR' || label === 'Clonar') && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
     ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (
       <SearchIcon sx={{ width: small ? 18 : 24 }} />
     )) ||
     ((label === 'ENCAMINHAR' || label === 'DESPACHO' || label === 'Encaminhar') && (
       <Seguimento sx={{ width: small ? 18 : 22 }} />
+    )) ||
+    ((label === 'DETALHES' || label === 'DESTINATÁRIOS' || label === 'Pareceres') && (
+      <Detalhes sx={{ width: small ? 18 : 22 }} />
     )) ||
     ((label === 'Editar' || label === 'EDITAR' || label === 'FOCAL POINT' || icon === 'editar') && (
       <Editar sx={{ width: small ? 18 : 22 }} />
