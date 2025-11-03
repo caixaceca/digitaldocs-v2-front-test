@@ -113,7 +113,6 @@ function DadosCredito({ dados }) {
           </Stack>
         </ListItem>
 
-        <TextItem title="Nível de decisão:" text={dados?.nivel_decisao} />
         <TextItem title="Data de desistência:" text={ptDate(dados?.data_desistido)} />
         <TextItem title="Data de indeferimento:" text={ptDate(dados?.data_indeferido)} />
         <TextItem title="Data de contratação:" text={ptDate(dados?.data_contratacao)} />
