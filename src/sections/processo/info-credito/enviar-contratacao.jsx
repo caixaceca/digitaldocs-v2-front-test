@@ -110,7 +110,7 @@ function DialogEnvioContratacao({ dados, onClose }) {
   };
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Enviar para contratação</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
         {temErros ? (

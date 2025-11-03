@@ -47,7 +47,7 @@ export default function GarantiasIniciais() {
   const { dadosStepper } = useSelector((state) => state.stepper);
 
   const formSchema = Yup.object().shape({ garantias: shapeGarantia() });
-  const defaultValues = useMemo(() => ({ garantias: dadosStepper?.garantias || [] }), [dadosStepper]);
+  const defaultValues = useMemo(() => ({ garantias: dadosStepper?.garantias || [garantiaSchema] }), [dadosStepper]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
 
   const { watch, control, handleSubmit } = methods;
@@ -124,7 +124,7 @@ function FormGarantias({ dados }) {
                   <RHFTextField label="Nº de livrança" name={`garantias[${index}].numero_livranca`} />
                 </GridItem>
               </Grid>
-              <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
+              {fields?.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
             </Stack>
           ))}
         </Stack>

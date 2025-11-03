@@ -49,7 +49,6 @@ export default function FormInfoCredito({ dados }) {
 
   const formSchema = Yup.object().shape({
     linha_id: Yup.mixed().required().label('Linha'),
-    garantia: Yup.string().required().label('Garantia'),
     finalidade: Yup.string().required().label('Finalidade'),
     cliente: Yup.number().positive().required().label('Nº cliente'),
     tipo_titular_id: Yup.mixed().required().label('Tipo de titular'),
@@ -145,11 +144,10 @@ export default function FormInfoCredito({ dados }) {
               <GridItem md={6}>
                 <RHFAutocompleteObj dc name="componente_id" label="Produto/Componente" options={componentesList} />
               </GridItem>
-              <GridItem sm={6}>
+              <GridItem sm={6} md={3}>
                 <RHFTextField name="setor_atividade" label="Ent. patronal/Set. atividade" />
               </GridItem>
-              <GridItem sm={6} children={<RHFTextField name="finalidade" label="Finalidade" />} />
-              <GridItem sm={6} children={<RHFTextField name="garantia" label="Garantia" />} />
+              <GridItem sm={6} md={3} children={<RHFTextField name="finalidade" label="Finalidade" />} />
             </Grid>
           </Card>
           <Card sx={{ mt: 3, p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>

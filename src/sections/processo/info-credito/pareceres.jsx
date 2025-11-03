@@ -68,7 +68,9 @@ export default function PareceresCredito({ infoCredito }) {
                 <Condicao label="Taxa de juro" value={fPercent(processo?.condicao_aprovacao?.taxa_juro)} />
                 <Condicao label="Prazo" value={`${processo?.condicao_aprovacao?.prazo} meses`} />
               </Stack>
-              {gestor && <DefaultAction small label="Editar" onClick={() => openModal('condicoes-aprovacao')} />}
+              {gestor && estado?.nivel_decisao === processo?.credito?.nivel_decisao && (
+                <DefaultAction small label="Editar" onClick={() => openModal('condicoes-aprovacao')} />
+              )}
             </Stack>
           )}
 

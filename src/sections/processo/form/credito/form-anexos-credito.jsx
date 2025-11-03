@@ -47,7 +47,6 @@ export default function FormAnexosCredito({ dados }) {
       formData.append('uo_origem_id', estado?.uo_id);
       formData.append('estado_atual_id', estado?.id);
       formData.append('balcao', dadosStepper?.balcao);
-      formData.append('garantia', dadosStepper.garantia);
       formData.append('fluxo_id', dadosStepper?.fluxo_id);
       formData.append('situacao_final_mes', 'Em análise');
       formData.append('taxa_juro', dadosStepper.taxa_juro);
@@ -59,6 +58,12 @@ export default function FormAnexosCredito({ dados }) {
       formData.append('tipo_titular_id', dadosStepper?.tipo_titular_id?.id);
       formData.append('montante_solicitado', dadosStepper.montante_solicitado);
       formData.append('data_entrada', format(dadosStepper.data_entrada, 'yyyy-MM-dd'));
+
+      const garantiasLabels = dadosStepper.garantias
+        .map((row) => row?.tipo_garantia_id?.label)
+        .filter(Boolean)
+        .join(', ');
+      formData.append('garantia', garantiasLabels ?? '');
 
       if (dadosStepper.obs) formData.append('obs', dadosStepper.obs);
       if (dadosStepper.cliente) formData.append('cliente', dadosStepper.cliente);
