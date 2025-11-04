@@ -26,6 +26,7 @@ const initialState = {
   isLoading: false,
   isOpenModal: false,
   utilizador: null,
+  indicadores: null,
   selectedItem: null,
   faq: [],
   slas: [],
@@ -96,12 +97,13 @@ export function getInSuporte(item, params) {
         (item === 'utilizadores' && `/api/v1/users/all`) ||
         (item === 'departamentos' && `/api/v1/departments/all`) ||
         (item === 'categorias' && `/api/v1/faq-categories/all`) ||
+        (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
+        (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
+        (item === 'indicadores' &&
+          `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}`) ||
         (item === 'tickets' &&
           `/api/v1/tickets/all?departmentId=${params?.department}${params?.status ? `&status=${params?.status}` : ''}`) ||
-        // DETALHES
-        (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
-        (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
         '';
       if (apiUrl) {
         const headers = headerOptions({ accessToken: idColaborador, mail: '', cc: true, ct: false, mfd: false });

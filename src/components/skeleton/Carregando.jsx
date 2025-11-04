@@ -169,3 +169,27 @@ export function TicketSkeleton() {
     </Stack>
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function DashboardTicketSkeleton() {
+  return (
+    <Grid container spacing={3}>
+      {[...Array(4)].map((_, index) => (
+        <GridItem key={`card_${index}`} xs={6} lg={3}>
+          <Skeleton variant="rectangular" height={130} sx={{ borderRadius: 2 }} />
+        </GridItem>
+      ))}
+      {[...Array(2)].map(() => (
+        <>
+          <GridItem sm={6} md={7}>
+            <Skeleton variant="rectangular" height={350} sx={{ borderRadius: 2 }} />
+          </GridItem>
+          <GridItem sm={6} md={5}>
+            <Skeleton variant="rectangular" height={350} sx={{ borderRadius: 2 }} />
+          </GridItem>
+        </>
+      ))}
+    </Grid>
+  );
+}

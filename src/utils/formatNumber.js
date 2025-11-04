@@ -51,6 +51,13 @@ export function fData(number) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function calcPercentagem(valor, total) {
+  if (total === 0) return 0;
+  return (valor / total) * 100;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function converterSegundos(number) {
   let valor = '';
   if (number < 60) valor = `${Math.round(number)} ${number === 1 ? 'segundo' : 'segundos'}`;

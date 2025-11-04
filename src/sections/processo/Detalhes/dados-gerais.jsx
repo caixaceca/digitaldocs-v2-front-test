@@ -14,7 +14,7 @@ import { SkeletonProcesso } from '../../../components/skeleton';
 //
 import NotaProcesso from './nota';
 import DetalhesProcesso from './detalhes';
-import Anexos from './anexos-dados-gerais';
+import Anexos from './anexos/anexos-dados-gerais';
 import GridItem from '../../../components/GridItem';
 
 // ---------------------------------------------------------------------------------------------------------------------

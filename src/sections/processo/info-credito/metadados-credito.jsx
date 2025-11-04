@@ -72,7 +72,10 @@ export default function MetadadosCredito({ dados, modificar = false, ids = null,
       step: 3,
       titulo: 'Imóvel / Bem Financiado',
       dados: [
-        { title: 'Tipo de imóvel', value: dados?.tipo_imovel || dados?.tipo_imovel_id },
+        {
+          title: 'Tipo de imóvel',
+          value: dados?.tipo_imovel?.id || dados?.tipo_imovel_id?.id || dados?.tipo_imovel || dados?.tipo_imovel_id,
+        },
         { title: 'Bem/Serviço financiado', value: dados?.bem_servico_financiado },
         { title: 'Tipo de seguro', value: dados?.tipo_seguro },
       ],

@@ -4,7 +4,7 @@ export const styles = {
   default: {
     document: {
       run: { font: { name: 'Neo Sans Std' }, size: '11pt' },
-      paragraph: { spacing: { line: '18pt' }, alignment: AlignmentType.JUSTIFIED },
+      paragraph: { spacing: { line: '12pt' }, alignment: AlignmentType.JUSTIFIED },
     },
   },
 
@@ -48,31 +48,3 @@ export function numberingFormat() {
 
   return { config };
 }
-
-export const numberingFormat1 = {
-  config: [
-    {
-      reference: 'numeracao',
-      levels: [
-        {
-          level: 0,
-          text: '%1.',
-          alignment: AlignmentType.END,
-          style: { paragraph: { indent: { left: 720, hanging: 260 } } },
-        },
-      ],
-    },
-    {
-      reference: 'letra',
-      levels: [
-        {
-          level: 0,
-          text: '%1)',
-          alignment: AlignmentType.CENTER,
-          format: LevelFormat.LOWER_LETTER,
-          style: { paragraph: { indent: { left: 980, hanging: 260 } } },
-        },
-      ],
-    },
-  ],
-};

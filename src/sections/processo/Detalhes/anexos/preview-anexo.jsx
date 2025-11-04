@@ -7,7 +7,7 @@ import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 // components
-import Image from '../../../components/Image';
+import Image from '../../../../components/Image';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

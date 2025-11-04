@@ -1,26 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material//Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+// redux
+import { useDispatch, useSelector } from '../../../redux/store';
+import { getInSuporte } from '../../../redux/slices/suporte-cliente';
 // components
 import GridItem from '../../../components/GridItem';
 import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
+import { DashboardTicketSkeleton } from '../../../components/skeleton';
 //
 import KPI from './kpi';
-import useDashboardMockData from './mock';
 import { Evolucao, PorDepartamento } from './chart-dasboard';
 import { Asuntos, Recentes, Avaliacoes, Desempenho } from './table-dashboard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function AdminDashboardMetrics() {
+  const dispatch = useDispatch();
   const [data, setData] = useState(new Date());
   const [periodo, setPeriodo] = useState('Mensal');
-  const { kpis, daily, monthly, byDepartment, bySubject, byEmployee, recentTickets, recentEvaluations } =
-    useDashboardMockData();
+
+  const { indicadores, isLoading } = useSelector((state) => state.suporte);
+
+  useEffect(() => {
+    const month = periodo === 'Mensal' ? data.getMonth() + 1 : '';
+    dispatch(getInSuporte('indicadores', { year: data.getFullYear(), month, reset: { dados: null } }));
+  }, [dispatch, periodo, data]);
 
   return (
     <>
@@ -52,30 +61,41 @@ export default function AdminDashboardMetrics() {
         }
       />
 
-      <Stack spacing={3}>
-        <KPI dados={kpis} />
+      {isLoading ? (
+        <DashboardTicketSkeleton />
+      ) : (
+        <Stack spacing={3}>
+          <KPI dados={indicadores?.kpis ?? null} />
 
-        <Grid container spacing={3}>
-          <GridItem md={7}>
-            <Evolucao dados={periodo === 'Mensal' ? daily : monthly} periodo={periodo} />
-          </GridItem>
-          <GridItem md={5}>
-            <PorDepartamento dados={byDepartment} />
-          </GridItem>
-          <GridItem md={7}>
-            <Asuntos dados={bySubject} />
-          </GridItem>
-          <GridItem md={5}>
-            <Desempenho dados={byEmployee} />
-          </GridItem>
-          <GridItem md={6}>
-            <Recentes dados={recentTickets} />
-          </GridItem>
-          <GridItem md={6}>
-            <Avaliacoes dados={recentEvaluations} />
-          </GridItem>
-        </Grid>
-      </Stack>
+          <Grid container spacing={3}>
+            <GridItem md={7}>
+              <Evolucao
+                periodo={periodo}
+                dados={
+                  periodo === 'Mensal'
+                    ? (indicadores?.indicators_by_day ?? [])
+                    : (indicadores?.indicators_by_month ?? [])
+                }
+              />
+            </GridItem>
+            <GridItem md={5}>
+              <PorDepartamento dados={indicadores?.indicators_by_department ?? []} />
+            </GridItem>
+            <GridItem md={7}>
+              <Asuntos dados={indicadores?.indicators_by_subject ?? []} />
+            </GridItem>
+            <GridItem md={5}>
+              <Desempenho dados={indicadores?.indicators_by_employee ?? []} />
+            </GridItem>
+            <GridItem md={6}>
+              <Recentes dados={indicadores?.recent_tickets ?? []} />
+            </GridItem>
+            <GridItem md={6}>
+              <Avaliacoes dados={indicadores?.recent_evaluations ?? []} />
+            </GridItem>
+          </Grid>
+        </Stack>
+      )}
     </>
   );
 }

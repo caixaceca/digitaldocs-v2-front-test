@@ -237,7 +237,7 @@ function Custos({ dados }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
 
   const formSchema = Yup.object().shape({
-    custo_total: Yup.number().min(0).required().label('Custo total'),
+    // custo_total: Yup.number().min(0).required().label('Custo total'),
     valor_juro: Yup.number().min(0).required().label('Valor de juros'),
     valor_comissao: Yup.number().min(0).required().label('Valor de comissão'),
     valor_prestacao: Yup.number().positive().required().label('Valor de prestação'),
@@ -247,7 +247,8 @@ function Custos({ dados }) {
 
   const defaultValues = useMemo(
     () => ({
-      custo_total: dados?.custo_total || dados?.custo_total || 0,
+      custo_total: 0,
+      // custo_total: dados?.custo_total || dados?.custo_total || 0,
       valor_juro: dadosStepper?.valor_juro || dados?.valor_juro || 0,
       valor_comissao: dadosStepper?.valor_comissao || dados?.valor_comissao || 0,
       valor_prestacao: dadosStepper?.valor_prestacao || dados?.valor_prestacao || '',
@@ -283,7 +284,9 @@ function Custos({ dados }) {
           <GridItem sm={6} md={4}>
             <RHFNumberField name="valor_imposto_selo" label="Valor de imposto selo" tipo="CVE" />
           </GridItem>
-          <GridItem sm={6} md={4} children={<RHFNumberField name="custo_total" label="Custo total" tipo="CVE" />} />
+          <GridItem sm={6} md={4}>
+            <RHFNumberField disabled name="custo_total" label="Custo total" tipo="CVE" />
+          </GridItem>
         </Grid>
         <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
       </FormProvider>
@@ -406,7 +409,9 @@ function Resumo({ onClose, ids }) {
   const handleSubmit = async () => {
     const formData = {
       ...dadosStepper,
+      tipo_imovel_id: dadosStepper?.tipo_imovel_id?.id,
       data_vencimento_prestacao1: formatDate(dadosStepper?.data_vencimento_prestacao1, 'yyyy-MM-dd'),
+      bem_servico_financiado: dadosStepper?.tipo_imovel_id?.id ? (dadosStepper?.bem_servico_financiado ?? '') : '',
     };
     const params = { ...ids, msg: 'Informações atualizadas', fillCredito: true };
     dispatch(updateItem('metadados-credito', JSON.stringify(formData), { ...params, onClose }));

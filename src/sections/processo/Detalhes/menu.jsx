@@ -5,12 +5,12 @@ import { useSelector } from '../../../redux/store';
 import InfoCon from './info-con';
 import Estados from './estados-processo';
 import DadosGerais from './dados-gerais';
-import TodosAnexos from './todos-anexos';
 import Versoes from './historico-versoes';
 import TableDetalhes from './table-processo';
 import Views from './historico-visualiacoes';
 import InfoCredito from '../info-credito/info';
 import Transicoes from './historico-transicoes';
+import TodosAnexos from './anexos/todos-anexos';
 import Pareceres, { PareceresEstado } from './historico-pareceres';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
 
   const { estado = null, credito = null, con = null } = processo || {};
   const { valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
-  const { estados = [], htransicoes = [], pareceres_estado: pareceres = [] } = processo || {};
+  const { estados = [], htransicoes = [], pareceres_estado: pareceres = [], criado_em: data } = processo || {};
   const modificar = useMemo(
     () => estado?.preso && estado?.atribuidoAMim && !credito?.enviado_para_contratacao,
     [credito?.enviado_para_contratacao, estado?.atribuidoAMim, estado?.preso]
@@ -33,7 +33,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     if (credito)
       tabs.push({
         value: 'Info. crédito',
-        component: <InfoCredito dados={{ ...credito, processoId: id, modificar }} />,
+        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em: data, modificar }} />,
       });
 
     if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
@@ -86,6 +86,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
   }, [
     id,
     con,
+    data,
     fluxo,
     valor,
     estado,

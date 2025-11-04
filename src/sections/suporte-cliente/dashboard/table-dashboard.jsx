@@ -10,9 +10,11 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
-//
+// utils
 import { LabelStatus, getColorRating } from '../utils';
 import { ptDateTime, toHourLabel } from '../../../utils/formatTime';
+//
+import { TableSearchNotFound } from '../../../components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +26,7 @@ export function Asuntos({ dados }) {
         { id: 'subject', label: 'Assunto' },
         { id: 'count', label: 'Abertos', align: 'center' },
         { id: 'resolved', label: 'Resolvidos', align: 'center' },
-        { id: 'avgResponse', label: 'Tempo resposta', align: 'center' },
+        { id: 'avg_response_time', label: 'Tempo resposta', align: 'center' },
         { id: 'rating', label: 'Avaliação', align: 'center' },
       ]}
       body={dados.map((row) => (
@@ -32,7 +34,7 @@ export function Asuntos({ dados }) {
           <TableCell>{row.subject}</TableCell>
           <TableCell align="center">{row.count}</TableCell>
           <TableCell align="center">{row.resolved}</TableCell>
-          <TableCell align="center">{toHourLabel(row.avgResponse)}</TableCell>
+          <TableCell align="center">{toHourLabel(row.avg_response_time)}</TableCell>
           <Avaliacao rating={row.rating} />
         </TableRow>
       ))}
@@ -54,8 +56,8 @@ export function Recentes({ dados }) {
       ]}
       body={dados.map((row) => (
         <TableRow key={row.id} hover>
-          <TableCell>{row.subject}</TableCell>
-          <TableCell>{row.customer}</TableCell>
+          <TableCell>{row.subject_name}</TableCell>
+          <TableCell>{row.customer_name}</TableCell>
           <TableCell align="center">{ptDateTime(row.created_at)}</TableCell>
           <TableCell align="center">
             <LabelStatus label={row?.status} />
@@ -79,7 +81,7 @@ export function Desempenho({ dados }) {
         { id: 'rating', label: 'Média avaliação', align: 'center' },
       ]}
       body={dados.map((row) => (
-        <TableRow key={row.employee} hover>
+        <TableRow key={`employee_${row.employee}`} hover>
           <TableCell>{row.employee}</TableCell>
           <TableCell align="center">{row.closed}</TableCell>
           <TableCell align="center">{row.resolved}</TableCell>
@@ -125,7 +127,11 @@ function TableDashboard({ title, headLabel, body }) {
       <Box sx={{ p: 1, mt: 1 }}>
         <Table>
           <TableHeadCustom headLabel={headLabel} />
-          <TableBody>{body}</TableBody>
+          {!body || body?.length === 0 ? (
+            <TableSearchNotFound height={99} message="Nenhum registro encontrado..." />
+          ) : (
+            <TableBody>{body}</TableBody>
+          )}
         </Table>
       </Box>
     </Card>

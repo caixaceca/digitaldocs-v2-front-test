@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from '../../redux/store';
 import { createInSuporte, updateInSuporte } from '../../redux/slices/suporte-cliente';
 // components
 import { DialogButons } from '../../components/Actions';
-import { FormLoading } from '../../components/skeleton/Carregando';
+import { FormLoading } from '../../components/skeleton';
 import { SearchNotFoundSmall } from '../../components/table/SearchNotFound';
 import { RHFSwitch, FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
 //

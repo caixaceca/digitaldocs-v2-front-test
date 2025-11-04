@@ -66,10 +66,10 @@ export function TableSearchNotFound({ message, height = 220 }) {
             fontStyle: 'italic',
             color: 'text.secondary',
             border: 'none !important',
-            py: height === 99 ? 2 : 7,
+            py: height === 99 ? 3 : 7,
           }}
         >
-          <DocIllustration sx={{ height, mb: { xs: height === 99 ? 1 : 4, sm: height === 99 ? 2 : 7 } }} />
+          <DocIllustration sx={{ height, mb: { xs: height === 99 ? 2 : 4, sm: height === 99 ? 3 : 7 } }} />
           {message}
         </TableCell>
       </TableRow>

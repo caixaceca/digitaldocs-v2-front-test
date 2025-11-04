@@ -10,18 +10,18 @@ import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 // utils
-import { emailCheck } from '../../../utils/validarAcesso';
-import { findColaborador } from '../../../utils/formatObject';
-import { getFileThumb, canPreview } from '../../../utils/formatFile';
-import { ptTime, ptDate, ptDateTime } from '../../../utils/formatTime';
+import { emailCheck } from '../../../../utils/validarAcesso';
+import { findColaborador } from '../../../../utils/formatObject';
+import { getFileThumb, canPreview } from '../../../../utils/formatFile';
+import { ptTime, ptDate, ptDateTime } from '../../../../utils/formatTime';
 // redux
-import { getAnexo } from '../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { getAnexo } from '../../../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '../../../../redux/store';
 // components
-import { Criado } from '../../../components/Panel';
-import { SearchNotFound } from '../../../components/table';
-import { Loading } from '../../../components/LoadingScreen';
-import { DefaultAction } from '../../../components/Actions';
+import { Criado } from '../../../../components/Panel';
+import { SearchNotFound } from '../../../../components/table';
+import { Loading } from '../../../../components/LoadingScreen';
+import { DefaultAction } from '../../../../components/Actions';
 //
 import ModelosRespostas from './modelos-resposta';
 import { PdfPreview, ImagemPreview } from './preview-anexo';

@@ -10,12 +10,11 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 // utils
+import { submitDados } from '../utils-form-processo';
 import { vdt } from '../../../../utils/formatObject';
 import { fillData } from '../../../../utils/formatTime';
-// hooks
-import { getComparator, applySort } from '../../../../hooks/useTable';
-// redux
 import { useSelector, useDispatch } from '../../../../redux/store';
+import { getComparator, applySort } from '../../../../hooks/useTable';
 // components
 import {
   FormProvider,
@@ -28,8 +27,6 @@ import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
 // sections
 import { listaTitrulares, listaProdutos } from '../../../gaji9/applySortFilter';
-//
-import { submitDados } from '../utils-form-processo';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

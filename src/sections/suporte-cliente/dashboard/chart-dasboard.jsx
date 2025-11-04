@@ -9,6 +9,7 @@ import CardHeader from '@mui/material/CardHeader';
 import { mesesAbr } from '../../../_mock/_others';
 import { fNumber, fPercent } from '../../../utils/formatNumber';
 // components
+import { SearchNotFoundSmall } from '../../../components/table';
 import Chart, { useChart, getChartColors } from '../../../components/chart';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -40,26 +41,30 @@ export function PorDepartamento({ dados }) {
   return (
     <Card sx={{ height: 1, display: 'flex', flexDirection: 'column' }}>
       <CardHeader title="Distribuição por departamento" />
-      <Stack direction="row" alignItems="center" justifyContent="space-around" spacing={3} sx={{ flexGrow: 1, p: 2 }}>
-        <Chart type="donut" series={chartSeries} options={chartOptions} height={250} />
+      {dados.length === 0 ? (
+        <SearchNotFoundSmall message="Nenhum registo encontrado..." />
+      ) : (
+        <Stack direction="row" alignItems="center" justifyContent="space-around" spacing={3} sx={{ flexGrow: 1, p: 2 }}>
+          <Chart type="donut" series={chartSeries} options={chartOptions} height={250} />
 
-        <Stack spacing={1.2}>
-          {dados.map((s, index) => (
-            <Stack key={s.department} direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Box sx={{ width: 12, height: 12, backgroundColor: chartColors.main[index], borderRadius: 1 }} />
-                <Typography variant="body2">
-                  {s.department}{' '}
-                  <Typography component="span" sx={{ typography: 'caption', color: 'text.secondary' }}>
-                    ({fPercent((s.count * 100) / total)})
+          <Stack spacing={1.2}>
+            {dados.map((s, index) => (
+              <Stack key={s.department} direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 12, height: 12, backgroundColor: chartColors.main[index], borderRadius: 1 }} />
+                  <Typography variant="body2">
+                    {s.department}{' '}
+                    <Typography component="span" sx={{ typography: 'caption', color: 'text.secondary' }}>
+                      ({fPercent((s.count * 100) / total)})
+                    </Typography>
                   </Typography>
-                </Typography>
+                </Stack>
+                <Typography variant="subtitle2">{s.count}</Typography>
               </Stack>
-              <Typography variant="subtitle2">{s.count}</Typography>
-            </Stack>
-          ))}
+            ))}
+          </Stack>
         </Stack>
-      </Stack>
+      )}
     </Card>
   );
 }

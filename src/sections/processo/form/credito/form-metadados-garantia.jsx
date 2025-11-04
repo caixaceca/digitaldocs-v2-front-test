@@ -211,7 +211,9 @@ export default function MetadadosForm({ onClose, dados, ids }) {
                 renderInput={(params) => <TextField {...params} label="Garantia" />}
               />
             </GridItem>
-            {tipo === 'DP' && <GridItem sm={6} children={<RHFNumberField name="conta_dp" label="Conta DP" />} />}
+            {tipo === 'DP' && (
+              <GridItem sm={6} children={<RHFNumberField name="conta_dp" label="Conta DP" noFormat />} />
+            )}
             {tipo === 'Título' && (
               <>
                 <GridItem sm={6}>

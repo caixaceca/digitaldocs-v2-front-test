@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // utils
 import { toHourLabel } from '../../../utils/formatTime';
-import { fNumber, fPercent } from '../../../utils/formatNumber';
+import { fNumber, fPercent, calcPercentagem } from '../../../utils/formatNumber';
 //
 import { Icon } from '../../../assets/icons';
 import GridItem from '../../../components/GridItem';
@@ -20,41 +20,43 @@ export default function KPI({ dados }) {
         color="primary.dark"
         icon={<TicketIcon />}
         title="Tickets Abertos"
-        value={fNumber(dados.ticketsOpened)}
-        melhorou={dados.ticketsOpened > dados.ticketsOpenedPrev}
-        sub={fNumber(dados.ticketsOpened - dados.ticketsOpenedPrev)}
+        value={fNumber(dados?.tickets_opened)}
+        melhorou={dados?.tickets_opened > dados?.tickets_opened_prev}
+        sub={fNumber(dados?.tickets_opened - dados?.tickets_opened_prev)}
       />
       <KpiItem
         icon={<CheckIcon />}
         title="Tickets Resolvidos"
-        value={fNumber(dados.ticketsResolved)}
-        melhorou={dados.ticketsResolved > dados.ticketsResolvedPrev}
-        sub={fNumber(dados.ticketsResolved - dados.ticketsResolvedPrev)}
+        value={fNumber(dados?.tickets_resolved)}
+        melhorou={dados?.tickets_resolved > dados?.tickets_resolved_prev}
+        sub={fNumber(dados?.tickets_resolved - dados?.tickets_resolved_prev)}
+        percentagem={fPercent(calcPercentagem(dados?.tickets_resolved, dados?.tickets_opened))}
       />
       <KpiItem
         color="info.main"
         icon={<FirstIcon />}
         title="Resolução 1º Contacto"
-        value={fPercent(dados.firstContactResolution)}
-        melhorou={dados.firstContactResolution > dados.firstContactResolutionPrev}
-        sub={fPercent(dados.firstContactResolution - dados.firstContactResolutionPrev)}
+        value={fNumber(dados?.first_contact_resolution)}
+        melhorou={dados?.first_contact_resolution > dados?.first_contact_resolution_prev}
+        sub={fNumber(dados?.first_contact_resolution - dados?.first_contact_resolution_prev)}
+        percentagem={fPercent(calcPercentagem(dados?.first_contact_resolution, dados?.tickets_resolved))}
       />
       <KpiItem
         md={6}
         inverso
         icon={<TimeIcon />}
         title="Tempo Médio Resposta"
-        value={toHourLabel(dados.avgResponse)}
-        melhorou={dados.avgResponse < dados.avgResponsePrev}
-        sub={toHourLabel(dados.avgResponse - dados.avgResponsePrev)}
+        value={toHourLabel(dados?.avg_response)}
+        melhorou={dados?.avg_response < dados?.avg_response_prev}
+        sub={toHourLabel(dados?.avg_response - dados?.avg_response_prev)}
       />
       <KpiItem
         md={6}
         icon={<SatisfyIcon />}
         title="Satisfação Média"
-        value={`${dados.satisfaction} / 5`}
-        melhorou={dados.satisfaction > dados.satisfactionPrev}
-        sub={(dados.satisfaction - dados.satisfactionPrev).toFixed(1)}
+        value={`${dados?.avg_satisfaction} / 5`}
+        melhorou={dados?.avg_satisfaction > dados?.avg_satisfaction_prev}
+        sub={(dados?.avg_satisfaction - dados?.avg_satisfaction_prev).toFixed(1)}
       />
     </Grid>
   );
@@ -62,7 +64,7 @@ export default function KPI({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 4, melhorou = false, inverso = false }) {
+function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 4, melhorou = false, inverso, percentagem }) {
   const cleanSub = String(sub).replace(/[+-]/, '').trim();
   const signedSub = `${(!inverso && melhorou) || (inverso && !melhorou) ? '+' : '−'}${cleanSub}`;
 
@@ -77,7 +79,14 @@ function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 4, melh
             <Typography variant="overline" color="text.secondary">
               {title}
             </Typography>
-            <Typography variant="h6">{value}</Typography>
+            <Typography variant="h6">
+              {value}
+              {percentagem && (
+                <Typography variant="body2" component="span" color="text.disabled">
+                  &nbsp;({percentagem})
+                </Typography>
+              )}
+            </Typography>
           </Box>
         </Stack>
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, color: 'text.disabled' }}>
