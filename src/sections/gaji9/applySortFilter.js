@@ -41,7 +41,11 @@ export function applySortFilter({ dados, filter, comparator }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function listaTitrulares(tiposTitulares) {
-  return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({ id, label: labelTitular(descritivo, consumidor) }));
+  return tiposTitulares?.map(({ id, consumidor, descritivo }) => ({
+    id,
+    segmento: descritivo,
+    label: labelTitular(descritivo, consumidor),
+  }));
 }
 
 export function listaProdutos(componentes) {

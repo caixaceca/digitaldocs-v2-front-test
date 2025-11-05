@@ -194,8 +194,8 @@ export function TransicaoForm({ onClose, fluxoId }) {
 
   const formSchema = Yup.object().shape({
     modo: Yup.mixed().required().label('Modo'),
-    origem: Yup.mixed().required().label('Origem'),
-    destino: Yup.mixed().required().label('Destino'),
+    estado_final_id: Yup.mixed().required().label('Destino'),
+    estado_inicial_id: Yup.mixed().required().label('Origem'),
     prazoemdias: Yup.number().min(0).typeError().label('Prazo'),
   });
 
@@ -211,8 +211,8 @@ export function TransicaoForm({ onClose, fluxoId }) {
       arqhasopnumero: selectedItem?.arqhasopnumero || false,
       to_alert: selectedItem ? selectedItem?.to_alert : true,
       is_after_devolucao: selectedItem?.is_after_devolucao || false,
-      destino: estadosList?.find(({ id }) => id === selectedItem?.estado_final_id) || null,
-      origem: estadosList?.find(({ id }) => id === selectedItem?.estado_inicial_id) || null,
+      estado_final_id: estadosList?.find(({ id }) => id === selectedItem?.estado_final_id) || null,
+      estado_inicial_id: estadosList?.find(({ id }) => id === selectedItem?.estado_inicial_id) || null,
     }),
     [fluxoId, selectedItem, perfilId, estadosList]
   );
@@ -229,8 +229,10 @@ export function TransicaoForm({ onClose, fluxoId }) {
   const onSubmit = async () => {
     try {
       const id = isEdit ? selectedItem?.id : fluxoId;
-      const formData = [{ ...values, estado_final_id: values?.destino?.id, estado_inicial_id: values?.origem?.id }];
       const params = { item1: 'fluxo', msg: `Transição ${isEdit ? 'atualizada' : 'adicionada'}`, id, onClose };
+      const ids = { estado_final_id: values?.estado_final_id?.id, estado_inicial_id: values?.estado_inicial_id?.id };
+      const formData = isEdit ? { ...values, ...ids } : [{ ...values, ...ids }];
+
       dispatch((isEdit ? updateItem : createItem)('transicoes', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -244,8 +246,12 @@ export function TransicaoForm({ onClose, fluxoId }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={2}>
             <Grid container spacing={3} sx={{ pt: 3 }}>
-              <GridItem sm={6} children={<RHFAutocompleteObj name="origem" label="Origem" options={estadosList} />} />
-              <GridItem sm={6} children={<RHFAutocompleteObj name="destino" label="Destino" options={estadosList} />} />
+              <GridItem sm={6}>
+                <RHFAutocompleteObj name="estado_inicial_id" label="Origem" options={estadosList} />
+              </GridItem>
+              <GridItem sm={6}>
+                <RHFAutocompleteObj name="estado_final_id" label="Destino" options={estadosList} />
+              </GridItem>
               <GridItem sm={6}>
                 <RHFAutocompleteSmp name="modo" label="Modo" options={['Seguimento', 'Devolução']} />
               </GridItem>

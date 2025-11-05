@@ -117,11 +117,10 @@ export default function Estados({ handleAceitar }) {
                                 />
                                 <DefaultAction
                                   label="LIBERTAR"
-                                  onClick={() =>
-                                    dispatch(
-                                      setModal({ modal: 'libertar', dados: { id: idp, estadoId, perfilId: pid } })
-                                    )
-                                  }
+                                  onClick={() => {
+                                    const dados = { id: idp, estadoId, perfilId: pid };
+                                    dispatch(setModal({ modal: 'libertar', dados }));
+                                  }}
                                 />
                               </>
                             )}

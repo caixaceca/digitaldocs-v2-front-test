@@ -191,7 +191,7 @@ export function pertencoAoEstado(meusAmbientes, estados) {
 }
 
 export function pertencoEstadoId(meusAmbientes, estadoId) {
-  return !!meusAmbientes?.find(({ id }) => id === estadoId);
+  return !!meusAmbientes?.find(({ id, observador }) => id === estadoId && !observador);
 }
 
 export function gestorEstado(meusAmbientes, estadoId) {
@@ -210,8 +210,9 @@ export function eliminarAnexo(meusAmbientes, modificar, estadoAnexo, estadoId) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function findColaboradores(colaboradores, idsList) {
+export const findColaboradores = (colaboradores = [], idsList = []) => {
+  const validIds = new Set(idsList.filter((i) => !i.observador).map((i) => i.perfil_id));
   return colaboradores
-    ?.filter(({ perfil_id: pidc }) => idsList?.map(({ perfil_id: pidl }) => pidl)?.includes(pidc))
-    ?.map(({ perfil_id: id, nome, email }) => ({ id, label: nome, mail: email }));
-}
+    .filter((c) => validIds.has(c.perfil_id))
+    .map(({ perfil_id: id, nome: label, email: mail }) => ({ id, label, mail }));
+};

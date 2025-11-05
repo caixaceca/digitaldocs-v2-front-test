@@ -19,7 +19,7 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 // utils
 import { ptDate } from '../../../../utils/formatTime';
-import { fCurrency } from '../../../../utils/formatNumber';
+import { fCurrency, fPercent } from '../../../../utils/formatNumber';
 import { CabecalhoWord, RodapeWord, stylesWord } from '../../../../components/exportar-dados/word';
 //
 import DownloadModelo from './download-modelo';
@@ -104,7 +104,7 @@ export default function CartaPropostaWord({ dados = {} }) {
                       new Paragraph({
                         spacing: { line: 300 },
                         alignment: AlignmentType.JUSTIFIED,
-                        children: [new TextRun({ text: valor })],
+                        children: valor instanceof Array ? valor : [new TextRun({ text: valor })],
                       }),
                     ],
                   }),
@@ -117,7 +117,7 @@ export default function CartaPropostaWord({ dados = {} }) {
                 new TableCell({
                   borders: borderConf,
                   width: { size: 100, type: WidthType.PERCENTAGE },
-                  margins: { top: 100, bottom: 100, left: 120, right: 120 },
+                  margins: { top: 100, bottom: 200, left: 120, right: 120 },
                   children: linhas,
                 }),
               ],
@@ -126,6 +126,15 @@ export default function CartaPropostaWord({ dados = {} }) {
 
     return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [header, ...rows] });
   };
+
+  const assinatura = (nome) =>
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [
+        new TextRun({ text: '__________________________________________', break: 2 }),
+        new TextRun({ text: nome, break: 1 }),
+      ],
+    });
 
   const exportToWord = async (setLoading) => {
     try {
@@ -144,6 +153,7 @@ export default function CartaPropostaWord({ dados = {} }) {
         fiadores,
         montante,
         taxa_mora: taxaMora,
+        gerente_nome: nomeGerente,
         data_proposta: dataProposta,
         conta_pagamento: contaPagamento,
         proponente_nome: nomeProponente,
@@ -170,17 +180,30 @@ export default function CartaPropostaWord({ dados = {} }) {
           ],
           ['Forma de utilização', 'Imediata, na data de disponibilização do crédito.'],
           ['Prazo de amortização', `${prazoAmortizacao} meses, a contar da data de assinatura do contrato.`],
-          ['Taxa de juro anual nominal (TAN)', `${tan} ao ano, sujeito às alterações do preçário da Caixa.`],
-          ['TAEG', `${taeg} conforme cálculo efetuado nos termos legais.`],
-          ['Taxa de juro de mora', `${taxaMora} a.a. que acresce à TAN, em caso de mora.`],
+          [
+            'Taxa de juro anual nominal (TAN)',
+            [
+              new TextRun({ text: `${fPercent(tan)} ao ano, sujeito às alterações do preçário da Caixa` }),
+              new TextRun({
+                text: 'Os juros serão contados sobre o capital utilizado e efetivamente em dívida e serão incluídos nas prestações de reembolso.',
+                break: 2,
+              }),
+            ],
+          ],
+          ['TAEG', `${fPercent(taeg)} conforme cálculo efetuado nos termos legais.`],
+          ['Taxa de juro de mora', `${fPercent(taxaMora)} a.a. que acresce à TAN, em caso de mora.`],
           [
             'Garantia',
-            `Fiança solidária sem benefício de excussão prévia, prestada por:\n${fiadores
-              .map(
+            [
+              new TextRun({ text: 'Fiança solidária sem benefício de excussão prévia, prestada por:' }),
+              ...fiadores.map(
                 (f) =>
-                  `- ${f?.nome}, ${f?.estadoCivil}, NATURAL DE ${f?.naturalidade}, NIF ${f?.nif}, RESIDENTE EM ${f?.residencia}`
-              )
-              .join('\n')}`,
+                  new TextRun({
+                    text: `- ${f?.nome}, ${f?.estadoCivil || ''}, NATURAL DE ${f?.naturalidade || ''}, NIF ${f?.nif || ''}, RESIDENTE EM ${f?.residencia || ''}`,
+                    break: 1,
+                  })
+              ),
+            ],
           ],
           [
             'Reembolso',
@@ -194,7 +217,10 @@ export default function CartaPropostaWord({ dados = {} }) {
         'ENCARGOS',
         [
           ['Comissão de abertura', `À taxa de ${comissaoAbertura}. No montante de ${fCVE(valorComissaoAbertura)}.`],
-          ['Imposto de selo sobre crédito', `À taxa de ${impostoSelo}. No montante de ${fCVE(valorImpostoSelo)}.`],
+          [
+            'Imposto de selo sobre crédito',
+            `À taxa de ${fPercent(impostoSelo)}. No montante de ${fCVE(valorImpostoSelo)}.`,
+          ],
           ['Imposto de selo sobre comissão', `À taxa de 3,5%. No montante de ${fCVE(valorImpostoSeloComissao)}.`],
           [
             'Total de encargos iniciais',
@@ -235,13 +261,7 @@ export default function CartaPropostaWord({ dados = {} }) {
               }),
             ],
           }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({ text: '__________________________________________', break: 2 }),
-              new TextRun({ text: nomeProponente, break: 1 }),
-            ],
-          }),
+          ...[assinatura(nomeProponente)],
         ],
         1
       );
@@ -258,16 +278,7 @@ export default function CartaPropostaWord({ dados = {} }) {
               }),
             ],
           }),
-          ...fiadores?.map(
-            (f) =>
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: '__________________________________________', break: 2 }),
-                  new TextRun({ text: f.nome, break: 1 }),
-                ],
-              })
-          ),
+          ...fiadores?.map((f) => assinatura(f.nome)),
         ],
         1
       );
@@ -320,11 +331,11 @@ export default function CartaPropostaWord({ dados = {} }) {
 
               new Paragraph({
                 alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: `A Gerência da Agência ${agencia}`, break: 2 }),
-                  new TextRun({ text: '__________________________________________', break: 5 }),
-                ],
+                children: [new TextRun({ text: `A Gerência da Agência ${agencia}`, break: 2 })],
               }),
+              new Paragraph({ text: '', break: 1 }),
+              new Paragraph({ text: '', break: 1 }),
+              ...[assinatura(nomeGerente)],
 
               new Paragraph({ text: '', break: 2 }),
               declaracaoProponente,

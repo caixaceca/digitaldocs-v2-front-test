@@ -132,7 +132,7 @@ export default function FormInfoCredito({ dados }) {
                   disabled={!values?.tipo_titular_id}
                   options={applySort(
                     linhas
-                      ?.filter(({ descricao }) => descricao === values?.tipo_titular_id?.label)
+                      ?.filter(({ descricao }) => descricao === values?.tipo_titular_id?.segmento)
                       ?.map(({ id, linha }) => ({ id, label: linha })),
                     getComparator('asc', 'label')
                   )}

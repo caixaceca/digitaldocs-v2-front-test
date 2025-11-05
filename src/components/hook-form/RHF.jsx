@@ -50,7 +50,7 @@ export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RHFAutocompleteSmp({ name, label, multiple = false, ...other }) {
+export function RHFAutocompleteSmp({ name, label, small = false, multiple = false, ...other }) {
   const { control } = useFormContext();
   const { dc = false, ...rest } = other;
 
@@ -64,6 +64,7 @@ export function RHFAutocompleteSmp({ name, label, multiple = false, ...other }) 
           fullWidth
           multiple={multiple}
           disableClearable={!!dc}
+          size={small ? 'small' : 'medium'}
           onChange={(event, newValue) => field.onChange(newValue)}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
           {...rest}

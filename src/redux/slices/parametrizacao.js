@@ -273,9 +273,11 @@ export function createItem(item, dados, params) {
           dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data?.objeto ?? null }));
         } else if (item === 'acessos') {
           dispatch(slice.actions.createSuccess({ item, dados: response.data }));
+        } else if (item === 'perfis') {
+          dispatch(getFromParametrizacao('estado', { id: params?.id }));
         } else {
-          const dadosE = (item === 'perfis' && JSON.parse(dados)?.perfis) || response.data?.objeto || response.data;
-          dispatch(slice.actions.createSuccess({ item, item1: params?.item1 || '', dados: dadosE }));
+          const dados = response.data?.objeto || response.data;
+          dispatch(slice.actions.createSuccess({ item, item1: params?.item1 || '', dados }));
         }
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);

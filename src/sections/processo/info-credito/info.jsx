@@ -141,7 +141,7 @@ function DadosCredito({ dados }) {
               <Typography variant="caption">Nível de decisão:</Typography>
               &nbsp;
               {` ${dados?.nivel_decisao} - `}
-              {(dados?.nivel_decisao === '1' && 'Comité Base') ||
+              {(dados?.nivel_decisao === 1 && 'Comité Base') ||
                 (dados?.nivel_decisao === 2 && 'Comité Diretor') ||
                 (dados?.nivel_decisao === 3 && 'Comité Superior')}
             </Label>

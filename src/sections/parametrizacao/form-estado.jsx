@@ -25,6 +25,7 @@ import {
   RHFTextField,
   RHFDatePicker,
   RHFNumberField,
+  RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '../../components/hook-form';
 import GridItem from '../../components/GridItem';
@@ -35,7 +36,7 @@ import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 import { listaPerfis } from './applySortFilter';
 import { ItemComponent } from './ParametrizacaoForm';
 
-const ps = { perfil_id: null, gestor: false, padrao: false, observador: false, data_limite: null, data_inicial: null };
+const ps = { perfil_id: null, gestor: null, padrao: false, observador: false, data_limite: null, data_inicial: null };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -135,12 +136,11 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
   const defaultValues = useMemo(
     () => ({
       perfil_id_cc: perfilId,
-      gestor: selectedItem?.gestor || false,
       padrao: selectedItem?.padrao || false,
-      observador: selectedItem?.observador || false,
       perfil_id: perfilIdE || selectedItem?.perfil_id,
       estado: estadosList.find(({ id }) => id === estadoAtualId) || null,
       data_limite: selectedItem?.data_limite ? new Date(selectedItem?.data_limite) : null,
+      gestor: (selectedItem?.gestor && 'Gestor') || (selectedItem?.observador && 'Observador') || null,
       data_inicial: selectedItem ? new Date(selectedItem?.data_inicial || selectedItem?.data_inicio) : null,
     }),
     [selectedItem, perfilId, estadosList, perfilIdE, estadoAtualId]
@@ -157,7 +157,12 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
 
   const onSubmit = async () => {
     try {
-      const formData = { ...values, estado_id: values?.estado?.id };
+      const formData = {
+        ...values,
+        estado_id: values?.estado?.id,
+        gestor: values?.gestor === 'Gestor',
+        observador: values?.gestor === 'Observador',
+      };
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
       const params1 = { item: estadoId ? 'perfis' : '', item1: estadoId ? 'estado' : '', onClose };
       dispatch(
@@ -170,32 +175,29 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{selectedItem ? 'Editar estado' : 'Adicionar estado'}</DialogTitle>
+      <DialogTitle sx={{ mb: 2 }}>
+        {selectedItem ? `Editar ${perfilIdE ? 'estado' : 'perfil'}` : `Adicionar ${perfilIdE ? 'estado' : 'perfil'}`}
+      </DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={3}>
-            <Grid container spacing={3} sx={{ pt: 3 }}>
-              <GridItem
-                children={<RHFAutocompleteObj name="estado" label="Estado" disabled={isEdit} options={estadosList} />}
-              />
-              <GridItem xs={6} children={<RHFDatePicker dateTime name="data_inicial" label="Data de início" />} />
-              <GridItem xs={6}>
-                <RHFDatePicker dateTime disablePast name="data_limite" label="Data de término" />
-              </GridItem>
-              <GridItem xs={4} children={<RHFSwitch name="observador" label="Observador" />} />
-              <GridItem xs={4} children={<RHFSwitch name="gestor" label="Gestor" />} />
-              <GridItem xs={4} children={<RHFSwitch name="padrao" label="Padrão" />} />
+            <Stack spacing={3} sx={{ pt: 1 }}>
+              <RHFAutocompleteObj name="estado" label="Estado" disabled={isEdit} options={estadosList} />
+              <Stack direction="row" spacing={3}>
+                <RHFAutocompleteSmp label="Função" name="gestor" options={['Gestor', 'Observador']} />
+                <RHFSwitch mt name="padrao" label="Padrão" />
+              </Stack>
+              <Stack direction="row" spacing={3}>
+                <RHFDatePicker dateTime name="data_inicial" label="Início" />
+                <RHFDatePicker dateTime name="data_limite" label="Término" />
+              </Stack>
               {isEdit && (
-                <GridItem
-                  children={
-                    <Alert severity="info">
-                      <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
-                      <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
-                    </Alert>
-                  }
-                />
+                <Alert severity="info">
+                  <Typography variant="body2">Os estados atríbuidos não podem ser eliminados.</Typography>
+                  <Typography variant="body2">Para desativar o estado, preencha a data de término.</Typography>
+                </Alert>
               )}
-            </Grid>
+            </Stack>
             <DialogButons isSaving={isSaving} onClose={onClose} edit={isEdit} />
           </ItemComponent>
         </FormProvider>
@@ -212,10 +214,16 @@ export function PerfisEstadoForm({ onClose }) {
   const { isSaving, estado } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
 
+  const colaboradoresList = useMemo(
+    () => colaboradores?.filter(({ ativo }) => ativo)?.map(({ perfil_id: pid, nome }) => ({ id: pid, label: nome })),
+    [colaboradores]
+  );
+
   const defaultValues = useMemo(() => ({ perfis: [ps] }), []);
   const formSchema = Yup.object().shape({
     perfis: Yup.array(Yup.object({ perfil_id: Yup.mixed().required().label('Colaborador') })),
   });
+
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { watch, control, handleSubmit } = methods;
   const values = watch();
@@ -223,9 +231,17 @@ export function PerfisEstadoForm({ onClose }) {
 
   const onSubmit = async () => {
     try {
+      const params = { id: estado?.id, msg: 'Colaboradores adicionados', onClose };
       const formData = { estado_id: estado?.id, perfil_id_cc: perfilId, perfis: [] };
-      values?.perfis?.forEach((row) => formData?.perfis?.push({ ...row, perfil_id: row?.perfil_id?.id }));
-      const params = { item1: 'estado', msg: 'Perfis adicionados', onClose };
+
+      values?.perfis?.forEach((row) =>
+        formData?.perfis?.push({
+          ...row,
+          perfil_id: row?.perfil_id?.id,
+          gestor: row?.gestor === 'Gestor',
+          observador: row?.gestor === 'Observador',
+        })
+      );
       dispatch(createItem('perfis', JSON.stringify(formData), params));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -235,7 +251,7 @@ export function PerfisEstadoForm({ onClose }) {
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt
-        title="Adicionar colaborador"
+        title="Adicionar colaborador(es)"
         action={<AddItem dados={{ small: true, label: 'Colaborador' }} onClick={() => append(ps)} />}
       />
       <DialogContent>
@@ -244,24 +260,27 @@ export function PerfisEstadoForm({ onClose }) {
             {fields.map((item, index) => (
               <Stack direction="row" key={item.id} spacing={2} alignItems="center">
                 <Stack sx={{ width: 1 }} spacing={1}>
-                  <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
-                    <Stack direction="row" sx={{ width: { xs: 1, md: '50%' } }}>
+                  <Stack spacing={2}>
+                    <Stack direction="row" spacing={3}>
                       <RHFAutocompleteObj
                         label="Colaborador"
+                        options={colaboradoresList}
                         name={`perfis[${index}].perfil_id`}
-                        options={colaboradores?.map(({ perfil_id: pid, nome }) => ({ id: pid, label: nome }))}
                         getOptionDisabled={(option) => values.perfis.some(({ perfil }) => perfil?.id === option.id)}
                       />
+                      <Stack>
+                        <RHFSwitch mt name={`perfis[${index}].padrao`} label="Padrão" />
+                      </Stack>
                     </Stack>
-                    <Stack direction="row" spacing={1}>
+                    <Stack direction="row" spacing={2}>
                       <RHFDatePicker dateTime name={`perfis[${index}].data_inicial`} label="Início" />
                       <RHFDatePicker dateTime name={`perfis[${index}].data_limite`} label="Término" />
+                      <RHFAutocompleteSmp
+                        label="Função"
+                        name={`perfis[${index}].gestor`}
+                        options={['Gestor', 'Observador']}
+                      />
                     </Stack>
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <RHFSwitch name={`perfis[${index}].observador`} label="Observador" />
-                    <RHFSwitch name={`perfis[${index}].gestor`} label="Gestor" />
-                    <RHFSwitch name={`perfis[${index}].padrao`} label="Padrão" />
                   </Stack>
                 </Stack>
                 {values.perfis.length > 1 && <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />}
@@ -279,11 +298,15 @@ export function PerfisEstadoForm({ onClose }) {
 
 export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   const dispatch = useDispatch();
+  const isEdit = !!selectedItem;
   const { enqueueSnackbar } = useSnackbar();
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isSaving } = useSelector((state) => state.parametrizacao);
-  const perfisList = useMemo(() => listaPerfis(item?.perfis, colaboradores), [colaboradores, item?.perfis]);
-  const isEdit = !!selectedItem;
+
+  const perfisList = useMemo(() => {
+    const perfis = (item?.perfis ?? [])?.filter(({ observador }) => !observador);
+    return listaPerfis(perfis, colaboradores);
+  }, [colaboradores, item?.perfis]);
 
   const formSchema = Yup.object().shape({
     pesos: Yup.array(

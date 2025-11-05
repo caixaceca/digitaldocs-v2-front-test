@@ -55,7 +55,7 @@ export default function PageProcesso() {
   const [currentTab, setCurrentTab] = useState('Dados gerais');
 
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { meusAmbientes, isAdmin, colaboradoresEstado: ce } = useSelector((state) => state.parametrizacao);
+  const { meusAmbientes, isAdmin, colaboradoresEstado: colabEstado } = useSelector((state) => state.parametrizacao);
   const { processos, done, pdfPreview, selectedItem, isOpenModal, isSaving, isLoadingFile } = useSelector(
     (state) => state.digitaldocs
   );
@@ -68,7 +68,7 @@ export default function PageProcesso() {
   const acessoDesarquivar = useAcesso({ acessos: ['arquivo-111'] }) || isAdmin;
   const estadoId = useMemo(() => estado?.estado_id || '', [estado?.estado_id]);
   const ultimaTransicao = useMemo(() => htransicoes?.[0] || null, [htransicoes]);
-  const colaboradoresList = useMemo(() => findColaboradores(colaboradores, ce), [colaboradores, ce]);
+  const colaboradoresList = useMemo(() => findColaboradores(colaboradores, colabEstado), [colaboradores, colabEstado]);
   const linkNavigate = useMemo(
     () =>
       (params?.get?.('from') === 'Arquivos' && `${PATH_DIGITALDOCS.arquivo.lista}`) ||
