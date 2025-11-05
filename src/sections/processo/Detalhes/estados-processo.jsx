@@ -30,11 +30,9 @@ export default function Estados({ handleAceitar }) {
   const { processo } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
-  const { id: idp, fluxo, titular, estadoPreso, estados = [] } = processo;
 
-  const handleAccord = (panel) => (event, isExpanded) => {
-    setAccord(isExpanded ? panel : false);
-  };
+  const { id: idp, fluxo, titular, estadoPreso, estados = [] } = processo;
+  const handleAccord = (panel) => (event, isExpanded) => setAccord(isExpanded ? panel : false);
 
   return (
     <Box sx={{ pb: { xs: 1, sm: 2 } }}>

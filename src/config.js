@@ -14,8 +14,8 @@ export const msalConfig = {
   auth: {
     clientId: import.meta.env.VITE_CLIENTE_ID_AAD,
     authority: import.meta.env.VITE_AUTHORITY_AAD,
-    // redirectUri: window.location.origin,
-    redirectUri: 'https://ddocsteste.caixa.cv/fila-trabalho/lista',
+    redirectUri: window.location.origin,
+    // redirectUri: 'https://ddocsteste.caixa.cv/fila-trabalho/lista',
     // redirectUri: 'https://digitaldocs.caixa.cv/fila-trabalho/lista',
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },

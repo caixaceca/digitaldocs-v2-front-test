@@ -56,10 +56,21 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   }, [dispatch, estado]);
 
   useEffect(() => {
-    const estado =
-      meusAmbientes?.find(({ id }) => id === ambientId) || meusAmbientes.find(({ isinicial }) => isinicial) || null;
-    if (estado) setEstado(estado);
-  }, [ambientId, meusAmbientes]);
+    if (!meusAmbientes?.length) return;
+
+    let estadoSelecionado = null;
+
+    if (isEdit) {
+      estadoSelecionado = meusAmbientes.find(({ id }) => id === ambientId) || null;
+    } else {
+      estadoSelecionado =
+        meusAmbientes.find(({ id, isinicial }) => id === ambientId && isinicial) ||
+        meusAmbientes.find(({ isinicial }) => isinicial) ||
+        null;
+    }
+
+    if (estadoSelecionado) setEstado(estadoSelecionado);
+  }, [ambientId, meusAmbientes, isEdit]);
 
   useEffect(() => {
     const fluxoProcesso = fluxosList?.find(({ id }) => id === processo?.fluxo_id) || null;

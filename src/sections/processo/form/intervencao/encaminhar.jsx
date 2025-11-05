@@ -9,8 +9,10 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
+import AlertTitle from '@mui/material/AlertTitle';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -104,7 +106,7 @@ export function EncaminharEmSerie({ dados }) {
   const { acao, destinos, gerencia = false, onClose } = dados;
   const { dadosStepper } = useSelector((state) => state.stepper);
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
-  const { motivosTransicao } = useSelector((state) => state.parametrizacao);
+  const { motivosTransicao, decisor } = useSelector((state) => state.parametrizacao);
   const { fluxo = '', entidade = '', fluxo_id: fluxoId = '', numero_operacao: numOp = '', estado = null } = processo;
   const indicarMotivo = useMemo(() => acao === 'DEVOLVER' || estado?.estado?.includes('GAJ'), [acao, estado?.estado]);
 
@@ -149,12 +151,15 @@ export function EncaminharEmSerie({ dados }) {
       !values?.estado?.label?.includes('Atendimento'),
     [gerencia, fluxo, entidade, acao, values?.estado]
   );
+  const creditoSemMetadados = useMemo(
+    () => decisor && processo?.is_credito && !processo?.credito?.gaji9_metadados,
+    [decisor, processo?.credito?.gaji9_metadados, processo?.is_credito]
+  );
+
   const numOperacao = useMemo(() => !!values?.estado?.hasopnumero, [values?.estado?.hasopnumero]);
   const parecer = useMemo(() => !!values?.estado?.requer_parecer, [values?.estado?.requer_parecer]);
 
-  const onSubmit = async () => {
-    dispatch(updateDados({ forward: true, dados: values }));
-  };
+  const onSubmit = async () => dispatch(updateDados({ forward: true, dados: values }));
 
   useEffect(() => {
     if (indicarMotivo) dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
@@ -166,10 +171,8 @@ export function EncaminharEmSerie({ dados }) {
   }, [dispatch, values?.estado?.estado_final_id]);
 
   useEffect(() => {
-    if (fluxoId) {
-      const params = { fluxoId, transicaoId: values?.estado?.id, reset: { val: [] } };
-      dispatch(getFromParametrizacao('checklist', params));
-    }
+    if (fluxoId)
+      dispatch(getFromParametrizacao('checklist', { fluxoId, transicaoId: values?.estado?.id, reset: { val: [] } }));
   }, [dispatch, fluxoId, values?.estado?.id]);
 
   return (
@@ -178,14 +181,32 @@ export function EncaminharEmSerie({ dados }) {
         <GridItem md={(parecer && numOperacao && 6) || ((parecer || numOperacao) && 8) || 12}>
           <RHFAutocompleteObj dc name="estado" label="Estado" options={destinos} />
         </GridItem>
-        {aberturaSemEntGer ? (
+        {aberturaSemEntGer || creditoSemMetadados ? (
           <GridItem>
-            <Typography>
-              Processo de <b>Abertura de Conta</b> não pode ser encaminhado sem <b>entidade(s)</b>!
-            </Typography>
-            <Typography>
-              Por favor edita o processo, adicionando a(s) entidade(s) e depois prossiga com o devido encaminhamento.
-            </Typography>
+            {creditoSemMetadados ? (
+              <Alert severity="warning" sx={{ justifyContent: 'left' }}>
+                <AlertTitle sx={{ typography: 'subtitle2' }}>Processo incompleto</AlertTitle>
+                <Typography variant="body2">
+                  O processo não pode ser encaminhado para um estado decisor sem que os <b>metadados</b> tenham sido
+                  preenchidos.
+                </Typography>
+                <Typography variant="body2">
+                  Para inserir os dados necessários, aceda ao menu <b>Info. Crédito</b> e selecione o item{' '}
+                  <b>Metadados - GAJi9</b>.
+                </Typography>
+              </Alert>
+            ) : (
+              <Alert severity="warning" sx={{ justifyContent: 'left' }}>
+                <AlertTitle sx={{ typography: 'subtitle2' }}>Processo incompleto</AlertTitle>
+                <Typography variant="body2">
+                  O processo não pode ser encaminhado sem que a(s) <b>entidade(s)</b> tenham sido adicionadas.
+                </Typography>
+                <Typography variant="body2">
+                  Por favor, edite o processo, adicione a(s) entidade(s) necessária(s) e depois prossiga com o
+                  encaminhamento.
+                </Typography>
+              </Alert>
+            )}
           </GridItem>
         ) : (
           <>
@@ -222,7 +243,12 @@ export function EncaminharEmSerie({ dados }) {
           </>
         )}
       </Grid>
-      <ButtonsStepper onClose={onClose} isSaving={isSaving} labelCancel="Cancelar" hideSubmit={aberturaSemEntGer} />
+      <ButtonsStepper
+        onClose={onClose}
+        isSaving={isSaving}
+        labelCancel="Cancelar"
+        hideSubmit={aberturaSemEntGer || creditoSemMetadados}
+      />
     </FormProvider>
   );
 }
@@ -248,17 +274,15 @@ export function OutrosEmSerie({ acao }) {
       ),
     [checklist, dadosStepper?.estado?.id]
   );
+
   const colaboradoresList = useMemo(
     () => findColaboradores(colaboradores, colaboradoresEstado),
     [colaboradores, colaboradoresEstado]
   );
-  const criador = useMemo(
-    () =>
-      acao === 'DEVOLVER' && dadosStepper?.estado?.inicial
-        ? colaboradoresList?.find(({ mail }) => mail?.toLowerCase() === criadorP?.toLowerCase())
-        : null,
-    [acao, colaboradoresList, dadosStepper?.estado?.inicial, criadorP]
-  );
+  const criador = useMemo(() => {
+    if (acao !== 'DEVOLVER' || !dadosStepper?.estado?.inicial) return null;
+    return colaboradoresList?.find((c) => c.mail?.toLowerCase() === criadorP?.toLowerCase()) || null;
+  }, [acao, colaboradoresList, dadosStepper?.estado?.inicial, criadorP]);
 
   const formSchema = shapeAnexos(outros, checkList, true);
   const defaultValues = useMemo(

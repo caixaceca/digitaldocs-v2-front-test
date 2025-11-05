@@ -61,8 +61,6 @@ export default function TableInfoEstado({ item, dados }) {
   });
   const isNotFound = !dataFiltered.length;
 
-  console.log(dataFiltered);
-
   return (
     <>
       <Card sx={{ p: 1 }}>

@@ -27,6 +27,7 @@ const initialState = {
   modalParams: '',
   isEdit: false,
   isAdmin: false,
+  decisor: false,
   isSaving: false,
   isLoading: false,
   isOpenView: false,
@@ -204,9 +205,10 @@ export function getFromParametrizacao(item, params) {
           '';
         if (item === 'meusacessos') dispatch(slice.actions.getMeusAcessosSuccess(response.data));
         else if (item === 'meusambientes') dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
-        else if (item === 'colaboradoresEstado')
+        else if (item === 'colaboradoresEstado') {
           dispatch(slice.actions.getSuccess({ item, dados: response?.data?.objeto?.perfis || [] }));
-        else
+          dispatch(slice.actions.getSuccess({ item: 'decisor', dados: !!response?.data?.objeto?.is_decisao }));
+        } else
           dispatch(
             slice.actions.getSuccess({
               item: params?.item || item,

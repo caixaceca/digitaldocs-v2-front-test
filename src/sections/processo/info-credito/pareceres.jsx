@@ -83,14 +83,14 @@ export default function PareceresCredito({ infoCredito }) {
       )}
 
       {infoCredito && historicoPareceres?.length > 0 && (
-        <Stack spacing={2}>
+        <Stack spacing={3}>
           <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
             Histórico
           </Typography>
-          <Divider sx={{ mt: '5px !important', mb: '-10px !important' }} />
+          <Divider sx={{ mt: '5px !important', mb: '-15px !important' }} />
           {agruparPorEstado(historicoPareceres)?.map((row) => (
             <Stack key={row?.estado_id}>
-              <Typography variant="subtitle2" sx={{ pb: 1 }}>
+              <Typography variant="subtitle1" sx={{ pb: 1 }}>
                 {row?.estado}
               </Typography>
               <Stack spacing={2}>
@@ -217,12 +217,18 @@ function Condicao({ label, value }) {
 
 function agruparPorEstado(pareceres) {
   const mapa = pareceres.reduce((acc, item) => {
-    if (!acc[item.estado_id]) {
-      acc[item.estado_id] = { estado_id: item.estado_id, estado: item.estado, pareceres: [] };
-    }
+    if (!acc[item.estado_id]) acc[item.estado_id] = { estado_id: item.estado_id, estado: item.estado, pareceres: [] };
     acc[item.estado_id].pareceres.push(item);
     return acc;
   }, {});
 
-  return Object.values(mapa);
+  const estados = Object.values(mapa).map((grupo) => ({
+    ...grupo,
+    pareceres: grupo.pareceres.sort((a, b) => b.id - a.id),
+  }));
+
+  estados.sort((a, b) => b.pareceres[0].id - a.pareceres[0].id);
+
+  console.log(estados);
+  return estados;
 }

@@ -289,7 +289,7 @@ export default function CartaPropostaWord({ dados = {} }) {
         styles: stylesWord,
         sections: [
           {
-            properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '25mm', left: '25mm' } } },
+            properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '24mm', left: '24mm' } } },
             headers: CabecalhoWord(true, logo, 'JRDC.FM.C.023.00'),
             footers: RodapeWord(true, iso27001, iso9001),
             children: [
