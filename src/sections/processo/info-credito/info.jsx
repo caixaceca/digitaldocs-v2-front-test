@@ -24,6 +24,8 @@ import MetadadosCredito from './metadados-credito';
 import EnviarContratacao from './enviar-contratacao';
 import { GarantiasSeguros } from './garantias-seguros';
 
+const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent' };
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function InfoCredito({ dados }) {
@@ -81,12 +83,12 @@ function DadosCredito({ dados }) {
         <TextItem title="Segmento:" text={dados?.segmento} />
         <TextItem title="Ent. patronal/Set. atividade:" text={dados?.setor_atividade} />
         {dados?.valor_divida && (
-          <Paper sx={{ p: 1, pb: 0.75, my: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
+          <Paper sx={{ p: 1, pb: 0.5, mt: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
             <Label color="info" startIcon={<InfoOutlinedIcon />}>
               Entidade com crédito em dívida
             </Label>
-            <TextItem title="Valor:" text={fCurrency(dados?.valor_divida)} />
-            {dados?.periodo && <TextItem title="Data:" text={ptDate(dados?.periodo)} />}
+            <TextItem title="Valor:" text={fCurrency(dados?.valor_divida)} sx={itemStyleAlt} />
+            <TextItem title="Data:" text={ptDate(dados?.periodo)} sx={itemStyleAlt} />
           </Paper>
         )}
       </List>

@@ -13,7 +13,7 @@ import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
 // sections
 import { DiscoFicheiros } from '../../sections/indicadores/disco-ficheiros';
-import EstatisticaCredito from '../../sections/indicadores/EstatisticaCredito';
+import EstatisticaCredito from '../../sections/indicadores/estatistica-credito';
 import { TotalProcessos, Duracao, SGQ } from '../../sections/indicadores/Indicadores';
 
 // ---------------------------------------------------------------------------------------------------------------------

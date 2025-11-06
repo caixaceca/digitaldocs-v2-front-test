@@ -13,6 +13,7 @@ const initialState = {
   totalP: null,
   posicaoAtual: null,
   indicadoresArquivo: null,
+  moeda: localStorage.getItem('moedaEst') || 'Conto',
   fileSystem: [],
   indicadores: [],
   estCredito: { entrada: [], aprovado: [], contratado: [], indeferido: [], desistido: [] },
@@ -30,6 +31,11 @@ const slice = createSlice({
 
     getSuccess(state, action) {
       actionGet(state, action.payload);
+    },
+
+    setMoeda(state, action) {
+      state.moeda = action.payload;
+      localStorage.setItem('moedaEst', action.payload);
     },
 
     getResumoSuccess(state, action) {
@@ -54,7 +60,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { getSuccess } = slice.actions;
+export const { getSuccess, setMoeda } = slice.actions;
 
 export function getIndicadores(item, params) {
   return async (dispatch, getState) => {
@@ -127,43 +133,46 @@ export function getEstatisticaCredito(item, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
+      const urlResumo = `${DDOCS_API_SERVER}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
 
       switch (item) {
         case 'estCreditoMensal': {
-          const basePath = `${DDOCS_API_SERVER}/v1/indicadores/estatistica/credito/${perfilId}`;
           const uoParam = `uoID=${params?.uoID}`;
           const dataString = `${params?.ano}&mes=${params?.mes}`;
-          const requests = [
-            axios.get(`${basePath}?${uoParam}&fase=entrada&ano=${dataString}`, options),
-            axios.get(`${basePath}?${uoParam}&fase=aprovado&ano=${dataString}`, options),
-            axios.get(`${basePath}?${uoParam}&fase=contratado&ano=${dataString}`, options),
-            axios.get(`${basePath}?${uoParam}&fase=indeferido&ano=${dataString}`, options),
-            axios.get(`${basePath}?${uoParam}&fase=desistido&ano=${dataString}`, options),
-            axios.get(
-              `${DDOCS_API_SERVER}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`,
-              options
-            ),
-          ];
-          const responses = await Promise.all(requests);
+          const basePath = `${DDOCS_API_SERVER}/v1/indicadores/estatistica/credito/${perfilId}`;
 
-          dispatch(
-            slice.actions.getSuccess({
-              item: 'estCredito',
-              dados: {
-                entrada: responses[0].data || [],
-                aprovado: responses[1].data || [],
-                contratado: responses[2].data || [],
-                indeferido: responses[3].data || [],
-                desistido: responses[4].data || [],
-              },
-            })
-          );
-          dispatch(slice.actions.getResumoSuccess({ dados: responses[5].data, uoId: params?.uoID }));
+          if (params?.uoID > 0) {
+            const requests = [
+              axios.get(`${basePath}?${uoParam}&fase=entrada&ano=${dataString}`, options),
+              axios.get(`${basePath}?${uoParam}&fase=aprovado&ano=${dataString}`, options),
+              axios.get(`${basePath}?${uoParam}&fase=contratado&ano=${dataString}`, options),
+              axios.get(`${basePath}?${uoParam}&fase=indeferido&ano=${dataString}`, options),
+              axios.get(`${basePath}?${uoParam}&fase=desistido&ano=${dataString}`, options),
+              axios.get(urlResumo, options),
+            ];
+            const responses = await Promise.all(requests);
+
+            dispatch(
+              slice.actions.getSuccess({
+                item: 'estCredito',
+                dados: {
+                  entrada: responses[0].data || [],
+                  aprovado: responses[1].data || [],
+                  contratado: responses[2].data || [],
+                  indeferido: responses[3].data || [],
+                  desistido: responses[4].data || [],
+                },
+              })
+            );
+            dispatch(slice.actions.getResumoSuccess({ dados: responses[5].data, uoId: params?.uoID }));
+          } else {
+            const response = await axios.get(urlResumo, options);
+            dispatch(slice.actions.getResumoSuccess({ dados: response.data, uoId: params?.uoID }));
+          }
           break;
         }
         case 'estCreditoIntervalo': {
-          const url = `${DDOCS_API_SERVER}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
-          const response = await axios.get(url, options);
+          const response = await axios.get(urlResumo, options);
           dispatch(slice.actions.getResumoSuccess({ dados: response.data, uoId: params?.uoID }));
           break;
         }

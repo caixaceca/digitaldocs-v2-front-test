@@ -22,6 +22,18 @@ export function fCurrency(value) {
   return numeral(number).format('0,0.00$');
 }
 
+export function fConto(value, sufixo) {
+  if (value === '' || value === null || value === undefined) return '';
+
+  const number = Number(value);
+  if (Number.isNaN(number)) return '';
+
+  const contos = number === 0 ? 0 : number / 1000;
+  const label = contos > 1 ? 'contos' : 'conto';
+
+  return `${fNumber(contos)}${sufixo ? ` ${label}` : ''}`;
+}
+
 export function fPercent(value) {
   if (value === '' || value === null || value === undefined) return '';
 

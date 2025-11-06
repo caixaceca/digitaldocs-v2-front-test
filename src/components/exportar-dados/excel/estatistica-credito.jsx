@@ -3,9 +3,8 @@ import { sumBy } from 'lodash';
 import { saveAs } from 'file-saver';
 // utils
 import { ptDate } from '../../../utils/formatTime';
-import { fCurrency, fPercent } from '../../../utils/formatNumber';
-// redux
 import { useSelector } from '../../../redux/store';
+import { fCurrency, fConto, fPercent } from '../../../utils/formatNumber';
 //
 import { ExportToExcell, fileInfo, sheetProperty, estiloCabecalho, ajustarLargura } from './formatacoes';
 
@@ -15,43 +14,52 @@ const borderCinza = { style: 'thin', color: { argb: 'AAAAAA' } };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
+export default function ExportarEstatisticaCredito({ uo, data, periodo }) {
   const { cc } = useSelector((state) => state.intranet);
-  const { resumoEstCredito, estCredito } = useSelector((state) => state.indicadores);
+  const { resumoEstCredito, estCredito, moeda } = useSelector((state) => state.indicadores);
 
   const rowsResumo = [
-    ['Empresa', 'Construção', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Construção'))],
-    [null, 'Tesouraria', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Tesouraria'))],
-    [null, 'Investimento', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Investimento'))],
-    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', ''))],
-    ['Particular', 'Habitação', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'Habitação'))],
-    [null, 'CrediCaixa', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'CrediCaixa'))],
-    [null, 'Outros', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'Outros'))],
-    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Particular', ''))],
+    ['Empresa', 'Construção', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Construção', moeda))],
+    [null, 'Tesouraria', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Tesouraria', moeda))],
+    [null, 'Investimento', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Investimento', moeda))],
+    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', '', moeda))],
+    ['Particular', 'Habitação', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'Habitação', moeda))],
+    [null, 'CrediCaixa', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'CrediCaixa', moeda))],
+    [null, 'Outros', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'Outros', moeda))],
+    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Particular', '', moeda))],
     [
       'Produtor Individual',
       'Tesouraria',
-      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Tesouraria')),
+      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Tesouraria', moeda)),
     ],
-    [null, 'Investimento', ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Investimento'))],
-    [null, 'Micro-Crédito', ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Micro-Crédito'))],
-    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', ''))],
-    ['Entidades Públicas', null, ...Object.values(dadosResumo(resumoEstCredito, 'Entidade Pública', ''))],
-    ['Garantias Bancárias', null, ...Object.values(dadosResumo(resumoEstCredito, '', 'Garantia Bancária'))],
-    ['TOTAL ACUMULADO', null, ...Object.values(dadosResumo(resumoEstCredito, '', ''))],
+    [
+      null,
+      'Investimento',
+      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Investimento', moeda)),
+    ],
+    [
+      null,
+      'Micro-Crédito',
+      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Micro-Crédito', moeda)),
+    ],
+    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', '', moeda))],
+    ['Entidades Públicas', null, ...Object.values(dadosResumo(resumoEstCredito, 'Entidade Pública', '', moeda))],
+    ['Garantias Bancárias', null, ...Object.values(dadosResumo(resumoEstCredito, '', 'Garantia Bancária', moeda))],
+    ['TOTAL ACUMULADO', null, ...Object.values(dadosResumo(resumoEstCredito, '', '', moeda))],
   ];
 
-  const dadosEntrada = dadosFase(estCredito?.entrada, 'Entrada', 'montantes', '', 6);
-  const dadosAprovado = dadosFase(estCredito?.aprovado, 'Aprovado', 'montante_aprovado', 'montantes', 4);
+  const dadosEntrada = dadosFase(estCredito?.entrada, 'Entrada', 'montantes', '', 6, moeda);
+  const dadosAprovado = dadosFase(estCredito?.aprovado, 'Aprovado', 'montante_aprovado', 'montantes', 4, moeda);
   const dadosContratado = dadosFase(
     estCredito?.contratado,
     'Contratado',
     'montante_contratado',
     'montante_aprovado',
-    9
+    9,
+    moeda
   );
-  const dadosIndeferido = dadosFase(estCredito?.indeferido, 'Indeferido', 'montantes', '', 5);
-  const dadosDesistido = dadosFase(estCredito?.desistido, 'Desistido', 'montantes', '', 5);
+  const dadosIndeferido = dadosFase(estCredito?.indeferido, 'Indeferido', 'montantes', '', 5, moeda);
+  const dadosDesistido = dadosFase(estCredito?.desistido, 'Desistido', 'montantes', '', 5, moeda);
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -143,7 +151,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
         { text: '\nUnidade orgânica: ', font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: uo, font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: '\nPeríodo: ', font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
-        { text: periodo, font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
+        { text: data, font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: '\nGerado por: ', font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: cc?.nome || '', font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 } },
         { text: ` (${ptDate(new Date())})`, font: { bold: false, color: { argb: 'FFFFFF' }, size: 12 } },
@@ -152,7 +160,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
     resumoSheet.getCell('A1').alignment = { wrapText: true, vertical: 'middle' };
     resumoSheet.getRow(1).height = 80;
 
-    if (vista === 'Mensal' && uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS') {
+    if (periodo === 'Mensal' && uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS') {
       // ENTRADAS
       const entradaSheet = workbook.addWorksheet('Entradas', sheetProperty('EEEEEE', 2, false));
       addCabecalho(entradaSheet, 'Entradas');
@@ -164,7 +172,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
       estiloCabecalho(entradaSheet, 2, 10);
       ajustarLargura(entradaSheet);
       mesclarSegmentoLinha(entradaSheet, 'A1:J1', 10, dadosEntrada.lengths);
-      addTotalGeral(entradaSheet, estCredito?.entrada, 'ENTRADOS', dadosEntrada.rows.length + 4);
+      addTotalGeral(entradaSheet, estCredito?.entrada, 'ENTRADOS', dadosEntrada.rows.length + 4, moeda);
 
       // SHEET APROVADAS
       const aprovadoSheet = workbook.addWorksheet('Aprovados', sheetProperty('EDFAE6', 2, false));
@@ -177,7 +185,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
       estiloCabecalho(aprovadoSheet, 2, 9);
       ajustarLargura(aprovadoSheet);
       mesclarSegmentoLinha(aprovadoSheet, 'A1:I1', 9, dadosAprovado.lengths);
-      addTotalGeral(aprovadoSheet, estCredito?.aprovado, 'APROVADOS', dadosAprovado.rows.length + 4);
+      addTotalGeral(aprovadoSheet, estCredito?.aprovado, 'APROVADOS', dadosAprovado.rows.length + 4, moeda);
 
       // SHEET CONTRATADAS
       const contratadoSheet = workbook.addWorksheet('Contratados', sheetProperty('C8FACD', 2, false));
@@ -190,7 +198,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
       estiloCabecalho(contratadoSheet, 2, 14);
       ajustarLargura(contratadoSheet);
       mesclarSegmentoLinha(contratadoSheet, 'A1:N1', 14, dadosContratado.lengths);
-      addTotalGeral(contratadoSheet, estCredito?.contratado, 'CONTRATADOS', dadosContratado.rows.length + 4);
+      addTotalGeral(contratadoSheet, estCredito?.contratado, 'CONTRATADOS', dadosContratado.rows.length + 4, moeda);
 
       // SHEET INDEFERIDOS
       const indeferidosSheet = workbook.addWorksheet('Indeferidos', sheetProperty('FFE7D9', 2, false));
@@ -203,7 +211,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
       estiloCabecalho(indeferidosSheet, 2, 9);
       ajustarLargura(indeferidosSheet);
       mesclarSegmentoLinha(indeferidosSheet, 'A1:I1', 9, dadosIndeferido.lengths);
-      addTotalGeral(indeferidosSheet, estCredito?.indeferido, 'INDEFERIDOS', dadosIndeferido.rows.length + 4);
+      addTotalGeral(indeferidosSheet, estCredito?.indeferido, 'INDEFERIDOS', dadosIndeferido.rows.length + 4, moeda);
 
       // SHEET DESISTIDOS
       const desistidosSheet = workbook.addWorksheet('Desistidos', sheetProperty('FFE7D9', 2, false));
@@ -216,13 +224,13 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
       estiloCabecalho(desistidosSheet, 2, 9);
       ajustarLargura(desistidosSheet);
       mesclarSegmentoLinha(desistidosSheet, 'A1:I1', 9, dadosDesistido.lengths);
-      addTotalGeral(desistidosSheet, estCredito?.desistido, 'DESISTIDOS', dadosDesistido.rows.length + 4);
+      addTotalGeral(desistidosSheet, estCredito?.desistido, 'DESISTIDOS', dadosDesistido.rows.length + 4, moeda);
     }
 
     // GERAR E BAIXAR O FICHEIRO
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
-    saveAs(blob, `Estatística de crédito ${uo} - ${periodo}.xlsx`);
+    saveAs(blob, `Estatística de crédito ${uo} - ${data}.xlsx`);
   };
 
   return <ExportToExcell handleExport={exportToExcel} />;
@@ -230,7 +238,7 @@ export default function ExportarEstatisticaCredito({ uo, periodo, vista }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function dadosResumo(dados, segmento, linha) {
+function dadosResumo(dados, segmento, linha, moeda) {
   const entradas = dadosPorItem(dados?.entrada, segmento, linha);
   const aprovados = dadosPorItem(dados?.aprovado, segmento, linha);
   const contratados = dadosPorItem(dados?.contratado, segmento, linha);
@@ -239,43 +247,43 @@ function dadosResumo(dados, segmento, linha) {
 
   return {
     qtdEnt: sumBy(entradas, 'total'),
-    valorEnt: sumBy(entradas, 'montantes'),
+    valorEnt: valorMoeda(sumBy(entradas, 'montantes'), moeda),
     qtdAp: sumBy(aprovados, 'total'),
-    valorAp: sumBy(aprovados, 'montante_aprovado'),
+    valorAp: valorMoeda(sumBy(aprovados, 'montante_aprovado'), moeda),
     qtdCont: sumBy(contratados, 'total'),
-    valorCont: sumBy(contratados, 'montante_contratado'),
+    valorCont: valorMoeda(sumBy(contratados, 'montante_contratado'), moeda),
     qtdId: sumBy(indeferidos, 'total') + sumBy(desistidos, 'total'),
-    valorId: sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'),
+    valorId: valorMoeda(sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'), moeda),
   };
 }
 
-function dadosFase(dados, fase, item1, item2, emptyRows) {
-  const empConst = dadosItem(dados, 'Empresa', 'Construção', fase, true);
-  const empTes = dadosItem(dados, 'Empresa', 'Tesouraria', fase, false);
-  const empInvest = dadosItem(dados, 'Empresa', 'Investimento', fase, false);
-  const partHab = dadosItem(dados, 'Particular', 'Habitação', fase, true);
-  const partCredi = dadosItem(dados, 'Particular', 'CrediCaixa', fase, false);
-  const partOut = dadosItem(dados, 'Particular', 'Outros', fase, false);
-  const piTes = dadosItem(dados, 'Produtor Individual', 'Tesouraria', fase, true);
-  const piInvest = dadosItem(dados, 'Produtor Individual', 'Investimento', fase, false);
-  const piMicro = dadosItem(dados, 'Produtor Individual', 'Micro-Crédito', fase, false);
-  const entPub = dadosItem(dados, 'Entidade Pública', '', fase, true);
-  const barantBanc = dadosItem(dados, '', 'Garantia Bancária', fase, true);
+function dadosFase(dados, fase, item1, item2, emptyRows, moeda) {
+  const empConst = dadosItem(dados, 'Empresa', 'Construção', fase, true, moeda);
+  const empTes = dadosItem(dados, 'Empresa', 'Tesouraria', fase, false, moeda);
+  const empInvest = dadosItem(dados, 'Empresa', 'Investimento', fase, false, moeda);
+  const partHab = dadosItem(dados, 'Particular', 'Habitação', fase, true, moeda);
+  const partCredi = dadosItem(dados, 'Particular', 'CrediCaixa', fase, false, moeda);
+  const partOut = dadosItem(dados, 'Particular', 'Outros', fase, false, moeda);
+  const piTes = dadosItem(dados, 'Produtor Individual', 'Tesouraria', fase, true, moeda);
+  const piInvest = dadosItem(dados, 'Produtor Individual', 'Investimento', fase, false, moeda);
+  const piMicro = dadosItem(dados, 'Produtor Individual', 'Micro-Crédito', fase, false, moeda);
+  const entPub = dadosItem(dados, 'Entidade Pública', '', fase, true, moeda);
+  const barantBanc = dadosItem(dados, '', 'Garantia Bancária', fase, true, moeda);
 
   return {
     rows: [
       ...empConst,
       ...empTes,
       ...empInvest,
-      totalSegmento(dados, 'Empresa', emptyRows, item1, item2),
+      totalSegmento(dados, 'Empresa', emptyRows, item1, item2, moeda),
       ...partHab,
       ...partCredi,
       ...partOut,
-      totalSegmento(dados, 'Particular', emptyRows, item1, item2),
+      totalSegmento(dados, 'Particular', emptyRows, item1, item2, moeda),
       ...piTes,
       ...piInvest,
       ...piMicro,
-      totalSegmento(dados, 'Produtor Individual', emptyRows, item1, item2),
+      totalSegmento(dados, 'Produtor Individual', emptyRows, item1, item2, moeda),
       ...entPub,
       ...barantBanc,
     ],
@@ -295,7 +303,7 @@ function dadosFase(dados, fase, item1, item2, emptyRows) {
   };
 }
 
-function dadosItem(dados, segmento, linha, tab, first) {
+function dadosItem(dados, segmento, linha, tab, first, moeda) {
   segmento = linha === 'Garantia Bancária' ? '' : segmento;
   linha = segmento === 'Entidade Pública' ? '' : linha;
   const dadosFilter = dadosPorItem(dados, segmento, linha);
@@ -316,13 +324,17 @@ function dadosItem(dados, segmento, linha, tab, first) {
       row?.finalidade || '',
       row?.situacao_final_mes || '',
       row?.nproposta || '',
-      row?.montantes || 0,
+      valorMoeda(row?.montantes || 0, moeda),
     ]);
     return [
       ...dadosList,
-      [...[...Array(9)].map(() => null), sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montantes')],
+      [
+        ...[...Array(9)].map(() => null),
+        valorMoeda(sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montantes'), moeda),
+      ],
     ];
   }
+
   if (tab === 'Aprovado' && dadosFilter?.length > 0) {
     const dadosList = dadosFilter?.map((row, index) => [
       first && index === 0 && segmentoLabel ? segmentoLabel : null,
@@ -332,15 +344,15 @@ function dadosItem(dados, segmento, linha, tab, first) {
       ptDate(row?.data_aprovacao),
       row?.setor_atividade || '',
       row?.situacao_final_mes || '',
-      row?.montantes || 0,
-      row?.montante_aprovado || 0,
+      valorMoeda(row?.montantes || 0, moeda),
+      valorMoeda(row?.montante_aprovado || 0, moeda),
     ]);
     return [
       ...dadosList,
       [
         ...[...Array(7)].map(() => null),
-        sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montantes'),
-        sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montante_aprovado'),
+        valorMoeda(sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montantes'), moeda),
+        valorMoeda(sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montante_aprovado'), moeda),
       ],
     ];
   }
@@ -358,15 +370,15 @@ function dadosItem(dados, segmento, linha, tab, first) {
       row?.garantia || '',
       row?.escalao_decisao || '',
       row?.cliente || '',
-      row?.montante_aprovado || 0,
-      row?.montante_contratado || 0,
+      valorMoeda(row?.montante_aprovado || 0, moeda),
+      valorMoeda(row?.montante_contratado || 0, moeda),
     ]);
     return [
       ...dadosList,
       [
         ...[...Array(12)].map(() => null),
-        sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montante_aprovado'),
-        sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montante_contratado'),
+        valorMoeda(sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montante_aprovado'), moeda),
+        valorMoeda(sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montante_contratado'), moeda),
       ],
     ];
   }
@@ -382,11 +394,14 @@ function dadosItem(dados, segmento, linha, tab, first) {
       (tab === 'Indeferido' && !!row?.data_indeferido && ptDate(row?.data_indeferido)) ||
         (tab === 'Desistido' && !!row?.data_desistido && ptDate(row?.data_desistido)) ||
         '',
-      row?.montantes || 0,
+      valorMoeda(row?.montantes || 0, moeda),
     ]);
     return [
       ...dadosList,
-      [...[...Array(8)].map(() => null), sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montantes')],
+      [
+        ...[...Array(8)].map(() => null),
+        valorMoeda(sumBy(dadosPorItem(dadosFilter, segmento, linha), 'montantes'), moeda),
+      ],
     ];
   }
   return [
@@ -402,22 +417,29 @@ function dadosItem(dados, segmento, linha, tab, first) {
   ];
 }
 
-function totalSegmento(dados, segmento, cellsEmpty, item1, item2) {
+function totalSegmento(dados, segmento, cellsEmpty, item1, item2, moeda) {
   return [
     null,
     null,
     dadosPorItem(dados, segmento, '')?.length,
     ...[...Array(cellsEmpty)].map(() => null),
     ...(item2
-      ? [sumBy(dadosPorItem(dados, segmento, ''), item2), sumBy(dadosPorItem(dados, segmento, ''), item1)]
-      : [sumBy(dadosPorItem(dados, segmento, ''), item1)]),
+      ? [
+          valorMoeda(sumBy(dadosPorItem(dados, segmento, ''), item2), moeda),
+          valorMoeda(sumBy(dadosPorItem(dados, segmento, ''), item1), moeda),
+        ]
+      : [valorMoeda(sumBy(dadosPorItem(dados, segmento, ''), item1), moeda)]),
   ];
 }
 
-function addTotalGeral(sheet, dados, fase, length) {
+function addTotalGeral(sheet, dados, fase, length, moeda) {
+  const total = sumBy(
+    dadosPorItem(dados, '', ''),
+    (fase === 'APROVADOS' && 'montante_aprovado') || (fase === 'CONTRATADOS' && 'montante_contratado') || 'montantes'
+  );
   sheet.addRow([...Array((fase === 'ENTRADOS' && 10) || (fase === 'CONTRATADOS' && 14) || 9)].map(() => null));
   sheet.addRow([
-    `TOTAL DE CRÉDITOS ${fase} (${dadosPorItem(dados, '', '')?.length}) - ${fCurrency(sumBy(dadosPorItem(dados, '', ''), (fase === 'APROVADOS' && 'montante_aprovado') || (fase === 'CONTRATADOS' && 'montante_contratado') || 'montantes'))}`,
+    `TOTAL DE CRÉDITOS ${fase} (${dadosPorItem(dados, '', '')?.length}) - ${moeda === 'Escudo' ? fCurrency(total) : fConto(total, true)}`,
   ]);
   sheet.getRow(length).height = 20;
   sheet.getCell(`A${length}`).font = { size: 12, bold: true };
@@ -583,3 +605,7 @@ function mesclarSegmentoLinha(sheet, cab, columns, lg) {
     }
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const valorMoeda = (value, moeda) => (moeda === 'Escudo' ? value : value / 1000);

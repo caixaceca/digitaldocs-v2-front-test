@@ -33,8 +33,6 @@ import { colorProcesso } from '../../tabela/table-processos';
 // _mock
 import { dis } from '../../../_mock';
 
-// ---------------------------------------------------------------------------------------------------------------------
-
 const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral', minHeight: 36 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -248,9 +246,9 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TextItem({ title = '', text = '', label = null, baralhar = false, situacao = null }) {
+export function TextItem({ title = '', text = '', label = null, baralhar = false, situacao = null, sx = null }) {
   return (title && text) || label ? (
-    <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle }}>
+    <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle, ...sx }}>
       {title && (
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           {title}
