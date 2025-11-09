@@ -42,22 +42,8 @@ export default function NaoClassificados({ naoClassificados, from, moeda }) {
                 <TableCell>{row?.segmento}</TableCell>
                 <TableCell>{row?.linha}</TableCell>
                 <TableCell>{row?.titular || row?.fase}</TableCell>
-                {from !== 'resumo' && (
-                  <TableCell align="center">
-                    {ptDate(
-                      (from === 'aprovado' && row?.data_aprovacao) ||
-                        (from === 'contratado' && row?.data_contratacao) ||
-                        row?.data_entrada
-                    )}
-                  </TableCell>
-                )}
-                <TableCell align="right">
-                  {(moeda === 'Escudo' ? fNumber : fConto)(
-                    ((from === 'contratado' || row?.fase === 'Contratado') && row?.montante_contratado) ||
-                      ((from === 'aprovado' || row?.fase === 'Aprovado') && row?.montante_aprovado) ||
-                      row?.montantes
-                  )}
-                </TableCell>
+                {from !== 'resumo' && <TableCell align="center">{ptDate(dataNC(from, row))}</TableCell>}
+                <TableCell align="right">{(moeda === 'Escudo' ? fNumber : fConto)(montateNC(from, row))}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -66,3 +52,18 @@ export default function NaoClassificados({ naoClassificados, from, moeda }) {
     </Stack>
   );
 }
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const montateNC = (from, row) =>
+  ((from === 'contratado' || row?.fase === 'Contratado') && row?.montante_contratado) ||
+  ((from === 'aprovado' || row?.fase === 'Aprovado') && row?.montante_aprovado) ||
+  row?.montantes ||
+  0;
+
+export const dataNC = (from, row) =>
+  (from === 'aprovado' && row?.data_aprovacao) ||
+  (from === 'desistido' && row?.data_desistido) ||
+  (from === 'indeferido' && row?.data_indeferido) ||
+  (from === 'contratado' && row?.data_contratacao) ||
+  row?.data_entrada ||
+  '';

@@ -151,6 +151,7 @@ export const getDepartTypeLabel = buildLabelGetter(departsTypeList);
 export const getCustomerTypeLabel = buildLabelGetter(customerTypeList);
 
 // ---------------------------------------------------------------------------------------------------------------------
+
 export const getColorRating = (rating) => {
   if (rating < 1.5) return 'error.main';
   if (rating >= 1.5 && rating <= 2.5) return 'warning.main';

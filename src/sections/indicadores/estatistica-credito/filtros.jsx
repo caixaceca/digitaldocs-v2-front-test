@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from '../../../redux/store';
 import { getEstatisticaCredito, setMoeda } from '../../../redux/slices/indicadores';
 // components
 import { RHFDateIF } from '../../../components/hook-form';
-import { ExportarEstatisticaCredito } from '../../../components/exportar-dados/excel';
+import ExportarEstatisticaCredito from '../../../components/exportar-dados/excel/estatistica-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
