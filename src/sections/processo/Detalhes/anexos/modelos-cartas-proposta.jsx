@@ -49,7 +49,6 @@ export default function CartaPropostaWord({ dados = {} }) {
     agencia: 'PLATEAU',
     prazo_entrega_contrato: 15,
     gerente_nome: 'Nome do Gerente',
-    referencia: '984635234',
     agencia_localizacao: 'Plateau',
     ...dados,
   };

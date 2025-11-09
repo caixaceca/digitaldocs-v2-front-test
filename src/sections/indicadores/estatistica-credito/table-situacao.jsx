@@ -4,17 +4,23 @@ import { useState, useMemo } from 'react';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
+import TextDecreaseIcon from '@mui/icons-material/TextDecrease';
+import TextIncreaseIcon from '@mui/icons-material/TextIncrease';
 // utils
 import { useSelector } from '../../../redux/store';
 import { normalizeText } from '../../../utils/formatText';
 import { fCurrency, fConto, fNumber } from '../../../utils/formatNumber';
 // components
 import { EmptyRow } from './resumo';
+import NaoClassificados from './nao-classificados';
 import { Segmento, SegmentoStd } from './table-content';
 import { SkeletonTable } from '../../../components/skeleton';
 import { SearchToolbarSimple } from '../../../components/SearchToolbar';
@@ -23,16 +29,10 @@ import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 
 export default function TableSituacaoCredito({ from }) {
   const [filter, setFilter] = useState('');
+  const [font, setFont] = useState('caption');
   const { isLoading, estCredito, moeda } = useSelector((state) => state.indicadores);
   const { entrada, aprovado, desistido, contratado, indeferido } = estCredito || {};
 
-  const total = useMemo(
-    () =>
-      ((from === 'entrada' || from === 'desistido' || from === 'indeferido') && 'montantes') ||
-      (from === 'aprovado' && 'montante_aprovado') ||
-      (from === 'contratado' && 'montante_contratado'),
-    [from]
-  );
   const dadosFrom = useMemo(
     () =>
       (from === 'entrada' && entrada) ||
@@ -43,6 +43,18 @@ export default function TableSituacaoCredito({ from }) {
       [],
     [aprovado, contratado, desistido, entrada, from, indeferido]
   );
+
+  const itemMontante =
+    (from === 'aprovado' && 'montante_aprovado') || (from === 'contratado' && 'montante_contratado') || 'montantes';
+  const total = useMemo(() => sumBy(dadosFrom, itemMontante), [dadosFrom, itemMontante]);
+  const totalPrev = useMemo(
+    () =>
+      (from === 'aprovado' && sumBy(dadosFrom, 'montantes')) ||
+      (from === 'contratado' && sumBy(dadosFrom, 'montante_aprovado')) ||
+      0,
+    [dadosFrom, from]
+  );
+
   const {
     piTesouraria,
     piInvestimento,
@@ -55,13 +67,29 @@ export default function TableSituacaoCredito({ from }) {
     empresaInvestimento,
     particularHabitacao,
     particularCrediCaixa,
-  } = filterDados(dadosFrom, filter);
+    naoClassificados,
+  } = filterDados(Array.isArray(dadosFrom) ? dadosFrom : [], filter);
 
   return (
     <Card sx={{ p: 1 }}>
-      <SearchToolbarSimple filter={filter} setFilter={setFilter} />
+      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+        <Stack sx={{ flexGrow: 1 }}>
+          <SearchToolbarSimple filter={filter} setFilter={setFilter} />
+        </Stack>
+        <Tooltip title={font === 'caption' ? 'Aumentar fonte' : 'Diminuir fonte'}>
+          <IconButton onClick={() => setFont(font === 'caption' ? 'body1' : 'caption')}>
+            {font === 'caption' ? <TextIncreaseIcon /> : <TextDecreaseIcon />}
+          </IconButton>
+        </Tooltip>
+      </Stack>
       <Stack
-        sx={{ p: 1.5, borderRadius: 1, textAlign: 'center', bgcolor: 'background.neutral', typography: 'subtitle1' }}
+        sx={{
+          p: 1.5,
+          borderRadius: 1,
+          textAlign: 'center',
+          bgcolor: 'background.neutral',
+          typography: font === 'caption' ? 'subtitle2' : 'subtitle1',
+        }}
       >
         TOTAL DE CRÉDITOS{' '}
         {(from === 'entrada' && 'ENTRADOS') ||
@@ -69,47 +97,53 @@ export default function TableSituacaoCredito({ from }) {
           (from === 'contratado' && 'CONTRATADOS') ||
           (from === 'indeferido' && 'INDEFERIDOS') ||
           (from === 'desistido' && 'DESISTIDOS')}{' '}
-        ({fNumber(dadosFrom.length)}) -{' '}
-        {moeda === 'Escudo' ? fCurrency(sumBy(dadosFrom, total)) : fConto(sumBy(dadosFrom, total), true)}
+        ({fNumber(dadosFrom.length)}) - {moeda === 'Escudo' ? fCurrency(total) : fConto(total, true)}
+        {(from === 'aprovado' || from === 'contratado') && totalPrev !== total && <CellMontante from={from} />}
       </Stack>
-      <TableContainer sx={{ mt: 1 }}>
+      <TableContainer
+        sx={{
+          mt: 1,
+          '& .MuiTableCell-root': { typography: font },
+          '& .MuiTableHead-root .MuiTableCell-root': { fontWeight: 'bold' },
+        }}
+      >
         <Table size="small" id="tabel-estatistica-credito">
           <TableHead>
             <TableRow>
               <TableCell>Segmento</TableCell>
-              <TableCell>Linha de crédito</TableCell>
+              <TableCell>Linha</TableCell>
               <TableCell align="right">Nº</TableCell>
               <TableCell>Proponente</TableCell>
-              <TableCell>
-                Data de{' '}
+              <TableCell align="center">
+                Data{' '}
                 {((from === 'entrada' || from === 'indeferido' || from === 'desistido') && 'entrada') ||
                   (from === 'aprovado' && 'aprovação') ||
                   (from === 'contratado' && 'contratação')}
               </TableCell>
-              <TableCell>Sector de atividade</TableCell>
+              <TableCell>Sector atividade</TableCell>
               {(from === 'entrada' || from === 'indeferido' || from === 'desistido') && (
                 <TableCell>Finalidade</TableCell>
               )}
               {(from === 'entrada' || from === 'aprovado') && <TableCell>Situação</TableCell>}
-              {from === 'entrada' && <TableCell>Nº proposta</TableCell>}
+              {from === 'entrada' && <TableCell align="right">Nº proposta</TableCell>}
               {from === 'contratado' && (
                 <>
                   <TableCell>Finalidade</TableCell>
-                  <TableCell>Prazo amortização</TableCell>
-                  <TableCell>Taxa juro</TableCell>
+                  <TableCell align="right">Prazo</TableCell>
+                  <TableCell align="right">Taxa</TableCell>
                   <TableCell>Garantia</TableCell>
-                  <TableCell>Escalão decisão</TableCell>
-                  <TableCell>Nº de cliente</TableCell>
+                  <TableCell align="center">Decisor</TableCell>
+                  <TableCell align="right">Nº cliente</TableCell>
                 </>
               )}
               {(from === 'indeferido' || from === 'desistido') && (
-                <TableCell>Data de {from === 'indeferido' ? 'indeferimento' : 'desistência'}</TableCell>
+                <TableCell align="center">Data {from === 'indeferido' ? 'indeferimento' : 'desistência'}</TableCell>
               )}
               {(from === 'entrada' || from === 'aprovado' || from === 'indeferido' || from === 'desistido') && (
-                <TableCell align="right">Montante solicitado</TableCell>
+                <TableCell align="right">Solicitado</TableCell>
               )}
-              {(from === 'aprovado' || from === 'contratado') && <TableCell align="right">Montante aprovado</TableCell>}
-              {from === 'contratado' && <TableCell align="right">Montante contratado</TableCell>}
+              {(from === 'aprovado' || from === 'contratado') && <TableCell align="right">Aprovado</TableCell>}
+              {from === 'contratado' && <TableCell align="right">Contratado</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -165,37 +199,73 @@ export default function TableSituacaoCredito({ from }) {
           </TableBody>
         </Table>
       </TableContainer>
+      {naoClassificados.length > 0 && (
+        <NaoClassificados naoClassificados={naoClassificados} from={from} moeda={moeda} />
+      )}
     </Card>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function filterDados(dados, filter) {
-  if (filter) {
-    const normalizedFilter = normalizeText(filter);
-    dados = dados.filter(
-      ({ titular, cliente }) =>
-        (titular && normalizeText(titular).indexOf(normalizedFilter) !== -1) ||
-        (cliente && normalizeText(cliente).indexOf(normalizedFilter) !== -1)
-    );
-  }
-
-  return {
-    empresaConstrucao: dados?.filter(({ segmento, linha }) => segmento === 'Empresa' && linha === 'Construção'),
-    empresaTesouraria: dados?.filter(({ segmento, linha }) => segmento === 'Empresa' && linha === 'Tesouraria'),
-    empresaInvestimento: dados?.filter(({ segmento, linha }) => segmento === 'Empresa' && linha === 'Investimento'),
-    particularHabitacao: dados?.filter(({ segmento, linha }) => segmento === 'Particular' && linha === 'Habitação'),
-    particularCrediCaixa: dados?.filter(({ segmento, linha }) => segmento === 'Particular' && linha === 'CrediCaixa'),
-    particularOutros: dados?.filter(({ segmento, linha }) => segmento === 'Particular' && linha === 'Outros'),
-    piTesouraria: dados?.filter(({ segmento, linha }) => segmento === 'Produtor Individual' && linha === 'Tesouraria'),
-    piInvestimento: dados?.filter(
-      ({ segmento, linha }) => segmento === 'Produtor Individual' && linha === 'Investimento'
-    ),
-    piMicrocredito: dados?.filter(
-      ({ segmento, linha }) => segmento === 'Produtor Individual' && linha === 'Micro-Crédito'
-    ),
-    entidadesPublicas: dados?.filter(({ segmento }) => segmento === 'Entidade Pública'),
-    garantiaBancaria: dados?.filter(({ linha }) => linha === 'Garantia Bancária'),
-  };
+function CellMontante({ from }) {
+  return (
+    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Typography variant="caption" component="span" sx={{ color: 'error.main' }}>
+        *
+      </Typography>{' '}
+      O montante <b>{from === 'aprovado' ? 'solicitado' : 'aprovado'}</b> difere do montante{' '}
+      <b>{from === 'aprovado' ? 'aprovado' : 'contratado'}</b>
+    </Typography>
+  );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function filterDados(dados, filter) {
+  const filtrados = filter
+    ? dados.filter(({ titular, cliente }) => {
+        const normalizedFilter = normalizeText(filter);
+        const t = titular ? normalizeText(titular) : '';
+        const c = cliente ? normalizeText(cliente) : '';
+        return t.includes(normalizedFilter) || c.includes(normalizedFilter);
+      })
+    : dados;
+
+  const resultado = Object.keys(categorias).reduce((acc, key) => {
+    acc[key] = [];
+    return acc;
+  }, {});
+
+  const { classificados, naoClassificados } = filtrados.reduce(
+    (acc, item) => {
+      const categoriaEncontrada = Object.entries(categorias).find(
+        ([, cond]) => (!cond.segmento || cond.segmento === item.segmento) && (!cond.linha || cond.linha === item.linha)
+      );
+
+      if (categoriaEncontrada) {
+        const [chave] = categoriaEncontrada;
+        acc.classificados[chave].push(item);
+      } else acc.naoClassificados.push(item);
+
+      return acc;
+    },
+    { classificados: { ...resultado }, naoClassificados: [] }
+  );
+
+  return { ...classificados, naoClassificados };
+}
+
+export const categorias = {
+  empresaConstrucao: { segmento: 'Empresa', linha: 'Construção' },
+  empresaTesouraria: { segmento: 'Empresa', linha: 'Tesouraria' },
+  empresaInvestimento: { segmento: 'Empresa', linha: 'Investimento' },
+  particularHabitacao: { segmento: 'Particular', linha: 'Habitação' },
+  particularCrediCaixa: { segmento: 'Particular', linha: 'CrediCaixa' },
+  particularOutros: { segmento: 'Particular', linha: 'Outros' },
+  piTesouraria: { segmento: 'Produtor Individual', linha: 'Tesouraria' },
+  piInvestimento: { segmento: 'Produtor Individual', linha: 'Investimento' },
+  piMicrocredito: { segmento: 'Produtor Individual', linha: 'Micro-Crédito' },
+  entidadesPublicas: { segmento: 'Entidade Pública' },
+  garantiaBancaria: { linha: 'Garantia Bancária' },
+};

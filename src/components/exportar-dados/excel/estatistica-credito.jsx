@@ -6,6 +6,11 @@ import { ptDate } from '../../../utils/formatTime';
 import { useSelector } from '../../../redux/store';
 import { fCurrency, fConto, fPercent } from '../../../utils/formatNumber';
 //
+import {
+  segmentos,
+  filtrarSegLinha,
+  dadosNaoClassificados,
+} from '../../../sections/indicadores/estatistica-credito/resumo';
 import { ExportToExcell, fileInfo, sheetProperty, estiloCabecalho, ajustarLargura } from './formatacoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -18,35 +23,13 @@ export default function ExportarEstatisticaCredito({ uo, data, periodo }) {
   const { cc } = useSelector((state) => state.intranet);
   const { resumoEstCredito, estCredito, moeda } = useSelector((state) => state.indicadores);
 
-  const rowsResumo = [
-    ['Empresa', 'Construção', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Construção', moeda))],
-    [null, 'Tesouraria', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Tesouraria', moeda))],
-    [null, 'Investimento', ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', 'Investimento', moeda))],
-    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Empresa', '', moeda))],
-    ['Particular', 'Habitação', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'Habitação', moeda))],
-    [null, 'CrediCaixa', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'CrediCaixa', moeda))],
-    [null, 'Outros', ...Object.values(dadosResumo(resumoEstCredito, 'Particular', 'Outros', moeda))],
-    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Particular', '', moeda))],
-    [
-      'Produtor Individual',
-      'Tesouraria',
-      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Tesouraria', moeda)),
-    ],
-    [
-      null,
-      'Investimento',
-      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Investimento', moeda)),
-    ],
-    [
-      null,
-      'Micro-Crédito',
-      ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', 'Micro-Crédito', moeda)),
-    ],
-    [null, null, ...Object.values(dadosResumo(resumoEstCredito, 'Produtor Individual', '', moeda))],
+  const naoClassificados = dadosNaoClassificados(resumoEstCredito);
+  const rowsResumo = segmentos.flatMap((seg) => gerarLinhasSegmento(seg.nome, seg.linhas, resumoEstCredito, moeda));
+  rowsResumo.push(
     ['Entidades Públicas', null, ...Object.values(dadosResumo(resumoEstCredito, 'Entidade Pública', '', moeda))],
     ['Garantias Bancárias', null, ...Object.values(dadosResumo(resumoEstCredito, '', 'Garantia Bancária', moeda))],
-    ['TOTAL ACUMULADO', null, ...Object.values(dadosResumo(resumoEstCredito, '', '', moeda))],
-  ];
+    ['TOTAL ACUMULADO', null, ...Object.values(dadosResumo(resumoEstCredito, '', '', moeda))]
+  );
 
   const dadosEntrada = dadosFase(estCredito?.entrada, 'Entrada', 'montantes', '', 6, moeda);
   const dadosAprovado = dadosFase(estCredito?.aprovado, 'Aprovado', 'montante_aprovado', 'montantes', 4, moeda);
@@ -160,6 +143,29 @@ export default function ExportarEstatisticaCredito({ uo, data, periodo }) {
     resumoSheet.getCell('A1').alignment = { wrapText: true, vertical: 'middle' };
     resumoSheet.getRow(1).height = 80;
 
+    if (naoClassificados?.length > 0) {
+      resumoSheet.addRow([null]);
+      resumoSheet.addRow([null]);
+
+      const avisoLinha = resumoSheet.addRow([
+        '*Não foi possíveil classificar alguns registos. Verifique os dados de segmento e linha',
+      ]);
+      resumoSheet.mergeCells(`A${avisoLinha.number}:D${avisoLinha.number}`);
+      avisoLinha.getCell(1).font = { color: { argb: 'FF9800' }, bold: true };
+
+      naoClassificados.forEach((row) => {
+        const valor = Number(
+          (row?.fase === 'Contratado' && row?.montante_contratado) ||
+            (row?.fase === 'Aprovado' && row?.montante_aprovado) ||
+            row?.montantes
+        );
+
+        const novaLinha = resumoSheet.addRow([row?.segmento, row?.linha, row?.fase, valor]);
+        const celulaMontante = novaLinha.getCell(4);
+        celulaMontante.numFmt = '#,##0';
+      });
+    }
+
     if (periodo === 'Mensal' && uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS') {
       // ENTRADAS
       const entradaSheet = workbook.addWorksheet('Entradas', sheetProperty('EEEEEE', 2, false));
@@ -256,6 +262,19 @@ function dadosResumo(dados, segmento, linha, moeda) {
     valorId: valorMoeda(sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'), moeda),
   };
 }
+
+function gerarLinhasSegmento(segmento, linhas, dados, moeda) {
+  const rows = linhas?.map((linha, idx) => [
+    idx === 0 ? segmento : null,
+    linha,
+    ...Object.values(dadosResumo(dados, segmento, linha, moeda)),
+  ]);
+
+  rows.push([null, null, ...Object.values(dadosResumo(filtrarSegLinha(dados, segmento, linhas), segmento, '', moeda))]);
+  return rows;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function dadosFase(dados, fase, item1, item2, emptyRows, moeda) {
   const empConst = dadosItem(dados, 'Empresa', 'Construção', fase, true, moeda);

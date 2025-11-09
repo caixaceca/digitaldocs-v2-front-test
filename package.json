@@ -23,7 +23,7 @@
     "@hookform/resolvers": "^5.1.1",
     "@iconify/react": "^6.0.0",
     "@mui/icons-material": "^7.1.2",
-    "@mui/lab": "^7.0.0-beta.14",
+    "@mui/lab": "^7.0.1-beta.19",
     "@mui/material": "^7.1.2",
     "@mui/x-date-pickers": "^8.6.0",
     "@react-pdf-viewer/core": "^3.12.0",
@@ -62,9 +62,10 @@
     "rehype-raw": "^7.0.0",
     "simplebar-react": "^3.2.6",
     "yet-another-react-lightbox": "^3.23.4",
-    "yup": "^1.6.0"
+    "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.52.5",
     "@vitejs/plugin-react": "^4.6.0",
     "eslint": "^8.53.0",
     "eslint-config-airbnb": "^19.0.4",

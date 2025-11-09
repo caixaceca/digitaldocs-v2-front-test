@@ -21,7 +21,7 @@ export function PorDepartamento({ dados }) {
   const total = dados?.map((i) => i.count).reduce((a, b) => a + b, 0);
 
   const chartOptions = useChart({
-    labels: dados.map((i) => i.department),
+    labels: dados.map((i) => i.department_name),
     stroke: { width: 1, color: 'transparent' },
     legend: { show: false },
     tooltip: {
@@ -49,11 +49,17 @@ export function PorDepartamento({ dados }) {
 
           <Stack spacing={1.2}>
             {dados.map((s, index) => (
-              <Stack key={s.department} direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+              <Stack
+                spacing={2}
+                direction="row"
+                alignItems="center"
+                key={s.department_name}
+                justifyContent="space-between"
+              >
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Box sx={{ width: 12, height: 12, backgroundColor: chartColors.main[index], borderRadius: 1 }} />
                   <Typography variant="body2">
-                    {s.department}{' '}
+                    {s.department_name}{' '}
                     <Typography component="span" sx={{ typography: 'caption', color: 'text.secondary' }}>
                       ({fPercent((s.count * 100) / total)})
                     </Typography>

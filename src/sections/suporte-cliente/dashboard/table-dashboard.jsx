@@ -10,6 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 // utils
 import { LabelStatus, getColorRating } from '../utils';
 import { ptDateTime, toHourLabel } from '../../../utils/formatTime';
@@ -125,14 +126,16 @@ function TableDashboard({ title, headLabel, body }) {
     <Card sx={{ height: 1 }}>
       <CardHeader title={title} />
       <Box sx={{ p: 1, mt: 1 }}>
-        <Table>
-          <TableHeadCustom headLabel={headLabel} />
-          {!body || body?.length === 0 ? (
-            <TableSearchNotFound height={99} message="Nenhum registro encontrado..." />
-          ) : (
-            <TableBody>{body}</TableBody>
-          )}
-        </Table>
+        <TableContainer>
+          <Table>
+            <TableHeadCustom headLabel={headLabel} />
+            {!body || body?.length === 0 ? (
+              <TableSearchNotFound height={99} message="Nenhum registro encontrado..." />
+            ) : (
+              <TableBody>{body}</TableBody>
+            )}
+          </Table>
+        </TableContainer>
       </Box>
     </Card>
   );

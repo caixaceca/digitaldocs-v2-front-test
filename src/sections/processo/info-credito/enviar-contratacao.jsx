@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -10,9 +10,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
 // utils
 import useToggle from '../../../hooks/useToggle';
-import { usePermissao } from '../../../hooks/useAcesso';
 // redux
-import { getFromGaji9 } from '../../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../../redux/store';
 import { getFromDigitalDocs } from '../../../redux/slices/digitaldocs';
 // components
@@ -21,27 +19,13 @@ import { DefaultAction } from '../../../components/Actions';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function EnviarContratacao({ dados }) {
-  const dispatch = useDispatch();
-  const { temPermissao } = usePermissao();
   const { toggle: open, onOpen, onClose } = useToggle();
-  const { cc } = useSelector((state) => state.intranet);
-  const { utilizador } = useSelector((state) => state.gaji9);
-
-  useEffect(() => {
-    if (!utilizador && cc?.ad_id) {
-      dispatch(getFromGaji9('utilizador', { id: cc?.ad_id }));
-    }
-  }, [dispatch, utilizador, cc?.ad_id]);
-
-  const podeEnviar = utilizador?._role === 'GERENTE' || temPermissao(['READ_CREDITO']);
 
   return (
     <>
-      {podeEnviar && (
-        <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
-          <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={onOpen} />
-        </Stack>
-      )}
+      <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
+        <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={onOpen} />
+      </Stack>
 
       {open && <DialogEnvioContratacao dados={dados} onClose={onClose} />}
     </>
@@ -58,7 +42,6 @@ function DialogEnvioContratacao({ dados, onClose }) {
     if (!dados) return ['Dados do processo não encontrados'];
 
     const falhas = [];
-
     const metadados = dados?.gaji9_metadados || {};
 
     const regras = [
@@ -105,7 +88,7 @@ function DialogEnvioContratacao({ dados, onClose }) {
 
   const onConfirmar = () => {
     if (temErros) return;
-    const params = { id: dados?.id, notRest: true, msg: 'Processo enviado' };
+    const params = { id: dados?.processoId, notRest: true, msg: 'Processo enviado' };
     dispatch(getFromDigitalDocs('contratacao-gaji9', { ...params, onClose }));
   };
 

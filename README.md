@@ -44,7 +44,7 @@ Projetado com **React** e **Vite**, o sistema é altamente escalável, com uma a
 
 ### Pré-requisitos
 
-- Node.js 18 ou superior
+- Node.js 20 ou superior
 - Yarn
 
 ### Passos
@@ -59,7 +59,7 @@ Projetado com **React** e **Vite**, o sistema é altamente escalável, com uma a
 2. Instale as dependências:
 
    ```bash
-   yarn install
+   yarn install --ignore-optional
    ```
 
 3. Execute o projeto em modo desenvolvimento:

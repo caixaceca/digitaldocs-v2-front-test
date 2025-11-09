@@ -229,6 +229,5 @@ function agruparPorEstado(pareceres) {
 
   estados.sort((a, b) => b.pareceres[0].id - a.pareceres[0].id);
 
-  console.log(estados);
   return estados;
 }

@@ -2,6 +2,7 @@ import sumBy from 'lodash/sumBy';
 // @mui
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 // utils
 import { useSelector } from '../../../redux/store';
 import { ptDate } from '../../../utils/formatTime';
@@ -201,7 +202,7 @@ function TableRowTotal({ total, total1 = 0, nivel, from, color = '', empty = fal
       {length > -1 ? (
         <>
           <TableCell>{}</TableCell>
-          <TableCell align="right" sx={{ typography: 'subtitle1' }}>
+          <TableCell align="right" sx={{ fontWeight: 'bold !important' }}>
             {length}
           </TableCell>
           <TableCell colSpan={cell - 1}>{}</TableCell>
@@ -209,11 +210,11 @@ function TableRowTotal({ total, total1 = 0, nivel, from, color = '', empty = fal
       ) : (
         <TableCell colSpan={nivel === 1 ? cell : cell + 1}>{}</TableCell>
       )}
-      <TableCell align="right" sx={{ typography: (nivel === 1 && 'subtitle2') || 'subtitle1', whiteSpace: 'nowrap' }}>
+      <TableCell align="right" sx={{ fontWeight: 'bold  !important', whiteSpace: 'nowrap' }}>
         {nivel === 1 ? labelValue(total, moeda) : <b>{labelValue(total, moeda)}</b>}
       </TableCell>
       {(from === 'aprovado' || from === 'contratado') && (
-        <TableCell align="right" sx={{ typography: (nivel === 1 && 'subtitle2') || 'subtitle1', whiteSpace: 'nowrap' }}>
+        <TableCell align="right" sx={{ fontWeight: 'bold  !important', whiteSpace: 'nowrap' }}>
           {nivel === 1 ? labelValue(total1, moeda) : <b>{labelValue(total1, moeda)}</b>}
         </TableCell>
       )}
@@ -238,51 +239,59 @@ function FirstRowLinha({ linha, dados, length, from }) {
 
 function DadosCell({ dados, from, index = 1, total }) {
   const { moeda } = useSelector((state) => state.indicadores);
+  const dif =
+    (from === 'aprovado' && dados?.montantes !== dados?.montante_aprovado) ||
+    (from === 'contratado' && dados?.montante_aprovado !== dados?.montante_contratado);
 
   return dados ? (
     <>
       <TableCell align="right" sx={{ pl: '12px !important' }}>
         {fNumber(index)}
       </TableCell>
-      <TableCell sx={{ minWidth: 200 }}>{dados?.titular}</TableCell>
+      <TableCell sx={{ minWidth: 170 }}>{dados?.titular}</TableCell>
       {(from === 'entrada' || from === 'desistido' || from === 'indeferido') && (
-        <TableCell>{ptDate(dados?.data_entrada)}</TableCell>
+        <TableCell align="center">{ptDate(dados?.data_entrada)}</TableCell>
       )}
-      {from === 'aprovado' && <TableCell>{ptDate(dados?.data_aprovacao)}</TableCell>}
-      {from === 'contratado' && <TableCell>{ptDate(dados?.data_contratacao)}</TableCell>}
+      {from === 'aprovado' && <TableCell align="center">{ptDate(dados?.data_aprovacao)}</TableCell>}
+      {from === 'contratado' && <TableCell align="center">{ptDate(dados?.data_contratacao)}</TableCell>}
       <TableCell>{dados?.setor_atividade}</TableCell>
       {from !== 'aprovado' && <TableCell>{dados?.finalidade}</TableCell>}
       {(from === 'entrada' || from === 'aprovado') && <TableCell>{dados?.situacao_final_mes}</TableCell>}
-      {from === 'entrada' && <TableCell>{dados?.nproposta}</TableCell>}
+      {from === 'entrada' && <TableCell align="right">{dados?.nproposta}</TableCell>}
       {from === 'contratado' && (
         <>
-          <TableCell>{`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}</TableCell>
-          <TableCell>{dados?.taxa_juro && fPercent(dados?.taxa_juro)}</TableCell>
+          <TableCell align="right">{`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}</TableCell>
+          <TableCell align="right">{dados?.taxa_juro && fPercent(dados?.taxa_juro)}</TableCell>
           <TableCell>{dados?.garantia}</TableCell>
-          <TableCell>{dados?.escalao_decisao}</TableCell>
-          <TableCell>{dados?.cliente}</TableCell>
+          <TableCell align="center">{dados?.escalao_decisao}</TableCell>
+          <TableCell align="right">{dados?.cliente}</TableCell>
         </>
       )}
-      {from === 'indeferido' && <TableCell>{ptDate(dados?.data_indeferido)}</TableCell>}
-      {from === 'desistido' && <TableCell>{ptDate(dados?.data_desistido)}</TableCell>}
-      {from !== 'contratado' && (
-        <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {labelValue(dados?.montantes, moeda)}
-        </TableCell>
-      )}
+      {from === 'indeferido' && <TableCell align="center">{ptDate(dados?.data_indeferido)}</TableCell>}
+      {from === 'desistido' && <TableCell align="center">{ptDate(dados?.data_desistido)}</TableCell>}
+      {from !== 'contratado' && <CellMontante valor={dados?.montantes} moeda={moeda} />}
       {(from === 'aprovado' || from === 'contratado') && (
-        <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {labelValue(dados?.montante_aprovado, moeda)}
-        </TableCell>
+        <CellMontante valor={dados?.montante_aprovado} moeda={moeda} dif={from === 'aprovado' && dif} />
       )}
-      {from === 'contratado' && (
-        <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {labelValue(dados?.montante_contratado, moeda)}
-        </TableCell>
-      )}
+      {from === 'contratado' && <CellMontante valor={dados?.montante_contratado} moeda={moeda} dif={dif} />}
     </>
   ) : (
     <TableRowTotal nivel={1} from={from} empty color={total ? 'background.neutral' : ''} />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function CellMontante({ valor, moeda, dif }) {
+  return (
+    <TableCell align="right" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      {dif && (
+        <Typography component="span" variant="subtitle2" sx={{ color: 'error.main' }}>
+          *&nbsp;
+        </Typography>
+      )}
+      {labelValue(valor, moeda)}
+    </TableCell>
   );
 }
 

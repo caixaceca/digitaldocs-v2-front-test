@@ -16,10 +16,12 @@ import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturnedOutlined';
 // utils
+import { categorias } from './table-situacao';
 import { useSelector } from '../../../redux/store';
 import { bgGradient } from '../../../utils/cssStyles';
 import { fCurrency, fConto, fNumber } from '../../../utils/formatNumber';
 // components
+import NaoClassificados from './nao-classificados';
 import { BoxMask } from '../../../components/Panel';
 import GridItem from '../../../components/GridItem';
 import { BarChart } from '../../../components/skeleton';
@@ -28,7 +30,9 @@ import { BarChart } from '../../../components/skeleton';
 
 export default function ResumoEstatisticaCredito() {
   const { isLoading, resumoEstCredito, moeda } = useSelector((state) => state.indicadores);
-  const { qtdEnt, qtdAp, qtdCont, qtdId, valEnt, valorAp, valCont, valId } = dadosResumo(resumoEstCredito, '', '');
+  const { qtdEnt, qtdAp, qtdCont, qtdId, valEnt, valorAp, valCont, valId } = dadosResumo(resumoEstCredito);
+
+  const naoClassificados = dadosNaoClassificados(resumoEstCredito);
 
   return (
     <Grid container spacing={3}>
@@ -61,7 +65,7 @@ export default function ResumoEstatisticaCredito() {
                       <TableCell colSpan={2} align="center">
                         Contratados
                       </TableCell>
-                      <TableCell colSpan={2} align="center" sx={{ borderBottomRightRadius: '0px !important' }}>
+                      <TableCell colSpan={2} align="center">
                         Indeferidos/Desistidos
                       </TableCell>
                     </TableRow>
@@ -80,29 +84,16 @@ export default function ResumoEstatisticaCredito() {
                       </TableCell>
                     </TableRow>
                   </TableHead>
+
                   <TableBody>
-                    <EmptyRow />
-                    <TotaisLinha first segmento="Empresa" linha="Construção" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Empresa" linha="Tesouraria" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Empresa" linha="Investimento" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Empresa" dados={resumoEstCredito} />
-                    <EmptyRow />
-                    <TotaisLinha first segmento="Particular" linha="Habitação" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Particular" linha="CrediCaixa" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Particular" linha="Outros" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Particular" dados={resumoEstCredito} />
-                    <EmptyRow />
-                    <TotaisLinha first segmento="Produtor Individual" linha="Tesouraria" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Produtor Individual" linha="Investimento" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Produtor Individual" linha="Micro-Crédito" dados={resumoEstCredito} />
-                    <TotaisLinha segmento="Produtor Individual" dados={resumoEstCredito} />
+                    {segmentos.map(({ nome, linhas }) => renderSegmento(nome, linhas, resumoEstCredito))}
+
                     <EmptyRow />
                     <TotaisLinha first segmento="Entidade Pública" dados={resumoEstCredito} />
+
                     <EmptyRow />
                     <TotaisLinha first linha="Garantia Bancária" dados={resumoEstCredito} />
-                    <EmptyRow />
-                  </TableBody>
-                  <TableBody>
+
                     <EmptyRow segmento />
                     <TotaisLinha linha="Tesouraria" dados={resumoEstCredito} />
                     <TotaisLinha linha="Investimento" dados={resumoEstCredito} />
@@ -110,11 +101,27 @@ export default function ResumoEstatisticaCredito() {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {naoClassificados.length > 0 && (
+                <NaoClassificados naoClassificados={naoClassificados} moeda={moeda} from="resumo" />
+              )}
             </Card>
           </GridItem>
         </>
       )}
     </Grid>
+  );
+}
+// ---------------------------------------------------------------------------------------------------------------------
+
+function renderSegmento(segmento, linhas, dados) {
+  return (
+    <>
+      <EmptyRow />
+      {linhas.map((linha, idx) => (
+        <TotaisLinha key={`${segmento}-${linha}`} first={idx === 0} segmento={segmento} linha={linha} dados={dados} />
+      ))}
+      <TotaisLinha total segmento={segmento} dados={filtrarSegLinha(dados, segmento, linhas)} />
+    </>
   );
 }
 
@@ -188,6 +195,7 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
     'grey.500_48';
   const subTotal =
     !linha && (segmento === 'Empresa' || segmento === 'Particular' || segmento === 'Produtor Individual');
+
   return (
     <TableRow hover sx={{ bgcolor: subTotal && color, '& .MuiTableCell-root': { fontWeight: subTotal && 900 } }}>
       {first && (
@@ -212,6 +220,7 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
 
 function TableRowTotais({ dados }) {
   const { moeda } = useSelector((state) => state.indicadores);
+
   return ['qtdEnt', 'valEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valCont', 'qtdId', 'valId']?.map((row) => (
     <TableCell key={row} align="right">
       {moeda === 'Escudo' ? fNumber(dados[row]) : fConto(dados[row])}
@@ -224,8 +233,8 @@ function TableRowTotais({ dados }) {
 export function EmptyRow({ segmento }) {
   return (
     <TableRow>
-      <TableCell sx={{ p: segmento ? 3 : 0.25, border: segmento && 'none' }}> </TableCell>
-      <TableCell colSpan={20} sx={{ p: segmento ? 3 : 0.25 }}>
+      <TableCell sx={{ p: segmento ? 1.5 : 0.25, border: segmento && 'none' }}> </TableCell>
+      <TableCell colSpan={20} sx={{ p: segmento ? 1.5 : 0.25 }}>
         {' '}
       </TableCell>
     </TableRow>
@@ -234,30 +243,72 @@ export function EmptyRow({ segmento }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function dadosResumo(dados, segmento, linha) {
+function dadosResumo(dados, segmento = '', linha = '') {
   const entradas = dadosPorItem(dados?.entrada, segmento, linha);
   const aprovados = dadosPorItem(dados?.aprovado, segmento, linha);
   const contratados = dadosPorItem(dados?.contratado, segmento, linha);
   const indeferidos = dadosPorItem(dados?.indeferido, segmento, linha);
   const desistidos = dadosPorItem(dados?.desistido, segmento, linha);
 
+  const safeSum = (arr, key) => (Array.isArray(arr) ? sumBy(arr, key) || 0 : 0);
+
   return {
-    qtdEnt: sumBy(entradas, 'total'),
-    valEnt: sumBy(entradas, 'montantes'),
-    qtdAp: sumBy(aprovados, 'total'),
-    valorAp: sumBy(aprovados, 'montante_aprovado'),
-    qtdCont: sumBy(contratados, 'total'),
-    valCont: sumBy(contratados, 'montante_contratado'),
-    qtdId: sumBy(indeferidos, 'total') + sumBy(desistidos, 'total'),
-    valId: sumBy(indeferidos, 'montantes') + sumBy(desistidos, 'montantes'),
+    qtdEnt: safeSum(entradas, 'total'),
+    valEnt: safeSum(entradas, 'montantes'),
+    qtdAp: safeSum(aprovados, 'total'),
+    valorAp: safeSum(aprovados, 'montante_aprovado'),
+    qtdCont: safeSum(contratados, 'total'),
+    valCont: safeSum(contratados, 'montante_contratado'),
+    qtdId: safeSum(indeferidos, 'total') + safeSum(desistidos, 'total'),
+    valId: safeSum(indeferidos, 'montantes') + safeSum(desistidos, 'montantes'),
   };
 }
 
 function dadosPorItem(dados, segmento, linha) {
-  return (
-    (segmento && linha && dados?.filter(({ segmento: seg, linha: lin }) => seg === segmento && lin === linha)) ||
-    (segmento && dados?.filter(({ segmento: seg, linha: lin }) => seg === segmento && lin !== 'Garantia Bancária')) ||
-    (linha && dados?.filter(({ segmento: seg, linha: lin }) => linha === lin && seg !== 'Entidade Pública')) ||
-    dados
-  );
+  if (!Array.isArray(dados)) return [];
+
+  return dados.filter(({ segmento: seg, linha: lin }) => {
+    const matchSegmento = !segmento || seg === segmento;
+    const matchLinha = !linha || lin === linha;
+
+    const isGarantia = lin === 'Garantia Bancária';
+    const isEntidadePublica = seg === 'Entidade Pública';
+
+    if (segmento && !linha && isGarantia) return false;
+    if (linha && !segmento && isEntidadePublica) return false;
+
+    return matchSegmento && matchLinha;
+  });
+}
+
+export const segmentos = [
+  { nome: 'Empresa', linhas: ['Construção', 'Tesouraria', 'Investimento'] },
+  { nome: 'Particular', linhas: ['Habitação', 'CrediCaixa', 'Outros'] },
+  { nome: 'Produtor Individual', linhas: ['Tesouraria', 'Investimento', 'Micro-Crédito'] },
+];
+
+export function filtrarSegLinha(dados, segmento, linhas) {
+  const resultado = {};
+
+  Object.keys(dados)?.forEach((fase) => {
+    resultado[fase] = dados[fase].filter(({ segmento: seg, linha }) => seg === segmento && linhas.includes(linha));
+  });
+
+  return resultado;
+}
+
+export function dadosNaoClassificados(dados) {
+  const naoClassificados = [];
+
+  const todosDados = Object.keys(dados)?.flatMap((fase) => dados[fase] || []);
+  todosDados.forEach((item) => {
+    const categoria = Object.entries(categorias).find(
+      ([, cond]) => (!cond.segmento || cond.segmento === item.segmento) && (!cond.linha || cond.linha === item.linha)
+    );
+
+    const chave = categoria ? categoria[0] : null;
+    if (!chave) naoClassificados.push(item);
+  });
+
+  return naoClassificados;
 }
