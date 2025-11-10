@@ -136,60 +136,62 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
   useEffect(() => {
     dispatch(getSuccess({ item: 'indicadores', dados: [] }));
 
-    const uoId = uo?.id || '';
-    const fluxoId = fluxo?.id || '';
-    const estadoId = estado?.id || '';
-    const perfilId = colaborador?.id || '';
-    const porEstado = agrEntradas === 'Estado';
-    const validarDistinto = tab === 'entradaTrabalhado';
-    const destinoId = porEstado ? estado?.id : balcao?.id;
-    const destino = porEstado ? 'num_estado' : 'num_balcao';
-    const de = momento === 'Criação no sistema' ? 'c' : 'e';
-    const validarEntrada = tab === 'totalTrabalhados' || tab === 'acao';
+    if (perfilId) {
+      const uoId = uo?.id || '';
+      const fluxoId = fluxo?.id || '';
+      const estadoId = estado?.id || '';
+      const perfilId = colaborador?.id || '';
+      const porEstado = agrEntradas === 'Estado';
+      const validarDistinto = tab === 'entradaTrabalhado';
+      const destinoId = porEstado ? estado?.id : balcao?.id;
+      const destino = porEstado ? 'num_estado' : 'num_balcao';
+      const de = momento === 'Criação no sistema' ? 'c' : 'e';
+      const validarEntrada = tab === 'totalTrabalhados' || tab === 'acao';
 
-    const fluxoKey = (tab === 'execucao' && 'fluxoIDFilter') || 'fluxoID';
-    const uoKey = ((tab === 'data' || tab === 'tipos') && 'uoID') || 'uo_id';
-    const estadoKey = (tab === 'execucao' && 'estadoIDFilter') || 'estado_id';
-    const perfilKey = (tab === 'execucao' && 'perfilIDFilter') || (tab === 'data' && 'perfilID1') || 'perfilPID';
+      const fluxoKey = (tab === 'execucao' && 'fluxoIDFilter') || 'fluxoID';
+      const uoKey = ((tab === 'data' || tab === 'tipos') && 'uoID') || 'uo_id';
+      const estadoKey = (tab === 'execucao' && 'estadoIDFilter') || 'estado_id';
+      const perfilKey = (tab === 'execucao' && 'perfilIDFilter') || (tab === 'data' && 'perfilID1') || 'perfilPID';
 
-    const datas = {
-      dataFinal: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
-      dataInicial: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
-    };
+      const datas = {
+        dataFinal: dataValido(dataf) ? format(dataf, 'yyyy-MM-dd') : '',
+        dataInicial: dataValido(datai) ? format(datai, 'yyyy-MM-dd') : '',
+      };
 
-    if (tab === 'data') dispatch(getIndicadores(tab, { vista, uoId, uoKey, perfilId, perfilKey }));
-    if (tab === 'criacao' && uo?.id) dispatch(getIndicadores(tab, { uoId, ...datas }));
-    if (tab === 'trabalhados' && estadoId) dispatch(getIndicadores(tab, { estadoId, ...datas }));
-    if (tab === 'devolucoes' && estadoId) dispatch(getIndicadores(tab, { estadoId, origem, ...datas }));
-    if (tab === 'origem') dispatch(getIndicadores(tab, { escopo: agrupamento === 'Colaborador' ? 'perfil' : 'uo' }));
-    if (tab === 'tipos') dispatch(getIndicadores(tab, { uoId, uoKey, perfilId, perfilKey, ...datas }));
-    if (tab === 'conclusao') dispatch(getIndicadores(tab, { de, perfilId, perfilKey, fluxoId, fluxoKey, ...datas }));
-    if (tab === 'entradas' && ((porEstado && estadoId) || (!porEstado && balcao?.id)))
-      dispatch(getIndicadores(tab, { destino, destinoId, ...datas }));
-    if (tab === 'execucao' && (perfilId || fluxoId || estadoId))
-      dispatch(getIndicadores(tab, { perfilId, perfilKey, fluxoId, fluxoKey, estadoId, estadoKey }));
-    if (
-      (tab === 'acao' ||
-        tab === 'equipa' ||
-        tab === 'colaboradores' ||
-        tab === 'totalTrabalhados' ||
-        tab === 'entradaTrabalhado') &&
-      ((porEstado && estadoId) || (!porEstado && uoId)) &&
-      dataValido(ano)
-    )
-      dispatch(
-        getIndicadores(tab, {
-          uoKey,
-          perfilKey,
-          estadoKey,
-          ano: format(ano, 'yyyy'),
-          uoId: !porEstado && uoId ? uoId : '',
-          estadoId: porEstado && estadoId ? estadoId : '',
-          perfilId: validarEntrada && perfilId ? perfilId : '',
-          entrada: (validarEntrada && entrada && 'true') || (validarEntrada && !entrada && 'false') || '',
-          distinto: (validarDistinto && entrada && 'true') || (validarDistinto && !entrada && 'false') || '',
-        })
-      );
+      if (tab === 'data') dispatch(getIndicadores(tab, { vista, uoId, uoKey, perfilId, perfilKey }));
+      if (tab === 'criacao' && uo?.id) dispatch(getIndicadores(tab, { uoId, ...datas }));
+      if (tab === 'trabalhados' && estadoId) dispatch(getIndicadores(tab, { estadoId, ...datas }));
+      if (tab === 'devolucoes' && estadoId) dispatch(getIndicadores(tab, { estadoId, origem, ...datas }));
+      if (tab === 'origem') dispatch(getIndicadores(tab, { escopo: agrupamento === 'Colaborador' ? 'perfil' : 'uo' }));
+      if (tab === 'tipos') dispatch(getIndicadores(tab, { uoId, uoKey, perfilId, perfilKey, ...datas }));
+      if (tab === 'conclusao') dispatch(getIndicadores(tab, { de, perfilId, perfilKey, fluxoId, fluxoKey, ...datas }));
+      if (tab === 'entradas' && ((porEstado && estadoId) || (!porEstado && balcao?.id)))
+        dispatch(getIndicadores(tab, { destino, destinoId, ...datas }));
+      if (tab === 'execucao' && (perfilId || fluxoId || estadoId))
+        dispatch(getIndicadores(tab, { perfilId, perfilKey, fluxoId, fluxoKey, estadoId, estadoKey }));
+      if (
+        (tab === 'acao' ||
+          tab === 'equipa' ||
+          tab === 'colaboradores' ||
+          tab === 'totalTrabalhados' ||
+          tab === 'entradaTrabalhado') &&
+        ((porEstado && estadoId) || (!porEstado && uoId)) &&
+        dataValido(ano)
+      )
+        dispatch(
+          getIndicadores(tab, {
+            uoKey,
+            perfilKey,
+            estadoKey,
+            ano: format(ano, 'yyyy'),
+            uoId: !porEstado && uoId ? uoId : '',
+            estadoId: porEstado && estadoId ? estadoId : '',
+            perfilId: validarEntrada && perfilId ? perfilId : '',
+            entrada: (validarEntrada && entrada && 'true') || (validarEntrada && !entrada && 'false') || '',
+            distinto: (validarDistinto && entrada && 'true') || (validarDistinto && !entrada && 'false') || '',
+          })
+        );
+    }
   }, [
     tab,
     ano,
