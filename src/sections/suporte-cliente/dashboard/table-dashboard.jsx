@@ -12,6 +12,7 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
+import { noDados } from '../../../components/Panel';
 import { LabelStatus, getColorRating } from '../utils';
 import { ptDateTime, toHourLabel } from '../../../utils/formatTime';
 //
@@ -158,12 +159,16 @@ export function TableHeadCustom({ headLabel }) {
 export function Avaliacao({ rating }) {
   return (
     <TableCell align="center">
-      <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
-        <Rating readOnly size="small" precision={0.1} value={rating} sx={{ color: 'success.main' }} />
-        <Typography variant="caption" sx={{ fontWeight: 'bold', color: getColorRating(rating) }}>
-          {rating}
-        </Typography>
-      </Stack>
+      {rating ? (
+        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+          <Rating readOnly size="small" precision={0.1} value={rating} sx={{ color: 'success.main' }} />
+          <Typography variant="caption" sx={{ fontWeight: 'bold', color: getColorRating(rating) }}>
+            {rating}
+          </Typography>
+        </Stack>
+      ) : (
+        noDados('(Sem avaliação)')
+      )}
     </TableCell>
   );
 }

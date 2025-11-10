@@ -24,41 +24,56 @@ export function useColaborador({ userId, nome }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SearchToolbar({ dados, subjectsList = [], departmentsList = [] }) {
+export function SearchToolbar({ dados, lists, extra }) {
+  const { admin, colaborador, setColaborador } = extra;
+  const { usersList = [], subjectsList = [], departamentos = [] } = lists;
   const { filter, status, subject, department, setStatus, setFilter, setSubject, setDepartment } = dados;
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-        <Autocomplete
-          fullWidth
-          disableClearable
-          options={departmentsList}
-          value={department || null}
-          sx={{ minWidth: { xl: 200, md: 150 } }}
-          getOptionLabel={(option) => option?.abreviation || option?.name}
-          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          renderInput={(params) => <TextField {...params} label="Departamento" />}
-          onChange={(event, newValue) => setItemValue(newValue, setDepartment, 'departmentTicket', true)}
-        />
-        <Autocomplete
-          fullWidth
-          options={statusList}
-          value={status || null}
-          sx={{ minWidth: { sm: 160 } }}
-          getOptionLabel={(option) => option?.label}
-          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          renderInput={(params) => <TextField {...params} label="Estado" />}
-          onChange={(event, newValue) => setItemValue(newValue, setStatus, 'statusTicket', true)}
-        />
-        <Autocomplete
-          fullWidth
-          value={subject || null}
-          options={subjectsList?.sort()}
-          sx={{ minWidth: { xl: 300, md: 250 } }}
-          renderInput={(params) => <TextField {...params} label="Assunto" />}
-          onChange={(event, newValue) => setItemValue(newValue, setSubject, 'subjectTicket')}
-        />
+    <Stack direction={{ xs: 'column', lg: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          {admin && (
+            <Autocomplete
+              fullWidth
+              options={departamentos}
+              value={department || null}
+              sx={{ minWidth: { md: 150 } }}
+              getOptionLabel={(option) => option?.abreviation || option?.name}
+              isOptionEqualToValue={(option, value) => option?.id === value?.id}
+              renderInput={(params) => <TextField {...params} label="Departamento" />}
+              onChange={(event, newValue) => setItemValue(newValue, setDepartment, 'departmentTicket', true)}
+            />
+          )}
+          <Autocomplete
+            fullWidth
+            value={subject || null}
+            options={subjectsList?.sort()}
+            sx={{ minWidth: { xl: 250, md: 200 } }}
+            renderInput={(params) => <TextField {...params} label="Assunto" />}
+            onChange={(event, newValue) => setItemValue(newValue, setSubject, 'subjectTicket')}
+          />
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          <Autocomplete
+            fullWidth
+            options={statusList}
+            value={status || null}
+            sx={{ minWidth: { sm: 160 } }}
+            getOptionLabel={(option) => option?.label}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => <TextField {...params} label="Estado" />}
+            onChange={(event, newValue) => setItemValue(newValue, setStatus, 'statusTicket', true)}
+          />
+          <Autocomplete
+            fullWidth
+            value={colaborador || null}
+            options={usersList?.sort()}
+            sx={{ minWidth: { xl: 250, md: 200 } }}
+            renderInput={(params) => <TextField {...params} label="Atribuído a" />}
+            onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorTickets')}
+          />
+        </Stack>
       </Stack>
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
         <SearchField item="filterC" filter={filter} setFilter={setFilter} />

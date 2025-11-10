@@ -76,6 +76,7 @@ export function authenticateColaborador() {
         headers: { Authorization: `Bearer ${accessToken}` },
         withCredentials: true,
       });
+      localStorage.setItem('accessToken', accessToken);
       dispatch(slice.actions.getSuccess({ item: 'perfil', dados: perfil?.data?.objeto }));
       perfil?.data?.objeto?.grupos?.forEach(({ grupo }) => dispatch(addRole(grupo)));
     } catch (error) {

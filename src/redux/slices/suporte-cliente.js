@@ -101,9 +101,9 @@ export function getInSuporte(item, params) {
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
         (item === 'indicadores' &&
-          `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}`) ||
+          `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}${params?.department ? `&department=${params?.department}` : ''}`) ||
         (item === 'tickets' &&
-          `/api/v1/tickets/all?departmentId=${params?.department}${params?.status ? `&status=${params?.status}` : ''}`) ||
+          `/api/v1/tickets/all${params?.department ? `?departmentId=${params?.department}` : ''}${params?.status ? `${params?.department ? '&' : '?'}status=${params?.status}` : ''}`) ||
         '';
       if (apiUrl) {
         const headers = headerOptions({ accessToken: idColaborador, mail: '', cc: true, ct: false, mfd: false });

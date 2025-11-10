@@ -27,7 +27,7 @@ import DetalhesTicket from './detalhes-ticket';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Tickets() {
+export default function Tickets({ admin, department, setDepartment }) {
   const dispatch = useDispatch();
 
   const {
@@ -44,36 +44,30 @@ export default function Tickets() {
     onChangeRowsPerPage,
   } = useTable();
 
-  const { isLoading, tickets, departamentos, modalSuporte, utilizador } = useSelector((state) => state.suporte);
+  const { isLoading, tickets, departamentos, modalSuporte } = useSelector((state) => state.suporte);
 
-  const [department, setDepartment] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem('filterTickets') || '');
   const [subject, setSubject] = useState(localStorage.getItem('subjectTickets') || '');
+  const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorTickets') || '');
   const [status, setStatus] = useState(
     statusList?.find(({ id }) => id === localStorage.getItem('statusTicket')) || { id: 'OPEN', label: 'Pendente' }
   );
 
   useEffect(() => {
-    if (!department?.id && departamentos?.length > 0) {
-      const idSel = localStorage.getItem('departmentTicket') || utilizador?.department_id;
-      const dep = departamentos.find(({ id }) => Number(id) === Number(idSel));
-      if (dep) setDepartment({ id: dep.id, abreviation: dep.abreviation });
-    }
-  }, [departamentos, department?.id, utilizador?.department_id]);
-
-  useEffect(() => {
-    if (department?.id) dispatch(getInSuporte('tickets', { department: department?.id, status: status?.id }));
-  }, [dispatch, department?.id, status?.id]);
+    if (department?.id || admin) dispatch(getInSuporte('tickets', { department: department?.id, status: status?.id }));
+  }, [dispatch, department?.id, status?.id, admin]);
 
   useEffect(() => {
     setPage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const subjectList = useMemo(() => [...new Set(tickets?.map((t) => t.subject_name))], [tickets]);
+  const subjectsList = useMemo(() => [...new Set(tickets?.map((t) => t.subject_name).filter(Boolean))], [tickets]);
+  const usersList = useMemo(() => [...new Set(tickets?.map((t) => t.current_user_name).filter(Boolean))], [tickets]);
+
   const dataFiltered = useMemo(
-    () => applySortFilter({ dados: tickets, filter, subject, comparator: getComparator(order, orderBy) }),
-    [tickets, filter, subject, order, orderBy]
+    () => applySortFilter({ dados: tickets, filter, subject, colaborador, comparator: getComparator(order, orderBy) }),
+    [tickets, filter, subject, order, colaborador, orderBy]
   );
   const isNotFound = !dataFiltered.length;
 
@@ -89,8 +83,8 @@ export default function Tickets() {
       <HeaderBreadcrumbs sx={{ px: 1 }} heading="Tickets" />
       <Card sx={{ p: 1 }}>
         <SearchToolbar
-          subjectsList={subjectList}
-          departmentsList={departamentos}
+          extra={{ colaborador, setColaborador, admin }}
+          lists={{ usersList, subjectsList, departamentos }}
           dados={{ filter, status, subject, department, setStatus, setFilter, setSubject, setDepartment }}
         />
         <Scrollbar>
@@ -105,7 +99,7 @@ export default function Tickets() {
                   { id: 'subject_name', label: 'Assunto' },
                   { id: 'customer_name', label: 'Requerente' },
                   { id: 'created_at', label: 'Data', align: 'center' },
-                  { id: 'current_user_name', label: 'Colaborador' },
+                  { id: 'current_user_name', label: 'Atribuído a' },
                   { id: 'status', label: 'Estado', align: 'center' },
                   { id: '', width: 10 },
                 ]}
@@ -161,10 +155,11 @@ export default function Tickets() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function applySortFilter({ dados, filter, subject, comparator }) {
+export function applySortFilter({ dados, filter, subject, colaborador, comparator }) {
   dados = applySort(dados, comparator);
 
   if (subject) dados = dados.filter(({ subject_name: subjectRow }) => subjectRow === subject);
+  if (colaborador) dados = dados.filter(({ current_user_name: colaboradorRow }) => colaboradorRow === colaborador);
 
   if (filter) {
     const normalizedFilter = normalizeText(filter);

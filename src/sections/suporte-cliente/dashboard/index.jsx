@@ -5,7 +5,8 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material//Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-// redux
+// utils
+import { setItemValue } from '../../../utils/formatObject';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getInSuporte } from '../../../redux/slices/suporte-cliente';
 // components
@@ -19,7 +20,7 @@ import { Asuntos, Recentes, Avaliacoes, Desempenho } from './table-dashboard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function AdminDashboardMetrics() {
+export default function AdminDashboardMetrics({ departamentos = [], department, setDepartment }) {
   const dispatch = useDispatch();
   const [data, setData] = useState(new Date());
   const [periodo, setPeriodo] = useState('Mensal');
@@ -27,9 +28,10 @@ export default function AdminDashboardMetrics() {
   const { indicadores, isLoading } = useSelector((state) => state.suporte);
 
   useEffect(() => {
+    const year = data.getFullYear();
     const month = periodo === 'Mensal' ? data.getMonth() + 1 : '';
-    dispatch(getInSuporte('indicadores', { year: data.getFullYear(), month, reset: { dados: null } }));
-  }, [dispatch, periodo, data]);
+    dispatch(getInSuporte('indicadores', { year, month, department: department?.id ?? '', reset: { dados: null } }));
+  }, [dispatch, periodo, data, department?.id]);
 
   return (
     <>
@@ -37,25 +39,38 @@ export default function AdminDashboardMetrics() {
         sx={{ px: 1 }}
         heading="Painel de Gestão"
         action={
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Autocomplete
+                fullWidth
+                size="small"
+                value={periodo}
+                disableClearable
+                sx={{ maxWidth: 120 }}
+                options={['Mensal', 'Anual']}
+                onChange={(event, newValue) => setPeriodo(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth label="Período" />}
+              />
+              <DatePicker
+                value={data}
+                maxDate={new Date()}
+                minDate={new Date('2020-01-01')}
+                onChange={(newValue) => setData(newValue)}
+                label={periodo === 'Mensal' ? 'Mês' : 'Data'}
+                views={periodo === 'Mensal' ? ['month', 'year'] : ['year']}
+                slotProps={{ textField: { size: 'small', sx: { maxWidth: periodo === 'Mensal' ? 200 : 150 } } }}
+              />
+            </Stack>
             <Autocomplete
               fullWidth
               size="small"
-              value={periodo}
-              disableClearable
-              sx={{ maxWidth: 150 }}
-              options={['Mensal', 'Anual']}
-              onChange={(event, newValue) => setPeriodo(newValue)}
-              renderInput={(params) => <TextField {...params} fullWidth label="Período" />}
-            />
-            <DatePicker
-              value={data}
-              maxDate={new Date()}
-              minDate={new Date('2020-01-01')}
-              onChange={(newValue) => setData(newValue)}
-              label={periodo === 'Mensal' ? 'Mês' : 'Data'}
-              views={periodo === 'Mensal' ? ['month', 'year'] : ['year']}
-              slotProps={{ textField: { size: 'small', sx: { maxWidth: periodo === 'Mensal' ? 300 : 200 } } }}
+              sx={{ minWidth: 200 }}
+              options={departamentos}
+              value={department || null}
+              getOptionLabel={(option) => option?.abreviation || option?.name}
+              isOptionEqualToValue={(option, value) => option?.id === value?.id}
+              renderInput={(params) => <TextField {...params} label="Departamento" />}
+              onChange={(event, newValue) => setItemValue(newValue, setDepartment, 'departmentTicket', true)}
             />
           </Stack>
         }
@@ -79,13 +94,13 @@ export default function AdminDashboardMetrics() {
               />
             </GridItem>
             <GridItem md={5}>
-              <PorDepartamento dados={indicadores?.indicators_by_department ?? []} />
+              <PorDepartamento dados={indicadores?.indicators_by_department?.filter(({ count }) => count) ?? []} />
             </GridItem>
             <GridItem md={7}>
-              <Asuntos dados={indicadores?.indicators_by_subject ?? []} />
+              <Asuntos dados={indicadores?.indicators_by_subject?.filter(({ count }) => count) ?? []} />
             </GridItem>
             <GridItem md={5}>
-              <Desempenho dados={indicadores?.indicators_by_employee ?? []} />
+              <Desempenho dados={indicadores?.indicators_by_employee?.filter(({ closed }) => closed) ?? []} />
             </GridItem>
             <GridItem md={6}>
               <Recentes dados={indicadores?.recent_tickets ?? []} />

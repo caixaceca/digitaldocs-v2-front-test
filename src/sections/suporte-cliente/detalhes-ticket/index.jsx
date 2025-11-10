@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 // @mui
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -25,8 +25,9 @@ import { Detalhes } from './detalhes';
 
 export default function DetalhesTicket({ onClose }) {
   const [currentTab, setCurrentTab] = useState('Detalhes');
-  const { isLoading, selectedItem } = useSelector((state) => state.suporte);
+  const { isLoading, selectedItem, utilizador } = useSelector((state) => state.suporte);
   const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
+  const admin = useMemo(() => utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR', [utilizador]);
 
   const tabsList = [
     { value: 'Detalhes', component: <Detalhes ticket={selectedItem} /> },
@@ -124,7 +125,7 @@ export default function DetalhesTicket({ onClose }) {
 
       {!isLoading && !!selectedItem && selectedItem?.status !== 'CLOSED' && (
         <DialogActions>
-          <Actions dados={selectedItem} onClose={onClose} />
+          <Actions dados={selectedItem} onClose={onClose} admin={admin} />
         </DialogActions>
       )}
     </Dialog>

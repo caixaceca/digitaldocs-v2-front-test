@@ -54,7 +54,7 @@ export default function TodosAnexos() {
             {((emailCheck(mail, '') && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
               <ModelosRespostas />
             )}
-            {emailCheck(mail, '') && <CartaPropostaWord />}
+            {emailCheck(mail, '') && <CartaPropostaWord dados={processo} />}
           </>
         ) : (
           <SearchNotFound message="Nenhum anexo encontrado..." />

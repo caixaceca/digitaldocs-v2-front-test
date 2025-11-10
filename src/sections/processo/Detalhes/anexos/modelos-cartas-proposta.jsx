@@ -1,5 +1,6 @@
 import { saveAs } from 'file-saver';
 import { useSnackbar } from 'notistack';
+// docx
 import {
   Table,
   Packer,
@@ -30,10 +31,13 @@ export default function CartaPropostaWord({ dados = {} }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const defaulted = {
-    proponente_nome: 'Joel Freire Fortes',
-    fiadores: [{ nome: 'Bryan Freire Fortes' }, { nome: 'Doriana Lopes Alves' }],
+    proponente_nome: dados?.titular ?? 'Nome do proponente',
+    fiadores: [
+      { nome: 'Nome Fiador 1', estadoCivil: 'Solteiro', nif: '124357453', residencia: 'Palmarejo' },
+      { nome: 'Nome Fiador 2', estadoCivil: 'Solteira', nif: '223145321', residencia: 'Fazenda' },
+    ],
     data_proposta: new Date(),
-    data_solicitacao: '2025-01-21',
+    data_solicitacao: dados?.data_entrada ?? '2025-01-21',
     montante: 1250000,
     prazo_amortizacao: 60,
     tan: 11,
