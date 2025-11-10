@@ -361,7 +361,6 @@ export default function CartaPropostaWord({ dados = {} }) {
       <Divider textAlign="left" sx={{ mt: 1.5, mb: 0.5, typography: 'overline' }}>
         Modelo de Carta Proposta
       </Divider>
-
       <DownloadModelo modelo="Modelo - CrediCaixa.docx" onClick={exportToWord} />
     </Stack>
   );

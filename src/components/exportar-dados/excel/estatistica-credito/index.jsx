@@ -1,6 +1,8 @@
 import ExcelJS from 'exceljs';
 import { sumBy } from 'lodash';
+import { useState } from 'react';
 import { saveAs } from 'file-saver';
+import { useSnackbar } from 'notistack';
 // utils
 import { ptDate } from '../../../../utils/formatTime';
 import { useSelector } from '../../../../redux/store';
@@ -16,6 +18,9 @@ import { cabecalho, valorMoeda, colunasSI, celulasConteudo, mesclarSegmentoLinha
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function ExportarEstatisticaCredito({ uo, data, periodo }) {
+  const { enqueueSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
+
   const { cc } = useSelector((state) => state.intranet);
   const { resumoEstCredito, estCredito, moeda } = useSelector((state) => state.indicadores);
 
@@ -33,105 +38,113 @@ export default function ExportarEstatisticaCredito({ uo, data, periodo }) {
   const dadosDesistido = dadosFase(estCredito?.desistido, 'Desistido', 'montantes', '', 5, moeda);
 
   const exportToExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    fileInfo(workbook);
+    try {
+      setLoading(true);
+      const workbook = new ExcelJS.Workbook();
+      fileInfo(workbook);
 
-    const resumoSheet = workbook.addWorksheet('Resumo', sheetProperty('AAAAAA', 3, false));
-    resumoEstatistica({ cc, moeda, dados: resumoEstCredito, uo, data, resumoSheet });
+      const resumoSheet = workbook.addWorksheet('Resumo', sheetProperty('AAAAAA', 3, false));
+      resumoEstatistica({ cc, moeda, dados: resumoEstCredito, uo, data, resumoSheet });
 
-    if (periodo === 'Mensal' && uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS') {
-      // ENTRADAS
-      const entradaSheet = workbook.addWorksheet('Entradas', sheetProperty('EEEEEE', 2, false));
-      cabecalho(entradaSheet, 'Entradas');
-      dadosEntrada.rows.forEach((row) => {
-        entradaSheet.addRow(row);
-      });
-      celulasConteudo('Entrada', entradaSheet, dadosEntrada.rows.length + 2, 3, 10, 10);
-      colunasSI(entradaSheet);
-      estiloCabecalho(entradaSheet, 2, 10);
-      ajustarLargura(entradaSheet);
-      mesclarSegmentoLinha(entradaSheet, 'A1:J1', 10, dadosEntrada.lengths);
-      addTotalGeral(entradaSheet, estCredito?.entrada, 'ENTRADOS', dadosEntrada.rows.length + 4, moeda);
-      if (dadosEntrada.naoClassificados?.length > 0) {
-        addNaoClassificados(entradaSheet, dadosEntrada.naoClassificados, 'entrada', moeda);
+      if (periodo === 'Mensal' && uo !== 'Caixa' && uo !== 'DCN' && uo !== 'DCS') {
+        // ENTRADAS
+        const entradaSheet = workbook.addWorksheet('Entradas', sheetProperty('EEEEEE', 2, false));
+        cabecalho(entradaSheet, 'Entradas');
+        dadosEntrada.rows.forEach((row) => {
+          entradaSheet.addRow(row);
+        });
+        celulasConteudo('Entrada', entradaSheet, dadosEntrada.rows.length + 2, 3, 10, 10);
+        colunasSI(entradaSheet);
+        estiloCabecalho(entradaSheet, 2, 10);
+        ajustarLargura(entradaSheet);
+        mesclarSegmentoLinha(entradaSheet, 'A1:J1', 10, dadosEntrada.lengths);
+        addTotalGeral(entradaSheet, estCredito?.entrada, 'ENTRADOS', dadosEntrada.rows.length + 4, moeda);
+        if (dadosEntrada.naoClassificados?.length > 0) {
+          addNaoClassificados(entradaSheet, dadosEntrada.naoClassificados, 'entrada', moeda);
+        }
+
+        // SHEET APROVADAS
+        const aprovadoSheet = workbook.addWorksheet('Aprovados', sheetProperty('EDFAE6', 2, false));
+        cabecalho(aprovadoSheet, 'Aprovados');
+        dadosAprovado.rows.forEach((row) => {
+          const novaLinha = aprovadoSheet.addRow(row);
+          const celula = novaLinha.getCell(10);
+          if (celula.value === '*') celula.font = { color: { argb: 'FF4842' }, bold: true };
+        });
+        celulasConteudo('Aprovado', aprovadoSheet, dadosAprovado.rows.length + 2, 3, 9, 8);
+        colunasSI(aprovadoSheet);
+        estiloCabecalho(aprovadoSheet, 2, 9);
+        ajustarLargura(aprovadoSheet);
+        mesclarSegmentoLinha(aprovadoSheet, 'A1:I1', 9, dadosAprovado.lengths);
+        addTotalGeral(aprovadoSheet, estCredito?.aprovado, 'APROVADOS', dadosAprovado.rows.length + 4, moeda);
+        if (dadosAprovado.naoClassificados?.length > 0) {
+          addNaoClassificados(aprovadoSheet, dadosAprovado.naoClassificados, 'aprovado', moeda);
+        }
+
+        // SHEET CONTRATADAS
+        const contratadoSheet = workbook.addWorksheet('Contratados', sheetProperty('C8FACD', 2, false));
+        cabecalho(contratadoSheet, 'Contratados');
+        dadosContratado.rows.forEach((row) => {
+          const novaLinha = contratadoSheet.addRow(row);
+          const celula = novaLinha.getCell(15);
+          if (celula.value === '*') celula.font = { color: { argb: 'FF4842' }, bold: true };
+        });
+        celulasConteudo('Contratado', contratadoSheet, dadosContratado.rows.length + 2, 3, 14, 13);
+        colunasSI(contratadoSheet);
+        estiloCabecalho(contratadoSheet, 2, 14);
+        ajustarLargura(contratadoSheet);
+        mesclarSegmentoLinha(contratadoSheet, 'A1:N1', 14, dadosContratado.lengths);
+        addTotalGeral(contratadoSheet, estCredito?.contratado, 'CONTRATADOS', dadosContratado.rows.length + 4, moeda);
+        if (dadosContratado.naoClassificados?.length > 0) {
+          addNaoClassificados(contratadoSheet, dadosContratado.naoClassificados, 'contratado', moeda);
+        }
+
+        // SHEET INDEFERIDOS
+        const indeferidosSheet = workbook.addWorksheet('Indeferidos', sheetProperty('FFE7D9', 2, false));
+        cabecalho(indeferidosSheet, 'Indeferidos');
+        dadosIndeferido.rows.forEach((row) => {
+          indeferidosSheet.addRow(row);
+        });
+        celulasConteudo('Indeferido', indeferidosSheet, dadosIndeferido.rows.length + 2, 3, 9, 9);
+        colunasSI(indeferidosSheet);
+        estiloCabecalho(indeferidosSheet, 2, 9);
+        ajustarLargura(indeferidosSheet);
+        mesclarSegmentoLinha(indeferidosSheet, 'A1:I1', 9, dadosIndeferido.lengths);
+        addTotalGeral(indeferidosSheet, estCredito?.indeferido, 'INDEFERIDOS', dadosIndeferido.rows.length + 4, moeda);
+        if (dadosIndeferido.naoClassificados?.length > 0) {
+          addNaoClassificados(indeferidosSheet, dadosIndeferido.naoClassificados, 'indeferido', moeda);
+        }
+
+        // SHEET DESISTIDOS
+        const desistidosSheet = workbook.addWorksheet('Desistidos', sheetProperty('FFE7D9', 2, false));
+        cabecalho(desistidosSheet, 'Desistidos');
+        dadosDesistido.rows.forEach((row) => {
+          desistidosSheet.addRow(row);
+        });
+        celulasConteudo('Desistido', desistidosSheet, dadosDesistido.rows.length + 2, 3, 9, 9);
+        colunasSI(desistidosSheet);
+        estiloCabecalho(desistidosSheet, 2, 9);
+        ajustarLargura(desistidosSheet);
+        mesclarSegmentoLinha(desistidosSheet, 'A1:I1', 9, dadosDesistido.lengths);
+        addTotalGeral(desistidosSheet, estCredito?.desistido, 'DESISTIDOS', dadosDesistido.rows.length + 4, moeda);
+        if (dadosDesistido.naoClassificados?.length > 0) {
+          addNaoClassificados(desistidosSheet, dadosDesistido.naoClassificados, 'desistido', moeda);
+        }
       }
 
-      // SHEET APROVADAS
-      const aprovadoSheet = workbook.addWorksheet('Aprovados', sheetProperty('EDFAE6', 2, false));
-      cabecalho(aprovadoSheet, 'Aprovados');
-      dadosAprovado.rows.forEach((row) => {
-        const novaLinha = aprovadoSheet.addRow(row);
-        const celula = novaLinha.getCell(10);
-        if (celula.value === '*') celula.font = { color: { argb: 'FF4842' }, bold: true };
-      });
-      celulasConteudo('Aprovado', aprovadoSheet, dadosAprovado.rows.length + 2, 3, 9, 8);
-      colunasSI(aprovadoSheet);
-      estiloCabecalho(aprovadoSheet, 2, 9);
-      ajustarLargura(aprovadoSheet);
-      mesclarSegmentoLinha(aprovadoSheet, 'A1:I1', 9, dadosAprovado.lengths);
-      addTotalGeral(aprovadoSheet, estCredito?.aprovado, 'APROVADOS', dadosAprovado.rows.length + 4, moeda);
-      if (dadosAprovado.naoClassificados?.length > 0) {
-        addNaoClassificados(aprovadoSheet, dadosAprovado.naoClassificados, 'aprovado', moeda);
-      }
-
-      // SHEET CONTRATADAS
-      const contratadoSheet = workbook.addWorksheet('Contratados', sheetProperty('C8FACD', 2, false));
-      cabecalho(contratadoSheet, 'Contratados');
-      dadosContratado.rows.forEach((row) => {
-        const novaLinha = contratadoSheet.addRow(row);
-        const celula = novaLinha.getCell(15);
-        if (celula.value === '*') celula.font = { color: { argb: 'FF4842' }, bold: true };
-      });
-      celulasConteudo('Contratado', contratadoSheet, dadosContratado.rows.length + 2, 3, 14, 13);
-      colunasSI(contratadoSheet);
-      estiloCabecalho(contratadoSheet, 2, 14);
-      ajustarLargura(contratadoSheet);
-      mesclarSegmentoLinha(contratadoSheet, 'A1:N1', 14, dadosContratado.lengths);
-      addTotalGeral(contratadoSheet, estCredito?.contratado, 'CONTRATADOS', dadosContratado.rows.length + 4, moeda);
-      if (dadosContratado.naoClassificados?.length > 0) {
-        addNaoClassificados(contratadoSheet, dadosContratado.naoClassificados, 'contratado', moeda);
-      }
-
-      // SHEET INDEFERIDOS
-      const indeferidosSheet = workbook.addWorksheet('Indeferidos', sheetProperty('FFE7D9', 2, false));
-      cabecalho(indeferidosSheet, 'Indeferidos');
-      dadosIndeferido.rows.forEach((row) => {
-        indeferidosSheet.addRow(row);
-      });
-      celulasConteudo('Indeferido', indeferidosSheet, dadosIndeferido.rows.length + 2, 3, 9, 9);
-      colunasSI(indeferidosSheet);
-      estiloCabecalho(indeferidosSheet, 2, 9);
-      ajustarLargura(indeferidosSheet);
-      mesclarSegmentoLinha(indeferidosSheet, 'A1:I1', 9, dadosIndeferido.lengths);
-      addTotalGeral(indeferidosSheet, estCredito?.indeferido, 'INDEFERIDOS', dadosIndeferido.rows.length + 4, moeda);
-      if (dadosIndeferido.naoClassificados?.length > 0) {
-        addNaoClassificados(indeferidosSheet, dadosIndeferido.naoClassificados, 'indeferido', moeda);
-      }
-
-      // SHEET DESISTIDOS
-      const desistidosSheet = workbook.addWorksheet('Desistidos', sheetProperty('FFE7D9', 2, false));
-      cabecalho(desistidosSheet, 'Desistidos');
-      dadosDesistido.rows.forEach((row) => {
-        desistidosSheet.addRow(row);
-      });
-      celulasConteudo('Desistido', desistidosSheet, dadosDesistido.rows.length + 2, 3, 9, 9);
-      colunasSI(desistidosSheet);
-      estiloCabecalho(desistidosSheet, 2, 9);
-      ajustarLargura(desistidosSheet);
-      mesclarSegmentoLinha(desistidosSheet, 'A1:I1', 9, dadosDesistido.lengths);
-      addTotalGeral(desistidosSheet, estCredito?.desistido, 'DESISTIDOS', dadosDesistido.rows.length + 4, moeda);
-      if (dadosDesistido.naoClassificados?.length > 0) {
-        addNaoClassificados(desistidosSheet, dadosDesistido.naoClassificados, 'desistido', moeda);
-      }
+      // GERAR E BAIXAR O FICHEIRO
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      saveAs(blob, `Estatística de crédito ${uo} - ${data}.xlsx`);
+      enqueueSnackbar('Ficheiro gerado com sucesso', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar('Erro ao gerar o ficheiro Excel', { variant: 'error' });
+    } finally {
+      setLoading(false);
     }
-
-    // GERAR E BAIXAR O FICHEIRO
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/octet-stream' });
-    saveAs(blob, `Estatística de crédito ${uo} - ${data}.xlsx`);
   };
 
-  return <ExportToExcell handleExport={exportToExcel} />;
+  return <ExportToExcell handleExport={exportToExcel} loading={loading} />;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

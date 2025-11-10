@@ -2,21 +2,27 @@
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
+import CircularProgress from '@mui/material/CircularProgress';
 // utils
 import { getFileThumb } from '../../../utils/formatFile';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function ExportToExcell({ handleExport, small = false, absolute = false }) {
+export function ExportToExcell({ handleExport, small = false, absolute = false, loading = false }) {
   return (
     <Box sx={absolute ? { top: 10, right: 10, position: 'absolute' } : null}>
       <Tooltip title="EXPORTAR" arrow>
         <Fab
+          disabled={loading}
           onClick={() => handleExport()}
           color={small ? 'inherit' : 'success'}
           sx={{ width: small ? 30 : 36, height: small ? 30 : 36 }}
         >
-          {getFileThumb(true, { width: small ? 18 : 22 }, 'file.xlsx')}
+          {loading ? (
+            <CircularProgress size={small ? 18 : 24} />
+          ) : (
+            getFileThumb(true, { width: small ? 18 : 22 }, 'file.xlsx')
+          )}
         </Fab>
       </Tooltip>
     </Box>
