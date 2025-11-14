@@ -83,6 +83,7 @@ export function SearchToolbar({ dados, lists, extra }) {
               setItemValue('', setFilter, 'filterTicket');
               setItemValue('', setStatus, 'statusTicket');
               setItemValue('', setSubject, 'subjectTicket');
+              setItemValue('', setColaborador, 'colaboradorTickets');
             }}
           />
         )}

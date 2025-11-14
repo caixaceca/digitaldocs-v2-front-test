@@ -161,9 +161,9 @@ function Condicoes({ dados }) {
 
   const formSchema = Yup.object().shape({
     taxa_taeg: Yup.number().positive().required().label('Taxa TAEG'),
+    numero_prestacao: Yup.number().positive().integer().required().label('Nº de prestações'),
     taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
     taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
-    numero_prestacao: Yup.number().positive().max(100).integer().required().label('Nº de prestações'),
     // meses_vencimento: Yup.number().positive().integer().required().label('Meses de vencimento'),
     // prazo_utilizacao: Yup.number().positive().integer().required().label('Prazo de utilização'),
     taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Taxa de juros desconto'),
