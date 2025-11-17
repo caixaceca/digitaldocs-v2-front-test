@@ -137,7 +137,15 @@ export function normalizeData(dateString) {
 }
 
 export function toHourLabel(value) {
-  const horas = Math.floor(value);
-  const minutos = Math.round((value - horas) * 60);
-  return `${horas}h ${minutos}m`;
+  const dias = Math.floor(value / 24);
+  const horasRestantes = Math.floor(value % 24);
+  const minutos = Math.round((value - Math.floor(value)) * 60);
+
+  let label = '';
+
+  if (dias > 0) label += `${dias}d `;
+  if (horasRestantes > 0 || dias > 0) label += `${horasRestantes}h `;
+  label += `${minutos}m`;
+
+  return label.trim();
 }

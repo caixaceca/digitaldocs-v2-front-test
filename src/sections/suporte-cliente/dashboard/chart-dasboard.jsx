@@ -57,10 +57,10 @@ export function PorDepartamento({ dados }) {
                 justifyContent="space-between"
               >
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <Box sx={{ width: 12, height: 12, backgroundColor: chartColors.main[index], borderRadius: 1 }} />
+                  <Box sx={{ width: 12, height: 12, minWidth: 12, backgroundColor: chartColors.main[index] }} />
                   <Typography variant="body2">
                     {s.department_name}{' '}
-                    <Typography component="span" sx={{ typography: 'caption', color: 'text.secondary' }}>
+                    <Typography component="span" variant="caption" sx={{ color: 'text.secondary' }}>
                       ({fPercent((s.count * 100) / total)})
                     </Typography>
                   </Typography>

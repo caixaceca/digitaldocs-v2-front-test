@@ -11,9 +11,8 @@ import {
   actionUpdate,
   actionDelete,
   headerOptions,
-  selectUtilizador,
 } from './sliceActions';
-// import { getAccessToken } from './intranet';
+import { getAccessToken } from './intranet';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -82,14 +81,12 @@ export const { setModal, getSuccess } = slice.actions;
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function getInSuporte(item, params) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     if (!params?.notLoading) dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     if (params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params?.reset?.dados }));
 
     try {
-      // const accessToken = await getAccessToken();
-      const { idColaborador } = selectUtilizador(getState()?.intranet || {});
-      // console.log(accessToken);
+      const accessToken = await getAccessToken();
       const apiUrl =
         (item === 'faq' && `/api/v1/faqs/all`) ||
         (item === 'slas' && `/api/v1/slas/all`) ||
@@ -106,7 +103,7 @@ export function getInSuporte(item, params) {
           `/api/v1/tickets/all${params?.department ? `?departmentId=${params?.department}` : ''}${params?.status ? `${params?.department ? '&' : '?'}status=${params?.status}` : ''}`) ||
         '';
       if (apiUrl) {
-        const headers = headerOptions({ accessToken: idColaborador, mail: '', cc: true, ct: false, mfd: false });
+        const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         const response = await axios.get(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, headers);
 
         const dados = response.data?.payload;
@@ -125,13 +122,12 @@ export function getInSuporte(item, params) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function createInSuporte(item, body, params) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
 
     try {
-      // const accessToken = await getAccessToken();
-      const { idColaborador } = selectUtilizador(getState()?.intranet || {});
-      const options = headerOptions({ accessToken: idColaborador, mail: '', ct: true, mfd: item === 'add-message' });
+      const accessToken = await getAccessToken();
+      const options = headerOptions({ accessToken, mail: '', ct: true, mfd: item === 'add-message' });
       if (item === 'add-message') delete options.headers['content-type'];
 
       const apiUrl =
@@ -168,13 +164,12 @@ export function createInSuporte(item, body, params) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function updateInSuporte(item, body, params) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
 
     try {
-      // const accessToken = await getAccessToken();
-      const { idColaborador } = selectUtilizador(getState()?.intranet || {});
-      const options = headerOptions({ accessToken: idColaborador, mail: '', cc: true, ct: true, mfd: false });
+      const accessToken = await getAccessToken();
+      const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
 
       const apiUrl =
         (item === 'faq' && `/api/v1/faqs/update/${params?.id}`) ||
@@ -225,12 +220,11 @@ export function updateInSuporte(item, body, params) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function deleteInSuporte(item, params) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
 
     try {
-      // const accessToken = await getAccessToken();
-      const { idColaborador } = selectUtilizador(getState()?.intranet || {});
+      const accessToken = await getAccessToken();
       const apiUrl =
         (item === 'faq' && `/api/v1/faqs/delete/${params?.id}`) ||
         (item === 'slas' && `/api/v1/slas/delete/${params?.id}`) ||
@@ -242,7 +236,7 @@ export function deleteInSuporte(item, params) {
         '';
 
       if (apiUrl) {
-        const options = headerOptions({ accessToken: idColaborador, mail: '', cc: true, ct: false, mfd: false });
+        const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         await axios.delete(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, options);
 
         dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));

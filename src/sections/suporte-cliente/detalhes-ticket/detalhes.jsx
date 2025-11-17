@@ -70,7 +70,7 @@ function ItemDesc({ label, value }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Avaliacao({ avaliacao }) {
-  const { comments, evaluationDateTime } = avaliacao;
+  const { comments, evaluation_datetime: date } = avaliacao;
   const rating = 4;
   const labels = { 1: 'Muito insatisfeito', 2: 'Insatisfeito', 3: 'Razoável', 4: 'Satisfeito', 5: 'Muito satisfeito' };
 
@@ -88,7 +88,7 @@ function Avaliacao({ avaliacao }) {
           {labels[rating]}
         </Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.5 }}>
-          {ptDateTime(evaluationDateTime)}
+          {ptDateTime(date)}
         </Typography>
       </Stack>
 

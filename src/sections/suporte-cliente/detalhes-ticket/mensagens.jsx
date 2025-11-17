@@ -46,6 +46,8 @@ function TimelineMessageItem({ message, isLast, isDesktop }) {
   const { content, sent_at: at, from, attachments = [] } = message;
   const criadoPor = useColaborador({ userId: from, nome: true });
 
+  console.log(attachments);
+
   return (
     <TimelineItem sx={{ '&:before': { display: 'none' } }}>
       {isDesktop && (
@@ -88,10 +90,10 @@ function TimelineMessageItem({ message, isLast, isDesktop }) {
                   key={anexo?.identifier}
                   rel="noopener noreferrer"
                   sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
-                  startIcon={getFileThumb(false, { width: 20, height: 20 }, anexo?.fileName)}
+                  startIcon={getFileThumb(false, { width: 20, height: 20 }, anexo?.filename)}
                   href={`${SUPORTE_CLIENTE_API_SERVER}/api/v1/ticket-attachments/download/${anexo?.identifier}`}
                 >
-                  {anexo?.fileName}
+                  {anexo?.filename}
                 </Button>
               ))}
             </Stack>

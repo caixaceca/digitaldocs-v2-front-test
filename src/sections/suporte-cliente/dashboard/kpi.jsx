@@ -54,7 +54,7 @@ export default function KPI({ dados }) {
         md={6}
         icon={<SatisfyIcon />}
         title="Satisfação Média"
-        value={`${dados?.avg_satisfaction} / 5`}
+        value={`${dados?.avg_satisfaction?.toFixed(1)} / 5`}
         melhorou={dados?.avg_satisfaction > dados?.avg_satisfaction_prev}
         sub={(dados?.avg_satisfaction - dados?.avg_satisfaction_prev).toFixed(1)}
       />

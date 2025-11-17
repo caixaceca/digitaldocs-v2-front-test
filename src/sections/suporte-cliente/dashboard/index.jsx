@@ -94,7 +94,18 @@ export default function AdminDashboardMetrics({ departamentos = [], department, 
               />
             </GridItem>
             <GridItem md={5}>
-              <PorDepartamento dados={indicadores?.indicators_by_department?.filter(({ count }) => count) ?? []} />
+              <PorDepartamento
+                dados={
+                  indicadores?.indicators_by_department
+                    ?.filter(({ count }) => count)
+                    ?.map((row) => ({
+                      ...row,
+                      department_name:
+                        departamentos?.find(({ name }) => name === row.department_name)?.abreviation ??
+                        row.department_name,
+                    })) ?? []
+                }
+              />
             </GridItem>
             <GridItem md={7}>
               <Asuntos dados={indicadores?.indicators_by_subject?.filter(({ count }) => count) ?? []} />

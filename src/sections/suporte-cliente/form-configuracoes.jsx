@@ -100,7 +100,7 @@ export function FaqForm({ onClose }) {
   const formSchema = Yup.object().shape({
     question: Yup.string().required().label('Questão'),
     response: Yup.string().required().label('Resposta'),
-    categoryId: Yup.mixed().required().label('Categoria'),
+    category_id: Yup.mixed().required().label('Categoria'),
   });
 
   const defaultValues = useMemo(
@@ -109,7 +109,7 @@ export function FaqForm({ onClose }) {
       question: selectedItem?.question ?? '',
       response: selectedItem?.response ?? '',
       highlighted: !!selectedItem?.highlighted,
-      categoryId: categoriasList?.find(({ id }) => id === selectedItem?.category_id) ?? null,
+      category_id: categoriasList?.find(({ id }) => id === selectedItem?.category_id) ?? null,
     }),
     [selectedItem, categoriasList]
   );
@@ -123,7 +123,7 @@ export function FaqForm({ onClose }) {
   }, [selectedItem]);
 
   const onSubmit = async (values) => {
-    const formData = { ...values, categoryId: values?.categoryId?.id };
+    const formData = { ...values, category_id: values?.category_id?.id };
     const params = { id: selectedItem?.id, msg: `Questão ${isEdit ? 'atualizada' : 'adicionada'}` };
     dispatch((isEdit ? updateInSuporte : createInSuporte)('faq', JSON.stringify(formData), { ...params, onClose }));
   };
@@ -136,7 +136,7 @@ export function FaqForm({ onClose }) {
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
-                <RHFAutocompleteObj name="categoryId" label="Categoria" options={categoriasList} />
+                <RHFAutocompleteObj name="category_id" label="Categoria" options={categoriasList} />
                 <Stack direction="row" spacing={3}>
                   <RHFNumberField name="sequence" label="Ordem" sx={{ width: { sm: 200 } }} />
                   <RHFSwitch name="highlighted" label="Destacar" mt />
