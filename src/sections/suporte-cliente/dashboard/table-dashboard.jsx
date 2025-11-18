@@ -60,7 +60,9 @@ export function Recentes({ dados }) {
         <TableRow key={row.id} hover>
           <TableCell>{row.subject_name}</TableCell>
           <TableCell>{row.customer_name}</TableCell>
-          <TableCell align="center">{ptDateTime(row.created_at)}</TableCell>
+          <TableCell align="center" sx={{ typography: 'caption' }}>
+            {ptDateTime(row.created_at)}
+          </TableCell>
           <TableCell align="center">
             <LabelStatus label={row?.status} />
           </TableCell>
@@ -104,16 +106,12 @@ export function Avaliacoes({ dados }) {
         { id: 'subject', label: 'Assunto' },
         { id: 'rating', label: 'Avaliação', align: 'center' },
         { id: 'comment', label: 'Comentário' },
-        { id: 'created_at', label: 'Data', align: 'center' },
       ]}
       body={dados.map((row) => (
         <TableRow key={row.id} hover>
-          <TableCell>{row.subject}</TableCell>
-          <TableCell align="center">
-            <Rating size="small" value={row.rating} readOnly sx={{ color: 'success.main' }} />
-          </TableCell>
-          <TableCell>{row.comment}</TableCell>
-          <TableCell align="center">{ptDateTime(row.created_at)}</TableCell>
+          <TableCell>{row?.subject}</TableCell>
+          <Avaliacao rating={row.rating} extra={ptDateTime(row?.created_at)} />
+          <TableCell>{row?.comment}</TableCell>
         </TableRow>
       ))}
     />
@@ -156,18 +154,23 @@ export function TableHeadCustom({ headLabel }) {
   );
 }
 
-export function Avaliacao({ rating }) {
+export function Avaliacao({ rating, extra = null }) {
   return (
     <TableCell align="center">
       {rating ? (
         <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
           <Rating readOnly size="small" precision={0.1} value={rating} sx={{ color: 'success.main' }} />
           <Typography variant="caption" sx={{ fontWeight: 'bold', color: getColorRating(rating) }}>
-            {rating}
+            ({rating})
           </Typography>
         </Stack>
       ) : (
         noDados('(Sem avaliação)')
+      )}
+      {extra && (
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {extra}
+        </Typography>
       )}
     </TableCell>
   );

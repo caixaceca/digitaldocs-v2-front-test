@@ -46,8 +46,6 @@ function TimelineMessageItem({ message, isLast, isDesktop }) {
   const { content, sent_at: at, from, attachments = [] } = message;
   const criadoPor = useColaborador({ userId: from, nome: true });
 
-  console.log(attachments);
-
   return (
     <TimelineItem sx={{ '&:before': { display: 'none' } }}>
       {isDesktop && (

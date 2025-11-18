@@ -33,7 +33,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     if (credito)
       tabs.push({
         value: 'Info. crédito',
-        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em: data, modificar }} />,
+        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em: data, modificar, estado }} />,
       });
 
     if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });

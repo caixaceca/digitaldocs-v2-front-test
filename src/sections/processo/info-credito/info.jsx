@@ -8,16 +8,18 @@ import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
+import { useSelector } from '../../../redux/store';
 import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
+import { processoEstadoInicial } from '../../../utils/validarAcesso';
 // components
 import Label from '../../../components/Label';
 import { TextItem } from '../Detalhes/detalhes';
 import { DefaultAction } from '../../../components/Actions';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-form';
-// _mock
+//
 import PareceresCredito from './pareceres';
 import FichaAnalise from './ficha-parecer';
 import MetadadosCredito from './metadados-credito';
@@ -30,6 +32,8 @@ const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent
 
 export default function InfoCredito({ dados }) {
   const [currentTab, setCurrentTab] = useState('Info. gerais');
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
+  const estadoInicial = processoEstadoInicial(meusAmbientes, dados?.estado?.estado_id);
 
   const tabsList = [
     { value: 'Info. gerais', component: <DadosCredito dados={dados} /> },
@@ -45,7 +49,7 @@ export default function InfoCredito({ dados }) {
     },
     { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} /> },
     { value: 'Seguros', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} seguro /> },
-    { value: 'Ficha de análise', component: <FichaAnalise /> },
+    ...(dados?.modificar && estadoInicial ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
     { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];
 

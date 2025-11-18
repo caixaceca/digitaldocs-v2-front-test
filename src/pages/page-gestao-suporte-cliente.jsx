@@ -32,7 +32,7 @@ export default function PageGestaoSuporteCliente() {
         value: 'Dashboard',
         component: <Dashboard department={department} setDepartment={setDepartment} departamentos={departamentos} />,
       },
-      { value: 'Configurações', component: <Configuracoes /> },
+      ...(admin ? [{ value: 'Configurações', component: <Configuracoes /> }] : []),
     ],
     [department, admin, departamentos]
   );

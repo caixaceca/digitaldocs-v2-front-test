@@ -70,7 +70,7 @@ const WARNING = {
   main: '#FF9800',
   dark: '#CC7700',
   darker: '#994F00',
-  contrastText: GREY[800],
+  contrastText: '#fff',
 };
 
 const ERROR = {
@@ -113,8 +113,8 @@ const COMMON = {
   primary: { ...PRIMARY, contrastText: '#fff' },
   secondary: { ...SECONDARY, contrastText: '#fff' },
   info: { ...INFO, contrastText: '#fff' },
-  success: { ...SUCCESS, contrastText: GREY[800] },
-  warning: { ...WARNING, contrastText: GREY[800] },
+  success: { ...SUCCESS, contrastText: '#fff' },
+  warning: { ...WARNING, contrastText: '#fff' },
   error: { ...ERROR, contrastText: '#fff' },
   focus: { ...FOCUS, contrastText: '#fff' },
   grey: GREY,

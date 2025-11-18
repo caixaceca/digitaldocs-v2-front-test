@@ -74,7 +74,7 @@ export default function TableConfiguracoes({ item }) {
       (item === 'respostas' && respostas) ||
       (item === 'departamentos' && departamentos) ||
       (item === 'utilizadores' &&
-        utilizadores?.map((row) => ({ ...row, ...colaboradores?.find(({ id }) => id === row?.employee_id) }))) ||
+        utilizadores?.map((row) => ({ ...colaboradores?.find(({ id }) => id === row?.employee_id), ...row }))) ||
       [],
   });
   const isNotFound = !dataFiltered.length;

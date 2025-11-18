@@ -32,7 +32,7 @@ export function SearchToolbar({ dados, lists, extra }) {
   return (
     <Stack direction={{ xs: 'column', lg: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexGrow: 1 }}>
           {admin && (
             <Autocomplete
               fullWidth
@@ -54,12 +54,12 @@ export function SearchToolbar({ dados, lists, extra }) {
             onChange={(event, newValue) => setItemValue(newValue, setSubject, 'subjectTicket')}
           />
         </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexGrow: 1 }}>
           <Autocomplete
             fullWidth
             options={statusList}
             value={status || null}
-            sx={{ minWidth: { sm: 160 } }}
+            sx={{ minWidth: { sm: 150 } }}
             getOptionLabel={(option) => option?.label}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => <TextField {...params} label="Estado" />}
@@ -69,7 +69,7 @@ export function SearchToolbar({ dados, lists, extra }) {
             fullWidth
             value={colaborador || null}
             options={usersList?.sort()}
-            sx={{ minWidth: { xl: 250, md: 200 } }}
+            sx={{ minWidth: { xl: 230, md: 180 } }}
             renderInput={(params) => <TextField {...params} label="Atribuído a" />}
             onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorTickets')}
           />
@@ -152,6 +152,14 @@ export const actionsList = [
   { id: 'ASSIGNMENT', label: 'Atribuição' },
   { id: 'FORWARDING', label: 'Encaminhamento' },
   { id: 'STATUS_CHANGE', label: 'Alteração do estado' },
+];
+
+export const ratingList = [
+  { id: 'VERY_UNSATISFIED', rating: 1, label: 'Muito insatisfeito' },
+  { id: 'UNSATISFIED', rating: 2, label: 'Insatisfeito' },
+  { id: 'NEUTRAL', rating: 3, label: 'Neutro' },
+  { id: 'SATISFIED', rating: 4, label: 'Satisfeito' },
+  { id: 'VERY_SATISFIED', rating: 5, label: 'Muito satisfeito' },
 ];
 
 // ---------------------------------------------------------------------------------------------------------------------

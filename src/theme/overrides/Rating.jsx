@@ -1,4 +1,4 @@
-import { StarIcon } from './CustomIcons';
+import StarIcon from '@mui/icons-material/Star';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

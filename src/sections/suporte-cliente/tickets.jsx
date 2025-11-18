@@ -75,7 +75,6 @@ export default function Tickets({ admin, department, setDepartment }) {
     dispatch(setModal({ modal: 'detalhes-ticket' }));
     dispatch(getInSuporte('ticket', { id: dados?.id, item: 'selectedItem' }));
   };
-
   const onClose = () => dispatch(setModal({}));
 
   return (
@@ -164,9 +163,9 @@ export function applySortFilter({ dados, filter, subject, colaborador, comparato
   if (filter) {
     const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
-      ({ nome, description }) =>
-        (nome && normalizeText(nome).indexOf(normalizedFilter) !== -1) ||
-        (description && normalizeText(description).indexOf(normalizedFilter) !== -1)
+      ({ customer_name: customer, code_ticket: code }) =>
+        (code && normalizeText(code).indexOf(normalizedFilter) !== -1) ||
+        (customer && normalizeText(customer).indexOf(normalizedFilter) !== -1)
     );
   }
 

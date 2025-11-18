@@ -28,20 +28,33 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
   const dispatch = useDispatch();
   const { isEdit, isSaving, departamentos, utilizadores } = useSelector((state) => state.suporte);
 
-  const label = (item === 'assign' && 'Utilizador') || (item === 'change-department' && 'Departamento') || 'Estado';
   const title = (item === 'assign' && 'Atribuir') || (item === 'change-department' && 'Encaminhar') || 'Alterar';
+  const label = (item === 'assign' && 'Utilizador') || (item === 'change-department' && 'Departamento') || 'Estado';
 
-  const usersList = useMemo(() => utilizadores?.map(({ id, username }) => ({ id, label: username })), [utilizadores]);
-  const departsList = useMemo(() => departamentos?.map(({ id, name }) => ({ id, label: name })), [departamentos]);
+  const usersList = useMemo(
+    () =>
+      utilizadores
+        ?.filter((ut) => ut?.department_id === dados?.current_department_id)
+        ?.map(({ id, username }) => ({ id, label: username })),
+    [dados?.current_department_id, utilizadores]
+  );
+  const departsList = useMemo(
+    () =>
+      departamentos
+        ?.filter(({ id }) => id !== dados?.current_department_id)
+        ?.map(({ id, name }) => ({ id, label: name })),
+    [dados?.current_department_id, departamentos]
+  );
 
   const itemList = useMemo(() => {
     if (item === 'assign' && Array.isArray(usersList)) return usersList;
     if (item === 'change-department' && Array.isArray(departsList)) return departsList;
+    if (dados?.status === 'IN_PROGRESS' && item === 'change-status') return [{ id: 'CLOSED', label: 'Fechado' }];
     return [
       { id: 'IN_PROGRESS', label: 'Em análise' },
       { id: 'CLOSED', label: 'Fechado' },
     ];
-  }, [item, usersList, departsList]);
+  }, [item, usersList, departsList, dados?.status]);
 
   const formSchema = Yup.object().shape({ item: Yup.mixed().required().label(label) });
   const defaultValues = useMemo(() => ({ item: null, resolved: false }), []);

@@ -6,7 +6,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
-import { getCustomerTypeLabel, getColorRating } from '../utils';
+import { getCustomerTypeLabel, getColorRating, ratingList } from '../utils';
 // components
 import { LabelSN } from '../../../components/Label';
 import { newLineText } from '../../../components/Panel';
@@ -71,8 +71,7 @@ function ItemDesc({ label, value }) {
 
 function Avaliacao({ avaliacao }) {
   const { comments, evaluation_datetime: date } = avaliacao;
-  const rating = 4;
-  const labels = { 1: 'Muito insatisfeito', 2: 'Insatisfeito', 3: 'Razoável', 4: 'Satisfeito', 5: 'Muito satisfeito' };
+  const rating = ratingList?.find(({ id }) => id === avaliacao?.rating)?.rating;
 
   return (
     <>
@@ -85,7 +84,7 @@ function Avaliacao({ avaliacao }) {
       <Stack direction="row" spacing={1} alignItems="flex-end" useFlexGap flexWrap="wrap">
         <Rating name="read-only" value={rating} readOnly sx={{ color: 'success.main' }} />
         <Typography variant="subtitle1" sx={{ color: getColorRating(rating), lineHeight: 1.5, px: 1 }}>
-          {labels[rating]}
+          {ratingList?.find(({ id }) => id === avaliacao?.rating)?.label}
         </Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.5 }}>
           {ptDateTime(date)}
