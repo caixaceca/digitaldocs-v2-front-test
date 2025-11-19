@@ -10,6 +10,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import useAnexos from '../../hooks/useAnexos';
+import { applySort, getComparator } from '../../hooks/useTable';
 import { useSelector, useDispatch } from '../../redux/store';
 import { createInSuporte, updateInSuporte } from '../../redux/slices/suporte-cliente';
 // components
@@ -26,35 +27,16 @@ import { DialogButons } from '../../components/Actions';
 
 export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket }) {
   const dispatch = useDispatch();
+  const { colaboradores } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, departamentos, utilizadores } = useSelector((state) => state.suporte);
 
   const title = (item === 'assign' && 'Atribuir') || (item === 'change-department' && 'Encaminhar') || 'Alterar';
   const label = (item === 'assign' && 'Utilizador') || (item === 'change-department' && 'Departamento') || 'Estado';
 
-  const usersList = useMemo(
-    () =>
-      utilizadores
-        ?.filter((ut) => ut?.department_id === dados?.current_department_id)
-        ?.map(({ id, username }) => ({ id, label: username })),
-    [dados?.current_department_id, utilizadores]
+  const itemList = useMemo(
+    () => buildItemList({ item, colaboradores, utilizadores, departamentos, dados }),
+    [item, colaboradores, utilizadores, departamentos, dados]
   );
-  const departsList = useMemo(
-    () =>
-      departamentos
-        ?.filter(({ id }) => id !== dados?.current_department_id)
-        ?.map(({ id, name }) => ({ id, label: name })),
-    [dados?.current_department_id, departamentos]
-  );
-
-  const itemList = useMemo(() => {
-    if (item === 'assign' && Array.isArray(usersList)) return usersList;
-    if (item === 'change-department' && Array.isArray(departsList)) return departsList;
-    if (dados?.status === 'IN_PROGRESS' && item === 'change-status') return [{ id: 'CLOSED', label: 'Fechado' }];
-    return [
-      { id: 'IN_PROGRESS', label: 'Em análise' },
-      { id: 'CLOSED', label: 'Fechado' },
-    ];
-  }, [item, usersList, departsList, dados?.status]);
 
   const formSchema = Yup.object().shape({ item: Yup.mixed().required().label(label) });
   const defaultValues = useMemo(() => ({ item: null, resolved: false }), []);
@@ -126,4 +108,48 @@ export function MessageForm({ dados, onClose }) {
       </DialogContent>
     </Dialog>
   );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function buildItemList({ item, colaboradores, utilizadores, departamentos, dados }) {
+  const colaboradoresMap = new Map(colaboradores?.map((c) => [c.id, c.nome]));
+
+  const status = dados?.status;
+  const currentDept = dados?.current_department_id;
+
+  const usersList = utilizadores
+    ?.filter((ut) => ut?.department_id === currentDept)
+    ?.map((ut) => ({ id: ut.id, label: colaboradoresMap.get(ut.employee_id) || ut.username }));
+
+  const departsList = departamentos
+    ?.filter((dep) => dep.id !== currentDept)
+    ?.map((dep) => ({ id: dep.id, label: dep.name }));
+
+  let itemList;
+
+  switch (item) {
+    case 'assign':
+      itemList = usersList || [];
+      break;
+
+    case 'change-department':
+      itemList = departsList || [];
+      break;
+
+    case 'change-status':
+      itemList =
+        status === 'IN_PROGRESS'
+          ? [{ id: 'CLOSED', label: 'Fechado' }]
+          : [
+              { id: 'IN_PROGRESS', label: 'Em análise' },
+              { id: 'CLOSED', label: 'Fechado' },
+            ];
+      break;
+
+    default:
+      itemList = [];
+  }
+
+  return applySort(itemList, getComparator('asc', 'label'));
 }

@@ -59,7 +59,7 @@ export function SearchToolbar({ dados, lists, extra }) {
             fullWidth
             options={statusList}
             value={status || null}
-            sx={{ minWidth: { sm: 150 } }}
+            sx={{ minWidth: { sm: 155 } }}
             getOptionLabel={(option) => option?.label}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
             renderInput={(params) => <TextField {...params} label="Estado" />}
