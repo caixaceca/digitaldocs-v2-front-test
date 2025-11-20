@@ -77,7 +77,7 @@ export default function TableSituacaoCredito({ from }) {
           <SearchToolbarSimple filter={filter} setFilter={setFilter} />
         </Stack>
         <Tooltip title={font === 'caption' ? 'Aumentar fonte' : 'Diminuir fonte'}>
-          <IconButton onClick={() => setFont(font === 'caption' ? 'body1' : 'caption')}>
+          <IconButton onClick={() => setFont(font === 'caption' ? 'body2' : 'caption')}>
             {font === 'caption' ? <TextIncreaseIcon /> : <TextDecreaseIcon />}
           </IconButton>
         </Tooltip>
