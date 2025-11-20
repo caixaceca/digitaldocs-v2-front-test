@@ -44,8 +44,10 @@ import {
   Detalhes,
   Eliminar,
   Atribuir,
+  Contrato,
   Seguimento,
 } from '../assets';
+import { Icon } from '../assets/icons';
 import SvgIconStyle from './SvgIconStyle';
 import { DialogConfirmar } from './CustomDialog';
 
@@ -119,6 +121,11 @@ export function DefaultAction({
     ((label === 'Anterior' || label === 'VOLTAR') && <ArrowBackIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'DEVOLVER' && <Seguimento sx={{ width: 22, height: 22, transform: 'rotate(180deg)' }} />) ||
     ((label === 'CLONAR' || label === 'Clonar') && <ContentCopyOutlinedIcon sx={{ width: small ? 18 : 24 }} />) ||
+    (label === 'Enviar para GAJ-i9' && (
+      <Icon sx={{ width: small ? 18 : 22 }}>
+        <Contrato />
+      </Icon>
+    )) ||
     ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (
       <SearchIcon sx={{ width: small ? 18 : 24 }} />
     )) ||

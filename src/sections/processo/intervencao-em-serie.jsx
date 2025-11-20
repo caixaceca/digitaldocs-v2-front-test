@@ -12,6 +12,7 @@ import { DefaultAction } from '../../components/Actions';
 //
 import { ArquivarForm } from './form/form-arquivo';
 import { EncaminharStepper } from './form/intervencao';
+import EnviarContratacao from './info-credito/enviar-contratacao';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -36,6 +37,9 @@ export default function Intervencao() {
 
   return (
     <>
+      {processo?.credito?.situacao_final_mes === 'Aprovado' && !processo?.credito?.enviado_para_contratacao && (
+        <EnviarContratacao fab dados={{ ...processo?.credito, processoId: processo?.id }} />
+      )}
       {devolucoes?.length > 0 && <Encaminhar dados={{ gerencia, destinos: devolucoes, acao: 'DEVOLVER', fluxoId }} />}
 
       {seguimentos?.length > 0 && (

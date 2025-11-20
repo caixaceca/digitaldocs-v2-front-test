@@ -18,14 +18,18 @@ import { DefaultAction } from '../../../components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function EnviarContratacao({ dados }) {
+export default function EnviarContratacao({ fab = false, dados }) {
   const { toggle: open, onOpen, onClose } = useToggle();
 
   return (
     <>
-      <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
-        <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={onOpen} />
-      </Stack>
+      {fab ? (
+        <DefaultAction label="Enviar para GAJ-i9" onClick={onOpen} sx={{ p: 0 }} />
+      ) : (
+        <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
+          <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={onOpen} />
+        </Stack>
+      )}
 
       {open && <DialogEnvioContratacao dados={dados} onClose={onClose} />}
     </>
