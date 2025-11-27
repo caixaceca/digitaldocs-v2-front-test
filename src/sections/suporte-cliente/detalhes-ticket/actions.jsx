@@ -2,7 +2,7 @@ import { useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 // components
-import { ActionForm, MessageForm } from '../form-ticket';
+import { ActionForm, MessageForm } from './form-ticket';
 import { DefaultAction } from '../../../components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------

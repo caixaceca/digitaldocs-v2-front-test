@@ -30,6 +30,7 @@ const initialState = {
   faq: [],
   slas: [],
   tickets: [],
+  pesquisa: [],
   assuntos: [],
   respostas: [],
   categorias: [],
@@ -97,6 +98,7 @@ export function getInSuporte(item, params) {
         (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
+        (item === 'pesquisa' && `/api/v1/tickets/search?query=${params?.query}`) ||
         (item === 'indicadores' &&
           `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}${params?.department ? `&department=${params?.department}` : ''}`) ||
         (item === 'tickets' &&
@@ -142,11 +144,6 @@ export function createInSuporte(item, body, params) {
         '';
 
       if (apiUrl) {
-        if (params?.status === 'OPEN' && item === 'add-message') {
-          const paramss = { id: params?.id, value: { id: 'IN_PROGRESS', label: 'Em análise' } };
-          await dispatch(updateInSuporte('change-status', '', { getItem: 'selectedItem', patch: true, ...paramss }));
-        }
-
         const response = await axios.post(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
         const dados = response.data?.payload;
         dispatch(slice.actions.createSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
@@ -187,11 +184,6 @@ export function updateInSuporte(item, body, params) {
         '';
 
       if (apiUrl) {
-        if (params?.status === 'OPEN' && item !== 'change-status') {
-          const paramss = { id: params.id, value: { id: 'IN_PROGRESS', label: 'Em análise' } };
-          await dispatch(updateInSuporte('change-status', '', { getItem: 'selectedItem', patch: true, ...paramss }));
-        }
-
         const method = params?.patch ? 'patch' : 'put';
         const response = await axios[method](`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
 

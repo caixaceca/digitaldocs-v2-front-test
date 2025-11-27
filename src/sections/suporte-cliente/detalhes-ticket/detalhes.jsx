@@ -4,12 +4,13 @@ import Stack from '@mui/material/Stack';
 import Rating from '@mui/material/Rating';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 // utils
 import { ptDateTime } from '../../../utils/formatTime';
 import { getCustomerTypeLabel, getColorRating, ratingList } from '../utils';
 // components
-import { LabelSN } from '../../../components/Label';
 import { newLineText } from '../../../components/Panel';
+import Label, { LabelSN } from '../../../components/Label';
 //
 import Mensagens from './mensagens';
 
@@ -27,7 +28,7 @@ export const Detalhes = React.memo(({ ticket }) => {
 
   return (
     <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={5}>
+      <Stack useFlexGap flexWrap="wrap" direction={{ xs: 'column', sm: 'row' }} spacing={5}>
         <Stack spacing={1}>
           <ItemDesc label="Cliente da Caixa" value={<LabelSN val={customer?.is_cliente} />} />
           <ItemDesc label="Nome" value={customer?.fullname} />
@@ -43,6 +44,11 @@ export const Detalhes = React.memo(({ ticket }) => {
             <ItemDesc label="Agência" value={customer?.agency_name} />
             <ItemDesc label="Número de conta" value={customer?.account_number} />
           </Stack>
+        )}
+        {res?.created_by_email && (
+          <Label color="info" startIcon={<InfoOutlineIcon />}>
+            Criado a partir de email
+          </Label>
         )}
       </Stack>
 

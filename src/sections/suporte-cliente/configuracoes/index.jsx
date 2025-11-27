@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { setItemValue } from '../../utils/formatObject';
+import { setItemValue } from '../../../utils/formatObject';
 // redux
-import { useDispatch } from '../../redux/store';
-import { setModal } from '../../redux/slices/suporte-cliente';
+import { useDispatch } from '../../../redux/store';
+import { setModal } from '../../../redux/slices/suporte-cliente';
 // Components
-import { DefaultAction } from '../../components/Actions';
-import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { DefaultAction } from '../../../components/Actions';
+import { TabsWrapperSimple } from '../../../components/TabsWrapper';
+import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
 //
 import TableConfiguracoes from './table-configuracoes';
 

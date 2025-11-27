@@ -8,21 +8,21 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { normalizeText } from '../../utils/formatText';
-import useTable, { getComparator, applySort } from '../../hooks/useTable';
+import { normalizeText } from '../../../utils/formatText';
+import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getInSuporte, setModal } from '../../redux/slices/suporte-cliente';
+import { useDispatch, useSelector } from '../../../redux/store';
+import { getInSuporte, setModal } from '../../../redux/slices/suporte-cliente';
 // Components
-import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, Colaborador, newLineText, noDados } from '../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Scrollbar from '../../../components/Scrollbar';
+import { DefaultAction } from '../../../components/Actions';
+import { SkeletonTable } from '../../../components/skeleton';
+import { SearchToolbarSimple } from '../../../components/SearchToolbar';
+import { CellChecked, Colaborador, newLineText, noDados } from '../../../components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
 import Categorias from './categorias';
-import { getApllyLabel, getRolesLabel, getPhasesLabel, getDepartTypeLabel, LabelApply } from './utils';
+import { getApllyLabel, getRolesLabel, getPhasesLabel, getDepartTypeLabel, LabelApply } from '../utils';
 import { FaqForm, SlaForm, AssuntoForm, UtilizadorForm, RespostaForm, DepartamentoForm } from './form-configuracoes';
 
 // ---------------------------------------------------------------------------------------------------------------------

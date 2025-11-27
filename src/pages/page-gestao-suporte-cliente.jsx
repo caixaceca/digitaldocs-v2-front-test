@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import SearchIcon from '@mui/icons-material/Search';
 // utils
 import { useSelector } from '../redux/store';
 import useSettings from '../hooks/useSettings';
@@ -10,10 +11,11 @@ import { setItemValue } from '../utils/formatObject';
 import Page from '../components/Page';
 import TabsWrapper from '../components/TabsWrapper';
 // sections
-import Tickets from '../sections/suporte-cliente/tickets';
 import Dashboard from '../sections/suporte-cliente/dashboard';
+import Tickets from '../sections/suporte-cliente/lista-pedidos';
 import Configuracoes from '../sections/suporte-cliente/configuracoes';
 import AcessoSuporte from '../sections/suporte-cliente/acesso-suporte';
+import ProcurarPedidos from '../sections/suporte-cliente/lista-pedidos/procurar-pedidos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -33,6 +35,7 @@ export default function PageGestaoSuporteCliente() {
         component: <Dashboard department={department} setDepartment={setDepartment} departamentos={departamentos} />,
       },
       ...(admin ? [{ value: 'Configurações', component: <Configuracoes /> }] : []),
+      { value: 'Procurar', icon: <SearchIcon sx={{ width: 20, height: 20 }} />, component: <ProcurarPedidos /> },
     ],
     [department, admin, departamentos]
   );

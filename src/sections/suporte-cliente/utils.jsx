@@ -1,14 +1,8 @@
-// @mui
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
 // utils
 import { useSelector } from '../../redux/store';
-import { setItemValue } from '../../utils/formatObject';
 import { colorLabel } from '../../utils/getColorPresets';
 // components
 import Label from '../../components/Label';
-import { SearchField, RemoverFiltros } from '../../components/SearchToolbar';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -20,76 +14,6 @@ export function useColaborador({ userId, nome }) {
   const colaborador = colaboradores?.find(({ id }) => id === user?.employee_id);
 
   return nome ? (colaborador?.nome ?? '') : (colaborador ?? null);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function SearchToolbar({ dados, lists, extra }) {
-  const { admin, colaborador, setColaborador } = extra;
-  const { usersList = [], subjectsList = [], departamentos = [] } = lists;
-  const { filter, status, subject, department, setStatus, setFilter, setSubject, setDepartment } = dados;
-
-  return (
-    <Stack direction={{ xs: 'column', lg: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexGrow: 1 }}>
-          {admin && (
-            <Autocomplete
-              fullWidth
-              options={departamentos}
-              value={department || null}
-              sx={{ minWidth: { md: 150 } }}
-              getOptionLabel={(option) => option?.abreviation || option?.name}
-              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-              renderInput={(params) => <TextField {...params} label="Departamento" />}
-              onChange={(event, newValue) => setItemValue(newValue, setDepartment, 'departmentTicket', true)}
-            />
-          )}
-          <Autocomplete
-            fullWidth
-            value={subject || null}
-            options={subjectsList?.sort()}
-            sx={{ minWidth: { xl: 250, md: 200 } }}
-            renderInput={(params) => <TextField {...params} label="Assunto" />}
-            onChange={(event, newValue) => setItemValue(newValue, setSubject, 'subjectTicket')}
-          />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flexGrow: 1 }}>
-          <Autocomplete
-            fullWidth
-            options={statusList}
-            value={status || null}
-            sx={{ minWidth: { sm: 155 } }}
-            getOptionLabel={(option) => option?.label}
-            isOptionEqualToValue={(option, value) => option?.id === value?.id}
-            renderInput={(params) => <TextField {...params} label="Estado" />}
-            onChange={(event, newValue) => setItemValue(newValue, setStatus, 'statusTicket', true)}
-          />
-          <Autocomplete
-            fullWidth
-            value={colaborador || null}
-            options={usersList?.sort()}
-            sx={{ minWidth: { xl: 230, md: 180 } }}
-            renderInput={(params) => <TextField {...params} label="Atribuído a" />}
-            onChange={(event, newValue) => setItemValue(newValue, setColaborador, 'colaboradorTickets')}
-          />
-        </Stack>
-      </Stack>
-      <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} sx={{ flexGrow: 1 }} alignItems="center">
-        <SearchField item="filterC" filter={filter} setFilter={setFilter} />
-        {(filter || subject || status) && (
-          <RemoverFiltros
-            removerFiltro={() => {
-              setItemValue('', setFilter, 'filterTicket');
-              setItemValue('', setStatus, 'statusTicket');
-              setItemValue('', setSubject, 'subjectTicket');
-              setItemValue('', setColaborador, 'colaboradorTickets');
-            }}
-          />
-        )}
-      </Stack>
-    </Stack>
-  );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -183,3 +107,22 @@ export const getColorRating = (rating) => {
   if (rating >= 3.5 && rating <= 4.5) return 'info.main';
   return 'success.main';
 };
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function injectCollaboratorName(data, users, colaboradores) {
+  const usersById = new Map(users.map((u) => [u.id, u]));
+  const colaboradoresById = new Map(colaboradores.map((c) => [c.id, c]));
+
+  return data.map((item) => {
+    if (!item.current_user_id) return { ...item, colaborador: null };
+
+    const user = usersById.get(item.current_user_id);
+    if (!user) return { ...item, colaborador: null };
+
+    const colaborador = colaboradoresById.get(user.employee_id);
+    const name = colaborador ? colaborador.nome : item?.current_user_name;
+
+    return { ...item, colaborador: name };
+  });
+}

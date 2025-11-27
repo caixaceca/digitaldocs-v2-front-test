@@ -97,7 +97,11 @@ function TimelineRowItem({ row, isLast, isDesktop }) {
               <Typography sx={{ color: 'text.secondary', typography: 'caption' }}>{ptDateTime(at)}</Typography>
             </Stack>
           )}
-          {action === 'Abertura' && <Typography variant="body2">Ticket adicionado pelo cliente</Typography>}
+          {action === 'Abertura' && (
+            <Typography variant="body2">
+              {row?.by_email ? 'Ticket criado a partir do email' : 'Ticket criado pelo cliente'}
+            </Typography>
+          )}
           {action === 'Atribuição' && (
             <Typography variant="body2">
               Ticket atribuido a <strong>{atribuidoA ?? row?.to_user_username}</strong>

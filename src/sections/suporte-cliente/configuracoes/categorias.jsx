@@ -8,12 +8,12 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '../../../redux/store';
 // Components
 import { CategoriasForm } from './form-configuracoes';
-import { DefaultAction } from '../../components/Actions';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { TableSearchNotFound } from '../../components/table/SearchNotFound';
+import { DefaultAction } from '../../../components/Actions';
+import { DialogTitleAlt } from '../../../components/CustomDialog';
+import { TableSearchNotFound } from '../../../components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

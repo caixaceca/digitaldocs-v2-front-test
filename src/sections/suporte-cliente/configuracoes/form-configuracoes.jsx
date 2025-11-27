@@ -9,15 +9,21 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { createInSuporte, updateInSuporte } from '../../redux/slices/suporte-cliente';
+import { useSelector, useDispatch } from '../../../redux/store';
+import { createInSuporte, updateInSuporte } from '../../../redux/slices/suporte-cliente';
 // components
-import { DialogButons } from '../../components/Actions';
-import { FormLoading } from '../../components/skeleton';
-import { SearchNotFoundSmall } from '../../components/table/SearchNotFound';
-import { RHFSwitch, FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '../../components/hook-form';
+import { DialogButons } from '../../../components/Actions';
+import { FormLoading } from '../../../components/skeleton';
+import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
+import {
+  RHFSwitch,
+  FormProvider,
+  RHFTextField,
+  RHFNumberField,
+  RHFAutocompleteObj,
+} from '../../../components/hook-form';
 //
-import { applyList, rolesList, phasesList } from './utils';
+import { applyList, rolesList, phasesList } from '../utils';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

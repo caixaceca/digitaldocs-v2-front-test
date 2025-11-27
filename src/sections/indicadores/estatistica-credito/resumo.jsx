@@ -30,7 +30,7 @@ import { BarChart } from '../../../components/skeleton';
 
 export default function ResumoEstatisticaCredito() {
   const { isLoading, resumoEstCredito, moeda } = useSelector((state) => state.indicadores);
-  const { qtdEnt, qtdAp, qtdCont, qtdId, valEnt, valorAp, valCont, valId } = dadosResumo(resumoEstCredito);
+  const { qtdEnt, qtdAp, qtdCont, qtdId, valorEnt, valorAp, valorCont, valorId } = dadosResumo(resumoEstCredito);
 
   const naoClassificados = dadosNaoClassificados(resumoEstCredito);
 
@@ -44,10 +44,10 @@ export default function ResumoEstatisticaCredito() {
         </GridItem>
       ) : (
         <>
-          <CardResumo moeda={moeda} label="Entrada" qtd={qtdEnt} total={valEnt} />
+          <CardResumo moeda={moeda} label="Entrada" qtd={qtdEnt} total={valorEnt} />
           <CardResumo moeda={moeda} label="Aprovado" qtd={qtdAp} total={valorAp} />
-          <CardResumo moeda={moeda} label="Contratado" qtd={qtdCont} total={valCont} />
-          <CardResumo moeda={moeda} label="Indeferido/Desistido" qtd={qtdId} total={valId} />
+          <CardResumo moeda={moeda} label="Contratado" qtd={qtdCont} total={valorCont} />
+          <CardResumo moeda={moeda} label="Indeferido/Desistido" qtd={qtdId} total={valorId} />
           <GridItem>
             <Card sx={{ p: 1 }}>
               <TableContainer>
@@ -221,9 +221,10 @@ function TotaisLinha({ first = false, segmento = '', linha = '', dados }) {
 function TableRowTotais({ dados }) {
   const { moeda } = useSelector((state) => state.indicadores);
 
-  return ['qtdEnt', 'valEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valCont', 'qtdId', 'valId']?.map((row) => (
+  return ['qtdEnt', 'valorEnt', 'qtdAp', 'valorAp', 'qtdCont', 'valorCont', 'qtdId', 'valorId']?.map((row) => (
     <TableCell key={row} align="right">
-      {moeda === 'Escudo' ? fNumber(dados[row]) : fConto(dados[row])}
+      {row?.includes('valor') && moeda === 'Conto' ? fConto(dados[row]) : fNumber(dados[row])}
+      {/* {moeda === 'Escudo' ? fNumber(dados[row]) : fConto(dados[row])} */}
     </TableCell>
   ));
 }
@@ -254,13 +255,13 @@ function dadosResumo(dados, segmento = '', linha = '') {
 
   return {
     qtdEnt: safeSum(entradas, 'total'),
-    valEnt: safeSum(entradas, 'montantes'),
+    valorEnt: safeSum(entradas, 'montantes'),
     qtdAp: safeSum(aprovados, 'total'),
     valorAp: safeSum(aprovados, 'montante_aprovado'),
     qtdCont: safeSum(contratados, 'total'),
-    valCont: safeSum(contratados, 'montante_contratado'),
+    valorCont: safeSum(contratados, 'montante_contratado'),
     qtdId: safeSum(indeferidos, 'total') + safeSum(desistidos, 'total'),
-    valId: safeSum(indeferidos, 'montantes') + safeSum(desistidos, 'montantes'),
+    valorId: safeSum(indeferidos, 'montantes') + safeSum(desistidos, 'montantes'),
   };
 }
 

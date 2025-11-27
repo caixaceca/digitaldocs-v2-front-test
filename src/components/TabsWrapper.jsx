@@ -46,8 +46,14 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
             onChange={(event, newValue) => setItemValue(newValue, changeTab, tab)}
             value={tabsList.some(({ value }) => value === currentTab) ? currentTab : tabsList[0].value}
           >
-            {tabsList.map(({ value, label }) => (
-              <Tab key={value} value={value} label={label || value} sx={{ px: 0.64, pb: 1.5, pt: 1.75, mt: 0.25 }} />
+            {tabsList.map(({ value, label, icon }) => (
+              <Tab
+                icon={icon}
+                key={value}
+                value={value}
+                label={label || value}
+                sx={{ px: 0.64, pb: 1.5, pt: 1.75, mt: 0.25 }}
+              />
             ))}
           </Tabs>
         )}

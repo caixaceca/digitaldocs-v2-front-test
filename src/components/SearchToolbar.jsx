@@ -322,7 +322,7 @@ export function TableToolbarPerfilEstados({ options }) {
       <Stack spacing={1} direction="row" justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
         <SearchField item="filterAcessos" filter={filter} setFilter={setFilter} />
         {(filter || uo) && (
-          <Tooltip title="Remover pesquiza" arrow>
+          <Tooltip title="Remover pesquisa" arrow>
             <IconButton
               color="inherit"
               onClick={() => {

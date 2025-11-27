@@ -36,7 +36,7 @@ export default function DetalhesTicket({ onClose }) {
       component: (
         <Historico
           historico={[
-            { action: 'Abertura', created_at: selectedItem?.created_at },
+            { action: 'Abertura', created_at: selectedItem?.created_at, by_email: selectedItem?.created_by_email },
             ...(getStatusLabel(selectedItem?.status) === 'Fechado' && selectedItem?.closed_at
               ? [
                   {

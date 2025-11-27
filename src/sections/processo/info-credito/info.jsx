@@ -141,16 +141,19 @@ function DadosCredito({ dados }) {
 
         {situacao === 'aprovado' && dados?.modificar && <EnviarContratacao dados={dados} />}
 
-        {dados?.nivel_decisao && (
-          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
-            <Label color="focus" startIcon={<InfoOutlinedIcon />}>
-              <Typography variant="caption">Nível de decisão:</Typography>
-              &nbsp;
-              {` ${dados?.nivel_decisao} - `}
-              {(dados?.nivel_decisao === 1 && 'Comité Base') ||
-                (dados?.nivel_decisao === 2 && 'Comité Diretor') ||
-                (dados?.nivel_decisao === 3 && 'Comité Superior')}
-            </Label>
+        {(dados?.nivel_decisao || dados?.enviado_para_contratacao) && (
+          <Stack direction="row" justifyContent="center" spacing={2} useFlexGap flexWrap="wrap" sx={{ mt: 2 }}>
+            {dados?.nivel_decisao && (
+              <Label startIcon={<InfoOutlinedIcon />}>
+                <Typography variant="caption">Nível de decisão:</Typography>
+                &nbsp;
+                {` ${dados?.nivel_decisao} - `}
+                {(dados?.nivel_decisao === 1 && 'Comité Base') ||
+                  (dados?.nivel_decisao === 2 && 'Comité Diretor') ||
+                  (dados?.nivel_decisao === 3 && 'Comité Superior')}
+              </Label>
+            )}
+            {dados?.enviado_para_contratacao && <Label startIcon={<InfoOutlinedIcon />}>Enviado para GAJ-i9</Label>}
           </Stack>
         )}
       </List>
