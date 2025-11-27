@@ -30,6 +30,7 @@ const initialState = {
   faq: [],
   slas: [],
   tickets: [],
+  prompts: [],
   pesquisa: [],
   assuntos: [],
   respostas: [],
@@ -65,6 +66,13 @@ const slice = createSlice({
       if (index !== -1) state.tickets[index][prop] = assign ? value?.label : value?.id;
     },
 
+    toogleItem(state, action) {
+      const { id, item, active } = action.payload;
+      if (item === 'prompts') state.prompts = state.prompts?.map((row) => ({ ...row, active: false }));
+      const index = state[item].findIndex(({ id: idRow }) => idRow === id);
+      if (index !== -1) state[item][index].active = active;
+    },
+
     setModal(state, action) {
       state.isEdit = !!action?.payload?.isEdit;
       state.modalSuporte = action?.payload?.modal || '';
@@ -95,8 +103,10 @@ export function getInSuporte(item, params) {
         (item === 'utilizadores' && `/api/v1/users/all`) ||
         (item === 'departamentos' && `/api/v1/departments/all`) ||
         (item === 'categorias' && `/api/v1/faq-categories/all`) ||
+        (item === 'prompts' && `/api/v1/mail-scan-presets/all`) ||
         (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
+        (item === 'prompt' && `/api/v1/mail-scan-presets/${params?.id}`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search?query=${params?.query}`) ||
         (item === 'indicadores' &&
@@ -139,6 +149,7 @@ export function createInSuporte(item, body, params) {
         (item === 'utilizadores' && `/api/v1/users/register`) ||
         (item === 'departamentos' && `/api/v1/departments/new`) ||
         (item === 'categorias' && `/api/v1/faq-categories/create`) ||
+        (item === 'prompts' && `/api/v1/mail-scan-presets/create`) ||
         (item === 'respostas' && `/api/v1/standardized-response/create`) ||
         (item === 'add-message' && `/api/v1/ticket-messages/create/${params?.id}`) ||
         '';
@@ -174,8 +185,14 @@ export function updateInSuporte(item, body, params) {
         (item === 'assuntos' && `/api/subjects/update/${params?.id}`) ||
         (item === 'utilizadores' && `/api/v1/users/update/${params?.id}`) ||
         (item === 'departamentos' && `/api/v1/departments/update/${params?.id}`) ||
+        (item === 'prompts' && `/api/v1/mail-scan-presets/update/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/update/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/update/{id}?id=${params?.id}`) ||
+        // toggle
+        (item === 'toggle-faq' && `/api/v1/faqs/toggle/${params?.id}`) ||
+        (item === 'toggle-utilizadores' && `/api/v1/users/toggle/${params?.id}`) ||
+        (item === 'toggle-respostas' && `/api/v1/standardized-response/toggle/${params?.id}`) ||
+        (item === 'toggle-prompts' && `/api/v1/mail-scan-presets/toggle-active/${params?.id}`) ||
         // ticket
         (item === 'assign' && `/api/v1/tickets/assign/${params?.id}/${params?.value?.id}`) ||
         (item === 'change-department' && `/api/v1/tickets/change-department/${params?.id}/${params?.value?.id}`) ||
@@ -188,7 +205,8 @@ export function updateInSuporte(item, body, params) {
         const response = await axios[method](`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
 
         const dados = response.data?.payload;
-        if (params?.getItem) {
+        if (item?.includes('toggle-')) dispatch(slice.actions.toogleItem(params));
+        else if (params?.getItem) {
           dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
           if (item === 'assign' || item === 'change-status') {
             dispatch(slice.actions.changeProp({ assign: item === 'assign', value: params?.value, id: params?.id }));
@@ -224,6 +242,7 @@ export function deleteInSuporte(item, params) {
         (item === 'utilizadores' && `/api/v1/users/delete/${params?.id}`) ||
         (item === 'departamentos' && `/api/v1/departments/delete/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/delete/${params?.id}`) ||
+        (item === 'prompts' && `/api/v1/mail-scan-presets/delete/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/delete/${params?.id}`) ||
         '';
 

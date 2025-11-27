@@ -47,7 +47,7 @@ export const Detalhes = React.memo(({ ticket }) => {
         )}
         {res?.created_by_email && (
           <Label color="info" startIcon={<InfoOutlineIcon />}>
-            Criado a partir de email
+            Criado a partir do email
           </Label>
         )}
       </Stack>

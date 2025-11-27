@@ -27,6 +27,7 @@ export default function Configuracoes() {
       { value: 'Respostas', component: <TableConfiguracoes item="respostas" /> },
       { value: 'SLA', component: <TableConfiguracoes item="slas" /> },
       { value: 'FAQ', component: <TableConfiguracoes item="faq" /> },
+      { value: 'Prompt email', component: <TableConfiguracoes item="prompts" /> },
     ],
     []
   );

@@ -23,6 +23,7 @@ import {
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
 //
+import { mapConcelhoToBackend } from './utils';
 import { applyList, rolesList, phasesList } from '../utils';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -253,12 +254,7 @@ export function DepartamentoForm({ onClose }) {
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
           .replace(/\s+/g, '_') ?? '',
-      council:
-        uo?.concelho
-          .toUpperCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/\s+/g, '_') ?? '',
+      council: mapConcelhoToBackend(uo?.concelho),
       region: uo?.regiao === 'Sul' ? 'SOUTH' : 'NORTH',
       type:
         (uo?.tipo === 'Agências' && 'AGENCY') || (uo?.tipo === 'Serviços Centrais' && 'CENTRAL_SERVICES') || 'OTHER',

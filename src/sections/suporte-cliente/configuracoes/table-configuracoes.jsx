@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Switch from '@mui/material/Switch';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
+import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import { normalizeText } from '../../../utils/formatText';
 import useTable, { getComparator, applySort } from '../../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getInSuporte, setModal } from '../../../redux/slices/suporte-cliente';
+import { getInSuporte, updateInSuporte, setModal } from '../../../redux/slices/suporte-cliente';
 // Components
 import Scrollbar from '../../../components/Scrollbar';
 import { DefaultAction } from '../../../components/Actions';
@@ -22,6 +23,7 @@ import { CellChecked, Colaborador, newLineText, noDados } from '../../../compone
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
 import Categorias from './categorias';
+import FormPrompt from './form-prompt';
 import { getApllyLabel, getRolesLabel, getPhasesLabel, getDepartTypeLabel, LabelApply } from '../utils';
 import { FaqForm, SlaForm, AssuntoForm, UtilizadorForm, RespostaForm, DepartamentoForm } from './form-configuracoes';
 
@@ -43,10 +45,10 @@ export default function TableConfiguracoes({ item }) {
     onChangePage,
     onChangeDense,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: 'designacao', defaultOrder: 'asc' });
+  } = useTable();
 
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { assuntos, utilizadores, slas, faq, departamentos, respostas, isLoading, modalSuporte } = useSelector(
+  const { assuntos, utilizadores, slas, faq, departamentos, respostas, prompts, isLoading, modalSuporte } = useSelector(
     (state) => state.suporte
   );
 
@@ -70,6 +72,7 @@ export default function TableConfiguracoes({ item }) {
     dados:
       (item === 'faq' && faq) ||
       (item === 'slas' && slas) ||
+      (item === 'prompts' && prompts) ||
       (item === 'assuntos' && assuntos) ||
       (item === 'respostas' && respostas) ||
       (item === 'departamentos' && departamentos) ||
@@ -79,16 +82,16 @@ export default function TableConfiguracoes({ item }) {
   });
   const isNotFound = !dataFiltered.length;
 
+  const onClose = () => dispatch(setModal({}));
   const viewItem = (modal, dados) => {
-    // const itemSingle =
-    //   (item === 'faq' && 'pergunta') || (item === 'asuntos' && 'asunto') || (item === 'utilizadores' && 'utilizador');
-
-    dispatch(setModal({ modal, dados, isEdit: modal === 'update' }));
-    // const id = item === 'funcoes' ? dados?.utilizador_id : dados?.id;
-    // dispatch(getInSuporte(itemSingle, { id, item: 'selectedItem' }));
+    dispatch(setModal({ modal, dados: item === 'prompts' ? null : dados, isEdit: modal === 'update' }));
+    if (item === 'prompts') dispatch(getInSuporte('prompt', { id: dados?.id, item: 'selectedItem' }));
   };
 
-  const onClose = () => dispatch(setModal({}));
+  const changeStatus = (dados) => {
+    const params = { id: dados?.id, item, msg: `Item ${dados?.active ? 'desativado' : 'ativado'}` };
+    dispatch(updateInSuporte(`toggle-${item}`, null, { ...params, patch: true, active: !dados?.active }));
+  };
 
   return (
     <>
@@ -100,7 +103,7 @@ export default function TableConfiguracoes({ item }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={(item === 'faq' && 7) || 5} />
+                  <SkeletonTable row={10} column={(item === 'prompts' && 3) || (item === 'faq' && 7) || 5} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
@@ -110,7 +113,7 @@ export default function TableConfiguracoes({ item }) {
                         {item === 'utilizadores' ? (
                           <Colaborador row={{ colaborador: row }} />
                         ) : (
-                          <>{row?.subject || row?.name || row?.question || noDados()}</>
+                          row?.subject || row?.name || row?.question || row?.preset_name || noDados()
                         )}
                       </TableCell>
 
@@ -150,13 +153,17 @@ export default function TableConfiguracoes({ item }) {
                       {item === 'faq' && <TableCell>{newLineText(row?.response)}</TableCell>}
                       {item === 'faq' && <CellChecked check={row?.highlighted} />}
 
-                      {item !== 'assuntos' && item !== 'slas' && <CellChecked check={row?.active || row?.enabled} />}
+                      {(item === 'prompts' || item === 'utilizadores' || item === 'respostas' || item === 'faq') && (
+                        <TableCell align="center">
+                          <FormControlLabel
+                            label={row?.active ? 'Ativo' : 'Inativo'}
+                            control={<Switch size="small" checked={row?.active} onChange={() => changeStatus(row)} />}
+                          />
+                        </TableCell>
+                      )}
 
                       <TableCell align="center" width={10}>
-                        <Stack direction="row" spacing={0.5} justifyContent="right">
-                          <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
-                          {/* <DefaultAction small label="DETALHES" onClick={() => viewItem('detalhes', row)} /> */}
-                        </Stack>
+                        <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
                       </TableCell>
                     </TableRow>
                   ))
@@ -189,6 +196,7 @@ export default function TableConfiguracoes({ item }) {
         <>
           {item === 'faq' && <FaqForm onClose={onClose} />}
           {item === 'slas' && <SlaForm onClose={onClose} />}
+          {item === 'prompts' && <FormPrompt onClose={onClose} />}
           {item === 'assuntos' && <AssuntoForm onClose={onClose} />}
           {item === 'respostas' && <RespostaForm onClose={onClose} />}
           {item === 'utilizadores' && <UtilizadorForm onClose={onClose} />}
@@ -216,7 +224,7 @@ export function applySortFilter({ dados, filter, comparator }) {
     );
   }
 
-  return dados;
+  return dados?.map((row) => ({ ...row, active: row?.active || row?.enabled }));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -257,8 +265,11 @@ function headerTable(item) {
         { id: 'response', label: 'Resposta' },
         { id: 'highlighted', label: 'Destaque', align: 'center' },
       ]) ||
+      (item === 'prompts' && [{ id: 'preset_name', label: 'Nome' }]) ||
       []),
-    ...(item !== 'assuntos' && item !== 'slas' ? [{ id: 'active', label: 'Ativo', align: 'center' }] : []),
+    ...(item !== 'assuntos' && item !== 'departamentos' && item !== 'slas'
+      ? [{ id: 'active', label: 'Estado', align: 'center' }]
+      : []),
     { id: '', width: 10 },
   ];
 }
