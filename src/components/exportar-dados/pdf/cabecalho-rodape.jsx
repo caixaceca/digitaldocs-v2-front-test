@@ -97,7 +97,6 @@ export function RodapePdfAlt({ rodape = false }) {
     <>
       {rodape ? (
         <View style={[styles.footer, styles.footer2]} fixed>
-          <View style={[styles.footerQrCode]}>{/* <Image src={qrCode} /> */}</View>
           <View style={[styles.footerText, styles.textSuccess]}>
             <Text>Caixa Económica de Cabo Verde, S.A.</Text>
             <Text>Capital social nominal de 1.392.000.000$00, Conser. do Reg. Comerc. da Praia nº 336</Text>
@@ -124,10 +123,8 @@ export function RodapePdfAlt({ rodape = false }) {
 
 export function RodapeFicha({ title1 = 'Elaborado:', title2 = 'Aprovado:', elaborado = '', aprovado = '' }) {
   return (
-    <View fixed style={[styles.text7, { marginTop: '2mm', lineHeight: 0 }]}>
-      <View
-        style={[styles.gridContainer, styles.bgSuccess, { color: '#fff', paddingTop: '2mm', paddingBottom: '1mm' }]}
-      >
+    <View fixed style={[styles.text7, { marginTop: '5mm', lineHeight: 0 }]}>
+      <View style={[styles.gridContainer, styles.bgSuccess, styles.footerItemPadding, { color: '#fff' }]}>
         <View style={[styles.tCell_33]}>
           <Text>{title1}</Text>
         </View>
@@ -138,7 +135,7 @@ export function RodapeFicha({ title1 = 'Elaborado:', title2 = 'Aprovado:', elabo
           <Text>Pág:</Text>
         </View>
       </View>
-      <View style={[styles.gridContainer, { paddingTop: '2mm', paddingBottom: '1mm' }]}>
+      <View style={[styles.gridContainer, styles.footerItemPadding]}>
         <View style={[styles.tCell_33]}>
           <Text>{elaborado}</Text>
         </View>

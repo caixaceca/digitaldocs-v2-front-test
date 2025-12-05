@@ -7,7 +7,7 @@ import { UploadIllustration } from '../../assets';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function BlockContent({ multiple = false, small = false }) {
+export default function BlockContent({ multiple = false, small = false, permitidos = '' }) {
   return (
     <Stack
       alignItems="center"
@@ -18,18 +18,27 @@ export default function BlockContent({ multiple = false, small = false }) {
     >
       <UploadIllustration sx={{ width: small ? 80 : 120 }} />
 
-      <Box sx={{ p: small ? 1 : 2 }}>
+      <Box sx={{ p: small ? 0 : 2 }}>
         <Typography variant={small ? 'subtitle2' : 'subtitle1'}>
-          Solte ou selecione o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''}...
+          Arraste ou selecione o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''}.
         </Typography>
 
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          Solte o{multiple ? 's' : ''} ficheiro{multiple ? 's' : ''} nesta zona ou{' '}
+          Arraste para esta área ou{' '}
           <Box component="span" sx={{ color: 'primary.main', textDecoration: 'underline', fontWeight: 600 }}>
-            clica aqui
+            clique aqui
           </Box>{' '}
-          e procura na sua máquina...
+          para escolher do seu dispositivo
         </Typography>
+
+        {permitidos && (
+          <Typography sx={{ color: 'text.disabled', typography: 'caption' }}>
+            <Box component="span" sx={{ color: 'error.main', fontWeight: 600 }}>
+              *{' '}
+            </Box>
+            Formatos permitidos: {permitidos}
+          </Typography>
+        )}
       </Box>
     </Stack>
   );

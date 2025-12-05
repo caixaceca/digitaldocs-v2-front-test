@@ -106,8 +106,9 @@ export function getInSuporte(item, params) {
         (item === 'prompts' && `/api/v1/mail-scan-presets/all`) ||
         (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
-        (item === 'prompt' && `/api/v1/mail-scan-presets/${params?.id}`) ||
+        (item === 'presets' && `/api/v1/mail-scan-presets/${params?.id}`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
+        (item === 'prompt' && `/api/v1/mail-scan-presets/generate-prompt`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search?query=${params?.query}`) ||
         (item === 'indicadores' &&
           `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}${params?.department ? `&department=${params?.department}` : ''}`) ||

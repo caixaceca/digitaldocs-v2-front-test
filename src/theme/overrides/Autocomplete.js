@@ -28,6 +28,7 @@ export default function Autocomplete(theme) {
           padding: theme.spacing(1),
           margin: theme.spacing(0.75, 0),
           borderRadius: theme.shape.borderRadius,
+          minHeight: 'unset !important',
         },
         groupLabel: {
           textTransform: 'uppercase',

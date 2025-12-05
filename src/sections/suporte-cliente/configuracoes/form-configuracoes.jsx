@@ -8,13 +8,12 @@ import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-// redux
+// utils
+import { mapConcelhoToBackend } from './utils';
+import { applyList, rolesList, phasesList } from '../utils';
 import { useSelector, useDispatch } from '../../../redux/store';
 import { createInSuporte, updateInSuporte } from '../../../redux/slices/suporte-cliente';
 // components
-import { DialogButons } from '../../../components/Actions';
-import { FormLoading } from '../../../components/skeleton';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
 import {
   RHFSwitch,
   FormProvider,
@@ -22,9 +21,9 @@ import {
   RHFNumberField,
   RHFAutocompleteObj,
 } from '../../../components/hook-form';
-//
-import { mapConcelhoToBackend } from './utils';
-import { applyList, rolesList, phasesList } from '../utils';
+import { DialogButons } from '../../../components/Actions';
+import { FormLoading } from '../../../components/skeleton';
+import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

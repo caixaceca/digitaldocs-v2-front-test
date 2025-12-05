@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Switch from '@mui/material/Switch';
 import TableRow from '@mui/material/TableRow';
@@ -23,7 +24,8 @@ import { CellChecked, Colaborador, newLineText, noDados } from '../../../compone
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
 import Categorias from './categorias';
-import FormPrompt from './form-prompt';
+import DetalhesPrompt from './detalhes';
+import FormPrompt, { Eliminar } from './form-prompt';
 import { getApllyLabel, getRolesLabel, getPhasesLabel, getDepartTypeLabel, LabelApply } from '../utils';
 import { FaqForm, SlaForm, AssuntoForm, UtilizadorForm, RespostaForm, DepartamentoForm } from './form-configuracoes';
 
@@ -84,8 +86,10 @@ export default function TableConfiguracoes({ item }) {
 
   const onClose = () => dispatch(setModal({}));
   const viewItem = (modal, dados) => {
-    dispatch(setModal({ modal, dados: item === 'prompts' ? null : dados, isEdit: modal === 'update' }));
-    if (item === 'prompts') dispatch(getInSuporte('prompt', { id: dados?.id, item: 'selectedItem' }));
+    const getdetail = item === 'prompts' && modal !== 'delete';
+    dispatch(setModal({ modal, dados: getdetail ? null : dados, isEdit: modal === 'update' }));
+    if (getdetail)
+      dispatch(getInSuporte(modal === 'detalhes' ? 'prompt' : 'presets', { id: dados?.id, item: 'selectedItem' }));
   };
 
   const changeStatus = (dados) => {
@@ -163,7 +167,15 @@ export default function TableConfiguracoes({ item }) {
                       )}
 
                       <TableCell align="center" width={10}>
-                        <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
+                        <Stack direction="row" spacing={0.75}>
+                          <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
+                          {item === 'prompts' && !row?.active && (
+                            <DefaultAction small label="ELIMINAR" onClick={() => viewItem('eliminar', row)} />
+                          )}
+                          {item === 'prompts' && row?.active && (
+                            <DefaultAction small label="DETALHES" onClick={() => viewItem('detalhes', row)} />
+                          )}
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))
@@ -190,8 +202,9 @@ export default function TableConfiguracoes({ item }) {
         )}
       </Card>
 
-      {/* {modalSuporte === 'detalhes' && <DetalhesGaji9 closeModal={onClose} item={item} />} */}
       {modalSuporte === 'categories' && <Categorias onClose={onClose} />}
+      {modalSuporte === 'detalhes' && <DetalhesPrompt onClose={onClose} />}
+      {modalSuporte === 'eliminar' && <Eliminar onClose={onClose} item={item} />}
       {(modalSuporte === 'add' || modalSuporte === 'update') && (
         <>
           {item === 'faq' && <FaqForm onClose={onClose} />}

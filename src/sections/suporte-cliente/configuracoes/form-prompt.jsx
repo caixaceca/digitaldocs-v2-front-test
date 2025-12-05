@@ -5,14 +5,14 @@ import DialogContent from '@mui/material/DialogContent';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
 import { updateDados, resetDados } from '../../../redux/slices/stepper';
-import { createInSuporte, updateInSuporte } from '../../../redux/slices/suporte-cliente';
+import { createInSuporte, updateInSuporte, deleteInSuporte } from '../../../redux/slices/suporte-cliente';
 // components
 import Steps from '../../../components/Steps';
 import { FormLoading } from '../../../components/skeleton';
 import { ButtonsStepper } from '../../../components/Actions';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
 import { FormProvider, RHFTextField } from '../../../components/hook-form';
 import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
+import { DialogTitleAlt, DialogConfirmar } from '../../../components/CustomDialog';
 //
 import { usePromptStep, schemaContexto, schemaInstrucoes, schemaResposta } from './utils';
 
@@ -21,7 +21,7 @@ import { usePromptStep, schemaContexto, schemaInstrucoes, schemaResposta } from 
 export default function FormPrompt({ onClose }) {
   const dispatch = useDispatch();
   const { dadosStepper, activeStep } = useSelector((s) => s.stepper);
-  const { selectedItem, isLoading, isEdit } = useSelector((s) => s.suporte);
+  const { selectedItem, isLoading, isSaving, isEdit } = useSelector((s) => s.suporte);
 
   const handleClose = () => {
     dispatch(resetDados());
@@ -80,7 +80,10 @@ export default function FormPrompt({ onClose }) {
 
                 {activeStep === 2 && (
                   <Resposta
+                    onSave={save}
+                    onBack={goBack}
                     isEdit={isEdit}
+                    isSaving={isSaving}
                     dados={{
                       prompt_response_example:
                         dadosStepper?.prompt_response_example || selectedItem?.prompt_response_example || '',
@@ -89,8 +92,6 @@ export default function FormPrompt({ onClose }) {
                         selectedItem?.negative_prompt_response_example ||
                         '',
                     }}
-                    onSave={save}
-                    onBack={goBack}
                   />
                 )}
               </>
@@ -139,7 +140,7 @@ function Instrucoes({ dados, onForward, onBack }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Resposta({ dados, onBack, onSave, isEdit }) {
+function Resposta({ dados, onBack, onSave, isEdit, isSaving }) {
   const { methods, handle } = usePromptStep(schemaResposta, dados, onSave);
 
   return (
@@ -149,7 +150,23 @@ function Resposta({ dados, onBack, onSave, isEdit }) {
         <RHFTextField name="negative_prompt_response_example" label="Exemplo negativo" multiline rows={4} />
       </Stack>
 
-      <ButtonsStepper onClose={onBack} label={isEdit ? 'Guardar' : 'Adicionar'} />
+      <ButtonsStepper onClose={onBack} label={isEdit ? 'Guardar' : 'Adicionar'} isSaving={isSaving} />
     </FormProvider>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Eliminar({ item, onClose }) {
+  const dispatch = useDispatch();
+  const { isSaving, selectedItem } = useSelector((state) => state.suporte);
+
+  return (
+    <DialogConfirmar
+      onClose={onClose}
+      isSaving={isSaving}
+      desc="eliminar este item"
+      handleOk={() => dispatch(deleteInSuporte(item, { id: selectedItem?.id, msg: 'Item eliminado', onClose }))}
+    />
   );
 }

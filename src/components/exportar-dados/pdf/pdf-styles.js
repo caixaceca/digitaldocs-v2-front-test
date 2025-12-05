@@ -106,12 +106,13 @@ const styles = StyleSheet.create({
   mt15: { marginTop: 15 },
 
   /// FOOTER
+  nofooter: { height: '25mm' },
   footer: { left: 0, right: 0, bottom: 0, margin: 'auto', position: 'absolute', flexDirection: 'row' },
   footer1: { fontSize: 8, color: '#fff', padding: '4mm', paddingBottom: '1mm', justifyContent: 'center' },
   footer2: { padding: '8mm', alignItems: 'center', paddingBottom: '9mm', justifyContent: 'space-between' },
-  nofooter: { height: '25mm' },
+
+  footerItemPadding: { paddingTop: '2mm', paddingBottom: '1mm' },
   footerText: { top: 5, fontSize: 9, width: '129mm', margin: 'auto', lineHeight: 1.2, textAlign: 'right' },
-  footerQrCode: { width: '22mm', height: '22mm' },
   footerCertificacoes: { width: '43mm', paddingRight: '5mm', alignItems: 'flex-end', alignContent: 'flex-end' },
 });
 

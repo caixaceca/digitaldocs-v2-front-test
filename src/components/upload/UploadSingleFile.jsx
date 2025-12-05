@@ -43,7 +43,7 @@ export default function UploadSingleFile({ error = false, file, helperText, sx, 
         }}
       >
         <input {...getInputProps()} />
-        <BlockContent small={other?.small} />
+        <BlockContent small={other?.small} permitidos={other?.permitidos} />
         {file && getFileFormat(file.name) === 'image' && (
           <Image
             alt="file preview"

@@ -1,10 +1,9 @@
-//
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 // config
 import { ambiente } from '../../config';
 // routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
 // assets
+import { SuporteIcon } from '../../theme/overrides/CustomIcons';
 import { Home, Portal, Arquivo, Controle, Contrato, Dashboard, FilaTrabalho, Parametrizacao } from '../../assets';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -26,7 +25,7 @@ const navConfig = [
       {
         roles: ['suporte-cliente-100'],
         title: 'Suporte ao cliente',
-        icon: <SupportAgentIcon />,
+        icon: <SuporteIcon />,
         path: PATH_DIGITALDOCS.suporteCliente.root,
       },
       {
